@@ -300,7 +300,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 
 @media (max-width: 650px) {
   .homepage-product-grid {
-    gap: 20px;
+    gap: 36px;
   }
   .homepage-product-grid .product-card {
     flex: 0 0 220px;
@@ -838,9 +838,9 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
     box-shadow: none !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
-    /* Revert to default padding-left and padding-right from index.css to match other page components */
-    padding-left: calc(clamp(15px, 3.5vw, 40px) + 10px) !important;
-    padding-right: calc(clamp(15px, 3.5vw, 40px) + 10px) !important;
+    /* Increased padding on mobile to give margins more space */
+    padding-left: calc(clamp(28px, 8vw, 56px)) !important;
+    padding-right: calc(clamp(28px, 8vw, 56px)) !important;
   }
 
   .founders-story-text-column {
@@ -1870,7 +1870,13 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
     text-align: center;
     line-height: 1.5;
     flex-direction: column;
-    gap: 8px;
+    gap: 20px;
+  }
+
+  /* Hide eyebrows on mobile only */
+  .nv-eyebrow,
+  .testimonials-eyebrow {
+    display: none !important;
   }
 }
 
