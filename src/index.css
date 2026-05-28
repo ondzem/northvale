@@ -1878,6 +1878,11 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   .testimonials-eyebrow {
     display: none !important;
   }
+
+  /* Hide scrollbar for mobile USP scroll container */
+  .usp-scroll-container::-webkit-scrollbar {
+    display: none !important;
+  }
 }
 
 

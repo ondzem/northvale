@@ -55,8 +55,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // USP slideshow state & data
-  const [currentUsp, setCurrentUsp] = useState(0);
+  // USP slideshow ref & data
+  const uspScrollRef = useRef(null);
   const uspItems = [
     { icon: '/truck-moving.png', title: 'Doprava zdarma', desc: 'při objednávce nad 1 000 Kč' },
     { icon: '/tachometer-fast.png', title: 'Rychlost doručení', desc: 'Odesíláme do 24 hodin' },
@@ -64,16 +64,42 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     { icon: '/credit-card.png', title: 'Bezpečná platba', desc: 'Karta, bankovní převod, dobírka' }
   ];
 
-  const nextUsp = () => {
-    setCurrentUsp(prev => (prev + 1) % uspItems.length);
+  const handleUspScroll = (direction) => {
+    if (uspScrollRef.current) {
+      const scrollAmount = uspScrollRef.current.clientWidth;
+      uspScrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
   };
 
-  const prevUsp = () => {
-    setCurrentUsp(prev => (prev - 1 + uspItems.length) % uspItems.length);
-  };
-
-  // Slideshow state
+  // Slideshow state & swipe gesture logic for hero slideshow
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe) {
+      nextSlide();
+    } else if (isRightSwipe) {
+      prevSlide();
+    }
+  };
   const slides = [
     { 
       mobileImage: '/Mobile - Grading karet.webp', 
@@ -220,6 +246,9 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 setActivePage(slides[currentSlide].page);
               }
             }}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
           >
             {!slides[currentSlide].desktopImage && (
               <div style={styles.slideContent}>
@@ -642,41 +671,71 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
       {/* USP Bar */}
       {isUspMobile ? (
-        <section className="usp-slider-container container">
+        <section 
+          style={{ 
+            ...styles.uspBar, 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '12px 16px',
+            position: 'relative'
+          }}
+          className="container"
+        >
           <button 
             className="usp-arrow-btn" 
-            onClick={prevUsp}
+            onClick={() => handleUspScroll('left')}
             aria-label="Předchozí výhoda"
           >
             ‹
           </button>
           
           <div 
-            className="usp-slide-fade"
-            key={currentUsp}
+            ref={uspScrollRef}
+            className="usp-scroll-container"
             style={{
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '16px',
+              flexDirection: 'row',
+              overflowX: 'auto',
+              scrollBehavior: 'smooth',
+              scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch',
               flex: 1,
-              padding: '4px 12px'
+              gap: '0px',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
             }}
           >
-            <img 
-              src={uspItems[currentUsp].icon} 
-              alt="" 
-              style={styles.uspIcon} 
-            />
-            <div style={styles.uspText}>
-              <h4 style={{ ...styles.uspTitle, margin: 0 }}>{uspItems[currentUsp].title}</h4>
-              <p style={{ ...styles.uspDesc, margin: '3px 0 0' }}>{uspItems[currentUsp].desc}</p>
-            </div>
+            {uspItems.map((item, idx) => (
+              <div 
+                key={idx}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '16px',
+                  minWidth: '100%',
+                  flexShrink: 0,
+                  scrollSnapAlign: 'center',
+                  padding: '4px 0'
+                }}
+              >
+                <img 
+                  src={item.icon} 
+                  alt="" 
+                  style={styles.uspIcon} 
+                />
+                <div style={styles.uspText}>
+                  <h4 style={{ ...styles.uspTitle, margin: 0 }}>{item.title}</h4>
+                  <p style={{ ...styles.uspDesc, margin: '3px 0 0' }}>{item.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
 
           <button 
             className="usp-arrow-btn" 
-            onClick={nextUsp}
+            onClick={() => handleUspScroll('right')}
             aria-label="Další výhoda"
           >
             ›
@@ -842,7 +901,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
       {/* Product Grids */}
       {/* 1. Novinky (New arrivals) */}
-      <section style={styles.sectionContainer} className="container">
+      <section style={{ ...styles.sectionContainer, paddingBottom: isMobile ? '48px' : '0' }} className="container">
         <header className="nv-header">
           <div className="nv-header-left">
             <div className="nv-eyebrow">Nové přírůstky</div>
@@ -967,7 +1026,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         </section>
 
         {/* 3. Ohodnocené karty (Slabs) */}
-        <section style={styles.sectionContainer} className="container">
+        <section style={{ ...styles.sectionContainer, paddingBottom: isMobile ? '48px' : '0' }} className="container">
           <header className="nv-header">
             <div className="nv-header-left">
               <div className="nv-eyebrow">Certifikovaná kvalita</div>
@@ -1013,7 +1072,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       </div>
 
       {/* 4. Příslušenství (Accessories) */}
-      <section style={{ ...styles.sectionContainer, marginBottom: isMobile ? '24px' : '40px' }} className="container">
+      <section style={{ ...styles.sectionContainer, marginBottom: isMobile ? '24px' : '40px', paddingBottom: isMobile ? '48px' : '0' }} className="container">
         <header className="nv-header">
           <div className="nv-header-left">
             <div className="nv-eyebrow">Doplňky pro sběratele</div>

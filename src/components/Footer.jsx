@@ -68,7 +68,7 @@ export default function Footer({ setActivePage }) {
 
       <div className="footer-bottom">
         <div className="container footer-bottom-content">
-          <span>&copy; 2026 NORTHVALE TCG</span>
+          <span>&copy; {new Date().getFullYear()} NORTHVALE TCG</span>
           <span>Vytvořil <a href="https://ozeman.cz" target="_blank" rel="noopener noreferrer" className="credits-link">ozeman.cz</a></span>
         </div>
       </div>
