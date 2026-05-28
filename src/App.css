@@ -1,0 +1,58 @@
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+
+  /* Standardní (Mobil i Desktop) */
+  padding-left: calc(clamp(15px, 3.5vw, 40px) + 10px) !important;
+  padding-right: calc(clamp(15px, 3.5vw, 40px) + 10px) !important;
+}
+
+/* Pro rozlišení mezi 1024px a 1400px */
+@media (min-width: 1024px) and (max-width: 1400px) {
+  .container {
+    padding-left: calc(clamp(15px, 3.5vw, 40px) - 10px) !important;
+    padding-right: calc(clamp(15px, 3.5vw, 40px) - 10px) !important;
+  }
+}
+
+/* Pro rozlišení nad 1400px - zvětšení maximální šířky na 1440px */
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1440px;
+  }
+}
+
+
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-4 {
+  gap: 16px;
+}
+
+.gap-8 {
+  gap: 32px;
+}
+
+.text-gold {
+  color: var(--color-gold);
+}
+
+.text-green {
+  color: var(--color-green);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
