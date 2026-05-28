@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function Footer({ setActivePage }) {
   return (
@@ -35,7 +34,8 @@ export default function Footer({ setActivePage }) {
             <li className="footer-link" onClick={() => setActivePage('support')}>Centrum podpory</li>
             <li className="footer-link" onClick={() => setActivePage('support')}>FAQ</li>
             <li className="footer-link" onClick={() => setActivePage('community')}>Doprava a osobní odběr</li>
-            <li className="footer-link" onClick={() => setActivePage('support')}>Obchodní podmínky</li>
+            <li className="footer-link" onClick={() => setActivePage('gdpr-vop')}>Obchodní podmínky (VOP)</li>
+            <li className="footer-link" onClick={() => setActivePage('gdpr-vop')}>Ochrana osobních údajů (GDPR)</li>
           </ul>
         </div>
 

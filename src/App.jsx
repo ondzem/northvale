@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Homepage from './components/Homepage';
@@ -15,6 +15,9 @@ import SupportFAQ from './components/SupportFAQ';
 import CheckoutFlow from './components/CheckoutFlow';
 import UserPortal from './components/UserPortal';
 import AdminPanel from './components/AdminPanel';
+import GdprVop from './components/GdprVop';
+import Cart from './components/Cart';
+import Favorites from './components/Favorites';
 
 import { mockProducts } from './mockData';
 import './App.css';
@@ -333,6 +336,28 @@ export default function App() {
           <AdminPanel 
             buylists={buylists}
             approveBuylist={approveBuylist}
+          />
+        )}
+
+        {activePage === 'gdpr-vop' && (
+          <GdprVop setActivePage={setActivePage} />
+        )}
+
+        {activePage === 'cart' && (
+          <Cart 
+            cart={cart} 
+            setCart={setCart} 
+            user={user} 
+            setActivePage={setActivePage} 
+          />
+        )}
+
+        {activePage === 'favorites' && (
+          <Favorites 
+            products={mockProducts}
+            addToCart={addToCart}
+            setSelectedProductId={setSelectedProductId}
+            setActivePage={setActivePage}
           />
         )}
       </main>

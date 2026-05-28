@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function UserPortal({ user, setActivePage }) {
   const getGradingStepIndex = (status) => {

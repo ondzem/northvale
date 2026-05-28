@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function SinglesDetail({ productId, products, addToCart, setSelectedProductId, setActivePage }) {
   const [showBackImage, setShowBackImage] = useState(false);

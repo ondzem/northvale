@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
-export default function GradingPortal({ submitGrading, user, setActivePage }) {
+function generateGradingId() {
+  return 'GR-' + Math.floor(100000 + Math.random() * 900000);
+}
+
+export default function GradingPortal({ submitGrading, setActivePage }) {
   const [step, setStep] = useState(1);
   const [company, setCompany] = useState('PSA');
   const [cardCount, setCardCount] = useState(1);
@@ -36,7 +40,7 @@ export default function GradingPortal({ submitGrading, user, setActivePage }) {
 
   const handleSubmit = () => {
     const submission = {
-      id: 'GR-' + Math.floor(100000 + Math.random() * 900000),
+      id: generateGradingId(),
       company,
       cardCount,
       price: finalTotal,

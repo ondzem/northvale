@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import ProductCard from './ProductCard';
+import DealOfTheDay from './DealOfTheDay';
 
 export default function SinglesCatalog({ products, addToCart, setSelectedProductId, setActivePage, filters, setFilters, searchQuery, setSearchQuery }) {
   const [selectedEditions, setSelectedEditions] = useState(filters.edition ? [filters.edition] : []);
@@ -11,8 +13,17 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
   const [showImporter, setShowImporter] = useState(false);
   const [decklistText, setDecklistText] = useState('');
   
-  // Button micro-animation state
-  const [addedItems, setAddedItems] = useState({}); // item/variant id -> boolean
+  // Expandable description state
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
+
+  // Active subcategory (rarity filter)
+  const [activeSubcategory, setActiveSubcategory] = useState('all');
+
+  // Sorting
+  const [sortBy, setSortBy] = useState('top');
+
+  // Mobile filters sidebar open/close
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // Get only singles
   const singles = products.filter(p => p.type === 'single');
@@ -20,7 +31,15 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
   // Available filters options
   const editions = Array.from(new Set(singles.map(s => s.edition)));
   const conditions = ['NM', 'EX', 'GD', 'LP', 'PL', 'PO'];
-  const langs = ['EN', 'JP', 'CN'];
+  const langs = ['EN', 'JP', 'CN', 'KR'];
+
+  const subcategories = [
+    { id: 'all', name: 'Všechny kusovky', icon: '🃏' },
+    { id: 'Alternate Art', name: 'Alternate Art', icon: '🌟' },
+    { id: 'Special Illustration Rare', name: 'Special Illustration', icon: '🎨' },
+    { id: 'Secret Rare', name: 'Secret Rare', icon: '💎' },
+    { id: 'Rainbow Rare', name: 'Rainbow Rare', icon: '🌈' },
+  ];
 
   // Toggle helpers
   const handleEditionToggle = (edition) => {
@@ -43,14 +62,24 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
 
   // Filter logic
   const filteredSingles = singles.filter(product => {
-    if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase()) && !product.edition.toLowerCase().includes(searchQuery.toLowerCase())) {
+    // Search query filter
+    if (searchQuery && 
+        !product.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
+        !product.edition.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
     }
 
+    // Edition filter
     if (selectedEditions.length > 0 && !selectedEditions.includes(product.edition)) {
       return false;
     }
 
+    // Subcategory (Rarity) filter
+    if (activeSubcategory !== 'all' && product.rarity !== activeSubcategory) {
+      return false;
+    }
+
+    // Variants matching filters
     const matchingVariants = product.variants.filter(variant => {
       if (selectedConditions.length > 0 && !selectedConditions.includes(variant.condition)) {
         return false;
@@ -67,18 +96,16 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
     return matchingVariants.length > 0;
   });
 
-  const handleCardClick = (productId) => {
-    setSelectedProductId(productId);
-    setActivePage('singles-detail');
-  };
+  // Sort logic
+  const sortedSingles = [...filteredSingles].sort((a, b) => {
+    const priceA = a.variants ? Math.min(...a.variants.map(v => v.price)) : a.price;
+    const priceB = b.variants ? Math.min(...b.variants.map(v => v.price)) : b.price;
 
-  const handleBuyClick = (variant, card) => {
-    addToCart(variant, card);
-    setAddedItems(prev => ({ ...prev, [variant.id]: true }));
-    setTimeout(() => {
-      setAddedItems(prev => ({ ...prev, [variant.id]: false }));
-    }, 1500);
-  };
+    if (sortBy === 'expensive') return priceB - priceA;
+    if (sortBy === 'cheap') return priceA - priceB;
+    if (sortBy === 'new') return b.id.localeCompare(a.id); // mock sort
+    return 0; // Default: top
+  });
 
   // Parse and import decklist
   const handleImportDecklist = () => {
@@ -87,16 +114,14 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
     let importCount = 0;
     
     lines.forEach(line => {
-      // Matches: "4 Charizard" or "1 Pikachu" or just "Charizard" (defaults to 1)
       const match = line.trim().match(/^(\d+)?\s*(.+)$/);
       if (match) {
         const qty = match[1] ? parseInt(match[1]) : 1;
         const cardQuery = match[2].trim();
         
-        // Search our singles for a name match
         const card = singles.find(p => p.name.toLowerCase().includes(cardQuery.toLowerCase()));
         if (card) {
-          const defaultVariant = card.variants[0]; // NM EN foil or default
+          const defaultVariant = card.variants[0];
           for (let i = 0; i < qty; i++) {
             addToCart(defaultVariant, card);
           }
@@ -115,15 +140,15 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
   };
 
   return (
-    <div style={styles.container} className="container fade-in">
-      <h1 className="sr-only">Katalog kusových TCG karet - NORTHVALE</h1>
+    <div className="container fade-in" style={{ paddingTop: '20px', paddingBottom: '40px' }}>
+      <h1 className="sr-only">Katalog kusových TCG karet - Pokémon Kusovky</h1>
 
-      {/* Decklist Importer Toggle */}
-      <div style={styles.importerToggleBar}>
+      {/* Decklist Importer Toggle Bar */}
+      <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '20px' }}>
         <button 
           className="btn btn-secondary" 
           onClick={() => setShowImporter(!showImporter)}
-          style={styles.importerToggleBtn}
+          style={{ fontSize: '13px' }}
         >
           {showImporter ? '✕ Zavřít importér' : '📥 Importovat Decklist (pro turnajové hráče)'}
         </button>
@@ -131,9 +156,9 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
 
       {/* Decklist Importer Box */}
       {showImporter && (
-        <div style={styles.importerBox} className="glass-panel">
-          <h3 style={styles.importerTitle}>Decklist Importer</h3>
-          <p style={styles.importerDesc}>
+        <div className="glass-panel" style={{ padding: '24px', textAlign: 'left', marginBottom: '24px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: '800', margin: '0 0 6px 0' }}>Decklist Importer</h3>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '0 0 12px 0', lineHeight: '1.4' }}>
             Vložte seznam karet (každou kartu na nový řádek ve formátu: <code>množství název</code>, např. <code>4 Charizard</code>). Automaticky vyhledáme a přidáme nejlepší dostupné varianty do košíku.
           </p>
           <textarea
@@ -141,7 +166,18 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
             placeholder="Příklad:&#10;4 Charizard ex&#10;2 Pikachu VMAX"
             value={decklistText}
             onChange={(e) => setDecklistText(e.target.value)}
-            style={styles.importerTextarea}
+            style={{
+              width: '100%',
+              backgroundColor: 'var(--bg-page)',
+              border: '1px solid var(--border-light)',
+              padding: '12px',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--text-main)',
+              fontSize: '13px',
+              fontFamily: 'monospace',
+              outline: 'none',
+              resize: 'vertical',
+            }}
           />
           <button className="btn btn-primary" onClick={handleImportDecklist} style={{ marginTop: '12px' }}>
             Importovat do košíku
@@ -149,32 +185,63 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
         </div>
       )}
 
-      <div style={styles.layout}>
-        {/* Left Sidebar Filters */}
-        <aside style={styles.sidebar} className="glass-panel">
-          <h3 style={styles.sidebarHeading}>Filtry</h3>
+      {/* Main Split Layout */}
+      <div className="catalog-split-container">
+        
+        {/* LEFT COLUMN: Sidebar Filters & Deal of the Day */}
+        <aside className={`catalog-sidebar ${mobileFiltersOpen ? 'mobile-open' : ''}`}>
+          
+          {/* Mobile Sidebar Close Button */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 className="catalog-sidebar-title">Filtry a akce</h3>
+            <button 
+              className="mobile-only-close-btn"
+              onClick={() => setMobileFiltersOpen(false)}
+              style={{
+                display: 'none',
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-gold)',
+                fontSize: '22px',
+                cursor: 'pointer',
+                padding: '4px'
+              }}
+            >
+              ✕
+            </button>
+          </div>
 
-          <div style={styles.filterSection}>
-            <h4 style={styles.filterTitle}>Vyhledat v kategorii</h4>
+          {/* Deal of the Day Sidebar Widget */}
+          <DealOfTheDay 
+            products={products}
+            addToCart={addToCart}
+            setSelectedProductId={setSelectedProductId}
+            setActivePage={setActivePage}
+          />
+
+          {/* Filter: Search within category */}
+          <div className="sidebar-filter-section">
+            <h4 className="sidebar-filter-title">Hledat název karty</h4>
             <input 
               type="text" 
-              placeholder="Název karty..." 
+              placeholder="Zadejte název..." 
               value={searchQuery || ''} 
               onChange={(e) => setSearchQuery(e.target.value)} 
-              style={styles.searchInput}
+              className="sidebar-search-input"
             />
           </div>
 
-          <div style={styles.filterSection}>
-            <h4 style={styles.filterTitle}>Edice / Set</h4>
-            <div style={styles.checkboxList}>
+          {/* Filter: Set / Edition checkboxes */}
+          <div className="sidebar-filter-section">
+            <h4 className="sidebar-filter-title">Edice / Set</h4>
+            <div className="sidebar-checkbox-list">
               {editions.map(ed => (
-                <label key={ed} style={styles.checkboxLabel}>
+                <label key={ed} className="sidebar-checkbox-label">
                   <input 
                     type="checkbox" 
                     checked={selectedEditions.includes(ed)} 
                     onChange={() => handleEditionToggle(ed)}
-                    style={styles.checkbox}
+                    className="sidebar-checkbox"
                   />
                   <span>{ed}</span>
                 </label>
@@ -182,73 +249,89 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
             </div>
           </div>
 
-          <div style={styles.filterSection}>
-            <h4 style={styles.filterTitle}>Stav karty</h4>
-            <div style={styles.checkboxList}>
+          {/* Filter: Condition checkboxes */}
+          <div className="sidebar-filter-section">
+            <h4 className="sidebar-filter-title">Stav karty</h4>
+            <div className="sidebar-checkbox-list">
               {conditions.map(cond => (
-                <label key={cond} style={styles.checkboxLabel}>
+                <label key={cond} className="sidebar-checkbox-label">
                   <input 
                     type="checkbox" 
                     checked={selectedConditions.includes(cond)} 
                     onChange={() => handleConditionToggle(cond)}
-                    style={styles.checkbox}
+                    className="sidebar-checkbox"
                   />
-                  <span style={styles.conditionText}>{cond}</span>
+                  <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>{cond}</span>
                 </label>
               ))}
             </div>
-            <span style={styles.guideLink} onClick={() => setActivePage('grading-guide')}>Průvodce stavy karet</span>
+            <span 
+              onClick={() => { setActivePage('grading-guide'); setMobileFiltersOpen(false); }}
+              style={{
+                fontSize: '11px',
+                color: 'var(--color-gold)',
+                cursor: 'pointer',
+                fontWeight: '600',
+                textDecoration: 'underline',
+                textAlign: 'left'
+              }}
+            >
+              Průvodce stavy karet
+            </span>
           </div>
 
-          <div style={styles.filterSection}>
-            <h4 style={styles.filterTitle}>Jazyk</h4>
-            <div style={styles.checkboxList}>
+          {/* Filter: Language checkboxes */}
+          <div className="sidebar-filter-section">
+            <h4 className="sidebar-filter-title">Jazyk</h4>
+            <div className="sidebar-checkbox-list">
               {langs.map(lang => (
-                <label key={lang} style={styles.checkboxLabel}>
+                <label key={lang} className="sidebar-checkbox-label">
                   <input 
                     type="checkbox" 
                     checked={selectedLangs.includes(lang)} 
                     onChange={() => handleLangToggle(lang)}
-                    style={styles.checkbox}
+                    className="sidebar-checkbox"
                   />
-                  <span>{lang === 'EN' ? 'Angličtina (EN)' : lang === 'JP' ? 'Japonština (JP)' : 'Čínština (CHN)'}</span>
+                  <span>{lang === 'EN' ? 'Angličtina (EN) 🇬🇧' : lang === 'JP' ? 'Japonština (JP) 🇯🇵' : lang === 'CN' ? 'Čínština (CN) 🇨🇳' : 'Korejština (KR) 🇰🇷'}</span>
                 </label>
               ))}
             </div>
           </div>
 
-          <div style={styles.filterSection}>
-            <h4 style={styles.filterTitle}>Provedení</h4>
+          {/* Filter: Foil Type select */}
+          <div className="sidebar-filter-section">
+            <h4 className="sidebar-filter-title">Provedení</h4>
             <select 
               value={foilFilter} 
               onChange={(e) => setFoilFilter(e.target.value)} 
-              style={styles.selectInput}
+              className="sidebar-select"
             >
               <option value="all">Všechny úpravy</option>
-              <option value="foil">Pouze Foil (Třpytivé)</option>
-              <option value="non-foil">Pouze Non-Foil (Matné)</option>
+              <option value="foil">Pouze Foil (Třpytivé) ✨</option>
+              <option value="non-foil">Pouze Non-Foil (Matné) ▱</option>
             </select>
           </div>
 
-          <div style={styles.filterSection}>
-            <h4 style={styles.filterTitle}>Maximální cena</h4>
-            <div style={styles.priceRow}>
+          {/* Filter: Price Range slider */}
+          <div className="sidebar-filter-section">
+            <h4 className="sidebar-filter-title">Maximální cena</h4>
+            <div className="sidebar-range-box">
               <input 
                 type="range" 
                 min="0" 
                 max="25000" 
-                step="100"
+                step="250"
                 value={priceRange} 
                 onChange={(e) => setPriceRange(Number(e.target.value))} 
-                style={styles.rangeInput}
+                className="sidebar-range-input"
               />
-              <span style={styles.priceDisplay}>{priceRange.toLocaleString()} Kč</span>
+              <span className="sidebar-range-value">{priceRange.toLocaleString()} Kč</span>
             </div>
           </div>
 
+          {/* Clear Filters Button */}
           <button 
-            className="btn btn-secondary" 
-            style={styles.clearBtn}
+            className="btn btn-secondary sidebar-reset-btn"
             onClick={() => {
               setSelectedEditions([]);
               setSelectedConditions([]);
@@ -256,113 +339,121 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
               setFoilFilter('all');
               setPriceRange(25000);
               setSearchQuery('');
+              setActiveSubcategory('all');
               setFilters({});
+              setMobileFiltersOpen(false);
             }}
           >
             Smazat filtry
           </button>
         </aside>
 
-        {/* Right Product Listing */}
-        <main style={styles.mainContent}>
-          <div style={styles.resultsBar}>
-            <h2 style={styles.resultsHeading}>Kusové karty ({filteredSingles.length})</h2>
-            {searchQuery && (
-              <span style={styles.queryTag}>
-                Vyhledávání: "{searchQuery}" <button style={styles.tagCloseBtn} onClick={() => setSearchQuery('')}>&times;</button>
-              </span>
-            )}
+        {/* RIGHT COLUMN: Headers, Subcategories, Toolbar & Products Grid */}
+        <main className="catalog-main">
+          
+          {/* Header Introduction Box */}
+          <div className="category-intro-box">
+            <div style={{ fontSize: '11px', color: 'var(--color-gold)', fontWeight: '800', textTransform: 'uppercase', marginBottom: '4px' }}>
+              Kusové karty
+            </div>
+            <h2 className="category-title">Pokémon Kusovky</h2>
+            <div className="category-description-wrapper">
+              <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`}>
+                Objevte širokou nabídku Pokémon kusových karet z nejnovějších i starších edicí. Od běžných karet po extrémně vzácné kousky Alternate Art a Special Illustration Rare. Garantujeme 100% originalitu a precizní posouzení stavu každé nabízené karty. Naše nabídka Pokémon kusovek je denně aktualizována. Každá karta prochází přísnou kontrolou kvality, abychom zajistili přesné zařazení do stavových kategorií. Využijte náš pokročilý filtr pro rychlé nalezení konkrétních karet do vašeho herního balíčku nebo sbírky. Pro turnajové hráče doporučujeme použít náš inovativní Decklist Importer, se kterým naplníte košík celým seznamem karet během několika sekund.
+              </p>
+              <button 
+                className="description-toggle-btn"
+                onClick={() => setIsDescExpanded(!isDescExpanded)}
+              >
+                {isDescExpanded ? 'Méně informací ▲' : 'Více informací ▼'}
+              </button>
+            </div>
           </div>
 
-          {filteredSingles.length === 0 ? (
-            <div style={styles.noResults} className="glass-panel">
+          {/* Subcategories Grid Selection */}
+          <div className="subcategories-section-title">Populární kategorie vzácností</div>
+          <div className="subcategory-grid">
+            {subcategories.map(sub => (
+              <div 
+                key={sub.id} 
+                className={`subcategory-box ${activeSubcategory === sub.id ? 'active' : ''}`}
+                onClick={() => setActiveSubcategory(sub.id)}
+              >
+                <span className="subcategory-icon">{sub.icon}</span>
+                <span className="subcategory-name">{sub.name}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Toolbar panel */}
+          <div className="catalog-toolbar">
+            <div className="toolbar-left-group">
+              {/* Sort Tabs */}
+              <div className="sort-tabs-list">
+                <button 
+                  className={`sort-tab-btn ${sortBy === 'top' ? 'active' : ''}`}
+                  onClick={() => setSortBy('top')}
+                >
+                  TOP
+                </button>
+                <button 
+                  className={`sort-tab-btn ${sortBy === 'expensive' ? 'active' : ''}`}
+                  onClick={() => setSortBy('expensive')}
+                >
+                  Nejdražší
+                </button>
+                <button 
+                  className={`sort-tab-btn ${sortBy === 'cheap' ? 'active' : ''}`}
+                  onClick={() => setSortBy('cheap')}
+                >
+                  Nejlevnější
+                </button>
+                <button 
+                  className={`sort-tab-btn ${sortBy === 'new' ? 'active' : ''}`}
+                  onClick={() => setSortBy('new')}
+                >
+                  Novinky
+                </button>
+              </div>
+            </div>
+
+            <div className="toolbar-right-group">
+              {/* Counter */}
+              <span className="results-counter">
+                Celkem nalezeno: <strong>{sortedSingles.length}</strong> karet
+              </span>
+
+              {/* Filters Trigger (Mobile only) */}
+              <button 
+                className="mobile-filters-trigger"
+                onClick={() => setMobileFiltersOpen(true)}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>
+                Filtry
+              </button>
+            </div>
+          </div>
+
+          {/* Products Grid */}
+          {sortedSingles.length === 0 ? (
+            <div className="glass-panel" style={{ padding: '48px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', textAlign: 'center' }}>
               <span style={{ fontSize: '48px' }}>🔍</span>
-              <h3>Nebyly nalezeny žádné karty</h3>
-              <p>Zkuste změnit nastavení filtrů nebo vyhledávaný výraz.</p>
+              <h3>Nebyly nalezeny žádné kusové karty</h3>
+              <p style={{ color: 'var(--text-muted)' }}>Zkuste změnit výběr filtrů nebo vyhledávaný výraz.</p>
             </div>
           ) : (
-            <div style={styles.cardList}>
-              {filteredSingles.map(card => {
-                const activeVariants = card.variants.filter(v => {
-                  if (selectedConditions.length > 0 && !selectedConditions.includes(v.condition)) return false;
-                  if (selectedLangs.length > 0 && !selectedLangs.includes(v.lang)) return false;
-                  if (foilFilter === 'foil' && !v.foil) return false;
-                  if (foilFilter === 'non-foil' && v.foil) return false;
-                  if (v.price > priceRange) return false;
-                  return true;
-                });
-
-                return (
-                  <div key={card.id} style={styles.cardRow} className="glass-card">
-                    <div style={styles.cardRowImgContainer} onClick={() => handleCardClick(card.id)}>
-                      <img src={card.image} alt={card.name} style={styles.cardRowImg} />
-                    </div>
-                    <div style={styles.cardRowDetails}>
-                      <span style={styles.editionBadge}>{card.edition}</span>
-                      <h3 style={styles.cardRowName} onClick={() => handleCardClick(card.id)}>{card.name}</h3>
-                      <p style={styles.rarityLabel}>{card.rarity}</p>
-                      
-                      <div style={styles.variantsContainer}>
-                        <table style={styles.table}>
-                          <thead>
-                            <tr>
-                              <th style={styles.th}>Stav</th>
-                              <th style={styles.th}>Jazyk</th>
-                              <th style={styles.th}>Úprava</th>
-                              <th style={styles.th}>Skladem</th>
-                              <th style={styles.th}>Cena</th>
-                              <th style={{ ...styles.th, textAlign: 'right' }}>Akce</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {activeVariants.map(variant => {
-                              const isAdded = addedItems[variant.id];
-                              
-                              return (
-                                <tr key={variant.id} style={styles.tr}>
-                                  <td style={styles.td}>
-                                    <span 
-                                      style={styles.conditionBadge} 
-                                      onClick={() => setActivePage('grading-guide')}
-                                      title="Zobrazit průvodce stavy"
-                                    >
-                                      {variant.condition}
-                                    </span>
-                                  </td>
-                                  <td style={styles.td}>{variant.lang}</td>
-                                  <td style={styles.td}>{variant.foil ? 'Foil' : 'Non-Foil'}</td>
-                                  <td style={styles.td}>
-                                    <span style={{ color: variant.stock > 0 ? 'var(--color-green)' : 'var(--text-muted)' }}>
-                                      {variant.stock} ks
-                                    </span>
-                                  </td>
-                                  <td style={styles.tdPrice}>{variant.price.toLocaleString('cs-CZ')} Kč</td>
-                                  <td style={{ ...styles.td, textAlign: 'right' }}>
-                                    <button 
-                                      className="btn"
-                                      style={{
-                                        ...styles.buyBtn,
-                                        backgroundColor: isAdded ? 'var(--color-green)' : 'var(--color-gold)',
-                                        color: '#000',
-                                        transform: isAdded ? 'scale(0.94)' : 'scale(1)',
-                                        transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)'
-                                      }}
-                                      disabled={variant.stock === 0}
-                                      onClick={() => handleBuyClick(variant, card)}
-                                    >
-                                      {isAdded ? '✓ Přidáno' : 'Do košíku'}
-                                    </button>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="catalog-product-grid">
+              {sortedSingles.map(product => (
+                <ProductCard 
+                  key={product.id}
+                  product={product}
+                  addToCart={addToCart}
+                  setSelectedProductId={setSelectedProductId}
+                  setActivePage={setActivePage}
+                />
+              ))}
             </div>
           )}
         </main>
@@ -370,290 +461,3 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
     </div>
   );
 }
-
-const styles = {
-  container: {
-    paddingTop: '20px',
-    paddingBottom: '20px',
-  },
-  importerToggleBar: {
-    display: 'flex',
-    justifyContent: 'flex-start',
-    marginBottom: '20px',
-  },
-  importerToggleBtn: {
-    fontSize: '13px',
-  },
-  importerBox: {
-    padding: '24px',
-    textAlign: 'left',
-    marginBottom: '24px',
-  },
-  importerTitle: {
-    fontSize: '16px',
-    fontWeight: '800',
-    margin: '0 0 6px',
-  },
-  importerDesc: {
-    fontSize: '13px',
-    color: 'var(--text-muted)',
-    margin: '0 0 12px',
-    lineHeight: '1.4',
-  },
-  importerTextarea: {
-    width: '100%',
-    backgroundColor: 'var(--bg-page)',
-    border: '1px solid var(--border-light)',
-    padding: '12px',
-    borderRadius: 'var(--radius-sm)',
-    color: 'var(--text-main)',
-    fontSize: '13px',
-    fontFamily: 'monospace',
-    outline: 'none',
-    resize: 'vertical',
-  },
-  layout: {
-    display: 'flex',
-    gap: '24px',
-    flexWrap: 'wrap',
-  },
-  sidebar: {
-    flex: '1 1 280px',
-    padding: '24px',
-    alignSelf: 'flex-start',
-    textAlign: 'left',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  },
-  sidebarHeading: {
-    fontSize: '18px',
-    fontWeight: '800',
-    margin: 0,
-    borderBottom: '1px solid var(--border)',
-    paddingBottom: '12px',
-  },
-  filterSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  filterTitle: {
-    fontSize: '13px',
-    fontWeight: '700',
-    color: 'var(--text-main)',
-    margin: 0,
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-  },
-  searchInput: {
-    backgroundColor: 'var(--bg-page)',
-    border: '1px solid var(--border-light)',
-    padding: '8px 12px',
-    borderRadius: 'var(--radius-sm)',
-    fontSize: '13px',
-    color: 'var(--text-main)',
-    outline: 'none',
-  },
-  checkboxList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-    maxHeight: '160px',
-    overflowY: 'auto',
-    paddingRight: '6px',
-  },
-  checkboxLabel: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '13px',
-    color: 'var(--text-muted)',
-    cursor: 'pointer',
-  },
-  checkbox: {
-    cursor: 'pointer',
-  },
-  conditionText: {
-    fontWeight: '700',
-    color: 'var(--text-main)',
-  },
-  guideLink: {
-    fontSize: '11px',
-    color: 'var(--color-gold)',
-    cursor: 'pointer',
-    marginTop: '4px',
-    fontWeight: '600',
-    textDecoration: 'underline',
-  },
-  selectInput: {
-    backgroundColor: 'var(--bg-page)',
-    border: '1px solid var(--border-light)',
-    padding: '8px 12px',
-    borderRadius: 'var(--radius-sm)',
-    fontSize: '13px',
-    color: 'var(--text-main)',
-    outline: 'none',
-  },
-  priceRow: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-  },
-  rangeInput: {
-    width: '100%',
-    cursor: 'pointer',
-  },
-  priceDisplay: {
-    fontSize: '13px',
-    fontWeight: '700',
-    color: 'var(--color-gold)',
-    textAlign: 'right',
-  },
-  clearBtn: {
-    width: '100%',
-    marginTop: '10px',
-  },
-  mainContent: {
-    flex: '3 1 600px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  },
-  resultsBar: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '12px',
-  },
-  resultsHeading: {
-    fontSize: '20px',
-    fontWeight: '700',
-    margin: 0,
-  },
-  queryTag: {
-    fontSize: '12px',
-    backgroundColor: 'var(--bg-surface-alt)',
-    padding: '4px 10px',
-    borderRadius: 'var(--radius-sm)',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-  },
-  tagCloseBtn: {
-    fontWeight: '700',
-    fontSize: '14px',
-    color: 'var(--color-gold)',
-  },
-  noResults: {
-    padding: '48px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '12px',
-    textAlign: 'center',
-  },
-  cardList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  cardRow: {
-    display: 'flex',
-    gap: '24px',
-    padding: '20px',
-    alignItems: 'flex-start',
-    flexWrap: 'wrap',
-    textAlign: 'left',
-  },
-  cardRowImgContainer: {
-    width: '130px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(9, 9, 11, 0.4)',
-    padding: '8px',
-    borderRadius: 'var(--radius-md)',
-    cursor: 'pointer',
-  },
-  cardRowImg: {
-    maxWidth: '100%',
-    maxHeight: '180px',
-    objectFit: 'contain',
-  },
-  cardRowDetails: {
-    flex: '1 1 300px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-  },
-  editionBadge: {
-    fontSize: '10px',
-    color: 'var(--color-gold)',
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
-  cardRowName: {
-    fontSize: '16px',
-    fontWeight: '800',
-    margin: 0,
-    cursor: 'pointer',
-    '&:hover': {
-      color: 'var(--color-gold)',
-    }
-  },
-  rarityLabel: {
-    fontSize: '11px',
-    color: 'var(--text-muted)',
-    margin: 0,
-  },
-  variantsContainer: {
-    marginTop: '12px',
-    overflowX: 'auto',
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    fontSize: '13px',
-  },
-  th: {
-    textAlign: 'left',
-    color: 'var(--text-muted)',
-    fontWeight: '600',
-    paddingBottom: '8px',
-    borderBottom: '1px solid rgba(255,255,255,0.06)',
-  },
-  tr: {
-    borderBottom: '1px solid rgba(255,255,255,0.03)',
-    '&:last-child': {
-      borderBottom: 'none',
-    }
-  },
-  td: {
-    padding: '10px 0',
-  },
-  conditionBadge: {
-    fontSize: '10px',
-    fontWeight: '800',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    padding: '2px 6px',
-    borderRadius: '2px',
-    cursor: 'pointer',
-    color: 'var(--text-main)',
-  },
-  tdPrice: {
-    padding: '10px 0',
-    fontWeight: '700',
-    color: 'var(--color-gold)',
-  },
-  buyBtn: {
-    padding: '6px 12px',
-    fontSize: '12px',
-    fontWeight: '700',
-    borderRadius: 'var(--radius-sm)',
-    border: 'none',
-    cursor: 'pointer',
-  }
-};

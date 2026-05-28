@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function SealedDetail({ productId, products, addToCart, setSelectedProductId, setActivePage }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);

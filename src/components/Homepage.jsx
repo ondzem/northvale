@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const ProductImage = ({ src, alt, className = '' }) => {
   const [aspectRatio, setAspectRatio] = useState(1.0);
@@ -24,18 +24,6 @@ const ProductImage = ({ src, alt, className = '' }) => {
   );
 };
 
-const getCardThemeClass = (product) => {
-  const name = (product.name || '').toLowerCase();
-  if (name.includes('charizard')) return 'ca-base-charizard';
-  if (name.includes('pikachu')) return 'ca-base-pikachu';
-  if (name.includes('umbreon')) return 'ca-base-umbreon';
-  if (name.includes('giratina')) return 'ca-base-giratina';
-  if (name.includes('rayquaza')) return 'ca-base-rayquaza';
-  
-  const themes = ['ca-base-charizard', 'ca-base-pikachu', 'ca-base-umbreon', 'ca-base-giratina', 'ca-base-rayquaza'];
-  const code = (product.id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return themes[code % themes.length];
-};
 
 export default function Homepage({ setActivePage, addToCart, products, setSelectedProductId, setFilters }) {
   // Mobile state detection (900px breakpoint for layout)

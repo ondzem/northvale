@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function Navbar({ activePage, setActivePage, cart, user, setFilters, setSearchQuery }) {
+export default function Navbar({ setActivePage, cart, user, setFilters, setSearchQuery }) {
   const [drawerOpen, _setDrawerOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -44,22 +44,7 @@ export default function Navbar({ activePage, setActivePage, cart, user, setFilte
     };
   }, [drawerOpen]);
 
-  const [openMobileSections, setOpenMobileSections] = useState({
-    pokemon: false,
-    mtg: false,
-    onepiece: false,
-    riftbound: false,
-    accessories: false,
-    slabs: false,
-    grading: false,
-  });
 
-  const toggleMobileSection = (section) => {
-    setOpenMobileSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
 
   const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -206,7 +191,7 @@ export default function Navbar({ activePage, setActivePage, cart, user, setFilte
               </form>
 
               <div style={styles.navActions}>
-                <button className="nav-action-btn" onClick={() => { setFilters({}); setActivePage('singles-catalog'); }} title="Oblíbené">
+                <button className="nav-action-btn" onClick={() => setActivePage('favorites')} title="Oblíbené">
                   <img src="/heart.png" alt="Oblíbené" />
                   <span style={styles.actionLabel}>Oblíbené</span>
                 </button>
@@ -218,7 +203,7 @@ export default function Navbar({ activePage, setActivePage, cart, user, setFilte
                   </span>
                 </button>
 
-                <button className="nav-action-btn" style={{ marginRight: '-12px' }} onClick={() => setActivePage('checkout')} title="Košík">
+                <button className="nav-action-btn" style={{ marginRight: '-12px' }} onClick={() => setActivePage('cart')} title="Košík">
                   <div style={styles.cartIconWrapper}>
                     <img src="/shopping-cart.png" alt="Košík" />
                     {cartItemsCount > 0 && (
@@ -463,7 +448,7 @@ export default function Navbar({ activePage, setActivePage, cart, user, setFilte
                 <button className="nav-action-btn" style={styles.mobileActionBtn} onClick={() => setActivePage('profile')} title="Přihlásit se">
                   <img src="/user.png" alt="Profil" style={styles.mobileActionIcon} />
                 </button>
-                <button className="nav-action-btn" style={{ ...styles.mobileActionBtn, marginRight: '-8px' }} onClick={() => setActivePage('checkout')} title="Košík">
+                <button className="nav-action-btn" style={{ ...styles.mobileActionBtn, marginRight: '-8px' }} onClick={() => setActivePage('cart')} title="Košík">
                   <div style={styles.cartIconWrapper}>
                     <img src="/shopping-cart.png" alt="Košík" style={styles.mobileActionIcon} />
                     {cartItemsCount > 0 && (
@@ -689,7 +674,7 @@ export default function Navbar({ activePage, setActivePage, cart, user, setFilte
               <div style={styles.mobileDrawerFooter}>
                 {/* Actions Row (Oblíbené, Kontakt) */}
                 <div style={styles.drawerActionsRow}>
-                  <button style={styles.drawerActionLink} onClick={() => { handleCategoryClick('singles'); setDrawerOpen(false); }}>
+                  <button style={styles.drawerActionLink} onClick={() => { setActivePage('favorites'); setDrawerOpen(false); }}>
                     <img src="/heart.png" alt="" style={styles.drawerActionIcon} /> Oblíbené
                   </button>
                   <button style={styles.drawerActionLink} onClick={() => { setActivePage('support'); setDrawerOpen(false); }}>

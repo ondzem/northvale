@@ -1,7 +1,17 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { bulkRates } from '../mockData';
 
-export default function BuylistPortal({ products, submitBuylist, user, setActivePage }) {
+let buylistIdCounter = 0;
+function generateUniqueId() {
+  buylistIdCounter += 1;
+  return `item-${Date.now()}-${buylistIdCounter}`;
+}
+
+function generateSubmissionId() {
+  return `BL-${Math.floor(100000 + Math.random() * 900000)}`;
+}
+
+export default function BuylistPortal({ products, submitBuylist, setActivePage }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [buylistCart, setBuylistCart] = useState([]);
   const [bulkCounts, setBulkCounts] = useState(
@@ -25,7 +35,7 @@ export default function BuylistPortal({ products, submitBuylist, user, setActive
     const baseValue = Math.round(defaultVariant.price * 0.6);
 
     const newItem = {
-      id: Math.random().toString(36).substring(7),
+      id: generateUniqueId(),
       product,
       condition: 'NM',
       lang: 'EN',
@@ -93,7 +103,7 @@ export default function BuylistPortal({ products, submitBuylist, user, setActive
     }
 
     const submission = {
-      id: 'BL-' + Math.floor(100000 + Math.random() * 900000),
+      id: generateSubmissionId(),
       items: buylistCart.map(item => ({
         name: item.product.name,
         condition: item.condition,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function CheckoutFlow({ cart, user, submitOrder, setActivePage }) {
   const [name, setName] = useState('');
