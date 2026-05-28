@@ -1099,7 +1099,6 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           <div className="newsletter-content">
             <div className="newsletter-eyebrow">NEWSLETTER • 028</div>
             <h2 className="newsletter-heading">Nové edice & výkupy jako první.</h2>
-            <p className="newsletter-desc">Bez spamu. Jen oznámení o startu předobjednávek a nově otevřených výkupních oknech.</p>
           </div>
           <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); alert('Děkujeme za přihlášení k newsletteru!'); }}>
             <div className="newsletter-input-group">
