@@ -74,7 +74,7 @@ export const mockProducts = [
       { id: 'ra-1', condition: 'NM', lang: 'EN', foil: true, price: 14500, stock: 1 }
     ]
   },
- 
+
   // --- SEALED PRODUCTS (Pokémon) ---
   {
     id: 'deal-of-the-day',
@@ -84,7 +84,7 @@ export const mockProducts = [
     edition: '151',
     price: 1790,
     originalPrice: 2690,
-    image: '/Akce - NORTHVALE.png',
+    image: '/Akce - NORTHVALE.webp',
     preorder: false,
     investment: false,
     lang: 'JP',
@@ -211,7 +211,7 @@ export const mockProducts = [
     desc: 'Originální sealed case obsahující 2 kompletní sady Pokémon Classic Collection přímo od výrobce. Perfektní investiční produkt zajištěný originální páskou.',
     stock: 2
   },
- 
+
   // --- MAGIC THE GETHERING (MTG) ---
   {
     id: 'mtg-mh3-booster-box',
@@ -237,7 +237,7 @@ export const mockProducts = [
     desc: 'Předpřipravený herní balíček o 100 kartách připravený k okamžitému hraní formátu Commander. Velmi silný balíček postavený na sesílání instantů a sorcery.',
     stock: 10
   },
- 
+
   // --- ONE PIECE ---
   {
     id: 'op-07-booster-box',
@@ -251,7 +251,7 @@ export const mockProducts = [
     desc: 'Velmi žádaný zapečetěný box karetní hry One Piece obsahující 24 boosterů. Obsahuje karty ze ságy Egghead.',
     stock: 6
   },
- 
+
   // --- RIFTBOUND ---
   {
     id: 'riftbound-trial-deck',
@@ -265,7 +265,7 @@ export const mockProducts = [
     desc: 'Ideální startovní sada pro začínající hráče Riftbound. Obsahuje předpřipravený balíček a pravidla pro rychlé naučení hry.',
     stock: 15
   },
- 
+
   // --- ACCESSORIES ---
   {
     id: 'dragon-shield-matte-clear',
@@ -327,7 +327,7 @@ export const mockProducts = [
     desc: 'Prémiové album na 360 karet s elastickým páskem a bočním vkládáním pro maximální bezpečí tvé sbírky.',
     stock: 20
   },
- 
+
   // --- SLABS (Graded Cards) ---
   {
     id: 'slab-charizard-psa10',

@@ -1,5 +1,42 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+const ProductImage = ({ src, alt, className = '' }) => {
+  const [aspectRatio, setAspectRatio] = useState(1.0);
+  const [loaded, setLoaded] = useState(false);
+
+  const handleLoad = (e) => {
+    const { naturalWidth, naturalHeight } = e.target;
+    if (naturalWidth && naturalHeight) {
+      setAspectRatio(naturalWidth / naturalHeight);
+    }
+    setLoaded(true);
+  };
+
+  const fitClass = aspectRatio >= 1.1 ? 'ca-fit-contain' : 'ca-fit-cover';
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      onLoad={handleLoad}
+      className={`${className} ${fitClass} ${loaded ? 'loaded' : ''}`}
+    />
+  );
+};
+
+const getCardThemeClass = (product) => {
+  const name = (product.name || '').toLowerCase();
+  if (name.includes('charizard')) return 'ca-base-charizard';
+  if (name.includes('pikachu')) return 'ca-base-pikachu';
+  if (name.includes('umbreon')) return 'ca-base-umbreon';
+  if (name.includes('giratina')) return 'ca-base-giratina';
+  if (name.includes('rayquaza')) return 'ca-base-rayquaza';
+  
+  const themes = ['ca-base-charizard', 'ca-base-pikachu', 'ca-base-umbreon', 'ca-base-giratina', 'ca-base-rayquaza'];
+  const code = (product.id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return themes[code % themes.length];
+};
+
 export default function Homepage({ setActivePage, addToCart, products, setSelectedProductId, setFilters }) {
   // Mobile state detection (900px breakpoint for layout)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
@@ -88,6 +125,34 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   const preordersRef = useRef(null);
   const gradedCardsRef = useRef(null);
   const accessoriesRef = useRef(null);
+  const testimonialsRef = useRef(null);
+
+  const testimonials = [
+    {
+      initials: 'FK',
+      name: 'Filip K.',
+      desc: 'Pardubice',
+      text: '„Karty dorazily v naprosto bezchybném stavu. Kartonový sendvič a toploader bez lepidla jsou přesně to, co od sběratelského obchodu očekávám. Tímto děkuji za super přístup a skvělou komunikaci.“'
+    },
+    {
+      initials: 'MR',
+      name: 'Monika R.',
+      desc: 'UPCE student',
+      text: '„Oceňuji možnost doručení kusovek na odběrné místo v kavárně v centru Pardubic. Neplatím žádné poštovné pro malé objednávky a k tomu dostanu výbornou kávu. Výkup proběhl naprosto hladce.“'
+    },
+    {
+      initials: 'PS',
+      name: 'Petr S.',
+      desc: 'Hradec Králové',
+      text: '„Nechal jsem si přes ně nagradovat pět drahých Pokémon karet u PSA. Celý proces šlo sledovat online v mém profilu, vše bylo pojištěné a výsledné známky (tři desítky!) předčily mé očekávání.“'
+    },
+    {
+      initials: 'JM',
+      name: 'Jana M.',
+      desc: 'Pardubice',
+      text: '„Jako rodič velmi oceňuji dárkového průvodce. Vůbec se v Pokémon edicích nevyznám, ale s jejich dárkovým setem pod stromečkem mělo dítě obrovskou radost a já měl jistotu, že nekupuji fake karty.“'
+    }
+  ];
 
   const handleScroll = (ref, direction) => {
     if (ref.current) {
@@ -778,24 +843,39 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       {/* Product Grids */}
       {/* 1. Novinky (New arrivals) */}
       <section style={styles.sectionContainer} className="container">
-        <div style={styles.sectionHeader}>
-          <h2 style={styles.sectionHeading} className="section-title">Novinky</h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span className="more-link-desktop" onClick={() => { setFilters({}); setActivePage('singles-catalog'); }}>Zobrazit více &rsaquo;</span>
+        <header className="nv-header">
+          <div className="nv-header-left">
+            <div className="nv-eyebrow">Nové přírůstky</div>
+            <h2 className="nv-title">Novinky</h2>
           </div>
-        </div>
+          <span className="nv-link more-link-desktop" onClick={() => { setFilters({}); setActivePage('singles-catalog'); }}>
+            Zobrazit více &rarr;
+          </span>
+        </header>
         <div className="slider-container-wrapper">
           <button onClick={() => handleScroll(newArrivalsRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
           <div ref={newArrivalsRef} className="homepage-product-grid">
             {newArrivals.map(product => (
-              <div key={product.id} className="product-card" style={styles.productCard} onClick={() => handleCardClick(product)}>
-                <div style={styles.cardImgContainer}>
-                  <img src={product.image} alt={product.name} style={styles.cardImg} />
+              <div key={product.id} className={`vf-card type-${product.type}`} onClick={() => handleCardClick(product)}>
+                <div className="vf-art">
+                  <div className="card-art">
+                    <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
+                    <div className="ca-holo"></div>
+                    <div className="ca-shine"></div>
+                    <div className="ca-grain"></div>
+                  </div>
                 </div>
-                <div style={styles.cardDetails}>
-                  <h4 style={styles.cardName}>{product.name.split(' (')[0]}</h4>
-                  <span style={styles.cardStock} className="text-green">● Skladem</span>
-                  <span style={styles.cardPrice}>{((product.variants ? product.variants[0].price : product.price) || 1200).toLocaleString('cs-CZ')} Kč</span>
+                <div className="vf-shadow"></div>
+                <div className="vf-info">
+                  <div className="vf-name">{product.name.split(' (')[0]}</div>
+                  <div className="vf-rule"></div>
+                  <div className="vf-meta">
+                    <span className="vf-stock">
+                      <span className="vf-dot"></span>
+                      Skladem
+                    </span>
+                    <span className="vf-price">{((product.variants ? product.variants[0].price : product.price) || 1200).toLocaleString('cs-CZ')} Kč</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -803,7 +883,9 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           <button onClick={() => handleScroll(newArrivalsRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
         </div>
         <div className="more-link-mobile-wrapper">
-          <span className="more-link-mobile" onClick={() => { setFilters({}); setActivePage('singles-catalog'); }}>Zobrazit více &rsaquo;</span>
+          <span className="nv-link more-link-mobile" onClick={() => { setFilters({}); setActivePage('singles-catalog'); }}>
+            Zobrazit více &rarr;
+          </span>
         </div>
       </section>
 
@@ -822,31 +904,49 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       }}>
         {/* 2. Předobjednávky (Preorders) */}
         <section style={{ ...styles.sectionContainer, marginBottom: isMobile ? '24px' : '40px' }} className="container">
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionHeading} className="section-title">Předobjednávky</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <span className="more-link-desktop" onClick={() => { setFilters({}); setActivePage('sealed-catalog'); }}>Zobrazit více &rsaquo;</span>
+          <header className="nv-header">
+            <div className="nv-header-left">
+              <div className="nv-eyebrow">Připravované edice</div>
+              <h2 className="nv-title">Předobjednávky</h2>
             </div>
-          </div>
+            <span className="nv-link more-link-desktop" onClick={() => { setFilters({}); setActivePage('sealed-catalog'); }}>
+              Zobrazit více &rarr;
+            </span>
+          </header>
           <div className="slider-container-wrapper">
             <button onClick={() => handleScroll(preordersRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
             <div ref={preordersRef} className="homepage-product-grid">
-              {preorders.map(product => (
-                <div key={product.id} className="product-card" style={styles.productCard} onClick={() => handleCardClick(product)}>
-                  <div style={styles.cardImgContainer}>
-                    <img src={product.image} alt={product.name} style={styles.cardImg} />
-                  </div>
-                  <div style={styles.cardDetails}>
-                    <h4 style={styles.cardName}>{product.name}</h4>
-                    <span style={styles.cardPrice}>{product.price.toLocaleString('cs-CZ')} Kč</span>
+            {preorders.map(product => (
+              <div key={product.id} className={`vf-card type-${product.type}`} onClick={() => handleCardClick(product)}>
+                <div className="vf-art">
+                  <div className="card-art">
+                    <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
+                    <div className="ca-holo"></div>
+                    <div className="ca-shine"></div>
+                    <div className="ca-grain"></div>
                   </div>
                 </div>
-              ))}
+                <div className="vf-shadow"></div>
+                <div className="vf-info">
+                  <div className="vf-name">{product.name}</div>
+                  <div className="vf-rule"></div>
+                  <div className="vf-meta">
+                    <span className="vf-stock">
+                      <span className="vf-dot"></span>
+                      Předobjednávka
+                    </span>
+                    <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
+                  </div>
+                </div>
+              </div>
+            ))}
             </div>
             <button onClick={() => handleScroll(preordersRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
           </div>
           <div className="more-link-mobile-wrapper">
-            <span className="more-link-mobile" onClick={() => { setFilters({}); setActivePage('sealed-catalog'); }}>Zobrazit více &rsaquo;</span>
+            <span className="nv-link more-link-mobile" onClick={() => { setFilters({}); setActivePage('sealed-catalog'); }}>
+              Zobrazit více &rarr;
+            </span>
           </div>
         </section>
 
@@ -868,56 +968,85 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
         {/* 3. Ohodnocené karty (Slabs) */}
         <section style={styles.sectionContainer} className="container">
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionHeading} className="section-title">Ohodnocené karty</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <span className="more-link-desktop" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>Zobrazit více &rsaquo;</span>
+          <header className="nv-header">
+            <div className="nv-header-left">
+              <div className="nv-eyebrow">Certifikovaná kvalita</div>
+              <h2 className="nv-title">Ohodnocené karty</h2>
             </div>
-          </div>
+            <span className="nv-link more-link-desktop" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
+              Zobrazit více &rarr;
+            </span>
+          </header>
           <div className="slider-container-wrapper">
             <button onClick={() => handleScroll(gradedCardsRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
             <div ref={gradedCardsRef} className="homepage-product-grid">
-              {gradedCards.map(product => (
-                <div key={product.id} className="product-card rarity-gold" style={styles.productCard} onClick={() => handleCardClick(product)}>
-                  <div style={styles.cardImgContainer}>
-                    <img src={product.image} alt={product.name} style={styles.cardImg} />
-                  </div>
-                  <div style={styles.cardDetails}>
-                    <h4 style={styles.cardName}>{product.name}</h4>
-                    <span style={styles.slabBadge}>{product.company} {product.grade}</span>
-                    <span style={styles.cardPrice}>{product.price.toLocaleString('cs-CZ')} Kč</span>
+            {gradedCards.map(product => (
+              <div key={product.id} className={`vf-card type-${product.type}`} onClick={() => handleCardClick(product)}>
+                <div className="vf-art">
+                  <div className="card-art">
+                    <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
+                    <div className="ca-holo"></div>
+                    <div className="ca-shine"></div>
+                    <div className="ca-grain"></div>
                   </div>
                 </div>
-              ))}
+                <div className="vf-shadow"></div>
+                <div className="vf-info">
+                  <div className="vf-name">{product.name}</div>
+                  <div className="vf-rule"></div>
+                  <div className="vf-meta">
+                    <span className="slab-badge">{product.company} {product.grade}</span>
+                    <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
+                  </div>
+                </div>
+              </div>
+            ))}
             </div>
             <button onClick={() => handleScroll(gradedCardsRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
           </div>
           <div className="more-link-mobile-wrapper">
-            <span className="more-link-mobile" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>Zobrazit více &rsaquo;</span>
+            <span className="nv-link more-link-mobile" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
+              Zobrazit více &rarr;
+            </span>
           </div>
         </section>
       </div>
 
       {/* 4. Příslušenství (Accessories) */}
       <section style={{ ...styles.sectionContainer, marginBottom: isMobile ? '24px' : '40px' }} className="container">
-        <div style={styles.sectionHeader}>
-          <h2 style={styles.sectionHeading} className="section-title">Příslušenství</h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span className="more-link-desktop" onClick={() => { setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); }}>Zobrazit více &rsaquo;</span>
+        <header className="nv-header">
+          <div className="nv-header-left">
+            <div className="nv-eyebrow">Doplňky pro sběratele</div>
+            <h2 className="nv-title">Příslušenství</h2>
           </div>
-        </div>
+          <span className="nv-link more-link-desktop" onClick={() => { setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); }}>
+            Zobrazit více &rarr;
+          </span>
+        </header>
         <div className="slider-container-wrapper">
           <button onClick={() => handleScroll(accessoriesRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
           <div ref={accessoriesRef} className="homepage-product-grid">
             {accessories.map(product => (
-              <div key={product.id} className="product-card" style={styles.productCard} onClick={() => handleCardClick(product)}>
-                <div style={styles.cardImgContainer}>
-                  <img src={product.image} alt={product.name} style={styles.cardImg} />
+              <div key={product.id} className={`vf-card type-${product.type}`} onClick={() => handleCardClick(product)}>
+                <div className="vf-art">
+                  <div className="card-art">
+                    <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
+                    <div className="ca-holo"></div>
+                    <div className="ca-shine"></div>
+                    <div className="ca-grain"></div>
+                  </div>
                 </div>
-                <div style={styles.cardDetails}>
-                  <h4 style={styles.cardName}>{product.name}</h4>
-                  <span style={styles.cardStock} className="text-green">● Skladem</span>
-                  <span style={styles.cardPrice}>{product.price.toLocaleString('cs-CZ')} Kč</span>
+                <div className="vf-shadow"></div>
+                <div className="vf-info">
+                  <div className="vf-name">{product.name}</div>
+                  <div className="vf-rule"></div>
+                  <div className="vf-meta">
+                    <span className="vf-stock">
+                      <span className="vf-dot"></span>
+                      Skladem
+                    </span>
+                    <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -925,74 +1054,61 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           <button onClick={() => handleScroll(accessoriesRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
         </div>
         <div className="more-link-mobile-wrapper">
-          <span className="more-link-mobile" onClick={() => { setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); }}>Zobrazit více &rsaquo;</span>
+          <span className="nv-link more-link-mobile" onClick={() => { setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); }}>
+            Zobrazit více &rarr;
+          </span>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section style={styles.sectionContainer} className="container">
-        <h2 style={styles.sectionHeading} className="section-title">Co o nás říkají</h2>
-        <div style={styles.testimonialsGrid}>
-          <div style={styles.testimonialCard} className="glass-card">
-            <div style={styles.starsRow}>
-              {[...Array(5)].map((_, i) => (
-                <img key={i} src="/star.png" alt="star" style={styles.starIcon} />
-              ))}
-            </div>
-            <p style={styles.testimonialText}>
-              „Karty dorazily v naprosto bezchybném stavu. Kartonový sendvič a toploader bez lepidla jsou přesně to, co od sběratelského obchodu očekávám. Tímto děkuji za super přístup a skvělou komunikaci.“
-            </p>
-            <span style={styles.testimonialUser}>Filip K., Pardubice</span>
+      <section style={styles.sectionContainer} className="container testimonials-section">
+        <header className="testimonials-header">
+          <div className="testimonials-header-left">
+            <div className="testimonials-eyebrow">RECENZE OVĚŘENÝCH ZÁKAZNÍKŮ</div>
+            <h2 className="testimonials-title">Co o nás říkají</h2>
           </div>
-
-          <div style={styles.testimonialCard} className="glass-card">
-            <div style={styles.starsRow}>
-              {[...Array(5)].map((_, i) => (
-                <img key={i} src="/star.png" alt="star" style={styles.starIcon} />
-              ))}
-            </div>
-            <p style={styles.testimonialText}>
-              „Oceňuji možnost doručení kusovek na odběrné místo v kavárně v centru Pardubic. Neplatím žádné poštovné pro malé objednávky a k tomu dostanu výbornou kávu. Výkup proběhl naprosto hladce.“
-            </p>
-            <span style={styles.testimonialUser}>Monika R., UPCE student</span>
+          <div className="testimonials-rating-desktop">
+            <span className="testimonials-stars">★★★★★</span>
+            <span className="testimonials-rating-text">4,8 • 312 hodnocení</span>
           </div>
-
-          <div style={styles.testimonialCard} className="glass-card">
-            <div style={styles.starsRow}>
-              {[...Array(5)].map((_, i) => (
-                <img key={i} src="/star.png" alt="star" style={styles.starIcon} />
-              ))}
-            </div>
-            <p style={styles.testimonialText}>
-              „Nechal jsem si přes ně nagradovat pět drahých Pokémon karet u PSA. Celý proces šlo sledovat online v mém profilu, vše bylo pojištěné a výsledné známky (tři desítky!) předčily mé očekávání.“
-            </p>
-            <span style={styles.testimonialUser}>Petr S., Hradec Králové</span>
+        </header>
+        <div className="slider-container-wrapper testimonials-slider-wrapper">
+          <button onClick={() => handleScroll(testimonialsRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
+          <div ref={testimonialsRef} className="testimonials-grid-scroll">
+            {testimonials.map((t, idx) => (
+              <div key={idx} className="testimonial-card">
+                <div className="testimonial-quote">“</div>
+                <p className="testimonial-text">{t.text.replace(/^[„"“]/, '').replace(/[“"“]$/, '')}</p>
+                <div className="testimonial-footer">
+                  <div className="testimonial-avatar">{t.initials}</div>
+                  <div className="testimonial-author-info">
+                    <span className="testimonial-author-name">{t.name}</span>
+                    <span className="testimonial-author-desc">{t.desc}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-
-          <div style={styles.testimonialCard} className="glass-card">
-            <div style={styles.starsRow}>
-              {[...Array(5)].map((_, i) => (
-                <img key={i} src="/star.png" alt="star" style={styles.starIcon} />
-              ))}
-            </div>
-            <p style={styles.testimonialText}>
-              „Jako rodič velmi oceňuji dárkového průvodce. Vůbec se v Pokémon edicích nevyznám, ale s jejich dárkovým setem pod stromečkem mělo dítě obrovskou radost a já měl jistotu, že nekupuji fake karty.“
-            </p>
-            <span style={styles.testimonialUser}>Jana M., Pardubice</span>
-          </div>
+          <button onClick={() => handleScroll(testimonialsRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
         </div>
       </section>
 
       {/* Newsletter */}
-      <section style={styles.newsletterSection} className="glass-panel container">
-        <div style={styles.newsletterContent}>
-          <h3 style={styles.newsletterHeading}>Chcete vědět o nových edicích a výkupech jako první?</h3>
-          <p style={styles.newsletterDesc}>Zadejte Svůj e-mail a zašleme Vám upozornění při zahájení předobjednávek.</p>
+      <section className="newsletter-section-wrapper">
+        <div className="container newsletter-section">
+          <div className="newsletter-content">
+            <div className="newsletter-eyebrow">NEWSLETTER • 028</div>
+            <h2 className="newsletter-heading">Nové edice & výkupy jako první.</h2>
+            <p className="newsletter-desc">Bez spamu. Jen oznámení o startu předobjednávek a nově otevřených výkupních oknech.</p>
+          </div>
+          <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); alert('Děkujeme za přihlášení k newsletteru!'); }}>
+            <div className="newsletter-input-group">
+              <label className="newsletter-input-label">VÁŠ E-MAIL</label>
+              <input type="email" required placeholder="jmeno@example.com" className="newsletter-underline-input" />
+            </div>
+            <button className="newsletter-submit-btn" type="submit">ODEBÍRAT &rarr;</button>
+          </form>
         </div>
-        <form style={styles.newsletterForm} onSubmit={(e) => { e.preventDefault(); alert('Děkujeme za přihlášení k newsletteru!'); }}>
-          <input type="email" required placeholder="Váš e-mail..." style={styles.newsletterInput} />
-          <button className="btn btn-primary" type="submit" style={styles.newsletterBtn}>Odebírat</button>
-        </form>
       </section>
     </div>
   );
@@ -1001,7 +1117,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 const styles = {
   container: {
     paddingTop: '24px',
-    paddingBottom: '24px',
+    paddingBottom: 0,
     display: 'flex',
     flexDirection: 'column',
     gap: '88px',
@@ -1324,81 +1440,6 @@ const styles = {
     borderRadius: '2px',
   },
 
-  testimonialsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-    gap: '20px',
-  },
-  testimonialCard: {
-    padding: '24px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-    textAlign: 'left',
-  },
-  starsRow: {
-    display: 'flex',
-    gap: '2px',
-  },
-  starIcon: {
-    width: '12px',
-    height: '12px',
-  },
-  testimonialText: {
-    fontSize: '13px',
-    color: 'var(--text-muted)',
-    lineHeight: '1.6',
-    fontStyle: 'italic',
-  },
-  testimonialUser: {
-    fontSize: '11px',
-    fontWeight: '700',
-    color: 'var(--text-main)',
-    marginTop: 'auto',
-  },
-  newsletterSection: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '30px 40px',
-    gap: '24px',
-    textAlign: 'left',
-    flexWrap: 'wrap',
-  },
-  newsletterContent: {
-    flex: '2 1 400px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  },
-  newsletterHeading: {
-    fontSize: '18px',
-    fontWeight: '700',
-    margin: 0,
-  },
-  newsletterDesc: {
-    fontSize: '13px',
-    color: 'var(--text-muted)',
-    margin: 0,
-  },
-  newsletterForm: {
-    flex: '1 1 300px',
-    display: 'flex',
-    gap: '10px',
-  },
-  newsletterInput: {
-    flexGrow: 1,
-    backgroundColor: 'var(--bg-page)',
-    border: '1px solid var(--border-light)',
-    padding: '10px 16px',
-    borderRadius: 'var(--radius-md)',
-    fontSize: '14px',
-    color: 'var(--text-main)',
-    outline: 'none',
-  },
-  newsletterBtn: {
-    whiteSpace: 'nowrap',
-  },
   storySection: {
     display: 'flex',
     gap: '40px',

@@ -2,180 +2,76 @@ import React from 'react';
 
 export default function Footer({ setActivePage }) {
   return (
-    <footer style={styles.footer}>
-      <div className="container" style={styles.footerGrid}>
+    <footer className="main-footer">
+      <div className="container footer-grid">
         {/* Column 1: About */}
-        <div style={styles.column}>
-          <div style={styles.logoRow} onClick={() => setActivePage('home')}>
-            <img src="/Northvale Logo.webp" alt="NORTHVALE TCG" style={styles.logoImg} />
-          </div>
-          <p style={styles.aboutText}>
-            Váš spolehlivý partner ve světě sběratelských karetních her. Nabízíme sealed produkty, kusové karty i profesionální zprostředkování gradingu v USA. Zakládáme si na sběratelském standardu balení a férových cenách.
+        <div className="footer-column">
+          <img 
+            src="/Northvale Logo.webp" 
+            alt="NORTHVALE TCG" 
+            className="footer-logo" 
+            onClick={() => setActivePage('home')} 
+          />
+          <p className="footer-desc">
+            Váš spolehlivý partner ve světě sběratelských karetních her. Sealed produkty, kusové karty i profesionální zprostředkování gradingu v USA.
           </p>
+          <div className="footer-socials">
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="footer-social-link">
+              <img src="/instagram.png" alt="Instagram" className="footer-social-icon" />
+            </a>
+            <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" className="footer-social-link">
+              <img src="/tik-tok.png" alt="TikTok" className="footer-social-icon" />
+            </a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="footer-social-link">
+              <img src="/youtube.png" alt="YouTube" className="footer-social-icon" />
+            </a>
+          </div>
         </div>
 
         {/* Column 2: Purchasing Info */}
-        <div style={styles.column}>
-          <h4 style={styles.heading}>Vše o nákupu</h4>
-          <ul style={styles.list}>
-            <li style={styles.listItem} onClick={() => setActivePage('support')}>Centrum podpory</li>
-            <li style={styles.listItem} onClick={() => setActivePage('support')}>FAQ</li>
-            <li style={styles.listItem} onClick={() => setActivePage('community')}>Doprava a osobní odběr</li>
-            <li style={styles.listItem} onClick={() => setActivePage('support')}>Obchodní podmínky</li>
+        <div className="footer-column">
+          <h4 className="footer-heading">Vše o nákupu</h4>
+          <ul className="footer-list">
+            <li className="footer-link" onClick={() => setActivePage('support')}>Centrum podpory</li>
+            <li className="footer-link" onClick={() => setActivePage('support')}>FAQ</li>
+            <li className="footer-link" onClick={() => setActivePage('community')}>Doprava a osobní odběr</li>
+            <li className="footer-link" onClick={() => setActivePage('support')}>Obchodní podmínky</li>
           </ul>
         </div>
 
         {/* Column 3: Customer Services */}
-        <div style={styles.column}>
-          <h4 style={styles.heading}>Pro zákazníky</h4>
-          <ul style={styles.list}>
-            <li style={styles.listItem} onClick={() => setActivePage('buylist')}>Výkup karet (Buylist)</li>
-            <li style={styles.listItem} onClick={() => setActivePage('grading')}>Grading servis</li>
-            <li style={styles.listItem} onClick={() => setActivePage('grading-guide')}>Průvodce stavy karet</li>
-            <li style={styles.listItem} onClick={() => setActivePage('profile')}>Zůstatek Store Kreditu</li>
+        <div className="footer-column">
+          <h4 className="footer-heading">Pro zákazníky</h4>
+          <ul className="footer-list">
+            <li className="footer-link" onClick={() => setActivePage('buylist')}>Výkup karet (Buylist)</li>
+            <li className="footer-link" onClick={() => setActivePage('grading')}>Grading servis</li>
+            <li className="footer-link" onClick={() => setActivePage('grading-guide')}>Průvodce stavy karet</li>
+            <li className="footer-link" onClick={() => setActivePage('profile')}>Zůstatek Store Kreditu</li>
           </ul>
         </div>
 
-        {/* Column 4: Contacts & Socials */}
-        <div style={styles.column}>
-          <h4 style={styles.heading}>Kontakty</h4>
-          <p style={styles.contactDetail}>
-            <strong>E-mail:</strong> info@northvaletcg.eu<br />
-            <strong>Odběrné místo:</strong> Coffee & Cards, Pardubice
-          </p>
-          <div style={styles.socialsRow}>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
-              <img src="/instagram.png" alt="Instagram" style={styles.socialIcon} />
-            </a>
-            <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
-              <img src="/tik-tok.png" alt="TikTok" style={styles.socialIcon} />
-            </a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
-              <img src="/youtube.png" alt="YouTube" style={styles.socialIcon} />
-            </a>
+        {/* Column 4: Contacts */}
+        <div className="footer-column">
+          <h4 className="footer-heading">Kontakty</h4>
+          
+          <div className="footer-contact-row">
+            <span className="contact-key">E-mail</span>
+            <span className="contact-value">info@northvaletcg.eu</span>
+          </div>
+          
+          <div className="footer-contact-row">
+            <span className="contact-key">Odběr</span>
+            <span className="contact-value">Coffee & Cards, Pardubice</span>
           </div>
         </div>
       </div>
 
-      <div style={styles.bottomBar}>
-        <div className="container" style={styles.bottomBarContent}>
-          <span style={styles.copyText}>&copy; 2026 NORTHVALE TCG. Všechna práva vyhrazena. Používáme výhradně krátké spojovníky.</span>
-          <span style={styles.designerText}>Navrženo pro sběratele a turnajové hráče.</span>
+      <div className="footer-bottom">
+        <div className="container footer-bottom-content">
+          <span>&copy; 2026 NORTHVALE TCG</span>
+          <span>Vytvořil <a href="https://ozeman.cz" target="_blank" rel="noopener noreferrer" className="credits-link">ozeman.cz</a></span>
         </div>
       </div>
     </footer>
   );
 }
-
-const styles = {
-  footer: {
-    backgroundColor: 'var(--bg-secondary)',
-    borderTop: '1px solid var(--border)',
-    paddingTop: '60px',
-    marginTop: 'auto',
-  },
-  footerGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-    gap: '40px',
-    paddingBottom: '40px',
-  },
-  column: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-  },
-  logoRow: {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: '20px',
-    cursor: 'pointer',
-  },
-  logoImg: {
-    height: '36px',
-    width: 'auto',
-    objectFit: 'contain',
-  },
-  aboutText: {
-    color: 'var(--text-muted)',
-    fontSize: '13px',
-    lineHeight: '1.6',
-    textAlign: 'left',
-  },
-  heading: {
-    fontFamily: 'var(--font-heading)',
-    fontWeight: '700',
-    fontSize: '16px',
-    marginBottom: '20px',
-    color: 'var(--text-main)',
-  },
-  list: {
-    listStyle: 'none',
-    padding: 0,
-    margin: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-    alignItems: 'flex-start',
-  },
-  listItem: {
-    fontSize: '13px',
-    color: 'var(--text-muted)',
-    cursor: 'pointer',
-    transition: 'color 0.2s',
-    '&:hover': {
-      color: 'var(--color-gold)',
-    }
-  },
-  contactDetail: {
-    color: 'var(--text-muted)',
-    fontSize: '13px',
-    lineHeight: '1.6',
-    textAlign: 'left',
-    marginBottom: '20px',
-  },
-  socialsRow: {
-    display: 'flex',
-    gap: '12px',
-  },
-  socialLink: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '36px',
-    height: '36px',
-    borderRadius: '50%',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    border: '1px solid rgba(255, 255, 255, 0.06)',
-    transition: 'all 0.2s',
-    '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-      borderColor: 'var(--color-gold)',
-    }
-  },
-  socialIcon: {
-    width: '18px',
-    height: '18px',
-    filter: 'invert(0.9)',
-  },
-  bottomBar: {
-    borderTop: '1px solid rgba(255, 255, 255, 0.04)',
-    padding: '20px 0',
-    backgroundColor: 'var(--bg-page)',
-  },
-  bottomBarContent: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '12px',
-    fontSize: '12px',
-    color: 'var(--text-muted)',
-  },
-  copyText: {
-    textAlign: 'left',
-  },
-  designerText: {
-    textAlign: 'right',
-  }
-};
