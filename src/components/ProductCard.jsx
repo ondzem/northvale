@@ -247,9 +247,9 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
       </div>
       <div className="vf-shadow"></div>
 
-      {/* Info Content Section */}
+      {/* Info Content Section - now using the exact same class and style rules as the homepage card */}
       <div 
-        className="card-details-box"
+        className="vf-info"
         style={{
           padding: '16px',
           display: 'flex',
@@ -257,11 +257,13 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           flexGrow: 1,
           borderTop: '1px solid rgba(255, 255, 255, 0.05)',
           backgroundColor: 'rgba(19, 19, 22, 0.6)',
-          borderRadius: '0 0 8px 8px'
+          borderRadius: '0 0 8px 8px',
+          marginTop: '0px',
+          boxSizing: 'border-box'
         }}
       >
         {/* Edition/Series */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
           <span style={{
             fontSize: '9px',
             color: 'var(--color-gold)',
@@ -276,21 +278,44 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           </span>
         </div>
 
-        {/* Card Title */}
-        <h3 className="card-title-heading" style={{
-          fontSize: '14px',
-          fontWeight: '700',
-          color: 'var(--text-main)',
-          margin: '0 0 10px 0',
-          lineHeight: '1.4',
-          minHeight: '38px',
-          overflow: 'hidden',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical'
-        }}>
+        {/* Card Title - Using homepage styling */}
+        <div className="vf-name" style={{ whiteSpace: 'normal', minHeight: '38px', fontSize: '14px', fontWeight: '700', marginBottom: '8px', lineHeight: '1.4' }}>
           {product.name.split(' (')[0]}
-        </h3>
+        </div>
+
+        {/* Horizontal rule */}
+        <div className="vf-rule" style={{ marginBottom: '8px' }}></div>
+
+        {/* Meta row containing Stock (Left) and Price (Right) */}
+        <div className="vf-meta" style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span className="vf-stock" style={{ fontSize: '10px' }}>
+            {stock > 0 ? (
+              <>
+                <span className="vf-dot"></span>
+                Skladem ({stock} ks)
+              </>
+            ) : product.preorder ? (
+              <>
+                <span className="vf-dot" style={{ backgroundColor: 'var(--color-gold)', boxShadow: '0 0 8px rgba(253, 189, 22, 0.6)' }}></span>
+                Na objednání
+              </>
+            ) : (
+              <>
+                <span className="vf-dot" style={{ backgroundColor: 'var(--text-muted)', boxShadow: 'none' }}></span>
+                Vyprodáno
+              </>
+            )}
+          </span>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            {originalPrice && (
+              <span style={{ fontSize: '10px', color: 'var(--color-red)', textDecoration: 'line-through', marginBottom: '2px' }}>
+                {originalPrice.toLocaleString()} Kč
+              </span>
+            )}
+            <span className="vf-price" style={{ fontSize: '15px' }}>{price.toLocaleString('cs-CZ')} Kč</span>
+          </div>
+        </div>
 
         {/* Dynamic Specifications Table */}
         <table className="card-specs-table" style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', marginBottom: '12px' }}>
@@ -395,43 +420,8 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           </div>
         )}
 
-        {/* Price & Add to Cart footer block */}
-        <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span style={{ fontSize: '11px', fontWeight: '600' }}>
-              {stock > 0 ? (
-                <span className="text-green" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <span style={{ display: 'inline-block', width: '6px', height: '6px', backgroundColor: 'var(--color-green)', borderRadius: '50%' }}></span>
-                  Skladem ({stock} ks)
-                </span>
-              ) : product.preorder ? (
-                <span style={{ color: 'var(--color-gold)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <span style={{ display: 'inline-block', width: '6px', height: '6px', backgroundColor: 'var(--color-gold)', borderRadius: '50%' }}></span>
-                  Na objednání
-                </span>
-              ) : (
-                <span style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <span style={{ display: 'inline-block', width: '6px', height: '6px', backgroundColor: 'var(--border-light)', borderRadius: '50%' }}></span>
-                  Vyprodáno
-                </span>
-              )}
-            </span>
-            
-            {/* Price display */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-              {originalPrice && (
-                <span style={{ fontSize: '10px', color: 'var(--color-red)', textDecoration: 'line-through' }}>
-                  {originalPrice.toLocaleString()} Kč
-                </span>
-              )}
-              <span style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-gold)' }}>
-                {price.toLocaleString()} Kč
-              </span>
-            </div>
-          </div>
-
-          {/* Add to Cart button */}
+        {/* Add to Cart button footer block */}
+        <div style={{ marginTop: 'auto', paddingTop: '10px' }}>
           <button 
             className="btn btn-primary do-kosiku-btn"
             disabled={stock === 0}
