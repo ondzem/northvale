@@ -189,24 +189,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
       </div>
       <div className="vf-shadow"></div>
 
-      {/* Info Content Section - exact same layout and transparent style as on the homepage */}
       <div className="vf-info">
-        {/* Edition/Series */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <span style={{
-            fontSize: '9px',
-            color: 'var(--color-gold)',
-            fontWeight: '800',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
-          }}>
-            {product.edition || product.game}
-          </span>
-          <span style={{ fontSize: '9px', color: 'var(--text-muted)' }}>
-            {product.game}
-          </span>
-        </div>
-
         {/* Card Title - Using homepage styling */}
         <div className="vf-name">
           {product.name.split(' (')[0]}

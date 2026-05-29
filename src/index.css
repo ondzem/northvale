@@ -2290,10 +2290,11 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 /* Premium Card Grid for Catalogs */
 .catalog-product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  column-gap: 36px;
-  row-gap: 48px;
+  grid-template-columns: repeat(auto-fill, 240px);
+  column-gap: 28px;
+  row-gap: 40px;
   margin-bottom: 40px;
+  justify-content: center;
   justify-items: center;
 }
 
@@ -2391,7 +2392,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 /* Enforced uniform heights & width for catalog cards */
 .catalog-product-grid .vf-card {
   width: 240px;
-  height: 580px;
+  height: 570px;
   flex: 0 0 240px;
 }
 
@@ -2402,18 +2403,22 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 }
 
 .catalog-product-grid .vf-name {
-  white-space: normal;
-  min-height: 38px;
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  line-height: 1.4;
+  display: block;
+  width: 100%;
+  margin: 0 0 14px;
+  font-size: 17px;
+  font-weight: 600;
+  color: rgb(240, 240, 240);
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (max-width: 650px) {
   .catalog-product-grid .vf-card {
     width: 200px;
-    height: 480px;
+    height: 470px;
     flex: 0 0 200px;
   }
 }
