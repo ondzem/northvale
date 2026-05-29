@@ -278,6 +278,25 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
         {/* Add to Cart and Favorite footer block */}
         <div className="card-buy-container" style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
           <button 
+            className={`card-favorite-btn ${isFavorite ? 'active' : ''}`}
+            onClick={handleFavoriteClick}
+            aria-label="Přidat do oblíbených"
+          >
+            <svg 
+              width="16" 
+              height="16" 
+              viewBox="0 0 24 24" 
+              fill={isFavorite ? 'currentColor' : 'none'} 
+              stroke="currentColor" 
+              strokeWidth="2.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </button>
+
+          <button 
             className="btn btn-primary do-kosiku-btn"
             disabled={stock === 0}
             onClick={handleBuyClick}
@@ -309,25 +328,6 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
               )}
             </svg>
             {isAdded ? 'Přidáno' : 'Do košíku'}
-          </button>
-
-          <button 
-            className={`card-favorite-btn ${isFavorite ? 'active' : ''}`}
-            onClick={handleFavoriteClick}
-            aria-label="Přidat do oblíbených"
-          >
-            <svg 
-              width="16" 
-              height="16" 
-              viewBox="0 0 24 24" 
-              fill={isFavorite ? 'currentColor' : 'none'} 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-            </svg>
           </button>
         </div>
       </div>
