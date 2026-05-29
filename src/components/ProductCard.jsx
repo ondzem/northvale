@@ -1,8 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const ProductImage = ({ src, alt, className = '' }) => {
   const [aspectRatio, setAspectRatio] = useState(1.0);
   const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef(null);
+
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      setLoaded(true);
+      const { naturalWidth, naturalHeight } = imgRef.current;
+      if (naturalWidth && naturalHeight) {
+        setAspectRatio(naturalWidth / naturalHeight);
+      }
+    }
+  }, [src]);
 
   const handleLoad = (e) => {
     const { naturalWidth, naturalHeight } = e.target;
@@ -16,16 +27,11 @@ const ProductImage = ({ src, alt, className = '' }) => {
 
   return (
     <img
+      ref={imgRef}
       src={src}
       alt={alt}
       onLoad={handleLoad}
       className={`${className} ${fitClass} ${loaded ? 'loaded' : ''}`}
-      style={{
-        maxWidth: '100%',
-        maxHeight: '100%',
-        objectFit: aspectRatio >= 1.1 ? 'contain' : 'contain',
-        transition: 'all 0.3s ease',
-      }}
     />
   );
 };
@@ -112,12 +118,12 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
 
   return (
     <div 
-      className={`vf-card type-${product.type} premium-catalog-card ${stock === 0 ? 'out-of-stock' : ''}`}
+      className={`vf-card type-${product.type} ${stock === 0 ? 'out-of-stock' : ''}`}
       onClick={handleCardClick}
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
+        height: 'auto',
         position: 'relative',
         cursor: 'pointer',
         textAlign: 'left'
@@ -161,8 +167,8 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
       </button>
 
       {/* Holographic Art Box */}
-      <div className="vf-art" style={{ position: 'relative', height: '200px', width: '100%' }}>
-        <div className="card-art" style={{ height: '100%', borderRadius: '8px' }}>
+      <div className="vf-art">
+        <div className="card-art" style={{ borderRadius: '8px' }}>
           {/* Card Theme Gradient Base */}
           <div className={`ca-base ${getCardThemeClass(product)}`}></div>
           
@@ -247,18 +253,13 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
       </div>
       <div className="vf-shadow"></div>
 
-      {/* Info Content Section - now using the exact same class and style rules as the homepage card */}
+      {/* Info Content Section - exact same layout and transparent style as on the homepage */}
       <div 
         className="vf-info"
         style={{
-          padding: '16px',
           display: 'flex',
           flexDirection: 'column',
-          flexGrow: 1,
-          borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-          backgroundColor: 'rgba(19, 19, 22, 0.6)',
-          borderRadius: '0 0 8px 8px',
-          marginTop: '0px',
+          marginTop: '28px',
           boxSizing: 'border-box'
         }}
       >
