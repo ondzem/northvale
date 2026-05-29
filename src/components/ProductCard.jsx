@@ -66,7 +66,7 @@ const getCardCode = (product) => {
 };
 
 export default function ProductCard({ product, addToCart, setSelectedProductId, setActivePage }) {
-  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+  const selectedVariantIndex = 0;
   const [isAdded, setIsAdded] = useState(false);
   const [isFavorite, setIsFavorite] = useState(() => {
     try {
@@ -123,7 +123,6 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: 'auto',
         position: 'relative',
         cursor: 'pointer',
         textAlign: 'left'
@@ -135,20 +134,6 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
         onClick={handleFavoriteClick}
         aria-label="Přidat do oblíbených"
         style={{
-          position: 'absolute',
-          top: '12px',
-          right: '12px',
-          zIndex: 30,
-          background: 'rgba(0, 0, 0, 0.4)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderRadius: '50%',
-          width: '32px',
-          height: '32px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
           color: isFavorite ? '#ff4a5a' : '#fff'
         }}
       >
@@ -182,70 +167,21 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
 
           {/* Slab Label Overlay if it is a graded slab */}
           {product.type === 'slab' && (
-            <div className="slab-badge-overlay" style={{
-              position: 'absolute',
-              top: '8px',
-              left: '8px',
-              backgroundColor: '#fff',
-              color: '#000',
-              padding: '2px 8px',
-              borderRadius: '3px',
-              fontWeight: '800',
-              fontSize: '10px',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-              borderLeft: '3px solid var(--color-gold)',
-              fontFamily: 'var(--font-heading)',
-              zIndex: 10,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}>
+            <div className="slab-badge-overlay">
               <span>{product.company}</span>
-              <span style={{
-                backgroundColor: '#000',
-                color: '#fff',
-                borderRadius: '50%',
-                width: '14px',
-                height: '14px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '8px'
-              }}>{product.grade}</span>
+              <span>{product.grade}</span>
             </div>
           )}
 
           {/* Preorder & Investment Tags */}
           {product.preorder && (
-            <span className="card-tag preorder-tag" style={{
-              position: 'absolute',
-              bottom: '8px',
-              left: '8px',
-              fontSize: '8px',
-              fontWeight: '800',
-              backgroundColor: 'rgba(245, 158, 11, 0.9)',
-              color: '#000',
-              padding: '2px 6px',
-              borderRadius: '2px',
-              zIndex: 10
-            }}>
+            <span className="card-tag preorder-tag">
               PŘEDOBJEDNÁVKA
             </span>
           )}
 
           {product.investment && (
-            <span className="card-tag invest-tag" style={{
-              position: 'absolute',
-              bottom: '8px',
-              left: '8px',
-              fontSize: '8px',
-              fontWeight: '800',
-              backgroundColor: 'rgba(16, 185, 129, 0.9)',
-              color: '#000',
-              padding: '2px 6px',
-              borderRadius: '2px',
-              zIndex: 10
-            }}>
+            <span className="card-tag invest-tag">
               INVESTIČNÍ
             </span>
           )}
@@ -254,15 +190,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
       <div className="vf-shadow"></div>
 
       {/* Info Content Section - exact same layout and transparent style as on the homepage */}
-      <div 
-        className="vf-info"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          marginTop: '28px',
-          boxSizing: 'border-box'
-        }}
-      >
+      <div className="vf-info">
         {/* Edition/Series */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
           <span style={{
@@ -280,12 +208,12 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
         </div>
 
         {/* Card Title - Using homepage styling */}
-        <div className="vf-name" style={{ whiteSpace: 'normal', minHeight: '38px', fontSize: '14px', fontWeight: '700', marginBottom: '8px', lineHeight: '1.4' }}>
+        <div className="vf-name">
           {product.name.split(' (')[0]}
         </div>
 
         {/* Horizontal rule */}
-        <div className="vf-rule" style={{ marginBottom: '8px' }}></div>
+        <div className="vf-rule"></div>
 
         {/* Meta row containing Stock (Left) and Price (Right) */}
         <div className="vf-meta" style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -319,27 +247,27 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
         </div>
 
         {/* Dynamic Specifications Table */}
-        <table className="card-specs-table" style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', marginBottom: '12px' }}>
+        <table className="card-specs-table">
           <tbody>
             {isSingle && (
               <>
-                <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
-                  <td style={{ padding: '4px 0', color: 'var(--text-muted)' }}>Rarita</td>
-                  <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: '600' }}>{product.rarity || 'Secret Rare'}</td>
+                <tr>
+                  <td>Rarita</td>
+                  <td>{product.rarity || 'Secret Rare'}</td>
                 </tr>
-                <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
-                  <td style={{ padding: '4px 0', color: 'var(--text-muted)' }}>Kód karty</td>
-                  <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: '700', color: 'var(--color-gold)' }}>{getCardCode(product)}</td>
+                <tr>
+                  <td>Kód karty</td>
+                  <td className="spec-gold">{getCardCode(product)}</td>
                 </tr>
-                <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
-                  <td style={{ padding: '4px 0', color: 'var(--text-muted)' }}>Stav & Jazyk</td>
-                  <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: '600' }}>
+                <tr>
+                  <td>Stav & Jazyk</td>
+                  <td>
                     {hasVariants ? `${currentVariant.condition} - ${currentVariant.lang}` : 'NM - EN'}
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '4px 0', color: 'var(--text-muted)' }}>Úprava</td>
-                  <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: '600' }}>
+                  <td>Úprava</td>
+                  <td>
                     {hasVariants ? (currentVariant.foil ? 'Foil ✨' : 'Non-Foil ▱') : 'Foil ✨'}
                   </td>
                 </tr>
@@ -348,36 +276,36 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
 
             {product.type === 'slab' && (
               <>
-                <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
-                  <td style={{ padding: '4px 0', color: 'var(--text-muted)' }}>Certifikační firma</td>
-                  <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: '600' }}>{product.company}</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
-                  <td style={{ padding: '4px 0', color: 'var(--text-muted)' }}>Výsledná známka</td>
-                  <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: '700', color: 'var(--color-gold)' }}>{product.grade} / 10</td>
+                <tr>
+                  <td>Certifikační firma</td>
+                  <td>{product.company}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '4px 0', color: 'var(--text-muted)' }}>Cert. číslo</td>
-                  <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: '600', fontFamily: 'monospace' }}>#{product.certNumber}</td>
+                  <td>Výsledná známka</td>
+                  <td className="spec-gold">{product.grade} / 10</td>
+                </tr>
+                <tr>
+                  <td>Cert. číslo</td>
+                  <td className="spec-monospace">#{product.certNumber}</td>
                 </tr>
               </>
             )}
 
             {(product.type === 'sealed' || product.type === 'accessory') && (
               <>
-                <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
-                  <td style={{ padding: '4px 0', color: 'var(--text-muted)' }}>Edice / Set</td>
-                  <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: '600' }}>{product.edition || 'Scarlet & Violet'}</td>
+                <tr>
+                  <td>Edice / Set</td>
+                  <td>{product.edition || 'Scarlet & Violet'}</td>
                 </tr>
-                <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
-                  <td style={{ padding: '4px 0', color: 'var(--text-muted)' }}>Jazyk balení</td>
-                  <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: '600' }}>
+                <tr>
+                  <td>Jazyk balení</td>
+                  <td>
                     {product.lang === 'JP' ? 'Japonština (JP) 🇯🇵' : product.lang === 'EN' ? 'Angličtina (EN) 🇬🇧' : 'Všechny jazyky'}
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '4px 0', color: 'var(--text-muted)' }}>Kategorie</td>
-                  <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: '600', textTransform: 'capitalize' }}>
+                  <td>Kategorie</td>
+                  <td style={{ textTransform: 'capitalize' }}>
                     {product.type === 'sealed' ? 'Zapečetěné' : 'Příslušenství'}
                   </td>
                 </tr>
@@ -386,64 +314,17 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           </tbody>
         </table>
 
-        {/* Variant Selector Toggles (Singles Only) */}
-        {hasVariants && product.variants.length > 1 && (
-          <div 
-            className="variant-pill-selector" 
-            onClick={(e) => e.stopPropagation()} 
-            style={{ 
-              display: 'flex', 
-              gap: '6px', 
-              flexWrap: 'wrap', 
-              marginBottom: '14px',
-              padding: '2px 0'
-            }}
-          >
-            {product.variants.map((v, idx) => (
-              <button
-                key={v.id}
-                onClick={() => setSelectedVariantIndex(idx)}
-                style={{
-                  backgroundColor: selectedVariantIndex === idx ? 'var(--color-gold)' : 'rgba(255, 255, 255, 0.04)',
-                  color: selectedVariantIndex === idx ? '#000' : 'var(--text-main)',
-                  border: selectedVariantIndex === idx ? '1px solid var(--color-gold)' : '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '4px',
-                  padding: '3px 8px',
-                  fontSize: '9px',
-                  fontWeight: '800',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                {v.condition} - {v.lang}
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Add to Cart button footer block */}
-        <div style={{ marginTop: 'auto', paddingTop: '10px' }}>
+        <div className="card-buy-container">
           <button 
             className="btn btn-primary do-kosiku-btn"
             disabled={stock === 0}
             onClick={handleBuyClick}
             style={{
-              width: '100%',
               backgroundColor: isAdded ? 'var(--color-green)' : 'var(--color-gold)',
-              color: '#000',
-              fontWeight: '800',
-              padding: '8px 12px',
-              borderRadius: 'var(--radius-md)',
-              fontSize: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              border: 'none',
               cursor: stock > 0 ? 'pointer' : 'not-allowed',
-              opacity: stock > 0 ? 1 : 0.4,
-              transition: 'all 0.2s ease',
-              boxShadow: '0 4px 12px rgba(253, 189, 22, 0.1)'
+              opacity: stock > 0 ? 1 : 0.4
             }}
           >
             <svg 
