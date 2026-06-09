@@ -197,15 +197,6 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
             <button 
               className="mobile-only-close-btn"
               onClick={() => setMobileFiltersOpen(false)}
-              style={{
-                display: 'none',
-                background: 'none',
-                border: 'none',
-                color: 'var(--color-gold)',
-                fontSize: '22px',
-                cursor: 'pointer',
-                padding: '4px'
-              }}
             >
               ✕
             </button>

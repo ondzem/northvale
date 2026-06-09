@@ -97,7 +97,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     { title: 'Zprostředkování gradingu v USA', desc: 'Pošlete Své karty do PSA, Beckett nebo TAG s pre-grading kontrolou.', buttonText: 'Více o gradingu', page: 'grading' },
     { title: 'One Piece Card Game', desc: 'Nové booster boxy a starter decky skladem.', buttonText: 'Prohlížet One Piece', page: 'sealed-catalog' },
     { title: 'Investiční produkty', desc: 'Vybrané ETB a booster boxy v bezchybném stavu vhodné do sbírky.', buttonText: 'Investovat', page: 'sealed-catalog' },
-    { title: 'Výkup karet s +25% bonusem', desc: 'Získejte Store Kredit a nakupte nové karty výhodněji.', buttonText: 'Prodat karty', page: 'buylist' }
+    { title: 'Výkup karet za hotové', desc: 'Nabídněte nám své přebytečné karty a získejte peníze na bankovní účet.', buttonText: 'Prodat karty', page: 'buylist' }
   ];
 
   // Deal of the day countdown timer

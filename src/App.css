@@ -1,26 +1,26 @@
 .container {
-  max-width: 1280px;
+  max-width: 1360px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
 
-  /* Standardní (Mobil i Desktop) */
-  padding-left: calc(clamp(15px, 3.5vw, 40px) + 10px) !important;
-  padding-right: calc(clamp(15px, 3.5vw, 40px) + 10px) !important;
+  /* Standardní (Mobil i Desktop) - zmenšené odsazení od okrajů pro roztáhnutí obsahu */
+  padding-left: clamp(16px, 2.5vw, 32px) !important;
+  padding-right: clamp(16px, 2.5vw, 32px) !important;
 }
 
 /* Pro rozlišení mezi 1024px a 1400px */
 @media (min-width: 1024px) and (max-width: 1400px) {
   .container {
-    padding-left: calc(clamp(15px, 3.5vw, 40px) - 10px) !important;
-    padding-right: calc(clamp(15px, 3.5vw, 40px) - 10px) !important;
+    padding-left: clamp(16px, 2.5vw, 32px) !important;
+    padding-right: clamp(16px, 2.5vw, 32px) !important;
   }
 }
 
-/* Pro rozlišení nad 1400px - zvětšení maximální šířky na 1440px */
+/* Pro rozlišení nad 1400px - zvětšení maximální šířky na 1520px */
 @media (min-width: 1400px) {
   .container {
-    max-width: 1440px;
+    max-width: 1520px;
   }
 }
 

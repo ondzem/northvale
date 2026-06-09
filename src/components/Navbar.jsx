@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function Navbar({ setActivePage, cart, user, setFilters, setSearchQuery }) {
+export default function Navbar({ setActivePage, cart, user, setFilters, setSearchQuery, isLoggedIn, onOpenLogin }) {
   const [drawerOpen, _setDrawerOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -196,10 +196,23 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   <span style={styles.actionLabel}>Oblíbené</span>
                 </button>
 
-                <button className="nav-action-btn" onClick={() => setActivePage('profile')} title="Přihlásit se">
-                  <img src="/user.png" alt="Profil" />
+                <button 
+                  className="nav-action-btn" 
+                  onClick={() => isLoggedIn ? setActivePage('profile') : onOpenLogin()} 
+                  title={isLoggedIn ? "Můj účet" : "Přihlásit se"}
+                >
+                  {isLoggedIn && user.avatar && user.avatar !== '/user.png' ? (
+                    <img 
+                      src={user.avatar} 
+                      alt="Profil" 
+                      className="no-invert-avatar" 
+                      style={{ borderRadius: '50%', filter: 'none', width: '22px', height: '22px', objectFit: 'cover' }} 
+                    />
+                  ) : (
+                    <img src="/user.png" alt="Profil" />
+                  )}
                   <span style={styles.actionLabel}>
-                    {user.storeCredit > 1000 ? `Můj účet (${user.storeCredit} Kč)` : 'Přihlásit se'}
+                    {isLoggedIn ? `${user.name || 'Můj účet'}` : 'Přihlásit se'}
                   </span>
                 </button>
 
@@ -445,8 +458,22 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
 
               {/* Right: Profile & Cart */}
               <div style={styles.mobileRightArea}>
-                <button className="nav-action-btn" style={styles.mobileActionBtn} onClick={() => setActivePage('profile')} title="Přihlásit se">
-                  <img src="/user.png" alt="Profil" style={styles.mobileActionIcon} />
+                <button 
+                  className="nav-action-btn" 
+                  style={styles.mobileActionBtn} 
+                  onClick={() => isLoggedIn ? setActivePage('profile') : onOpenLogin()} 
+                  title={isLoggedIn ? "Můj účet" : "Přihlásit se"}
+                >
+                  {isLoggedIn && user.avatar && user.avatar !== '/user.png' ? (
+                    <img 
+                      src={user.avatar} 
+                      alt="Profil" 
+                      className="no-invert-avatar" 
+                      style={{ borderRadius: '50%', filter: 'none', width: '22px', height: '22px', objectFit: 'cover' }} 
+                    />
+                  ) : (
+                    <img src="/user.png" alt="Profil" style={styles.mobileActionIcon} />
+                  )}
                 </button>
                 <button className="nav-action-btn" style={{ ...styles.mobileActionBtn, marginRight: '-8px' }} onClick={() => setActivePage('cart')} title="Košík">
                   <div style={styles.cartIconWrapper}>
@@ -615,7 +642,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   <div style={styles.drawerSection}>
                     <h4 style={styles.drawerSectionTitle}>Výkup karet (Buylist)</h4>
                     <p style={styles.drawerText}>
-                      Vykupujeme kusové karty her Pokémon, Magic a One Piece. Získejte peníze na účet nebo Store Kredit s <strong>+25% bonusem</strong>!
+                      Vykupujeme kusové karty her Pokémon, Magic a One Piece. Získejte peníze přímo na svůj bankovní účet!
                     </p>
                     <button 
                       className="btn btn-primary" 
@@ -643,8 +670,11 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   <div style={styles.drawerSection}>
                     <h4 style={styles.drawerSectionTitle}>Kontakty a otevírací doba</h4>
                     <p style={styles.drawerText}>
-                      <strong>Adresa:</strong> Sladkovského 512, Pardubice<br />
+                      <strong>Provozovatel:</strong> NORTHVALE s.r.o.<br />
+                      <strong>Sídlo:</strong> Bratří Čapků 1095, Holice<br />
+                      <strong>Odběr:</strong> Sladkovského 512, Pardubice<br />
                       <strong>E-mail:</strong> info@northvaletcg.eu<br />
+                      <strong>Telefon:</strong> +420 739 666 779<br />
                       <strong>Otevřeno:</strong> Denně 9:00 - 20:00
                     </p>
                   </div>

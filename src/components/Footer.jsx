@@ -33,9 +33,9 @@ export default function Footer({ setActivePage }) {
           <ul className="footer-list">
             <li className="footer-link" onClick={() => setActivePage('support')}>Centrum podpory</li>
             <li className="footer-link" onClick={() => setActivePage('support')}>FAQ</li>
-            <li className="footer-link" onClick={() => setActivePage('community')}>Doprava a osobní odběr</li>
-            <li className="footer-link" onClick={() => setActivePage('gdpr-vop')}>Obchodní podmínky (VOP)</li>
-            <li className="footer-link" onClick={() => setActivePage('gdpr-vop')}>Ochrana osobních údajů (GDPR)</li>
+            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'doprava')}>Doprava a osobní odběr</li>
+            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'vop')}>Obchodní podmínky (VOP)</li>
+            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'gdpr')}>Ochrana osobních údajů (GDPR)</li>
           </ul>
         </div>
 
@@ -46,7 +46,6 @@ export default function Footer({ setActivePage }) {
             <li className="footer-link" onClick={() => setActivePage('buylist')}>Výkup karet (Buylist)</li>
             <li className="footer-link" onClick={() => setActivePage('grading')}>Grading servis</li>
             <li className="footer-link" onClick={() => setActivePage('grading-guide')}>Průvodce stavy karet</li>
-            <li className="footer-link" onClick={() => setActivePage('profile')}>Zůstatek Store Kreditu</li>
           </ul>
         </div>
 
@@ -55,20 +54,30 @@ export default function Footer({ setActivePage }) {
           <h4 className="footer-heading">Kontakty</h4>
           
           <div className="footer-contact-row">
+            <span className="contact-key">IČO</span>
+            <span className="contact-value">29618142</span>
+          </div>
+          
+          <div className="footer-contact-row">
             <span className="contact-key">E-mail</span>
             <span className="contact-value">info@northvaletcg.eu</span>
+          </div>
+
+          <div className="footer-contact-row">
+            <span className="contact-key">Telefon</span>
+            <span className="contact-value">+420 739 666 779</span>
           </div>
           
           <div className="footer-contact-row">
             <span className="contact-key">Odběr</span>
-            <span className="contact-value">Coffee & Cards, Pardubice</span>
+            <span className="contact-value">Pardubice / Holice</span>
           </div>
         </div>
       </div>
 
       <div className="footer-bottom">
         <div className="container footer-bottom-content">
-          <span>&copy; {new Date().getFullYear()} NORTHVALE TCG</span>
+          <span>&copy; {new Date().getFullYear()} NORTHVALE s.r.o.</span>
           <span>Vytvořil <a href="https://ozeman.cz" target="_blank" rel="noopener noreferrer" className="credits-link">ozeman.cz</a></span>
         </div>
       </div>

@@ -27,11 +27,7 @@ export default function SupportFAQ() {
       questions: [
         {
           q: 'Jak funguje výkup karet?',
-          a: 'Karty naklikáte do výkupního košíku v našem portálu, zvolíte stav a jazyk a odešlete. Následně karty zabalíte a zašlete na naši adresu nebo odevzdáte v Pardubicích. Jakmile karty zkontrolujeme (do 48h od přijetí), vyplatíme Vám peníze nebo připíšeme kredit.'
-        },
-        {
-          q: 'Co je to Store Kredit a jaký je bonus?',
-          a: 'Store Kredit je virtuální zůstatek na Vašem uživatelském účtu. Pokud zvolíte výplatu výkupu ve Store Kreditu, navýšíme celkovou částku o 25% bonus. Tento kredit pak můžete uplatnit v pokladně na nákup jakéhokoliv dalšího zboží.'
+          a: 'Karty naklikáte do výkupního košíku v našem portálu, zvolíte stav a jazyk a odešlete. Následně karty zabalíte a zašlete na naši adresu nebo odevzdáte v Pardubicích. Jakmile karty zkontrolujeme (do 48h od přijetí), vyplatíme Vám peníze přímo na Váš bankovní účet.'
         }
       ]
     },
@@ -40,7 +36,7 @@ export default function SupportFAQ() {
       questions: [
         {
           q: 'Jaké platební metody podporujete?',
-          a: 'Můžete platit platební kartou online přes zabezpečenou platební bránu, klasickým bankovním převodem, nebo uplatnit Svůj Store Kredit získaný z výkupů.'
+          a: 'Můžete platit platební kartou online přes zabezpečenou platební bránu, nebo klasickým bankovním převodem.'
         },
         {
           q: 'Jak mohu zboží reklamovat?',
@@ -108,6 +104,36 @@ export default function SupportFAQ() {
         {/* Right Column: Contact Form */}
         <div style={styles.rightCol} className="glass-panel">
           <h2 style={styles.sectionHeading}>Napište nám</h2>
+          
+          {/* Direct Support Contacts */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            padding: '16px',
+            backgroundColor: 'rgba(255, 255, 255, 0.015)',
+            border: '1px solid rgba(255, 255, 255, 0.05)',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '13px',
+            lineHeight: '1.5',
+            color: 'var(--text-muted)'
+          }}>
+            <div>
+              <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '2px' }}>Centrum podpory:</strong>
+              Můžete nás kontaktovat přímo nebo využít formulář níže.
+            </div>
+            <div>
+              <strong>E-mail:</strong> <a href="mailto:info@northvaletcg.eu" style={{ color: 'var(--color-gold)', textDecoration: 'none', fontWeight: 'bold' }}>info@northvaletcg.eu</a>
+            </div>
+            <div>
+              <strong>Telefon:</strong> <a href="tel:+420739666779" style={{ color: 'var(--color-gold)', textDecoration: 'none', fontWeight: 'bold' }}>+420 739 666 779</a>
+            </div>
+            <div style={{ fontSize: '11px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '8px', marginTop: '4px' }}>
+              <strong>Provozovatel:</strong> NORTHVALE s.r.o.<br />
+              <strong>Sídlo:</strong> Bratří Čapků 1095, 534 01 Holice<br />
+              <strong>IČO:</strong> 29618142 | <strong>DIČ:</strong> CZ29618142
+            </div>
+          </div>
           
           {contactSubmitted ? (
             <div style={styles.successForm}>

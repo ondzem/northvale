@@ -17,7 +17,7 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
   const [bulkCounts, setBulkCounts] = useState(
     bulkRates.reduce((acc, rate) => ({ ...acc, [rate.id]: 0 }), {})
   );
-  const [payoutMethod, setPayoutMethod] = useState('credit'); // 'credit' or 'cash'
+  const payoutMethod = 'cash';
 
   // Get only single cards for searching
   const singleCards = products.filter(p => p.type === 'single');
@@ -91,10 +91,7 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
   }, 0);
 
   const cashTotal = Math.round(singlesCashTotal + bulkCashTotal);
-  // Store Credit gets +25% bonus
-  const creditTotal = Math.round(cashTotal * 1.25);
-
-  const finalTotal = payoutMethod === 'credit' ? creditTotal : cashTotal;
+  const finalTotal = cashTotal;
 
   const handleSubmit = () => {
     if (buylistCart.length === 0 && Object.values(bulkCounts).every(v => v === 0)) {
@@ -114,7 +111,7 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
       bulk: bulkRates.map(rate => ({
         type: `${rate.game} - ${rate.type}`,
         count: bulkCounts[rate.id],
-        price: payoutMethod === 'credit' ? rate.creditRate : rate.cashRate
+        price: rate.cashRate
       })).filter(b => b.count > 0),
       payoutMethod,
       totalPayout: finalTotal,
@@ -250,7 +247,7 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
                     <span style={styles.bulkGame}>{rate.game}</span>
                     <span style={styles.bulkType}>{rate.type}</span>
                     <span style={styles.bulkRates}>
-                      Cena: {rate.cashRate} Kč (Hotovost) / {rate.creditRate} Kč (Kredit) za kus
+                      Cena: {rate.cashRate} Kč za kus
                     </span>
                   </div>
                   <div style={styles.bulkInputWrapper}>
@@ -273,37 +270,20 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
         <div style={styles.rightCol} className="glass-panel">
           <h3 style={styles.summaryTitle}>Přehled výkupu</h3>
 
-          {/* Payout method choice */}
+          {/* Payout method info */}
           <div style={styles.payoutChoice}>
             <h4 style={styles.choiceHeading}>Způsob výplaty:</h4>
-            <div style={styles.choiceGrid}>
-              <div 
-                style={{
-                  ...styles.choiceCard,
-                  borderColor: payoutMethod === 'credit' ? 'var(--color-gold)' : 'rgba(63, 63, 70, 0.4)',
-                  backgroundColor: payoutMethod === 'credit' ? 'rgba(245, 158, 11, 0.05)' : 'transparent'
-                }}
-                onClick={() => setPayoutMethod('credit')}
-                className="glass-card"
-              >
-                <span style={styles.choiceTitle}>Store Kredit</span>
-                <span style={styles.choiceBonus}>+25% BONUS</span>
-                <span style={styles.choiceDesc}>Na nákup dalšího zboží u nás</span>
-              </div>
-
-              <div 
-                style={{
-                  ...styles.choiceCard,
-                  borderColor: payoutMethod === 'cash' ? 'var(--color-gold)' : 'rgba(63, 63, 70, 0.4)',
-                  backgroundColor: payoutMethod === 'cash' ? 'rgba(245, 158, 11, 0.05)' : 'transparent'
-                }}
-                onClick={() => setPayoutMethod('cash')}
-                className="glass-card"
-              >
-                <span style={styles.choiceTitle}>Bankovní převod</span>
-                <span style={styles.choiceBonus} className="text-muted">BEZ BONUSU</span>
-                <span style={styles.choiceDesc}>Peníze přímo na Váš účet</span>
-              </div>
+            <div 
+              style={{
+                ...styles.choiceCard,
+                borderColor: 'rgba(63, 63, 70, 0.4)',
+                backgroundColor: 'transparent',
+                cursor: 'default'
+              }}
+              className="glass-card"
+            >
+              <span style={styles.choiceTitle}>Bankovní převod</span>
+              <span style={styles.choiceDesc}>Peníze zašleme přímo na Váš bankovní účet po fyzické kontrole karet.</span>
             </div>
           </div>
 
@@ -318,13 +298,6 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
               <span>{bulkCashTotal.toLocaleString()} Kč</span>
             </div>
             
-            {payoutMethod === 'credit' && (
-              <div style={styles.summaryRow} className="text-green">
-                <span>Výkupní bonus (+25%):</span>
-                <span>+{Math.round((singlesCashTotal + bulkCashTotal) * 0.25).toLocaleString()} Kč</span>
-              </div>
-            )}
-            
             <div style={styles.totalRow}>
               <span>Celková odhadovaná cena:</span>
               <span style={{ color: 'var(--color-gold)' }}>{finalTotal.toLocaleString()} Kč</span>
@@ -337,7 +310,7 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
             <ul style={styles.infoList}>
               <li>Karty k výkupu nám zašlete poštou nebo odevzdejte osobně v kavárně v Pardubicích.</li>
               <li>Fyzickou kontrolu stavu a pravosti karet provedeme do 48 hodin od přijetí.</li>
-              <li>Po schválení Vám ihned připíšeme Store Kredit nebo zašleme peníze na účet.</li>
+              <li>Po schválení Vám ihned zašleme peníze na bankovní účet.</li>
             </ul>
           </div>
 

@@ -28,7 +28,7 @@ export default function AdminPanel({ buylists, approveBuylist }) {
         <div style={styles.leftCol} className="glass-panel">
           <h2 style={styles.sectionHeading}>Správa podaných výkupů</h2>
           <p style={styles.desc}>
-            Zde vidíte všechny výkupy, které uživatelé naklikali na webu. Fyzicky zkontrolujte stav doručených karet a kliknutím na schválit připíšete Store Kredit na účet uživatele.
+            Zde vidíte všechny výkupy, které uživatelé naklikali na webu. Fyzicky zkontrolujte stav doručených karet a kliknutím na schválit potvrdíte vyplacení částky na bankovní účet uživatele.
           </p>
 
           {buylists.length === 0 ? (
@@ -71,7 +71,7 @@ export default function AdminPanel({ buylists, approveBuylist }) {
 
                     <div style={styles.approvalRow}>
                       <div style={styles.payoutDetail}>
-                        <span>Způsob: <strong>{bl.payoutMethod === 'credit' ? 'Store Kredit (+25% bonus)' : 'Na bankovní účet'}</strong></span>
+                        <span>Způsob: <strong>Na bankovní účet</strong></span>
                         <span style={styles.totalVal}>Částka k vyplacení: {bl.totalPayout.toLocaleString()} Kč</span>
                       </div>
                       

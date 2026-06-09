@@ -18,6 +18,7 @@ import AdminPanel from './components/AdminPanel';
 import GdprVop from './components/GdprVop';
 import Cart from './components/Cart';
 import Favorites from './components/Favorites';
+import LoginModal from './components/LoginModal';
 
 import { mockProducts } from './mockData';
 import './App.css';
@@ -25,6 +26,14 @@ import './App.css';
 export default function App() {
   // Navigation & Page State
   const [activePage, setActivePage] = useState('home');
+  const [gdprVopTab, setGdprVopTab] = useState('vop');
+
+  const navigateToPage = (page, tab) => {
+    setActivePage(page);
+    if (page === 'gdpr-vop' && tab) {
+      setGdprVopTab(tab);
+    }
+  };
 
   useEffect(() => {
     // Detect OS and add class
@@ -48,8 +57,54 @@ export default function App() {
       clearTimeout(scrollTimeout);
     };
   }, []);
+
+  // Smooth scroll to top on page or legal tab change
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, [activePage, gdprVopTab]);
+
   const [selectedProductId, setSelectedProductId] = useState(null);
   
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  const handleLogin = (email, name = '', avatar = '') => {
+    setIsLoggedIn(true);
+    setUser(prev => ({
+      ...prev,
+      email: email,
+      name: name || email.split('@')[0],
+      avatar: avatar || '/user.png'
+    }));
+    showToast(`Byl jste úspěšně přihlášen jako ${name || email}`, 'success');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUser(prev => ({
+      ...prev,
+      email: '',
+      name: '',
+      avatar: '/user.png'
+    }));
+    setActivePage('home');
+    showToast('Byl jste úspěšně odhlášen.', 'success');
+  };
+
+  const handleRegister = (email, name = '', phone = '') => {
+    setIsLoggedIn(true);
+    setUser(prev => ({
+      ...prev,
+      email: email,
+      name: name || email.split('@')[0],
+      phone: phone,
+      avatar: '/user.png'
+    }));
+    showToast(`Registrace úspěšná! Vítejte, ${name || email}`, 'success');
+  };
   // Search and Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({});
@@ -70,12 +125,11 @@ export default function App() {
 
   // User State (Mock DB)
   const [user, setUser] = useState({
-    storeCredit: 1000,
-    transactionHistory: [
-      { id: 't-init', description: 'Uvítací bonusový Store Kredit', amount: 1000, date: '26. 5. 2026' }
-    ],
     orderHistory: [],
-    gradingSubmissions: []
+    gradingSubmissions: [],
+    name: '',
+    email: '',
+    avatar: '/user.png'
   });
 
   // Buylists State (Admin approvals)
@@ -85,15 +139,15 @@ export default function App() {
       items: [
         { name: 'Charizard ex (Special Illustration Rare)', condition: 'NM', lang: 'EN', price: 1110, quantity: 1 }
       ],
-      payoutMethod: 'credit',
-      totalPayout: 1388,
+      payoutMethod: 'cash',
+      totalPayout: 1110,
       status: 'Čeká na odeslání',
       date: '25. 5. 2026'
     }
   ]);
 
   // Add to Cart Action
-  const addToCart = (variant, product) => {
+  const addToCart = (variant, product, quantityToAdd = 1) => {
     const isSingle = product.type === 'single';
     const itemId = isSingle ? variant.id : product.id;
     const itemName = isSingle ? `${product.name} (${variant.condition})` : product.name;
@@ -103,14 +157,14 @@ export default function App() {
       const existing = prevCart.find(item => item.id === itemId);
       if (existing) {
         return prevCart.map(item => 
-          item.id === itemId ? { ...item, quantity: item.quantity + 1 } : item
+          item.id === itemId ? { ...item, quantity: item.quantity + quantityToAdd } : item
         );
       } else {
         return [...prevCart, {
           id: itemId,
           name: itemName,
           price: itemPrice,
-          quantity: 1,
+          quantity: quantityToAdd,
           condition: isSingle ? variant.condition : null,
           lang: isSingle ? variant.lang : null,
           foil: isSingle ? variant.foil : null,
@@ -119,29 +173,14 @@ export default function App() {
         }];
       }
     });
-    showToast(`"${itemName}" přidáno do košíku.`, 'success');
+    showToast(`"${itemName}" (${quantityToAdd} ks) přidáno do košíku.`, 'success');
   };
 
   // Submit Order Action
-  const submitOrder = (order, creditApplied) => {
+  const submitOrder = (order) => {
     setUser(prev => {
-      let updatedCredit = prev.storeCredit;
-      let updatedHistory = [...prev.transactionHistory];
-
-      if (creditApplied > 0) {
-        updatedCredit -= creditApplied;
-        updatedHistory.unshift({
-          id: 't-ord-' + order.id,
-          description: `Platba za objednávku #${order.id} (uplatněn kredit)`,
-          amount: -creditApplied,
-          date: order.date
-        });
-      }
-
       return {
         ...prev,
-        storeCredit: updatedCredit,
-        transactionHistory: updatedHistory,
         orderHistory: [order, ...prev.orderHistory]
       };
     });
@@ -169,36 +208,7 @@ export default function App() {
       
       const updated = { ...bl, status: 'Schváleno - Vyplaceno' };
 
-      if (bl.payoutMethod === 'credit') {
-        setUser(prevUser => ({
-          ...prevUser,
-          storeCredit: prevUser.storeCredit + bl.totalPayout,
-          transactionHistory: [
-            {
-              id: 't-buy-' + bl.id,
-              description: `Připsán Store Kredit za výkup ${bl.id} (+25% bonus)`,
-              amount: bl.totalPayout,
-              date: new Date().toLocaleDateString()
-            },
-            ...prevUser.transactionHistory
-          ]
-        }));
-        showToast(`Výkup ${bl.id} schválen. Kredit +${bl.totalPayout} Kč byl připsán.`, 'success');
-      } else {
-        setUser(prevUser => ({
-          ...prevUser,
-          transactionHistory: [
-            {
-              id: 't-buy-cash-' + bl.id,
-              description: `Vyplacena hotovost za výkup ${bl.id} na bankovní účet`,
-              amount: 0,
-              date: new Date().toLocaleDateString()
-            },
-            ...prevUser.transactionHistory
-          ]
-        }));
-        showToast(`Výkup ${bl.id} schválen k bankovnímu převodu.`, 'success');
-      }
+      showToast(`Výkup ${bl.id} schválen k bankovnímu převodu.`, 'success');
 
       return updated;
     }));
@@ -208,11 +218,13 @@ export default function App() {
     <div style={styles.appContainer}>
       <Navbar 
         activePage={activePage} 
-        setActivePage={setActivePage} 
+        setActivePage={navigateToPage} 
         cart={cart}
         user={user}
         setFilters={setFilters}
         setSearchQuery={setSearchQuery}
+        isLoggedIn={isLoggedIn}
+        onOpenLogin={() => setIsLoginModalOpen(true)}
       />
       
       <main style={styles.mainContent}>
@@ -269,6 +281,8 @@ export default function App() {
             addToCart={addToCart}
             setSelectedProductId={setSelectedProductId}
             setActivePage={setActivePage}
+            setFilters={setFilters}
+            alert={showToast}
           />
         )}
 
@@ -279,6 +293,8 @@ export default function App() {
             addToCart={addToCart}
             setSelectedProductId={setSelectedProductId}
             setActivePage={setActivePage}
+            setFilters={setFilters}
+            alert={showToast}
           />
         )}
 
@@ -318,7 +334,6 @@ export default function App() {
         {activePage === 'checkout' && (
           <CheckoutFlow 
             cart={cart}
-            user={user}
             submitOrder={submitOrder}
             setActivePage={setActivePage}
             alert={showToast}
@@ -329,6 +344,7 @@ export default function App() {
           <UserPortal 
             user={user}
             setActivePage={setActivePage}
+            onLogout={handleLogout}
           />
         )}
 
@@ -340,14 +356,13 @@ export default function App() {
         )}
 
         {activePage === 'gdpr-vop' && (
-          <GdprVop setActivePage={setActivePage} />
+          <GdprVop setActivePage={navigateToPage} initialTab={gdprVopTab} />
         )}
 
         {activePage === 'cart' && (
           <Cart 
             cart={cart} 
             setCart={setCart} 
-            user={user} 
             setActivePage={setActivePage} 
           />
         )}
@@ -362,7 +377,14 @@ export default function App() {
         )}
       </main>
 
-      <Footer setActivePage={setActivePage} />
+      <Footer setActivePage={navigateToPage} />
+
+      <LoginModal 
+        isOpen={isLoginModalOpen} 
+        onClose={() => setIsLoginModalOpen(false)} 
+        onLogin={handleLogin} 
+        onRegister={handleRegister} 
+      />
 
       {/* Premium Custom Toast Banner */}
       {toast.visible && (

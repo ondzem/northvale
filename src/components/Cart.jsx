@@ -1,4 +1,4 @@
-export default function Cart({ cart, setCart, user, setActivePage }) {
+export default function Cart({ cart, setCart, setActivePage }) {
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   
   const updateQuantity = (itemId, delta) => {
@@ -230,22 +230,7 @@ export default function Cart({ cart, setCart, user, setActivePage }) {
                 </div>
               </div>
 
-              {/* Store credit indicator info */}
-              {user.storeCredit > 0 && (
-                <div 
-                  style={{ 
-                    padding: '12px', 
-                    backgroundColor: 'rgba(253,189,22,0.04)', 
-                    border: '1px solid rgba(253,189,22,0.1)', 
-                    borderRadius: '4px',
-                    fontSize: '11px',
-                    lineHeight: '1.4',
-                    color: 'var(--text-muted)'
-                  }}
-                >
-                  💰 Máte k dispozici <strong>{user.storeCredit.toLocaleString()} Kč</strong> ve Store Kreditu. Můžete jej uplatnit hned v dalším kroku v pokladně.
-                </div>
-              )}
+
 
               {/* Totals Row */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>

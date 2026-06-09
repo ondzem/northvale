@@ -1,5 +1,5 @@
 
-export default function UserPortal({ user, setActivePage }) {
+export default function UserPortal({ user, setActivePage, onLogout }) {
   const getGradingStepIndex = (status) => {
     const steps = ['Příprava', 'Odesláno do USA', 'Zpracování', 'Nagradováno', 'Na cestě zpět', 'Připraveno'];
     return steps.indexOf(status);
@@ -12,50 +12,30 @@ export default function UserPortal({ user, setActivePage }) {
       <h1 className="sr-only">Můj uživatelský účet a zůstatky - NORTHVALE</h1>
 
       <div style={styles.layout}>
-        {/* Left Column: Account Details, Credit Balance & History */}
+        {/* Left Column: Account Details & History */}
         <div style={styles.leftCol}>
-          {/* Credit balance card */}
-          <div style={styles.creditCard} className="glass-panel">
-            <div style={styles.creditInfo}>
-              <span style={styles.creditTitle}>Váš Store Kredit</span>
-              <span style={styles.creditValue}>{user.storeCredit.toLocaleString()} Kč</span>
-              <p style={styles.creditDesc}>
-                Kredit získáváte prodejem karet přes náš výkupní systém s bonusem +25%. Můžete jej využít k placení jakéhokoliv zboží v pokladně.
-              </p>
+          {/* User profile card */}
+          <div style={styles.profileCard} className="glass-panel">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              {user.avatar && (
+                <img 
+                  src={user.avatar} 
+                  alt="Avatar" 
+                  style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-gold)' }} 
+                />
+              )}
+              <div style={styles.profileInfo}>
+                <span style={styles.profileLabel}>Přihlášen jako</span>
+                <span style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-main)', display: 'block' }}>{user.name || user.email.split('@')[0]}</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{user.email || 'sběratel@northvaletcg.eu'}</span>
+              </div>
             </div>
-            <div style={styles.creditActions}>
-              <button className="btn btn-primary" onClick={() => setActivePage('buylist')}>
-                Prodat další karty (+25% bonus)
-              </button>
-            </div>
+            <button className="btn btn-secondary" style={styles.logoutBtn} onClick={onLogout}>
+              Odhlásit se
+            </button>
           </div>
 
-          {/* Transactions history */}
-          <div style={styles.section} className="glass-panel">
-            <h3 style={styles.sectionHeading}>Historie transakcí</h3>
-            {user.transactionHistory.length === 0 ? (
-              <p style={styles.emptyText}>Zatím jste neprovedli žádné transakce.</p>
-            ) : (
-              <div style={styles.list}>
-                {user.transactionHistory.map(tr => (
-                  <div key={tr.id} style={styles.listItem} className="glass-card">
-                    <div style={styles.trMeta}>
-                      <span style={styles.trDesc}>{tr.description}</span>
-                      <span style={styles.trDate}>{tr.date}</span>
-                    </div>
-                    <span 
-                      style={{ 
-                        ...styles.trAmount,
-                        color: tr.amount > 0 ? 'var(--color-green)' : 'var(--text-muted)'
-                      }}
-                    >
-                      {tr.amount > 0 ? '+' : ''}{tr.amount.toLocaleString()} Kč
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+
 
           {/* Order history */}
           <div style={styles.section} className="glass-panel">
@@ -196,6 +176,37 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '24px',
+  },
+  profileCard: {
+    padding: '20px 30px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '24px',
+    flexWrap: 'wrap',
+    textAlign: 'left',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+  },
+  profileInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+  },
+  profileLabel: {
+    fontSize: '11px',
+    fontWeight: '700',
+    color: 'var(--text-muted)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+  profileEmail: {
+    fontSize: '18px',
+    fontWeight: '700',
+    color: 'var(--text-main)',
+  },
+  logoutBtn: {
+    padding: '8px 16px',
+    fontSize: '13px',
   },
   creditCard: {
     padding: '30px',

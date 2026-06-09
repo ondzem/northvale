@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function CheckoutFlow({ cart, user, submitOrder, setActivePage }) {
+export default function CheckoutFlow({ cart, submitOrder, setActivePage }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -9,7 +9,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
   const [zip, setZip] = useState('');
   const [shipping, setShipping] = useState('zasilkovna');
   const [payment, setPayment] = useState('card');
-  const [creditApplied, setCreditApplied] = useState(0);
+  const creditApplied = 0;
   
   // ISIC states
   const [isicNumber, setIsicNumber] = useState('');
@@ -31,15 +31,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
   // ISIC 5% discount
   const isicDiscount = isicApplied ? Math.round(cartSubtotal * 0.05) : 0;
 
-  // Handle store credit input limit
-  const maxCreditToApply = Math.min(user.storeCredit, cartSubtotal + shippingCost - isicDiscount);
-
-  const handleApplyCreditChange = (val) => {
-    const amount = Math.min(maxCreditToApply, Math.max(0, parseInt(val) || 0));
-    setCreditApplied(amount);
-  };
-
-  const finalTotal = Math.max(0, cartSubtotal + shippingCost - creditApplied - isicDiscount);
+  const finalTotal = Math.max(0, cartSubtotal + shippingCost - isicDiscount);
 
   const handleApplyIsic = () => {
     if (isicNumber.trim().toUpperCase().startsWith('S')) {
@@ -238,33 +230,6 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
                 </div>
               </div>
 
-              {/* Store credit interaction */}
-              {user.storeCredit > 0 && (
-                <div style={styles.creditApplySection} className="glass-card">
-                  <h4 style={styles.creditHeading}>Uplatnit Store Kredit</h4>
-                  <p style={styles.creditDesc}>Máte k dispozici celkem <strong>{user.storeCredit} Kč</strong>.</p>
-                  <div style={styles.creditInputRow}>
-                    <input 
-                      type="number" 
-                      min="0" 
-                      max={maxCreditToApply}
-                      value={creditApplied} 
-                      onChange={(e) => handleApplyCreditChange(e.target.value)}
-                      style={styles.creditInput}
-                    />
-                    <span style={styles.creditUnit}>Kč</span>
-                    <button 
-                      type="button"
-                      className="btn btn-secondary"
-                      style={styles.maxCreditBtn}
-                      onClick={() => setCreditApplied(maxCreditToApply)}
-                    >
-                      MAX
-                    </button>
-                  </div>
-                </div>
-              )}
-
               <div style={styles.totalsRow}>
                 <div style={styles.totalDetail}>
                   <span>Mezisoučet:</span>
@@ -278,12 +243,6 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
                   <div style={{ ...styles.totalDetail, color: 'var(--color-green)' }}>
                     <span>ISIC Sleva (5%):</span>
                     <span>-{isicDiscount.toLocaleString()} Kč</span>
-                  </div>
-                )}
-                {creditApplied > 0 && (
-                  <div style={{ ...styles.totalDetail, color: 'var(--color-green)' }}>
-                    <span>Použitý Store Kredit:</span>
-                    <span>-{creditApplied.toLocaleString()} Kč</span>
                   </div>
                 )}
                 <div style={styles.finalTotalRow}>
