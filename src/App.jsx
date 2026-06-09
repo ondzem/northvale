@@ -58,13 +58,7 @@ export default function App() {
     };
   }, []);
 
-  // Smooth scroll to top on page or legal tab change
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  }, [activePage, gdprVopTab]);
+
 
   const [selectedProductId, setSelectedProductId] = useState(null);
   
@@ -114,6 +108,82 @@ export default function App() {
 
   // Toast Notification State
   const [toast, setToast] = useState({ message: '', visible: false, type: 'success' });
+
+  // Smooth scroll to top on page or legal tab change
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, [activePage, gdprVopTab]);
+
+  // Dynamic Page Title
+  useEffect(() => {
+    let title = 'Northvaletcg.eu';
+    
+    switch (activePage) {
+      case 'home':
+        title = 'Domů - Northvaletcg.eu';
+        break;
+      case 'singles-catalog':
+        title = 'Pokémon Singles - Northvaletcg.eu';
+        break;
+      case 'sealed-catalog':
+        title = 'Sealed produkty - Northvaletcg.eu';
+        break;
+      case 'slabs-catalog':
+        title = 'Ohodnocené slabs - Northvaletcg.eu';
+        break;
+      case 'singles-detail':
+      case 'sealed-detail': {
+        const currentProduct = mockProducts.find(p => p.id === selectedProductId);
+        if (currentProduct) {
+          title = `${currentProduct.name} - Northvaletcg.eu`;
+        }
+        break;
+      }
+      case 'buylist':
+        title = 'Výkup karet (Buylist) - Northvaletcg.eu';
+        break;
+      case 'grading':
+        title = 'Grading Servis - Northvaletcg.eu';
+        break;
+      case 'grading-guide':
+        title = 'Průvodce stavy karet - Northvaletcg.eu';
+        break;
+      case 'community':
+        title = 'Komunita a turnaje - Northvaletcg.eu';
+        break;
+      case 'support':
+        title = 'Centrum podpory - Northvaletcg.eu';
+        break;
+      case 'admin':
+        title = 'Administrace - Northvaletcg.eu';
+        break;
+      case 'gdpr-vop':
+        if (gdprVopTab === 'doprava') {
+          title = 'Doprava a platba - Northvaletcg.eu';
+        } else if (gdprVopTab === 'vop') {
+          title = 'Obchodní podmínky (VOP) - Northvaletcg.eu';
+        } else {
+          title = 'Ochrana osobních údajů (GDPR) - Northvaletcg.eu';
+        }
+        break;
+      case 'cart':
+        title = 'Nákupní košík - Northvaletcg.eu';
+        break;
+      case 'favorites':
+        title = 'Oblíbené - Northvaletcg.eu';
+        break;
+      case 'profile':
+        title = 'Můj profil - Northvaletcg.eu';
+        break;
+      default:
+        title = 'Northvaletcg.eu';
+    }
+    
+    document.title = title;
+  }, [activePage, selectedProductId, gdprVopTab]);
 
   // Custom Toast helper
   const showToast = (message, type = 'success') => {
