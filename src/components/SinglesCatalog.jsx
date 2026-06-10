@@ -236,7 +236,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
     ];
   } else if (selectedGame === 'Lorcana') {
     subcategories = [
-      { id: 'all', name: 'Lorcana TCG', icon: <img src="/Lorcana.png" alt="" className="subcategory-img" /> },
+      { id: 'all', name: 'Lorcana TCG', icon: <img src="/lorcana logo.webp" alt="" className="subcategory-img" /> },
       { id: 'Common', name: 'Common', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
       { id: 'Uncommon', name: 'Uncommon', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
       { id: 'Rare', name: 'Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },

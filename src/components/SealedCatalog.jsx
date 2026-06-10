@@ -329,7 +329,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     ];
   } else if (selectedGame === 'Lorcana') {
     subcategories = [
-      { id: 'all', name: 'Lorcana TCG', icon: <img src="/Lorcana.png" alt="" className="subcategory-img" /> },
+      { id: 'all', name: 'Lorcana TCG', icon: <img src="/lorcana logo.webp" alt="" className="subcategory-img" /> },
       { id: 'Booster Box', name: 'Booster Boxy', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/501783_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
       { id: 'Trove Box', name: 'Trove Boxy', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/559441_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
       { id: 'Booster', name: 'Boostery', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/482406_in_1000x1000.jpg" alt="" className="subcategory-img" /> },

@@ -243,29 +243,53 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     Pokémon <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
                   </button>
                   {activeDropdown === 'pokemon' && (
-                    <div style={styles.dropdownMenu} className="glass-panel">
-                      <div style={styles.dropdownGrid}>
-                        <div style={styles.dropdownColumn}>
-                          <h4 style={styles.dropdownColHeading}>ENG (Anglické)</h4>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'EN', type: 'Booster Box' })}>Booster boxy</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'EN', type: 'Elite Trainer Box' })}>Elite trainer boxy</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'EN', type: 'Booster Bundle' })}>Bundles</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'EN', type: 'Booster' })}>Boostery</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'EN', type: 'Special Collection' })}>Speciální kolekce</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'EN', type: 'Other' })}>Ostatní</span>
+                    <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
+                      <div className="nav-dropdown-row">
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', type: 'Booster Box' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/552309_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Booster boxy</span>
                         </div>
-                        <div style={styles.dropdownColumn}>
-                          <h4 style={styles.dropdownColHeading}>JPN (Japonské)</h4>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'JP', type: 'Booster Box' })}>Booster boxy</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'JP', type: 'Booster' })}>Boostery</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'JP', type: 'Special Collection' })}>Speciální kolekce</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'JP', type: 'Other' })}>Ostatní</span>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', type: 'Elite Trainer Box' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/506307_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Elite trainer boxy</span>
                         </div>
-                        <div style={styles.dropdownColumn}>
-                          <h4 style={styles.dropdownColHeading}>CHN (Čínské)</h4>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'CN', type: 'Booster Box' })}>Booster boxy</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'CN', type: 'Booster' })}>Boostery</span>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', type: 'Booster Bundle' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/530267_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Bundles</span>
                         </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', type: 'Booster' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/550201_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Boostery</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', type: 'Special Collection' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/561990_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Speciální kolekce</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', type: 'Other' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/450463_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Ostatní</span>
+                        </div>
+                      </div>
+                      <div className="nav-dropdown-footer">
+                        <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon' })}>
+                          Celá kategorie
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                          </svg>
+                        </span>
                       </div>
                     </div>
                   )}
@@ -281,14 +305,41 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     Disney Lorcana <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
                   </button>
                   {activeDropdown === 'lorcana' && (
-                    <div style={styles.dropdownMenu} className="glass-panel">
-                      <div style={styles.dropdownGrid}>
-                        <div style={styles.dropdownColumn}>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Booster Box' })}>Booster boxy</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Trove Box' })}>Trove boxy</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Booster' })}>Boostery</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Other' })}>Ostatní</span>
+                    <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
+                      <div className="nav-dropdown-row">
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Booster Box' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/501783_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Booster boxy</span>
                         </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Trove Box' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/559441_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Trove boxy</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Booster' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/482406_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Boostery</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Other' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/482407_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Ostatní</span>
+                        </div>
+                      </div>
+                      <div className="nav-dropdown-footer">
+                        <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('sealed', { game: 'Lorcana' })}>
+                          Celá kategorie
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                          </svg>
+                        </span>
                       </div>
                     </div>
                   )}
@@ -304,13 +355,35 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     One Piece <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
                   </button>
                   {activeDropdown === 'onepiece' && (
-                    <div style={styles.dropdownMenu} className="glass-panel">
-                      <div style={styles.dropdownGrid}>
-                        <div style={styles.dropdownColumn}>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'One Piece', type: 'Booster Box' })}>Booster boxy</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'One Piece', type: 'Booster' })}>Boostery</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'One Piece', type: 'Other' })}>Ostatní</span>
+                    <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
+                      <div className="nav-dropdown-row">
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'One Piece', type: 'Booster Box' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/532107_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Booster boxy</span>
                         </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'One Piece', type: 'Booster' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/536109_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Boostery</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'One Piece', type: 'Other' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/513361_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Ostatní</span>
+                        </div>
+                      </div>
+                      <div className="nav-dropdown-footer">
+                        <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('sealed', { game: 'One Piece' })}>
+                          Celá kategorie
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                          </svg>
+                        </span>
                       </div>
                     </div>
                   )}
@@ -326,14 +399,41 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     Riftbound <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
                   </button>
                   {activeDropdown === 'riftbound' && (
-                    <div style={styles.dropdownMenu} className="glass-panel">
-                      <div style={styles.dropdownGrid}>
-                        <div style={styles.dropdownColumn}>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Booster Box' })}>Booster boxy</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Booster' })}>Boostery</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Trial Deck' })}>Trial decky</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Other' })}>Ostatní</span>
+                    <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
+                      <div className="nav-dropdown-row">
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Booster Box' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/Riftbound.webp" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Booster boxy</span>
                         </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Booster' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/Riftbound.webp" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Boostery</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Trial Deck' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/Riftbound.webp" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Trial decky</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Other' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/Riftbound.webp" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Ostatní</span>
+                        </div>
+                      </div>
+                      <div className="nav-dropdown-footer">
+                        <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('sealed', { game: 'Riftbound' })}>
+                          Celá kategorie
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                          </svg>
+                        </span>
                       </div>
                     </div>
                   )}
@@ -349,20 +449,53 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     Příslušenství <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
                   </button>
                   {activeDropdown === 'accessories' && (
-                    <div style={styles.dropdownMenu} className="glass-panel">
-                      <div style={styles.dropdownGrid}>
-                        <div style={styles.dropdownColumn}>
-                          <h4 style={styles.dropdownColHeading}>Alba</h4>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Binders', subsubcat: 'cards' })}>Na karty</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Binders', subsubcat: 'toploaders' })}>Na toploadery</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Binders', subsubcat: 'graded' })}>Na graded karty</span>
+                    <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
+                      <div className="nav-dropdown-row">
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Binders', subsubcat: 'cards' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Na karty</span>
                         </div>
-                        <div style={styles.dropdownColumn}>
-                          <h4 style={styles.dropdownColHeading}>Ostatní</h4>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Sleeves' })}>Sleevy</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Toploaders' })}>Toploadery</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Other' })}>Ostatní</span>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Binders', subsubcat: 'toploaders' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Na toploadery</span>
                         </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Binders', subsubcat: 'graded' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Na graded karty</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Sleeves' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/122159_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Sleevy</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Toploaders' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/142981_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Toploadery</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Other' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Ostatní</span>
+                        </div>
+                      </div>
+                      <div className="nav-dropdown-footer">
+                        <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('sealed', { game: 'Accessories' })}>
+                          Celá kategorie
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                          </svg>
+                        </span>
                       </div>
                     </div>
                   )}
@@ -378,14 +511,41 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     Akryly <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
                   </button>
                   {activeDropdown === 'acrylics' && (
-                    <div style={styles.dropdownMenu} className="glass-panel">
-                      <div style={styles.dropdownGrid}>
-                        <div style={styles.dropdownColumn}>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Pokémon' })}>Pokemon</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Lorcana' })}>Lorcana</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Riftbound' })}>Riftbound</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'PSA' })}>Psa karty</span>
+                    <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
+                      <div className="nav-dropdown-row">
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Pokémon' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/acrylic-etb-box.png" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Pokemon</span>
                         </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Lorcana' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/acrylic-etb-box.png" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Lorcana</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Riftbound' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/acrylic-etb-box.png" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Riftbound</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'PSA' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/acrylic-etb-box.png" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Psa karty</span>
+                        </div>
+                      </div>
+                      <div className="nav-dropdown-footer">
+                        <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics' })}>
+                          Celá kategorie
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                          </svg>
+                        </span>
                       </div>
                     </div>
                   )}
@@ -401,13 +561,35 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     Ohodnocené karty <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
                   </button>
                   {activeDropdown === 'slabs' && (
-                    <div style={styles.dropdownMenu} className="glass-panel">
-                      <div style={styles.dropdownGrid}>
-                        <div style={styles.dropdownColumn}>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('slabs', { company: 'PSA' })}>PSA</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('slabs', { company: 'Beckett' })}>Beckett</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('slabs', { company: 'Other' })}>Ostatní (CGC, TAG)</span>
+                    <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
+                      <div className="nav-dropdown-row">
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('slabs', { company: 'PSA' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/Ohodnoceni karet.webp" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">PSA</span>
                         </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('slabs', { company: 'Beckett' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/Ohodnoceni karet.webp" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Beckett</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('slabs', { company: 'Other' })}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/Ohodnoceni karet.webp" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Ostatní (CGC, TAG)</span>
+                        </div>
+                      </div>
+                      <div className="nav-dropdown-footer">
+                        <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('slabs')}>
+                          Celá kategorie
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                          </svg>
+                        </span>
                       </div>
                     </div>
                   )}
@@ -423,19 +605,52 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     Grading <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
                   </button>
                   {activeDropdown === 'grading' && (
-                    <div style={styles.dropdownMenu} className="glass-panel">
-                      <div style={styles.dropdownGrid}>
-                        <div style={styles.dropdownColumn}>
-                          <span style={styles.dropdownLink} onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>Pre Grading</span>
-                          <span style={styles.dropdownLink} onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>Odeslání PSA</span>
-                          <span style={styles.dropdownLink} onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>Odeslání Beckett</span>
-                          <span style={styles.dropdownLink} onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>Odeslání TAG</span>
-                          <span style={{ ...styles.dropdownLink, color: 'var(--color-gold)', marginTop: '8px' }} onClick={() => { setActivePage('grading-guide'); setActiveDropdown(null); }}>Průvodce stavy</span>
+                    <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
+                      <div className="nav-dropdown-row">
+                        <div className="nav-dropdown-item" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/Grading.webp" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Pre Grading</span>
                         </div>
+                        <div className="nav-dropdown-item" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/Desktop - Grading Karet.webp" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Odeslání PSA</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/Mobile - Grading karet.webp" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Odeslání Beckett</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/grading sekce.webp" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text">Odeslání TAG</span>
+                        </div>
+                        <div className="nav-dropdown-item" onClick={() => { setActivePage('grading-guide'); setActiveDropdown(null); }}>
+                          <div className="nav-dropdown-icon">
+                            <img src="/grading sekce.webp" alt="" className="nav-dropdown-img" />
+                          </div>
+                          <span className="nav-dropdown-text" style={{ color: 'var(--color-gold)' }}>Průvodce stavy</span>
+                        </div>
+                      </div>
+                      <div className="nav-dropdown-footer">
+                        <span className="nav-dropdown-all-link" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
+                          Celá kategorie
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                          </svg>
+                        </span>
                       </div>
                     </div>
                   )}
                 </div>
+
               </div>
 
               {/* Hamburger Icon */}
@@ -976,6 +1191,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     height: '100%',
+    position: 'relative',
   },
   categoriesList: {
     display: 'flex',
@@ -983,7 +1199,7 @@ const styles = {
     height: '100%',
   },
   dropdownContainer: {
-    position: 'relative',
+    position: 'static',
     height: '100%',
     display: 'flex',
     alignItems: 'center',
@@ -1012,17 +1228,21 @@ const styles = {
     position: 'absolute',
     top: '46px',
     left: '0',
-    padding: '20px',
-    minWidth: '240px',
-    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)',
+    right: '0',
+    width: '100%',
+    padding: '36px 48px',
+    boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6)',
     zIndex: 1000,
+    backgroundColor: 'var(--bg-secondary)',
+    border: '1px solid var(--border)',
+    borderTop: 'none',
+    borderRadius: '0 0 var(--radius-md) var(--radius-md)',
   },
   dropdownGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-    gap: '24px',
-    width: 'max-content',
-    maxWidth: '800px',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+    gap: '32px',
+    width: '100%',
   },
   dropdownColumn: {
     display: 'flex',

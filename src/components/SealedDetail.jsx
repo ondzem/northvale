@@ -1,6 +1,18 @@
 import { useState } from 'react';
 import ProductCard from './ProductCard';
 
+const getGameImage = (product) => {
+  if (product.category === 'Acrylics') return '/acrylic-etb-box.png';
+  const game = product.game || '';
+  const g = game.toLowerCase();
+  if (g.includes('pokémon') || g.includes('pokemon')) return '/Pokemon.webp';
+  if (g.includes('lorcana')) return '/lorcana logo.webp';
+  if (g.includes('riftbound')) return '/Riftbound.webp';
+  if (g.includes('magic')) return '/Magic the gathering.webp';
+  if (g.includes('one piece') || g.includes('onepiece')) return '/One piece.webp';
+  return '/logo s popisem.webp';
+};
+
 export default function SealedDetail({ productId, products, addToCart, setSelectedProductId, setActivePage, setFilters, alert }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -563,165 +575,186 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
         const accColor = product.name.includes('Clear') ? 'Průhledná (Clear)' : 'Černá (Black)';
 
         return (
-          <section id="popis" className="detail-section custom-detail-panel" style={{ padding: '30px' }}>
-            <h3 className="detail-section-title">Popis produktu</h3>
+          <section id="popis" className="detail-section">
             <div className="tab-popis-layout">
-              <div className="tab-popis-text">
-                <p>{product.desc}</p>
-                
-                {isSealed && (
-                  <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <p style={{ lineHeight: '1.6', fontSize: '14px', margin: 0 }}>
-                      Originální zapečetěné balení <strong>{product.name}</strong> ze sady <strong>{product.edition}</strong> v {langAdjective} jazyce. Ideální produkt pro sběratele, hráče i jako dlouhodobá investice.
-                    </p>
-                    <ul style={{ paddingLeft: '20px', margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: 'var(--text-muted)' }}>
-                      <li><strong style={{ color: 'var(--text-main)' }}>Stav balení:</strong> Produkt je chráněn originální neporušenou smršťovací fólií (shrink wrap) s logy výrobce.</li>
-                      <li>
-                        <strong style={{ color: 'var(--text-main)' }}>Obsah balení:</strong>
-                        <ul style={{ paddingLeft: '20px', marginTop: '4px', listStyleType: 'circle' }}>
-                          <li>{product.boosterCount || 1} booster balíčků sady {product.edition}</li>
-                          {product.name.includes('Elite Trainer') && <li>Promo karta, kostky, obaly na karty, počítadla a sběratelská krabice.</li>}
-                          {product.name.includes('Trove') && <li>8 boosterů, krabičky na balíčky, kostky, počítadlo životů a sběratelská krabice.</li>}
-                        </ul>
-                      </li>
-                      <li><strong style={{ color: 'var(--text-main)' }}>Sběratelský standard odeslání:</strong> Produkty balíme do pevných kartonových krabic s papírovou a bublinkovou výplní tak, aby rohy krabice zůstaly při přepravě netknuté.</li>
-                    </ul>
+              <div className="tab-popis-left-col">
+                <div className="detail-desc-block">
+                  <h3 className="detail-section-title" style={{ marginTop: 0 }}>Popis produktu</h3>
+                  <div className="tab-popis-text">
+                    <p style={{ margin: 0 }}>{product.desc}</p>
                   </div>
-                )}
+                </div>
 
-                {isAccessory && (
-                  <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <p style={{ lineHeight: '1.6', fontSize: '14px', margin: 0 }}>
-                      Prvotřídní herní příslušenství <strong>{product.name}</strong> pro maximální bezpečí a organizaci Vaší sbírky.
-                    </p>
-                    <ul style={{ paddingLeft: '20px', margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: 'var(--text-muted)' }}>
-                      <li><strong style={{ color: 'var(--text-main)' }}>Spolehlivost:</strong> Vyrobeno z nekyselých materiálů bez obsahu PVC, které zaručují, že Vaše karty neztratí barvu ani hodnotu.</li>
-                      <li><strong style={{ color: 'var(--text-main)' }}>Sběratelský standard:</strong> Odesíláme v pevných krabicích chránících rohy alb a krabiček před poškozením při přepravě.</li>
-                    </ul>
-                  </div>
-                )}
+                <div className="detail-desc-media-block">
+                  <img 
+                    src={getGameImage(product)} 
+                    alt={product.game || 'Detail produktu'} 
+                    className="detail-desc-image" 
+                  />
+                </div>
 
-                {isAcrylic && (
-                  <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <p style={{ lineHeight: '1.6', fontSize: '14px', margin: 0 }}>
-                      Luxusní akrylový case <strong>{product.name}</strong> z {product.acrylicThickness || 4}mm vysoce kvalitního akrylátu s magnetickým víkem a integrovaným UV filtrem.
-                    </p>
-                    <ul style={{ paddingLeft: '20px', margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: 'var(--text-muted)' }}>
-                      <li><strong style={{ color: 'var(--text-main)' }}>UV Ochrana:</strong> Integrovaný 99% UV filtr chrání barvy a fólie sealed produktů před vyblednutím na slunci.</li>
-                      <li><strong style={{ color: 'var(--text-main)' }}>Zavírání:</strong> Extra silné neodymové magnety ve víku drží pouzdro bezpečně uzavřené.</li>
-                    </ul>
-                  </div>
-                )}
+                <div className="detail-desc-block">
+                  {isSealed && (
+                    <div className="detail-desc-features">
+                      <h4 className="detail-features-subtitle">Hlavní přednosti a obsah balení</h4>
+                      <p style={{ lineHeight: '1.7', fontSize: '14.5px', color: 'rgba(255, 255, 255, 0.85)', margin: '0 0 16px 0' }}>
+                        Originální zapečetěné balení <strong>{product.name}</strong> ze sady <strong>{product.edition}</strong> v {langAdjective} jazyce. Ideální produkt pro sběratele, hráče i jako dlouhodobá investice.
+                      </p>
+                      <ul className="detail-desc-list">
+                        <li><strong style={{ color: 'var(--text-main)' }}>Stav balení:</strong> Produkt je chráněn originální neporušenou smršťovací fólií (shrink wrap) s logy výrobce.</li>
+                        <li>
+                          <strong style={{ color: 'var(--text-main)' }}>Obsah balení:</strong>
+                          <ul style={{ paddingLeft: '20px', marginTop: '4px', listStyleType: 'circle' }}>
+                            <li>{product.boosterCount || 1} booster balíčků sady {product.edition}</li>
+                            {product.name.includes('Elite Trainer') && <li>Promo karta, kostky, obaly na karty, počítadla a sběratelská krabice.</li>}
+                            {product.name.includes('Trove') && <li>8 boosterů, krabičky na balíčky, kostky, počítadlo životů a sběratelská krabice.</li>}
+                          </ul>
+                        </li>
+                        <li><strong style={{ color: 'var(--text-main)' }}>Sběratelský standard odeslání:</strong> Produkty balíme do pevných kartonových krabic s papírovou a bublinkovou výplní tak, aby rohy krabice zůstaly při přepravě netknuté.</li>
+                      </ul>
+                    </div>
+                  )}
+
+                  {isAccessory && (
+                    <div className="detail-desc-features">
+                      <h4 className="detail-features-subtitle">Vlastnosti příslušenství</h4>
+                      <p style={{ lineHeight: '1.7', fontSize: '14.5px', color: 'rgba(255, 255, 255, 0.85)', margin: '0 0 16px 0' }}>
+                        Prvotřídní herní příslušenství <strong>{product.name}</strong> pro maximální bezpečí a organizaci Vaší sbírky.
+                      </p>
+                      <ul className="detail-desc-list">
+                        <li><strong style={{ color: 'var(--text-main)' }}>Spolehlivost:</strong> Vyrobeno z nekyselých materiálů bez obsahu PVC, které zaručují, že Vaše karty neztratí barvu ani hodnotu.</li>
+                        <li><strong style={{ color: 'var(--text-main)' }}>Sběratelský standard:</strong> Odesíláme v pevných krabicích chránících rohy alb a krabiček před poškozením při přepravě.</li>
+                      </ul>
+                    </div>
+                  )}
+
+                  {isAcrylic && (
+                    <div className="detail-desc-features">
+                      <h4 className="detail-features-subtitle">Technické přednosti akrylového pouzdra</h4>
+                      <p style={{ lineHeight: '1.7', fontSize: '14.5px', color: 'rgba(255, 255, 255, 0.85)', margin: '0 0 16px 0' }}>
+                        Luxusní akrylový case <strong>{product.name}</strong> z {product.acrylicThickness || 4}mm vysoce kvalitního akrylátu s magnetickým víkem a integrovaným UV filtrem.
+                      </p>
+                      <ul className="detail-desc-list">
+                        <li><strong style={{ color: 'var(--text-main)' }}>UV Ochrana:</strong> Integrovaný 99% UV filtr chrání barvy a fólie sealed produktů před vyblednutím na slunci.</li>
+                        <li><strong style={{ color: 'var(--text-main)' }}>Zavírání:</strong> Extra silné neodymové magnety ve víku drží pouzdro bezpečně uzavřené.</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                {isSealed && (
-                  <table className="tab-popis-specs-table">
-                    <tbody>
-                      <tr>
-                        <td>Značka / Hra</td>
-                        <td>{product.game}</td>
-                      </tr>
-                      <tr>
-                        <td>Edice / Sada</td>
-                        <td>{product.edition}</td>
-                      </tr>
-                      <tr>
-                        <td>Kód produktu</td>
-                        <td>{getProductCode(product)}</td>
-                      </tr>
-                      <tr>
-                        <td>Typ balení</td>
-                        <td>{getPackagingType(product)}</td>
-                      </tr>
-                      <tr>
-                        <td>Jazyk</td>
-                        <td>{langFull}</td>
-                      </tr>
-                      <tr>
-                        <td>Počet boosterů</td>
-                        <td>{product.boosterCount || 1} ks</td>
-                      </tr>
-                      <tr>
-                        <td>Rok vydání</td>
-                        <td>{product.year || 2024}</td>
-                      </tr>
-                      <tr>
-                        <td>Stav sealed fólie</td>
-                        <td>{product.foilCondition || '100% stav bez poškození'}</td>
-                      </tr>
-                      <tr>
-                        <td>Hmotnost (Weighted)</td>
-                        <td>Neváženo</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                )}
+              
+              <div className="tab-popis-right-col">
+                <div className="custom-detail-panel" style={{ padding: '32px', width: '100%', boxSizing: 'border-box' }}>
+                  <h3 className="detail-section-title" style={{ marginTop: 0 }}>Parametry produktu</h3>
+                  {isSealed && (
+                    <table className="tab-popis-specs-table">
+                      <tbody>
+                        <tr>
+                          <td>Značka / Hra</td>
+                          <td>{product.game}</td>
+                        </tr>
+                        <tr>
+                          <td>Edice / Sada</td>
+                          <td>{product.edition}</td>
+                        </tr>
+                        <tr>
+                          <td>Kód produktu</td>
+                          <td>{getProductCode(product)}</td>
+                        </tr>
+                        <tr>
+                          <td>Typ balení</td>
+                          <td>{getPackagingType(product)}</td>
+                        </tr>
+                        <tr>
+                          <td>Jazyk</td>
+                          <td>{langFull}</td>
+                        </tr>
+                        <tr>
+                          <td>Počet boosterů</td>
+                          <td>{product.boosterCount || 1} ks</td>
+                        </tr>
+                        <tr>
+                          <td>Rok vydání</td>
+                          <td>{product.year || 2024}</td>
+                        </tr>
+                        <tr>
+                          <td>Stav sealed fólie</td>
+                          <td>{product.foilCondition || '100% stav bez poškození'}</td>
+                        </tr>
+                        <tr>
+                          <td>Hmotnost (Weighted)</td>
+                          <td>Neváženo</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  )}
 
-                {isAccessory && (
-                  <table className="tab-popis-specs-table">
-                    <tbody>
-                      <tr>
-                        <td>Název doplňku</td>
-                        <td>{product.name}</td>
-                      </tr>
-                      <tr>
-                        <td>Typ příslušenství</td>
-                        <td>{accType}</td>
-                      </tr>
-                      <tr>
-                        <td>Výrobce / Značka</td>
-                        <td><strong>{accBrand}</strong></td>
-                      </tr>
-                      <tr>
-                        <td>Velikost / Rozměr</td>
-                        <td>{accSize}</td>
-                      </tr>
-                      <tr>
-                        <td>Počet kusů v balení</td>
-                        <td>{accCount}</td>
-                      </tr>
-                      <tr>
-                        <td>Materiál / Povrch</td>
-                        <td>{accMaterial}</td>
-                      </tr>
-                      <tr>
-                        <td>Barva</td>
-                        <td>{accColor}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                )}
+                  {isAccessory && (
+                    <table className="tab-popis-specs-table">
+                      <tbody>
+                        <tr>
+                          <td>Název doplňku</td>
+                          <td>{product.name}</td>
+                        </tr>
+                        <tr>
+                          <td>Typ příslušenství</td>
+                          <td>{accType}</td>
+                        </tr>
+                        <tr>
+                          <td>Výrobce / Značka</td>
+                          <td><strong>{accBrand}</strong></td>
+                        </tr>
+                        <tr>
+                          <td>Velikost / Rozměr</td>
+                          <td>{accSize}</td>
+                        </tr>
+                        <tr>
+                          <td>Počet kusů v balení</td>
+                          <td>{accCount}</td>
+                        </tr>
+                        <tr>
+                          <td>Materiál / Povrch</td>
+                          <td>{accMaterial}</td>
+                        </tr>
+                        <tr>
+                          <td>Barva</td>
+                          <td>{accColor}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  )}
 
-                {isAcrylic && (
-                  <table className="tab-popis-specs-table">
-                    <tbody>
-                      <tr>
-                        <td>Název boxu</td>
-                        <td>{product.name}</td>
-                      </tr>
-                      <tr>
-                        <td>Kompatibilita</td>
-                        <td>{product.game} Booster Box / ETB / Slab</td>
-                      </tr>
-                      <tr>
-                        <td>Tloušťka akrylu</td>
-                        <td>{product.acrylicThickness || 4} mm</td>
-                      </tr>
-                      <tr>
-                        <td>UV Ochrana</td>
-                        <td>{product.uvProtection ? 'Ano (99% ochrana)' : 'Ne'}</td>
-                      </tr>
-                      <tr>
-                        <td>Typ zavírání</td>
-                        <td>{product.closingType || 'Magnetické víko'}</td>
-                      </tr>
-                      <tr>
-                        <td>Vnitřní rozměry</td>
-                        <td>{product.innerDimensions || '142 x 125 x 78 mm'}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                )}
+                  {isAcrylic && (
+                    <table className="tab-popis-specs-table">
+                      <tbody>
+                        <tr>
+                          <td>Název boxu</td>
+                          <td>{product.name}</td>
+                        </tr>
+                        <tr>
+                          <td>Kompatibilita</td>
+                          <td>{product.game} Booster Box / ETB / Slab</td>
+                        </tr>
+                        <tr>
+                          <td>Tloušťka akrylu</td>
+                          <td>{product.acrylicThickness || 4} mm</td>
+                        </tr>
+                        <tr>
+                          <td>UV Ochrana</td>
+                          <td>{product.uvProtection ? 'Ano (99% ochrana)' : 'Ne'}</td>
+                        </tr>
+                        <tr>
+                          <td>Typ zavírání</td>
+                          <td>{product.closingType || 'Magnetické víko'}</td>
+                        </tr>
+                        <tr>
+                          <td>Vnitřní rozměry</td>
+                          <td>{product.innerDimensions || '142 x 125 x 78 mm'}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  )}
+                </div>
               </div>
             </div>
           </section>
@@ -730,7 +763,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
 
       {/* Hodnocení Section */}
       {activeTab === 'hodnoceni' && (
-        <section id="hodnoceni" className="detail-section custom-detail-panel" style={{ padding: '30px' }}>
+        <section id="hodnoceni" className="detail-section custom-detail-panel">
           <div className="reviews-dashboard">
             <div className="reviews-dashboard-score">
               <div className="reviews-average-number">4.8</div>
@@ -817,7 +850,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
 
       {/* Diskuze Section */}
       {activeTab === 'diskuse' && (
-        <section id="diskuse" className="detail-section custom-detail-panel" style={{ padding: '30px' }}>
+        <section id="diskuse" className="detail-section custom-detail-panel">
           <div className="discussions-dashboard">
             <div className="discussions-dashboard-info">
               <h3 className="detail-section-title" style={{ margin: 0 }}>Diskuze k produktu ({comments.length})</h3>

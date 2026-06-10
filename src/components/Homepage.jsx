@@ -874,7 +874,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             <img src="/Pokemon.webp" alt="Pokémon" className="category-tile-img" />
           </div>
           <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Lorcana' }); setActivePage('sealed-catalog'); }}>
-            <img src="/Lorcana.png" alt="Disney Lorcana" className="category-tile-img" />
+            <img src="/lorcana logo.webp" alt="Disney Lorcana" className="category-tile-img" />
           </div>
           <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'One Piece' }); setActivePage('sealed-catalog'); }}>
             <img src="/One piece.webp" alt="One Piece" className="category-tile-img" />
