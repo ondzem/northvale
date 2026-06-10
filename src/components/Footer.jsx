@@ -36,6 +36,7 @@ export default function Footer({ setActivePage }) {
             <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'doprava')}>Doprava a osobní odběr</li>
             <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'vop')}>Obchodní podmínky (VOP)</li>
             <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'gdpr')}>Ochrana osobních údajů (GDPR)</li>
+            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'odstoupeni')}>Odstoupení od smlouvy</li>
           </ul>
         </div>
 

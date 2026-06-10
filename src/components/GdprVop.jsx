@@ -9,6 +9,59 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
     setPrevInitialTab(initialTab);
   }
 
+  // Form states for Odstoupení od smlouvy
+  const [orderNumber, setOrderNumber] = useState('');
+  const [email, setEmail] = useState('');
+  const [bankAccount, setBankAccount] = useState('');
+  const [returnType, setReturnType] = useState('celou');
+  const [partialItemsText, setPartialItemsText] = useState('');
+  const [refundMethod, setRefundMethod] = useState('bank');
+  const [errors, setErrors] = useState({});
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submittedData, setSubmittedData] = useState(null);
+
+  const handleWithdrawalSubmit = (e) => {
+    e.preventDefault();
+    const newErrors = {};
+
+    if (!orderNumber.trim()) {
+      newErrors.orderNumber = 'Číslo objednávky je povinné.';
+    }
+    if (!email.trim()) {
+      newErrors.email = 'E-mailová adresa je povinná.';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Zadejte platnou e-mailovou adresu.';
+    }
+    if (!bankAccount.trim()) {
+      newErrors.bankAccount = 'Číslo bankovního účtu je povinné.';
+    }
+    if (returnType === 'pouze' && !partialItemsText.trim()) {
+      newErrors.partialItemsText = 'Vyberte nebo vypište zboží k vrácení.';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('cs-CZ');
+    const formattedTime = now.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+
+    setSubmittedData({
+      orderNumber,
+      email,
+      bankAccount,
+      returnType,
+      partialItemsText,
+      refundMethod,
+      date: formattedDate,
+      time: formattedTime
+    });
+    setIsSubmitted(true);
+  };
+
   return (
     <div className="container fade-in" style={{ paddingTop: '20px', paddingBottom: '60px', textAlign: 'left' }}>
       <h1 className="sr-only">Dokumenty, Obchodní podmínky a Ochrana osobních údajů - NORTHVALE s.r.o.</h1>
@@ -96,6 +149,28 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
             }}
           >
             <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Ochrana údajů (GDPR)
+          </button>
+          <button
+            onClick={() => setActiveTab('odstoupeni')}
+            className={`btn ${activeTab === 'odstoupeni' ? 'btn-primary' : ''}`}
+            style={{
+              width: '100%',
+              padding: '14px',
+              fontWeight: '800',
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              fontSize: '13px',
+              backgroundColor: activeTab === 'odstoupeni' ? 'var(--color-gold)' : 'var(--bg-secondary)',
+              color: activeTab === 'odstoupeni' ? '#000' : 'var(--text-muted)',
+              border: activeTab === 'odstoupeni' ? '1px solid var(--color-gold)' : '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> Odstoupení od smlouvy
           </button>
 
           <div style={{
@@ -470,6 +545,333 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 Odesláním objednávky nebo registrací potvrzujete seznámení se s těmito zásadami ochrany osobních údajů a jejich přijetí. Tyto zásady jsme oprávněni jednostranně měnit.
               </p>
               <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '20px' }}>V Holicích, dne 9. června 2026</p>
+            </div>
+          )}
+
+          {activeTab === 'odstoupeni' && (
+            <div>
+              <h2 style={{ fontSize: '24px', fontWeight: '800', margin: '0 0 20px 0', color: 'var(--text-main)', fontFamily: 'var(--font-heading)' }}>
+                ODSTOUPENÍ OD SMLOUVY (ONLINE FORMULÁŘ)
+              </h2>
+              <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginBottom: '24px' }}>
+                Jako spotřebitel máte právo odstoupit od kupní smlouvy uzavřené na našem e-shopu <strong>northvaletcg.eu</strong> bez udání důvodu, a to do <strong>14 dnů</strong> od převzetí zboží.
+              </p>
+              <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginBottom: '24px' }}>
+                V souladu s novou legislativou platnou od 19. června 2026 (tzv. tlačítková novela 2.0) jsme pro vás proces odstoupení maximálně zjednodušili. Nyní již nemusíte tisknout, ručně vyplňovat a posílat papírové formuláře. Vše vyřídíte elektronicky přímo na této stránce.
+              </p>
+
+              <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.06)', margin: '24px 0' }} />
+
+              <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-gold)', margin: '24px 0 12px 0' }}>Jak postupovat pro odstoupení od smlouvy:</h3>
+              <ol style={{ paddingLeft: '20px', fontSize: '13px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
+                <li><strong>Vyplňte elektronický formulář níže</strong> (zadejte číslo objednávky, váš e-mail a vyberte zboží, které chcete vrátit).</li>
+                <li><strong>Odešlete formulář</strong> kliknutím na tlačítko <strong>„Odstoupit od smlouvy“</strong>.</li>
+                <li><strong>Ihned obdržíte e-mail s potvrzením</strong> o přijetí vašeho odstoupení, které obsahuje přesné datum, čas a rekapitulaci vráceného zboží.</li>
+                <li><strong>Zboží odešlete</strong> bez zbytečného odkladu (nejpozději do 14 dnů od odeslání formuláře) na naši adresu: <br /><strong>NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice</strong>.</li>
+              </ol>
+
+              <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.06)', margin: '24px 0' }} />
+
+              <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-gold)', margin: '24px 0 12px 0' }}>
+                ELEKTRONICKÝ FORMULÁŘ PRO ODSTOUPENÍ
+              </h3>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: '24px' }}>
+                (Tento formulář slouží pro rychlé a plně elektronické odeslání oznámení o odstoupení od kupní smlouvy)
+              </p>
+
+              {isSubmitted ? (
+                <div style={{
+                  border: '1px solid var(--color-gold)',
+                  backgroundColor: 'rgba(245, 158, 11, 0.02)',
+                  padding: '24px',
+                  borderRadius: 'var(--radius-lg)',
+                  marginBottom: '24px',
+                  boxSizing: 'border-box'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                    <span style={{ fontSize: '24px', color: 'var(--color-gold)' }}>✓</span>
+                    <h4 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-gold)', margin: 0 }}>
+                      Odstoupení bylo úspěšně odesláno!
+                    </h4>
+                  </div>
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '20px' }}>
+                    Vaše oznámení o odstoupení k objednávce <strong>#{submittedData.orderNumber}</strong> bylo zaregistrováno dne <strong>{submittedData.date} v {submittedData.time}</strong>. Potvrzující e-mail byl odeslán na adresu <strong>{submittedData.email}</strong>.
+                  </p>
+
+                  <div style={{
+                    backgroundColor: 'var(--bg-page)',
+                    border: '1px solid var(--border-light)',
+                    padding: '16px',
+                    borderRadius: 'var(--radius-md)',
+                    fontSize: '13px',
+                    lineHeight: '1.6',
+                    marginBottom: '20px'
+                  }}>
+                    <div style={{ fontWeight: '700', marginBottom: '8px', color: 'var(--text-main)' }}>Rekapitulace oznámení:</div>
+                    <div><strong>Číslo objednávky:</strong> {submittedData.orderNumber}</div>
+                    <div><strong>E-mail:</strong> {submittedData.email}</div>
+                    <div><strong>Číslo bankovního účtu:</strong> {submittedData.bankAccount}</div>
+                    <div><strong>Vrácené zboží:</strong> {submittedData.returnType === 'celou' ? 'Celá objednávka' : `Pouze vybrané zboží: ${submittedData.partialItemsText}`}</div>
+                    <div><strong>Způsob vrácení peněz:</strong> {submittedData.refundMethod === 'bank' ? 'Převod na bankovní účet' : 'Store Credit'}</div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setIsSubmitted(false);
+                      setOrderNumber('');
+                      setEmail('');
+                      setBankAccount('');
+                      setReturnType('celou');
+                      setPartialItemsText('');
+                      setRefundMethod('bank');
+                      setErrors({});
+                    }}
+                    className="btn btn-secondary"
+                    style={{ padding: '10px 20px', fontSize: '12px', fontWeight: '800', cursor: 'pointer' }}
+                  >
+                    Odeslat další oznámení
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleWithdrawalSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', backgroundColor: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--border-light)', padding: '24px', borderRadius: 'var(--radius-lg)' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: '800', margin: '0 0 4px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '8px', color: 'var(--text-main)', fontFamily: 'var(--font-heading)' }}>1. Identifikace nákupu</h4>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: '700' }}>Číslo objednávky:</label>
+                        <input
+                          type="text"
+                          value={orderNumber}
+                          onChange={(e) => setOrderNumber(e.target.value)}
+                          placeholder="např. 20260001"
+                          style={{
+                            backgroundColor: 'var(--bg-page)',
+                            border: errors.orderNumber ? '1px solid #ef4444' : '1px solid var(--border-light)',
+                            padding: '10px 14px',
+                            borderRadius: 'var(--radius-sm)',
+                            fontSize: '13px',
+                            color: 'var(--text-main)',
+                            outline: 'none'
+                          }}
+                        />
+                        {errors.orderNumber && <span style={{ color: '#ef4444', fontSize: '11px', marginTop: '2px' }}>{errors.orderNumber}</span>}
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: '700' }}>E-mailová adresa (použitá při objednávce):</label>
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="např. jan.novak@email.cz"
+                          style={{
+                            backgroundColor: 'var(--bg-page)',
+                            border: errors.email ? '1px solid #ef4444' : '1px solid var(--border-light)',
+                            padding: '10px 14px',
+                            borderRadius: 'var(--radius-sm)',
+                            fontSize: '13px',
+                            color: 'var(--text-main)',
+                            outline: 'none'
+                          }}
+                        />
+                        {errors.email && <span style={{ color: '#ef4444', fontSize: '11px', marginTop: '2px' }}>{errors.email}</span>}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <label style={{ fontSize: '12px', fontWeight: '700' }}>Číslo bankovního účtu pro vrácení peněz:</label>
+                      <input
+                        type="text"
+                        value={bankAccount}
+                        onChange={(e) => setBankAccount(e.target.value)}
+                        placeholder="např. 123456789 / 0100"
+                        style={{
+                          backgroundColor: 'var(--bg-page)',
+                          border: errors.bankAccount ? '1px solid #ef4444' : '1px solid var(--border-light)',
+                          padding: '10px 14px',
+                          borderRadius: 'var(--radius-sm)',
+                          fontSize: '13px',
+                          color: 'var(--text-main)',
+                          outline: 'none'
+                        }}
+                      />
+                      {errors.bankAccount && <span style={{ color: '#ef4444', fontSize: '11px', marginTop: '2px' }}>{errors.bankAccount}</span>}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', backgroundColor: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--border-light)', padding: '24px', borderRadius: 'var(--radius-lg)' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: '800', margin: '0 0 4px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '8px', color: 'var(--text-main)', fontFamily: 'var(--font-heading)' }}>2. Výběr zboží k vrácení</h4>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <label style={{
+                        padding: '12px 16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        cursor: 'pointer',
+                        border: returnType === 'celou' ? '1px solid var(--color-gold)' : '1px solid var(--border-light)',
+                        borderRadius: 'var(--radius-md)',
+                        backgroundColor: returnType === 'celou' ? 'rgba(245, 158, 11, 0.03)' : 'transparent',
+                        transition: 'all 0.2s'
+                      }}>
+                        <input
+                          type="radio"
+                          name="returnType"
+                          checked={returnType === 'celou'}
+                          onChange={() => setReturnType('celou')}
+                          style={{ cursor: 'pointer' }}
+                        />
+                        <div style={{ textAlign: 'left' }}>
+                          <span style={{ fontSize: '13px', fontWeight: '700', display: 'block', color: 'var(--text-main)' }}>Celou objednávku</span>
+                          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Všechno zboží z objednávky</span>
+                        </div>
+                      </label>
+
+                      <label style={{
+                        padding: '12px 16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        cursor: 'pointer',
+                        border: returnType === 'pouze' ? '1px solid var(--color-gold)' : '1px solid var(--border-light)',
+                        borderRadius: 'var(--radius-md)',
+                        backgroundColor: returnType === 'pouze' ? 'rgba(245, 158, 11, 0.03)' : 'transparent',
+                        transition: 'all 0.2s'
+                      }}>
+                        <input
+                          type="radio"
+                          name="returnType"
+                          checked={returnType === 'pouze'}
+                          onChange={() => setReturnType('pouze')}
+                          style={{ cursor: 'pointer' }}
+                        />
+                        <div style={{ textAlign: 'left' }}>
+                          <span style={{ fontSize: '13px', fontWeight: '700', display: 'block', color: 'var(--text-main)' }}>Pouze vybrané zboží z objednávky</span>
+                          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Specifikujte konkrétní produkty níže</span>
+                        </div>
+                      </label>
+                    </div>
+
+                    {returnType === 'pouze' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: '700' }}>Vypište názvy produktů a počet kusů:</label>
+                        <textarea
+                          value={partialItemsText}
+                          onChange={(e) => setPartialItemsText(e.target.value)}
+                          placeholder="např. 2x Pokémon Scarlet & Violet Booster Pack"
+                          style={{
+                            width: '100%',
+                            minHeight: '80px',
+                            backgroundColor: 'var(--bg-page)',
+                            border: errors.partialItemsText ? '1px solid #ef4444' : '1px solid var(--border-light)',
+                            padding: '10px 14px',
+                            borderRadius: 'var(--radius-sm)',
+                            fontSize: '13px',
+                            color: 'var(--text-main)',
+                            outline: 'none',
+                            resize: 'vertical',
+                            fontFamily: 'inherit'
+                          }}
+                        />
+                        {errors.partialItemsText && <span style={{ color: '#ef4444', fontSize: '11px', marginTop: '2px' }}>{errors.partialItemsText}</span>}
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', backgroundColor: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--border-light)', padding: '24px', borderRadius: 'var(--radius-lg)' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: '800', margin: '0 0 4px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '8px', color: 'var(--text-main)', fontFamily: 'var(--font-heading)' }}>3. Způsob vrácení peněžních prostředků</h4>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <label style={{
+                        padding: '12px 16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        cursor: 'pointer',
+                        border: refundMethod === 'bank' ? '1px solid var(--color-gold)' : '1px solid var(--border-light)',
+                        borderRadius: 'var(--radius-md)',
+                        backgroundColor: refundMethod === 'bank' ? 'rgba(245, 158, 11, 0.03)' : 'transparent',
+                        transition: 'all 0.2s'
+                      }}>
+                        <input
+                          type="radio"
+                          name="refundMethod"
+                          checked={refundMethod === 'bank'}
+                          onChange={() => setRefundMethod('bank')}
+                          style={{ cursor: 'pointer' }}
+                        />
+                        <div style={{ textAlign: 'left' }}>
+                          <span style={{ fontSize: '13px', fontWeight: '700', display: 'block', color: 'var(--text-main)' }}>Převodem na bankovní účet</span>
+                          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Standardní možnost vrácení peněz</span>
+                        </div>
+                      </label>
+
+                      <label style={{
+                        padding: '12px 16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        cursor: 'pointer',
+                        border: refundMethod === 'credit' ? '1px solid var(--color-gold)' : '1px solid var(--border-light)',
+                        borderRadius: 'var(--radius-md)',
+                        backgroundColor: refundMethod === 'credit' ? 'rgba(245, 158, 11, 0.03)' : 'transparent',
+                        transition: 'all 0.2s'
+                      }}>
+                        <input
+                          type="radio"
+                          name="refundMethod"
+                          checked={refundMethod === 'credit'}
+                          onChange={() => setRefundMethod('credit')}
+                          style={{ cursor: 'pointer' }}
+                        />
+                        <div style={{ textAlign: 'left' }}>
+                          <span style={{ fontSize: '13px', fontWeight: '700', display: 'block', color: 'var(--text-main)' }}>Formou Store Kreditu na můj uživatelský účet</span>
+                          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Pro registrované zákazníky; připíše se ihned po kontrole karet a lze využít na další nákupy</span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    border: '1px dashed rgba(245, 158, 11, 0.25)',
+                    backgroundColor: 'rgba(245, 158, 11, 0.02)',
+                    padding: '20px',
+                    borderRadius: '8px',
+                    fontSize: '12.5px',
+                    color: 'var(--text-muted)',
+                    lineHeight: '1.6'
+                  }}>
+                    <h4 style={{ fontSize: '13px', fontWeight: '800', color: 'var(--color-gold)', margin: '0 0 10px 0', letterSpacing: '0.5px' }}>
+                      DŮLEŽITÉ UPOZORNĚNÍ PRO SBĚRATELE A INVESTORY:
+                    </h4>
+                    <p style={{ margin: '0 0 10px 0' }}>
+                      Berte prosím na vědomí, že u <strong>zapečetěných produktů</strong> (např. Booster Boxy, Elite Trainer Boxy, speciální dárkové sety, nebo jednotlivé Boostery) dochází porušením originální ochranné fólie (tzv. shrink wrap s logy výrobce) k nevratnému poškození sběratelské a investiční hodnoty.
+                    </p>
+                    <p style={{ margin: 0 }}>
+                      Zboží se tímto okamžikem stává rozbaleným a zvážitelným (ztrácí záruku neotevřenosti). Pokud vrátíte zboží s porušenou fólií, budeme nuceni uplatnit nárok na náhradu snížení hodnoty zboží v souladu s § 1833 občanského zákoníku. Tato náhrada může činit <strong>30 až 50 % z kupní ceny zboží</strong> a bude odečtena od vrácené částky. U kusových karet (Singles) nesmí dojít k poškození stavu karty (např. poškrábání, ohnutí rohů či otlačení od kroužkových alb).
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+                    <button type="submit" className="btn btn-primary" style={{ padding: '14px', width: '100%', fontWeight: '800', fontSize: '14px', cursor: 'pointer' }}>
+                      ODSTOUPIT OD SMLOUVY
+                    </button>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                      (Kliknutím na toto tlačítko odešlete vyplněné odstoupení od smlouvy prodávajícímu. Odesláním se zahajuje 14denní lhůta pro vrácení fyzického zboží.)
+                    </span>
+                  </div>
+                </form>
+              )}
+
+              <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.06)', margin: '24px 0' }} />
+
+              <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-gold)', margin: '24px 0 12px 0' }}>Co se stane po kliknutí na tlačítko?</h3>
+              <ol style={{ paddingLeft: '20px', fontSize: '13px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <li><strong>Potvrzení do e-mailu:</strong> Náš systém vám v souladu se zákonem okamžitě odešle automatické potvrzení o přijetí odstoupení s časovým razítkem.</li>
+                <li><strong>Odeslání zboží prodejci:</strong> Zboží bezpečně zabalte (pro kusové karty doporučujeme použít penny sleeve a toploader, pro zapečetěné krabice pevnou kartonovou krabici a bublinkovou fólii, aby nedošlo k poškození během dopravy) a odešlete na naši adresu: <strong>NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice</strong>.</li>
+                <li><strong>Kontrola a vrácení peněz:</strong> Jakmile zásilku převezmeme, zkontrolujeme stav karet či neporušenost fólií u sealed produktů. Nejpozději do 14 dnů od převzetí vráceného zboží (nebo od okamžiku, kdy nám prokážete, že bylo zboží odesláno) vám vrátíme peníze na bankovní účet nebo připíšeme Store Credit.</li>
+              </ol>
             </div>
           )}
         </main>

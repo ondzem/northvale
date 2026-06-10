@@ -144,6 +144,8 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
 export default function App() {
   const initialUrlState = parseUrlToState();
 
+  const toastTimeoutRef = useRef(null);
+
   // Navigation & Page State
   const [activePage, setActivePage] = useState(initialUrlState.page);
   const [gdprVopTab, setGdprVopTab] = useState(initialUrlState.tab);
@@ -323,6 +325,8 @@ export default function App() {
           title = 'Doprava a platba - Northvaletcg.eu';
         } else if (gdprVopTab === 'vop') {
           title = 'Obchodní podmínky (VOP) - Northvaletcg.eu';
+        } else if (gdprVopTab === 'odstoupeni') {
+          title = 'Odstoupení od smlouvy - Northvaletcg.eu';
         } else {
           title = 'Ochrana osobních údajů (GDPR) - Northvaletcg.eu';
         }
@@ -344,11 +348,28 @@ export default function App() {
   }, [activePage, selectedProductId, gdprVopTab]);
 
   // Custom Toast helper
-  const showToast = (message, type = 'success') => {
-    setToast({ message, visible: true, type });
-    setTimeout(() => {
+  const showToast = (message, type = 'success', title = '') => {
+    // Determine title if not provided
+    let defaultTitle = 'Oznámení';
+    if (type === 'success') {
+      if (message.includes('košík') || message.includes('přidáno')) {
+        defaultTitle = 'Zboží přidáno do košíku';
+      } else {
+        defaultTitle = 'Úspěšná operace';
+      }
+    } else if (type === 'error') {
+      defaultTitle = 'Nastala chyba';
+    }
+
+    setToast({ message, visible: true, type, title: title || defaultTitle });
+    
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    
+    toastTimeoutRef.current = setTimeout(() => {
       setToast(prev => ({ ...prev, visible: false }));
-    }, 3500);
+    }, 4000);
   };
 
   // User State (Mock DB)
@@ -615,12 +636,64 @@ export default function App() {
       />
 
       {/* Premium Custom Toast Banner */}
-      {toast.visible && (
-        <div style={styles.toast} className="glass-panel">
-          <span style={styles.toastIcon}>✓</span>
-          <span style={styles.toastMessage}>{toast.message}</span>
-        </div>
-      )}
+      {toast.visible && (() => {
+        const cartMatch = toast.message.match(/"([^"]+)"\s*\((\d+)\s*ks\)\s*přidáno do košíku\./);
+        const isCartAddition = !!cartMatch;
+        const productName = isCartAddition ? cartMatch[1] : '';
+        const quantity = isCartAddition ? cartMatch[2] : '';
+
+        return (
+          <div className="premium-toast">
+            <div className="premium-toast-header">
+              <div className="premium-toast-icon-wrapper">
+                {isCartAddition ? (
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                )}
+              </div>
+              <div className="premium-toast-title-container">
+                <span className="premium-toast-title">
+                  {isCartAddition ? 'Košík aktualizován' : (toast.title || 'Oznámení')}
+                </span>
+                <span className="premium-toast-body">
+                  {isCartAddition ? (
+                    <>
+                      Úspěšně jste přidali <strong>{productName}</strong> ({quantity} ks) do košíku.
+                    </>
+                  ) : (
+                    toast.message
+                  )}
+                </span>
+              </div>
+              <button 
+                className="premium-toast-close" 
+                onClick={() => setToast(prev => ({ ...prev, visible: false }))}
+                aria-label="Zavřít"
+              >
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+            
+            {isCartAddition && (
+              <div className="premium-toast-action-area">
+                <button 
+                  className="premium-toast-btn"
+                  onClick={() => {
+                    setActivePage('cart');
+                    setToast(prev => ({ ...prev, visible: false }));
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                  Zobrazit košík
+                </button>
+              </div>
+            )}
+            
+            <div className="premium-toast-progress" />
+          </div>
+        );
+      })()}
     </div>
   );
 }
