@@ -243,10 +243,6 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
           Domů
         </span>
         <span className="breadcrumb-separator">/</span>
-        <span className="breadcrumb-item" onClick={() => { if (setFilters) setFilters({}); setActivePage('singles-catalog'); }}>
-          Kusové karty
-        </span>
-        <span className="breadcrumb-separator">/</span>
         <span 
           className="breadcrumb-item" 
           onClick={() => { 
@@ -514,7 +510,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               <path d="M17 8h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2v4l-4-4H9a1.9 1.9 0 0 1-2-2" />
               <path d="M3 14V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-4 4v-4H3z" />
             </svg>
-            <span>Diskuse</span>
+            <span>Diskuze</span>
           </button>
           <button 
             className={`product-tab-btn ${activeTab === 'souvisejici' ? 'active' : ''}`} 
@@ -543,57 +539,174 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
 
     <div className="container">
       {/* Popis Section */}
-      {activeTab === 'popis' && (
-        <section id="popis" className="detail-section custom-detail-panel" style={{ padding: '30px' }}>
-          <h3 className="detail-section-title">Popis produktu</h3>
-          <div className="tab-popis-layout">
-            <div className="tab-popis-text">
-              <p>{product.desc}</p>
-              {product.type === 'single' && (
-                <p style={{ marginTop: '16px' }}>
-                  Tato karta pochází ze série <strong>{product.game} - {product.edition}</strong>. Je ideálním doplňkem do vašeho herního balíčku nebo do sbírky. Každá karta je u nás pečlivě kontrolována a balena v souladu s nejvyššími sběratelskými standardy, aby se k vám dostala v bezvadném stavu.
-                </p>
-              )}
+      {activeTab === 'popis' && (() => {
+        const isSlab = product.type === 'slab';
+        
+        // Helper formatting
+        const foilText = foil ? 'Foil' : 'Non-Foil';
+        const foilLongText = foil ? 'Foil (Třpytivá) ✨' : 'Non-Foil (Matná)';
+        const langText = lang === 'JP' ? 'Japonština 🇯🇵' : lang === 'CN' ? 'Čínština 🇨🇳' : 'Angličtina 🇬🇧';
+        const conditionFull = condition === 'NM' ? 'Near Mint (NM)' : condition === 'EX' ? 'Excellent (EX)' : condition === 'GD' ? 'Good (GD)' : condition === 'LP' ? 'Light Played (LP)' : condition === 'PL' ? 'Played (PL)' : 'Poor (PO)';
+        
+        // Mocked details based on card id
+        const yearReleased = product.id.includes('charizard') ? 2023 : product.id.includes('pikachu') ? 2020 : product.id.includes('umbreon') ? 2021 : product.id.includes('giratina') ? 2022 : product.id.includes('rayquaza') ? 2021 : 2024;
+        const setCode = product.id.includes('charizard') ? 'OBF' : product.id.includes('pikachu') ? 'VIV' : product.id.includes('umbreon') ? 'EVS' : product.id.includes('giratina') ? 'LOR' : product.id.includes('rayquaza') ? 'EVS' : 'LRC';
+        const elementColor = product.game === 'Pokémon' ? (product.id.includes('charizard') ? 'Fire' : product.id.includes('pikachu') ? 'Lightning' : product.id.includes('umbreon') ? 'Darkness' : product.id.includes('giratina') ? 'Psychic' : product.id.includes('rayquaza') ? 'Dragon' : 'Grass') : (product.game === 'Lorcana' ? 'Amethyst' : 'Purple');
+        const stageLevel = product.id.includes('vmax') ? 'VMAX' : product.id.includes('ex') ? 'ex' : 'Basic';
+        const illustrator = product.id.includes('charizard') ? 'Mitsuhiro Arita' : product.id.includes('pikachu') ? 'Kiyotaka Oshiyama' : 'Teeziro';
+
+        return (
+          <section id="popis" className="detail-section custom-detail-panel" style={{ padding: '30px' }}>
+            <h3 className="detail-section-title">Popis produktu</h3>
+            <div className="tab-popis-layout">
+              <div className="tab-popis-text">
+                <p>{product.desc}</p>
+                
+                {!isSlab ? (
+                  <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <p style={{ lineHeight: '1.6', fontSize: '14px', margin: 0 }}>
+                      <strong>{product.name}</strong> ze sady <strong>{product.edition}</strong> je skvělým přírůstkem do Vaší sbírky i herního balíčku. Tato karta je v provedení <strong>{foilText}</strong> a pochází z oficiální distribuce.
+                    </p>
+                    <ul style={{ paddingLeft: '20px', margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: 'var(--text-muted)' }}>
+                      <li><strong style={{ color: 'var(--text-main)' }}>Stav karty:</strong> Karta je v našem skladu pečlivě uchovávána a odpovídá stavu <strong>{conditionFull}</strong>.</li>
+                      <li><strong style={{ color: 'var(--text-main)' }}>Bezpečné doručení:</strong> Kartu Vám odešleme v penny sleeve obalu hlavou dolů, pevném toploaderu s vytahovacím poutkem a zajistíme ji mezi dva silné kartony papírovou malířskou páskou. Žádné zbytky lepidla na plastech.</li>
+                    </ul>
+                  </div>
+                ) : (
+                  <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <p style={{ lineHeight: '1.6', fontSize: '14px', margin: 0 }}>
+                      Investiční a sběratelská karta <strong>{product.name}</strong> ze sady <strong>{product.edition}</strong> ohodnocená prestižní společností <strong>{product.company}</strong> s výslednou známkou <strong>{product.grade} ({product.grade === 10 ? 'Gem Mint' : 'Gem Mint'})</strong>.
+                    </p>
+                    <ul style={{ paddingLeft: '20px', margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: 'var(--text-muted)' }}>
+                      <li><strong style={{ color: 'var(--text-main)' }}>Certifikace:</strong> Pravost a kvalitu této karty si můžete ověřit v oficiálním registru pod číslem <strong>{product.certNumber}</strong>.</li>
+                      <li><strong style={{ color: 'var(--text-main)' }}>Ochrana:</strong> Plastové pouzdro (slab) chrání kartu před prachem, vlhkostí a mechanickým poškozením. Zásilku balíme do silné vrstvy bublinkové fólie a pevné kartonové krabice.</li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+              <div>
+                {!isSlab ? (
+                  <table className="tab-popis-specs-table">
+                    <tbody>
+                      <tr>
+                        <td>Značka / Hra</td>
+                        <td>{product.game}</td>
+                      </tr>
+                      <tr>
+                        <td>Edice / Sada</td>
+                        <td>{product.edition}</td>
+                      </tr>
+                      <tr>
+                        <td>Zkratka edice</td>
+                        <td>{setCode}</td>
+                      </tr>
+                      {product.rarity && (
+                        <tr>
+                          <td>Rarita</td>
+                          <td>{product.rarity}</td>
+                        </tr>
+                      )}
+                      <tr>
+                        <td>Číslo karty</td>
+                        <td>{getCardCode(product)}</td>
+                      </tr>
+                      <tr>
+                        <td>Stav karty</td>
+                        <td>{conditionFull}</td>
+                      </tr>
+                      <tr>
+                        <td>Jazyk</td>
+                        <td>{langText}</td>
+                      </tr>
+                      <tr>
+                        <td>Provedení (Finish)</td>
+                        <td>{foilLongText}</td>
+                      </tr>
+                      <tr>
+                        <td>Typ / Element</td>
+                        <td>{elementColor}</td>
+                      </tr>
+                      {product.game === 'Pokémon' && (
+                        <tr>
+                          <td>Stádium vývoje</td>
+                          <td>{stageLevel}</td>
+                        </tr>
+                      )}
+                      <tr>
+                        <td>Ilustrátor</td>
+                        <td>{illustrator}</td>
+                      </tr>
+                      <tr>
+                        <td>Rok vydání</td>
+                        <td>{yearReleased}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                ) : (
+                  <table className="tab-popis-specs-table">
+                    <tbody>
+                      <tr>
+                        <td>Značka / Hra</td>
+                        <td>{product.game}</td>
+                      </tr>
+                      <tr>
+                        <td>Edice / Sada</td>
+                        <td>{product.edition}</td>
+                      </tr>
+                      {product.rarity && (
+                        <tr>
+                          <td>Rarita</td>
+                          <td>{product.rarity}</td>
+                        </tr>
+                      )}
+                      <tr>
+                        <td>Jazyk</td>
+                        <td>{langText}</td>
+                      </tr>
+                      <tr>
+                        <td>Gradingová firma</td>
+                        <td><strong>{product.company}</strong></td>
+                      </tr>
+                      <tr>
+                        <td>Výsledná známka</td>
+                        <td><strong>{product.grade} ({product.grade === 10 ? 'Gem Mint' : 'Gem Mint'})</strong></td>
+                      </tr>
+                      <tr>
+                        <td>Certifikační číslo</td>
+                        <td><code>{product.certNumber}</code></td>
+                      </tr>
+                      {product.company === 'Beckett' && (
+                        <>
+                          <tr>
+                            <td>Centering (Vycentrování)</td>
+                            <td>9.5</td>
+                          </tr>
+                          <tr>
+                            <td>Corners (Rohy)</td>
+                            <td>9.5</td>
+                          </tr>
+                          <tr>
+                            <td>Edges (Hrany)</td>
+                            <td>9.5</td>
+                          </tr>
+                          <tr>
+                            <td>Surface (Povrch)</td>
+                            <td>10</td>
+                          </tr>
+                        </>
+                      )}
+                      <tr>
+                        <td>Certifikovaný podpis</td>
+                        <td>Ne</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                )}
+              </div>
             </div>
-            <div>
-              <table className="tab-popis-specs-table">
-                <tbody>
-                  <tr>
-                    <td>Značka</td>
-                    <td>{product.game}</td>
-                  </tr>
-                  <tr>
-                    <td>Edice</td>
-                    <td>{product.edition}</td>
-                  </tr>
-                  {product.rarity && (
-                    <tr>
-                      <td>Rarita</td>
-                      <td>{product.rarity}</td>
-                    </tr>
-                  )}
-                  <tr>
-                    <td>Kód karty</td>
-                    <td>{getCardCode(product)}</td>
-                  </tr>
-                  <tr>
-                    <td>Stav karty</td>
-                    <td>{condition}</td>
-                  </tr>
-                  <tr>
-                    <td>Jazyk</td>
-                    <td>{lang === 'JP' ? 'Japonština 🇯🇵' : 'Angličtina 🇬🇧'}</td>
-                  </tr>
-                  <tr>
-                    <td>Úprava</td>
-                    <td>{foil ? 'Foil (Třpytivá) ✨' : 'Non-Foil (Matná)'}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      )}
+          </section>
+        );
+      })()}
 
       {/* Hodnocení Section */}
       {activeTab === 'hodnoceni' && (
@@ -682,7 +795,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
         </section>
       )}
 
-      {/* Diskuse Section */}
+      {/* Diskuze Section */}
       {activeTab === 'diskuse' && (
         <section id="diskuse" className="detail-section custom-detail-panel" style={{ padding: '30px' }}>
           <div className="discussions-dashboard">

@@ -69,7 +69,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
   };
 
   return (
-    <header style={styles.header}>
+    <header style={styles.header} className="main-navbar">
       {!isMobile ? (
         <>
           {/* 1. TOP BAR (Zákaznická pomoc, Čeština, sociální sítě) */}
@@ -79,12 +79,12 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 Potřebujete poradit? <strong style={styles.faqLink}>Podívejte se na naše nejčastější dotazy</strong>
               </div>
               <div style={styles.topBarRight}>
-                <div 
+                <div
                   style={styles.langContainer}
                   onMouseLeave={() => setLangDropdownOpen(false)}
                 >
-                  <div 
-                    style={styles.langSelector} 
+                  <div
+                    style={styles.langSelector}
                     onClick={() => setLangDropdownOpen(!langDropdownOpen)}
                   >
                     {lang === 'CZ' ? (
@@ -96,13 +96,13 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       <>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" style={styles.flagIcon}>
                           <clipPath id="s">
-                            <path d="M0,0 v30 h60 v-30 z"/>
+                            <path d="M0,0 v30 h60 v-30 z" />
                           </clipPath>
-                          <path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
-                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" clipPath="url(#s)"/>
-                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="4" clipPath="url(#s)"/>
-                          <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10"/>
-                          <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6"/>
+                          <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
+                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" clipPath="url(#s)" />
+                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="4" clipPath="url(#s)" />
+                          <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10" />
+                          <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6" />
                         </svg>
                         <span>English</span>
                       </>
@@ -112,7 +112,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
 
                   {langDropdownOpen && (
                     <div style={styles.langDropdown} className="glass-panel">
-                      <div 
+                      <div
                         style={{
                           ...styles.langOption,
                           backgroundColor: lang === 'CZ' ? 'rgba(255,255,255,0.05)' : 'transparent',
@@ -122,7 +122,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                         <img src="/cz ikona.png" alt="CZ" style={styles.flagIcon} />
                         <span>Čeština</span>
                       </div>
-                      <div 
+                      <div
                         style={{
                           ...styles.langOption,
                           backgroundColor: lang === 'EN' ? 'rgba(255,255,255,0.05)' : 'transparent',
@@ -131,28 +131,28 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" style={styles.flagIcon}>
                           <clipPath id="s2">
-                            <path d="M0,0 v30 h60 v-30 z"/>
+                            <path d="M0,0 v30 h60 v-30 z" />
                           </clipPath>
-                          <path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
-                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" clipPath="url(#s2)"/>
-                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="4" clipPath="url(#s2)"/>
-                          <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10"/>
-                          <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6"/>
+                          <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
+                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" clipPath="url(#s2)" />
+                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="4" clipPath="url(#s2)" />
+                          <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10" />
+                          <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6" />
                         </svg>
                         <span>English</span>
                       </div>
                     </div>
                   )}
                 </div>
-                
+
                 <span style={styles.topBarDivider}>|</span>
-                
+
                 <span style={styles.contactLink} onClick={() => setActivePage('support')}>
                   Kontakt
                 </span>
-                
+
                 <span style={styles.topBarDivider}>|</span>
-                
+
                 <div style={styles.socials}>
                   <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
                     <img src="/instagram.png" alt="Instagram" style={styles.socialIcon} />
@@ -173,7 +173,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
             <div className="container" style={styles.middleBarContent}>
               {/* Logo */}
               <div style={styles.logoContainer} onClick={() => { setFilters({}); setActivePage('home'); }}>
-                <img src="/Northvale Logo.webp" alt="NORTHVALE TCG" style={styles.logoImg} />
+                <img src="/logo s popisem.webp" alt="NORTHVALE TCG" style={styles.logoImg} />
               </div>
 
               {/* Search bar */}
@@ -196,17 +196,17 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   <span style={styles.actionLabel}>Oblíbené</span>
                 </button>
 
-                <button 
-                  className="nav-action-btn" 
-                  onClick={() => isLoggedIn ? setActivePage('profile') : onOpenLogin()} 
+                <button
+                  className="nav-action-btn"
+                  onClick={() => isLoggedIn ? setActivePage('profile') : onOpenLogin()}
                   title={isLoggedIn ? "Můj účet" : "Přihlásit se"}
                 >
                   {isLoggedIn && user.avatar && user.avatar !== '/user.png' ? (
-                    <img 
-                      src={user.avatar} 
-                      alt="Profil" 
-                      className="no-invert-avatar" 
-                      style={{ borderRadius: '50%', filter: 'none', width: '22px', height: '22px', objectFit: 'cover' }} 
+                    <img
+                      src={user.avatar}
+                      alt="Profil"
+                      className="no-invert-avatar"
+                      style={{ borderRadius: '50%', filter: 'none', width: '22px', height: '22px', objectFit: 'cover' }}
                     />
                   ) : (
                     <img src="/user.png" alt="Profil" />
@@ -234,12 +234,12 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
             <div className="container" style={styles.bottomBarContent}>
               <div style={styles.categoriesList}>
                 {/* 1. Pokémon Dropdown */}
-                <div 
+                <div
                   style={styles.dropdownContainer}
                   onMouseEnter={() => setActiveDropdown('pokemon')}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button style={{ ...styles.categoryItem, paddingLeft: 0 }} onClick={() => handleCategoryClick('singles', { game: 'Pokémon' })}>
+                  <button style={{ ...styles.categoryItem, paddingLeft: 0 }} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon' })}>
                     Pokémon <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
                   </button>
                   {activeDropdown === 'pokemon' && (
@@ -248,54 +248,46 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                         <div style={styles.dropdownColumn}>
                           <h4 style={styles.dropdownColHeading}>ENG (Anglické)</h4>
                           <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'EN', type: 'Booster Box' })}>Booster boxy</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'EN', type: 'ETB' })}>Elite trainer boxy (ETB)</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'EN', type: 'Booster Bundle' })}>Booster bundly</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'EN', type: 'Elite Trainer Box' })}>Elite trainer boxy</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'EN', type: 'Booster Bundle' })}>Bundles</span>
                           <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'EN', type: 'Booster' })}>Boostery</span>
                           <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'EN', type: 'Special Collection' })}>Speciální kolekce</span>
                           <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'EN', type: 'Other' })}>Ostatní</span>
                         </div>
                         <div style={styles.dropdownColumn}>
-                          <h4 style={styles.dropdownColHeading} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'JP' })}>JPN (Japonské)</h4>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'JP' })}>Všechny JPN produkty</span>
-                          
-                          <h4 style={{ ...styles.dropdownColHeading, marginTop: '16px' }} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'CN' })}>CHN (Čínské)</h4>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'CN' })}>Všechny CHN produkty</span>
+                          <h4 style={styles.dropdownColHeading}>JPN (Japonské)</h4>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'JP', type: 'Booster Box' })}>Booster boxy</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'JP', type: 'Booster' })}>Boostery</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'JP', type: 'Special Collection' })}>Speciální kolekce</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'JP', type: 'Other' })}>Ostatní</span>
                         </div>
-                        <div style={{ ...styles.dropdownColumn, gridColumn: 'span 2' }}>
-                          <h4 style={styles.dropdownColHeading}>Investiční</h4>
-                          <p style={styles.investDesc}>
-                            V této sekci najdete produkty starších i moderních setů. Ty pak pečlivě prohlížíme a vybíráme ty v TOP stavech vhodných do sbírky.
-                          </p>
-                          <div style={styles.investLinks}>
-                            <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', investment: true, type: 'Booster Box' })}>Booster boxy</span>
-                            <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', investment: true, type: 'ETB' })}>ETB</span>
-                            <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', investment: true, type: 'Sealed Case' })}>Sealed case</span>
-                            <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', investment: true, type: 'Other' })}>Ostatní</span>
-                          </div>
+                        <div style={styles.dropdownColumn}>
+                          <h4 style={styles.dropdownColHeading}>CHN (Čínské)</h4>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'CN', type: 'Booster Box' })}>Booster boxy</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', lang: 'CN', type: 'Booster' })}>Boostery</span>
                         </div>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* 2. Magic the Gathering Dropdown */}
-                <div 
+                {/* 2. Disney Lorcana Dropdown */}
+                <div
                   style={styles.dropdownContainer}
-                  onMouseEnter={() => setActiveDropdown('mtg')}
+                  onMouseEnter={() => setActiveDropdown('lorcana')}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button style={styles.categoryItem} onClick={() => handleCategoryClick('singles', { game: 'Magic' })}>
-                    Magic: The Gathering <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
+                  <button style={styles.categoryItem} onClick={() => handleCategoryClick('sealed', { game: 'Lorcana' })}>
+                    Disney Lorcana <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
                   </button>
-                  {activeDropdown === 'mtg' && (
+                  {activeDropdown === 'lorcana' && (
                     <div style={styles.dropdownMenu} className="glass-panel">
                       <div style={styles.dropdownGrid}>
                         <div style={styles.dropdownColumn}>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Magic', type: 'Booster Box' })}>Booster boxy</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Magic', type: 'Commander Deck' })}>Commander decky</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Magic', type: 'Bundle' })}>Bundly</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Magic', type: 'Booster' })}>Boostery</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Magic', type: 'Other' })}>Ostatní</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Booster Box' })}>Booster boxy</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Trove Box' })}>Trove boxy</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Booster' })}>Boostery</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Other' })}>Ostatní</span>
                         </div>
                       </div>
                     </div>
@@ -303,12 +295,12 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 </div>
 
                 {/* 3. One Piece Dropdown */}
-                <div 
+                <div
                   style={styles.dropdownContainer}
                   onMouseEnter={() => setActiveDropdown('onepiece')}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button style={styles.categoryItem} onClick={() => handleCategoryClick('singles', { game: 'One Piece' })}>
+                  <button style={styles.categoryItem} onClick={() => handleCategoryClick('sealed', { game: 'One Piece' })}>
                     One Piece <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
                   </button>
                   {activeDropdown === 'onepiece' && (
@@ -325,12 +317,12 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 </div>
 
                 {/* 4. Riftbound Dropdown */}
-                <div 
+                <div
                   style={styles.dropdownContainer}
                   onMouseEnter={() => setActiveDropdown('riftbound')}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button style={styles.categoryItem} onClick={() => handleCategoryClick('singles', { game: 'Riftbound' })}>
+                  <button style={styles.categoryItem} onClick={() => handleCategoryClick('sealed', { game: 'Riftbound' })}>
                     Riftbound <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
                   </button>
                   {activeDropdown === 'riftbound' && (
@@ -338,8 +330,8 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       <div style={styles.dropdownGrid}>
                         <div style={styles.dropdownColumn}>
                           <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Booster Box' })}>Booster boxy</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Trial Deck' })}>Trial decky</span>
                           <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Booster' })}>Boostery</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Trial Deck' })}>Trial decky</span>
                           <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Other' })}>Ostatní</span>
                         </div>
                       </div>
@@ -348,29 +340,51 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 </div>
 
                 {/* 5. Příslušenství Dropdown */}
-                <div 
+                <div
                   style={styles.dropdownContainer}
                   onMouseEnter={() => setActiveDropdown('accessories')}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button style={styles.categoryItem} onClick={() => handleCategoryClick('sealed', { category: 'Accessories' })}>
+                  <button style={styles.categoryItem} onClick={() => handleCategoryClick('sealed', { game: 'Accessories' })}>
                     Příslušenství <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
                   </button>
                   {activeDropdown === 'accessories' && (
                     <div style={styles.dropdownMenu} className="glass-panel">
                       <div style={styles.dropdownGrid}>
                         <div style={styles.dropdownColumn}>
-                          <h4 style={styles.dropdownColHeading}>Ochrana karet</h4>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { category: 'Accessories', subcat: 'Penny sleeves' })}>Penny sleeves</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { category: 'Accessories', subcat: 'Perfect fit' })}>Perfect fit</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { category: 'Accessories', subcat: 'Matte sleeves' })}>Matné herní obaly</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { category: 'Accessories', subcat: 'Toploaders' })}>Toploadery</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { category: 'Accessories', subcat: 'Card Saver 1' })}>Card Savery 1</span>
+                          <h4 style={styles.dropdownColHeading}>Alba</h4>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Binders', subsubcat: 'cards' })}>Na karty</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Binders', subsubcat: 'toploaders' })}>Na toploadery</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Binders', subsubcat: 'graded' })}>Na graded karty</span>
                         </div>
                         <div style={styles.dropdownColumn}>
-                          <h4 style={styles.dropdownColHeading}>Ukládání</h4>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { category: 'Accessories', subcat: 'Binders' })}>Alba</span>
-                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { category: 'Accessories', subcat: 'Acrylic Boxes' })}>Akrylové boxy</span>
+                          <h4 style={styles.dropdownColHeading}>Ostatní</h4>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Sleeves' })}>Sleevy</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Toploaders' })}>Toploadery</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Other' })}>Ostatní</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 6. Akryly Dropdown */}
+                <div
+                  style={styles.dropdownContainer}
+                  onMouseEnter={() => setActiveDropdown('acrylics')}
+                  onMouseLeave={() => setActiveDropdown(null)}
+                >
+                  <button style={styles.categoryItem} onClick={() => handleCategoryClick('sealed', { game: 'Acrylics' })}>
+                    Akryly <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
+                  </button>
+                  {activeDropdown === 'acrylics' && (
+                    <div style={styles.dropdownMenu} className="glass-panel">
+                      <div style={styles.dropdownGrid}>
+                        <div style={styles.dropdownColumn}>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Pokémon' })}>Pokemon</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Lorcana' })}>Lorcana</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Riftbound' })}>Riftbound</span>
+                          <span style={styles.dropdownLink} onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'PSA' })}>Psa karty</span>
                         </div>
                       </div>
                     </div>
@@ -378,7 +392,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 </div>
 
                 {/* 6. Ohodnocené karty Dropdown */}
-                <div 
+                <div
                   style={styles.dropdownContainer}
                   onMouseEnter={() => setActiveDropdown('slabs')}
                   onMouseLeave={() => setActiveDropdown(null)}
@@ -400,7 +414,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 </div>
 
                 {/* 7. Grading Dropdown */}
-                <div 
+                <div
                   style={styles.dropdownContainer}
                   onMouseEnter={() => setActiveDropdown('grading')}
                   onMouseLeave={() => setActiveDropdown(null)}
@@ -458,18 +472,18 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
 
               {/* Right: Profile & Cart */}
               <div style={styles.mobileRightArea}>
-                <button 
-                  className="nav-action-btn" 
-                  style={styles.mobileActionBtn} 
-                  onClick={() => isLoggedIn ? setActivePage('profile') : onOpenLogin()} 
+                <button
+                  className="nav-action-btn"
+                  style={styles.mobileActionBtn}
+                  onClick={() => isLoggedIn ? setActivePage('profile') : onOpenLogin()}
                   title={isLoggedIn ? "Můj účet" : "Přihlásit se"}
                 >
                   {isLoggedIn && user.avatar && user.avatar !== '/user.png' ? (
-                    <img 
-                      src={user.avatar} 
-                      alt="Profil" 
-                      className="no-invert-avatar" 
-                      style={{ borderRadius: '50%', filter: 'none', width: '22px', height: '22px', objectFit: 'cover' }} 
+                    <img
+                      src={user.avatar}
+                      alt="Profil"
+                      className="no-invert-avatar"
+                      style={{ borderRadius: '50%', filter: 'none', width: '22px', height: '22px', objectFit: 'cover' }}
                     />
                   ) : (
                     <img src="/user.png" alt="Profil" style={styles.mobileActionIcon} />
@@ -509,15 +523,15 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
 
       {/* 4. SLIDE-OUT DRAWER OVERLAY */}
       {drawerOpen && (
-        <div 
+        <div
           style={{
             ...styles.drawerOverlay,
             justifyContent: isMobile ? 'flex-start' : 'flex-end',
             animation: isClosing ? 'fadeOut 0.3s forwards' : 'none'
-          }} 
+          }}
           onClick={() => setDrawerOpen(false)}
         >
-          <div 
+          <div
             style={{
               ...styles.drawer,
               width: isMobile ? '100vw' : 'min(360px, 100vw)',
@@ -525,11 +539,11 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
               borderLeft: isMobile ? 'none' : '1px solid rgba(63, 63, 86, 0.4)',
               boxShadow: isMobile ? '10px 0 30px rgba(0,0,0,0.5)' : '-10px 0 30px rgba(0,0,0,0.5)',
               transformOrigin: isMobile ? 'top left' : 'top right',
-              animation: isClosing 
+              animation: isClosing
                 ? (isMobile ? 'slideOutToTopLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'slideOutToTopRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards')
                 : (isMobile ? 'slideFromTopLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'slideFromTopRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards')
-            }} 
-            className="glass-panel" 
+            }}
+            className="glass-panel"
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{
@@ -541,54 +555,61 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
               {!isMobile && <h3 style={styles.drawerHeading}>Více informací</h3>}
               <button style={styles.drawerCloseBtn} onClick={() => setDrawerOpen(false)}>&times;</button>
             </div>
-            
+
             <div style={styles.drawerBody} className="drawer-body-no-scrollbar">
               {/* Mobile Navigation Categories (Only shown on mobile) */}
               {isMobile && (
                 <div style={styles.mobileDrawerNav}>
                   {/* 1. Pokémon */}
                   <div style={styles.mobileNavSection}>
-                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('singles', { game: 'Pokémon' }); setDrawerOpen(false); }}>
+                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('sealed', { game: 'Pokémon' }); setDrawerOpen(false); }}>
                       <span>Pokémon</span>
                     </div>
                   </div>
 
-                  {/* 2. MTG */}
+                  {/* 2. Disney Lorcana */}
                   <div style={styles.mobileNavSection}>
-                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('singles', { game: 'Magic' }); setDrawerOpen(false); }}>
-                      <span>Magic: The Gathering</span>
+                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('sealed', { game: 'Lorcana' }); setDrawerOpen(false); }}>
+                      <span>Disney Lorcana</span>
                     </div>
                   </div>
 
                   {/* 3. One Piece */}
                   <div style={styles.mobileNavSection}>
-                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('singles', { game: 'One Piece' }); setDrawerOpen(false); }}>
+                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('sealed', { game: 'One Piece' }); setDrawerOpen(false); }}>
                       <span>One Piece</span>
                     </div>
                   </div>
 
                   {/* 4. Riftbound */}
                   <div style={styles.mobileNavSection}>
-                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('singles', { game: 'Riftbound' }); setDrawerOpen(false); }}>
+                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('sealed', { game: 'Riftbound' }); setDrawerOpen(false); }}>
                       <span>Riftbound</span>
                     </div>
                   </div>
 
                   {/* 5. Accessories */}
                   <div style={styles.mobileNavSection}>
-                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('sealed', { category: 'Accessories' }); setDrawerOpen(false); }}>
+                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('sealed', { game: 'Accessories' }); setDrawerOpen(false); }}>
                       <span>Příslušenství</span>
                     </div>
                   </div>
 
-                  {/* 6. Slabs */}
+                  {/* 6. Acrylics */}
+                  <div style={styles.mobileNavSection}>
+                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('sealed', { game: 'Acrylics' }); setDrawerOpen(false); }}>
+                      <span>Akryly</span>
+                    </div>
+                  </div>
+
+                  {/* 7. Slabs */}
                   <div style={styles.mobileNavSection}>
                     <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('slabs'); setDrawerOpen(false); }}>
                       <span>Ohodnocené karty</span>
                     </div>
                   </div>
 
-                  {/* 7. Grading */}
+                  {/* 8. Grading */}
                   <div style={styles.mobileNavSection}>
                     <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { setActivePage('grading'); setDrawerOpen(false); }}>
                       <span>Grading</span>
@@ -601,7 +622,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       <span>Jazyk</span>
                     </div>
                     <div style={{ display: 'flex', gap: '10px', marginTop: '8px', justifyContent: 'center' }}>
-                      <button 
+                      <button
                         style={{
                           ...styles.mobileLangBtn,
                           border: lang === 'CZ' ? '1px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.1)',
@@ -611,7 +632,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       >
                         <img src="/cz ikona.png" alt="CZ" style={styles.flagIcon} /> Čeština
                       </button>
-                      <button 
+                      <button
                         style={{
                           ...styles.mobileLangBtn,
                           border: lang === 'EN' ? '1px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.1)',
@@ -621,13 +642,13 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" style={styles.flagIcon}>
                           <clipPath id="s-mob">
-                            <path d="M0,0 v30 h60 v-30 z"/>
+                            <path d="M0,0 v30 h60 v-30 z" />
                           </clipPath>
-                          <path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
-                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" clipPath="url(#s-mob)"/>
-                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="4" clipPath="url(#s-mob)"/>
-                          <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10"/>
-                          <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6"/>
+                          <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
+                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" clipPath="url(#s-mob)" />
+                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="4" clipPath="url(#s-mob)" />
+                          <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10" />
+                          <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6" />
                         </svg>
                         English
                       </button>
@@ -642,10 +663,10 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   <div style={styles.drawerSection}>
                     <h4 style={styles.drawerSectionTitle}>Výkup karet (Buylist)</h4>
                     <p style={styles.drawerText}>
-                      Vykupujeme kusové karty her Pokémon, Magic a One Piece. Získejte peníze přímo na svůj bankovní účet!
+                      Vykupujeme kusové karty her Pokémon, Lorcana a One Piece. Získejte peníze přímo na svůj bankovní účet!
                     </p>
-                    <button 
-                      className="btn btn-primary" 
+                    <button
+                      className="btn btn-primary"
                       onClick={() => { setActivePage('buylist'); setDrawerOpen(false); }}
                       style={{ width: '100%', marginTop: '8px' }}
                     >
@@ -658,8 +679,8 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     <p style={styles.drawerText}>
                       Vyzvedněte si Své objednávky zdarma v Pardubicích. Ke každé objednávce získáte 10% slevu na kávu.
                     </p>
-                    <button 
-                      className="btn btn-secondary" 
+                    <button
+                      className="btn btn-secondary"
                       onClick={() => { setActivePage('community'); setDrawerOpen(false); }}
                       style={{ width: '100%', marginTop: '8px' }}
                     >
@@ -687,8 +708,8 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   </div>
 
                   <div style={{ ...styles.drawerSection, borderBottom: 'none', marginTop: 'auto' }}>
-                    <button 
-                      className="btn btn-secondary" 
+                    <button
+                      className="btn btn-secondary"
                       onClick={() => { setActivePage('admin'); setDrawerOpen(false); }}
                       style={{ width: '100%', opacity: 0.6, fontSize: '12px' }}
                     >
@@ -749,7 +770,7 @@ const styles = {
     flexDirection: 'column',
     width: '100%',
   },
-  
+
   /* 1. Top Bar styles */
   topBar: {
     backgroundColor: 'var(--bg-page)',
@@ -879,7 +900,7 @@ const styles = {
     objectFit: 'contain',
     marginTop: '-6px',
     marginBottom: '-6px',
-    marginLeft: '-34px',
+    marginLeft: '-17px',
     zIndex: 10,
   },
   searchForm: {
@@ -1233,7 +1254,7 @@ const styles = {
     justifyContent: 'center',
     opacity: 0.8,
   },
-  
+
   /* Mobile drawer accordion styles */
   mobileDrawerNav: {
     display: 'flex',

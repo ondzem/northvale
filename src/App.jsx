@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Homepage from './components/Homepage';
@@ -23,10 +23,133 @@ import LoginModal from './components/LoginModal';
 import { mockProducts } from './mockData';
 import './App.css';
 
+const parseUrlToState = () => {
+  const path = window.location.pathname;
+  const searchParams = new URLSearchParams(window.location.search);
+  
+  let page = 'home';
+  let productId = null;
+  let tab = 'vop';
+  let parsedFilters = {};
+  
+  if (path.startsWith('/sealed-detail/')) {
+    page = 'sealed-detail';
+    productId = path.replace('/sealed-detail/', '');
+  } else if (path.startsWith('/singles-detail/')) {
+    page = 'singles-detail';
+    productId = path.replace('/singles-detail/', '');
+  } else if (path === '/singles-catalog') {
+    page = 'singles-catalog';
+  } else if (path === '/sealed-catalog') {
+    page = 'sealed-catalog';
+  } else if (path === '/slabs-catalog') {
+    page = 'slabs-catalog';
+  } else if (path === '/buylist') {
+    page = 'buylist';
+  } else if (path === '/grading') {
+    page = 'grading';
+  } else if (path === '/grading-guide') {
+    page = 'grading-guide';
+  } else if (path === '/community') {
+    page = 'community';
+  } else if (path === '/support') {
+    page = 'support';
+  } else if (path === '/checkout') {
+    page = 'checkout';
+  } else if (path === '/profile') {
+    page = 'profile';
+  } else if (path === '/admin') {
+    page = 'admin';
+  } else if (path === '/gdpr-vop') {
+    page = 'gdpr-vop';
+    tab = searchParams.get('tab') || 'vop';
+  } else if (path === '/cart') {
+    page = 'cart';
+  } else if (path === '/favorites') {
+    page = 'favorites';
+  } else {
+    page = 'home';
+  }
+  
+  searchParams.forEach((value, key) => {
+    if (key !== 'tab' && key !== 'q') {
+      if (value === 'true') parsedFilters[key] = true;
+      else if (value === 'false') parsedFilters[key] = false;
+      else parsedFilters[key] = value;
+    }
+  });
+
+  const searchQuery = searchParams.get('q') || '';
+  
+  return { page, productId, tab, filters: parsedFilters, searchQuery };
+};
+
+const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => {
+  let path = '/';
+  const searchParams = new URLSearchParams();
+  
+  if (page === 'sealed-detail' && productId) {
+    path = `/sealed-detail/${productId}`;
+  } else if (page === 'singles-detail' && productId) {
+    path = `/singles-detail/${productId}`;
+  } else if (page === 'singles-catalog') {
+    path = '/singles-catalog';
+  } else if (page === 'sealed-catalog') {
+    path = '/sealed-catalog';
+  } else if (page === 'slabs-catalog') {
+    path = '/slabs-catalog';
+  } else if (page === 'buylist') {
+    path = '/buylist';
+  } else if (page === 'grading') {
+    path = '/grading';
+  } else if (page === 'grading-guide') {
+    path = '/grading-guide';
+  } else if (page === 'community') {
+    path = '/community';
+  } else if (page === 'support') {
+    path = '/support';
+  } else if (page === 'checkout') {
+    path = '/checkout';
+  } else if (page === 'profile') {
+    path = '/profile';
+  } else if (page === 'admin') {
+    path = '/admin';
+  } else if (page === 'gdpr-vop') {
+    path = '/gdpr-vop';
+    if (tab) {
+      searchParams.set('tab', tab);
+    }
+  } else if (page === 'cart') {
+    path = '/cart';
+  } else if (page === 'favorites') {
+    path = '/favorites';
+  }
+  
+  if (filtersObj && Object.keys(filtersObj).length > 0) {
+    Object.entries(filtersObj).forEach(([key, val]) => {
+      if (val !== undefined && val !== null && val !== '') {
+        searchParams.set(key, String(val));
+      }
+    });
+  }
+
+  if (searchQuery) {
+    searchParams.set('q', searchQuery);
+  }
+  
+  const searchStr = searchParams.toString();
+  return path + (searchStr ? `?${searchStr}` : '');
+};
+
 export default function App() {
+  const initialUrlState = parseUrlToState();
+
   // Navigation & Page State
-  const [activePage, setActivePage] = useState('home');
-  const [gdprVopTab, setGdprVopTab] = useState('vop');
+  const [activePage, setActivePage] = useState(initialUrlState.page);
+  const [gdprVopTab, setGdprVopTab] = useState(initialUrlState.tab);
+  const [selectedProductId, setSelectedProductId] = useState(initialUrlState.productId);
+  const [searchQuery, setSearchQuery] = useState(initialUrlState.searchQuery);
+  const [filters, setFilters] = useState(initialUrlState.filters);
 
   const navigateToPage = (page, tab) => {
     setActivePage(page);
@@ -34,6 +157,43 @@ export default function App() {
       setGdprVopTab(tab);
     }
   };
+
+  const isPoppingState = useRef(false);
+
+  // Sync state to URL in history
+  useEffect(() => {
+    const newUrl = generateUrlFromState(activePage, selectedProductId, gdprVopTab, filters, searchQuery);
+    const currentUrl = window.location.pathname + window.location.search;
+    
+    if (newUrl !== currentUrl) {
+      if (isPoppingState.current) {
+        // Just sync currentUrl
+      } else {
+        window.history.pushState(null, '', newUrl);
+      }
+    }
+  }, [activePage, selectedProductId, gdprVopTab, filters, searchQuery]);
+
+  // Sync browser back/forward buttons to state
+  useEffect(() => {
+    const handlePopState = () => {
+      const stateFromUrl = parseUrlToState();
+      isPoppingState.current = true;
+      setActivePage(stateFromUrl.page);
+      setSelectedProductId(stateFromUrl.productId);
+      setGdprVopTab(stateFromUrl.tab);
+      setFilters(stateFromUrl.filters);
+      setSearchQuery(stateFromUrl.searchQuery);
+      setTimeout(() => {
+        isPoppingState.current = false;
+      }, 0);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
   useEffect(() => {
     // Detect OS and add class
@@ -60,7 +220,7 @@ export default function App() {
 
 
 
-  const [selectedProductId, setSelectedProductId] = useState(null);
+  // selectedProductId is declared at the top
   
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -99,9 +259,7 @@ export default function App() {
     }));
     showToast(`Registrace úspěšná! Vítejte, ${name || email}`, 'success');
   };
-  // Search and Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState({});
+  // Search and Filters are declared at the top
 
   // Cart State
   const [cart, setCart] = useState([]);
@@ -129,7 +287,7 @@ export default function App() {
         title = 'Pokémon Singles - Northvaletcg.eu';
         break;
       case 'sealed-catalog':
-        title = 'Sealed produkty - Northvaletcg.eu';
+        title = 'Katalog - Northvaletcg.eu';
         break;
       case 'slabs-catalog':
         title = 'Ohodnocené slabs - Northvaletcg.eu';

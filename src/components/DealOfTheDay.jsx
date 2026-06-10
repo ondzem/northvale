@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 
 export default function DealOfTheDay({ products, addToCart, setSelectedProductId, setActivePage }) {
-  const dealProduct = products.find(p => p.id === 'deal-of-the-day') || products[0];
+  const dealProduct = products.find(p => p.id === 'deal-of-the-day') || products.find(p => p.price !== undefined) || products[0];
+  const dealProductHasVariants = dealProduct.variants && dealProduct.variants.length > 0;
+  const dealProductPrice = dealProductHasVariants ? dealProduct.variants[0].price : (dealProduct.price || 0);
+  const dealProductStock = dealProductHasVariants ? dealProduct.variants[0].stock : (dealProduct.stock || 0);
+  const dealProductOriginalPrice = dealProduct.originalPrice || (dealProductHasVariants ? dealProduct.variants[0].originalPrice : null);
   
   // Deal of the day countdown timer
   const [timeLeft, setTimeLeft] = useState({ hours: 14, minutes: 35, seconds: 22 });
@@ -42,8 +46,8 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
     }, 1500);
   };
 
-  const discountPercent = dealProduct.originalPrice 
-    ? Math.round(((dealProduct.originalPrice - dealProduct.price) / dealProduct.originalPrice) * 100)
+  const discountPercent = dealProductOriginalPrice 
+    ? Math.round(((dealProductOriginalPrice - dealProductPrice) / dealProductOriginalPrice) * 100)
     : 33;
 
   return (
@@ -123,7 +127,7 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
           borderRadius: '4px',
           border: '1px solid rgba(255, 255, 255, 0.1)'
         }}>
-          Zbývá {dealProduct.stock} kusů
+          Zbývá {dealProductStock} kusů
         </span>
       </div>
 
@@ -146,11 +150,11 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
               -{discountPercent} %
             </span>
             <span style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-              {dealProduct.originalPrice ? dealProduct.originalPrice.toLocaleString() : '2 690'} Kč
+              {dealProductOriginalPrice ? dealProductOriginalPrice.toLocaleString() : '2 690'} Kč
             </span>
           </div>
           <span style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-gold)', marginTop: '2px', whiteSpace: 'nowrap' }}>
-            {dealProduct.price.toLocaleString()} Kč
+            {dealProductPrice.toLocaleString()} Kč
           </span>
         </div>
 
@@ -168,14 +172,14 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
             justifyContent: 'center',
             gap: '6px',
             border: 'none',
-            cursor: dealProduct.stock > 0 ? 'pointer' : 'not-allowed',
+            cursor: dealProductStock > 0 ? 'pointer' : 'not-allowed',
             flex: '0 0 auto',
             minWidth: '110px',
             transform: dealAdded ? 'scale(0.95)' : 'scale(1)',
             transition: 'all 0.15s ease',
             boxShadow: '0 4px 12px rgba(253, 189, 22, 0.15)'
           }}
-          disabled={dealProduct.stock === 0}
+          disabled={dealProductStock === 0}
           onClick={handleBuyDealClick}
         >
           <img 

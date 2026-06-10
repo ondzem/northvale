@@ -6,7 +6,7 @@ export default function Footer({ setActivePage }) {
         {/* Column 1: About */}
         <div className="footer-column">
           <img 
-            src="/Northvale Logo.webp" 
+            src="/logo s popisem.webp" 
             alt="NORTHVALE TCG" 
             className="footer-logo" 
             onClick={() => setActivePage('home')} 

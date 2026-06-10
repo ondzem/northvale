@@ -1,8 +1,164 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
 import DealOfTheDay from './DealOfTheDay';
 
+const gameInfo = {
+  'Pokémon': {
+    title: 'Pokémon Kusovky',
+    desc: 'Objevte širokou nabídku Pokémon kusových karet z nejnovějších i starších edicí. Od běžných karet po extrémně vzácné kousky Alternate Art a Special Illustration Rare. Garantujeme 100% originalitu a precizní posouzení stavu každé nabízené karty. Naše nabídka Pokémon kusovek je denně aktualizována. Každá karta prochází přísnou kontrolou kvality, abychom zajistili přesné zařazení do stavových kategorií. Využijte náš pokročilý filtr pro rychlé nalezení konkrétních karet do vašeho herního balíčku nebo sbírky. Pro turnajové hráče doporučujeme použít náš inovativní Decklist Importer, se kterým naplníte košík celým seznamem karet během několika sekund.'
+  },
+  'Lorcana': {
+    title: 'Disney Lorcana Kusovky',
+    desc: 'Prozkoumejte naši nabídku kusových karet Disney Lorcana. Najděte chybějící karty do své sbírky nebo herního balíčku, od běžných karet až po vzácné Enchanted verze oblíbených postav. Zaručujeme kvalitu a originalitu všech karet, které pečlivě třídíme podle stavu a edic. Prozkoumejte magický svět Lorcana s našimi prémiovými kartami.'
+  },
+  'One Piece': {
+    title: 'One Piece Kusovky',
+    desc: 'Kompletní výběr kusových karet z One Piece Card Game. Od základních karet po Alternate Art a Secret Rare sběratelské kusy. Všechny karty jsou detailně zkontrolovány, abychom zaručili jejich stav a pravost. Sestavte si svůj pirátský balíček s nejlepšími lídry a charaktery.'
+  },
+  'Riftbound': {
+    title: 'Riftbound Kusovky',
+    desc: 'Najděte ty správné kusové karty pro taktickou hru Riftbound. Doplňte svůj balíček o klíčové jednotky a kouzla. Garantujeme rychlé doručení a výborný stav všech herních karet. Získejte převahu na bojišti s těmi správnými strategickými kartami.'
+  }
+};
+
+const subSubcategoriesConfig = {
+  'Pokémon': {
+    'Alternate Art': {
+      title: 'Pokémon Alternate Art karty',
+      desc: 'Alternate Art (Alt Art) karty jsou jedny z nejvyhledávanějších a nejcennějších karet moderní éry Pokémon TCG. Tyto karty nahrazují tradiční zobrazení Pokémona detailní, celoplošnou uměleckou ilustrací, která často vypráví příběh nebo zachycuje Pokémona v jeho přirozeném prostředí. Mají extrémně nízký poměr otevírání z boosterů a představují skvělou sběratelskou i investiční příležitost.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Alt Arty', icon: '🎨' },
+        { id: 'Alternate Art', name: 'Standard Alt Art', icon: '✨' },
+        { id: 'Alternate Art Secret Rare', name: 'Secret Rare Alt Art', icon: '👑' }
+      ]
+    },
+    'Special Illustration Rare': {
+      title: 'Pokémon Special Illustration Rare karty',
+      desc: 'Special Illustration Rare (SIR) jsou zlatým standardem moderních sérií ze éry Scarlet & Violet. Tyto karty se vyznačují dechberoucími celoplošnými kresbami od renomovaných ilustrátorů, které přetvářejí ikonické Pokémony do uměleckých děl. Každá karta je opatřena jedinečnou texturou a foilovým efektem.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny SIR', icon: '🌟' },
+        { id: 'Special Illustration', name: 'Special Illustration', icon: '🎨' }
+      ]
+    },
+    'Secret Rare': {
+      title: 'Pokémon Secret Rare karty',
+      desc: 'Secret Rare karty jsou karty, jejichž číslo edice přesahuje oficiální počet karet v setu (např. 215/198). Tyto karty bývají vyvedeny ve zlatém provedení, s duhovým efektem nebo jako speciální celoplošné ilustrace. Jsou ozdobou každého sběratelského alba.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Secret Rare', icon: '🔑' },
+        { id: 'Alternate Art Secret Rare', name: 'Secret Rare Alt Art', icon: '✨' }
+      ]
+    },
+    'Rainbow Rare': {
+      title: 'Pokémon Rainbow Rare karty',
+      desc: 'Rainbow Rare (duhové) karty byly představeny v éře Sun & Moon a pokračovaly v éře Sword & Shield. Tyto karty mají charakteristický stříbřitě duhový třpytivý povrch s výraznou texturou, který pokrývá celou plochu karty. Jsou vysoce ceněny pro svůj unikátní estetický vzhled.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Rainbow Rare', icon: '🌈' },
+        { id: 'Rainbow Rare', name: 'Rainbow Rare', icon: '✨' }
+      ]
+    }
+  },
+  'Lorcana': {
+    'Enchanted': {
+      title: 'Disney Lorcana Enchanted karty',
+      desc: 'Enchanted karty jsou nejvzácnějšími a sběratelsky nejcennějšími kartami v Disney Lorcana. Mají nádhernou bezrámovou alternativní ilustraci pokrytou speciálním duhovým „foil“ efektem. Pravděpodobnost otevření Enchanted karty z boosteru je extrémně nízká, což z nich dělá vysoce ceněné sběratelské klenoty.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Enchanted', icon: '✨' },
+        { id: 'Enchanted', name: 'Enchanted', icon: '🦄' }
+      ]
+    },
+    'Legendary': {
+      title: 'Disney Lorcana Legendary karty',
+      desc: 'Legendary karty představují nejvyšší standardní vzácnost v balíčcích Disney Lorcana (před Enchanted). Tyto karty mají silné herní schopnosti a nádherný foilový nebo nefoilový vzhled. Jsou klíčové pro stavbu kompetitivních herních balíčků.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Legendary', icon: '🐉' },
+        { id: 'Legendary', name: 'Legendary', icon: '💎' }
+      ]
+    },
+    'Super Rare': {
+      title: 'Disney Lorcana Super Rare karty',
+      desc: 'Super Rare karty jsou další významnou úrovní vzácnosti v Disney Lorcana. Často obsahují velmi užitečné postavy a akční karty, které tvoří pilíře mnoha herních strategií.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Super Rare', icon: '🌟' }
+      ]
+    },
+    'Rare': {
+      title: 'Disney Lorcana Rare karty',
+      desc: 'Rare (vzácné) karty jsou v každém boosteru garantovány v počtu dvou kusů (pokud nejsou nahrazeny vyšší vzácností). Nabízejí pestrou škálu zajímavých efektů a postav.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Rare', icon: '🛡️' }
+      ]
+    },
+    'Uncommon': {
+      title: 'Disney Lorcana Uncommon karty',
+      desc: 'Uncommon (neobvyklé) karty doplňují herní balíčky o důležité synergické karty a postavy.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Uncommon', icon: '⚡' }
+      ]
+    },
+    'Common': {
+      title: 'Disney Lorcana Common karty',
+      desc: 'Common (běžné) karty tvoří základní kostru každého herního balíčku a sbírky. Obsahují základní verze mnoha oblíbených postav.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Common', icon: '🍃' }
+      ]
+    }
+  },
+  'One Piece': {
+    'Alternate Art': {
+      title: 'One Piece Alternate Art karty',
+      desc: 'Alternate Art (Alt Art) karty v One Piece Card Game se vyznačují exkluzivními ilustracemi postav a vůdců, které se liší od standardních verzí v setu. Nejvzácnější z nich jsou takzvané Manga Rare karty, které mají na pozadí ikonické panely z manga předlohy Eiichira Ody. Jsou svatým grálem pro všechny fanoušky Slamáků.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Alt Arty', icon: '🏴‍☠️' },
+        { id: 'Alternate Art', name: 'Standard Alt Art', icon: '✨' }
+      ]
+    },
+    'Secret Rare': {
+      title: 'One Piece Secret Rare karty',
+      desc: 'Secret Rare (SEC) karty jsou nejvyšší standardní vzácností v každém setu One Piece Card Game. Mají úchvatné zpracování a jsou velmi silné v samotné hře.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Secret Rare', icon: '🪙' }
+      ]
+    },
+    'Leader': {
+      title: 'One Piece Leader karty',
+      desc: 'Leader (vůdce) karty určují barvu a strategii vašeho celého One Piece balíčku. Nabízíme jak standardní Leader karty, tak jejich vzácné Alternate Art verze s celoplošným zobrazením obličeje postavy.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Leadery', icon: '👑' }
+      ]
+    },
+    'Super Rare': {
+      title: 'One Piece Super Rare karty',
+      desc: 'Super Rare (SR) karty tvoří klíčové bojovníky a události pro sestavení konkurenceschopného balíčku.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Super Rare', icon: '🌟' }
+      ]
+    },
+    'Rare': {
+      title: 'One Piece Rare karty',
+      desc: 'Vzácné (R) karty v One Piece Card Game přinášejí důležité efekty a podporu pro vaše pirátské posádky.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Rare', icon: '🛡️' }
+      ]
+    },
+    'Uncommon': {
+      title: 'One Piece Uncommon karty',
+      desc: 'Neobvyklé (UC) karty poskytují nezbytné synergie a doplňkové postavy pro stabilní hru.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Uncommon', icon: '⚡' }
+      ]
+    },
+    'Common': {
+      title: 'One Piece Common karty',
+      desc: 'Běžné (C) karty tvoří základ každé edice a jsou základním stavebním kamenem pro začínající hráče.',
+      subsubcats: [
+        { id: 'all', name: 'Všechny Common', icon: '🍃' }
+      ]
+    }
+  }
+};
+
 export default function SinglesCatalog({ products, addToCart, setSelectedProductId, setActivePage, filters, setFilters, searchQuery, setSearchQuery }) {
+  const [selectedGame, setSelectedGame] = useState(filters.game || 'Pokémon');
   const [selectedEditions, setSelectedEditions] = useState(filters.edition ? [filters.edition] : []);
   const [selectedConditions, setSelectedConditions] = useState([]);
   const [selectedLangs, setSelectedLangs] = useState(filters.lang ? [filters.lang] : []);
@@ -17,7 +173,10 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
   const [isDescExpanded, setIsDescExpanded] = useState(false);
 
   // Active subcategory (rarity filter)
-  const [activeSubcategory, setActiveSubcategory] = useState('all');
+  const [activeSubcategory, setActiveSubcategory] = useState(filters.rarity || 'all');
+  const [activeSubsubcategory, setActiveSubsubcategory] = useState(filters.subsubcat || 'all');
+
+
 
   // Sorting
   const [sortBy, setSortBy] = useState('top');
@@ -25,21 +184,82 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
   // Mobile filters sidebar open/close
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // Get only singles
-  const singles = products.filter(p => p.type === 'single');
+  useEffect(() => {
+    if (mobileFiltersOpen) {
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    };
+  }, [mobileFiltersOpen]);
+
+  const [prevFilters, setPrevFilters] = useState(filters);
+  if (filters !== prevFilters) {
+    setPrevFilters(filters);
+    if (filters.game) setSelectedGame(filters.game);
+    if (filters.lang) {
+      setSelectedLangs([filters.lang]);
+    } else {
+      setSelectedLangs([]);
+    }
+    if (filters.edition) {
+      setSelectedEditions([filters.edition]);
+    } else {
+      setSelectedEditions([]);
+    }
+    setActiveSubcategory(filters.rarity || 'all');
+    setActiveSubsubcategory(filters.subsubcat || 'all');
+  }
+
+  // Get only singles and slabs (slab products are also single cards but graded!)
+  const singles = products.filter(p => p.type === 'single' || p.type === 'slab');
 
   // Available filters options
-  const editions = Array.from(new Set(singles.map(s => s.edition)));
+  const editions = Array.from(new Set(singles.filter(s => s.game === selectedGame).map(s => s.edition)));
   const conditions = ['NM', 'EX', 'GD', 'LP', 'PL', 'PO'];
   const langs = ['EN', 'JP', 'CN', 'KR'];
 
-  const subcategories = [
-    { id: 'all', name: 'Všechny kusovky', icon: '🃏' },
-    { id: 'Alternate Art', name: 'Alternate Art', icon: '🌟' },
-    { id: 'Special Illustration Rare', name: 'Special Illustration', icon: '🎨' },
-    { id: 'Secret Rare', name: 'Secret Rare', icon: '💎' },
-    { id: 'Rainbow Rare', name: 'Rainbow Rare', icon: '🌈' },
-  ];
+  // Dynamic subcategories setup
+  let subcategories = [];
+  if (selectedGame === 'Pokémon') {
+    subcategories = [
+      { id: 'all', name: 'Pokémon TCG', icon: <img src="/Pokemon.webp" alt="" className="subcategory-img" /> },
+      { id: 'Alternate Art', name: 'Alternate Art', icon: <img src="https://images.pokemontcg.io/swsh11/186.png" alt="" className="subcategory-img" /> },
+      { id: 'Special Illustration Rare', name: 'Special Illustration', icon: <img src="https://images.pokemontcg.io/sv3/223.png" alt="" className="subcategory-img" /> },
+      { id: 'Secret Rare', name: 'Secret Rare', icon: <img src="https://images.pokemontcg.io/swsh7/218.png" alt="" className="subcategory-img" /> },
+      { id: 'Rainbow Rare', name: 'Rainbow Rare', icon: <img src="https://images.pokemontcg.io/swsh4/188.png" alt="" className="subcategory-img" /> },
+    ];
+  } else if (selectedGame === 'Lorcana') {
+    subcategories = [
+      { id: 'all', name: 'Lorcana TCG', icon: <img src="/Lorcana.png" alt="" className="subcategory-img" /> },
+      { id: 'Common', name: 'Common', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+      { id: 'Uncommon', name: 'Uncommon', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+      { id: 'Rare', name: 'Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+      { id: 'Super Rare', name: 'Super Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+      { id: 'Legendary', name: 'Legendary', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+      { id: 'Enchanted', name: 'Enchanted', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+    ];
+  } else if (selectedGame === 'One Piece') {
+    subcategories = [
+      { id: 'all', name: 'One Piece TCG', icon: <img src="/One piece.webp" alt="" className="subcategory-img" /> },
+      { id: 'Common', name: 'Common', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+      { id: 'Uncommon', name: 'Uncommon', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+      { id: 'Rare', name: 'Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+      { id: 'Super Rare', name: 'Super Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+      { id: 'Secret Rare', name: 'Secret Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+      { id: 'Leader', name: 'Leader', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+      { id: 'Alternate Art', name: 'Alternate Art', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+    ];
+  } else {
+    subcategories = [
+      { id: 'all', name: selectedGame ? `${selectedGame} TCG` : 'Všechny kusovky', icon: <img src="/Pokemon.webp" alt="" className="subcategory-img" /> }
+    ];
+  }
 
   // Toggle helpers
   const handleEditionToggle = (edition) => {
@@ -62,6 +282,10 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
 
   // Filter logic
   const filteredSingles = singles.filter(product => {
+    // Game filter
+    if (selectedGame && product.game !== selectedGame) {
+      return false;
+    }
     // Search query filter
     if (searchQuery && 
         !product.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
@@ -79,8 +303,23 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
       return false;
     }
 
+    // Subsubcategory filter
+    if (activeSubsubcategory !== 'all' && product.subsubcategory !== activeSubsubcategory) {
+      return false;
+    }
+
     // Variants matching filters
-    const matchingVariants = product.variants.filter(variant => {
+    if (product.type === 'slab') {
+      if (foilFilter === 'foil') return false;
+      if (product.price > priceRange) return false;
+      if (selectedLangs.length > 0) {
+        const slabLang = product.name.toLowerCase().includes('japanese') || product.name.toLowerCase().includes('jp') ? 'JP' : 'EN';
+        if (!selectedLangs.includes(slabLang)) return false;
+      }
+      return true;
+    }
+
+    const matchingVariants = product.variants ? product.variants.filter(variant => {
       if (selectedConditions.length > 0 && !selectedConditions.includes(variant.condition)) {
         return false;
       }
@@ -91,15 +330,15 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
       if (foilFilter === 'non-foil' && variant.foil) return false;
       if (variant.price > priceRange) return false;
       return true;
-    });
+    }) : [];
 
     return matchingVariants.length > 0;
   });
 
   // Sort logic
   const sortedSingles = [...filteredSingles].sort((a, b) => {
-    const priceA = a.variants ? Math.min(...a.variants.map(v => v.price)) : a.price;
-    const priceB = b.variants ? Math.min(...b.variants.map(v => v.price)) : b.price;
+    const priceA = a.variants && a.variants.length > 0 ? Math.min(...a.variants.map(v => v.price)) : (a.price || 0);
+    const priceB = b.variants && b.variants.length > 0 ? Math.min(...b.variants.map(v => v.price)) : (b.price || 0);
 
     if (sortBy === 'expensive') return priceB - priceA;
     if (sortBy === 'cheap') return priceA - priceB;
@@ -185,12 +424,48 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
         </div>
       )}
 
+      {/* Breadcrumbs Navigation */}
+      {(selectedGame !== 'all' || activeSubcategory !== 'all') && (
+        <nav className="breadcrumbs-nav" aria-label="Drobečková navigace">
+          <span className="breadcrumb-item" onClick={() => setActivePage('home')}>Domů</span>
+          
+          {selectedGame !== 'all' && (
+            <>
+              <span className="breadcrumb-separator">/</span>
+              {activeSubcategory === 'all' ? (
+                <span className="breadcrumb-item active">{selectedGame}</span>
+              ) : (
+                <span 
+                  className="breadcrumb-item" 
+                  onClick={() => { 
+                    setActiveSubcategory('all'); 
+                    setActiveSubsubcategory('all'); 
+                    setFilters(prev => ({ ...prev, rarity: undefined, subsubcat: undefined })); 
+                  }}
+                >
+                  {selectedGame}
+                </span>
+              )}
+            </>
+          )}
+
+          {activeSubcategory !== 'all' && (
+            <>
+              <span className="breadcrumb-separator">/</span>
+              <span className="breadcrumb-item active">
+                {subcategories.find(s => s.id === activeSubcategory)?.name}
+              </span>
+            </>
+          )}
+        </nav>
+      )}
+
       {/* Main Split Layout */}
       <div className="catalog-split-container">
         
         {/* LEFT COLUMN: Sidebar Filters & Deal of the Day */}
         <aside className={`catalog-sidebar ${mobileFiltersOpen ? 'mobile-open' : ''}`}>
-          
+
           {/* Mobile Sidebar Close Button */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 className="catalog-sidebar-title">Filtry a akce</h3>
@@ -343,38 +618,109 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
         <main className="catalog-main">
           
           {/* Header Introduction Box */}
-          <div className="category-intro-box">
-            <div style={{ fontSize: '11px', color: 'var(--color-gold)', fontWeight: '800', textTransform: 'uppercase', marginBottom: '4px' }}>
-              Kusové karty
-            </div>
-            <h2 className="category-title">Pokémon Kusovky</h2>
-            <div className="category-description-wrapper">
-              <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`}>
-                Objevte širokou nabídku Pokémon kusových karet z nejnovějších i starších edicí. Od běžných karet po extrémně vzácné kousky Alternate Art a Special Illustration Rare. Garantujeme 100% originalitu a precizní posouzení stavu každé nabízené karty. Naše nabídka Pokémon kusovek je denně aktualizována. Každá karta prochází přísnou kontrolou kvality, abychom zajistili přesné zařazení do stavových kategorií. Využijte náš pokročilý filtr pro rychlé nalezení konkrétních karet do vašeho herního balíčku nebo sbírky. Pro turnajové hráče doporučujeme použít náš inovativní Decklist Importer, se kterým naplníte košík celým seznamem karet během několika sekund.
-              </p>
-              <button 
-                className="description-toggle-btn"
-                onClick={() => setIsDescExpanded(!isDescExpanded)}
-              >
-                {isDescExpanded ? 'Méně informací ▲' : 'Více informací ▼'}
-              </button>
-            </div>
-          </div>
-
-          {/* Subcategories Grid Selection */}
-          <div className="subcategories-section-title">Populární kategorie vzácností</div>
-          <div className="subcategory-grid">
-            {subcategories.map(sub => (
-              <div 
-                key={sub.id} 
-                className={`subcategory-box ${activeSubcategory === sub.id ? 'active' : ''}`}
-                onClick={() => setActiveSubcategory(sub.id)}
-              >
-                <span className="subcategory-icon">{sub.icon}</span>
-                <span className="subcategory-name">{sub.name}</span>
+          {activeSubcategory === 'all' ? (
+            <div className="category-intro-box">
+              <div style={{ fontSize: '11px', color: 'var(--color-gold)', fontWeight: '800', textTransform: 'uppercase', marginBottom: '4px' }}>
+                Kusové karty
               </div>
-            ))}
-          </div>
+              <h2 className="category-title">{gameInfo[selectedGame]?.title || 'Kusové TCG karty'}</h2>
+              <div className="category-description-wrapper">
+                <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`}>
+                  {gameInfo[selectedGame]?.desc || 'Vyberte si ze širokého katalogu kusových karet pro různé karetní hry (Pokémon, Lorcana, One Piece, Riftbound). Garantujeme 100% originalitu a perfektní servis.'}
+                </p>
+                <button 
+                  className="description-toggle-btn"
+                  onClick={() => setIsDescExpanded(!isDescExpanded)}
+                >
+                  {isDescExpanded ? 'Méně informací ▲' : 'Více informací ▼'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="category-intro-box">
+              <h2 className="category-title">
+                {subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.title || `${selectedGame} - ${subcategories.find(s => s.id === activeSubcategory)?.name}`}
+              </h2>
+              <div className="category-description-wrapper">
+                <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`}>
+                  {subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.desc || 'Detailní popis vzácnosti se připravuje.'}
+                </p>
+                <button
+                  className="description-toggle-btn"
+                  onClick={() => setIsDescExpanded(!isDescExpanded)}
+                >
+                  {isDescExpanded ? 'Méně informací ▲' : 'Více informací ▼'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Subcategories or Sub-subcategories Grid Selection */}
+          {activeSubcategory === 'all' ? (
+            subcategories.length > 0 && (
+              <>
+                <div className="subcategories-section-title">
+                  {selectedGame === 'Pokémon' ? 'Populární kategorie vzácností' : `Vyberte vzácnost (${selectedGame})`}
+                </div>
+                <div className="subcategory-grid">
+                  {subcategories.map(sub => {
+                    const hasImage = sub.icon && sub.icon.props && sub.icon.props.src;
+                    return (
+                      <div 
+                        key={sub.id} 
+                        className={`subcategory-box ${activeSubcategory === sub.id ? 'active' : ''}`}
+                        onClick={() => {
+                          setActiveSubcategory(sub.id);
+                          setActiveSubsubcategory('all');
+                          setFilters(prev => ({ 
+                            ...prev, 
+                            rarity: sub.id === 'all' ? undefined : sub.id,
+                            subsubcat: undefined 
+                          }));
+                        }}
+                      >
+                        <span className={`subcategory-icon ${hasImage ? 'clean-img-container' : ''}`}>
+                          {sub.icon}
+                        </span>
+                        <span className="subcategory-name">{sub.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )
+          ) : (
+            subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.subsubcats && (
+              <>
+                <div className="subcategories-section-title">
+                  Upřesněte vzácnost
+                </div>
+                <div className="subcategory-grid">
+                  {subSubcategoriesConfig[selectedGame][activeSubcategory].subsubcats.map(sub => {
+                    const isEmoji = typeof sub.icon === 'string';
+                    return (
+                      <div
+                        key={sub.id}
+                        className={`subcategory-box ${activeSubsubcategory === sub.id ? 'active' : ''}`}
+                        onClick={() => {
+                          setActiveSubsubcategory(sub.id);
+                          setFilters(prev => ({
+                            ...prev,
+                            subsubcat: sub.id === 'all' ? undefined : sub.id
+                          }));
+                        }}
+                      >
+                        <span className="subcategory-icon" style={{ fontSize: isEmoji ? '24px' : 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {sub.icon}
+                        </span>
+                        <span className="subcategory-name">{sub.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )
+          )}
 
           {/* Toolbar panel */}
           <div className="catalog-toolbar">
@@ -449,6 +795,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
           )}
         </main>
       </div>
+
     </div>
   );
 }

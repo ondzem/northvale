@@ -266,7 +266,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
                 <tr>
                   <td>Kategorie</td>
                   <td style={{ textTransform: 'capitalize' }}>
-                    {product.type === 'sealed' ? 'Zapečetěné' : 'Příslušenství'}
+                    {product.type === 'sealed' ? 'Sealed' : 'Příslušenství'}
                   </td>
                 </tr>
               </>

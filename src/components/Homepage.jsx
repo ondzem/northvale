@@ -179,7 +179,11 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     }
   };
 
-  const dealProduct = products.find(p => p.id === 'deal-of-the-day') || products[0];
+  const dealProduct = products.find(p => p.id === 'deal-of-the-day') || products.find(p => p.price !== undefined) || products[0];
+  const dealProductHasVariants = dealProduct.variants && dealProduct.variants.length > 0;
+  const dealProductPrice = dealProductHasVariants ? dealProduct.variants[0].price : (dealProduct.price || 0);
+  const dealProductStock = dealProductHasVariants ? dealProduct.variants[0].stock : (dealProduct.stock || 0);
+  const dealProductOriginalPrice = dealProduct.originalPrice || (dealProductHasVariants ? dealProduct.variants[0].originalPrice : null);
 
   const handleCardClick = (product) => {
     setSelectedProductId(product.id);
@@ -200,7 +204,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
   return (
     <div style={{ ...styles.container, paddingTop: isMobile ? '12px' : '24px', gap: isMobile ? '48px' : '88px' }} className="fade-in">
-      <h1 className="sr-only">NORTHVALE TCG - Váš specializovaný e-shop pro Pokémon, Magic the Gathering a grading karet</h1>
+      <h1 className="sr-only">NORTHVALE TCG - Váš specializovaný e-shop pro Pokémon, Lorcana, One Piece a grading karet</h1>
 
       {/* Hero Section */}
       <section style={{ ...styles.heroSection, marginTop: isMobile ? '12px' : '64px', gap: isMobile ? '16px' : '24px' }} className="container">
@@ -340,7 +344,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   borderRadius: '4px',
                   border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
-                  Zbývá {dealProduct.stock} kusů
+                  Zbývá {dealProductStock} kusů
                 </span>
               </div>
 
@@ -360,14 +364,14 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-red)' }}>
-                      -{dealProduct.originalPrice ? Math.round(((dealProduct.originalPrice - dealProduct.price) / dealProduct.originalPrice) * 100) : 33} %
+                      -{dealProductOriginalPrice ? Math.round(((dealProductOriginalPrice - dealProductPrice) / dealProductOriginalPrice) * 100) : 33} %
                     </span>
                     <span style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                      {dealProduct.originalPrice ? dealProduct.originalPrice.toLocaleString() : '2 690'} Kč
+                      {dealProductOriginalPrice ? dealProductOriginalPrice.toLocaleString() : '2 690'} Kč
                     </span>
                   </div>
                   <span style={{ fontSize: !isMobile ? '19px' : '18px', fontWeight: '800', color: 'var(--color-gold)', marginTop: '2px', whiteSpace: 'nowrap' }}>
-                    {dealProduct.price.toLocaleString()} Kč
+                    {dealProductPrice.toLocaleString()} Kč
                   </span>
                 </div>
 
@@ -596,21 +600,21 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                       border: '1px solid rgba(255, 255, 255, 0.1)',
                       marginBottom: '2px'
                     }}>
-                      Zbývá {dealProduct.stock} kusů
+                      Zbývá {dealProductStock} kusů
                     </span>
 
                     {/* Pricing */}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-red)' }}>
-                          -{dealProduct.originalPrice ? Math.round(((dealProduct.originalPrice - dealProduct.price) / dealProduct.originalPrice) * 100) : 33} %
+                          -{dealProductOriginalPrice ? Math.round(((dealProductOriginalPrice - dealProductPrice) / dealProductOriginalPrice) * 100) : 33} %
                         </span>
                         <span style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                          {dealProduct.originalPrice ? dealProduct.originalPrice.toLocaleString() : '2 690'} Kč
+                          {dealProductOriginalPrice ? dealProductOriginalPrice.toLocaleString() : '2 690'} Kč
                         </span>
                       </div>
                       <span style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-gold)', marginTop: '1px' }}>
-                        {dealProduct.price.toLocaleString()} Kč
+                        {dealProductPrice.toLocaleString()} Kč
                       </span>
                     </div>
 
@@ -635,7 +639,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                         transition: 'all 0.15s ease',
                         boxShadow: '0 4px 12px rgba(253, 189, 22, 0.15)'
                       }}
-                      disabled={dealProduct.stock === 0}
+                      disabled={dealProductStock === 0}
                       onClick={handleBuyDealClick}
                     >
                       <img 
@@ -869,8 +873,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Pokémon' }); setActivePage('sealed-catalog'); }}>
             <img src="/Pokemon.webp" alt="Pokémon" className="category-tile-img" />
           </div>
-          <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Magic' }); setActivePage('sealed-catalog'); }}>
-            <img src="/Magic the gathering.webp" alt="Magic: The Gathering" className="category-tile-img" />
+          <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Lorcana' }); setActivePage('sealed-catalog'); }}>
+            <img src="/Lorcana.png" alt="Disney Lorcana" className="category-tile-img" />
           </div>
           <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'One Piece' }); setActivePage('sealed-catalog'); }}>
             <img src="/One piece.webp" alt="One Piece" className="category-tile-img" />

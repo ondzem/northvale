@@ -1,10 +1,10 @@
 
 export default function CommunityTournaments() {
   const events = [
-    { day: 'Úterý', time: '17:00', game: 'Magic: The Gathering', format: 'Draft - Modern Horizons 3', location: 'Tolarie (Zámecká 23)' },
+    { day: 'Úterý', time: '17:00', game: 'Disney Lorcana', format: 'Constructed League', location: 'Wombat Games (Sladkovského 505)' },
     { day: 'Středa', time: '16:30', game: 'Pokémon TCG', format: 'Standard Junior League', location: 'Wombat Games (Sladkovského 505)' },
     { day: 'Čtvrtek', time: '17:30', game: 'One Piece Card Game', format: 'Constructed Tournament', location: 'Wombat Games (Sladkovského 505)' },
-    { day: 'Pátek', time: '17:00', game: 'Magic: The Gathering', format: 'FNM - Commander', location: 'Tolarie (Zámecká 23)' },
+    { day: 'Pátek', time: '17:00', game: 'Disney Lorcana', format: 'Draft - Shimmering Skies', location: 'Wombat Games (Sladkovského 505)' },
     { day: 'Sobota', time: '10:00', game: 'Pokémon TCG', format: 'Standard Premier Challenge', location: 'Wombat Games (Sladkovského 505)' }
   ];
 
