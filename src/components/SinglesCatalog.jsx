@@ -218,7 +218,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
   }
 
   // Get only singles and slabs (slab products are also single cards but graded!)
-  const singles = products.filter(p => p.type === 'single' || p.type === 'slab');
+  const singles = products.filter(p => p.type === 'single' || (FEATURE_FLAGS.showSlabs && p.type === 'slab'));
 
   // Available filters options
   const editions = Array.from(new Set(singles.filter(s => s.game === selectedGame).map(s => s.edition)));

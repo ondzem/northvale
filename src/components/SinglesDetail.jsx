@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FEATURE_FLAGS } from '../config';
 import ProductCard from './ProductCard';
 
 const getGameImage = (product) => {
@@ -142,7 +143,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
     .slice(0, 8);
 
   const similarSingles = products
-    .filter(p => (p.type === 'single' || p.type === 'slab') && p.id !== product.id && !relatedSingles.some(r => r.id === p.id))
+    .filter(p => (p.type === 'single' || (FEATURE_FLAGS.showSlabs && p.type === 'slab')) && p.id !== product.id && !relatedSingles.some(r => r.id === p.id))
     .slice(0, 8);
 
   // Helper function to get card codes
@@ -915,7 +916,9 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
         <div className="container newsletter-section">
           <div className="newsletter-content">
             <div className="newsletter-eyebrow">NEWSLETTER • 028</div>
-            <h2 className="newsletter-heading">Nové edice & výkupy jako první.</h2>
+            <h2 className="newsletter-heading">
+              {FEATURE_FLAGS.showBuylist ? 'Nové edice & výkupy jako první.' : 'Nové edice & akce jako první.'}
+            </h2>
           </div>
           <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); if(alert) alert('Děkujeme za přihlášení k newsletteru!', 'success'); }}>
             <div className="newsletter-input-group">

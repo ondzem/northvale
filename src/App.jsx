@@ -34,17 +34,29 @@ const parseUrlToState = () => {
   let parsedFilters = {};
   
   if (path.startsWith('/sealed-detail/')) {
-    page = 'sealed-detail';
-    productId = path.replace('/sealed-detail/', '');
+    const parsedId = path.replace('/sealed-detail/', '');
+    const product = mockProducts.find(p => p.id === parsedId);
+    if (product && !FEATURE_FLAGS.showSlabs && (product.subsubcat === 'graded' || product.subcat === 'graded' || (product.category === 'Acrylics' && product.game === 'PSA'))) {
+      page = 'home';
+    } else {
+      page = 'sealed-detail';
+      productId = parsedId;
+    }
   } else if (path.startsWith('/singles-detail/')) {
-    page = 'singles-detail';
-    productId = path.replace('/singles-detail/', '');
+    const parsedId = path.replace('/singles-detail/', '');
+    const product = mockProducts.find(p => p.id === parsedId);
+    if (product && product.type === 'slab' && !FEATURE_FLAGS.showSlabs) {
+      page = 'home';
+    } else {
+      page = 'singles-detail';
+      productId = parsedId;
+    }
   } else if (path === '/singles-catalog') {
     page = 'singles-catalog';
   } else if (path === '/sealed-catalog') {
     page = 'sealed-catalog';
   } else if (path === '/slabs-catalog') {
-    page = 'slabs-catalog';
+    page = FEATURE_FLAGS.showSlabs ? 'slabs-catalog' : 'home';
   } else if (path === '/buylist') {
     page = FEATURE_FLAGS.showBuylist ? 'buylist' : 'home';
   } else if (path === '/grading') {
@@ -98,7 +110,7 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
   } else if (page === 'sealed-catalog') {
     path = '/sealed-catalog';
   } else if (page === 'slabs-catalog') {
-    path = '/slabs-catalog';
+    path = FEATURE_FLAGS.showSlabs ? '/slabs-catalog' : '/';
   } else if (page === 'buylist') {
     path = FEATURE_FLAGS.showBuylist ? '/buylist' : '/';
   } else if (page === 'grading') {
@@ -159,6 +171,9 @@ export default function App() {
       page = 'home';
     }
     if ((page === 'grading' || page === 'grading-guide') && !FEATURE_FLAGS.showGrading) {
+      page = 'home';
+    }
+    if (page === 'slabs-catalog' && !FEATURE_FLAGS.showSlabs) {
       page = 'home';
     }
     setActivePage(page);
@@ -519,7 +534,7 @@ export default function App() {
           />
         )}
 
-        {activePage === 'slabs-catalog' && (
+        {activePage === 'slabs-catalog' && FEATURE_FLAGS.showSlabs && (
           <SlabsCatalog 
             products={mockProducts}
             addToCart={addToCart}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FEATURE_FLAGS } from '../config';
 import ProductCard from './ProductCard';
 
 const getGameImage = (product) => {
@@ -936,7 +937,9 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
         <div className="container newsletter-section">
           <div className="newsletter-content">
             <div className="newsletter-eyebrow">NEWSLETTER • 028</div>
-            <h2 className="newsletter-heading">Nové edice & výkupy jako první.</h2>
+            <h2 className="newsletter-heading">
+              {FEATURE_FLAGS.showBuylist ? 'Nové edice & výkupy jako první.' : 'Nové edice & akce jako první.'}
+            </h2>
           </div>
           <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); if(alert) alert('Děkujeme za přihlášení k newsletteru!', 'success'); }}>
             <div className="newsletter-input-group">

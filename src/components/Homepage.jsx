@@ -892,9 +892,11 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); }}>
             <img src="/Prislusentstvi.webp" alt="Příslušenství" className="category-tile-img" />
           </div>
-          <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
-            <img src="/Ohodnoceni karet.webp" alt="Ohodnocené karty" className="category-tile-img" />
-          </div>
+          {FEATURE_FLAGS.showSlabs && (
+            <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
+              <img src="/Ohodnoceni karet.webp" alt="Ohodnocené karty" className="category-tile-img" />
+            </div>
+          )}
         </div>
       </section>
 
@@ -1027,49 +1029,51 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         )}
 
         {/* 3. Ohodnocené karty (Slabs) */}
-        <section style={{ ...styles.sectionContainer, paddingBottom: isMobile ? '48px' : '0' }} className="container">
-          <header className="nv-header">
-            <div className="nv-header-left">
-              <div className="nv-eyebrow">Certifikovaná kvalita</div>
-              <h2 className="nv-title">Ohodnocené karty</h2>
-            </div>
-            <span className="nv-link more-link-desktop" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
-              Zobrazit více &rarr;
-            </span>
-          </header>
-          <div className="slider-container-wrapper">
-            <button onClick={() => handleScroll(gradedCardsRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
-            <div ref={gradedCardsRef} className="homepage-product-grid">
-            {gradedCards.map(product => (
-              <div key={product.id} className={`vf-card type-${product.type}`} onClick={() => handleCardClick(product)}>
-                <div className="vf-art">
-                  <div className="card-art">
-                    <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
-                    <div className="ca-holo"></div>
-                    <div className="ca-shine"></div>
-                    <div className="ca-grain"></div>
-                  </div>
-                </div>
-                <div className="vf-shadow"></div>
-                <div className="vf-info">
-                  <div className="vf-name">{product.name}</div>
-                  <div className="vf-rule"></div>
-                  <div className="vf-meta">
-                    <span className="slab-badge">{product.company} {product.grade}</span>
-                    <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
-                  </div>
-                </div>
+        {FEATURE_FLAGS.showSlabs && (
+          <section style={{ ...styles.sectionContainer, paddingBottom: isMobile ? '48px' : '0' }} className="container">
+            <header className="nv-header">
+              <div className="nv-header-left">
+                <div className="nv-eyebrow">Certifikovaná kvalita</div>
+                <h2 className="nv-title">Ohodnocené karty</h2>
               </div>
-            ))}
+              <span className="nv-link more-link-desktop" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
+                Zobrazit více &rarr;
+              </span>
+            </header>
+            <div className="slider-container-wrapper">
+              <button onClick={() => handleScroll(gradedCardsRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
+              <div ref={gradedCardsRef} className="homepage-product-grid">
+              {gradedCards.map(product => (
+                <div key={product.id} className={`vf-card type-${product.type}`} onClick={() => handleCardClick(product)}>
+                  <div className="vf-art">
+                    <div className="card-art">
+                      <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
+                      <div className="ca-holo"></div>
+                      <div className="ca-shine"></div>
+                      <div className="ca-grain"></div>
+                    </div>
+                  </div>
+                  <div className="vf-shadow"></div>
+                  <div className="vf-info">
+                    <div className="vf-name">{product.name}</div>
+                    <div className="vf-rule"></div>
+                    <div className="vf-meta">
+                      <span className="slab-badge">{product.company} {product.grade}</span>
+                      <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              </div>
+              <button onClick={() => handleScroll(gradedCardsRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
             </div>
-            <button onClick={() => handleScroll(gradedCardsRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
-          </div>
-          <div className="more-link-mobile-wrapper">
-            <span className="nv-link more-link-mobile" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
-              Zobrazit více &rarr;
-            </span>
-          </div>
-        </section>
+            <div className="more-link-mobile-wrapper">
+              <span className="nv-link more-link-mobile" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
+                Zobrazit více &rarr;
+              </span>
+            </div>
+          </section>
+        )}
       </div>
 
       {/* 4. Příslušenství (Accessories) */}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FEATURE_FLAGS } from '../config';
 import ProductCard from './ProductCard';
 import DealOfTheDay from './DealOfTheDay';
 
@@ -25,7 +26,7 @@ const gameInfo = {
   },
   'Acrylics': {
     title: 'Prémiové Akrylové Boxy',
-    desc: 'Vysoce kvalitní akrylové obaly s UV ochranou pro vaše cenné booster boxy, Elite Trainer Boxy a graded karty. Dokonalá ochrana a prezentace.'
+    desc: `Vysoce kvalitní akrylové obaly s UV ochranou pro vaše cenné booster boxy a Elite Trainer Boxy${FEATURE_FLAGS.showSlabs ? ' a graded karty' : ''}. Dokonalá ochrana a prezentace.`
   }
 };
 
@@ -313,7 +314,14 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
 
 
 
-  const sealedProducts = products.filter(p => p.type === 'sealed' || p.type === 'accessory');
+  const sealedProducts = products.filter(p => {
+    if (p.type !== 'sealed' && p.type !== 'accessory') return false;
+    if (!FEATURE_FLAGS.showSlabs) {
+      if (p.subsubcat === 'graded' || p.subcat === 'graded') return false;
+      if (p.category === 'Acrylics' && p.game === 'PSA') return false;
+    }
+    return true;
+  });
 
   // Dynamic subcategories setup
   let subcategories = [];
@@ -355,19 +363,19 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       { id: 'all', name: 'Všechno příslušenství', icon: <img src="/Prislusentstvi.webp" alt="" className="subcategory-img" /> },
       { id: 'cards', name: 'Na karty', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
       { id: 'toploaders', name: 'Na toploadery', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'graded', name: 'Na graded karty', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+      FEATURE_FLAGS.showSlabs && { id: 'graded', name: 'Na graded karty', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
       { id: 'Sleeves', name: 'Sleevy', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/122159_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
       { id: 'Toploaders', name: 'Toploadery', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/142981_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
       { id: 'Other', name: 'Ostatní', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="subcategory-img" /> }
-    ];
+    ].filter(Boolean);
   } else if (selectedGame === 'Acrylics') {
     subcategories = [
       { id: 'all', name: 'Všechny akryly', icon: <img src="/acrylic-etb-box.png" alt="" className="subcategory-img" /> },
       { id: 'Pokémon', name: 'Pokémon', icon: <img src="/acrylic-etb-box.png" alt="" className="subcategory-img" /> },
       { id: 'Lorcana', name: 'Lorcana', icon: <img src="/acrylic-etb-box.png" alt="" className="subcategory-img" /> },
       { id: 'Riftbound', name: 'Riftbound', icon: <img src="/acrylic-etb-box.png" alt="" className="subcategory-img" /> },
-      { id: 'PSA', name: 'Psa karty', icon: <img src="/acrylic-etb-box.png" alt="" className="subcategory-img" /> }
-    ];
+      FEATURE_FLAGS.showSlabs && { id: 'PSA', name: 'Psa karty', icon: <img src="/acrylic-etb-box.png" alt="" className="subcategory-img" /> }
+    ].filter(Boolean);
   } else {
     subcategories = [
       { id: 'all', name: 'Všechny produkty', icon: <img src="/Pokemon.webp" alt="" className="subcategory-img" /> }
