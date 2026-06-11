@@ -76,7 +76,7 @@ export default function Footer({ setActivePage }) {
         </div>
       </div>
 
-      <div className="footer-payment-info" style={{
+      <div className="footer-payment-mobile footer-payment-info" style={{
         borderTop: '1px solid rgba(255, 255, 255, 0.05)',
         paddingTop: '20px',
         paddingBottom: '20px',
@@ -95,6 +95,7 @@ export default function Footer({ setActivePage }) {
       <div className="footer-bottom">
         <div className="container footer-bottom-content">
           <span>&copy; {new Date().getFullYear()} NORTHVALE s.r.o.</span>
+          <img src="/comgate-logos.png" alt="Platební metody ComGate" className="footer-payment-desktop" style={{ maxHeight: '28px', opacity: 0.8 }} />
           <span>Vytvořil <a href="https://ozeman.cz" target="_blank" rel="noopener noreferrer" className="credits-link">ozeman.cz</a></span>
         </div>
       </div>

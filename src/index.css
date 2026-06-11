@@ -5106,4 +5106,17 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   }
 }
 
+/* Responsive visibility for footer payment logos */
+@media (max-width: 850px) {
+  .footer-payment-desktop {
+    display: none !important;
+  }
+}
+
+@media (min-width: 851px) {
+  .footer-payment-mobile {
+    display: none !important;
+  }
+}
+
 
