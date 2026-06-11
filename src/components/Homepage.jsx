@@ -159,9 +159,9 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       initials: 'MR',
       name: 'Monika R.',
       desc: 'UPCE student',
-      text: '„Oceňuji možnost doručení kusovek na odběrné místo v kavárně v centru Pardubic. Neplatím žádné poštovné pro malé objednávky a k tomu dostanu výbornou kávu. Výkup proběhl naprosto hladce.“'
+      text: `„Oceňuji možnost doručení kusovek na odběrné místo v kavárně v centru Pardubic. Neplatím žádné poštovné pro malé objednávky a k tomu dostanu výbornou kávu. ${FEATURE_FLAGS.showBuylist ? 'Výkup proběhl' : 'Nákup proběhl'} naprosto hladce.“`
     },
-    {
+    FEATURE_FLAGS.showGrading && {
       initials: 'PS',
       name: 'Petr S.',
       desc: 'Hradec Králové',
@@ -173,7 +173,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       desc: 'Pardubice',
       text: '„Jako rodič velmi oceňuji dárkového průvodce. Vůbec se v Pokémon edicích nevyznám, ale s jejich dárkovým setem pod stromečkem mělo dítě obrovskou radost a já měl jistotu, že nekupuji fake karty.“'
     }
-  ];
+  ].filter(Boolean);
 
   const handleScroll = (ref, direction) => {
     if (ref.current) {
