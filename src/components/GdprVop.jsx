@@ -336,6 +336,9 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 4.1. Cenu zboží může kupující uhradit v hotovosti při osobním odběru, bezhotovostně přes platební bránu ComGate, převodem na bankovní účet, na dobírku, nebo uplatněním Store Kreditu.
               </p>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                4.1.1. Bezhotovostní platby platební kartou a zrychleným převodem jsou zabezpečeny platební bránou ComGate. Přenos citlivých dat a informací o platbách probíhá v šifrované podobě s využitím standardu SSL / TLS.
+              </p>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                 4.2. Společně s kupní cenou je kupující povinen zaplatit náklady spojené s balením a dodáním.
               </p>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
