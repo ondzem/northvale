@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { FEATURE_FLAGS } from '../config';
 
 const ProductImage = ({ src, alt, className = '' }) => {
   const [aspectRatio, setAspectRatio] = useState(1.0);
@@ -88,7 +89,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       prevSlide();
     }
   };
-  const slides = [
+  const rawSlides = [
     { 
       mobileImage: '/Mobile - Grading karet.webp', 
       desktopImage: '/Desktop - Grading Karet.webp', 
@@ -99,6 +100,12 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     { title: 'Investiční produkty', desc: 'Vybrané ETB a booster boxy v bezchybném stavu vhodné do sbírky.', buttonText: 'Investovat', page: 'sealed-catalog' },
     { title: 'Výkup karet za hotové', desc: 'Nabídněte nám své přebytečné karty a získejte peníze na bankovní účet.', buttonText: 'Prodat karty', page: 'buylist' }
   ];
+
+  const slides = rawSlides.filter(slide => {
+    if (slide.page === 'grading' && !FEATURE_FLAGS.showGrading) return false;
+    if (slide.page === 'buylist' && !FEATURE_FLAGS.showBuylist) return false;
+    return true;
+  });
 
   // Deal of the day countdown timer
   const [timeLeft, setTimeLeft] = useState({ hours: 14, minutes: 35, seconds: 22 });
@@ -1002,20 +1009,22 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         </section>
 
         {/* Grading Banner */}
-        <section style={{ marginBottom: isMobile ? '24px' : '40px' }} className="container">
-          <div className="grading-banner-card">
-            <div className="grading-banner-content">
-              <h2 className="grading-banner-title">Nechte si ohodnotit vaši kartu</h2>
-              <p className="grading-banner-description">
-                Zprostředkujeme pro Vás odeslání karet do USA (PSA, Beckett, TAG). Vaše karty vyčistíme, bezpečně zabalíme a kompletně pojistíme. Sledujte průběh své zakázky online.
-              </p>
-              <button className="btn btn-primary" onClick={() => { setFilters({}); setActivePage('grading'); }}>Chci ohodnotit kartu</button>
+        {FEATURE_FLAGS.showGrading && (
+          <section style={{ marginBottom: isMobile ? '24px' : '40px' }} className="container">
+            <div className="grading-banner-card">
+              <div className="grading-banner-content">
+                <h2 className="grading-banner-title">Nechte si ohodnotit vaši kartu</h2>
+                <p className="grading-banner-description">
+                  Zprostředkujeme pro Vás odeslání karet do USA (PSA, Beckett, TAG). Vaše karty vyčistíme, bezpečně zabalíme a kompletně pojistíme. Sledujte průběh své zakázky online.
+                </p>
+                <button className="btn btn-primary" onClick={() => { setFilters({}); setActivePage('grading'); }}>Chci ohodnotit kartu</button>
+              </div>
+              <div className="grading-banner-img-wrapper">
+                <img src="/grading sekce.webp" alt="Grading karet" className="grading-banner-image" />
+              </div>
             </div>
-            <div className="grading-banner-img-wrapper">
-              <img src="/grading sekce.webp" alt="Grading karet" className="grading-banner-image" />
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* 3. Ohodnocené karty (Slabs) */}
         <section style={{ ...styles.sectionContainer, paddingBottom: isMobile ? '48px' : '0' }} className="container">
@@ -1149,7 +1158,9 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         <div className="container newsletter-section">
           <div className="newsletter-content">
             <div className="newsletter-eyebrow">NEWSLETTER • 028</div>
-            <h2 className="newsletter-heading">Nové edice & výkupy jako první.</h2>
+            <h2 className="newsletter-heading">
+              {FEATURE_FLAGS.showBuylist ? 'Nové edice & výkupy jako první.' : 'Nové edice & akce jako první.'}
+            </h2>
           </div>
           <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); alert('Děkujeme za přihlášení k newsletteru!'); }}>
             <div className="newsletter-input-group">

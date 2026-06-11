@@ -21,6 +21,7 @@ import Favorites from './components/Favorites';
 import LoginModal from './components/LoginModal';
 
 import { mockProducts } from './mockData';
+import { FEATURE_FLAGS } from './config';
 import './App.css';
 
 const parseUrlToState = () => {
@@ -45,11 +46,11 @@ const parseUrlToState = () => {
   } else if (path === '/slabs-catalog') {
     page = 'slabs-catalog';
   } else if (path === '/buylist') {
-    page = 'buylist';
+    page = FEATURE_FLAGS.showBuylist ? 'buylist' : 'home';
   } else if (path === '/grading') {
-    page = 'grading';
+    page = FEATURE_FLAGS.showGrading ? 'grading' : 'home';
   } else if (path === '/grading-guide') {
-    page = 'grading-guide';
+    page = FEATURE_FLAGS.showGrading ? 'grading-guide' : 'home';
   } else if (path === '/community') {
     page = 'community';
   } else if (path === '/support') {
@@ -99,11 +100,11 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
   } else if (page === 'slabs-catalog') {
     path = '/slabs-catalog';
   } else if (page === 'buylist') {
-    path = '/buylist';
+    path = FEATURE_FLAGS.showBuylist ? '/buylist' : '/';
   } else if (page === 'grading') {
-    path = '/grading';
+    path = FEATURE_FLAGS.showGrading ? '/grading' : '/';
   } else if (page === 'grading-guide') {
-    path = '/grading-guide';
+    path = FEATURE_FLAGS.showGrading ? '/grading-guide' : '/';
   } else if (page === 'community') {
     path = '/community';
   } else if (page === 'support') {
@@ -154,6 +155,12 @@ export default function App() {
   const [filters, setFilters] = useState(initialUrlState.filters);
 
   const navigateToPage = (page, tab) => {
+    if (page === 'buylist' && !FEATURE_FLAGS.showBuylist) {
+      page = 'home';
+    }
+    if ((page === 'grading' || page === 'grading-guide') && !FEATURE_FLAGS.showGrading) {
+      page = 'home';
+    }
     setActivePage(page);
     if (page === 'gdpr-vop' && tab) {
       setGdprVopTab(tab);
@@ -547,7 +554,7 @@ export default function App() {
           />
         )}
 
-        {activePage === 'buylist' && (
+        {activePage === 'buylist' && FEATURE_FLAGS.showBuylist && (
           <BuylistPortal 
             products={mockProducts}
             submitBuylist={submitBuylist}
@@ -557,7 +564,7 @@ export default function App() {
           />
         )}
 
-        {activePage === 'grading' && (
+        {activePage === 'grading' && FEATURE_FLAGS.showGrading && (
           <GradingPortal 
             submitGrading={submitGrading}
             user={user}
@@ -566,7 +573,7 @@ export default function App() {
           />
         )}
 
-        {activePage === 'grading-guide' && (
+        {activePage === 'grading-guide' && FEATURE_FLAGS.showGrading && (
           <GradingGuide 
             setActivePage={setActivePage}
           />

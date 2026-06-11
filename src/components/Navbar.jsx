@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FEATURE_FLAGS } from '../config';
 
 export default function Navbar({ setActivePage, cart, user, setFilters, setSearchQuery, isLoggedIn, onOpenLogin }) {
   const [drawerOpen, _setDrawerOpen] = useState(false);
@@ -596,60 +597,62 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 </div>
 
                 {/* 7. Grading Dropdown */}
-                <div
-                  style={styles.dropdownContainer}
-                  onMouseEnter={() => setActiveDropdown('grading')}
-                  onMouseLeave={() => setActiveDropdown(null)}
-                >
-                  <button style={styles.categoryItem} onClick={() => setActivePage('grading')}>
-                    Grading <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
-                  </button>
-                  {activeDropdown === 'grading' && (
-                    <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
-                      <div className="nav-dropdown-row">
-                        <div className="nav-dropdown-item" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
-                          <div className="nav-dropdown-icon">
-                            <img src="/Grading.webp" alt="" className="nav-dropdown-img" />
+                {FEATURE_FLAGS.showGrading && (
+                  <div
+                    style={styles.dropdownContainer}
+                    onMouseEnter={() => setActiveDropdown('grading')}
+                    onMouseLeave={() => setActiveDropdown(null)}
+                  >
+                    <button style={styles.categoryItem} onClick={() => setActivePage('grading')}>
+                      Grading <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
+                    </button>
+                    {activeDropdown === 'grading' && (
+                      <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
+                        <div className="nav-dropdown-row">
+                          <div className="nav-dropdown-item" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
+                            <div className="nav-dropdown-icon">
+                              <img src="/Grading.webp" alt="" className="nav-dropdown-img" />
+                            </div>
+                            <span className="nav-dropdown-text">Pre Grading</span>
                           </div>
-                          <span className="nav-dropdown-text">Pre Grading</span>
+                          <div className="nav-dropdown-item" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
+                            <div className="nav-dropdown-icon">
+                              <img src="/Desktop - Grading Karet.webp" alt="" className="nav-dropdown-img" />
+                            </div>
+                            <span className="nav-dropdown-text">Odeslání PSA</span>
+                          </div>
+                          <div className="nav-dropdown-item" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
+                            <div className="nav-dropdown-icon">
+                              <img src="/Mobile - Grading karet.webp" alt="" className="nav-dropdown-img" />
+                            </div>
+                            <span className="nav-dropdown-text">Odeslání Beckett</span>
+                          </div>
+                          <div className="nav-dropdown-item" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
+                            <div className="nav-dropdown-icon">
+                              <img src="/grading sekce.webp" alt="" className="nav-dropdown-img" />
+                            </div>
+                            <span className="nav-dropdown-text">Odeslání TAG</span>
+                          </div>
+                          <div className="nav-dropdown-item" onClick={() => { setActivePage('grading-guide'); setActiveDropdown(null); }}>
+                            <div className="nav-dropdown-icon">
+                              <img src="/grading sekce.webp" alt="" className="nav-dropdown-img" />
+                            </div>
+                            <span className="nav-dropdown-text" style={{ color: 'var(--color-gold)' }}>Průvodce stavy</span>
+                          </div>
                         </div>
-                        <div className="nav-dropdown-item" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
-                          <div className="nav-dropdown-icon">
-                            <img src="/Desktop - Grading Karet.webp" alt="" className="nav-dropdown-img" />
-                          </div>
-                          <span className="nav-dropdown-text">Odeslání PSA</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
-                          <div className="nav-dropdown-icon">
-                            <img src="/Mobile - Grading karet.webp" alt="" className="nav-dropdown-img" />
-                          </div>
-                          <span className="nav-dropdown-text">Odeslání Beckett</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
-                          <div className="nav-dropdown-icon">
-                            <img src="/grading sekce.webp" alt="" className="nav-dropdown-img" />
-                          </div>
-                          <span className="nav-dropdown-text">Odeslání TAG</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => { setActivePage('grading-guide'); setActiveDropdown(null); }}>
-                          <div className="nav-dropdown-icon">
-                            <img src="/grading sekce.webp" alt="" className="nav-dropdown-img" />
-                          </div>
-                          <span className="nav-dropdown-text" style={{ color: 'var(--color-gold)' }}>Průvodce stavy</span>
+                        <div className="nav-dropdown-footer">
+                          <span className="nav-dropdown-all-link" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
+                            Celá kategorie
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="5" y1="12" x2="19" y2="12"></line>
+                              <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                          </span>
                         </div>
                       </div>
-                      <div className="nav-dropdown-footer">
-                        <span className="nav-dropdown-all-link" onClick={() => { setActivePage('grading'); setActiveDropdown(null); }}>
-                          Celá kategorie
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                            <polyline points="12 5 19 12 12 19"></polyline>
-                          </svg>
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
 
               </div>
 
@@ -825,11 +828,13 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   </div>
 
                   {/* 8. Grading */}
-                  <div style={styles.mobileNavSection}>
-                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { setActivePage('grading'); setDrawerOpen(false); }}>
-                      <span>Grading</span>
+                  {FEATURE_FLAGS.showGrading && (
+                    <div style={styles.mobileNavSection}>
+                      <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { setActivePage('grading'); setDrawerOpen(false); }}>
+                        <span>Grading</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Language selector on mobile */}
                   <div style={{ ...styles.mobileNavSection, borderBottom: 'none', paddingBottom: '0', marginTop: '48px' }}>
@@ -875,19 +880,21 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
               {/* Desktop Drawer Content (Only shown on desktop) */}
               {!isMobile && (
                 <>
-                  <div style={styles.drawerSection}>
-                    <h4 style={styles.drawerSectionTitle}>Výkup karet (Buylist)</h4>
-                    <p style={styles.drawerText}>
-                      Vykupujeme kusové karty her Pokémon, Lorcana a One Piece. Získejte peníze přímo na svůj bankovní účet!
-                    </p>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => { setActivePage('buylist'); setDrawerOpen(false); }}
-                      style={{ width: '100%', marginTop: '8px' }}
-                    >
-                      Přejít na výkup
-                    </button>
-                  </div>
+                  {FEATURE_FLAGS.showBuylist && (
+                    <div style={styles.drawerSection}>
+                      <h4 style={styles.drawerSectionTitle}>Výkup karet (Buylist)</h4>
+                      <p style={styles.drawerText}>
+                        Vykupujeme kusové karty her Pokémon, Lorcana a One Piece. Získejte peníze přímo na svůj bankovní účet!
+                      </p>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => { setActivePage('buylist'); setDrawerOpen(false); }}
+                        style={{ width: '100%', marginTop: '8px' }}
+                      >
+                        Přejít na výkup
+                      </button>
+                    </div>
+                  )}
 
                   <div style={styles.drawerSection}>
                     <h4 style={styles.drawerSectionTitle}>Osobní odběr Coffee &amp; Cards</h4>

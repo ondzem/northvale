@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import { FEATURE_FLAGS } from '../config';
 
 export default function SupportFAQ() {
   const [openAccordion, setOpenAccordion] = useState(null);
   const [contactSubmitted, setContactSubmitted] = useState(false);
 
-  const faqData = [
+  const rawFaqData = [
     {
       category: 'Doprava a doručení',
       questions: [
@@ -45,6 +46,11 @@ export default function SupportFAQ() {
       ]
     }
   ];
+
+  const faqData = rawFaqData.filter(cat => {
+    if (cat.category.includes('Výkup') && !FEATURE_FLAGS.showBuylist) return false;
+    return true;
+  });
 
   const toggleAccordion = (index) => {
     setOpenAccordion(openAccordion === index ? null : index);
@@ -148,7 +154,12 @@ export default function SupportFAQ() {
             </div>
           ) : (
             <form style={styles.form} onSubmit={handleContactSubmit}>
-              <p style={styles.formDesc}>Máte dotaz k objednávce, výkupu nebo gradingu? Napište nám přes formulář níže.</p>
+              <p style={styles.formDesc}>
+                Máte dotaz k objednávce
+                {FEATURE_FLAGS.showBuylist ? ', výkupu' : ''}
+                {FEATURE_FLAGS.showGrading ? ' nebo gradingu' : ''}
+                ? Napište nám přes formulář níže.
+              </p>
               
               <div style={styles.formField}>
                 <label style={styles.formLabel}>Jméno a příjmení:</label>

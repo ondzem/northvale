@@ -1,4 +1,6 @@
 
+import { FEATURE_FLAGS } from '../config';
+
 export default function UserPortal({ user, setActivePage, onLogout }) {
   const getGradingStepIndex = (status) => {
     const steps = ['Příprava', 'Odesláno do USA', 'Zpracování', 'Nagradováno', 'Na cestě zpět', 'Připraveno'];
@@ -13,7 +15,7 @@ export default function UserPortal({ user, setActivePage, onLogout }) {
 
       <div style={styles.layout}>
         {/* Left Column: Account Details & History */}
-        <div style={styles.leftCol}>
+        <div style={{ ...styles.leftCol, flex: FEATURE_FLAGS.showGrading ? '1.8 1 500px' : '1 1 100%' }}>
           {/* User profile card */}
           <div style={styles.profileCard} className="glass-panel">
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
@@ -80,82 +82,84 @@ export default function UserPortal({ user, setActivePage, onLogout }) {
         </div>
 
         {/* Right Column: Grading Submissions (1/3 width) */}
-        <div style={styles.rightCol} className="glass-panel">
-          <h3 style={styles.sectionHeading}>Grading zakázky v USA</h3>
-          <p style={styles.desc}>Sledujte aktuální stav svých odeslaných karet do PSA, Beckett nebo TAG.</p>
+        {FEATURE_FLAGS.showGrading && (
+          <div style={styles.rightCol} className="glass-panel">
+            <h3 style={styles.sectionHeading}>Grading zakázky v USA</h3>
+            <p style={styles.desc}>Sledujte aktuální stav svých odeslaných karet do PSA, Beckett nebo TAG.</p>
 
-          {user.gradingSubmissions.length === 0 ? (
-            <div style={styles.emptyGrading} className="glass-card">
-              <span style={{ fontSize: '32px' }}>🔬</span>
-              <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                Zatím nemáte žádné aktivní grading zakázky.
-              </p>
-              <button 
-                className="btn btn-secondary" 
-                style={{ marginTop: '8px', fontSize: '12px' }}
-                onClick={() => setActivePage('grading')}
-              >
-                Vytvořit zakázku
-              </button>
-            </div>
-          ) : (
-            <div style={styles.gradingList}>
-              {user.gradingSubmissions.map(sub => {
-                const currentStepIdx = getGradingStepIndex(sub.status);
+            {user.gradingSubmissions.length === 0 ? (
+              <div style={styles.emptyGrading} className="glass-card">
+                <span style={{ fontSize: '32px' }}>🔬</span>
+                <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
+                  Zatím nemáte žádné aktivní grading zakázky.
+                </p>
+                <button 
+                  className="btn btn-secondary" 
+                  style={{ marginTop: '8px', fontSize: '12px' }}
+                  onClick={() => setActivePage('grading')}
+                >
+                  Vytvořit zakázku
+                </button>
+              </div>
+            ) : (
+              <div style={styles.gradingList}>
+                {user.gradingSubmissions.map(sub => {
+                  const currentStepIdx = getGradingStepIndex(sub.status);
 
-                return (
-                  <div key={sub.id} style={styles.gradingItem} className="glass-card">
-                    <div style={styles.gradingItemHeader}>
-                      <div>
-                        <span style={styles.gradingId}>Zakázka {sub.id}</span>
-                        <span style={styles.gradingMeta}>{sub.company} - {sub.cardCount} karet</span>
+                  return (
+                    <div key={sub.id} style={styles.gradingItem} className="glass-card">
+                      <div style={styles.gradingItemHeader}>
+                        <div>
+                          <span style={styles.gradingId}>Zakázka {sub.id}</span>
+                          <span style={styles.gradingMeta}>{sub.company} - {sub.cardCount} karet</span>
+                        </div>
+                        <span style={styles.gradingStatusBadge}>{sub.status}</span>
                       </div>
-                      <span style={styles.gradingStatusBadge}>{sub.status}</span>
-                    </div>
 
-                    {/* Stepper Timeline */}
-                    <div style={styles.timeline}>
-                      {gradingSteps.map((stepName, sIdx) => {
-                        const isCompleted = sIdx <= currentStepIdx;
-                        const isActive = sIdx === currentStepIdx;
+                      {/* Stepper Timeline */}
+                      <div style={styles.timeline}>
+                        {gradingSteps.map((stepName, sIdx) => {
+                          const isCompleted = sIdx <= currentStepIdx;
+                          const isActive = sIdx === currentStepIdx;
 
-                        return (
-                          <div key={sIdx} style={styles.timelineStep}>
-                            <div style={styles.timelineDotWrapper}>
-                              <div 
-                                style={{
-                                  ...styles.timelineDot,
-                                  backgroundColor: isActive ? 'var(--color-gold)' : isCompleted ? 'var(--color-green)' : 'rgba(255,255,255,0.06)'
-                                }}
-                              />
-                              {sIdx < gradingSteps.length - 1 && (
+                          return (
+                            <div key={sIdx} style={styles.timelineStep}>
+                              <div style={styles.timelineDotWrapper}>
                                 <div 
                                   style={{
-                                    ...styles.timelineLine,
-                                    backgroundColor: sIdx < currentStepIdx ? 'var(--color-green)' : 'rgba(255,255,255,0.04)'
+                                    ...styles.timelineDot,
+                                    backgroundColor: isActive ? 'var(--color-gold)' : isCompleted ? 'var(--color-green)' : 'rgba(255,255,255,0.06)'
                                   }}
                                 />
-                              )}
+                                {sIdx < gradingSteps.length - 1 && (
+                                  <div 
+                                    style={{
+                                      ...styles.timelineLine,
+                                      backgroundColor: sIdx < currentStepIdx ? 'var(--color-green)' : 'rgba(255,255,255,0.04)'
+                                    }}
+                                  />
+                                )}
+                              </div>
+                              <span 
+                                style={{
+                                  ...styles.timelineLabel,
+                                  color: isActive ? 'var(--color-gold)' : isCompleted ? 'var(--text-main)' : 'var(--text-muted)',
+                                  fontWeight: isActive ? '700' : 'normal'
+                                }}
+                              >
+                                {stepName}
+                              </span>
                             </div>
-                            <span 
-                              style={{
-                                ...styles.timelineLabel,
-                                color: isActive ? 'var(--color-gold)' : isCompleted ? 'var(--text-main)' : 'var(--text-muted)',
-                                fontWeight: isActive ? '700' : 'normal'
-                              }}
-                            >
-                              {stepName}
-                            </span>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FEATURE_FLAGS } from '../config';
 
 export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
@@ -468,10 +469,12 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                   <span className="benefit-icon">✦</span>
                   <span className="benefit-text">Stálý přehled a sledování všech objednávek</span>
                 </li>
-                <li>
-                  <span className="benefit-icon">✦</span>
-                  <span className="benefit-text">Snadný výkup vašich karet za skvělé ceny</span>
-                </li>
+                {FEATURE_FLAGS.showBuylist && (
+                  <li>
+                    <span className="benefit-icon">✦</span>
+                    <span className="benefit-text">Snadný výkup vašich karet za skvělé ceny</span>
+                  </li>
+                )}
               </ul>
 
               <div className="benefits-cta-box">

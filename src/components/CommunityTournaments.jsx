@@ -1,4 +1,6 @@
 
+import { FEATURE_FLAGS } from '../config';
+
 export default function CommunityTournaments() {
   const events = [
     { day: 'Úterý', time: '17:00', game: 'Disney Lorcana', format: 'Constructed League', location: 'Wombat Games (Sladkovského 505)' },
@@ -23,7 +25,9 @@ export default function CommunityTournaments() {
           <ul style={styles.perksList}>
             <li><strong>Doprava zdarma:</strong> Žádné poštovné pro jakoukoliv objednávku kusovek.</li>
             <li><strong>Kávový bonus:</strong> Ke každému vyzvednutému balíčku dostanete 10% slevu na výběrovou kávu.</li>
-            <li><strong>Fyzický výkup:</strong> Naklikejte výkup karet online a odevzdejte karty k fyzické kontrole přímo na kavárně bez placení poštovného.</li>
+            {FEATURE_FLAGS.showBuylist && (
+              <li><strong>Fyzický výkup:</strong> Naklikejte výkup karet online a odevzdejte karty k fyzické kontrole přímo na kavárně bez placení poštovného.</li>
+            )}
           </ul>
           <div style={styles.addressBox} className="glass-card">
             <strong>Adresa odběrného místa:</strong><br />

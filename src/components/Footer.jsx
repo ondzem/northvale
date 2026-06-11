@@ -1,4 +1,6 @@
 
+import { FEATURE_FLAGS } from '../config';
+
 export default function Footer({ setActivePage }) {
   return (
     <footer className="main-footer">
@@ -12,7 +14,7 @@ export default function Footer({ setActivePage }) {
             onClick={() => setActivePage('home')} 
           />
           <p className="footer-desc">
-            Váš spolehlivý partner ve světě sběratelských karetních her. Sealed produkty, kusové karty i profesionální zprostředkování gradingu v USA.
+            Váš spolehlivý partner ve světě sběratelských karetních her. Sealed produkty, kusové karty{FEATURE_FLAGS.showGrading ? ' i profesionální zprostředkování gradingu v USA' : ''}.
           </p>
           <div className="footer-socials">
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="footer-social-link">
@@ -41,14 +43,22 @@ export default function Footer({ setActivePage }) {
         </div>
 
         {/* Column 3: Customer Services */}
-        <div className="footer-column">
-          <h4 className="footer-heading">Pro zákazníky</h4>
-          <ul className="footer-list">
-            <li className="footer-link" onClick={() => setActivePage('buylist')}>Výkup karet (Buylist)</li>
-            <li className="footer-link" onClick={() => setActivePage('grading')}>Grading servis</li>
-            <li className="footer-link" onClick={() => setActivePage('grading-guide')}>Průvodce stavy karet</li>
-          </ul>
-        </div>
+        {(FEATURE_FLAGS.showBuylist || FEATURE_FLAGS.showGrading) && (
+          <div className="footer-column">
+            <h4 className="footer-heading">Pro zákazníky</h4>
+            <ul className="footer-list">
+              {FEATURE_FLAGS.showBuylist && (
+                <li className="footer-link" onClick={() => setActivePage('buylist')}>Výkup karet (Buylist)</li>
+              )}
+              {FEATURE_FLAGS.showGrading && (
+                <li className="footer-link" onClick={() => setActivePage('grading')}>Grading servis</li>
+              )}
+              {FEATURE_FLAGS.showGrading && (
+                <li className="footer-link" onClick={() => setActivePage('grading-guide')}>Průvodce stavy karet</li>
+              )}
+            </ul>
+          </div>
+        )}
 
         {/* Column 4: Contacts */}
         <div className="footer-column">

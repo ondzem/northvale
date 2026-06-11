@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FEATURE_FLAGS } from '../config';
 import ProductCard from './ProductCard';
 import DealOfTheDay from './DealOfTheDay';
 
@@ -531,19 +532,21 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
                 </label>
               ))}
             </div>
-            <span 
-              onClick={() => { setActivePage('grading-guide'); setMobileFiltersOpen(false); }}
-              style={{
-                fontSize: '11px',
-                color: 'var(--color-gold)',
-                cursor: 'pointer',
-                fontWeight: '600',
-                textDecoration: 'underline',
-                textAlign: 'left'
-              }}
-            >
-              Průvodce stavy karet
-            </span>
+            {FEATURE_FLAGS.showGrading && (
+              <span 
+                onClick={() => { setActivePage('grading-guide'); setMobileFiltersOpen(false); }}
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--color-gold)',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  textDecoration: 'underline',
+                  textAlign: 'left'
+                }}
+              >
+                Průvodce stavy karet
+              </span>
+            )}
           </div>
 
           {/* Filter: Language checkboxes */}
