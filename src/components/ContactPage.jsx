@@ -166,8 +166,8 @@ export default function ContactPage({ setActivePage }) {
               </span>
             </div>
 
-            <div style={styles.infoRow} style={{ borderBottom: 'none', paddingBottom: 0 }}>
-              <span style={styles.infoLabel}>Sídlo společnosti (Fakturační adresa)</span>
+            <div style={{ ...styles.infoRow, borderBottom: 'none', paddingBottom: 0 }}>
+              <span style={styles.infoLabel}>Sídlo společnosti</span>
               <span style={styles.infoValueText}>
                 Bratří Čapků 1095<br />
                 534 01 Holice
