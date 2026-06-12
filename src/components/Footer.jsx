@@ -1,7 +1,9 @@
 
 import { FEATURE_FLAGS } from '../config';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function Footer({ setActivePage }) {
+  const { lang, t } = useTranslation();
   const hasMiddleColumn = FEATURE_FLAGS.showBuylist || FEATURE_FLAGS.showGrading;
   const gridClassName = `container footer-grid ${hasMiddleColumn ? 'has-five-cols' : 'has-four-cols'}`;
 
@@ -17,7 +19,10 @@ export default function Footer({ setActivePage }) {
             onClick={() => setActivePage('home')} 
           />
           <p className="footer-desc">
-            Váš spolehlivý partner ve světě sběratelských karetních her. Sealed produkty, kusové karty{FEATURE_FLAGS.showGrading ? ' i profesionální zprostředkování gradingu v USA' : ''}.
+            {lang === 'CZ' 
+              ? `Váš spolehlivý partner ve světě sběratelských karetních her. Sealed produkty, kusové karty${FEATURE_FLAGS.showGrading ? ' i profesionální zprostředkování gradingu v USA' : ''}.`
+              : `Your reliable partner in the world of collectible card games. Sealed products, singles${FEATURE_FLAGS.showGrading ? ' and professional grading submissions to the US' : ''}.`
+            }
           </p>
           <div className="footer-socials">
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="footer-social-link">
@@ -34,10 +39,10 @@ export default function Footer({ setActivePage }) {
 
         {/* Column: About the company */}
         <div className="footer-column footer-col-company">
-          <h4 className="footer-heading">O společnosti</h4>
+          <h4 className="footer-heading">{lang === 'CZ' ? 'O společnosti' : 'Company'}</h4>
           <ul className="footer-list">
-            <li className="footer-link" onClick={() => setActivePage('about')}>O nás</li>
-            <li className="footer-link" onClick={() => setActivePage('support')}>Kontakt</li>
+            <li className="footer-link" onClick={() => setActivePage('about')}>{t('Navbar.aboutUs')}</li>
+            <li className="footer-link" onClick={() => setActivePage('support')}>{t('Navbar.contact')}</li>
             <li className="footer-link" onClick={() => {
               setActivePage('home');
               setTimeout(() => {
@@ -47,36 +52,36 @@ export default function Footer({ setActivePage }) {
                 }
               }, 100);
             }}>
-              Nabízené produkty
+              {lang === 'CZ' ? 'Nabízené produkty' : 'Our Products'}
             </li>
           </ul>
         </div>
 
         {/* Column 2: Purchasing Info */}
         <div className="footer-column footer-col-purchase">
-          <h4 className="footer-heading">Vše o nákupu</h4>
+          <h4 className="footer-heading">{t('Footer.customerService')}</h4>
           <ul className="footer-list">
-            <li className="footer-link" onClick={() => setActivePage('faq')}>Nejčastější dotazy (FAQ)</li>
-            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'doprava')}>Doprava a osobní odběr</li>
-            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'vop')}>Obchodní podmínky (VOP)</li>
-            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'gdpr')}>Ochrana osobních údajů (GDPR)</li>
-            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'odstoupeni')}>Odstoupení od smlouvy</li>
+            <li className="footer-link" onClick={() => window.dispatchEvent(new Event('open-cookie-settings'))}>{t('Footer.cookies')}</li>
+            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'doprava')}>{lang === 'CZ' ? 'Doprava a osobní odběr' : 'Shipping & Pickup'}</li>
+            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'vop')}>{t('Footer.terms')}</li>
+            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'gdpr')}>{t('Footer.privacy')}</li>
+            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'odstoupeni')}>{lang === 'CZ' ? 'Odstoupení od smlouvy' : 'Order Withdrawal'}</li>
           </ul>
         </div>
 
         {/* Column 3: Customer Services */}
         {hasMiddleColumn && (
           <div className="footer-column footer-col-services">
-            <h4 className="footer-heading">Pro zákazníky</h4>
+            <h4 className="footer-heading">{lang === 'CZ' ? 'Pro zákazníky' : 'Customer Service'}</h4>
             <ul className="footer-list">
               {FEATURE_FLAGS.showBuylist && (
-                <li className="footer-link" onClick={() => setActivePage('buylist')}>Výkup karet (Buylist)</li>
+                <li className="footer-link" onClick={() => setActivePage('buylist')}>{lang === 'CZ' ? 'Výkup karet (Buylist)' : 'Card Buylist'}</li>
               )}
               {FEATURE_FLAGS.showGrading && (
-                <li className="footer-link" onClick={() => setActivePage('grading')}>Grading servis</li>
+                <li className="footer-link" onClick={() => setActivePage('grading')}>{lang === 'CZ' ? 'Grading servis' : 'Grading Service'}</li>
               )}
               {FEATURE_FLAGS.showGrading && (
-                <li className="footer-link" onClick={() => setActivePage('grading-guide')}>Průvodce stavy karet</li>
+                <li className="footer-link" onClick={() => setActivePage('grading-guide')}>{t('Navbar.gradingGuide')}</li>
               )}
             </ul>
           </div>
@@ -84,10 +89,10 @@ export default function Footer({ setActivePage }) {
 
         {/* Column 4: Contacts */}
         <div className="footer-column footer-col-contacts">
-          <h4 className="footer-heading">Kontakty</h4>
+          <h4 className="footer-heading">{lang === 'CZ' ? 'Kontakty' : 'Contacts'}</h4>
           
           <div className="footer-contact-row">
-            <span className="contact-key">IČO</span>
+            <span className="contact-key">{lang === 'CZ' ? 'IČO' : 'Company ID'}</span>
             <span className="contact-value">29618142</span>
           </div>
           
@@ -97,12 +102,12 @@ export default function Footer({ setActivePage }) {
           </div>
 
           <div className="footer-contact-row">
-            <span className="contact-key">Telefon</span>
+            <span className="contact-key">{lang === 'CZ' ? 'Telefon' : 'Phone'}</span>
             <span className="contact-value">+420 739 666 779</span>
           </div>
           
           <div className="footer-contact-row">
-            <span className="contact-key">Odběr</span>
+            <span className="contact-key">{lang === 'CZ' ? 'Odběr' : 'Pickup'}</span>
             <span className="contact-value">Pardubice / Holice</span>
           </div>
         </div>
@@ -120,15 +125,15 @@ export default function Footer({ setActivePage }) {
           justifyContent: 'center',
           alignItems: 'center'
         }}>
-          <img src="/comgate-logos.png" alt="Platební metody ComGate" style={{ maxHeight: '35px', opacity: 0.8 }} />
+          <img src="/comgate-logos.png" alt={lang === 'CZ' ? 'Platební metody ComGate' : 'ComGate Payment Methods'} style={{ maxHeight: '35px', opacity: 0.8 }} />
         </div>
       </div>
 
       <div className="footer-bottom">
         <div className="container footer-bottom-content">
           <span>&copy; {new Date().getFullYear()} NORTHVALE s.r.o.</span>
-          <img src="/comgate-logos.png" alt="Platební metody ComGate" className="footer-payment-desktop" style={{ maxHeight: '28px', opacity: 0.8 }} />
-          <span>Vytvořil <a href="https://ozeman.cz" target="_blank" rel="noopener noreferrer" className="credits-link">ozeman.cz</a></span>
+          <img src="/comgate-logos.png" alt={lang === 'CZ' ? 'Platební metody ComGate' : 'ComGate Payment Methods'} className="footer-payment-desktop" style={{ maxHeight: '28px', opacity: 0.8 }} />
+          <span>{lang === 'CZ' ? 'Vytvořil' : 'Created by'} <a href="https://ozeman.cz" target="_blank" rel="noopener noreferrer" className="credits-link">ozeman.cz</a></span>
         </div>
       </div>
     </footer>

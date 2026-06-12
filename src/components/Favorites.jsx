@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react';
+import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 
 export default function Favorites({ products, addToCart, setSelectedProductId, setActivePage }) {
+  const { t } = useTranslation();
   const [favoriteIds, setFavoriteIds] = useState(() => {
     const ids = [];
     try {
@@ -58,31 +60,31 @@ export default function Favorites({ products, addToCart, setSelectedProductId, s
 
   return (
     <div className="container fade-in">
-      <h1 className="sr-only">Oblíbené položky - NORTHVALE</h1>
+      <h1 className="sr-only">{t('Favorites.srOnlyTitle')}</h1>
 
       {/* Breadcrumbs */}
-      <nav className="breadcrumbs-nav" aria-label="Drobečková navigace" style={{ marginBottom: '24px', paddingTop: '20px' }}>
-        <span className="breadcrumb-item" onClick={() => setActivePage('home')}>Domů</span>
+      <nav className="breadcrumbs-nav" aria-label={t('Favorites.breadcrumbLabel')} style={{ marginBottom: '24px', paddingTop: '20px' }}>
+        <span className="breadcrumb-item" onClick={() => setActivePage('home')}>{t('Favorites.breadcrumbHome')}</span>
         <span className="breadcrumb-separator">/</span>
-        <span className="breadcrumb-item active">Oblíbené</span>
+        <span className="breadcrumb-item active">{t('Favorites.breadcrumbFavs')}</span>
       </nav>
 
       <section className="fav-section" style={{ textAlign: 'left' }}>
         <h2 style={{ fontSize: '24px', fontWeight: '800', margin: '0 0 24px 0', fontFamily: 'var(--font-heading)' }}>
-          Oblíbené produkty
+          {t('Favorites.title')}
         </h2>
 
         {favoriteProducts.length === 0 ? (
           <div className="glass-panel" style={{ padding: '60px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', textAlign: 'center' }}>
             <span style={{ fontSize: '56px' }}>❤️</span>
-            <h3 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>Nemáte žádné oblíbené produkty</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>Označte produkty v katalogu ikonou srdíčka a zobrazí se zde.</p>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>{t('Favorites.emptyTitle')}</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>{t('Favorites.emptyDesc')}</p>
             <button 
               className="btn btn-primary" 
               onClick={() => setActivePage('singles-catalog')}
               style={{ marginTop: '10px' }}
             >
-              Prohlížet nabídku karet
+              {t('Favorites.browseBtn')}
             </button>
           </div>
         ) : (
@@ -94,7 +96,7 @@ export default function Favorites({ products, addToCart, setSelectedProductId, s
               <button 
                 onClick={() => handleScroll(favListRef, 'left')} 
                 className="scroll-arrow-btn left-arrow" 
-                aria-label="Předchozí"
+                aria-label={t('Favorites.prevBtn')}
               >
                 ‹
               </button>
@@ -117,7 +119,7 @@ export default function Favorites({ products, addToCart, setSelectedProductId, s
               <button 
                 onClick={() => handleScroll(favListRef, 'right')} 
                 className="scroll-arrow-btn right-arrow" 
-                aria-label="Další"
+                aria-label={t('Favorites.nextBtn')}
               >
                 ›
               </button>

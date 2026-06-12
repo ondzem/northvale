@@ -1,7 +1,10 @@
 import { FEATURE_FLAGS } from '../config';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function GradingGuide({ setActivePage }) {
-  const standards = [
+  const { lang } = useTranslation();
+
+  const standards = lang === 'CZ' ? [
     {
       condition: 'Near Mint (NM)',
       desc: 'Karta ve špičkovém stavu, téměř k nerozeznání od čerstvě vytažené z balíčku.',
@@ -44,16 +47,67 @@ export default function GradingGuide({ setActivePage }) {
       edges: 'Těžce poškozené, potrhané nebo roztřepené hrany.',
       surface: 'Hluboké ohyby přes celou kartu, popsaná, pomalovaná nebo poškozená vodou.'
     }
+  ] : [
+    {
+      condition: 'Near Mint (NM)',
+      desc: 'Card is in pristine condition, virtually indistinguishable from freshly pack-pulled.',
+      corners: 'Sharp with zero wear, or at most one tiny white speck (micro-whitening).',
+      edges: 'Sharp and clean, without any signs of friction or silvering.',
+      surface: 'Clean with no scratches, fingerprints, cloudiness, or loss of gloss.'
+    },
+    {
+      condition: 'Excellent (EX)',
+      desc: 'Well-preserved card with minor signs of handling, still excellent for collectors.',
+      corners: 'Minor white specks on corners (maximum 2–3 specks).',
+      edges: 'Very light silvering/whitening along one edge.',
+      surface: 'May have fine hairline scratches visible only under direct light.'
+    },
+    {
+      condition: 'Good (GD)',
+      desc: 'Visibly played card, but without bends or severe mechanical damage.',
+      corners: 'Clear whitening on multiple corners.',
+      edges: 'Moderate wear/whitening along the perimeter.',
+      surface: 'Minor scratches and slight cloudiness or minor surface grime.'
+    },
+    {
+      condition: 'Light Played (LP)',
+      desc: 'Card with significant wear caused by unsleeved play.',
+      corners: 'Visible corner wear, slightly rounded or frayed.',
+      edges: 'Heavier, continuous whitening along multiple edges.',
+      surface: 'Friction wear, loss of original sheen, multiple fine scratches or small dents.'
+    },
+    {
+      condition: 'Played (PL)',
+      desc: 'Card in poor shape with heavy wear from play and handling.',
+      corners: 'Heavy wear, corners may show slight creases or severe fraying.',
+      edges: 'Severely worn and frayed edges.',
+      surface: 'Major scratches, surface dirt, or minor creases that do not affect card structural integrity.'
+    },
+    {
+      condition: 'Poor (PO)',
+      desc: 'Extremely damaged card, unsuitable for collections, playable only in opaque sleeves.',
+      corners: 'Severely frayed, split, or destroyed corners.',
+      edges: 'Severely damaged, torn, or frayed edges.',
+      surface: 'Deep creases running across the card, written on, inked, or damaged by water.'
+    }
   ];
 
   return (
     <div style={styles.container} className="container fade-in">
-      <h1 className="sr-only">Průvodce stavy a grading standardy karet - NORTHVALE</h1>
+      <h1 className="sr-only">
+        {lang === 'CZ' 
+          ? 'Průvodce stavy a grading standardy karet - NORTHVALE' 
+          : 'Card Condition Guide & Grading Standards - NORTHVALE'}
+      </h1>
 
       <div style={styles.headerRow}>
-        <h2 style={styles.heading}>Průvodce stavy TCG karet</h2>
+        <h2 style={styles.heading}>
+          {lang === 'CZ' ? 'Průvodce stavy TCG karet' : 'TCG Card Condition Guide'}
+        </h2>
         <p style={styles.subtext}>
-          Při výkupu i prodeji kusových karet se držíme přísných evropských standardů. Zde naleznete přehledný popis, podle kterého hodnotíme opotřebení hran, rohů a povrchu.
+          {lang === 'CZ'
+            ? 'Při výkupu i prodeji kusových karet se držíme přísných evropských standardů. Zde naleznete přehledný popis, podle kterého hodnotíme opotřebení hran, rohů a povrchu.'
+            : 'When buying and selling single cards, we adhere strictly to premium grading standards. Here is a detailed description of how we evaluate wear on corners, edges, and card surfaces.'}
         </p>
       </div>
 
@@ -61,11 +115,11 @@ export default function GradingGuide({ setActivePage }) {
         <table style={styles.table}>
           <thead>
             <tr>
-              <th style={styles.th}>Stav karty</th>
-              <th style={styles.th}>Obecný popis</th>
-              <th style={styles.th}>Rohy</th>
-              <th style={styles.th}>Hrany</th>
-              <th style={styles.th}>Povrch</th>
+              <th style={styles.th}>{lang === 'CZ' ? 'Stav karty' : 'Card Condition'}</th>
+              <th style={styles.th}>{lang === 'CZ' ? 'Obecný popis' : 'Overview'}</th>
+              <th style={styles.th}>{lang === 'CZ' ? 'Rohy' : 'Corners'}</th>
+              <th style={styles.th}>{lang === 'CZ' ? 'Hrany' : 'Edges'}</th>
+              <th style={styles.th}>{lang === 'CZ' ? 'Povrch' : 'Surface'}</th>
             </tr>
           </thead>
           <tbody>
@@ -88,28 +142,36 @@ export default function GradingGuide({ setActivePage }) {
         <div style={styles.bottomCard} className="glass-panel">
           {FEATURE_FLAGS.showGrading ? (
             <>
-              <h3 style={styles.bottomHeading}>Potřebujete ohodnotit Své karty profesionálně?</h3>
+              <h3 style={styles.bottomHeading}>
+                {lang === 'CZ' ? 'Potřebujete ohodnotit své karty profesionálně?' : 'Do you need your cards professionally graded?'}
+              </h3>
               <p style={styles.bottomText}>
-                Pokud chcete mít jistotu a ochránit sběratelskou hodnotu Svých karet natrvalo, doporučujeme naši zprostředkovatelskou službu gradingu v USA (PSA, Beckett, TAG). Vaše karty před odesláním důkladně zkontrolujeme.
+                {lang === 'CZ'
+                  ? 'Pokud chcete mít jistotu a ochránit sběratelskou hodnotu svých karet natrvalo, doporučujeme naši zprostředkovatelskou službu gradingu v USA (PSA, Beckett, TAG). Vaše karty před odesláním důkladně zkontrolujeme.'
+                  : 'If you want to protect the collectible value of your cards permanently, we recommend our grading submission service to the USA (PSA, Beckett, TAG). We inspect your cards thoroughly before dispatch.'}
               </p>
             </>
           ) : (
             <>
-              <h3 style={styles.bottomHeading}>Chcete nám prodat Své karty?</h3>
+              <h3 style={styles.bottomHeading}>
+                {lang === 'CZ' ? 'Chcete nám prodat své karty?' : 'Want to sell your cards to us?'}
+              </h3>
               <p style={styles.bottomText}>
-                Nabídněte nám své přebytečné kusové karty nebo celou sbírku a získejte peníze na bankovní účet nebo store credit.
+                {lang === 'CZ'
+                  ? 'Nabídněte nám své přebytečné kusové karty nebo celou sbírku a získejte peníze na bankovní účet nebo store credit.'
+                  : 'Offer us your spare singles or your entire collection and receive payouts directly to your bank account or as Store Credit.'}
               </p>
             </>
           )}
           <div style={styles.btnRow}>
             {FEATURE_FLAGS.showGrading && (
               <button className="btn btn-primary" onClick={() => setActivePage('grading')}>
-                Přejít na objednávku gradingu
+                {lang === 'CZ' ? 'Přejít na objednávku gradingu' : 'Go to Grading Submission'}
               </button>
             )}
             {FEATURE_FLAGS.showBuylist && (
               <button className="btn btn-secondary" onClick={() => setActivePage('buylist')}>
-                Přejít na výkup karet (Buylist)
+                {lang === 'CZ' ? 'Přejít na výkup karet (Buylist)' : 'Go to Card Buylist'}
               </button>
             )}
           </div>

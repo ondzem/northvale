@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useTranslation } from '../context/LanguageContext';
 
 function generateGradingId() {
   return 'GR-' + Math.floor(100000 + Math.random() * 900000);
 }
 
 export default function GradingPortal({ submitGrading, setActivePage }) {
+  const { lang, t } = useTranslation();
   const [step, setStep] = useState(1);
   const [company, setCompany] = useState('PSA');
   const [cardCount, setCardCount] = useState(1);
@@ -45,12 +47,15 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
       cardCount,
       price: finalTotal,
       declaredValue,
-      status: 'Příprava', // Preparation -> Sent to USA -> Processing -> Graded -> On way back -> Ready
-      date: new Date().toLocaleDateString()
+      status: lang === 'CZ' ? 'Příprava' : 'Preparation', // Preparation -> Sent to USA -> Processing -> Graded -> On way back -> Ready
+      date: new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US')
     };
 
     submitGrading(submission);
-    alert(`Vaše zakázka ${submission.id} byla úspěšně vytvořena! Její stav můžete odteď sledovat v uživatelském portálu.`);
+    alert(lang === 'CZ' 
+      ? `Vaše zakázka ${submission.id} byla úspěšně vytvořena! Její stav můžete odteď sledovat v uživatelském portálu.`
+      : `Your grading submission ${submission.id} was successfully created! You can now track its status in your user profile.`
+    );
     
     // Clear and head to user portal
     setStep(1);
@@ -62,7 +67,7 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
 
   return (
     <div style={styles.container} className="container fade-in">
-      <h1 className="sr-only">Grading servis a zprostředkování - NORTHVALE</h1>
+      <h1 className="sr-only">{lang === 'CZ' ? 'Grading servis a zprostředkování - NORTHVALE' : 'Grading Service & Submissions - NORTHVALE'}</h1>
 
       <div style={styles.layout}>
         {/* Left Column: The 3-Step Stepper */}
@@ -78,18 +83,22 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
           </div>
 
           <div style={styles.stepTitleWrapper}>
-            <span style={styles.stepSub}>KROK {step} Z 3</span>
+            <span style={styles.stepSub}>{lang === 'CZ' ? `KROK ${step} Z 3` : `STEP ${step} OF 3`}</span>
             <h2 style={styles.stepTitle}>
-              {step === 1 && 'Volba gradingové firmy'}
-              {step === 2 && 'Doplňkové služby'}
-              {step === 3 && 'Pojištění a rekapitulace'}
+              {step === 1 && (lang === 'CZ' ? 'Volba gradingové firmy' : 'Choose Grading Company')}
+              {step === 2 && (lang === 'CZ' ? 'Doplňkové služby' : 'Additional Services')}
+              {step === 3 && (lang === 'CZ' ? 'Pojištění a rekapitulace' : 'Insurance & Summary')}
             </h2>
           </div>
 
           {/* Step 1 Content */}
           {step === 1 && (
             <div style={styles.stepContent}>
-              <p style={styles.descText}>Vyberte si asociaci, u které chcete nechat Své karty ohodnotit, a zadejte počet karet.</p>
+              <p style={styles.descText}>
+                {lang === 'CZ' 
+                  ? 'Vyberte si asociaci, u které chcete nechat své karty ohodnotit, a zadejte počet karet.' 
+                  : 'Choose the service you want to grade your cards with, and enter the number of cards.'}
+              </p>
               
               <div style={styles.selectionGrid}>
                 <div 
@@ -102,8 +111,12 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
                   className="glass-card"
                 >
                   <span style={styles.companyName}>PSA</span>
-                  <span style={styles.companyDesc}>Professional Sports Authenticator. Nejpopulárnější sběratelská asociace. Vyšší likvidita.</span>
-                  <span style={styles.companyPrice}>od 590 Kč / karta</span>
+                  <span style={styles.companyDesc}>
+                    {lang === 'CZ'
+                      ? 'Professional Sports Authenticator. Nejpopulárnější sběratelská asociace. Vyšší likvidita.'
+                      : 'Professional Sports Authenticator. The most popular grading association with the highest resale value.'}
+                  </span>
+                  <span style={styles.companyPrice}>{lang === 'CZ' ? 'od 590 Kč / karta' : 'from 590 Kč / card'}</span>
                 </div>
 
                 <div 
@@ -116,8 +129,12 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
                   className="glass-card"
                 >
                   <span style={styles.companyName}>Beckett (BGS)</span>
-                  <span style={styles.companyDesc}>Prémiový vzhled pouzdra s možností sub-grades. Ceněno u špičkových stavů (Black Label).</span>
-                  <span style={styles.companyPrice}>od 690 Kč / karta</span>
+                  <span style={styles.companyDesc}>
+                    {lang === 'CZ'
+                      ? 'Prémiový vzhled pouzdra s možností sub-grades. Ceněno u špičkových stavů (Black Label).'
+                      : 'Premium cases with sub-grades. highly valued for flawless cards (Black Label).'}
+                  </span>
+                  <span style={styles.companyPrice}>{lang === 'CZ' ? 'od 690 Kč / karta' : 'from 690 Kč / card'}</span>
                 </div>
 
                 <div 
@@ -130,13 +147,17 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
                   className="glass-card"
                 >
                   <span style={styles.companyName}>TAG</span>
-                  <span style={styles.companyDesc}>Moderní digitální hodnocení pomocí laserové a optické analýzy. Transparentní report.</span>
-                  <span style={styles.companyPrice}>od 490 Kč / karta</span>
+                  <span style={styles.companyDesc}>
+                    {lang === 'CZ'
+                      ? 'Moderní digitální hodnocení pomocí laserové a optické analýzy. Transparentní report.'
+                      : 'Modern digital grading using laser-accurate optics. Provides transparent condition reports.'}
+                  </span>
+                  <span style={styles.companyPrice}>{lang === 'CZ' ? 'od 490 Kč / karta' : 'from 490 Kč / card'}</span>
                 </div>
               </div>
 
               <div style={styles.inputWrapper}>
-                <label style={styles.inputLabel}>Počet karet k odeslání:</label>
+                <label style={styles.inputLabel}>{lang === 'CZ' ? 'Počet karet k odeslání:' : 'Number of cards to submit:'}</label>
                 <input 
                   type="number" 
                   min="1" 
@@ -152,7 +173,11 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
           {/* Step 2 Content */}
           {step === 2 && (
             <div style={styles.stepContent}>
-              <p style={styles.descText}>Zvyšte šance na dobrou známku. Nabízíme profesionální kontrolu a vyčištění karet před odesláním do USA.</p>
+              <p style={styles.descText}>
+                {lang === 'CZ'
+                  ? 'Zvyšte šance na dobrou známku. Nabízíme profesionální kontrolu a vyčištění karet před odesláním do USA.'
+                  : 'Increase your chances of getting a high grade. We offer professional card checking and detailing before shipment to the US.'}
+              </p>
 
               <div style={styles.servicesList}>
                 <label style={styles.serviceRow} className="glass-card">
@@ -163,9 +188,13 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
                     style={styles.checkbox}
                   />
                   <div style={styles.serviceInfo}>
-                    <span style={styles.serviceName}>Pre-grading kontrola (+90 Kč / karta)</span>
+                    <span style={styles.serviceName}>
+                      {lang === 'CZ' ? 'Pre-grading kontrola (+90 Kč / karta)' : 'Pre-grading check (+90 Kč / card)'}
+                    </span>
                     <span style={styles.serviceDesc}>
-                      Naši specialisté prozkoumají povrch, centrování a rohy pod mikroskopem. Pokud hrozí známka nižší než 9, budeme Vás kontaktovat a doporučíme stažení karty ze zakázky.
+                      {lang === 'CZ'
+                        ? 'Naši specialisté prozkoumají povrch, centrování a rohy pod mikroskopem. Pokud hrozí známka nižší než 9, budeme Vás kontaktovat a doporučíme stažení karty ze zakázky.'
+                        : 'Our certified specialists inspect card surface, centering, and corners. If the expected grade is below 9, we will contact you to discuss returning it.'}
                     </span>
                   </div>
                 </label>
@@ -178,9 +207,13 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
                     style={styles.checkbox}
                   />
                   <div style={styles.serviceInfo}>
-                    <span style={styles.serviceName}>Profesionální čištění karet (+150 Kč / karta)</span>
+                    <span style={styles.serviceName}>
+                      {lang === 'CZ' ? 'Profesionální čištění karet (+150 Kč / karta)' : 'Professional card cleaning (+150 Kč / card)'}
+                    </span>
                     <span style={styles.serviceDesc}>
-                      Bezpečné odstranění otisků prstů, prachu a drobných nečistot z povrchu karty speciálním šetrným roztokem.
+                      {lang === 'CZ'
+                        ? 'Bezpečné odstranění otisků prstů, prachu a drobných nečistot z povrchu karty speciálním šetrným roztokem.'
+                        : 'Gentle removal of fingerprints, dust, and microscopic grime from the card surface using specialized solutions.'}
                     </span>
                   </div>
                 </label>
@@ -191,10 +224,16 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
           {/* Step 3 Content */}
           {step === 3 && (
             <div style={styles.stepContent}>
-              <p style={styles.descText}>Zadejte odhadovanou tržní hodnotu Vašich karet. Na tuto částku budou karty pojištěny během přepravy do USA a zpět.</p>
+              <p style={styles.descText}>
+                {lang === 'CZ'
+                  ? 'Zadejte odhadovanou tržní hodnotu Vašich karet. Na tuto částku budou karty pojištěny během přepravy do USA a zpět.'
+                  : 'Specify the estimated market value of your cards. Your cards will be fully insured for this sum during transit to the US and back.'}
+              </p>
 
               <div style={styles.inputWrapper}>
-                <label style={styles.inputLabel}>Celková pojistná hodnota zásilky (Kč):</label>
+                <label style={styles.inputLabel}>
+                  {lang === 'CZ' ? 'Celková pojistná hodnota zásilky (Kč):' : 'Total shipment declared value (Kč):'}
+                </label>
                 <input 
                   type="number" 
                   min="1000" 
@@ -204,7 +243,9 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
                   style={styles.largeInput}
                 />
                 <span style={styles.inputSub}>
-                  Poplatek za plné pojištění a logistiku činí 0.5% z deklarované hodnoty (minimálně 50 Kč).
+                  {lang === 'CZ'
+                    ? 'Poplatek za plné pojištění a logistiku činí 0.5% z deklarované hodnoty (minimálně 50 Kč).'
+                    : 'The comprehensive transit insurance and logistics fee is 0.5% of the declared value (minimum 50 Kč).'}
                 </span>
               </div>
             </div>
@@ -213,12 +254,16 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
           {/* Navigation Buttons */}
           <div style={styles.btnRow}>
             {step > 1 && (
-              <button className="btn btn-secondary" onClick={handlePrevStep}>Zpět</button>
+              <button className="btn btn-secondary" onClick={handlePrevStep}>{t('common.back')}</button>
             )}
             {step < 3 ? (
-              <button className="btn btn-primary" style={styles.nextBtn} onClick={handleNextStep}>Pokračovat</button>
+              <button className="btn btn-primary" style={styles.nextBtn} onClick={handleNextStep}>
+                {lang === 'CZ' ? 'Pokračovat' : 'Continue'}
+              </button>
             ) : (
-              <button className="btn btn-success" style={styles.nextBtn} onClick={handleSubmit}>Odeslat zakázku</button>
+              <button className="btn btn-success" style={styles.nextBtn} onClick={handleSubmit}>
+                {lang === 'CZ' ? 'Odeslat zakázku' : 'Submit submission'}
+              </button>
             )}
           </div>
         </div>
@@ -227,60 +272,87 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
         <div style={styles.rightCol}>
           {/* Summary */}
           <div style={styles.summaryBox} className="glass-panel">
-            <h3 style={styles.summaryTitle}>Cena služeb</h3>
+            <h3 style={styles.summaryTitle}>
+              {lang === 'CZ' ? 'Cena služeb' : 'Pricing Summary'}
+            </h3>
             <div style={styles.summaryList}>
               <div style={styles.summaryRow}>
-                <span>Zvolená firma:</span>
+                <span>{lang === 'CZ' ? 'Zvolená firma:' : 'Selected service:'}</span>
                 <span>{company}</span>
               </div>
               <div style={styles.summaryRow}>
-                <span>Počet karet:</span>
-                <span>{cardCount} ks</span>
+                <span>{lang === 'CZ' ? 'Počet karet:' : 'Card count:'}</span>
+                <span>{cardCount} {t('common.pcs')}</span>
               </div>
               <div style={styles.summaryRow}>
-                <span>Základní cena:</span>
-                <span>{(basePricePerCard * cardCount).toLocaleString()} Kč</span>
+                <span>{lang === 'CZ' ? 'Základní cena:' : 'Base price:'}</span>
+                <span>{(basePricePerCard * cardCount).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč</span>
               </div>
               {services.preGrading && (
                 <div style={styles.summaryRow}>
-                  <span>Pre-grading kontrola:</span>
-                  <span>{(preGradingPrice * cardCount).toLocaleString()} Kč</span>
+                  <span>{lang === 'CZ' ? 'Pre-grading kontrola:' : 'Pre-grading check:'}</span>
+                  <span>{(preGradingPrice * cardCount).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč</span>
                 </div>
               )}
               {services.cleaning && (
                 <div style={styles.summaryRow}>
-                  <span>Profesionální čištění:</span>
-                  <span>{(cleaningPrice * cardCount).toLocaleString()} Kč</span>
+                  <span>{lang === 'CZ' ? 'Profesionální čištění:' : 'Professional cleaning:'}</span>
+                  <span>{(cleaningPrice * cardCount).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč</span>
                 </div>
               )}
               <div style={styles.summaryRow}>
-                <span>Pojištění zásilky:</span>
-                <span>{insuranceFee.toLocaleString()} Kč</span>
+                <span>{lang === 'CZ' ? 'Pojištění zásilky:' : 'Transit insurance:'}</span>
+                <span>{insuranceFee.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč</span>
               </div>
               <div style={styles.totalRow}>
-                <span>Celkem k úhradě:</span>
-                <span style={{ color: 'var(--color-gold)' }}>{finalTotal.toLocaleString()} Kč</span>
+                <span>{lang === 'CZ' ? 'Celkem k úhradě:' : 'Total due:'}</span>
+                <span style={{ color: 'var(--color-gold)' }}>{finalTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč</span>
               </div>
             </div>
           </div>
 
           {/* Packaging Guide */}
           <div style={styles.guideBox} className="glass-panel">
-            <h3 style={styles.guideTitle}>📦 Návod na bezpečné zabalení</h3>
-            <p style={styles.guideDesc}>Abyste předešli poškození karet při přepravě k nám, postupujte podle tohoto postupu:</p>
+            <h3 style={styles.guideTitle}>
+              {lang === 'CZ' ? '📦 Návod na bezpečné zabalení' : '📦 Secure Packaging Guide'}
+            </h3>
+            <p style={styles.guideDesc}>
+              {lang === 'CZ'
+                ? 'Abyste předešli poškození karet při přepravě k nám, postupujte podle tohoto postupu:'
+                : 'To prevent card damage during shipping to us, please follow these guidelines:'}
+            </p>
             <ol style={styles.guideList}>
-              <li>
-                <strong>Penny Sleeve:</strong> Vložte kartu do měkkého penny obalu <strong>hlavou dolů</strong>.
-              </li>
-              <li>
-                <strong>Vytahovací páska (Pull-Tab):</strong> Na zadní stranu penny sleeve nalepte kousek post-it papírku nebo pásky vyčnívající ven.
-              </li>
-              <li>
-                <strong>Card Saver 1:</strong> Vložte kartu do polotuhého plastového pouzdra Card Saver 1. Nepoužívejte toploadery pro odesílání do gradingových firem (vyžadují Card Savery).
-              </li>
-              <li>
-                <strong>Kartonový sendvič:</strong> Zabalte Card Savery s kartami mezi dva pevné kartony a zajistěte malířskou páskou (ne izolepou!).
-              </li>
+              {lang === 'CZ' ? (
+                <>
+                  <li>
+                    <strong>Penny Sleeve:</strong> Vložte kartu do měkkého penny obalu <strong>hlavou dolů</strong>.
+                  </li>
+                  <li>
+                    <strong>Vytahovací páska (Pull-Tab):</strong> Na zadní stranu penny sleeve nalepte kousek post-it papírku nebo pásky vyčnívající ven.
+                  </li>
+                  <li>
+                    <strong>Card Saver 1:</strong> Vložte kartu do polotuhého plastového pouzdra Card Saver 1. Nepoužívejte toploadery pro odesílání do gradingových firem (vyžadují Card Savery).
+                  </li>
+                  <li>
+                    <strong>Kartonový sendvič:</strong> Zabalte Card Savery s kartami mezi dva pevné kartony a zajistěte malířskou páskou (ne izolepou!).
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <strong>Penny Sleeve:</strong> Place the card in a soft penny sleeve <strong>upside down</strong>.
+                  </li>
+                  <li>
+                    <strong>Pull-Tab:</strong> Stick a small piece of paper or sticky note on the back of the sleeve to serve as a pull tab.
+                  </li>
+                  <li>
+                    <strong>Card Saver 1:</strong> Put the card inside a semi-rigid Card Saver 1 holder. Do not submit in toploaders (grading firms require Card Savery).
+                  </li>
+                  <li>
+                    <strong>Cardboard Sandwich:</strong> Sandwich the holders between two thick cardboards and tape it together using masking tape (no packaging tape!).
+                  </li>
+                </>
+              )}
             </ol>
           </div>
         </div>

@@ -1,38 +1,66 @@
 
 import { FEATURE_FLAGS } from '../config';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function CommunityTournaments() {
-  const events = [
+  const { lang, t } = useTranslation();
+
+  const events = lang === 'CZ' ? [
     { day: 'Úterý', time: '17:00', game: 'Disney Lorcana', format: 'Constructed League', location: 'Wombat Games (Sladkovského 505)' },
     { day: 'Středa', time: '16:30', game: 'Pokémon TCG', format: 'Standard Junior League', location: 'Wombat Games (Sladkovského 505)' },
     { day: 'Čtvrtek', time: '17:30', game: 'One Piece Card Game', format: 'Constructed Tournament', location: 'Wombat Games (Sladkovského 505)' },
     { day: 'Pátek', time: '17:00', game: 'Disney Lorcana', format: 'Draft - Shimmering Skies', location: 'Wombat Games (Sladkovského 505)' },
     { day: 'Sobota', time: '10:00', game: 'Pokémon TCG', format: 'Standard Premier Challenge', location: 'Wombat Games (Sladkovského 505)' }
+  ] : [
+    { day: 'Tuesday', time: '17:00', game: 'Disney Lorcana', format: 'Constructed League', location: 'Wombat Games (Sladkovského 505)' },
+    { day: 'Wednesday', time: '16:30', game: 'Pokémon TCG', format: 'Standard Junior League', location: 'Wombat Games (Sladkovského 505)' },
+    { day: 'Thursday', time: '17:30', game: 'One Piece Card Game', format: 'Constructed Tournament', location: 'Wombat Games (Sladkovského 505)' },
+    { day: 'Friday', time: '17:00', game: 'Disney Lorcana', format: 'Draft - Shimmering Skies', location: 'Wombat Games (Sladkovského 505)' },
+    { day: 'Saturday', time: '10:00', game: 'Pokémon TCG', format: 'Standard Premier Challenge', location: 'Wombat Games (Sladkovského 505)' }
   ];
 
   return (
     <div style={styles.container} className="container fade-in">
-      <h1 className="sr-only">Komunitní turnaje a osobní odběr Pardubice - NORTHVALE</h1>
+      <h1 className="sr-only">
+        {lang === 'CZ' ? 'Komunitní turnaje a osobní odběr Pardubice - NORTHVALE' : 'Community Tournaments & Pardubice Local Pickup - NORTHVALE'}
+      </h1>
 
       {/* Pardubice Local Plan */}
       <section style={styles.localSection} className="glass-panel">
         <div style={styles.localInfo}>
-          <span style={styles.badge}>LOKÁLNÍ DOMINANCE PARDUBICE</span>
-          <h2 style={styles.heading}>Osobní odběr zdarma v Coffee &amp; Cards</h2>
+          <span style={styles.badge}>
+            {lang === 'CZ' ? 'LOKÁLNÍ DOMINANCE PARDUBICE' : 'LOCAL PARADUBICE PRESENCE'}
+          </span>
+          <h2 style={styles.heading}>
+            {lang === 'CZ' ? 'Osobní odběr zdarma v Coffee & Cards' : 'Free Local Pickup at Coffee & Cards'}
+          </h2>
           <p style={styles.text}>
-            Pro malé objednávky kusových karet je poštovné 79 Kč zbytečnou překážkou. Proto jsme pro Vás zřídili bezplatné odběrné místo v kavárně <strong>Coffee &amp; Cards</strong> přímo v centru Pardubic. 
+            {lang === 'CZ' 
+              ? 'Pro malé objednávky kusových karet je poštovné 79 Kč zbytečnou překážkou. Proto jsme pro Vás zřídili bezplatné odběrné místo v kavárně Coffee & Cards přímo v centru Pardubic.' 
+              : 'For small orders of singles, paying 79 CZK for shipping can be an unnecessary barrier. That is why we have established a free pickup spot at Coffee & Cards café right in the center of Pardubice.'}
           </p>
           <ul style={styles.perksList}>
-            <li><strong>Doprava zdarma:</strong> Žádné poštovné pro jakoukoliv objednávku kusovek.</li>
-            <li><strong>Kávový bonus:</strong> Ke každému vyzvednutému balíčku dostanete 10% slevu na výběrovou kávu.</li>
+            <li>
+              <strong>{lang === 'CZ' ? 'Doprava zdarma:' : 'Free shipping:'}</strong>{' '}
+              {lang === 'CZ' ? 'Žádné poštovné pro jakoukoliv objednávku kusovek.' : 'Zero delivery fees on any order of raw single cards.'}
+            </li>
+            <li>
+              <strong>{lang === 'CZ' ? 'Kávový bonus:' : 'Coffee bonus:'}</strong>{' '}
+              {lang === 'CZ' ? 'Ke každému vyzvednutému balíčku dostanete 10% slevu na výběrovou kávu.' : 'Receive a 10% discount voucher on specialty coffee with every pickup.'}
+            </li>
             {FEATURE_FLAGS.showBuylist && (
-              <li><strong>Fyzický výkup:</strong> Naklikejte výkup karet online a odevzdejte karty k fyzické kontrole přímo na kavárně bez placení poštovného.</li>
+              <li>
+                <strong>{lang === 'CZ' ? 'Fyzický výkup:' : 'In-person buybacks:'}</strong>{' '}
+                {lang === 'CZ' 
+                  ? 'Naklikejte výkup karet online a odevzdejte karty k fyzické kontrole přímo na kavárně bez placení poštovného.' 
+                  : 'Submit your cards online via our buylist and drop them off directly at the café without any shipping fees.'}
+              </li>
             )}
           </ul>
           <div style={styles.addressBox} className="glass-card">
-            <strong>Adresa odběrného místa:</strong><br />
+            <strong>{lang === 'CZ' ? 'Adresa odběrného místa:' : 'Pickup Point Address:'}</strong><br />
             Coffee &amp; Cards, Sladkovského 512, Pardubice<br />
-            Otevřeno každý den: 9:00 - 20:00
+            {lang === 'CZ' ? 'Otevřeno každý den: 9:00 - 20:00' : 'Open daily: 9:00 AM - 8:00 PM'}
           </div>
         </div>
 
@@ -60,7 +88,9 @@ export default function CommunityTournaments() {
             <circle cx="180" cy="90" r="10" fill="var(--color-gold)" opacity="0.4" />
             <circle cx="180" cy="90" r="5" fill="var(--color-gold)" />
             <text x="140" y="78" fill="var(--color-gold)" fontSize="10" fontWeight="800">Coffee &amp; Cards</text>
-            <text x="160" y="106" fill="var(--text-main)" fontSize="7" fontWeight="600">Odběrné místo</text>
+            <text x="160" y="106" fill="var(--text-main)" fontSize="7" fontWeight="600">
+              {lang === 'CZ' ? 'Odběrné místo' : 'Pickup Point'}
+            </text>
           </svg>
         </div>
       </section>
@@ -68,9 +98,13 @@ export default function CommunityTournaments() {
       {/* UPCE student discount */}
       <section style={styles.studentSection} className="glass-panel">
         <div style={styles.studentText}>
-          <h3 style={styles.studentHeading}>Sleva 5% pro studenty UPCE s ISIC kartou</h3>
+          <h3 style={styles.studentHeading}>
+            {lang === 'CZ' ? 'Sleva 5% pro studenty UPCE s ISIC kartou' : '5% Student Discount for UPCE Students with ISIC'}
+          </h3>
           <p style={styles.studentDesc}>
-            Studujete na Univerzitě Pardubice a bydlíte na kolejích v Polabinách? Zadejte v pokladně číslo Své platné ISIC karty a získejte okamžitou slevu na veškerý sortiment kusovek i doplňků.
+            {lang === 'CZ' 
+              ? 'Studujete na Univerzitě Pardubice a bydlíte na kolejích v Polabinách? Zadejte v pokladně číslo své platné ISIC karty a získejte okamžitou slevu na veškerý sortiment kusovek i doplňků.' 
+              : 'Are you studying at the University of Pardubice and living in the Polabiny campus? Enter your valid ISIC number at checkout and get an instant discount on all singles and accessories.'}
           </p>
         </div>
         <div style={styles.isicPlaceholder} className="glass-card">
@@ -81,20 +115,24 @@ export default function CommunityTournaments() {
 
       {/* Tournament Calendar */}
       <section style={styles.calendarSection}>
-        <h2 style={styles.sectionHeading}>Kalendář podporovaných turnajů</h2>
+        <h2 style={styles.sectionHeading}>
+          {lang === 'CZ' ? 'Kalendář podporovaných turnajů' : 'Calendar of Supported Tournaments'}
+        </h2>
         <p style={styles.sectionSub}>
-          Místo vlastního konkurování lokálním hernám raději podporujeme místní komunitu. Dodáváme ceny (obaly Dragon Shield a boostery) na turnaje v Tolarii i Wombat Games.
+          {lang === 'CZ' 
+            ? 'Místo vlastního konkurování lokálním hernám raději podporujeme místní komunitu. Dodáváme ceny (obaly Dragon Shield a boostery) na turnaje v Tolarii i Wombat Games.' 
+            : 'Rather than competing with local game stores, we choose to support the local TCG community. We supply prize pools (Dragon Shield sleeves and booster packs) for events at Tolarie and Wombat Games.'}
         </p>
 
         <div style={styles.calendarTableWrapper} className="glass-panel">
           <table style={styles.table}>
             <thead>
               <tr>
-                <th style={styles.th}>Den</th>
-                <th style={styles.th}>Čas</th>
-                <th style={styles.th}>Hra</th>
-                <th style={styles.th}>Formát</th>
-                <th style={styles.th}>Kde se hraje</th>
+                <th style={styles.th}>{lang === 'CZ' ? 'Den' : 'Day'}</th>
+                <th style={styles.th}>{lang === 'CZ' ? 'Čas' : 'Time'}</th>
+                <th style={styles.th}>{lang === 'CZ' ? 'Hra' : 'Game'}</th>
+                <th style={styles.th}>{lang === 'CZ' ? 'Formát' : 'Format'}</th>
+                <th style={styles.th}>{lang === 'CZ' ? 'Kde se hraje' : 'Location'}</th>
               </tr>
             </thead>
             <tbody>

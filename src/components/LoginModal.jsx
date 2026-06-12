@@ -1,13 +1,16 @@
 import { useState } from 'react';
+import { useTranslation } from '../context/LanguageContext';
 import { FEATURE_FLAGS } from '../config';
 
 export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
+  const { t } = useTranslation();
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [newsletter, setNewsletter] = useState(false);
 
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
@@ -86,7 +89,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
       }
 
       if (password !== confirmPassword) {
-        alert('Hesla se neshodují!');
+        alert(t('LoginModal.passwordsDoNotMatch'));
         return;
       }
     }
@@ -94,7 +97,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
     if (hasError) return;
 
     if (isRegisterMode) {
-      onRegister(email, fullName, phone);
+      onRegister(email, fullName, phone, newsletter);
     } else {
       onLogin(email, fullName || email.split('@')[0]);
     }
@@ -105,6 +108,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
     setConfirmPassword('');
     setFullName('');
     setPhone('');
+    setNewsletter(false);
     setEmailError(false);
     setPasswordError(false);
     setFullNameError(false);
@@ -121,7 +125,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
 
   const handleGoogleLogin = () => {
     if (!window.google) {
-      alert('Google identity services se nepodařilo načíst z externí CDN.');
+      alert(t('LoginModal.googleSdkLoadError'));
       handleSocialClick('Google');
       return;
     }
@@ -133,7 +137,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
         callback: (tokenResponse) => {
           if (tokenResponse.error) {
             console.error('Google OAuth2 error:', tokenResponse);
-            alert('Nastala chyba při autorizaci Google účtu.');
+            alert(t('LoginModal.googleAuthError'));
             return;
           }
 
@@ -147,7 +151,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
               onLogin(userInfo.email, userInfo.name, userInfo.picture);
               onClose();
             } else {
-              alert('Nepodařilo se získat profilová data z vašeho Google účtu.');
+              alert(t('LoginModal.googleProfileError'));
             }
           })
           .catch(err => {
@@ -167,7 +171,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
 
   const handleAppleLogin = () => {
     if (!window.AppleID) {
-      alert('Sign in with Apple JS SDK se nepodařilo načíst.');
+      alert(t('LoginModal.appleSdkLoadError'));
       handleSocialClick('Apple');
       return;
     }
@@ -194,7 +198,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
             onLogin(userEmail, userName);
             onClose();
           } else {
-            alert('Apple Sign In neposkytl potřebná data.');
+            alert(t('LoginModal.appleAuthError'));
           }
         })
         .catch((error) => {
@@ -218,7 +222,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
     <div className="login-modal-overlay" onClick={onClose}>
       <div className="login-modal-container" onClick={(e) => e.stopPropagation()}>
         {/* Close Button */}
-        <button className="login-modal-close" onClick={onClose} aria-label="Zavřít">
+        <button className="login-modal-close" onClick={onClose} aria-label={t('common.close')}>
           ✕
         </button>
 
@@ -226,42 +230,42 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
 
         {showConfig ? (
           <div style={{ padding: '32px 40px', textAlign: 'left' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '8px', color: 'var(--text-main)' }}>⚙️ Nastavení API Klientů</h3>
+            <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '8px', color: 'var(--text-main)' }}>{t('LoginModal.apiSettingsTitle')}</h3>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.4' }}>
-              Zde můžete zadat své reálné Google Client ID a Apple Services ID pro plně funkční propojení na localhostu. Nastavení je uloženo lokálně v prohlížeči.
+              {t('LoginModal.apiSettingsDesc')}
             </p>
             <form onSubmit={saveConfig} className="login-modal-form">
               <div className="login-form-group">
-                <label className="login-form-label">Google OAuth Client ID</label>
+                <label className="login-form-label">{t('LoginModal.googleClientIdLabel')}</label>
                 <input 
                   type="text" 
                   className="login-form-input" 
                   value={googleClientId} 
                   onChange={e => { setGoogleClientId(e.target.value); localStorage.setItem('google_client_id', e.target.value); }} 
-                  placeholder="Zadejte klientské ID Google"
+                  placeholder={t('LoginModal.googleClientIdPlaceholder')}
                 />
               </div>
               <div className="login-form-group">
-                <label className="login-form-label">Apple Services ID (Client ID)</label>
+                <label className="login-form-label">{t('LoginModal.appleClientIdLabel')}</label>
                 <input 
                   type="text" 
                   className="login-form-input" 
                   value={appleClientId} 
                   onChange={e => { setAppleClientId(e.target.value); localStorage.setItem('apple_client_id', e.target.value); }} 
-                  placeholder="Zadejte Services ID Apple"
+                  placeholder={t('LoginModal.appleClientIdPlaceholder')}
                 />
               </div>
               <div className="login-form-group">
-                <label className="login-form-label">Apple Redirect URI</label>
+                <label className="login-form-label">{t('LoginModal.appleRedirectUriLabel')}</label>
                 <input 
                   type="text" 
                   className="login-form-input" 
                   value={appleRedirectUri} 
                   onChange={e => { setAppleRedirectUri(e.target.value); localStorage.setItem('apple_redirect_uri', e.target.value); }} 
-                  placeholder="Zadejte povolenou zpětnou adresu"
+                  placeholder={t('LoginModal.appleRedirectUriPlaceholder')}
                 />
               </div>
-              <button type="submit" className="login-submit-btn" style={{ width: '100%' }}>Uložit nastavení</button>
+              <button type="submit" className="login-submit-btn" style={{ width: '100%' }}>{t('LoginModal.saveSettingsBtn')}</button>
             </form>
           </div>
         ) : (
@@ -269,7 +273,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
             {/* Left Column: Form & Social Logins */}
             <div className="login-modal-left-column">
               <h2 className="login-modal-title">
-                {isRegisterMode ? 'Registrace' : 'Přihlásit se'}
+                {isRegisterMode ? t('LoginModal.tabRegister') : t('LoginModal.tabLogin')}
               </h2>
 
               <form onSubmit={handleSubmit} className="login-modal-form" noValidate>
@@ -278,7 +282,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                 {isRegisterMode && (
                   <div className="login-form-group">
                     <label className="login-form-label">
-                      Jméno a příjmení <span className="text-red">*</span>
+                      {t('LoginModal.fullNameLabel')} <span className="text-red">*</span>
                     </label>
                     <input
                       type="text"
@@ -288,12 +292,12 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                         if (fullNameError) setFullNameError(e.target.value.trim().length < 3);
                       }}
                       className={`login-form-input ${fullNameError ? 'input-error' : ''}`}
-                      placeholder="Např. Jan Novák"
+                      placeholder={t('LoginModal.fullNamePlaceholder')}
                       required
                     />
                     {fullNameError && (
                       <p className="login-form-error-msg">
-                        Zadejte prosím vaše jméno a příjmení.
+                        {t('LoginModal.fullNameError')}
                       </p>
                     )}
                   </div>
@@ -303,7 +307,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                 {isRegisterMode && (
                   <div className="login-form-group">
                     <label className="login-form-label">
-                      Telefon <span className="text-red">*</span>
+                      {t('LoginModal.phoneLabel')} <span className="text-red">*</span>
                     </label>
                     <input
                       type="tel"
@@ -313,12 +317,12 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                         if (phoneError) setPhoneError(e.target.value.trim().length < 9);
                       }}
                       className={`login-form-input ${phoneError ? 'input-error' : ''}`}
-                      placeholder="Např. +420 777 777 777"
+                      placeholder={t('LoginModal.phonePlaceholder')}
                       required
                     />
                     {phoneError && (
                       <p className="login-form-error-msg">
-                        Zadejte prosím platné telefonní číslo.
+                        {t('LoginModal.phoneError')}
                       </p>
                     )}
                   </div>
@@ -327,7 +331,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                 {/* Email Input */}
                 <div className="login-form-group">
                   <label className="login-form-label">
-                    Přihlašovací e-mail <span className="text-red">*</span>
+                    {t('LoginModal.emailLabel')} <span className="text-red">*</span>
                   </label>
                   <input
                     type="email"
@@ -342,7 +346,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                   />
                   {emailError && (
                     <p className="login-form-error-msg">
-                      Zadaný e-mail není ve správném formátu nebo obsahuje nepovolené znaky.
+                      {t('LoginModal.emailError')}
                     </p>
                   )}
                 </div>
@@ -350,7 +354,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                 {/* Password Input */}
                 <div className="login-form-group">
                   <label className="login-form-label">
-                    Heslo <span className="text-red">*</span>
+                    {t('LoginModal.passwordLabel')} <span className="text-red">*</span>
                   </label>
                   <input
                     type="password"
@@ -364,49 +368,67 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                   />
                   {passwordError && (
                     <p className="login-form-error-msg">
-                      Heslo musí mít alespoň 4 znaky.
+                      {t('LoginModal.passwordError')}
                     </p>
                   )}
                 </div>
 
                 {/* Confirm Password Input (Register only) */}
                 {isRegisterMode && (
-                  <div className="login-form-group">
-                    <label className="login-form-label">
-                      Potvrzení hesla <span className="text-red">*</span>
-                    </label>
-                    <input
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="login-form-input"
-                      required
-                    />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div className="login-form-group">
+                      <label className="login-form-label">
+                        {t('LoginModal.confirmPasswordLabel')} <span className="text-red">*</span>
+                      </label>
+                      <input
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="login-form-input"
+                        required
+                      />
+                    </div>
+
+                    {/* Newsletter Checkbox Option */}
+                    <div className="login-form-group" style={{ flexDirection: 'row', gap: '10px', alignItems: 'flex-start' }}>
+                      <input 
+                        type="checkbox" 
+                        id="register-newsletter" 
+                        checked={newsletter} 
+                        onChange={(e) => setNewsletter(e.target.checked)} 
+                        style={{ marginTop: '3px', cursor: 'pointer' }} 
+                      />
+                      <label htmlFor="register-newsletter" style={{ fontSize: '12px', color: 'var(--text-muted)', cursor: 'pointer', lineHeight: '1.4', fontWeight: '500', textTransform: 'none' }}>
+                        {t('LoginModal.newsletterOptIn')}
+                      </label>
+                    </div>
                   </div>
                 )}
 
                 {/* Submit Button */}
                 <button type="submit" className="login-submit-btn">
-                  {isRegisterMode ? 'Zaregistrovat se' : 'Přihlásit se'}
+                  {isRegisterMode ? t('LoginModal.btnRegister') : t('LoginModal.btnLogin')}
                 </button>
               </form>
 
               <p className="login-agreement-text">
-                Kliknutím na tlačítko {isRegisterMode ? 'Zaregistrovat se' : 'Přihlásit se'} souhlasím se zpracováním osobních údajů.
+                {t('LoginModal.agreementText')
+                  .replace('Zaregistrovat se / Přihlásit se', isRegisterMode ? t('LoginModal.btnRegister') : t('LoginModal.btnLogin'))
+                  .replace('Sign In / Register Account', isRegisterMode ? t('LoginModal.btnRegister') : t('LoginModal.btnLogin'))}
               </p>
 
               {!isRegisterMode && (
                 <button 
                   type="button" 
                   className="forgot-password-link"
-                  onClick={() => alert('Odkaz pro obnovení hesla byl odeslán na váš e-mail.')}
+                  onClick={() => alert(t('LoginModal.resetLinkSent'))}
                 >
-                  Zapomněl jsi své heslo?
+                  {t('LoginModal.forgotPasswordLink')}
                 </button>
               )}
 
               <div className="login-divider">
-                <span>nebo můžeš</span>
+                <span>{t('LoginModal.orYouCan')}</span>
               </div>
 
               {/* Social Logins */}
@@ -419,7 +441,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                   <svg className="social-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                     <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-.96.04-2.13.64-2.82 1.45-.6.69-1.12 1.84-.98 2.94.1.08.21.12.32.12.9 0 2.02-.67 2.49-1.45z"/>
                   </svg>
-                  Přihlásit se přes Apple
+                  {t('LoginModal.signInApple')}
                 </button>
 
                 <button 
@@ -433,7 +455,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                     <path fill="#FBBC05" d="M5.25 10.55c-.25-.75-.39-1.55-.39-2.38s.14-1.63.39-2.38L1.4 2.8C.51 4.59 0 6.6 0 8.73s.51 4.14 1.4 5.93l3.85-2.99.001-.12z"/>
                     <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.69-2.87c-1.02.68-2.33 1.09-3.96 1.09-3.09 0-5.71-2.07-6.64-4.88l-3.87 3c1.97 3.91 5.95 6.57 10.2 6.57z"/>
                   </svg>
-                  Přihlášení přes Google
+                  {t('LoginModal.signInGoogle')}
                 </button>
               </div>
             </div>
@@ -441,36 +463,36 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
             {/* Right Column: Benefits & Registration CTA */}
             <div className="login-modal-right-column">
               <h3 className="benefits-title">
-                Připoj se k tisícům spokojených sběratelů a získej tyto výhody:
+                {t('LoginModal.benefitsTitle')}
               </h3>
 
               <ul className="benefits-list">
                 <li>
                   <span className="benefit-icon">✦</span>
-                  <span className="benefit-text">Exkluzivní slevy pro registrované členy</span>
+                  <span className="benefit-text">{t('LoginModal.benefit1')}</span>
                 </li>
                 <li>
                   <span className="benefit-icon">✦</span>
-                  <span className="benefit-text">Přednostní informace o novinkách a cenových akcích</span>
+                  <span className="benefit-text">{t('LoginModal.benefit2')}</span>
                 </li>
                 <li>
                   <span className="benefit-icon">✦</span>
-                  <span className="benefit-text">Osobní nastavení svého sběratelského účtu</span>
+                  <span className="benefit-text">{t('LoginModal.benefit3')}</span>
                 </li>
                 <li>
                   <span className="benefit-icon">✦</span>
-                  <span className="benefit-text">Stálý přehled a sledování všech objednávek</span>
+                  <span className="benefit-text">{t('LoginModal.benefit4')}</span>
                 </li>
                 {FEATURE_FLAGS.showBuylist && (
                   <li>
                     <span className="benefit-icon">✦</span>
-                    <span className="benefit-text">Snadný výkup vašich karet za skvělé ceny</span>
+                    <span className="benefit-text">{t('LoginModal.benefit5')}</span>
                   </li>
                 )}
               </ul>
 
               <div className="benefits-cta-box">
-                <p className="cta-text">Registrace nezabere ani minutu!</p>
+                <p className="cta-text">{t('LoginModal.regTakesAMinute')}</p>
                 <button 
                   type="button" 
                   className="benefits-cta-btn"
@@ -480,9 +502,10 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                     setPasswordError(false);
                     setFullNameError(false);
                     setPhoneError(false);
+                    setNewsletter(false);
                   }}
                 >
-                  {isRegisterMode ? 'Chci se přihlásit' : 'Chci se zaregistrovat'}
+                  {isRegisterMode ? t('LoginModal.wantToSignIn') : t('LoginModal.wantToRegister')}
                 </button>
               </div>
             </div>

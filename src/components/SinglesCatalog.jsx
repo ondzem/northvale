@@ -1,24 +1,33 @@
 import { useState, useEffect } from 'react';
 import { FEATURE_FLAGS } from '../config';
+import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 import DealOfTheDay from './DealOfTheDay';
 
 const gameInfo = {
   'Pokémon': {
     title: 'Pokémon Kusovky',
-    desc: 'Objevte širokou nabídku Pokémon kusových karet z nejnovějších i starších edicí. Od běžných karet po extrémně vzácné kousky Alternate Art a Special Illustration Rare. Garantujeme 100% originalitu a precizní posouzení stavu každé nabízené karty. Naše nabídka Pokémon kusovek je denně aktualizována. Každá karta prochází přísnou kontrolou kvality, abychom zajistili přesné zařazení do stavových kategorií. Využijte náš pokročilý filtr pro rychlé nalezení konkrétních karet do vašeho herního balíčku nebo sbírky. Pro turnajové hráče doporučujeme použít náš inovativní Decklist Importer, se kterým naplníte košík celým seznamem karet během několika sekund.'
+    desc: 'Objevte širokou nabídku Pokémon kusových karet z nejnovějších i starších edicí. Od běžných karet po extrémně vzácné kousky Alternate Art a Special Illustration Rare. Garantujeme 100% originalitu a precizní posouzení stavu každé nabízené karty. Naše nabídka Pokémon kusovek je denně aktualizována. Každá karta prochází přísnou kontrolou kvality, abychom zajistili přesné zařazení do stavových kategorií. Využijte náš pokročilý filtr pro rychlé nalezení konkrétních karet do vašeho herního balíčku nebo sbírky. Pro turnajové hráče doporučujeme použít náš inovativní Decklist Importer, se kterým naplníte košík celým seznamem karet během několika sekund.',
+    enTitle: 'Pokémon Singles',
+    enDesc: 'Discover a wide selection of Pokémon single cards from the latest and vintage sets. From common cards to extremely rare Alternate Art and Special Illustration Rare pieces. We guarantee 100% authenticity and precise condition grading for every card. Our inventory of Pokémon singles is updated daily. Every card undergoes a strict quality control inspection to ensure correct condition grading. Use our advanced filter system to quickly find specific cards for your deck or collection. For tournament players, we recommend using our innovative Decklist Importer, which fills your cart with a complete list of cards in seconds.'
   },
   'Lorcana': {
     title: 'Disney Lorcana Kusovky',
-    desc: 'Prozkoumejte naši nabídku kusových karet Disney Lorcana. Najděte chybějící karty do své sbírky nebo herního balíčku, od běžných karet až po vzácné Enchanted verze oblíbených postav. Zaručujeme kvalitu a originalitu všech karet, které pečlivě třídíme podle stavu a edic. Prozkoumejte magický svět Lorcana s našimi prémiovými kartami.'
+    desc: 'Prozkoumejte naši nabídku kusových karet Disney Lorcana. Najděte chybějící karty do své sbírky nebo herního balíčku, od běžných karet až po vzácné Enchanted verze oblíbených postav. Zaručujeme kvalitu a originalitu všech karet, které pečlivě třídíme podle stavu a edic. Prozkoumejte magický svět Lorcana s našimi prémiovými kartami.',
+    enTitle: 'Disney Lorcana Singles',
+    enDesc: 'Explore our selection of Disney Lorcana singles. Find the missing cards for your collection or deck, from common cards to rare Enchanted versions of popular characters. We guarantee the quality and authenticity of all cards, which are carefully sorted by condition and set. Explore the magical world of Lorcana with our premium cards.'
   },
   'One Piece': {
     title: 'One Piece Kusovky',
-    desc: 'Kompletní výběr kusových karet z One Piece Card Game. Od základních karet po Alternate Art a Secret Rare sběratelské kusy. Všechny karty jsou detailně zkontrolovány, abychom zaručili jejich stav a pravost. Sestavte si svůj pirátský balíček s nejlepšími lídry a charaktery.'
+    desc: 'Kompletní výběr kusových karet z One Piece Card Game. Od základních karet po Alternate Art a Secret Rare sběratelské kusy. Všechny karty jsou detailně zkontrolovány, abychom zaručili jejich stav a pravost. Sestavte si svůj pirátský balíček s nejlepšími lídry a charaktery.',
+    enTitle: 'One Piece Singles',
+    enDesc: 'A complete selection of single cards from the One Piece Card Game. From basic cards to Alternate Art and Secret Rare collector pieces. All cards are inspected in detail to guarantee their condition and authenticity. Build your pirate crew deck with the best leaders and characters.'
   },
   'Riftbound': {
     title: 'Riftbound Kusovky',
-    desc: 'Najděte ty správné kusové karty pro taktickou hru Riftbound. Doplňte svůj balíček o klíčové jednotky a kouzla. Garantujeme rychlé doručení a výborný stav všech herních karet. Získejte převahu na bojišti s těmi správnými strategickými kartami.'
+    desc: 'Najděte ty správné kusové karty pro taktickou hru Riftbound. Doplňte svůj balíček o klíčové jednotky a kouzla. Garantujeme rychlé doručení a výborný stav všech herních karet. Získejte převahu na bojišti s těmi správnými strategickými kartami.',
+    enTitle: 'Riftbound Singles',
+    enDesc: 'Find the right single cards for the tactical game Riftbound. Complete your deck with key units and spells. We guarantee fast delivery and excellent condition for all game cards. Gain the upper hand on the battlefield with the right strategic cards.'
   }
 };
 
@@ -158,17 +167,217 @@ const subSubcategoriesConfig = {
   }
 };
 
+const translateSubsubcatName = (sub, lang) => {
+  if (lang === 'CZ') return sub.name;
+  const mapping = {
+    'Všechny Alt Arty': 'All Alt Arts',
+    'Standard Alt Art': 'Standard Alt Art',
+    'Secret Rare Alt Art': 'Secret Rare Alt Art',
+    'Všechny SIR': 'All SIRs',
+    'Special Illustration': 'Special Illustration',
+    'Všechny Secret Rare': 'All Secret Rares',
+    'Všechny Rainbow Rare': 'All Rainbow Rares',
+    'Rainbow Rare': 'Rainbow Rare',
+    'Všechny Enchanted': 'All Enchanteds',
+    'Enchanted': 'Enchanted',
+    'Všechny Legendary': 'All Legendaries',
+    'Legendary': 'Legendary',
+    'Všechny Super Rare': 'All Super Rares',
+    'Všechny Rare': 'All Rares',
+    'Všechny Uncommon': 'All Uncommons',
+    'Všechny Common': 'All Commons',
+    'Všechny Leadery': 'All Leaders',
+    'Leader': 'Leader',
+    'Všechno ostatní': 'All Others',
+    'Sealed Case': 'Sealed Case',
+    'Japonské ostatní': 'Japanese Others',
+    'Japonský Booster Box': 'Japanese Booster Box',
+    'Čínský Booster Box': 'Chinese Booster Box',
+    'Japonský Booster': 'Japanese Booster Pack',
+    'Čínský Booster': 'Chinese Booster Pack',
+    'Japonský Speciální Set': 'Japanese Special Set'
+  };
+  return mapping[sub.name] || sub.name;
+};
+
+const getSubSubcatTitle = (game, subcat, lang) => {
+  const c = subSubcategoriesConfig[game]?.[subcat];
+  if (!c) return '';
+  if (lang === 'CZ') return c.title;
+  
+  const titles = {
+    'Pokémon Alternate Art karty': 'Pokémon Alternate Art Cards',
+    'Pokémon Special Illustration Rare karty': 'Pokémon Special Illustration Rare Cards',
+    'Pokémon Secret Rare karty': 'Pokémon Secret Rare Cards',
+    'Pokémon Rainbow Rare karty': 'Pokémon Rainbow Rare Cards',
+    'Disney Lorcana Enchanted karty': 'Disney Lorcana Enchanted Cards',
+    'Disney Lorcana Legendary karty': 'Disney Lorcana Legendary Cards',
+    'Disney Lorcana Super Rare karty': 'Disney Lorcana Super Rare Cards',
+    'Disney Lorcana Rare karty': 'Disney Lorcana Rare Cards',
+    'Disney Lorcana Uncommon karty': 'Disney Lorcana Uncommon Cards',
+    'Disney Lorcana Common karty': 'Disney Lorcana Common Cards',
+    'One Piece Alternate Art karty': 'One Piece Alternate Art Cards',
+    'One Piece Secret Rare karty': 'One Piece Secret Rare Cards',
+    'One Piece Leader karty': 'One Piece Leader Cards',
+    'One Piece Super Rare karty': 'One Piece Super Rare Cards',
+    'One Piece Rare karty': 'One Piece Rare Cards',
+    'One Piece Uncommon karty': 'One Piece Uncommon Cards',
+    'One Piece Common karty': 'One Piece Common Cards'
+  };
+  return titles[c.title] || c.title;
+};
+
+const getSubSubcatDesc = (game, subcat, lang) => {
+  const c = subSubcategoriesConfig[game]?.[subcat];
+  if (!c) return '';
+  if (lang === 'CZ') return c.desc;
+  
+  const descs = {
+    'Alternate Art (Alt Art) karty jsou jedny z nejvyhledávanějších a nejcennějších karet moderní éry Pokémon TCG. Tyto karty nahrazují tradiční zobrazení Pokémona detailní, celoplošnou uměleckou ilustrací, která často vypráví příběh nebo zachycuje Pokémona v jeho přirozeném prostředí. Mají extrémně nízký poměr otevírání z boosterů a představují skvělou sběratelskou i investiční příležitost.':
+      'Alternate Art (Alt Art) cards are some of the most sought-after and valuable cards of the modern Pokémon TCG era. These cards replace the traditional artwork with a detailed, full-art illustration that often tells a story or depicts the Pokémon in its natural habitat. They have extremely low pull rates from booster packs and represent a great collecting and investment opportunity.',
+    'Special Illustration Rare (SIR) jsou zlatým standardem moderních sérií ze éry Scarlet & Violet. Tyto karty se vyznačují dechberoucími celoplošnými kresbami od renomovaných ilustrátorů, které přetvářejí ikonické Pokémony do uměleckých děl. Každá karta je opatřena jedinečnou texturou a foilovým efektem.':
+      'Special Illustration Rare (SIR) cards are the gold standard of modern Scarlet & Violet series. These cards feature breathtaking full-art illustrations by renowned artists, transforming iconic Pokémon into works of art. Each card is finished with a unique texture and foil effect.',
+    'Secret Rare karty jsou karty, jejichž číslo edice přesahuje oficiální počet karet v setu (např. 215/198). Tyto karty bývají vyvedeny ve zlatém provedení, s duhovým efektem nebo jako speciální celoplošné ilustrace. Jsou ozdobou každého sběratelského alba.':
+      'Secret Rare cards are cards whose set number exceeds the official set size (e.g., 215/198). These cards are typically designed in gold, with a rainbow pattern, or as special full-art illustrations. They are the crowning jewel of any collector album.',
+    'Rainbow Rare (duhové) karty byly představeny v éře Sun & Moon a pokračovaly v éře Sword & Shield. Tyto karty mají charakteristický stříbrytě duhový třpytivý povrch s výraznou texturou, který pokrývá celou plochu karty. Jsou vysoce ceněny pro svůj unikátní estetický vzhled.':
+      'Rainbow Rare cards were introduced in the Sun & Moon era and continued through the Sword & Shield era. These cards feature a signature silvery-rainbow shimmering surface with a distinct texture covering the entire card. They are highly valued for their unique aesthetic.',
+    'Enchanted karty jsou nejvzácnějšími a sběratelsky nejcennějšími kartami v Disney Lorcana. Mají nádhernou bezrámovou alternativní ilustraci pokrytou speciálním duhovým „foil“ efektem. Pravděpodobnost otevření Enchanted karty z boosteru je extrémně nízká, což z nich dělá vysoce ceněné sběratelské klenoty.':
+      'Enchanted cards are the rarest and most collectible cards in Disney Lorcana. They feature beautiful borderless alternative artwork with a special shimmering foil effect. The probability of opening an Enchanted card from a booster pack is extremely low, making them highly prized collector gems.',
+    'Legendary karty představují nejvyšší standardní vzácnost v balíčcích Disney Lorcana (před Enchanted). Tyto karty mají silné herní schopnosti a nádherný foilový nebo nefoilový vzhled. Jsou klíčové pro stavbu kompetitivních herních balíčků.':
+      'Legendary cards represent the highest standard rarity in Disney Lorcana booster packs (below Enchanted). These cards feature powerful gameplay abilities and a beautiful foil or non-foil finish. They are key to building competitive decks.',
+    'Super Rare karty jsou další významnou úrovní vzácnosti v Disney Lorcana. Často obsahují velmi užitečné postavy a akční karty, které tvoří pilíře mnoha herních strategií.':
+      'Super Rare cards are another key rarity tier in Disney Lorcana. They often contain very useful characters and action cards that form the backbone of many game strategies.',
+    'Rare (vzácné) karty jsou v každém boosteru garantovány v počtu dvou kusů (pokud nejsou nahrazeny vyšší vzácností). Nabízejí pestrou škálu zajímavých efektů a postav.':
+      'Rare cards are guaranteed at a rate of two per booster pack (unless replaced by a higher rarity). They offer a wide range of interesting effects and characters.',
+    'Uncommon (neobvyklé) karty doplňují herní balíčky o důležité synergické karty a postavy.':
+      'Uncommon cards supply decks with important synergistic cards and characters.',
+    'Common (běžné) karty tvoří základní kostru každého herního balíčku a sbírky. Obsahují základní verze mnoha oblíbených postav.':
+      'Common cards form the core of every game deck and collection. They contain basic versions of many fan-favorite characters.',
+    'Alternate Art (Alt Art) karty v One Piece Card Game se vyznačují exkluzivními ilustracemi postav a vůdců, které se liší od standardních verzí v setu. Nejvzácnější z nich jsou takzvané Manga Rare karty, které mají na pozadí ikonické panely z manga předlohy Eiichira Ody. Jsou svatým grálem pro všechny fanoušky Slamáků.':
+      'Alternate Art (Alt Art) cards in the One Piece Card Game feature exclusive artwork for characters and leaders that differ from the standard set prints. The rarest of these are the Manga Rare cards, which feature iconic manga panels by author Eiichiro Oda in the background. They are the holy grail for all Straw Hat crew fans.',
+    'Secret Rare (SEC) karty jsou nejvyšší standardní vzácností v každém setu One Piece Card Game. Mají úchvatné zpracování a jsou velmi silné v samotné hře.':
+      'Secret Rare (SEC) cards are the highest standard rarity in each One Piece Card Game set. They have stunning artwork and are very powerful in gameplay.',
+    'Leader (vůdce) karty určují barvu a strategii vašeho celého One Piece balíčku. Nabízíme jak standardní Leader karty, tak jejich vzácné Alternate Art verze s celoplošným zobrazením obličeje postavy.':
+      'Leader cards determine the color and strategy of your entire One Piece deck. We offer both standard Leader cards and their rare Alternate Art versions with full-face illustrations.',
+    'Super Rare (SR) karty tvoří klíčové bojovníky a události pro sestavení konkurenceschopného balíčku.':
+      'Super Rare (SR) cards form key combatants and events for constructing competitive decks.',
+    'Vzácné (R) karty v One Piece Card Game přinášejí důležité efekty a podporu pro vaše pirátské posádky.':
+      'Rare (R) cards in the One Piece Card Game bring key effects and support to your pirate crews.',
+    'Neobvyklé (UC) karty poskytují nezbyčnou synergie a doplňkové postavy pro stabilní hru.':
+      'Uncommon (UC) cards provide essential synergy and supporting characters for stable play.',
+    'Běžné (C) karty tvoří základ každé edice a jsou základním stavebním kamenem pro začínající hráče.':
+      'Common (C) cards form the foundation of each expansion and are the basic building blocks for beginning players.'
+  };
+  return descs[c.desc] || c.desc;
+};
+
 export default function SinglesCatalog({ products, addToCart, setSelectedProductId, setActivePage, filters, setFilters, searchQuery, setSearchQuery }) {
+  const { lang, t } = useTranslation();
   const [selectedGame, setSelectedGame] = useState(filters.game || 'Pokémon');
   const [selectedEditions, setSelectedEditions] = useState(filters.edition ? [filters.edition] : []);
   const [selectedConditions, setSelectedConditions] = useState([]);
   const [selectedLangs, setSelectedLangs] = useState(filters.lang ? [filters.lang] : []);
-  const [foilFilter, setFoilFilter] = useState('all');
+  const [selectedRarities, setSelectedRarities] = useState([]);
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [selectedFinishes, setSelectedFinishes] = useState([]); // 'foil', 'non-foil', 'reverse-holo'
   const [priceRange, setPriceRange] = useState(25000);
+
+  // Collapsible sections state
+  const [expandedSections, setExpandedSections] = useState({
+    search: true,
+    editions: false,
+    rarity: false,
+    finish: false,
+    condition: false,
+    lang: false,
+    color: false,
+    price: true
+  });
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
   
+  // Reset other filters when game changes
+  const [prevGame, setPrevGame] = useState(selectedGame);
+  if (selectedGame !== prevGame) {
+    setPrevGame(selectedGame);
+    setSelectedEditions([]);
+    setSelectedConditions([]);
+    setSelectedLangs([]);
+    setSelectedRarities([]);
+    setSelectedColors([]);
+    setSelectedFinishes([]);
+  }
+
   // Decklist Importer states
   const [showImporter, setShowImporter] = useState(false);
   const [decklistText, setDecklistText] = useState('');
+
+  const handleImportDecklist = () => {
+    if (!decklistText.trim()) {
+      alert(lang === 'CZ' ? 'Vložte prosím nějaké karty do seznamu.' : 'Please enter some cards in the list.');
+      return;
+    }
+
+    const lines = decklistText.split('\n');
+    let addedCount = 0;
+    let missingCards = [];
+
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return;
+
+      const match = trimmed.match(/^(\d+)\s+(.+)$/);
+      let quantity = 1;
+      let cardName = trimmed;
+
+      if (match) {
+        quantity = parseInt(match[1], 10);
+        cardName = match[2].trim();
+      }
+
+      const foundProduct = products.find(p => 
+        (p.type === 'single' || p.type === 'slab') && 
+        p.name.toLowerCase().includes(cardName.toLowerCase())
+      );
+
+      if (foundProduct) {
+        if (foundProduct.type === 'single' && foundProduct.variants && foundProduct.variants.length > 0) {
+          const inStockVariants = foundProduct.variants.filter(v => v.stock > 0);
+          const activeVariant = inStockVariants.length > 0 ? inStockVariants[0] : foundProduct.variants[0];
+          addToCart(activeVariant, foundProduct, quantity);
+          addedCount += quantity;
+        } else {
+          addToCart(null, foundProduct, quantity);
+          addedCount += quantity;
+        }
+      } else {
+        missingCards.push(cardName);
+      }
+    });
+
+    if (addedCount > 0) {
+      const msg = lang === 'CZ'
+        ? `Úspěšně naimportováno ${addedCount} ks karet do košíku.`
+        : `Successfully imported ${addedCount} pcs of cards to your cart.`;
+      
+      if (missingCards.length > 0) {
+        const missingMsg = lang === 'CZ'
+          ? `\n\nNásledující karty nebyly nalezeny:\n- ${missingCards.join('\n- ')}`
+          : `\n\nFollowing cards could not be found:\n- ${missingCards.join('\n- ')}`;
+        alert(msg + missingMsg);
+      } else {
+        alert(msg);
+      }
+      setDecklistText('');
+      setShowImporter(false);
+    } else {
+      alert(lang === 'CZ' 
+        ? 'Nepodařilo se najít žádné karty ze seznamu v naší nabídce.' 
+        : 'Could not find any cards from the list in our store.');
+    }
+  };
   
   // Expandable description state
   const [isDescExpanded, setIsDescExpanded] = useState(false);
@@ -176,8 +385,6 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
   // Active subcategory (rarity filter)
   const [activeSubcategory, setActiveSubcategory] = useState(filters.rarity || 'all');
   const [activeSubsubcategory, setActiveSubsubcategory] = useState(filters.subsubcat || 'all');
-
-
 
   // Sorting
   const [sortBy, setSortBy] = useState('top');
@@ -221,9 +428,103 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
   const singles = products.filter(p => p.type === 'single' || (FEATURE_FLAGS.showSlabs && p.type === 'slab'));
 
   // Available filters options
-  const editions = Array.from(new Set(singles.filter(s => s.game === selectedGame).map(s => s.edition)));
+  const baseSingles = singles.filter(s => s.game === selectedGame);
+  const editions = Array.from(new Set(baseSingles.map(s => s.edition)));
   const conditions = ['NM', 'EX', 'GD', 'LP', 'PL', 'PO'];
   const langs = ['EN', 'JP', 'CN', 'KR'];
+
+  // Helper mappings
+  const getCardColor = (card) => {
+    if (card.color) return card.color;
+    if (card.ink) return card.ink;
+    if (card.element) return card.element;
+    if (card.game === 'Pokémon') {
+      if (card.id.includes('charizard')) return 'Fire';
+      if (card.id.includes('pikachu')) return 'Lightning';
+      if (card.id.includes('umbreon')) return 'Darkness';
+      if (card.id.includes('giratina')) return 'Psychic';
+      if (card.id.includes('rayquaza')) return 'Dragon';
+      return 'Grass';
+    }
+    if (card.game === 'Lorcana') {
+      if (card.id.includes('elsa')) return 'Amethyst';
+      return 'Steel';
+    }
+    if (card.game === 'One Piece') {
+      if (card.id.includes('luffy')) return 'Purple';
+      return 'Red';
+    }
+    return 'Void';
+  };
+
+  const getCardRarityGroup = (card) => {
+    const r = card.rarity || '';
+    if (card.game === 'Pokémon') {
+      if (r === 'Common' || r === 'Uncommon') return 'Common / Uncommon';
+      if (r === 'Rare') return 'Rare';
+      if (card.id.includes('ex') || card.id.includes('v') || card.id.includes('vstar') || card.id.includes('vmax')) return 'ex / V / VSTAR / VMAX';
+      if (r === 'Special Illustration Rare' || r === 'Special Illustration') return 'Special Illustration Rare (SIR)';
+      if (r === 'Alternate Art Secret Rare' || r === 'Secret Rare') return 'Alternate Art / Secret Rare';
+      if (r === 'Rainbow Rare') return 'Rainbow Rare';
+      if (r === 'Gold') return 'Gold';
+    }
+    if (card.game === 'Lorcana') {
+      if (r === 'Common' || r === 'Uncommon') return 'Common / Uncommon';
+      if (r === 'Rare' || r === 'Super Rare') return 'Rare / Super Rare';
+      if (r === 'Legendary') return 'Legendary';
+      if (r === 'Enchanted') return 'Enchanted';
+    }
+    if (card.game === 'One Piece') {
+      if (r === 'Common' || r === 'Uncommon') return 'Common / Uncommon';
+      if (r === 'Rare' || r === 'Super Rare') return 'Rare';
+      if (card.id.includes('st') || r === 'Leader') return 'Leader';
+      if (r === 'Alternate Art') return 'Alternate Art';
+      if (r === 'Secret Rare') return 'Secret Rare';
+    }
+    return 'Other';
+  };
+
+  // Dynamic filter count calculations
+  const getEditionCount = (ed) => {
+    return baseSingles.filter(card => card.edition === ed).length;
+  };
+
+  const getRarityCount = (rarityGroup) => {
+    return baseSingles.filter(card => getCardRarityGroup(card) === rarityGroup).length;
+  };
+
+  const getConditionCount = (cond) => {
+    return baseSingles.filter(card => {
+      if (card.type === 'slab') return cond === 'NM';
+      return card.variants?.some(v => v.condition === cond);
+    }).length;
+  };
+
+  const getLangCount = (langCode) => {
+    return baseSingles.filter(card => {
+      if (card.type === 'slab') {
+        const slabLang = card.name.toLowerCase().includes('japanese') || card.name.toLowerCase().includes('jp') ? 'JP' : 'EN';
+        return slabLang === langCode;
+      }
+      return card.variants?.some(v => v.lang === langCode);
+    }).length;
+  };
+
+  const getFinishCount = (finish) => {
+    return baseSingles.filter(card => {
+      if (card.type === 'slab') return finish === 'non-foil';
+      return card.variants?.some(v => {
+        if (finish === 'foil') return v.foil === true;
+        if (finish === 'non-foil') return v.foil === false;
+        if (finish === 'reverse-holo') return v.reverseHolo === true;
+        return false;
+      });
+    }).length;
+  };
+
+  const getColorCount = (col) => {
+    return baseSingles.filter(card => getCardColor(card) === col).length;
+  };
 
   // Dynamic subcategories setup
   let subcategories = [];
@@ -258,7 +559,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
     ];
   } else {
     subcategories = [
-      { id: 'all', name: selectedGame ? `${selectedGame} TCG` : 'Všechny kusovky', icon: <img src="/Pokemon.webp" alt="" className="subcategory-img" /> }
+      { id: 'all', name: selectedGame ? `${selectedGame} TCG` : (lang === 'CZ' ? 'Všechny kusovky' : 'All Singles'), icon: <img src="/Pokemon.webp" alt="" className="subcategory-img" /> }
     ];
   }
 
@@ -281,6 +582,24 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
     );
   };
 
+  const handleRarityToggle = (rarity) => {
+    setSelectedRarities(prev => 
+      prev.includes(rarity) ? prev.filter(r => r !== rarity) : [...prev, rarity]
+    );
+  };
+
+  const handleColorToggle = (color) => {
+    setSelectedColors(prev => 
+      prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]
+    );
+  };
+
+  const handleFinishToggle = (finish) => {
+    setSelectedFinishes(prev => 
+      prev.includes(finish) ? prev.filter(f => f !== finish) : [...prev, finish]
+    );
+  };
+
   // Filter logic
   const filteredSingles = singles.filter(product => {
     // Game filter
@@ -299,6 +618,16 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
       return false;
     }
 
+    // Rarity checkbox filter
+    if (selectedRarities.length > 0 && !selectedRarities.includes(getCardRarityGroup(product))) {
+      return false;
+    }
+
+    // Color / Element checkbox filter
+    if (selectedColors.length > 0 && !selectedColors.includes(getCardColor(product))) {
+      return false;
+    }
+
     // Subcategory (Rarity) filter
     if (activeSubcategory !== 'all' && product.rarity !== activeSubcategory) {
       return false;
@@ -311,12 +640,13 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
 
     // Variants matching filters
     if (product.type === 'slab') {
-      if (foilFilter === 'foil') return false;
+      if (selectedFinishes.length > 0 && !selectedFinishes.includes('non-foil')) return false;
       if (product.price > priceRange) return false;
       if (selectedLangs.length > 0) {
         const slabLang = product.name.toLowerCase().includes('japanese') || product.name.toLowerCase().includes('jp') ? 'JP' : 'EN';
         if (!selectedLangs.includes(slabLang)) return false;
       }
+      if (selectedConditions.length > 0 && !selectedConditions.includes('NM')) return false;
       return true;
     }
 
@@ -327,8 +657,15 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
       if (selectedLangs.length > 0 && !selectedLangs.includes(variant.lang)) {
         return false;
       }
-      if (foilFilter === 'foil' && !variant.foil) return false;
-      if (foilFilter === 'non-foil' && variant.foil) return false;
+      if (selectedFinishes.length > 0) {
+        const finishMatches = selectedFinishes.some(f => {
+          if (f === 'foil') return variant.foil === true;
+          if (f === 'non-foil') return variant.foil === false;
+          if (f === 'reverse-holo') return variant.reverseHolo === true;
+          return false;
+        });
+        if (!finishMatches) return false;
+      }
       if (variant.price > priceRange) return false;
       return true;
     }) : [];
@@ -336,52 +673,179 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
     return matchingVariants.length > 0;
   });
 
-  // Sort logic
-  const sortedSingles = [...filteredSingles].sort((a, b) => {
-    const priceA = a.variants && a.variants.length > 0 ? Math.min(...a.variants.map(v => v.price)) : (a.price || 0);
-    const priceB = b.variants && b.variants.length > 0 ? Math.min(...b.variants.map(v => v.price)) : (b.price || 0);
-
-    if (sortBy === 'expensive') return priceB - priceA;
-    if (sortBy === 'cheap') return priceA - priceB;
-    if (sortBy === 'new') return b.id.localeCompare(a.id); // mock sort
-    return 0; // Default: top
-  });
-
-  // Parse and import decklist
-  const handleImportDecklist = () => {
-    if (!decklistText.trim()) return;
-    const lines = decklistText.split('\n');
-    let importCount = 0;
-    
-    lines.forEach(line => {
-      const match = line.trim().match(/^(\d+)?\s*(.+)$/);
-      if (match) {
-        const qty = match[1] ? parseInt(match[1]) : 1;
-        const cardQuery = match[2].trim();
-        
-        const card = singles.find(p => p.name.toLowerCase().includes(cardQuery.toLowerCase()));
-        if (card) {
-          const defaultVariant = card.variants[0];
-          for (let i = 0; i < qty; i++) {
-            addToCart(defaultVariant, card);
-          }
-          importCount += qty;
-        }
-      }
-    });
-
-    if (importCount > 0) {
-      alert(`Import úspěšný! Do košíku bylo přidáno ${importCount} karet podle Vašeho seznamu.`);
-      setDecklistText('');
-      setShowImporter(false);
+  const renderRarityFilter = () => {
+    let list = [];
+    if (selectedGame === 'Pokémon') {
+      list = ['Common / Uncommon', 'Rare', 'ex / V / VSTAR / VMAX', 'Special Illustration Rare (SIR)', 'Alternate Art / Secret Rare', 'Rainbow Rare', 'Gold'];
+    } else if (selectedGame === 'Lorcana') {
+      list = ['Common / Uncommon', 'Rare / Super Rare', 'Legendary', 'Enchanted'];
+    } else if (selectedGame === 'One Piece') {
+      list = ['Common / Uncommon', 'Rare', 'Leader', 'Alternate Art', 'Secret Rare'];
     } else {
-      alert('Nebyly nalezeny žádné odpovídající karty. Zkontrolujte prosím názvy v seznamu.');
+      return null;
     }
+
+    return (
+      <div className="sidebar-filter-section">
+        <h4 className={`sidebar-filter-title collapsible ${expandedSections.rarity ? 'active' : ''}`} onClick={() => toggleSection('rarity')}>
+          {lang === 'CZ' ? 'Rarita' : 'Rarity'}
+          <span className="chevron-icon">{expandedSections.rarity ? '▲' : '▼'}</span>
+        </h4>
+        {expandedSections.rarity && (
+          <div className="sidebar-checkbox-list">
+          {list.map(rar => {
+            const count = getRarityCount(rar);
+            const isDisabled = count === 0;
+            return (
+              <label key={rar} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                <input
+                  type="checkbox"
+                  checked={selectedRarities.includes(rar)}
+                  onChange={() => handleRarityToggle(rar)}
+                  disabled={isDisabled}
+                  className="sidebar-checkbox"
+                />
+                <span>{rar}</span>
+                <span className="filter-badge">{count}</span>
+              </label>
+            );
+          })}
+        </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderColorFilter = () => {
+    let list = [];
+    if (selectedGame === 'Pokémon') {
+      list = [
+        { name: 'Fire', color: '#ff3e3e', label: lang === 'CZ' ? 'Ohnivá (Fire) 🔥' : 'Fire 🔥' },
+        { name: 'Lightning', color: '#ffcd30', label: lang === 'CZ' ? 'Blesková (Lightning) ⚡' : 'Lightning ⚡' },
+        { name: 'Darkness', color: '#5c4084', label: lang === 'CZ' ? 'Temná (Darkness) 👁️' : 'Darkness 👁️' },
+        { name: 'Psychic', color: '#ec54ac', label: lang === 'CZ' ? 'Psychická (Psychic) 🔮' : 'Psychic 🔮' },
+        { name: 'Dragon', color: '#d4a373', label: lang === 'CZ' ? 'Dračí (Dragon) 🐉' : 'Dragon 🐉' },
+        { name: 'Grass', color: '#4ade80', label: lang === 'CZ' ? 'Travní (Grass) 🍃' : 'Grass 🍃' },
+        { name: 'Water', color: '#60a5fa', label: lang === 'CZ' ? 'Vodní (Water) 💧' : 'Water 💧' },
+        { name: 'Fighting', color: '#e76f51', label: lang === 'CZ' ? 'Bojová (Fighting) ✊' : 'Fighting ✊' },
+        { name: 'Metal', color: '#9ca3af', label: lang === 'CZ' ? 'Kovová (Metal) 🛡️' : 'Metal 🛡️' },
+        { name: 'Colorless', color: '#f3f4f6', label: lang === 'CZ' ? 'Bezbarvá (Colorless) ⚪' : 'Colorless ⚪' }
+      ];
+    } else if (selectedGame === 'Lorcana') {
+      list = [
+        { name: 'Amber', color: '#f59e0b', label: lang === 'CZ' ? 'Amber (Jantar) 🟨' : 'Amber 🟨' },
+        { name: 'Amethyst', color: '#8b5cf6', label: lang === 'CZ' ? 'Amethyst (Ametyst) 🟪' : 'Amethyst 🟪' },
+        { name: 'Emerald', color: '#10b981', label: lang === 'CZ' ? 'Emerald (Smaragd) 🟩' : 'Emerald 🟩' },
+        { name: 'Ruby', color: '#ef4444', label: lang === 'CZ' ? 'Ruby (Rubín) 🟥' : 'Ruby 🟥' },
+        { name: 'Sapphire', color: '#3b82f6', label: lang === 'CZ' ? 'Sapphire (Safír) 🟦' : 'Sapphire 🟦' },
+        { name: 'Steel', color: '#6b7280', label: lang === 'CZ' ? 'Steel (Ocel) ⬜' : 'Steel ⬜' }
+      ];
+    } else if (selectedGame === 'One Piece') {
+      list = [
+        { name: 'Red', color: '#ef4444', label: lang === 'CZ' ? 'Červená (Red) 🟥' : 'Red 🟥' },
+        { name: 'Blue', color: '#3b82f6', label: lang === 'CZ' ? 'Modrá (Blue) 🟦' : 'Blue 🟦' },
+        { name: 'Green', color: '#10b981', label: lang === 'CZ' ? 'Zelená (Green) 🟩' : 'Green 🟩' },
+        { name: 'Purple', color: '#8b5cf6', label: lang === 'CZ' ? 'Fialová (Purple) 🟪' : 'Purple 🟪' },
+        { name: 'Black', color: '#1f2937', label: lang === 'CZ' ? 'Černá (Black) ⬛' : 'Black ⬛' },
+        { name: 'Yellow', color: '#f59e0b', label: lang === 'CZ' ? 'Žlutá (Yellow) 🟨' : 'Yellow 🟨' }
+      ];
+    } else if (selectedGame === 'Riftbound') {
+      list = [
+        { name: 'Fire', color: '#ff3e3e', label: lang === 'CZ' ? 'Oheň (Fire) 🔥' : 'Fire 🔥' },
+        { name: 'Water', color: '#60a5fa', label: lang === 'CZ' ? 'Voda (Water) 💧' : 'Water 💧' },
+        { name: 'Air', color: '#a5f3fc', label: lang === 'CZ' ? 'Vzduch (Air) 🌪️' : 'Air 🌪️' },
+        { name: 'Earth', color: '#78350f', label: lang === 'CZ' ? 'Země (Earth) ⛰️' : 'Earth ⛰️' },
+        { name: 'Void', color: '#4b5563', label: lang === 'CZ' ? 'Prázdnota (Void) 🌌' : 'Void 🌌' }
+      ];
+    } else {
+      return null;
+    }
+
+    const title = lang === 'CZ'
+      ? (selectedGame === 'Lorcana' ? 'Barva inkoustu' : selectedGame === 'One Piece' ? 'Barva karty' : 'Element / Typ')
+      : (selectedGame === 'Lorcana' ? 'Ink Color' : selectedGame === 'One Piece' ? 'Card Color' : 'Element / Type');
+
+    return (
+      <div className="sidebar-filter-section">
+        <h4 className={`sidebar-filter-title collapsible ${expandedSections.color ? 'active' : ''}`} onClick={() => toggleSection('color')}>
+          {title}
+          <span className="chevron-icon">{expandedSections.color ? '▲' : '▼'}</span>
+        </h4>
+        {expandedSections.color && (
+          <div className="sidebar-checkbox-list">
+          {list.map(col => {
+            const count = getColorCount(col.name);
+            const isDisabled = count === 0;
+            return (
+              <label key={col.name} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                <input
+                  type="checkbox"
+                  checked={selectedColors.includes(col.name)}
+                  onChange={() => handleColorToggle(col.name)}
+                  disabled={isDisabled}
+                  className="sidebar-checkbox"
+                />
+                <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <span className="color-dot-indicator" style={{ backgroundColor: col.color }} />
+                  {col.label}
+                </span>
+                <span className="filter-badge">{count}</span>
+              </label>
+            );
+          })}
+        </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderFinishFilter = () => {
+    const finishes = [
+      { name: 'non-foil', label: lang === 'CZ' ? 'Matné (Non-Foil) ▱' : 'Non-Foil ▱' },
+      { name: 'foil', label: lang === 'CZ' ? 'Třpytivé (Foil) ✨' : 'Foil ✨' }
+    ];
+    if (selectedGame === 'Pokémon') {
+      finishes.push({ name: 'reverse-holo', label: 'Reverse Holo 💎' });
+    }
+
+    return (
+      <div className="sidebar-filter-section">
+        <h4 className={`sidebar-filter-title collapsible ${expandedSections.finish ? 'active' : ''}`} onClick={() => toggleSection('finish')}>
+          {lang === 'CZ' ? 'Provedení' : 'Finish'}
+          <span className="chevron-icon">{expandedSections.finish ? '▲' : '▼'}</span>
+        </h4>
+        {expandedSections.finish && (
+          <div className="sidebar-checkbox-list">
+          {finishes.map(f => {
+            const count = getFinishCount(f.name);
+            const isDisabled = count === 0;
+            return (
+              <label key={f.name} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                <input
+                  type="checkbox"
+                  checked={selectedFinishes.includes(f.name)}
+                  onChange={() => handleFinishToggle(f.name)}
+                  disabled={isDisabled}
+                  className="sidebar-checkbox"
+                />
+                <span>{f.label}</span>
+                <span className="filter-badge">{count}</span>
+              </label>
+            );
+          })}
+        </div>
+        )}
+      </div>
+    );
   };
 
   return (
     <div className="container fade-in" style={{ paddingTop: '20px', paddingBottom: '40px' }}>
-      <h1 className="sr-only">Katalog kusových TCG karet - Pokémon Kusovky</h1>
+      <h1 className="sr-only">
+        {lang === 'CZ' 
+          ? `Katalog kusových TCG karet - ${selectedGame} Kusovky` 
+          : `Catalog of TCG Singles - ${selectedGame} Singles`}
+      </h1>
 
       {/* Decklist Importer Toggle Bar */}
       <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '20px' }}>
@@ -390,7 +854,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
           onClick={() => setShowImporter(!showImporter)}
           style={{ fontSize: '13px' }}
         >
-          {showImporter ? '✕ Zavřít importér' : '📥 Importovat Decklist (pro turnajové hráče)'}
+          {showImporter ? (lang === 'CZ' ? '✕ Zavřít importér' : '✕ Close Importer') : (lang === 'CZ' ? '📥 Importovat Decklist (pro turnajové hráče)' : '📥 Import Decklist (for tournament players)')}
         </button>
       </div>
 
@@ -399,11 +863,17 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
         <div className="glass-panel" style={{ padding: '24px', textAlign: 'left', marginBottom: '24px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: '800', margin: '0 0 6px 0' }}>Decklist Importer</h3>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '0 0 12px 0', lineHeight: '1.4' }}>
-            Vložte seznam karet (každou kartu na nový řádek ve formátu: <code>množství název</code>, např. <code>4 Charizard</code>). Automaticky vyhledáme a přidáme nejlepší dostupné varianty do košíku.
+            {lang === 'CZ' 
+              ? 'Vložte seznam karet (každou kartu na nový řádek ve formátu: množství název, např. 4 Charizard). Automaticky vyhledáme a přidáme nejlepší dostupné varianty do košíku.'
+              : 'Paste a card list (each card on a new line in format: quantity name, e.g. 4 Charizard). We will automatically find and add the best available variants to your cart.'
+            }
           </p>
           <textarea
             rows="5"
-            placeholder="Příklad:&#10;4 Charizard ex&#10;2 Pikachu VMAX"
+            placeholder={lang === 'CZ' 
+              ? "Příklad:\n4 Charizard ex\n2 Pikachu VMAX" 
+              : "Example:\n4 Charizard ex\n2 Pikachu VMAX"
+            }
             value={decklistText}
             onChange={(e) => setDecklistText(e.target.value)}
             style={{
@@ -420,15 +890,15 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
             }}
           />
           <button className="btn btn-primary" onClick={handleImportDecklist} style={{ marginTop: '12px' }}>
-            Importovat do košíku
+            {lang === 'CZ' ? 'Importovat do košíku' : 'Import to Cart'}
           </button>
         </div>
       )}
 
       {/* Breadcrumbs Navigation */}
       {(selectedGame !== 'all' || activeSubcategory !== 'all') && (
-        <nav className="breadcrumbs-nav" aria-label="Drobečková navigace">
-          <span className="breadcrumb-item" onClick={() => setActivePage('home')}>Domů</span>
+        <nav className="breadcrumbs-nav" aria-label={lang === 'CZ' ? 'Drobečková navigace' : 'Breadcrumbs'}>
+          <span className="breadcrumb-item" onClick={() => setActivePage('home')}>{t('common.home')}</span>
           
           {selectedGame !== 'all' && (
             <>
@@ -469,7 +939,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
 
           {/* Mobile Sidebar Close Button */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 className="catalog-sidebar-title">Filtry a akce</h3>
+            <h3 className="catalog-sidebar-title">{lang === 'CZ' ? 'Filtry a akce' : 'Filters & Actions'}</h3>
             <button 
               className="mobile-only-close-btn"
               onClick={() => setMobileFiltersOpen(false)}
@@ -486,116 +956,174 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
             setActivePage={setActivePage}
           />
 
+          {/* Filter: {lang === 'CZ' ? 'Karetní hra' : 'Card Game'} */}
+          <div className="sidebar-filter-section">
+            <h4 className="sidebar-filter-title">{lang === 'CZ' ? 'Karetní hra' : 'Card Game'}</h4>
+            <select
+              value={selectedGame}
+              onChange={(e) => {
+                setSelectedGame(e.target.value);
+                setFilters(prev => ({ ...prev, game: e.target.value }));
+              }}
+              className="sidebar-select"
+            >
+              <option value="Pokémon">Pokémon TCG</option>
+              <option value="Lorcana">Disney Lorcana</option>
+              <option value="One Piece">One Piece TCG</option>
+              <option value="Riftbound">Riftbound</option>
+            </select>
+          </div>
+
           {/* Filter: Search within category */}
           <div className="sidebar-filter-section">
-            <h4 className="sidebar-filter-title">Hledat název karty</h4>
-            <input 
-              type="text" 
-              placeholder="Zadejte název..." 
-              value={searchQuery || ''} 
-              onChange={(e) => setSearchQuery(e.target.value)} 
-              className="sidebar-search-input"
-            />
+            <h4 className={`sidebar-filter-title collapsible ${expandedSections.search ? 'active' : ''}`} onClick={() => toggleSection('search')}>
+              {lang === 'CZ' ? 'Hledat název karty' : 'Search Card Name'}
+              <span className="chevron-icon">{expandedSections.search ? '▲' : '▼'}</span>
+            </h4>
+            {expandedSections.search && (
+              <input 
+                type="text" 
+                placeholder={lang === 'CZ' ? 'Zadejte název...' : 'Search by name...'} 
+                value={searchQuery || ''} 
+                onChange={(e) => setSearchQuery(e.target.value)} 
+                className="sidebar-search-input"
+              />
+            )}
           </div>
 
           {/* Filter: Set / Edition checkboxes */}
           <div className="sidebar-filter-section">
-            <h4 className="sidebar-filter-title">Edice / Set</h4>
-            <div className="sidebar-checkbox-list">
-              {editions.map(ed => (
-                <label key={ed} className="sidebar-checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={selectedEditions.includes(ed)} 
-                    onChange={() => handleEditionToggle(ed)}
-                    className="sidebar-checkbox"
-                  />
-                  <span>{ed}</span>
-                </label>
-              ))}
-            </div>
+            <h4 className={`sidebar-filter-title collapsible ${expandedSections.editions ? 'active' : ''}`} onClick={() => toggleSection('editions')}>
+              {lang === 'CZ' ? 'Edice / Set' : 'Expansion / Set'}
+              <span className="chevron-icon">{expandedSections.editions ? '▲' : '▼'}</span>
+            </h4>
+            {expandedSections.editions && (
+              <div className="sidebar-checkbox-list">
+                {editions.map(ed => {
+                  const count = getEditionCount(ed);
+                  const isDisabled = count === 0;
+                  return (
+                    <label key={ed} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedEditions.includes(ed)} 
+                        onChange={() => handleEditionToggle(ed)}
+                        disabled={isDisabled}
+                        className="sidebar-checkbox"
+                      />
+                      <span>{ed}</span>
+                      <span className="filter-badge">{count}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
           </div>
+
+          {/* Filter: Rarity */}
+          {renderRarityFilter()}
+
+          {/* Filter: {lang === 'CZ' ? '{lang === 'CZ' ? 'Provedení' : 'Finish'} / Finish' : 'Foiling / Finish'} */}
+          {renderFinishFilter()}
 
           {/* Filter: Condition checkboxes */}
           <div className="sidebar-filter-section">
-            <h4 className="sidebar-filter-title">Stav karty</h4>
-            <div className="sidebar-checkbox-list">
-              {conditions.map(cond => (
-                <label key={cond} className="sidebar-checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={selectedConditions.includes(cond)} 
-                    onChange={() => handleConditionToggle(cond)}
-                    className="sidebar-checkbox"
-                  />
-                  <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>{cond}</span>
-                </label>
-              ))}
-            </div>
-            {FEATURE_FLAGS.showGrading && (
-              <span 
-                onClick={() => { setActivePage('grading-guide'); setMobileFiltersOpen(false); }}
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--color-gold)',
-                  cursor: 'pointer',
-                  fontWeight: '600',
-                  textDecoration: 'underline',
-                  textAlign: 'left'
-                }}
-              >
-                Průvodce stavy karet
-              </span>
+            <h4 className={`sidebar-filter-title collapsible ${expandedSections.condition ? 'active' : ''}`} onClick={() => toggleSection('condition')}>
+              {lang === 'CZ' ? 'Stav karty' : 'Card Condition'}
+              <span className="chevron-icon">{expandedSections.condition ? '▲' : '▼'}</span>
+            </h4>
+            {expandedSections.condition && (
+              <>
+                <div className="sidebar-checkbox-list">
+                  {conditions.map(cond => {
+                    const count = getConditionCount(cond);
+                    const isDisabled = count === 0;
+                    return (
+                      <label key={cond} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedConditions.includes(cond)} 
+                          onChange={() => handleConditionToggle(cond)}
+                          disabled={isDisabled}
+                          className="sidebar-checkbox"
+                        />
+                        <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>{cond}</span>
+                        <span className="filter-badge">{count}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                {FEATURE_FLAGS.showGrading && (
+                  <span 
+                    onClick={() => { setActivePage('grading-guide'); setMobileFiltersOpen(false); }}
+                    style={{
+                      fontSize: '11px',
+                      color: 'var(--color-gold)',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      textDecoration: 'underline',
+                      textAlign: 'left'
+                    }}
+                  >
+                    {lang === 'CZ' ? 'Průvodce stavy karet' : 'Condition Guide'}
+                  </span>
+                )}
+              </>
             )}
           </div>
 
           {/* Filter: Language checkboxes */}
           <div className="sidebar-filter-section">
-            <h4 className="sidebar-filter-title">Jazyk</h4>
-            <div className="sidebar-checkbox-list">
-              {langs.map(lang => (
-                <label key={lang} className="sidebar-checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={selectedLangs.includes(lang)} 
-                    onChange={() => handleLangToggle(lang)}
-                    className="sidebar-checkbox"
-                  />
-                  <span>{lang === 'EN' ? 'Angličtina (EN) 🇬🇧' : lang === 'JP' ? 'Japonština (JP) 🇯🇵' : lang === 'CN' ? 'Čínština (CN) 🇨🇳' : 'Korejština (KR) 🇰🇷'}</span>
-                </label>
-              ))}
-            </div>
+            <h4 className={`sidebar-filter-title collapsible ${expandedSections.lang ? 'active' : ''}`} onClick={() => toggleSection('lang')}>
+              {lang === 'CZ' ? 'Jazyk' : 'Language'}
+              <span className="chevron-icon">{expandedSections.lang ? '▲' : '▼'}</span>
+            </h4>
+            {expandedSections.lang && (
+              <div className="sidebar-checkbox-list">
+                {langs.map(langCode => {
+                  const count = getLangCount(langCode);
+                  const isDisabled = count === 0;
+                  return (
+                    <label key={langCode} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedLangs.includes(langCode)} 
+                        onChange={() => handleLangToggle(langCode)}
+                        disabled={isDisabled}
+                        className="sidebar-checkbox"
+                      />
+                      <span>{lang === 'EN' ? (langCode === 'EN' ? 'English (EN) 🇬🇧' : langCode === 'JP' ? 'Japanese (JP) 🇯🇵' : langCode === 'CN' ? 'Chinese (CN) 🇨🇳' : 'Korean (KR) 🇰🇷') : (langCode === 'EN' ? 'Angličtina (EN) 🇬🇧' : langCode === 'JP' ? 'Japonština (JP) 🇯🇵' : langCode === 'CN' ? 'Čínština (CN) 🇨🇳' : 'Korejština (KR) 🇰🇷')}</span>
+                      <span className="filter-badge">{count}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {/* Filter: Foil Type select */}
-          <div className="sidebar-filter-section">
-            <h4 className="sidebar-filter-title">Provedení</h4>
-            <select 
-              value={foilFilter} 
-              onChange={(e) => setFoilFilter(e.target.value)} 
-              className="sidebar-select"
-            >
-              <option value="all">Všechny úpravy</option>
-              <option value="foil">Pouze Foil (Třpytivé) ✨</option>
-              <option value="non-foil">Pouze Non-Foil (Matné) ▱</option>
-            </select>
-          </div>
+          {/* Filter: Color / Element */}
+          {renderColorFilter()}
 
           {/* Filter: Price Range slider */}
           <div className="sidebar-filter-section">
-            <h4 className="sidebar-filter-title">Maximální cena</h4>
-            <div className="sidebar-range-box">
-              <input 
-                type="range" 
-                min="0" 
-                max="25000" 
-                step="250"
-                value={priceRange} 
-                onChange={(e) => setPriceRange(Number(e.target.value))} 
-                className="sidebar-range-input"
-              />
-              <span className="sidebar-range-value">{priceRange.toLocaleString()} Kč</span>
-            </div>
+            <h4 className={`sidebar-filter-title collapsible ${expandedSections.price ? 'active' : ''}`} onClick={() => toggleSection('price')}>
+              {lang === 'CZ' ? 'Maximální cena' : 'Max Price'}
+              <span className="chevron-icon">{expandedSections.price ? '▲' : '▼'}</span>
+            </h4>
+            {expandedSections.price && (
+              <div className="sidebar-range-box">
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="25000" 
+                  step="250"
+                  value={priceRange} 
+                  onChange={(e) => setPriceRange(Number(e.target.value))} 
+                  className="sidebar-range-input"
+                />
+                <span className="sidebar-range-value">{priceRange.toLocaleString()} {lang === 'CZ' ? 'Kč' : 'CZK'}</span>
+              </div>
+            )}
           </div>
 
           {/* Clear Filters Button */}
@@ -605,7 +1133,9 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
               setSelectedEditions([]);
               setSelectedConditions([]);
               setSelectedLangs([]);
-              setFoilFilter('all');
+              setSelectedRarities([]);
+              setSelectedColors([]);
+              setSelectedFinishes([]);
               setPriceRange(25000);
               setSearchQuery('');
               setActiveSubcategory('all');
@@ -613,7 +1143,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
               setMobileFiltersOpen(false);
             }}
           >
-            Smazat filtry
+            {lang === 'CZ' ? 'Smazat filtry' : 'Clear Filters'}
           </button>
         </aside>
 
@@ -624,35 +1154,37 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
           {activeSubcategory === 'all' ? (
             <div className="category-intro-box">
               <div style={{ fontSize: '11px', color: 'var(--color-gold)', fontWeight: '800', textTransform: 'uppercase', marginBottom: '4px' }}>
-                Kusové karty
+                {lang === 'CZ' ? 'Kusové karty' : 'Singles'}
               </div>
-              <h2 className="category-title">{gameInfo[selectedGame]?.title || 'Kusové TCG karty'}</h2>
+              <h2 className="category-title">
+                {(lang === 'CZ' ? gameInfo[selectedGame]?.title : gameInfo[selectedGame]?.enTitle) || (lang === 'CZ' ? 'Kusové TCG karty' : 'TCG Singles')}
+              </h2>
               <div className="category-description-wrapper">
                 <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`}>
-                  {gameInfo[selectedGame]?.desc || 'Vyberte si ze širokého katalogu kusových karet pro různé karetní hry (Pokémon, Lorcana, One Piece, Riftbound). Garantujeme 100% originalitu a perfektní servis.'}
+                  {(lang === 'CZ' ? gameInfo[selectedGame]?.desc : gameInfo[selectedGame]?.enDesc) || (lang === 'CZ' ? 'Vyberte si ze širokého katalogu kusových karet pro různé karetní hry (Pokémon, Lorcana, One Piece, Riftbound). Garantujeme 100% originalitu a perfektní servis.' : 'Select from our wide catalog of single cards for various card games (Pokémon, Lorcana, One Piece, Riftbound). We guarantee 100% authenticity and perfect service.')}
                 </p>
                 <button 
                   className="description-toggle-btn"
                   onClick={() => setIsDescExpanded(!isDescExpanded)}
                 >
-                  {isDescExpanded ? 'Méně informací ▲' : 'Více informací ▼'}
+                  {isDescExpanded ? (lang === 'CZ' ? 'Méně informací ▲' : 'Less info ▲') : (lang === 'CZ' ? 'Více informací ▼' : 'More info ▼')}
                 </button>
               </div>
             </div>
           ) : (
             <div className="category-intro-box">
               <h2 className="category-title">
-                {subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.title || `${selectedGame} - ${subcategories.find(s => s.id === activeSubcategory)?.name}`}
+                {getSubSubcatTitle(selectedGame, activeSubcategory, lang) || `${selectedGame} - ${translateSubsubcatName(subcategories.find(s => s.id === activeSubcategory), lang)}`}
               </h2>
               <div className="category-description-wrapper">
                 <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`}>
-                  {subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.desc || 'Detailní popis vzácnosti se připravuje.'}
+                  {getSubSubcatDesc(selectedGame, activeSubcategory, lang) || (lang === 'CZ' ? 'Detailní popis vzácnosti se připravuje.' : 'Detailed description is being prepared.')}
                 </p>
                 <button
                   className="description-toggle-btn"
                   onClick={() => setIsDescExpanded(!isDescExpanded)}
                 >
-                  {isDescExpanded ? 'Méně informací ▲' : 'Více informací ▼'}
+                  {isDescExpanded ? (lang === 'CZ' ? 'Méně informací ▲' : 'Less info ▲') : (lang === 'CZ' ? 'Více informací ▼' : 'More info ▼')}
                 </button>
               </div>
             </div>
@@ -663,7 +1195,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
             subcategories.length > 0 && (
               <>
                 <div className="subcategories-section-title">
-                  {selectedGame === 'Pokémon' ? 'Populární kategorie vzácností' : `Vyberte vzácnost (${selectedGame})`}
+                  {selectedGame === 'Pokémon' ? (lang === 'CZ' ? 'Populární kategorie vzácností' : 'Popular Rarity Categories') : (lang === 'CZ' ? `Vyberte vzácnost (${selectedGame})` : `Select Rarity (${selectedGame})`)}
                 </div>
                 <div className="subcategory-grid">
                   {subcategories.map(sub => {
@@ -685,7 +1217,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
                         <span className={`subcategory-icon ${hasImage ? 'clean-img-container' : ''}`}>
                           {sub.icon}
                         </span>
-                        <span className="subcategory-name">{sub.name}</span>
+                        <span className="subcategory-name">{translateSubsubcatName(sub, lang)}</span>
                       </div>
                     );
                   })}
@@ -696,7 +1228,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
             subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.subsubcats && (
               <>
                 <div className="subcategories-section-title">
-                  Upřesněte vzácnost
+                  {lang === 'CZ' ? 'Upřesněte vzácnost' : 'Refine Rarity'}
                 </div>
                 <div className="subcategory-grid">
                   {subSubcategoriesConfig[selectedGame][activeSubcategory].subsubcats.map(sub => {
@@ -716,7 +1248,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
                         <span className="subcategory-icon" style={{ fontSize: isEmoji ? '24px' : 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           {sub.icon}
                         </span>
-                        <span className="subcategory-name">{sub.name}</span>
+                        <span className="subcategory-name">{translateSubsubcatName(sub, lang)}</span>
                       </div>
                     );
                   })}
@@ -740,19 +1272,19 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
                   className={`sort-tab-btn ${sortBy === 'expensive' ? 'active' : ''}`}
                   onClick={() => setSortBy('expensive')}
                 >
-                  Nejdražší
+                  {lang === 'CZ' ? 'Nejdražší' : 'Price: High to Low'}
                 </button>
                 <button 
                   className={`sort-tab-btn ${sortBy === 'cheap' ? 'active' : ''}`}
                   onClick={() => setSortBy('cheap')}
                 >
-                  Nejlevnější
+                  {lang === 'CZ' ? 'Nejlevnější' : 'Price: Low to High'}
                 </button>
                 <button 
                   className={`sort-tab-btn ${sortBy === 'new' ? 'active' : ''}`}
                   onClick={() => setSortBy('new')}
                 >
-                  Novinky
+                  {lang === 'CZ' ? 'Novinky' : 'New Releases'}
                 </button>
               </div>
             </div>
@@ -760,7 +1292,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
             <div className="toolbar-right-group">
               {/* Counter */}
               <span className="results-counter">
-                Celkem nalezeno: <strong>{sortedSingles.length}</strong> karet
+                {lang === 'CZ' ? 'Celkem nalezeno: ' : 'Total found: '}<strong>{sortedSingles.length}</strong> {lang === 'CZ' ? 'karet' : 'cards'}
               </span>
 
               {/* Filters Trigger (Mobile only) */}
@@ -771,7 +1303,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
                 </svg>
-                Filtry
+                {lang === 'CZ' ? 'Filtry' : 'Filters'}
               </button>
             </div>
           </div>
@@ -780,8 +1312,8 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
           {sortedSingles.length === 0 ? (
             <div className="glass-panel" style={{ padding: '48px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', textAlign: 'center' }}>
               <span style={{ fontSize: '48px' }}>🔍</span>
-              <h3>Nebyly nalezeny žádné kusové karty</h3>
-              <p style={{ color: 'var(--text-muted)' }}>Zkuste změnit výběr filtrů nebo vyhledávaný výraz.</p>
+              <h3>{lang === 'CZ' ? 'Nebyly nalezeny žádné kusové karty' : 'No singles cards found'}</h3>
+              <p style={{ color: 'var(--text-muted)' }}>{lang === 'CZ' ? 'Zkuste změnit výběr filtrů nebo vyhledávaný výraz.' : 'Try changing your filter selection or search query.'}</p>
             </div>
           ) : (
             <div className="catalog-product-grid">

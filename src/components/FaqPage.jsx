@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { FEATURE_FLAGS } from '../config';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function FaqPage({ setActivePage }) {
+  const { lang, t } = useTranslation();
   const [openAccordion, setOpenAccordion] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const rawFaqData = [
+  const rawFaqData = lang === 'CZ' ? [
     {
       category: 'Doprava a doručení',
       questions: [
@@ -31,7 +33,7 @@ export default function FaqPage({ setActivePage }) {
       questions: [
         {
           q: 'Jak funguje výkup karet?',
-          a: 'Karty naklikáte do výkupního košíku v našem portálu, zvolíte stav a jazyk a odešlete. Následně karty zabalíte a zašlete na naši adresu nebo odevzdáte osobně. Jakmile karty zkontrolujeme (do 48h od přijetí), vyplatíme Vám penísen přímo na Váš bankovní účet.'
+          a: 'Karty naklikáte do výkupního košíku v našem portálu, zvolíte stav a jazyk a odešlete. Následně karty zabalíte a zašlete na naši adresu nebo odevzdáte osobně. Jakmile karty zkontrolujeme (do 48h od přijetí), vyplatíme Vám peníze přímo na Váš bankovní účet.'
         }
       ]
     },
@@ -48,10 +50,52 @@ export default function FaqPage({ setActivePage }) {
         }
       ]
     }
+  ] : [
+    {
+      category: 'Shipping & Delivery',
+      questions: [
+        {
+          q: 'What shipping methods do you offer and how much do they cost?',
+          a: 'We offer Packeta (79 CZK to pick-up points), GLS (99 CZK home delivery), and DPD (109 CZK home delivery). Local pickup is free at Bratří Čapků 1095, Holice (or by agreement in Pardubice). We offer free shipping on all orders over 2,000 CZK.'
+        },
+        {
+          q: 'How do you package single cards (Singles)?',
+          a: 'We adhere strictly to collector-grade standards: each card is placed upside down in a penny sleeve, a pull-tab is attached, it is inserted into a toploader, placed inside a sealable team bag, and secured between cardboard layers (we never apply adhesive tape directly to the toploader). Finally, it is shipped in a bubble mailer.'
+        },
+        {
+          q: 'When will I receive my order?',
+          a: 'We dispatch orders within 24 hours of payment (on business days). Delivery typically takes 24–48 hours after dispatch.'
+        }
+      ]
+    },
+    {
+      category: 'Card Buylist',
+      questions: [
+        {
+          q: 'How does the card buyback process work?',
+          a: 'Simply add your singles to the buylist cart in our portal, specify their condition and language, and submit. Then, pack the cards securely and send them to our address or drop them off in person. Once verified (usually within 48 hours), your payment will be sent directly to your bank account.'
+        }
+      ]
+    },
+    {
+      category: 'Payments & Claims',
+      questions: [
+        {
+          q: 'What payment methods do you accept?',
+          a: 'You can pay online by card via the secure ComGate payment gateway, or via standard bank transfer.'
+        },
+        {
+          q: 'How do I file a claim or return items?',
+          a: 'If your package is damaged during shipping or the card condition does not match its description, please contact us by email. We resolve all complaints promptly in compliance with consumer protection laws.'
+        }
+      ]
+    }
   ];
 
   const faqData = rawFaqData.filter(cat => {
-    if (cat.category.includes('Výkup') && !FEATURE_FLAGS.showBuylist) return false;
+    if (cat.category.toLowerCase().includes('výkup') || cat.category.toLowerCase().includes('buylist')) {
+      return FEATURE_FLAGS.showBuylist;
+    }
     return true;
   });
 
@@ -61,20 +105,20 @@ export default function FaqPage({ setActivePage }) {
 
   return (
     <div className="container fade-in">
-      <h1 className="sr-only">Nejčastější dotazy (FAQ) - NORTHVALE</h1>
+      <h1 className="sr-only">{lang === 'CZ' ? 'Nejčastější dotazy (FAQ) - NORTHVALE' : 'Frequently Asked Questions (FAQ) - NORTHVALE'}</h1>
 
       {/* Breadcrumbs */}
-      <nav className="breadcrumbs-nav" aria-label="Drobečková navigace" style={{ marginBottom: '24px', paddingTop: '20px' }}>
-        <span className="breadcrumb-item" onClick={() => setActivePage('home')}>Domů</span>
+      <nav className="breadcrumbs-nav" aria-label={lang === 'CZ' ? 'Drobečková navigace' : 'Breadcrumbs'} style={{ marginBottom: '24px', paddingTop: '20px' }}>
+        <span className="breadcrumb-item" onClick={() => setActivePage('home')}>{t('common.home')}</span>
         <span className="breadcrumb-separator">/</span>
-        <span className="breadcrumb-item active">Nejčastější dotazy (FAQ)</span>
+        <span className="breadcrumb-item active">{lang === 'CZ' ? 'Nejčastější dotazy (FAQ)' : 'FAQ'}</span>
       </nav>
 
       <section className="kt-section" style={{ paddingTop: '40px' }}>
         <div className="ktf-faq" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
           <div className="ktf-faq-head">
-            <div className="nv-eyebrow">Časté otázky</div>
-            <h2 className="ktf-faq-title">Nejčastější dotazy</h2>
+            <div className="nv-eyebrow">{lang === 'CZ' ? 'Časté otázky' : 'Common Questions'}</div>
+            <h2 className="ktf-faq-title">{lang === 'CZ' ? 'Nejčastější dotazy' : 'Frequently Asked Questions'}</h2>
           </div>
           <div className="ktf-faq-body">
             {faqData.map((cat, catIdx) => (

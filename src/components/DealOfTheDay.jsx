@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function DealOfTheDay({ products, addToCart, setSelectedProductId, setActivePage }) {
+  const { lang } = useTranslation();
   const dealProduct = products.find(p => p.id === 'deal-of-the-day') || products.find(p => p.price !== undefined) || products[0];
   const dealProductHasVariants = dealProduct.variants && dealProduct.variants.length > 0;
   const dealProductPrice = dealProductHasVariants ? dealProduct.variants[0].price : (dealProduct.price || 0);
@@ -127,7 +129,7 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
           borderRadius: '4px',
           border: '1px solid rgba(255, 255, 255, 0.1)'
         }}>
-          Zbývá {dealProductStock} kusů
+          {lang === 'CZ' ? `Zbývá ${dealProductStock} kusů` : `${dealProductStock} pcs left`}
         </span>
       </div>
 
@@ -150,11 +152,11 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
               -{discountPercent} %
             </span>
             <span style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-              {dealProductOriginalPrice ? dealProductOriginalPrice.toLocaleString() : '2 690'} Kč
+              {dealProductOriginalPrice ? dealProductOriginalPrice.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US') : '2 690'} {lang === 'CZ' ? 'Kč' : 'CZK'}
             </span>
           </div>
           <span style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-gold)', marginTop: '2px', whiteSpace: 'nowrap' }}>
-            {dealProductPrice.toLocaleString()} Kč
+            {dealProductPrice.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}
           </span>
         </div>
 
@@ -191,7 +193,7 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
               filter: 'brightness(0)' 
             }} 
           />
-          {dealAdded ? 'Přidáno' : 'Do košíku'}
+          {dealAdded ? (lang === 'CZ' ? 'Přidáno' : 'Added') : (lang === 'CZ' ? 'Do košíku' : 'Add to Cart')}
         </button>
       </div>
 
@@ -217,7 +219,7 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
           letterSpacing: '1px',
           marginBottom: '6px'
         }}>
-          Akce dne
+          {lang === 'CZ' ? 'Akce dne' : 'Deal of the day'}
         </span>
         <div style={{
           display: 'flex',
@@ -229,19 +231,19 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
             <span style={{ fontSize: '18px', fontWeight: '800' }}>
               {timeLeft.hours.toString().padStart(2, '0')}
             </span>
-            <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>hodin</span>
+            <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>{lang === 'CZ' ? 'hodin' : 'hours'}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
             <span style={{ fontSize: '18px', fontWeight: '800' }}>
               {timeLeft.minutes.toString().padStart(2, '0')}
             </span>
-            <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>minut</span>
+            <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>{lang === 'CZ' ? 'minut' : 'mins'}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
             <span style={{ fontSize: '18px', fontWeight: '800' }}>
               {timeLeft.seconds.toString().padStart(2, '0')}
             </span>
-            <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>sekund</span>
+            <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>{lang === 'CZ' ? 'sekund' : 'secs'}</span>
           </div>
         </div>
       </div>

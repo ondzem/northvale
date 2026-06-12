@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FEATURE_FLAGS } from '../config';
+import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 
 const getGameImage = (product) => {
@@ -15,6 +16,7 @@ const getGameImage = (product) => {
 };
 
 export default function SinglesDetail({ productId, products, addToCart, setSelectedProductId, setActivePage, setFilters, alert }) {
+  const { lang, t } = useTranslation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxZoomStyle, setLightboxZoomStyle] = useState({ display: 'none' });
@@ -83,9 +85,9 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
   if (!product) {
     return (
       <div style={styles.errorContainer} className="glass-panel">
-        <h3>Karta nebyla nalezena</h3>
+        <h3>{lang === 'CZ' ? 'Karta nebyla nalezena' : 'Card not found'}</h3>
         <button className="btn btn-primary" onClick={() => { if (setFilters) setFilters({}); setActivePage('singles-catalog'); }}>
-          Zpět do katalogu
+          {lang === 'CZ' ? 'Zpět do katalogu' : 'Back to catalog'}
         </button>
       </div>
     );
@@ -99,7 +101,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
   const price = activeVariant.price;
   const stock = activeVariant.stock;
   const condition = activeVariant.condition;
-  const lang = activeVariant.lang;
+  const variantLang = activeVariant.lang;
   const foil = activeVariant.foil;
 
   const images = [
@@ -180,7 +182,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
   const handleAskSubmit = (e) => {
     e.preventDefault();
     if (alert) {
-      alert('Váš dotaz byl úspěšně odeslán prodejci. Brzy se vám ozveme.', 'success');
+      alert(lang === 'CZ' ? 'Váš dotaz byl úspěšně odeslán prodejci. Brzy se vám ozveme.' : 'Your inquiry has been successfully sent to the seller. We will get back to you soon.', 'success');
     }
     setAskEmail('');
     setAskPhone('');
@@ -192,7 +194,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
   const handleWatchdogSubmit = (e) => {
     e.preventDefault();
     if (alert) {
-      alert('Hlídací pes byl nastaven. Budete upozorněni e-mailem.', 'success');
+      alert(lang === 'CZ' ? 'Hlídací pes byl nastaven. Budete upozorněni e-mailem.' : 'Watchdog has been set. You will be notified by email.', 'success');
     }
     setWatchdogPriceLimit('');
     setWatchdogEmail('');
@@ -203,13 +205,13 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
   const handleShareClick = () => {
     navigator.clipboard.writeText(window.location.href);
     if (alert) {
-      alert('Odkaz na tuto kartu byl zkopírován do schránky.', 'success');
+      alert(lang === 'CZ' ? 'Odkaz na tuto kartu byl zkopírován do schránky.' : 'Link to this card has been copied to your clipboard.', 'success');
     }
   };
 
   const handleReviewSubmit = (e) => {
     e.preventDefault();
-    const dateStr = new Date().toLocaleDateString('cs-CZ');
+    const dateStr = new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US');
     const newRev = {
       author: reviewAuthor,
       rating: reviewRating,
@@ -218,7 +220,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
     };
     setReviews([newRev, ...reviews]);
     if (alert) {
-      alert('Děkujeme! Vaše hodnocení bylo úspěšně přidáno.', 'success');
+      alert(lang === 'CZ' ? 'Děkujeme! Vaše hodnocení bylo úspěšně přidáno.' : 'Thank you! Your review has been successfully added.', 'success');
     }
     setReviewAuthor('');
     setReviewRating(5);
@@ -229,7 +231,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
 
   const handleCommentSubmit = (e) => {
     e.preventDefault();
-    const dateStr = new Date().toLocaleDateString('cs-CZ');
+    const dateStr = new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US');
     const newComm = {
       author: commentAuthor,
       date: dateStr,
@@ -237,7 +239,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
     };
     setComments([...comments, newComm]);
     if (alert) {
-      alert('Komentář byl úspěšně přidán do diskuze.', 'success');
+      alert(lang === 'CZ' ? 'Komentář byl úspěšně přidán do diskuze.' : 'Comment has been successfully added to the discussion.', 'success');
     }
     setCommentAuthor('');
     setCommentText('');
@@ -253,7 +255,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
       <div className="container">
         <nav className="breadcrumbs-nav">
         <span className="breadcrumb-item" onClick={() => { setActivePage('home'); }}>
-          Domů
+          {t('common.home')}
         </span>
         <span className="breadcrumb-separator">/</span>
         <span 
@@ -279,7 +281,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
           <div className="detail-gallery-wrapper">
             {/* Left Nav Arrow */}
             {images.length > 1 && (
-              <button type="button" className="gallery-nav-btn gallery-nav-left" onClick={handlePrevImage} aria-label="Předchozí obrázek">
+              <button type="button" className="gallery-nav-btn gallery-nav-left" onClick={handlePrevImage} aria-label={lang === 'CZ' ? 'Předchozí obrázek' : 'Previous image'}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="20" y1="12" x2="4" y2="12" />
                   <polyline points="10 18 4 12 10 6" />
@@ -300,7 +302,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
 
             {/* Right Nav Arrow */}
             {images.length > 1 && (
-              <button type="button" className="gallery-nav-btn gallery-nav-right" onClick={handleNextImage} aria-label="Další obrázek">
+              <button type="button" className="gallery-nav-btn gallery-nav-right" onClick={handleNextImage} aria-label={lang === 'CZ' ? 'Další obrázek' : 'Next image'}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="4" y1="12" x2="20" y2="12" />
                   <polyline points="14 6 20 12 14 18" />
@@ -335,7 +337,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
           <div className="rating-stars-container">
             <span className="rating-star-gold">{'★'.repeat(5)}</span>
             <span className="rating-count-link" onClick={() => scrollToSection('hodnoceni')}>
-              ({reviews.length} hodnocení)
+              ({reviews.length} {lang === 'CZ' ? 'hodnocení' : 'reviews'})
             </span>
           </div>
 
@@ -343,7 +345,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
           <p className="product-short-desc">
             {product.desc.split('.').slice(0, 2).filter(Boolean).join('. ') + '.'}
             <span className="more-info-link" onClick={() => scrollToSection('popis')}>
-              Víc informací
+              {lang === 'CZ' ? 'Víc informací' : 'More info'}
             </span>
           </p>
 
@@ -357,7 +359,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                   {price.toLocaleString('cs-CZ')} Kč
                 </div>
                 <div className="product-price-ex-vat">
-                  Bez DPH: {Math.round(price / 1.21).toLocaleString('cs-CZ')} Kč
+                  {lang === 'CZ' ? 'Bez DPH:' : 'Excl. VAT:'} {Math.round(price / 1.21).toLocaleString('cs-CZ')} Kč
                 </div>
               </div>
 
@@ -365,10 +367,10 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               <div className="product-stock-delivery-wrapper">
                 <div className={`product-stock-status ${stock > 0 ? 'in-stock' : 'out-of-stock'}`}>
                   <span style={{ fontSize: '20px', lineHeight: 1 }}>●</span>
-                  {stock > 0 ? `Skladem (${stock} ks)` : 'Na objednávku'}
+                  {stock > 0 ? (lang === 'CZ' ? `Skladem (${stock} ks)` : `In Stock (${stock} pcs)`) : (lang === 'CZ' ? 'Na objednávku' : 'Special Order')}
                 </div>
                 <span className="product-delivery-link" onClick={() => setActivePage('community')}>
-                  Možnosti doručení
+                  {lang === 'CZ' ? 'Možnosti doručení' : 'Delivery options'}
                 </span>
               </div>
             </div>
@@ -387,7 +389,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                   disabled={stock === 0}
                   onClick={() => addToCart(activeVariant, product, qty)}
                 >
-                  Do košíku
+                  {t('common.addToCart')}
                 </button>
               </div>
 
@@ -397,20 +399,20 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                   <svg viewBox="0 0 24 24" fill={isFavorite ? 'var(--color-gold)' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                   </svg>
-                  <span>Oblíbené</span>
+                  <span>{t('Navbar.favorites')}</span>
                 </button>
                 <button className="product-action-btn" onClick={() => setIsAskModalOpen(true)} title="Zeptat se" aria-label="Zeptat se">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                   </svg>
-                  <span>Zeptat se</span>
+                  <span>{lang === 'CZ' ? 'Zeptat se' : 'Ask a question'}</span>
                 </button>
                 <button className="product-action-btn" onClick={() => setIsWatchdogModalOpen(true)} title="Upozornění" aria-label="Upozornění">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                     <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                   </svg>
-                  <span>Upozornění</span>
+                  <span>{lang === 'CZ' ? 'Upozornění' : 'Watchdog'}</span>
                 </button>
                 <button className="product-action-btn" onClick={handleShareClick} title="Sdílet" aria-label="Sdílet">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -420,7 +422,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                     <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
                     <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
                   </svg>
-                  <span>Sdílet</span>
+                  <span>{lang === 'CZ' ? 'Sdílet' : 'Share'}</span>
                 </button>
               </div>
             </div>
@@ -436,8 +438,8 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                 <circle cx="18.5" cy="18.5" r="2.5" />
               </svg>
               <div className="detail-badge-text">
-                <h4 className="detail-badge-title">Doprava zdarma</h4>
-                <p className="detail-badge-desc">nad 1 000 Kč</p>
+                <h4 className="detail-badge-title">{lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'}</h4>
+                <p className="detail-badge-desc">{lang === 'CZ' ? 'nad 1 000 Kč' : 'over 1,000 CZK'}</p>
               </div>
             </div>
             <div className="detail-trust-badge">
@@ -447,8 +449,8 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                 <line x1="12" y1="2" x2="12" y2="4" />
               </svg>
               <div className="detail-badge-text">
-                <h4 className="detail-badge-title">Rychlost</h4>
-                <p className="detail-badge-desc">Odesíláme do 24h</p>
+                <h4 className="detail-badge-title">{lang === 'CZ' ? 'Rychlost' : 'Fast Dispatch'}</h4>
+                <p className="detail-badge-desc">{lang === 'CZ' ? 'Odesíláme do 24h' : 'Within 24 hours'}</p>
               </div>
             </div>
             <div className="detail-trust-badge">
@@ -457,8 +459,8 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                 <polyline points="9 11 11 13 15 9" />
               </svg>
               <div className="detail-badge-text">
-                <h4 className="detail-badge-title">100% Originál</h4>
-                <p className="detail-badge-desc">Od distributorů</p>
+                <h4 className="detail-badge-title">{lang === 'CZ' ? '100% Originál' : '100% Genuine'}</h4>
+                <p className="detail-badge-desc">{lang === 'CZ' ? 'Od distributorů' : 'From distributors'}</p>
               </div>
             </div>
             <div className="detail-trust-badge">
@@ -467,8 +469,8 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                 <line x1="1" y1="10" x2="23" y2="10" />
               </svg>
               <div className="detail-badge-text">
-                <h4 className="detail-badge-title">Bezpečná platba</h4>
-                <p className="detail-badge-desc">Karta, bankovní převod</p>
+                <h4 className="detail-badge-title">{lang === 'CZ' ? 'Bezpečná platba' : 'Secure Payment'}</h4>
+                <p className="detail-badge-desc">{lang === 'CZ' ? 'Karta, bankovní převod' : 'Card, bank transfer'}</p>
               </div>
             </div>
           </div>
@@ -476,10 +478,10 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
           {/* Product Code and Brand Specs */}
           <div className="product-meta-specs">
             <div className="product-meta-item">
-              Kód produktu: <strong>{getCardCode(product)}</strong>
+              {lang === 'CZ' ? 'Kód produktu:' : 'Product code:'} <strong>{getCardCode(product)}</strong>
             </div>
             <div className="product-meta-item">
-              Značka: <strong>{product.game}</strong>
+              {lang === 'CZ' ? 'Značka:' : 'Brand:'} <strong>{product.game}</strong>
             </div>
           </div>
         </div>
@@ -504,7 +506,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               <line x1="9" y1="8" x2="15" y2="8" />
               <line x1="17" y1="16" x2="23" y2="16" />
             </svg>
-            <span>Popis a parametry</span>
+            <span>{lang === 'CZ' ? 'Popis a parametry' : 'Description & Specs'}</span>
           </button>
           <button 
             className={`product-tab-btn ${activeTab === 'hodnoceni' ? 'active' : ''}`} 
@@ -513,7 +515,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
             <svg className="tab-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
-            <span>Hodnocení</span>
+            <span>{lang === 'CZ' ? 'Hodnocení' : 'Reviews'}</span>
           </button>
           <button 
             className={`product-tab-btn ${activeTab === 'diskuse' ? 'active' : ''}`} 
@@ -523,7 +525,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               <path d="M17 8h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2v4l-4-4H9a1.9 1.9 0 0 1-2-2" />
               <path d="M3 14V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-4 4v-4H3z" />
             </svg>
-            <span>Diskuze</span>
+            <span>{lang === 'CZ' ? 'Diskuze' : 'Discussion'}</span>
           </button>
           <button 
             className={`product-tab-btn ${activeTab === 'souvisejici' ? 'active' : ''}`} 
@@ -535,7 +537,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               <rect x="14" y="14" width="7" height="7" />
               <rect x="3" y="14" width="7" height="7" />
             </svg>
-            <span>Související produkty</span>
+            <span>{lang === 'CZ' ? 'Související produkty' : 'Related Products'}</span>
           </button>
           <button 
             className={`product-tab-btn ${activeTab === 'podobne' ? 'active' : ''}`} 
@@ -545,7 +547,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
             </svg>
-            <span>Podobné produkty</span>
+            <span>{lang === 'CZ' ? 'Podobné produkty' : 'Similar Products'}</span>
           </button>
         </div>
       </div>
@@ -557,8 +559,14 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
         
         // Helper formatting
         const foilText = foil ? 'Foil' : 'Non-Foil';
-        const foilLongText = foil ? 'Foil (Třpytivá) ✨' : 'Non-Foil (Matná)';
-        const langText = lang === 'JP' ? 'Japonština 🇯🇵' : lang === 'CN' ? 'Čínština 🇨🇳' : 'Angličtina 🇬🇧';
+        const foilLongText = foil 
+          ? (lang === 'CZ' ? 'Foil (Třpytivá) ✨' : 'Foil (Shiny) ✨') 
+          : (lang === 'CZ' ? 'Non-Foil (Matná)' : 'Non-Foil (Matte)');
+        const langText = variantLang === 'JP' 
+          ? (lang === 'CZ' ? 'Japonština 🇯🇵' : 'Japanese 🇯🇵') 
+          : variantLang === 'CN' 
+            ? (lang === 'CZ' ? 'Čínština 🇨🇳' : 'Chinese 🇨🇳') 
+            : (lang === 'CZ' ? 'Angličtina 🇬🇧' : 'English 🇬🇧');
         const conditionFull = condition === 'NM' ? 'Near Mint (NM)' : condition === 'EX' ? 'Excellent (EX)' : condition === 'GD' ? 'Good (GD)' : condition === 'LP' ? 'Light Played (LP)' : condition === 'PL' ? 'Played (PL)' : 'Poor (PO)';
         
         // Mocked details based on card id
@@ -573,7 +581,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
             <div className="tab-popis-layout">
               <div className="tab-popis-left-col">
                 <div className="detail-desc-block">
-                  <h3 className="detail-section-title" style={{ marginTop: 0 }}>Popis produktu</h3>
+                  <h3 className="detail-section-title" style={{ marginTop: 0 }}>{lang === 'CZ' ? 'Popis produktu' : 'Product Description'}</h3>
                   <div className="tab-popis-text">
                     <p style={{ margin: 0 }}>{product.desc}</p>
                   </div>
@@ -590,24 +598,72 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                 <div className="detail-desc-block">
                   {!isSlab ? (
                     <div className="detail-desc-features">
-                      <h4 className="detail-features-subtitle">Přednosti karty a standard doručení</h4>
+                      <h4 className="detail-features-subtitle">
+                        {lang === 'CZ' ? 'Přednosti karty a standard doručení' : 'Card Highlights & Delivery Standard'}
+                      </h4>
                       <p style={{ lineHeight: '1.7', fontSize: '14.5px', color: 'rgba(255, 255, 255, 0.85)', margin: '0 0 16px 0' }}>
-                        Originální karta <strong>{product.name}</strong> ze sady <strong>{product.edition}</strong> v provedení <strong>{foilText}</strong>. Karta pochází z oficiální distribuce a je skladována v ideálních podmínkách.
+                        {lang === 'CZ' ? (
+                          <>Originální karta <strong>{product.name}</strong> ze sady <strong>{product.edition}</strong> v provedení <strong>{foilText}</strong>. Karta pochází z oficiální distribuce a je skladována v ideálních podmínkách.</>
+                        ) : (
+                          <>Original card <strong>{product.name}</strong> from the <strong>{product.edition}</strong> set in <strong>{foilText}</strong> finish. The card comes from official distribution and is stored under optimal conditions.</>
+                        )}
                       </p>
                       <ul className="detail-desc-list">
-                        <li><strong style={{ color: 'var(--text-main)' }}>Stav karty:</strong> Karta je v našem skladu pečlivě uchovávána a odpovídá stavu <strong>{conditionFull}</strong>.</li>
-                        <li><strong style={{ color: 'var(--text-main)' }}>Bezpečné doručení:</strong> Kartu Vám odešleme v penny sleeve obalu hlavou dolů, pevném toploaderu s vytahovacím poutkem a zajistíme ji mezi dva silné kartony papírovou malířskou páskou. Žádné zbytky lepidla na plastech.</li>
+                        <li>
+                          <strong style={{ color: 'var(--text-main)' }}>
+                            {lang === 'CZ' ? 'Stav karty:' : 'Card Condition:'}
+                          </strong>{' '}
+                          {lang === 'CZ' ? (
+                            <>Karta je v našem skladu pečlivě uchovávána a odpovídá stavu <strong>{conditionFull}</strong>.</>
+                          ) : (
+                            <>The card is carefully kept in our stock and corresponds to <strong>{conditionFull}</strong> condition.</>
+                          )}
+                        </li>
+                        <li>
+                          <strong style={{ color: 'var(--text-main)' }}>
+                            {lang === 'CZ' ? 'Bezpečné doručení:' : 'Safe Delivery:'}
+                          </strong>{' '}
+                          {lang === 'CZ' ? (
+                            <>Kartu Vám odešleme v penny sleeve obalu hlavou dolů, pevném toploaderu s vytahovacím poutkem a zajistíme ji mezi dva silné kartony papírovou malířskou páskou. Žádné zbytky lepidla na plastech.</>
+                          ) : (
+                            <>We ship the card face down in a penny sleeve, insert it into a rigid toploader with a pull-tab, and secure it between two thick pieces of cardboard with painter's paper tape. No glue residues on plastics.</>
+                          )}
+                        </li>
                       </ul>
                     </div>
                   ) : (
                     <div className="detail-desc-features">
-                      <h4 className="detail-features-subtitle">Certifikace a ochrana investiční karty</h4>
+                      <h4 className="detail-features-subtitle">
+                        {lang === 'CZ' ? 'Certifikace a ochrana investiční karty' : 'Certification & Investment Card Protection'}
+                      </h4>
                       <p style={{ lineHeight: '1.7', fontSize: '14.5px', color: 'rgba(255, 255, 255, 0.85)', margin: '0 0 16px 0' }}>
-                        Investiční a sběratelská karta <strong>{product.name}</strong> ze sady <strong>{product.edition}</strong> ohodnocená prestižní společností <strong>{product.company}</strong> s výslednou známkou <strong>{product.grade}</strong>.
+                        {lang === 'CZ' ? (
+                          <>Investiční a sběratelská karta <strong>{product.name}</strong> ze sady <strong>{product.edition}</strong> ohodnocená prestižní společností <strong>{product.company}</strong> s výslednou známkou <strong>{product.grade}</strong>.</>
+                        ) : (
+                          <>Investment and collectible card <strong>{product.name}</strong> from the <strong>{product.edition}</strong> set, graded by the prestigious company <strong>{product.company}</strong> with a final grade of <strong>{product.grade}</strong>.</>
+                        )}
                       </p>
                       <ul className="detail-desc-list">
-                        <li><strong style={{ color: 'var(--text-main)' }}>Certifikace:</strong> Pravost a kvalitu této karty si můžete ověřit v oficiálním registru pod číslem <strong>{product.certNumber}</strong>.</li>
-                        <li><strong style={{ color: 'var(--text-main)' }}>Ochrana:</strong> Plastové pouzdro (slab) chrání kartu před prachem, vlhkostí a mechanickým poškozením. Zásilku balíme do silné vrstvy bublinkové fólie a pevné kartonové krabice.</li>
+                        <li>
+                          <strong style={{ color: 'var(--text-main)' }}>
+                            {lang === 'CZ' ? 'Certifikace:' : 'Certification:'}
+                          </strong>{' '}
+                          {lang === 'CZ' ? (
+                            <>Pravost a kvalitu této karty si můžete ověřit v oficiálním registru pod číslem <strong>{product.certNumber}</strong>.</>
+                          ) : (
+                            <>You can verify the authenticity and quality of this card in the official registry under the number <strong>{product.certNumber}</strong>.</>
+                          )}
+                        </li>
+                        <li>
+                          <strong style={{ color: 'var(--text-main)' }}>
+                            {lang === 'CZ' ? 'Ochrana:' : 'Protection:'}
+                          </strong>{' '}
+                          {lang === 'CZ' ? (
+                            <>Plastové pouzdro (slab) chrání kartu před prachem, vlhkostí a mechanickým poškozením. Zásilku balíme do silné vrstvy bublinkové fólie a pevné kartonové krabice.</>
+                          ) : (
+                            <>The plastic case (slab) protects the card from dust, moisture, and mechanical damage. We wrap the parcel in a thick layer of bubble wrap and ship it in a sturdy cardboard box.</>
+                          )}
+                        </li>
                       </ul>
                     </div>
                   )}
@@ -616,60 +672,60 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               
               <div className="tab-popis-right-col">
                 <div className="custom-detail-panel" style={{ padding: '32px', width: '100%', boxSizing: 'border-box' }}>
-                  <h3 className="detail-section-title" style={{ marginTop: 0 }}>Parametry karty</h3>
+                  <h3 className="detail-section-title" style={{ marginTop: 0 }}>{lang === 'CZ' ? 'Parametry karty' : 'Card Specs'}</h3>
                   {!isSlab ? (
                     <table className="tab-popis-specs-table">
                       <tbody>
                         <tr>
-                          <td>Značka / Hra</td>
+                          <td>{lang === 'CZ' ? 'Značka / Hra' : 'Game'}</td>
                           <td>{product.game}</td>
                         </tr>
                         <tr>
-                          <td>Edice / Sada</td>
+                          <td>{lang === 'CZ' ? 'Edice / Sada' : 'Expansion / Set'}</td>
                           <td>{product.edition}</td>
                         </tr>
                         <tr>
-                          <td>Zkratka edice</td>
+                          <td>{lang === 'CZ' ? 'Zkratka edice' : 'Set Code'}</td>
                           <td>{setCode}</td>
                         </tr>
                         {product.rarity && (
                           <tr>
-                            <td>Rarita</td>
+                            <td>{lang === 'CZ' ? 'Rarita' : 'Rarity'}</td>
                             <td>{product.rarity}</td>
                           </tr>
                         )}
                         <tr>
-                          <td>Číslo karty</td>
+                          <td>{lang === 'CZ' ? 'Číslo karty' : 'Card Number'}</td>
                           <td>{getCardCode(product)}</td>
                         </tr>
                         <tr>
-                          <td>Stav karty</td>
+                          <td>{lang === 'CZ' ? 'Stav karty' : 'Card Condition'}</td>
                           <td>{conditionFull}</td>
                         </tr>
                         <tr>
-                          <td>Jazyk</td>
+                          <td>{lang === 'CZ' ? 'Jazyk' : 'Language'}</td>
                           <td>{langText}</td>
                         </tr>
                         <tr>
-                          <td>Provedení (Finish)</td>
+                          <td>{lang === 'CZ' ? 'Provedení (Finish)' : 'Foiling / Finish'}</td>
                           <td>{foilLongText}</td>
                         </tr>
                         <tr>
-                          <td>Typ / Element</td>
+                          <td>{lang === 'CZ' ? 'Typ / Element' : 'Type / Element'}</td>
                           <td>{elementColor}</td>
                         </tr>
                         {product.game === 'Pokémon' && (
                           <tr>
-                            <td>Stádium vývoje</td>
+                            <td>{lang === 'CZ' ? 'Stádium vývoje' : 'Stage'}</td>
                             <td>{stageLevel}</td>
                           </tr>
                         )}
                         <tr>
-                          <td>Ilustrátor</td>
+                          <td>{lang === 'CZ' ? 'Ilustrátor' : 'Illustrator'}</td>
                           <td>{illustrator}</td>
                         </tr>
                         <tr>
-                          <td>Rok vydání</td>
+                          <td>{lang === 'CZ' ? 'Rok vydání' : 'Year Released'}</td>
                           <td>{yearReleased}</td>
                         </tr>
                       </tbody>
@@ -678,58 +734,58 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                     <table className="tab-popis-specs-table">
                       <tbody>
                         <tr>
-                          <td>Značka / Hra</td>
+                          <td>{lang === 'CZ' ? 'Značka / Hra' : 'Game'}</td>
                           <td>{product.game}</td>
                         </tr>
                         <tr>
-                          <td>Edice / Sada</td>
+                          <td>{lang === 'CZ' ? 'Edice / Sada' : 'Expansion / Set'}</td>
                           <td>{product.edition}</td>
                         </tr>
                         {product.rarity && (
                           <tr>
-                            <td>Rarita</td>
+                            <td>{lang === 'CZ' ? 'Rarita' : 'Rarity'}</td>
                             <td>{product.rarity}</td>
                           </tr>
                         )}
                         <tr>
-                          <td>Jazyk</td>
+                          <td>{lang === 'CZ' ? 'Jazyk' : 'Language'}</td>
                           <td>{langText}</td>
                         </tr>
                         <tr>
-                          <td>Gradingová firma</td>
+                          <td>{lang === 'CZ' ? 'Gradingová firma' : 'Grading Company'}</td>
                           <td><strong>{product.company}</strong></td>
                         </tr>
                         <tr>
-                          <td>Výsledná známka</td>
+                          <td>{lang === 'CZ' ? 'Výsledná známka' : 'Grade'}</td>
                           <td><strong>{product.grade} ({product.grade === 10 ? 'Gem Mint' : 'Gem Mint'})</strong></td>
                         </tr>
                         <tr>
-                          <td>Certifikační číslo</td>
+                          <td>{lang === 'CZ' ? 'Certifikační číslo' : 'Certificate Number'}</td>
                           <td><code>{product.certNumber}</code></td>
                         </tr>
                         {product.company === 'Beckett' && (
                           <>
                             <tr>
-                              <td>Centering (Vycentrování)</td>
+                              <td>{lang === 'CZ' ? 'Centering (Vycentrování)' : 'Centering'}</td>
                               <td>9.5</td>
                             </tr>
                             <tr>
-                              <td>Corners (Rohy)</td>
+                              <td>{lang === 'CZ' ? 'Corners (Rohy)' : 'Corners'}</td>
                               <td>9.5</td>
                             </tr>
                             <tr>
-                              <td>Edges (Hrany)</td>
+                              <td>{lang === 'CZ' ? 'Edges (Hrany)' : 'Edges'}</td>
                               <td>9.5</td>
                             </tr>
                             <tr>
-                              <td>Surface (Povrch)</td>
+                              <td>{lang === 'CZ' ? 'Surface (Povrch)' : 'Surface'}</td>
                               <td>10</td>
                             </tr>
                           </>
                         )}
                         <tr>
-                          <td>Certifikovaný podpis</td>
-                          <td>Ne</td>
+                          <td>{lang === 'CZ' ? 'Certifikovaný podpis' : 'Certified Autograph'}</td>
+                          <td>{lang === 'CZ' ? 'Ne' : 'No'}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -748,7 +804,9 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
             <div className="reviews-dashboard-score">
               <div className="reviews-average-number">4.8</div>
               <div className="reviews-average-stars">★★★★★</div>
-              <div className="reviews-average-count">Založeno na {reviews.length} hodnoceních</div>
+              <div className="reviews-average-count">
+                {lang === 'CZ' ? `Založeno na ${reviews.length} hodnoceních` : `Based on ${reviews.length} reviews`}
+              </div>
             </div>
             
             <div className="reviews-dashboard-bars">
@@ -780,13 +838,17 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
             </div>
 
             <div className="reviews-dashboard-action">
-              <p className="action-text">Podělte se o své zkušenosti s tímto produktem a pomozte ostatním sběratelům.</p>
+              <p className="action-text">
+                {lang === 'CZ' 
+                  ? 'Podělte se o své zkušenosti s tímto produktem a pomozte ostatním sběratelům.' 
+                  : 'Share your experience with this product and help other collectors.'}
+              </p>
               <button className="btn btn-primary reviews-add-btn" onClick={() => setIsReviewModalOpen(true)}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '6px' }}>
                   <path d="M12 20h9" />
                   <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
                 </svg>
-                Napsat recenzi
+                {lang === 'CZ' ? 'Napsat recenzi' : 'Write a review'}
               </button>
             </div>
           </div>
@@ -808,7 +870,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: '2px' }}>
                               <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                             </svg>
-                            Ověřený nákup
+                            {lang === 'CZ' ? 'Ověřený nákup' : 'Verified Purchase'}
                           </span>
                         </div>
                         <span className="review-date">{rev.date}</span>
@@ -823,7 +885,9 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               })}
             </div>
           ) : (
-            <div className="no-reviews">K tomuto produktu zatím nebyla přidána žádná hodnocení. Buďte první!</div>
+            <div className="no-reviews">
+              {lang === 'CZ' ? 'K tomuto produktu zatím nebyla přidána žádná hodnocení. Buďte první!' : 'No reviews have been added for this product yet. Be the first!'}
+            </div>
           )}
         </section>
       )}
@@ -833,14 +897,18 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
         <section id="diskuse" className="detail-section custom-detail-panel">
           <div className="discussions-dashboard">
             <div className="discussions-dashboard-info">
-              <h3 className="detail-section-title" style={{ margin: 0 }}>Diskuze k produktu ({comments.length})</h3>
-              <p className="discussions-dashboard-subtitle">Máte k produktu nějaký dotaz? Náš tým vám rád odpoví.</p>
+              <h3 className="detail-section-title" style={{ margin: 0 }}>
+                {lang === 'CZ' ? `Diskuze k produktu (${comments.length})` : `Product Discussion (${comments.length})`}
+              </h3>
+              <p className="discussions-dashboard-subtitle">
+                {lang === 'CZ' ? 'Máte k produktu nějaký dotaz? Náš tým vám rád odpoví.' : 'Do you have any questions about this product? Our team will gladly answer them.'}
+              </p>
             </div>
             <button className="btn btn-primary discussions-add-btn" onClick={() => setIsCommentModalOpen(true)}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '6px' }}>
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
-              Položit dotaz
+              {lang === 'CZ' ? 'Položit dotaz' : 'Ask a question'}
             </button>
           </div>
 
@@ -862,7 +930,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                       <div className="comment-header-row">
                         <span className={`comment-author ${isReply ? 'admin-author' : ''}`}>
                           {comm.author}
-                          {isReply && <span className="admin-badge">Podpora</span>}
+                          {isReply && <span className="admin-badge">{lang === 'CZ' ? 'Podpora' : 'Support'}</span>}
                         </span>
                         <span className="comment-date">{comm.date}</span>
                       </div>
@@ -873,7 +941,9 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               })}
             </div>
           ) : (
-            <div className="no-comments">K tomuto produktu zatím nebyly položeny žádné dotazy. Zeptejte se na to, co vás zajímá!</div>
+            <div className="no-comments">
+              {lang === 'CZ' ? 'K tomuto produktu zatím nebyly položeny žádné dotazy. Zeptejte se na to, co vás zajímá!' : 'No questions have been asked about this product yet. Ask what you are interested in!'}
+            </div>
           )}
         </section>
       )}
@@ -881,7 +951,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
       {/* Související produkty Section */}
       {activeTab === 'souvisejici' && (
         <section id="souvisejici" className="detail-section">
-          <h3 className="detail-section-title">Související produkty</h3>
+          <h3 className="detail-section-title">{lang === 'CZ' ? 'Související produkty' : 'Related Products'}</h3>
           {relatedSingles.length > 0 ? (
             <div className="catalog-product-grid">
               {relatedSingles.map(rel => (
@@ -889,7 +959,9 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               ))}
             </div>
           ) : (
-            <div className="no-reviews" style={{ background: 'rgba(255,255,255,0.01)', borderRadius: '8px' }}>Žádané související produkty nebyly nalezeny.</div>
+            <div className="no-reviews" style={{ background: 'rgba(255,255,255,0.01)', borderRadius: '8px' }}>
+              {lang === 'CZ' ? 'Žádané související produkty nebyly nalezeny.' : 'No related products found.'}
+            </div>
           )}
         </section>
       )}
@@ -897,7 +969,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
       {/* Podobné produkty Section */}
       {activeTab === 'podobne' && (
         <section id="podobne" className="detail-section">
-          <h3 className="detail-section-title">Podobné produkty</h3>
+          <h3 className="detail-section-title">{lang === 'CZ' ? 'Podobné produkty' : 'Similar Products'}</h3>
           {similarSingles.length > 0 ? (
             <div className="catalog-product-grid">
               {similarSingles.map(rel => (
@@ -905,7 +977,9 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               ))}
             </div>
           ) : (
-            <div className="no-reviews" style={{ background: 'rgba(255,255,255,0.01)', borderRadius: '8px' }}>Žádané podobné produkty nebyly nalezeny.</div>
+            <div className="no-reviews" style={{ background: 'rgba(255,255,255,0.01)', borderRadius: '8px' }}>
+              {lang === 'CZ' ? 'Žádané podobné produkty nebyly nalezeny.' : 'No similar products found.'}
+            </div>
           )}
         </section>
       )}
@@ -917,15 +991,17 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
           <div className="newsletter-content">
             <div className="newsletter-eyebrow">NEWSLETTER • 028</div>
             <h2 className="newsletter-heading">
-              {FEATURE_FLAGS.showBuylist ? 'Nové edice & výkupy jako první.' : 'Nové edice & akce jako první.'}
+              {FEATURE_FLAGS.showBuylist 
+                ? (lang === 'CZ' ? 'Nové edice & výkupy jako první.' : 'New editions & buybacks first.')
+                : (lang === 'CZ' ? 'Nové edice & akce jako první.' : 'New editions & sales first.')}
             </h2>
           </div>
-          <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); if(alert) alert('Děkujeme za přihlášení k newsletteru!', 'success'); }}>
+          <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); if(alert) alert(lang === 'CZ' ? 'Děkujeme za přihlášení k newsletteru!' : 'Thank you for subscribing to our newsletter!', 'success'); }}>
             <div className="newsletter-input-group">
-              <label className="newsletter-input-label">VÁŠ E-MAIL</label>
+              <label className="newsletter-input-label">{lang === 'CZ' ? 'VÁŠ E-MAIL' : 'YOUR EMAIL'}</label>
               <input type="email" required placeholder="jmeno@example.com" className="newsletter-underline-input" />
             </div>
-            <button className="newsletter-submit-btn" type="submit">ODEBÍRAT &rarr;</button>
+            <button className="newsletter-submit-btn" type="submit">{lang === 'CZ' ? 'ODEBÍRAT' : 'SUBSCRIBE'} &rarr;</button>
           </form>
         </div>
       </section>
@@ -945,7 +1021,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               type="button" 
               className="lightbox-close-btn" 
               onClick={() => setIsLightboxOpen(false)}
-              aria-label="Zavřít"
+              aria-label={lang === 'CZ' ? 'Zavřít' : 'Close'}
             >
               ✕
             </button>
@@ -959,7 +1035,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                   type="button" 
                   className="gallery-nav-btn gallery-nav-left" 
                   onClick={handlePrevImage} 
-                  aria-label="Předchozí obrázek"
+                  aria-label={lang === 'CZ' ? 'Předchozí obrázek' : 'Previous image'}
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="20" y1="12" x2="4" y2="12" />
@@ -988,7 +1064,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                   type="button" 
                   className="gallery-nav-btn gallery-nav-right" 
                   onClick={handleNextImage} 
-                  aria-label="Další obrázek"
+                  aria-label={lang === 'CZ' ? 'Další obrázek' : 'Next image'}
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="4" y1="12" x2="20" y2="12" />
@@ -1015,7 +1091,9 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               </div>
             )}
             
-            <span className="lightbox-tip">Najetím myší na obrázek jej přiblížíte pro detailní kontrolu.</span>
+            <span className="lightbox-tip">
+              {lang === 'CZ' ? 'Najetím myší na obrázek jej přiblížíte pro detailní kontrolu.' : 'Hover over the image to zoom in for detailed inspection.'}
+            </span>
           </div>
         </div>
       )}
@@ -1025,27 +1103,29 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
         <div className="product-modal-overlay" onClick={() => setIsAskModalOpen(false)}>
           <div className="product-modal-container" onClick={e => e.stopPropagation()}>
             <button className="product-modal-close" onClick={() => setIsAskModalOpen(false)}>✕</button>
-            <h3 className="product-modal-title">Zeptat se prodejce</h3>
+            <h3 className="product-modal-title">{lang === 'CZ' ? 'Zeptat se prodejce' : 'Ask the Seller'}</h3>
             <form onSubmit={handleAskSubmit} className="login-modal-form">
               <div className="login-form-group">
-                <label className="login-form-label">Váš E-mail <span className="text-red">*</span></label>
+                <label className="login-form-label">{lang === 'CZ' ? 'Váš E-mail' : 'Your Email'} <span className="text-red">*</span></label>
                 <input type="email" required className="login-form-input" value={askEmail} onChange={e => setAskEmail(e.target.value)} placeholder="jmeno@example.com" />
               </div>
               <div className="login-form-group">
-                <label className="login-form-label">Telefonní číslo</label>
-                <input type="tel" className="login-form-input" value={askPhone} onChange={e => setAskPhone(e.target.value)} placeholder="Např. +420 777 777 777" />
+                <label className="login-form-label">{lang === 'CZ' ? 'Telefonní číslo' : 'Phone Number'}</label>
+                <input type="tel" className="login-form-input" value={askPhone} onChange={e => setAskPhone(e.target.value)} placeholder={lang === 'CZ' ? 'Např. +420 777 777 777' : 'e.g. +420 777 777 777'} />
               </div>
               <div className="login-form-group">
-                <label className="login-form-label">Vaše zpráva <span className="text-red">*</span></label>
-                <textarea required className="login-form-input" style={{ minHeight: '100px', resize: 'vertical' }} value={askMessage} onChange={e => setAskMessage(e.target.value)} placeholder="Zde napište svůj dotaz ohledně karty..." />
+                <label className="login-form-label">{lang === 'CZ' ? 'Vaše zpráva' : 'Your Message'} <span className="text-red">*</span></label>
+                <textarea required className="login-form-input" style={{ minHeight: '100px', resize: 'vertical' }} value={askMessage} onChange={e => setAskMessage(e.target.value)} placeholder={lang === 'CZ' ? 'Zde napište svůj dotaz ohledně karty...' : 'Write your question about the card here...'} />
               </div>
               <div className="login-form-group" style={{ flexDirection: 'row', gap: '10px', alignItems: 'flex-start' }}>
                 <input type="checkbox" required id="ask-gdpr" checked={askGdpr} onChange={e => setAskGdpr(e.target.checked)} style={{ marginTop: '3px' }} />
                 <label htmlFor="ask-gdpr" style={{ fontSize: '11px', color: 'var(--text-muted)', cursor: 'pointer', lineHeight: '1.4' }}>
-                  Souhlasím se zpracováním osobních údajů v souladu se zásadami ochrany osobních údajů na této stránce.
+                  {lang === 'CZ' 
+                    ? 'Souhlasím se zpracováním osobních údajů v souladu se zásadami ochrany osobních údajů na této stránce.' 
+                    : 'I agree to the processing of personal data in accordance with the privacy policy on this site.'}
                 </label>
               </div>
-              <button type="submit" className="login-submit-btn">Odeslat dotaz</button>
+              <button type="submit" className="login-submit-btn">{lang === 'CZ' ? 'Odeslat dotaz' : 'Send Inquiry'}</button>
             </form>
           </div>
         </div>
@@ -1055,38 +1135,40 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
         <div className="product-modal-overlay" onClick={() => setIsWatchdogModalOpen(false)}>
           <div className="product-modal-container" onClick={e => e.stopPropagation()}>
             <button className="product-modal-close" onClick={() => setIsWatchdogModalOpen(false)}>✕</button>
-            <h3 className="product-modal-title">Sledovat produkt (Hlídací pes)</h3>
+            <h3 className="product-modal-title">{lang === 'CZ' ? 'Sledovat produkt (Hlídací pes)' : 'Watch Product (Watchdog)'}</h3>
             <form onSubmit={handleWatchdogSubmit} className="login-modal-form">
               <div className="login-form-group">
-                <label className="login-form-label">Upozornit mě, když:</label>
+                <label className="login-form-label">{lang === 'CZ' ? 'Upozornit mě, když:' : 'Notify me when:'}</label>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
                     <input type="radio" name="watchdog-type" checked={watchdogType === 'stock'} onChange={() => setWatchdogType('stock')} />
-                    Produkt bude skladem
+                    {lang === 'CZ' ? 'Produkt bude skladem' : 'Product is in stock'}
                   </label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
                     <input type="radio" name="watchdog-type" checked={watchdogType === 'sale'} onChange={() => setWatchdogType('sale')} />
-                    Produkt bude v akci
+                    {lang === 'CZ' ? 'Produkt bude v akci' : 'Product is on sale'}
                   </label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer', flexWrap: 'wrap' }}>
                     <input type="radio" name="watchdog-type" checked={watchdogType === 'price'} onChange={() => setWatchdogType('price')} />
-                    Cena klesne pod: 
-                    <input type="number" disabled={watchdogType !== 'price'} value={watchdogPriceLimit} onChange={e => setWatchdogPriceLimit(e.target.value)} className="login-form-input" style={{ width: '100px', padding: '6px 12px', display: 'inline-block', margin: '0 4px', height: 'auto' }} placeholder="Částka" />
+                    {lang === 'CZ' ? 'Cena klesne pod:' : 'Price drops below:'} 
+                    <input type="number" disabled={watchdogType !== 'price'} value={watchdogPriceLimit} onChange={e => setWatchdogPriceLimit(e.target.value)} className="login-form-input" style={{ width: '100px', padding: '6px 12px', display: 'inline-block', margin: '0 4px', height: 'auto' }} placeholder={lang === 'CZ' ? 'Částka' : 'Amount'} />
                     Kč
                   </label>
                 </div>
               </div>
               <div className="login-form-group" style={{ marginTop: '8px' }}>
-                <label className="login-form-label">E-mail pro zaslání upozornění <span className="text-red">*</span></label>
+                <label className="login-form-label">{lang === 'CZ' ? 'E-mail pro zaslání upozornění' : 'Email for notification'} <span className="text-red">*</span></label>
                 <input type="email" required className="login-form-input" value={watchdogEmail} onChange={e => setWatchdogEmail(e.target.value)} placeholder="jmeno@example.com" />
               </div>
               <div className="login-form-group" style={{ flexDirection: 'row', gap: '10px', alignItems: 'flex-start' }}>
                 <input type="checkbox" required id="watchdog-gdpr" checked={watchdogGdpr} onChange={e => setWatchdogGdpr(e.target.checked)} style={{ marginTop: '3px' }} />
                 <label htmlFor="watchdog-gdpr" style={{ fontSize: '11px', color: 'var(--text-muted)', cursor: 'pointer', lineHeight: '1.4' }}>
-                  Beru na vědomí, že moje e-mailová adresa bude spravována za účelem informování o dostupnosti a cenách produktů v souladu se zásadami zpracování osobních údajů.
+                  {lang === 'CZ' 
+                    ? 'Beru na vědomí, že moje e-mailová adresa bude spravována za účelem informování o dostupnosti a cenách produktů v souladu se zásadami zpracování osobních údajů.' 
+                    : 'I acknowledge that my email address will be managed for the purpose of informing me about product availability and prices in accordance with the privacy policy.'}
                 </label>
               </div>
-              <button type="submit" className="login-submit-btn">Uložit nastavení hlídání</button>
+              <button type="submit" className="login-submit-btn">{lang === 'CZ' ? 'Uložit nastavení hlídání' : 'Save Watchdog Settings'}</button>
             </form>
           </div>
         </div>
@@ -1096,27 +1178,27 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
         <div className="product-modal-overlay" onClick={() => setIsReviewModalOpen(false)}>
           <div className="product-modal-container" onClick={e => e.stopPropagation()}>
             <button className="product-modal-close" onClick={() => setIsReviewModalOpen(false)}>✕</button>
-            <h3 className="product-modal-title">Přidat hodnocení produktu</h3>
+            <h3 className="product-modal-title">{lang === 'CZ' ? 'Přidat hodnocení produktu' : 'Add Product Review'}</h3>
             <form onSubmit={handleReviewSubmit} className="login-modal-form">
               <div className="login-form-group">
-                <label className="login-form-label">Vaše jméno <span className="text-red">*</span></label>
+                <label className="login-form-label">{lang === 'CZ' ? 'Vaše jméno' : 'Your Name'} <span className="text-red">*</span></label>
                 <input type="text" required className="login-form-input" value={reviewAuthor} onChange={e => setReviewAuthor(e.target.value)} placeholder="Jan N." />
               </div>
               <div className="login-form-group">
-                <label className="login-form-label">Počet hvězdiček <span className="text-red">*</span></label>
+                <label className="login-form-label">{lang === 'CZ' ? 'Počet hvězdiček' : 'Star Rating'} <span className="text-red">*</span></label>
                 <select className="login-form-input" value={reviewRating} onChange={e => setReviewRating(Number(e.target.value))}>
-                  <option value={5}>★★★★★ (5 hvězdiček)</option>
-                  <option value={4}>★★★★☆ (4 hvězdičky)</option>
-                  <option value={3}>★★★☆☆ (3 hvězdičky)</option>
-                  <option value={2}>★★☆☆☆ (2 hvězdičky)</option>
-                  <option value={1}>★☆☆☆☆ (1 hvězdička)</option>
+                  <option value={5}>★★★★★ ({lang === 'CZ' ? '5 hvězdiček' : '5 stars'})</option>
+                  <option value={4}>★★★★☆ ({lang === 'CZ' ? '4 hvězdičky' : '4 stars'})</option>
+                  <option value={3}>★★★☆☆ ({lang === 'CZ' ? '3 hvězdičky' : '3 stars'})</option>
+                  <option value={2}>★★☆☆☆ ({lang === 'CZ' ? '2 hvězdičky' : '2 stars'})</option>
+                  <option value={1}>★☆☆☆☆ ({lang === 'CZ' ? '1 hvězdička' : '1 star'})</option>
                 </select>
               </div>
               <div className="login-form-group">
-                <label className="login-form-label">Text recenze <span className="text-red">*</span></label>
-                <textarea required className="login-form-input" style={{ minHeight: '100px', resize: 'vertical' }} value={reviewText} onChange={e => setReviewText(e.target.value)} placeholder="Jak jste spokojen s tímto produktem?" />
+                <label className="login-form-label">{lang === 'CZ' ? 'Text recenze' : 'Review Content'} <span className="text-red">*</span></label>
+                <textarea required className="login-form-input" style={{ minHeight: '100px', resize: 'vertical' }} value={reviewText} onChange={e => setReviewText(e.target.value)} placeholder={lang === 'CZ' ? 'Jak jste spokojen s tímto produktem?' : 'How satisfied are you with this product?'} />
               </div>
-              <button type="submit" className="login-submit-btn">Odeslat recenzi</button>
+              <button type="submit" className="login-submit-btn">{lang === 'CZ' ? 'Odeslat recenzi' : 'Submit Review'}</button>
             </form>
           </div>
         </div>
@@ -1126,17 +1208,17 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
         <div className="product-modal-overlay" onClick={() => setIsCommentModalOpen(false)}>
           <div className="product-modal-container" onClick={e => e.stopPropagation()}>
             <button className="product-modal-close" onClick={() => setIsCommentModalOpen(false)}>✕</button>
-            <h3 className="product-modal-title">Položit dotaz / Napsat komentář</h3>
+            <h3 className="product-modal-title">{lang === 'CZ' ? 'Položit dotaz / Napsat komentář' : 'Ask a Question / Write a Comment'}</h3>
             <form onSubmit={handleCommentSubmit} className="login-modal-form">
               <div className="login-form-group">
-                <label className="login-form-label">Vaše jméno <span className="text-red">*</span></label>
+                <label className="login-form-label">{lang === 'CZ' ? 'Vaše jméno' : 'Your Name'} <span className="text-red">*</span></label>
                 <input type="text" required className="login-form-input" value={commentAuthor} onChange={e => setCommentAuthor(e.target.value)} placeholder="Jan N." />
               </div>
               <div className="login-form-group">
-                <label className="login-form-label">Text komentáře <span className="text-red">*</span></label>
-                <textarea required className="login-form-input" style={{ minHeight: '100px', resize: 'vertical' }} value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="Zde napište svůj dotaz nebo postřeh..." />
+                <label className="login-form-label">{lang === 'CZ' ? 'Text komentáře' : 'Comment Text'} <span className="text-red">*</span></label>
+                <textarea required className="login-form-input" style={{ minHeight: '100px', resize: 'vertical' }} value={commentText} onChange={e => setCommentText(e.target.value)} placeholder={lang === 'CZ' ? 'Zde napište svůj dotaz nebo postřeh...' : 'Write your question or feedback here...'} />
               </div>
-              <button type="submit" className="login-submit-btn">Odeslat komentář</button>
+              <button type="submit" className="login-submit-btn">{lang === 'CZ' ? 'Odeslat komentář' : 'Submit Comment'}</button>
             </form>
           </div>
         </div>

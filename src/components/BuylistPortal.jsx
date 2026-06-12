@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { bulkRates } from '../mockData';
+import { useTranslation } from '../context/LanguageContext';
 
 let buylistIdCounter = 0;
 function generateUniqueId() {
@@ -12,6 +13,7 @@ function generateSubmissionId() {
 }
 
 export default function BuylistPortal({ products, submitBuylist, setActivePage }) {
+  const { lang, t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [buylistCart, setBuylistCart] = useState([]);
   const [bulkCounts, setBulkCounts] = useState(
@@ -95,7 +97,7 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
 
   const handleSubmit = () => {
     if (buylistCart.length === 0 && Object.values(bulkCounts).every(v => v === 0)) {
-      alert('Váš výkupní košík je prázdný.');
+      alert(t('BuylistPortal.emptyCart'));
       return;
     }
 
@@ -115,12 +117,15 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
       })).filter(b => b.count > 0),
       payoutMethod,
       totalPayout: finalTotal,
-      status: 'Čeká na odeslání',
-      date: new Date().toLocaleDateString()
+      status: lang === 'CZ' ? 'Čeká na odeslání' : 'Pending dispatch',
+      date: new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US')
     };
 
     submitBuylist(submission);
-    alert(`Výkup ${submission.id} byl úspěšně zaevidován! Nyní jej můžete schválit v Admin panelu.`);
+    alert(lang === 'CZ' 
+      ? `Výkup ${submission.id} byl úspěšně zaevidován! Nyní jej můžete schválit v Admin panelu.`
+      : `Buylist submission ${submission.id} has been recorded! You can now review it in the Admin panel.`
+    );
     
     // Clear cart and head to profile
     setBuylistCart([]);
@@ -130,20 +135,20 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
 
   return (
     <div style={styles.container} className="container fade-in">
-      <h1 className="sr-only">Výkupní portál TCG karet (Buylist) - NORTHVALE</h1>
+      <h1 className="sr-only">{lang === 'CZ' ? 'Výkupní portál TCG karet (Buylist) - NORTHVALE' : 'TCG Card Buylist Portal - NORTHVALE'}</h1>
 
       <div style={styles.layout}>
         {/* Left Column: Core Buylist Functionality */}
         <div style={styles.leftCol}>
           {/* Card search */}
           <div style={styles.section} className="glass-panel">
-            <h3 style={styles.sectionTitle}>1. Přidat konkrétní kusové karty</h3>
-            <p style={styles.desc}>Zadejte název karty, kterou nám chcete nabídnout k výkupu.</p>
+            <h3 style={styles.sectionTitle}>{lang === 'CZ' ? '1. Přidat konkrétní kusové karty' : '1. Add specific single cards'}</h3>
+            <p style={styles.desc}>{lang === 'CZ' ? 'Zadejte název karty, kterou nám chcete nabídnout k výkupu.' : 'Enter the name of the card you want to offer for buyback.'}</p>
             
             <div style={styles.searchWrapper}>
               <input 
                 type="text" 
-                placeholder="Vyhledat kartu k výkupu (např. Charizard)..." 
+                placeholder={lang === 'CZ' ? 'Vyhledat kartu k výkupu (např. Charizard)...' : 'Search for a card to sell (e.g. Charizard)...'} 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={styles.searchInput}
@@ -169,12 +174,12 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
                 <table style={styles.table}>
                   <thead>
                     <tr>
-                      <th style={styles.th}>Karta</th>
-                      <th style={styles.th}>Stav</th>
-                      <th style={styles.th}>Jazyk</th>
-                      <th style={styles.th}>Množství</th>
-                      <th style={styles.th}>Nase cena</th>
-                      <th style={{ ...styles.th, textAlign: 'right' }}>Odstranit</th>
+                      <th style={styles.th}>{lang === 'CZ' ? 'Karta' : 'Card'}</th>
+                      <th style={styles.th}>{t('common.condition')}</th>
+                      <th style={styles.th}>{t('common.language')}</th>
+                      <th style={styles.th}>{t('common.quantity')}</th>
+                      <th style={styles.th}>{lang === 'CZ' ? 'Naše nabídka' : 'Our Offer'}</th>
+                      <th style={{ ...styles.th, textAlign: 'right' }}>{lang === 'CZ' ? 'Odstranit' : 'Remove'}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -223,7 +228,7 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
                             style={styles.numInput}
                           />
                         </td>
-                        <td style={styles.tdPrice}>{item.basePrice.toLocaleString('cs-CZ')} Kč / ks</td>
+                        <td style={styles.tdPrice}>{item.basePrice.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'} / {lang === 'CZ' ? 'ks' : 'pcs'}</td>
                         <td style={{ ...styles.td, textAlign: 'right' }}>
                           <button style={styles.removeBtn} onClick={() => handleRemoveItem(item.id)}>&times;</button>
                         </td>
@@ -237,8 +242,8 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
 
           {/* Bulk Rates Calculator */}
           <div style={styles.section} className="glass-panel">
-            <h3 style={styles.sectionTitle}>2. Výkup bulků (Větší množství obyčejných karet)</h3>
-            <p style={styles.desc}>Máte stovky či tisíce common/rare karet? Nabízíme výkup na kusy.</p>
+            <h3 style={styles.sectionTitle}>{lang === 'CZ' ? '2. Výkup bulků (Větší množství obyčejných karet)' : '2. Bulk buybacks (large quantities of raw cards)'}</h3>
+            <p style={styles.desc}>{lang === 'CZ' ? 'Máte stovky či tisíce common/rare karet? Nabízíme výkup na kusy.' : 'Have hundreds or thousands of common/rare cards? We offer buybacks per piece.'}</p>
             
             <div style={styles.bulkGrid}>
               {bulkRates.map(rate => (
@@ -247,7 +252,7 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
                     <span style={styles.bulkGame}>{rate.game}</span>
                     <span style={styles.bulkType}>{rate.type}</span>
                     <span style={styles.bulkRates}>
-                      Cena: {rate.cashRate} Kč za kus
+                      {lang === 'CZ' ? `Cena: ${rate.cashRate} Kč za kus` : `Rate: ${rate.cashRate} CZK per card`}
                     </span>
                   </div>
                   <div style={styles.bulkInputWrapper}>
@@ -258,7 +263,7 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
                       onChange={(e) => handleBulkCountChange(rate.id, e.target.value)}
                       style={styles.bulkNumInput}
                     />
-                    <span style={styles.bulkUnit}>ks</span>
+                    <span style={styles.bulkUnit}>{t('common.pcs')}</span>
                   </div>
                 </div>
               ))}
@@ -268,11 +273,11 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
 
         {/* Right Column: Checkout/Summary Panel */}
         <div style={styles.rightCol} className="glass-panel">
-          <h3 style={styles.summaryTitle}>Přehled výkupu</h3>
+          <h3 style={styles.summaryTitle}>{lang === 'CZ' ? 'Přehled výkupu' : 'Buylist Summary'}</h3>
 
           {/* Payout method info */}
           <div style={styles.payoutChoice}>
-            <h4 style={styles.choiceHeading}>Způsob výplaty:</h4>
+            <h4 style={styles.choiceHeading}>{lang === 'CZ' ? 'Způsob výplaty:' : 'Payout Method:'}</h4>
             <div 
               style={{
                 ...styles.choiceCard,
@@ -282,35 +287,45 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
               }}
               className="glass-card"
             >
-              <span style={styles.choiceTitle}>Bankovní převod</span>
-              <span style={styles.choiceDesc}>Peníze zašleme přímo na Váš bankovní účet po fyzické kontrole karet.</span>
+              <span style={styles.choiceTitle}>{t('BuylistPortal.cashTitle')}</span>
+              <span style={styles.choiceDesc}>{t('BuylistPortal.cashDesc')}</span>
             </div>
           </div>
 
           {/* Pricing Summary */}
           <div style={styles.summaryPrices}>
             <div style={styles.summaryRow}>
-              <span>Kusové karty:</span>
-              <span>{singlesCashTotal.toLocaleString()} Kč</span>
+              <span>{lang === 'CZ' ? 'Kusové karty:' : 'Single cards:'}</span>
+              <span>{singlesCashTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}</span>
             </div>
             <div style={styles.summaryRow}>
-              <span>Bulk výkup:</span>
-              <span>{bulkCashTotal.toLocaleString()} Kč</span>
+              <span>{lang === 'CZ' ? 'Bulk výkup:' : 'Bulk cards:'}</span>
+              <span>{bulkCashTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}</span>
             </div>
             
             <div style={styles.totalRow}>
-              <span>Celková odhadovaná cena:</span>
-              <span style={{ color: 'var(--color-gold)' }}>{finalTotal.toLocaleString()} Kč</span>
+              <span>{lang === 'CZ' ? 'Celková odhadovaná cena:' : 'Total Estimated Payout:'}</span>
+              <span style={{ color: 'var(--color-gold)' }}>{finalTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}</span>
             </div>
           </div>
 
           {/* Warnings */}
           <div style={styles.infoBox} className="glass-card">
-            <h4 style={styles.infoTitle}>📌 Důležité informace:</h4>
+            <h4 style={styles.infoTitle}>{lang === 'CZ' ? '📌 Důležité informace:' : '📌 Important Information:'}</h4>
             <ul style={styles.infoList}>
-              <li>Karty k výkupu nám zašlete poštou nebo odevzdejte osobně v kavárně v Pardubicích.</li>
-              <li>Fyzickou kontrolu stavu a pravosti karet provedeme do 48 hodin od přijetí.</li>
-              <li>Po schválení Vám ihned zašleme peníze na bankovní účet.</li>
+              {lang === 'CZ' ? (
+                <>
+                  <li>Karty k výkupu nám zašlete poštou nebo odevzdejte osobně v kavárně v Pardubicích.</li>
+                  <li>Fyzickou kontrolu stavu a pravosti karet provedeme do 48 hodin od přijetí.</li>
+                  <li>Po schválení Vám ihned zašleme peníze na bankovní účet.</li>
+                </>
+              ) : (
+                <>
+                  <li>Send your buylist cards to our address or hand them in person at the cafe in Pardubice.</li>
+                  <li>We will perform a physical check of the condition and authenticity within 48 hours of receipt.</li>
+                  <li>Once approved, we will send the payout to your bank account immediately.</li>
+                </>
+              )}
             </ul>
           </div>
 
@@ -319,7 +334,7 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
             style={styles.submitBtn}
             onClick={handleSubmit}
           >
-            Odeslat výkup ke kontrole
+            {t('BuylistPortal.submitBtn')}
           </button>
         </div>
       </div>

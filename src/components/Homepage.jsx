@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { FEATURE_FLAGS } from '../config';
+import { useTranslation } from '../context/LanguageContext';
 
 const ProductImage = ({ src, alt, className = '' }) => {
   const [aspectRatio, setAspectRatio] = useState(1.0);
@@ -27,6 +28,7 @@ const ProductImage = ({ src, alt, className = '' }) => {
 
 
 export default function Homepage({ setActivePage, addToCart, products, setSelectedProductId, setFilters }) {
+  const { lang, t } = useTranslation();
   // Mobile state detection (900px breakpoint for layout)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
   // Image breakpoint detection (650px breakpoint for mobile images)
@@ -47,10 +49,10 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   // USP slideshow ref & data
   const uspScrollRef = useRef(null);
   const uspItems = [
-    { icon: '/truck-moving.png', title: 'Doprava zdarma', desc: 'při objednávce nad 1 000 Kč' },
-    { icon: '/tachometer-fast.png', title: 'Rychlost doručení', desc: 'Odesíláme do 24 hodin' },
-    { icon: '/badget-check-alt.png', title: '100% Originální', desc: 'Pouze od ověřených distributorů' },
-    { icon: '/credit-card.png', title: 'Bezpečná platba', desc: 'Karta, bankovní převod, dobírka' }
+    { icon: '/truck-moving.png', title: lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping', desc: lang === 'CZ' ? 'při objednávce nad 1 000 Kč' : 'on orders over 1,000 Kč' },
+    { icon: '/tachometer-fast.png', title: lang === 'CZ' ? 'Rychlost doručení' : 'Fast Shipping', desc: lang === 'CZ' ? 'Odesíláme do 24 hodin' : 'Dispatched within 24 hours' },
+    { icon: '/badget-check-alt.png', title: lang === 'CZ' ? '100% Originální' : '100% Authentic', desc: lang === 'CZ' ? 'Pouze od ověřených distributorů' : 'Only from verified distributors' },
+    { icon: '/credit-card.png', title: lang === 'CZ' ? 'Bezpečná platba' : 'Secure Payment', desc: lang === 'CZ' ? 'Karta, bankovní převod, dobírka' : 'Cards, bank transfer, COD' }
   ];
 
   const handleUspScroll = (direction) => {
@@ -95,10 +97,30 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       desktopImage: '/Desktop - Grading Karet.webp', 
       page: 'grading' 
     },
-    { title: 'Zprostředkování gradingu v USA', desc: 'Pošlete Své karty do PSA, Beckett nebo TAG s pre-grading kontrolou.', buttonText: 'Více o gradingu', page: 'grading' },
-    { title: 'One Piece Card Game', desc: 'Nové booster boxy a starter decky skladem.', buttonText: 'Prohlížet One Piece', page: 'sealed-catalog' },
-    { title: 'Investiční produkty', desc: 'Vybrané ETB a booster boxy v bezchybném stavu vhodné do sbírky.', buttonText: 'Investovat', page: 'sealed-catalog' },
-    { title: 'Výkup karet za hotové', desc: 'Nabídněte nám své přebytečné karty a získejte peníze na bankovní účet.', buttonText: 'Prodat karty', page: 'buylist' }
+    { 
+      title: lang === 'CZ' ? 'Zprostředkování gradingu v USA' : 'Grading Service in the US', 
+      desc: lang === 'CZ' ? 'Pošlete své karty do PSA, Beckett nebo TAG s pre-grading kontrolou.' : 'Submit your cards to PSA, Beckett, or TAG with pre-grading assessment.', 
+      buttonText: lang === 'CZ' ? 'Více o gradingu' : 'Learn More', 
+      page: 'grading' 
+    },
+    { 
+      title: 'One Piece Card Game', 
+      desc: lang === 'CZ' ? 'Nové booster boxy a starter decky skladem.' : 'New booster boxes and starter decks in stock.', 
+      buttonText: lang === 'CZ' ? 'Prohlížet One Piece' : 'Browse One Piece', 
+      page: 'sealed-catalog' 
+    },
+    { 
+      title: lang === 'CZ' ? 'Investiční produkty' : 'Investment Products', 
+      desc: lang === 'CZ' ? 'Vybrané ETB a booster boxy v bezchybném stavu vhodné do sbírky.' : 'Selected ETBs and booster boxes in pristine condition perfect for collecting.', 
+      buttonText: lang === 'CZ' ? 'Investovat' : 'Invest', 
+      page: 'sealed-catalog' 
+    },
+    { 
+      title: lang === 'CZ' ? 'Výkup karet za hotové' : 'Sell Cards for Cash', 
+      desc: lang === 'CZ' ? 'Nabídněte nám své přebytečné karty a získejte peníze na bankovní účet.' : 'Sell us your spare cards and receive a direct bank transfer payout.', 
+      buttonText: lang === 'CZ' ? 'Prodat karty' : 'Sell Cards', 
+      page: 'buylist' 
+    }
   ];
 
   const slides = rawSlides.filter(slide => {
@@ -153,25 +175,33 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       initials: 'FK',
       name: 'Filip K.',
       desc: 'Pardubice',
-      text: '„Karty dorazily v naprosto bezchybném stavu. Kartonový sendvič a toploader bez lepidla jsou přesně to, co od sběratelského obchodu očekávám. Tímto děkuji za super přístup a skvělou komunikaci.“'
+      text: lang === 'CZ'
+        ? '„Karty dorazily v naprosto bezchybném stavu. Kartonový sendvič a toploader bez lepidla jsou přesně to, co od sběratelského obchodu očekávám. Tímto děkuji za super přístup a skvělou komunikaci.“'
+        : '“The cards arrived in absolutely perfect condition. The cardboard sandwich and glue-free toploader are exactly what I expect from a collector-focused store. Thank you for the awesome service and great communication.”'
     },
     {
       initials: 'MR',
       name: 'Monika R.',
-      desc: 'UPCE student',
-      text: `„Oceňuji možnost doručení kusovek na odběrné místo v kavárně v centru Pardubic. Neplatím žádné poštovné pro malé objednávky a k tomu dostanu výbornou kávu. ${FEATURE_FLAGS.showBuylist ? 'Výkup proběhl' : 'Nákup proběhl'} naprosto hladce.“`
+      desc: lang === 'CZ' ? 'UPCE student' : 'UPCE Student',
+      text: lang === 'CZ'
+        ? `„Oceňuji možnost doručení kusovek na odběrné místo v kavárně v centru Pardubic. Neplatím žádné poštovné pro malé objednávky a k tomu dostanu výbornou kávu. ${FEATURE_FLAGS.showBuylist ? 'Výkup proběhl' : 'Nákup proběhl'} naprosto hladce.“`
+        : `“I appreciate the option to pick up my singles at the pickup point in a cafe in Pardubice city center. I don't pay any shipping for small orders and I get a delicious coffee to boot. The ${FEATURE_FLAGS.showBuylist ? 'buylist trade' : 'purchase'} went incredibly smoothly.”`
     },
     FEATURE_FLAGS.showGrading && {
       initials: 'PS',
       name: 'Petr S.',
       desc: 'Hradec Králové',
-      text: '„Nechal jsem si přes ně nagradovat pět drahých Pokémon karet u PSA. Celý proces šlo sledovat online v mém profilu, vše bylo pojištěné a výsledné známky (tři desítky!) předčily mé očekávání.“'
+      text: lang === 'CZ'
+        ? '„Nechal jsem si přes ně nagradovat pět drahých Pokémon karet u PSA. Celý proces šlo sledovat online v mém profilu, vše bylo pojištěné a výsledné známky (tři desítky!) předčily mé očekávání.“'
+        : '“I submitted five expensive Pokémon cards for grading to PSA through Northvale. The entire process was fully trackable online in my profile, fully insured, and the grades (three Gem Mints!) exceeded my expectations.”'
     },
     {
       initials: 'JM',
       name: 'Jana M.',
       desc: 'Pardubice',
-      text: '„Jako rodič velmi oceňuji dárkového průvodce. Vůbec se v Pokémon edicích nevyznám, ale s jejich dárkovým setem pod stromečkem mělo dítě obrovskou radost a já měl jistotu, že nekupuji fake karty.“'
+      text: lang === 'CZ'
+        ? '„Jako rodič velmi oceňuji dárkového průvodce. Vůbec se v Pokémon edicích nevyznám, ale s jejich dárkovým setem pod stromečkem mělo dítě obrovskou radost a já měl jistotu, že nekupuji fake karty.“'
+        : '“As a parent, I highly appreciate their gift guide. I don\'t understand Pokémon sets at all, but their gift bundle under the Christmas tree made my child extremely happy, and I was sure I wasn\'t buying counterfeit cards.”'
     }
   ].filter(Boolean);
 
@@ -211,7 +241,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
   return (
     <div style={{ ...styles.container, paddingTop: isMobile ? '12px' : '24px', gap: isMobile ? '48px' : '88px' }} className="fade-in">
-      <h1 className="sr-only">NORTHVALE TCG - Váš specializovaný e-shop pro Pokémon, Lorcana, One Piece a grading karet</h1>
+      <h1 className="sr-only">{lang === 'CZ' ? 'NORTHVALE TCG - Váš specializovaný e-shop pro Pokémon, Lorcana, One Piece a grading karet' : 'NORTHVALE TCG - Your specialized store for Pokémon, Lorcana, One Piece and card grading'}</h1>
 
       {/* Hero Section */}
       <section style={{ ...styles.heroSection, marginTop: isMobile ? '12px' : '64px', gap: isMobile ? '16px' : '24px' }} className="container">
@@ -236,9 +266,17 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               backgroundSize: 'cover',
               backgroundPosition: slides[currentSlide].desktopImage ? 'center bottom' : 'center',
               backgroundRepeat: 'no-repeat',
-              cursor: slides[currentSlide].page ? 'pointer' : 'default'
+              cursor: slides[currentSlide].page ? 'pointer' : 'default',
+              ...(!slides[currentSlide].desktopImage ? {
+                background: 'var(--bg-secondary)',
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid transparent',
+                boxShadow: '0 24px 50px rgba(0, 0, 0, 0.45)',
+                backdropFilter: 'none',
+                WebkitBackdropFilter: 'none'
+              } : {})
             }} 
-            className="glass-panel"
+            className={slides[currentSlide].desktopImage ? "glass-panel" : ""}
             onClick={() => {
               if (slides[currentSlide].page) {
                 setFilters({});
@@ -351,7 +389,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   borderRadius: '4px',
                   border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
-                  Zbývá {dealProductStock} kusů
+                  {lang === 'CZ' ? `Zbývá ${dealProductStock} kusů` : `${dealProductStock} pcs left`}
                 </span>
               </div>
 
@@ -415,7 +453,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                       filter: 'brightness(0)' 
                     }} 
                   />
-                  {dealAdded ? 'Přidáno' : 'Do košíku'}
+                  {dealAdded ? (lang === 'CZ' ? 'Přidáno' : 'Added') : (lang === 'CZ' ? 'Do košíku' : 'Add to Cart')}
                 </button>
               </div>
 
@@ -441,7 +479,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   letterSpacing: '1px',
                   marginBottom: '6px'
                 }}>
-                  Akce dne
+                  {lang === 'CZ' ? 'Akce dne' : 'Deal of the day'}
                 </span>
                 <div style={{
                   display: 'flex',
@@ -453,19 +491,19 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     <span style={{ fontSize: '18px', fontWeight: '800' }}>
                       {timeLeft.hours.toString().padStart(2, '0')}
                     </span>
-                    <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>hodin</span>
+                    <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>{lang === 'CZ' ? 'hodin' : 'hours'}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
                     <span style={{ fontSize: '18px', fontWeight: '800' }}>
                       {timeLeft.minutes.toString().padStart(2, '0')}
                     </span>
-                    <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>minut</span>
+                    <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>{lang === 'CZ' ? 'minut' : 'mins'}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
                     <span style={{ fontSize: '18px', fontWeight: '800' }}>
                       {timeLeft.seconds.toString().padStart(2, '0')}
                     </span>
-                    <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>sekund</span>
+                    <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>{lang === 'CZ' ? 'sekund' : 'secs'}</span>
                   </div>
                 </div>
               </div>
@@ -497,7 +535,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   marginBottom: '16px',
                   textAlign: 'center'
                 }}>
-                  Akce dne
+                  {lang === 'CZ' ? 'Akce dne' : 'Deal of the day'}
                 </span>
                 <div style={{
                   display: 'flex',
@@ -510,19 +548,19 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     <span style={{ fontSize: '24px', fontWeight: '800', lineHeight: '1' }}>
                       {timeLeft.hours.toString().padStart(2, '0')}
                     </span>
-                    <span style={{ fontSize: '9px', color: 'rgba(0, 0, 0, 0.65)', textTransform: 'uppercase', fontWeight: '500' }}>hodin</span>
+                    <span style={{ fontSize: '9px', color: 'rgba(0, 0, 0, 0.65)', textTransform: 'uppercase', fontWeight: '500' }}>{lang === 'CZ' ? 'hodin' : 'hours'}</span>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                     <span style={{ fontSize: '24px', fontWeight: '800', lineHeight: '1' }}>
                       {timeLeft.minutes.toString().padStart(2, '0')}
                     </span>
-                    <span style={{ fontSize: '9px', color: 'rgba(0, 0, 0, 0.65)', textTransform: 'uppercase', fontWeight: '500' }}>minut</span>
+                    <span style={{ fontSize: '9px', color: 'rgba(0, 0, 0, 0.65)', textTransform: 'uppercase', fontWeight: '500' }}>{lang === 'CZ' ? 'minut' : 'mins'}</span>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                     <span style={{ fontSize: '24px', fontWeight: '800', lineHeight: '1' }}>
                       {timeLeft.seconds.toString().padStart(2, '0')}
                     </span>
-                    <span style={{ fontSize: '9px', color: 'rgba(0, 0, 0, 0.65)', textTransform: 'uppercase', fontWeight: '500' }}>sekund</span>
+                    <span style={{ fontSize: '9px', color: 'rgba(0, 0, 0, 0.65)', textTransform: 'uppercase', fontWeight: '500' }}>{lang === 'CZ' ? 'sekund' : 'secs'}</span>
                   </div>
                 </div>
               </div>
@@ -607,7 +645,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                       border: '1px solid rgba(255, 255, 255, 0.1)',
                       marginBottom: '2px'
                     }}>
-                      Zbývá {dealProductStock} kusů
+                      {lang === 'CZ' ? `Zbývá ${dealProductStock} kusů` : `${dealProductStock} pcs left`}
                     </span>
 
                     {/* Pricing */}
@@ -658,7 +696,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                           filter: 'brightness(0)' 
                         }} 
                       />
-                      {dealAdded ? 'Přidáno' : 'Do košíku'}
+                      {dealAdded ? (lang === 'CZ' ? 'Přidáno' : 'Added') : (lang === 'CZ' ? 'Do košíku' : 'Add to Cart')}
                     </button>
                   </div>
                 </div>
@@ -743,31 +781,31 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       ) : (
         <section style={styles.uspBar} className="container">
           <div style={{ ...styles.uspBox, borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            <img src="/truck-moving.png" alt="Doprava zdarma" style={styles.uspIcon} />
+            <img src="/truck-moving.png" alt={lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'} style={styles.uspIcon} />
             <div style={styles.uspText}>
-              <h4 style={styles.uspTitle}>Doprava zdarma</h4>
-              <p style={styles.uspDesc}>při objednávce nad 1 000 Kč</p>
+              <h4 style={styles.uspTitle}>{lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'}</h4>
+              <p style={styles.uspDesc}>{lang === 'CZ' ? 'při objednávce nad 1 000 Kč' : 'on orders over 1,000 Kč'}</p>
             </div>
           </div>
           <div style={{ ...styles.uspBox, borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            <img src="/tachometer-fast.png" alt="Rychlost doručení" style={styles.uspIcon} />
+            <img src="/tachometer-fast.png" alt={lang === 'CZ' ? 'Rychlost doručení' : 'Fast Delivery'} style={styles.uspIcon} />
             <div style={styles.uspText}>
-              <h4 style={styles.uspTitle}>Rychlost doručení</h4>
-              <p style={styles.uspDesc}>Odesíláme do 24 hodin</p>
+              <h4 style={styles.uspTitle}>{lang === 'CZ' ? 'Rychlost doručení' : 'Fast Shipping'}</h4>
+              <p style={styles.uspDesc}>{lang === 'CZ' ? 'Odesíláme do 24 hodin' : 'Dispatched within 24 hours'}</p>
             </div>
           </div>
           <div style={{ ...styles.uspBox, borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            <img src="/badget-check-alt.png" alt="100% Originální" style={styles.uspIcon} />
+            <img src="/badget-check-alt.png" alt={lang === 'CZ' ? '100% Originální' : '100% Authentic'} style={styles.uspIcon} />
             <div style={styles.uspText}>
-              <h4 style={styles.uspTitle}>100% Originální</h4>
-              <p style={styles.uspDesc}>Pouze od ověřených distributorů</p>
+              <h4 style={styles.uspTitle}>{lang === 'CZ' ? '100% Originální' : '100% Authentic'}</h4>
+              <p style={styles.uspDesc}>{lang === 'CZ' ? 'Pouze od ověřených distributorů' : 'Only from verified distributors'}</p>
             </div>
           </div>
           <div style={styles.uspBox}>
-            <img src="/credit-card.png" alt="Bezpečná platba" style={styles.uspIcon} />
+            <img src="/credit-card.png" alt={lang === 'CZ' ? 'Bezpečná platba' : 'Secure Payment'} style={styles.uspIcon} />
             <div style={styles.uspText}>
-              <h4 style={styles.uspTitle}>Bezpečná platba</h4>
-              <p style={styles.uspDesc}>Karta, bankovní převod, dobírka</p>
+              <h4 style={styles.uspTitle}>{lang === 'CZ' ? 'Bezpečná platba' : 'Secure Payment'}</h4>
+              <p style={styles.uspDesc}>{lang === 'CZ' ? 'Karta, bankovní převod, dobírka' : 'Cards, bank transfer, COD'}</p>
             </div>
           </div>
         </section>
@@ -788,7 +826,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 display: 'block',
                 marginBottom: '6px'
               }}>
-                Příběh Northvale
+                {lang === 'CZ' ? 'Příběh Northvale' : 'The Northvale Story'}
               </span>
               <h2 style={{
                 fontSize: isMobile ? '28px' : '36px',
@@ -798,7 +836,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 margin: 0,
                 fontFamily: 'var(--font-heading)'
               }}>
-                Vítej na e-shopu Northvale
+                {lang === 'CZ' ? 'Vítej na e-shopu Northvale' : 'Welcome to Northvale'}
               </h2>
             </div>
 
@@ -810,7 +848,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               margin: 0,
               opacity: 0.95
             }}>
-              Po letech sbírání Pokémonů a dalších karetních her jsme se rozhodli posunout tento koníček o úroveň výš.
+              {lang === 'CZ' ? 'Po letech sbírání Pokémonů a dalších karetních her jsme se rozhodli posunout tento koníček o úroveň výš.' : 'After years of collecting Pokémon and other card games, we decided to take this hobby to the next level.'}
             </p>
 
             <p style={{
@@ -819,7 +857,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               lineHeight: '1.6',
               margin: 0
             }}>
-              Víme, jak těžké je dnes sehnat TCG produkty za rozumné ceny. Proto chceme nabídnout široký výběr produktů{FEATURE_FLAGS.showSlabs ? ', ohodnocených karet' : ''} i příslušenství za férové ceny.
+              {lang === 'CZ' ? `Víme, jak těžké je dnes sehnat TCG produkty za rozumné ceny. Proto chceme nabídnout široký výběr produktů${FEATURE_FLAGS.showSlabs ? ', ohodnocených karet' : ''} i příslušenství za férové ceny.` : `We know how hard it is to find TCG products at reasonable prices these days. That's why we want to offer a wide selection of products${FEATURE_FLAGS.showSlabs ? ', graded cards,' : ''} and accessories at fair prices.`}
             </p>
 
             <p style={{
@@ -828,14 +866,14 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               lineHeight: '1.6',
               margin: 0
             }}>
-              Zakládáme si především na kvalitě a dostupnosti zboží.
+              {lang === 'CZ' ? 'Zakládáme si především na kvalitě a dostupnosti zboží.' : 'We pride ourselves above all on the quality and availability of our inventory.'}
             </p>
             <button 
               className="btn btn-primary" 
               style={{ marginTop: '8px', alignSelf: 'flex-start' }}
               onClick={() => setActivePage('about')}
             >
-              Přečíst více
+              {lang === 'CZ' ? 'Přečíst více' : 'Read More'}
             </button>
           </div>
 
@@ -882,7 +920,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
         {/* Category Tiles */}
         <section id="popular-categories" className="category-section container">
-        <h2 style={styles.sectionHeading} className="section-title">Oblíbené kategorie</h2>
+        <h2 style={styles.sectionHeading} className="section-title">{lang === 'CZ' ? 'Oblíbené kategorie' : 'Popular Categories'}</h2>
         <div className="category-tiles-grid">
           <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Pokémon' }); setActivePage('sealed-catalog'); }}>
             <img src="/Pokemon.webp" alt="Pokémon" className="category-tile-img" />
@@ -897,29 +935,29 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             <img src="/Riftbound.webp" alt="Riftbound" className="category-tile-img" />
           </div>
           <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); }}>
-            <img src="/Prislusentstvi.webp" alt="Příslušenství" className="category-tile-img" />
+            <img src="/Prislusentstvi.webp" alt="{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}" className="category-tile-img" />
           </div>
           <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Acrylics' }); setActivePage('sealed-catalog'); }}>
             <img src="/Akryly.webp" alt="Akryly" className="category-tile-img" />
           </div>
           {FEATURE_FLAGS.showSlabs && (
             <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
-              <img src="/Ohodnoceni karet.webp" alt="Ohodnocené karty" className="category-tile-img" />
+              <img src="/Ohodnoceni karet.webp" alt="{lang === 'CZ' ? 'Ohodnocené karty' : 'Graded Cards'}" className="category-tile-img" />
             </div>
           )}
         </div>
       </section>
 
       {/* Product Grids */}
-      {/* 1. Novinky (New arrivals) */}
+      {/* 1. {lang === 'CZ' ? 'Novinky' : 'New Releases'} (New arrivals) */}
       <section style={{ ...styles.sectionContainer, paddingBottom: isMobile ? '48px' : '0' }} className="container">
         <header className="nv-header">
           <div className="nv-header-left">
-            <div className="nv-eyebrow">Nové přírůstky</div>
-            <h2 className="nv-title">Novinky</h2>
+            <div className="nv-eyebrow">{lang === 'CZ' ? 'Nové přírůstky' : 'New Additions'}</div>
+            <h2 className="nv-title">{lang === 'CZ' ? 'Novinky' : 'New Releases'}</h2>
           </div>
           <span className="nv-link more-link-desktop" onClick={() => { setFilters({}); setActivePage('singles-catalog'); }}>
-            Zobrazit více &rarr;
+            {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
           </span>
         </header>
         <div className="slider-container-wrapper">
@@ -942,7 +980,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   <div className="vf-meta">
                     <span className="vf-stock">
                       <span className="vf-dot"></span>
-                      Skladem
+                      {lang === 'CZ' ? 'Skladem' : 'In Stock'}
                     </span>
                     <span className="vf-price">{((product.variants ? product.variants[0].price : product.price) || 1200).toLocaleString('cs-CZ')} Kč</span>
                   </div>
@@ -954,7 +992,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         </div>
         <div className="more-link-mobile-wrapper">
           <span className="nv-link more-link-mobile" onClick={() => { setFilters({}); setActivePage('singles-catalog'); }}>
-            Zobrazit více &rarr;
+            {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
           </span>
         </div>
       </section>
@@ -972,15 +1010,15 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         gap: isMobile ? '72px' : '88px',
         boxSizing: 'border-box'
       }}>
-        {/* 2. Předobjednávky (Preorders) */}
+        {/* 2. {lang === 'CZ' ? 'Předobjednávky' : 'Pre-orders'} (Preorders) */}
         <section style={{ ...styles.sectionContainer, marginBottom: isMobile ? '24px' : '40px' }} className="container">
           <header className="nv-header">
             <div className="nv-header-left">
-              <div className="nv-eyebrow">Připravované edice</div>
-              <h2 className="nv-title">Předobjednávky</h2>
+              <div className="nv-eyebrow">{lang === 'CZ' ? 'Připravované edice' : 'Upcoming Expansions'}</div>
+              <h2 className="nv-title">{lang === 'CZ' ? 'Předobjednávky' : 'Pre-orders'}</h2>
             </div>
             <span className="nv-link more-link-desktop" onClick={() => { setFilters({}); setActivePage('sealed-catalog'); }}>
-              Zobrazit více &rarr;
+              {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
             </span>
           </header>
           <div className="slider-container-wrapper">
@@ -1003,7 +1041,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   <div className="vf-meta">
                     <span className="vf-stock">
                       <span className="vf-dot"></span>
-                      Předobjednávka
+                      {lang === 'CZ' ? 'Předobjednávka' : 'Pre-order'}
                     </span>
                     <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
                   </div>
@@ -1015,7 +1053,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           </div>
           <div className="more-link-mobile-wrapper">
             <span className="nv-link more-link-mobile" onClick={() => { setFilters({}); setActivePage('sealed-catalog'); }}>
-              Zobrazit více &rarr;
+              {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
             </span>
           </div>
         </section>
@@ -1025,11 +1063,11 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           <section style={{ marginBottom: isMobile ? '24px' : '40px' }} className="container">
             <div className="grading-banner-card">
               <div className="grading-banner-content">
-                <h2 className="grading-banner-title">Nechte si ohodnotit vaši kartu</h2>
+                <h2 className="grading-banner-title">{lang === 'CZ' ? 'Nechte si ohodnotit vaši kartu' : 'Have Your Cards Professionally Graded'}</h2>
                 <p className="grading-banner-description">
                   Zprostředkujeme pro Vás odeslání karet do USA (PSA, Beckett, TAG). Vaše karty vyčistíme, bezpečně zabalíme a kompletně pojistíme. Sledujte průběh své zakázky online.
                 </p>
-                <button className="btn btn-primary" onClick={() => { setFilters({}); setActivePage('grading'); }}>Chci ohodnotit kartu</button>
+                <button className="btn btn-primary" onClick={() => { setFilters({}); setActivePage('grading'); }}>{lang === 'CZ' ? 'Chci ohodnotit kartu' : 'Submit Cards for Grading'}</button>
               </div>
               <div className="grading-banner-img-wrapper">
                 <img src="/grading sekce.webp" alt="Grading karet" className="grading-banner-image" />
@@ -1038,16 +1076,16 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           </section>
         )}
 
-        {/* 3. Ohodnocené karty (Slabs) */}
+        {/* 3. {lang === 'CZ' ? 'Ohodnocené karty' : 'Graded Cards'} (Slabs) */}
         {FEATURE_FLAGS.showSlabs && (
           <section style={{ ...styles.sectionContainer, paddingBottom: isMobile ? '48px' : '0' }} className="container">
             <header className="nv-header">
               <div className="nv-header-left">
-                <div className="nv-eyebrow">Certifikovaná kvalita</div>
-                <h2 className="nv-title">Ohodnocené karty</h2>
+                <div className="nv-eyebrow">{lang === 'CZ' ? 'Certifikovaná kvalita' : 'Certified Quality'}</div>
+                <h2 className="nv-title">{lang === 'CZ' ? 'Ohodnocené karty' : 'Graded Cards'}</h2>
               </div>
               <span className="nv-link more-link-desktop" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
-                Zobrazit více &rarr;
+                {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
               </span>
             </header>
             <div className="slider-container-wrapper">
@@ -1079,22 +1117,22 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             </div>
             <div className="more-link-mobile-wrapper">
               <span className="nv-link more-link-mobile" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
-                Zobrazit více &rarr;
+                {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
               </span>
             </div>
           </section>
         )}
       </div>
 
-      {/* 4. Příslušenství (Accessories) */}
+      {/* 4. {lang === 'CZ' ? 'Příslušenství' : 'Accessories'} (Accessories) */}
       <section style={{ ...styles.sectionContainer, marginBottom: isMobile ? '24px' : '40px', paddingBottom: isMobile ? '48px' : '0' }} className="container">
         <header className="nv-header">
           <div className="nv-header-left">
-            <div className="nv-eyebrow">Doplňky pro sběratele</div>
-            <h2 className="nv-title">Příslušenství</h2>
+            <div className="nv-eyebrow">{lang === 'CZ' ? 'Doplňky pro sběratele' : 'Collector Accessories'}</div>
+            <h2 className="nv-title">{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}</h2>
           </div>
           <span className="nv-link more-link-desktop" onClick={() => { setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); }}>
-            Zobrazit více &rarr;
+            {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
           </span>
         </header>
         <div className="slider-container-wrapper">
@@ -1117,7 +1155,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   <div className="vf-meta">
                     <span className="vf-stock">
                       <span className="vf-dot"></span>
-                      Skladem
+                      {lang === 'CZ' ? 'Skladem' : 'In Stock'}
                     </span>
                     <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
                   </div>
@@ -1129,7 +1167,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         </div>
         <div className="more-link-mobile-wrapper">
           <span className="nv-link more-link-mobile" onClick={() => { setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); }}>
-            Zobrazit více &rarr;
+            {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
           </span>
         </div>
       </section>
@@ -1138,12 +1176,12 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       <section style={styles.sectionContainer} className="container testimonials-section">
         <header className="testimonials-header">
           <div className="testimonials-header-left">
-            <div className="testimonials-eyebrow">RECENZE OVĚŘENÝCH ZÁKAZNÍKŮ</div>
-            <h2 className="testimonials-title">Co o nás říkají</h2>
+            <div className="testimonials-eyebrow">{lang === 'CZ' ? 'RECENZE OVĚŘENÝCH ZÁKAZNÍKŮ' : 'VERIFIED CUSTOMER REVIEWS'}</div>
+            <h2 className="testimonials-title">{lang === 'CZ' ? 'Co o nás říkají' : 'What they say about us'}</h2>
           </div>
           <div className="testimonials-rating-desktop">
             <span className="testimonials-stars">★★★★★</span>
-            <span className="testimonials-rating-text">4,8 • 312 hodnocení</span>
+            <span className="testimonials-rating-text">{lang === 'CZ' ? '4,8 • 312 hodnocení' : '4.8 • 312 reviews'}</span>
           </div>
         </header>
         <div className="slider-container-wrapper testimonials-slider-wrapper">
@@ -1173,15 +1211,15 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           <div className="newsletter-content">
             <div className="newsletter-eyebrow">NEWSLETTER • 028</div>
             <h2 className="newsletter-heading">
-              {FEATURE_FLAGS.showBuylist ? 'Nové edice & výkupy jako první.' : 'Nové edice & akce jako první.'}
+              {lang === 'CZ' ? (FEATURE_FLAGS.showBuylist ? 'Nové edice & výkupy jako první.' : 'Nové edice & akce jako první.') : (FEATURE_FLAGS.showBuylist ? 'New expansions & buylists first.' : 'New expansions & deals first.')}
             </h2>
           </div>
-          <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); alert('Děkujeme za přihlášení k newsletteru!'); }}>
+          <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); alert(lang === 'CZ' ? 'Děkujeme za přihlášení k newsletteru!' : 'Thank you for subscribing to our newsletter!'); }}>
             <div className="newsletter-input-group">
-              <label className="newsletter-input-label">VÁŠ E-MAIL</label>
+              <label className="newsletter-input-label">{lang === 'CZ' ? 'VÁŠ E-MAIL' : 'YOUR EMAIL'}</label>
               <input type="email" required placeholder="jmeno@example.com" className="newsletter-underline-input" />
             </div>
-            <button className="newsletter-submit-btn" type="submit">ODEBÍRAT &rarr;</button>
+            <button className="newsletter-submit-btn" type="submit">{lang === 'CZ' ? 'SUBSCRIBE' : 'SUBSCRIBE'} &rarr;</button>
           </form>
         </div>
       </section>

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { FEATURE_FLAGS } from '../config';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function ContactPage({ setActivePage }) {
+  const { lang, t } = useTranslation();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [contactSubmitted, setContactSubmitted] = useState(false);
 
@@ -9,7 +11,7 @@ export default function ContactPage({ setActivePage }) {
     window.scrollTo(0, 0);
   }, []);
 
-  const rawFaqData = [
+  const rawFaqData = lang === 'CZ' ? [
     {
       category: 'Doprava a doručení',
       questions: [
@@ -49,10 +51,52 @@ export default function ContactPage({ setActivePage }) {
         }
       ]
     }
+  ] : [
+    {
+      category: 'Shipping & Delivery',
+      questions: [
+        {
+          q: 'What shipping methods do you offer and how much do they cost?',
+          a: 'We offer Packeta (79 CZK to pick-up points), GLS (99 CZK home delivery), and DPD (109 CZK home delivery). Local pickup is free at Bratří Čapků 1095, Holice (or by agreement in Pardubice). We offer free shipping on all orders over 2,000 CZK.'
+        },
+        {
+          q: 'How do you package single cards (Singles)?',
+          a: 'We adhere strictly to collector-grade standards: each card is placed upside down in a penny sleeve, a pull-tab is attached, it is inserted into a toploader, placed inside a sealable team bag, and secured between cardboard layers (we never apply adhesive tape directly to the toploader). Finally, it is shipped in a bubble mailer.'
+        },
+        {
+          q: 'When will I receive my order?',
+          a: 'We dispatch orders within 24 hours of payment (on business days). Delivery typically takes 24–48 hours after dispatch.'
+        }
+      ]
+    },
+    {
+      category: 'Card Buylist',
+      questions: [
+        {
+          q: 'How does the card buyback process work?',
+          a: 'Simply add your singles to the buylist cart in our portal, specify their condition and language, and submit. Then, pack the cards securely and send them to our address or drop them off in person. Once verified (usually within 48 hours), your payment will be sent directly to your bank account.'
+        }
+      ]
+    },
+    {
+      category: 'Payments & Claims',
+      questions: [
+        {
+          q: 'What payment methods do you accept?',
+          a: 'You can pay online by card via the secure ComGate payment gateway, or via standard bank transfer.'
+        },
+        {
+          q: 'How do I file a claim or return items?',
+          a: 'If your package is damaged during shipping or the card condition does not match its description, please contact us by email. We resolve all complaints promptly in compliance with consumer protection laws.'
+        }
+      ]
+    }
   ];
 
   const faqData = rawFaqData.filter(cat => {
-    if (cat.category.includes('Výkup') && !FEATURE_FLAGS.showBuylist) return false;
+    if (cat.category.toLowerCase().includes('výkup') || cat.category.toLowerCase().includes('buylist')) {
+      return FEATURE_FLAGS.showBuylist;
+    }
     return true;
   });
 
@@ -67,13 +111,13 @@ export default function ContactPage({ setActivePage }) {
 
   return (
     <div className="container fade-in">
-      <h1 className="sr-only">Kontakt a nejčastější dotazy - NORTHVALE</h1>
+      <h1 className="sr-only">{lang === 'CZ' ? 'Kontakt a nejčastější dotazy - NORTHVALE' : 'Contact and Frequently Asked Questions - NORTHVALE'}</h1>
 
       {/* Breadcrumbs */}
-      <nav className="breadcrumbs-nav" aria-label="Drobečková navigace" style={{ marginBottom: '24px', paddingTop: '20px' }}>
-        <span className="breadcrumb-item" onClick={() => setActivePage('home')}>Domů</span>
+      <nav className="breadcrumbs-nav" aria-label={lang === 'CZ' ? 'Drobečková navigace' : 'Breadcrumbs'} style={{ marginBottom: '24px', paddingTop: '20px' }}>
+        <span className="breadcrumb-item" onClick={() => setActivePage('home')}>{t('common.home')}</span>
         <span className="breadcrumb-separator">/</span>
-        <span className="breadcrumb-item active">Kontakt</span>
+        <span className="breadcrumb-item active">{t('Navbar.contact')}</span>
       </nav>
 
       <section className="kt-section">
@@ -81,37 +125,39 @@ export default function ContactPage({ setActivePage }) {
         <div className="ktf-grid">
           {/* Left info column */}
           <div className="ktf-left">
-            <div className="nv-eyebrow">Spojte se s námi</div>
-            <h2 className="ktf-title">Kontakt</h2>
+            <div className="nv-eyebrow">{lang === 'CZ' ? 'Spojte se s námi' : 'Get in touch'}</div>
+            <h2 className="ktf-title">{t('Navbar.contact')}</h2>
             <p className="ktf-sub">
-              Dotaz k objednávce, produktům nebo doručení? Odpovídáme zpravidla do 24 hodin.
+              {lang === 'CZ' 
+                ? 'Dotaz k objednávce, produktům nebo doručení? Odpovídáme zpravidla do 24 hodin.' 
+                : 'Have questions about orders, products or delivery? We usually reply within 24 hours.'}
             </p>
 
             <dl className="ktf-info">
               <div className="ktf-info-row">
-                <dt>E-mail</dt>
+                <dt>{t('ContactPage.email')}</dt>
                 <dd>
                   <a href="mailto:info@northvaletcg.eu">info@northvaletcg.eu</a>
                 </dd>
               </div>
 
               <div className="ktf-info-row">
-                <dt>Telefon</dt>
+                <dt>{t('ContactPage.phone')}</dt>
                 <dd>
                   <a href="tel:+420739666779">+420 739 666 779</a>
                 </dd>
               </div>
 
               <div className="ktf-info-row">
-                <dt>Provozovatel</dt>
+                <dt>{lang === 'CZ' ? 'Provozovatel' : 'Operator'}</dt>
                 <dd>
                   NORTHVALE s.r.o.
-                  <span className="ktf-info-sub">IČO 29618142 · DIČ CZ29618142</span>
+                  <span className="ktf-info-sub">{lang === 'CZ' ? 'IČO' : 'ID'} 29618142 · {lang === 'CZ' ? 'DIČ' : 'VAT'} CZ29618142</span>
                 </dd>
               </div>
 
               <div className="ktf-info-row">
-                <dt>Sídlo</dt>
+                <dt>{lang === 'CZ' ? 'Sídlo' : 'Registered Office'}</dt>
                 <dd>
                   Bratří Čapků 1095
                   <span className="ktf-info-sub">534 01 Holice</span>
@@ -126,41 +172,43 @@ export default function ContactPage({ setActivePage }) {
               <div className="ktf-success">
                 <span style={{ fontSize: '48px', color: 'var(--color-gold)', display: 'block', marginBottom: '16px' }}>✉️</span>
                 <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-main)', margin: '0 0 8px 0' }}>
-                  Zpráva byla úspěšně odeslána!
+                  {t('ContactPage.formSuccess')}
                 </h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', lineHeight: '1.6', marginBottom: '24px', maxWidth: '380px' }}>
-                  Děkujeme za Váš dotaz. Naše podpora Vám odpoví na zadaný e-mail co nejdříve (obvykle do 24 hodin).
+                  {lang === 'CZ' 
+                    ? 'Děkujeme za Váš dotaz. Naše podpora Vám odpoví na zadaný e-mail co nejdříve (obvykle do 24 hodin).' 
+                    : 'Thank you for your message. Our support team will reply to your email as soon as possible (usually within 24 hours).'}
                 </p>
                 <button className="btn btn-secondary" onClick={() => setContactSubmitted(false)}>
-                  Odeslat novou zprávu
+                  {lang === 'CZ' ? 'Odeslat novou zprávu' : 'Send another message'}
                 </button>
               </div>
             ) : (
               <form className="ktf-form" onSubmit={handleContactSubmit}>
                 <label className="ktf-field">
-                  <span>Jméno a příjmení</span>
-                  <input type="text" required placeholder="Jan Novák" />
+                  <span>{t('ContactPage.formName')}</span>
+                  <input type="text" required placeholder={lang === 'CZ' ? 'Jan Novák' : 'John Doe'} />
                 </label>
 
                 <label className="ktf-field">
-                  <span>E-mailová adresa</span>
-                  <input type="email" required placeholder="novak@example.cz" />
+                  <span>{t('ContactPage.formEmail')}</span>
+                  <input type="email" required placeholder="name@example.com" />
                 </label>
 
                 <label className="ktf-field">
                   <span>
-                    Telefonní číslo <em>· nepovinné</em>
+                    {lang === 'CZ' ? 'Telefonní číslo' : 'Phone Number'} <em>· {lang === 'CZ' ? 'nepovinné' : 'optional'}</em>
                   </span>
-                  <input type="tel" placeholder="Např. +420 123 456 789" />
+                  <input type="tel" placeholder={lang === 'CZ' ? 'Např. +420 123 456 789' : 'e.g., +44 20 7946 0958'} />
                 </label>
 
                 <label className="ktf-field">
-                  <span>Vaše zpráva</span>
-                  <textarea required rows="4" placeholder="Sem napište váš dotaz…" />
+                  <span>{t('ContactPage.formMessage')}</span>
+                  <textarea required rows="4" placeholder={lang === 'CZ' ? 'Sem napište váš dotaz…' : 'Write your question here...'} />
                 </label>
 
                 <button type="submit" className="ktf-submit">
-                  Odeslat zprávu <span className="nv-link-arrow">→</span>
+                  {t('ContactPage.formBtn')} <span className="nv-link-arrow">→</span>
                 </button>
               </form>
             )}
@@ -170,8 +218,8 @@ export default function ContactPage({ setActivePage }) {
         {/* FAQ Section */}
         <div className="ktf-faq">
           <div className="ktf-faq-head">
-            <div className="nv-eyebrow">Časté otázky</div>
-            <h3 className="ktf-faq-title">Nejčastější dotazy</h3>
+            <div className="nv-eyebrow">{lang === 'CZ' ? 'Časté otázky' : 'Common Questions'}</div>
+            <h3 className="ktf-faq-title">{lang === 'CZ' ? 'Nejčastější dotazy' : 'Frequently Asked Questions'}</h3>
           </div>
 
           <div className="ktf-faq-body">

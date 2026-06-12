@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
 import { FEATURE_FLAGS } from '../config';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function AboutPage({ setActivePage }) {
+  const { lang, t } = useTranslation();
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -9,34 +12,34 @@ export default function AboutPage({ setActivePage }) {
   // Determine text based on FEATURE_FLAGS.showSlabs
   const showSlabs = FEATURE_FLAGS.showSlabs;
   const paragraph3Text = showSlabs
-    ? "To bychom chtěli změnit. Chceme vám nabízet velké množství produktů, ohodnocených karet a příslušenství — se zaměřením na kvalitu a dostupnost zboží."
-    : "To bychom chtěli změnit. Chceme vám nabízet velké množství produktů a příslušenství — se zaměřením na kvalitu a dostupnost zboží.";
+    ? t('AboutPage.NVStoryP2Slabs') || t('AboutPage.storyP2Slabs')
+    : t('AboutPage.NVStoryP2NoSlabs') || t('AboutPage.storyP2NoSlabs');
 
   return (
     <div className="container fade-in">
       {/* Breadcrumbs */}
-      <nav className="breadcrumbs-nav" aria-label="Drobečková navigace" style={{ marginBottom: '24px', paddingTop: '20px' }}>
-        <span className="breadcrumb-item" onClick={() => setActivePage('home')}>Domů</span>
+      <nav className="breadcrumbs-nav" aria-label={lang === 'CZ' ? 'Drobečková navigace' : 'Breadcrumbs'} style={{ marginBottom: '24px', paddingTop: '20px' }}>
+        <span className="breadcrumb-item" onClick={() => setActivePage('home')}>{t('common.home')}</span>
         <span className="breadcrumb-separator">/</span>
-        <span className="breadcrumb-item active">O nás</span>
+        <span className="breadcrumb-item active">{t('Navbar.aboutUs')}</span>
       </nav>
 
       <section className="ab-section">
         {/* Main Grid */}
         <div className="abf-grid">
           <aside className="abf-aside">
-            <div className="nv-eyebrow">Příběh Northvale</div>
-            <h1 className="abf-title">
-              Od sběratelů,<br />pro sběratele.
+            <div className="nv-eyebrow">{t('AboutPage.storyEyebrow')}</div>
+            <h1 className="abf-title" style={{ whiteSpace: 'pre-line' }}>
+              {t('AboutPage.storyTitle')}
             </h1>
           </aside>
           
           <div className="abf-story">
             <p className="abf-lead">
-              Po dlouhých letech sbírání Pokémonů a různých dalších karetních her jsme se rozhodli posunout tento koníček o level výš.
+              {t('AboutPage.storyLead')}
             </p>
             <p>
-              Nevíme o jediném sběrateli, nadšenci nebo hráči, který by nebyl alespoň trochu zklamaný z toho, že si chce koupit nějaký TCG produkt a ten je nedostupný. Pokud ho sežene, tak je jeho cena vyšší než přípustná.
+              {t('AboutPage.storyP1')}
             </p>
             <p>
               {paragraph3Text}
@@ -48,7 +51,7 @@ export default function AboutPage({ setActivePage }) {
         <div className="abf-image-banner-container">
           <img 
             src="/o nas northvale.webp" 
-            alt="Tým Northvale" 
+            alt={lang === 'CZ' ? 'Tým Northvale' : 'Northvale Team'} 
             className="abf-image-banner" 
           />
         </div>
@@ -57,25 +60,25 @@ export default function AboutPage({ setActivePage }) {
         <div className="abf-values">
           <div className="abf-value">
             <span className="abf-value-num">01</span>
-            <h3 className="abf-value-title">100% garance pravosti</h3>
+            <h3 className="abf-value-title">{t('AboutPage.value1Title')}</h3>
             <p className="abf-value-text">
-              Všechny produkty nakupujeme výhradně z oficiální distribuce. Padělky u nás nemají šanci.
+              {t('AboutPage.value1Desc')}
             </p>
           </div>
 
           <div className="abf-value">
             <span className="abf-value-num">02</span>
-            <h3 className="abf-value-title">Sběratelské balení</h3>
+            <h3 className="abf-value-title">{t('AboutPage.value2Title')}</h3>
             <p className="abf-value-text">
-              Sami víme, jak bolí poškozené rohy booster boxů. Zásilky balíme do pevných krabic a tlustých vrstev bublinkové fólie.
+              {t('AboutPage.value2Desc')}
             </p>
           </div>
 
           <div className="abf-value">
             <span className="abf-value-num">03</span>
-            <h3 className="abf-value-title">Osobní přístup</h3>
+            <h3 className="abf-value-title">{t('AboutPage.value3Title')}</h3>
             <p className="abf-value-text">
-              Nejsme jen bezejmenný e-shop. Jsme součástí komunity. Rádi poradíme s výběrem.
+              {t('AboutPage.value3Desc')}
             </p>
           </div>
         </div>
@@ -83,9 +86,9 @@ export default function AboutPage({ setActivePage }) {
         {/* Quote Section */}
         <figure className="abf-quote">
           <blockquote>
-            „ Chceme, aby nákup karet nebyl jen transakce, ale radost. Od chvíle, kdy kliknete na objednat, až po chvíli, kdy s nadšením rozbalujete balíček. “
+            {t('AboutPage.quote')}
           </blockquote>
-          <figcaption>— Tým Northvale</figcaption>
+          <figcaption>— {t('AboutPage.quoteAuthor')}</figcaption>
         </figure>
 
         {/* CTA Section */}
@@ -102,7 +105,7 @@ export default function AboutPage({ setActivePage }) {
               }, 100);
             }}
           >
-            Prohlédnout produkty <span className="nv-link-arrow">→</span>
+            {t('AboutPage.cta')} <span className="nv-link-arrow">→</span>
           </span>
         </div>
       </section>

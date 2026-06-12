@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from '../context/LanguageContext';
 
 const ProductImage = ({ src, alt, className = '' }) => {
   const [aspectRatio, setAspectRatio] = useState(1.0);
@@ -66,6 +67,7 @@ const getCardCode = (product) => {
 };
 
 export default function ProductCard({ product, addToCart, setSelectedProductId, setActivePage }) {
+  const { lang, t } = useTranslation();
   const selectedVariantIndex = 0;
   const [isAdded, setIsAdded] = useState(false);
   const [isFavorite, setIsFavorite] = useState(() => {
@@ -153,13 +155,13 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           {/* Preorder & Investment Tags */}
           {product.preorder && (
             <span className="card-tag preorder-tag">
-              PŘEDOBJEDNÁVKA
+              {t('ProductCard.preorder')}
             </span>
           )}
 
           {product.investment && (
             <span className="card-tag invest-tag">
-              INVESTIČNÍ
+              {t('ProductCard.investment')}
             </span>
           )}
         </div>
@@ -181,17 +183,17 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
             {stock > 0 ? (
               <>
                 <span className="vf-dot"></span>
-                Skladem ({stock} ks)
+                {t('ProductCard.inStock')} ({stock} {t('ProductCard.pcs')})
               </>
             ) : product.preorder ? (
               <>
                 <span className="vf-dot" style={{ backgroundColor: 'var(--color-gold)', boxShadow: '0 0 8px rgba(253, 189, 22, 0.6)' }}></span>
-                Na objednání
+                {t('ProductCard.onOrder')}
               </>
             ) : (
               <>
                 <span className="vf-dot" style={{ backgroundColor: 'var(--text-muted)', boxShadow: 'none' }}></span>
-                Vyprodáno
+                {t('ProductCard.outOfStock')}
               </>
             )}
           </span>
@@ -199,10 +201,10 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
             {originalPrice && (
               <span style={{ fontSize: '10px', color: 'var(--color-red)', textDecoration: 'line-through', marginBottom: '2px' }}>
-                {originalPrice.toLocaleString()} Kč
+                {originalPrice.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}
               </span>
             )}
-            <span className="vf-price" style={{ fontSize: '15px' }}>{price.toLocaleString('cs-CZ')} Kč</span>
+            <span className="vf-price" style={{ fontSize: '15px' }}>{price.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}</span>
           </div>
         </div>
 
@@ -212,21 +214,21 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
             {isSingle && (
               <>
                 <tr>
-                  <td>Rarita</td>
+                  <td>{t('ProductCard.rarity')}</td>
                   <td>{product.rarity || 'Secret Rare'}</td>
                 </tr>
                 <tr>
-                  <td>Kód karty</td>
+                  <td>{t('ProductCard.cardCode')}</td>
                   <td className="spec-gold">{getCardCode(product)}</td>
                 </tr>
                 <tr>
-                  <td>Stav & Jazyk</td>
+                  <td>{t('ProductCard.stateLang')}</td>
                   <td>
                     {hasVariants ? `${currentVariant.condition} - ${currentVariant.lang}` : 'NM - EN'}
                   </td>
                 </tr>
                 <tr>
-                  <td>Úprava</td>
+                  <td>{t('ProductCard.finish')}</td>
                   <td>
                     {hasVariants ? (currentVariant.foil ? 'Foil ✨' : 'Non-Foil ▱') : 'Foil ✨'}
                   </td>
@@ -237,15 +239,15 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
             {product.type === 'slab' && (
               <>
                 <tr>
-                  <td>Certifikační firma</td>
+                  <td>{t('ProductCard.certCompany')}</td>
                   <td>{product.company}</td>
                 </tr>
                 <tr>
-                  <td>Výsledná známka</td>
+                  <td>{t('ProductCard.grade')}</td>
                   <td className="spec-gold">{product.grade} / 10</td>
                 </tr>
                 <tr>
-                  <td>Cert. číslo</td>
+                  <td>{t('ProductCard.certNumber')}</td>
                   <td className="spec-monospace">#{product.certNumber}</td>
                 </tr>
               </>
@@ -254,19 +256,19 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
             {(product.type === 'sealed' || product.type === 'accessory') && (
               <>
                 <tr>
-                  <td>Edice / Set</td>
+                  <td>{t('ProductCard.edition')}</td>
                   <td>{product.edition || 'Scarlet & Violet'}</td>
                 </tr>
                 <tr>
-                  <td>Jazyk balení</td>
+                  <td>{t('ProductCard.langPackaging')}</td>
                   <td>
-                    {product.lang === 'JP' ? 'Japonština (JP) 🇯🇵' : product.lang === 'EN' ? 'Angličtina (EN) 🇬🇧' : 'Všechny jazyky'}
+                    {product.lang === 'JP' ? t('ProductCard.japanese') : product.lang === 'EN' ? t('ProductCard.english') : t('ProductCard.allLanguages')}
                   </td>
                 </tr>
                 <tr>
-                  <td>Kategorie</td>
+                  <td>{t('ProductCard.category')}</td>
                   <td style={{ textTransform: 'capitalize' }}>
-                    {product.type === 'sealed' ? 'Sealed' : 'Příslušenství'}
+                    {product.type === 'sealed' ? 'Sealed' : t('ProductCard.accessory')}
                   </td>
                 </tr>
               </>
@@ -280,7 +282,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           <button 
             className={`card-favorite-btn ${isFavorite ? 'active' : ''}`}
             onClick={handleFavoriteClick}
-            aria-label="Přidat do oblíbených"
+            aria-label={t('ProductCard.addToFavs')}
           >
             <svg 
               width="16" 
@@ -327,7 +329,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
                 </>
               )}
             </svg>
-            {isAdded ? 'Přidáno' : 'Do košíku'}
+            {isAdded ? t('ProductCard.added') : t('ProductCard.addToCart')}
           </button>
         </div>
       </div>

@@ -1,17 +1,28 @@
 
 import { FEATURE_FLAGS } from '../config';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function UserPortal({ user, setActivePage, onLogout }) {
+  const { lang, t } = useTranslation();
+
   const getGradingStepIndex = (status) => {
     const steps = ['Příprava', 'Odesláno do USA', 'Zpracování', 'Nagradováno', 'Na cestě zpět', 'Připraveno'];
-    return steps.indexOf(status);
+    const stepsEN = ['Preparation', 'Sent to USA', 'Processing', 'Graded', 'On way back', 'Ready'];
+    
+    const idx = steps.indexOf(status);
+    if (idx !== -1) return idx;
+    return stepsEN.indexOf(status);
   };
 
-  const gradingSteps = ['Příprava', 'Odesláno do USA', 'Zpracování', 'Nagradováno', 'Na cestě zpět', 'Připraveno'];
+  const gradingSteps = lang === 'CZ'
+    ? ['Příprava', 'Odesláno do USA', 'Zpracování', 'Nagradováno', 'Na cestě zpět', 'Připraveno']
+    : ['Preparation', 'Sent to USA', 'Processing', 'Graded', 'On way back', 'Ready'];
 
   return (
     <div style={styles.container} className="container fade-in">
-      <h1 className="sr-only">Můj uživatelský účet a zůstatky - NORTHVALE</h1>
+      <h1 className="sr-only">
+        {lang === 'CZ' ? 'Můj uživatelský účet a zůstatky - NORTHVALE' : 'My Account & Submissions - NORTHVALE'}
+      </h1>
 
       <div style={styles.layout}>
         {/* Left Column: Account Details & History */}
@@ -27,50 +38,48 @@ export default function UserPortal({ user, setActivePage, onLogout }) {
                 />
               )}
               <div style={styles.profileInfo}>
-                <span style={styles.profileLabel}>Přihlášen jako</span>
+                <span style={styles.profileLabel}>{lang === 'CZ' ? 'Přihlášen jako' : 'Logged in as'}</span>
                 <span style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-main)', display: 'block' }}>{user.name || user.email.split('@')[0]}</span>
-                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{user.email || 'sběratel@northvaletcg.eu'}</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{user.email || (lang === 'CZ' ? 'sběratel@northvaletcg.eu' : 'collector@northvaletcg.eu')}</span>
               </div>
             </div>
             <button className="btn btn-secondary" style={styles.logoutBtn} onClick={onLogout}>
-              Odhlásit se
+              {t('UserPortal.logoutBtn')}
             </button>
           </div>
 
-
-
           {/* Order history */}
           <div style={styles.section} className="glass-panel">
-            <h3 style={styles.sectionHeading}>Historie objednávek</h3>
+            <h3 style={styles.sectionHeading}>{t('UserPortal.orderHistory')}</h3>
             {user.orderHistory.length === 0 ? (
-              <p style={styles.emptyText}>Zatím jste u nás nenakoupili.</p>
+              <p style={styles.emptyText}>{t('UserPortal.noOrders')}</p>
             ) : (
               <div style={styles.list}>
                 {user.orderHistory.map(order => (
                   <div key={order.id} style={styles.orderItem} className="glass-card">
                     <div style={styles.orderHeader}>
                       <div>
-                        <span style={styles.orderId}>Objednávka #{order.id}</span>
+                        <span style={styles.orderId}>{lang === 'CZ' ? 'Objednávka' : 'Order'} #{order.id}</span>
                         <span style={styles.orderDate}>{order.date}</span>
                       </div>
-                      <span style={styles.orderTotal}>{order.finalTotal.toLocaleString()} Kč</span>
+                      <span style={styles.orderTotal}>{order.finalTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč</span>
                     </div>
 
                     <div style={styles.orderBody}>
                       <div style={styles.orderProducts}>
                         {order.items.map((it, idx) => (
                           <span key={idx} style={styles.orderProdName}>
-                            {it.quantity}x {it.name} ({it.price.toLocaleString('cs-CZ')} Kč)
+                            {it.quantity}x {it.name} ({it.price.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč)
                           </span>
                         ))}
                       </div>
                       <div style={styles.orderActions}>
                         <a 
                           href="#invoice-download" 
-                          onClick={(e) => { e.preventDefault(); alert('Simulované stažení faktury z ERP Pohoda.'); }}
+                          onClick={(e) => { e.preventDefault(); alert(lang === 'CZ' ? 'Simulované stažení faktury z ERP Pohoda.' : 'Simulated invoice download from ERP Pohoda.'); }}
                           style={styles.invoiceLink}
                         >
-                          📄 Stáhnout fakturu (ERP Pohoda)
+                          📄 {lang === 'CZ' ? 'Stáhnout fakturu (ERP Pohoda)' : 'Download Invoice (ERP Pohoda)'}
                         </a>
                       </div>
                     </div>
@@ -84,36 +93,54 @@ export default function UserPortal({ user, setActivePage, onLogout }) {
         {/* Right Column: Grading Submissions (1/3 width) */}
         {FEATURE_FLAGS.showGrading && (
           <div style={styles.rightCol} className="glass-panel">
-            <h3 style={styles.sectionHeading}>Grading zakázky v USA</h3>
-            <p style={styles.desc}>Sledujte aktuální stav svých odeslaných karet do PSA, Beckett nebo TAG.</p>
+            <h3 style={styles.sectionHeading}>{t('UserPortal.gradingHistory')}</h3>
+            <p style={styles.desc}>
+              {lang === 'CZ' 
+                ? 'Sledujte aktuální stav svých odeslaných karet do PSA, Beckett nebo TAG.' 
+                : 'Track the status of your submissions shipped to PSA, Beckett, or TAG.'}
+            </p>
 
             {user.gradingSubmissions.length === 0 ? (
               <div style={styles.emptyGrading} className="glass-card">
                 <span style={{ fontSize: '32px' }}>🔬</span>
                 <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                  Zatím nemáte žádné aktivní grading zakázky.
+                  {t('UserPortal.noGrading')}
                 </p>
                 <button 
                   className="btn btn-secondary" 
                   style={{ marginTop: '8px', fontSize: '12px' }}
                   onClick={() => setActivePage('grading')}
                 >
-                  Vytvořit zakázku
+                  {lang === 'CZ' ? 'Vytvořit zakázku' : 'Create Submission'}
                 </button>
               </div>
             ) : (
               <div style={styles.gradingList}>
                 {user.gradingSubmissions.map(sub => {
                   const currentStepIdx = getGradingStepIndex(sub.status);
+                  
+                  // Translate status if in English mode
+                  let displayStatus = sub.status;
+                  if (lang === 'EN') {
+                    const statusMapping = {
+                      'Příprava': 'Preparation',
+                      'Odesláno do USA': 'Sent to USA',
+                      'Zpracování': 'Processing',
+                      'Nagradováno': 'Graded',
+                      'Na cestě zpět': 'On way back',
+                      'Připraveno': 'Ready'
+                    };
+                    displayStatus = statusMapping[sub.status] || sub.status;
+                  }
 
                   return (
                     <div key={sub.id} style={styles.gradingItem} className="glass-card">
                       <div style={styles.gradingItemHeader}>
                         <div>
-                          <span style={styles.gradingId}>Zakázka {sub.id}</span>
-                          <span style={styles.gradingMeta}>{sub.company} - {sub.cardCount} karet</span>
+                          <span style={styles.gradingId}>{lang === 'CZ' ? 'Zakázka' : 'Submission'} {sub.id}</span>
+                          <span style={styles.gradingMeta}>{sub.company} - {sub.cardCount} {lang === 'CZ' ? 'karet' : 'cards'}</span>
                         </div>
-                        <span style={styles.gradingStatusBadge}>{sub.status}</span>
+                        <span style={styles.gradingStatusBadge}>{displayStatus}</span>
                       </div>
 
                       {/* Stepper Timeline */}

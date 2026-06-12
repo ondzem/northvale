@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function CheckoutFlow({ cart, submitOrder, setActivePage }) {
+  const { lang, t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -36,16 +38,22 @@ export default function CheckoutFlow({ cart, submitOrder, setActivePage }) {
   const handleApplyIsic = () => {
     if (isicNumber.trim().toUpperCase().startsWith('S')) {
       setIsicApplied(true);
-      alert('ISIC karta byla úspěšně ověřena. Byla uplatněna sleva 5% na Vaši objednávku!');
+      alert(lang === 'CZ' 
+        ? 'ISIC karta byla úspěšně ověřena. Byla uplatněna sleva 5% na Vaši objednávku!'
+        : 'ISIC card verified successfully. 5% discount has been applied to your order!'
+      );
     } else {
-      alert('Neplatné číslo ISIC karty. Číslo musí začínat písmenem S (např. S1234567890).');
+      alert(lang === 'CZ'
+        ? 'Neplatné číslo ISIC karty. Číslo musí začínat písmenem S (např. S1234567890).'
+        : 'Invalid ISIC card number. The number must start with S (e.g., S1234567890).'
+      );
     }
   };
 
   const handlePlaceOrder = (e) => {
     e.preventDefault();
     if (cart.length === 0) {
-      alert('Váš košík je prázdný.');
+      alert(t('Cart.empty'));
       return;
     }
 
@@ -62,132 +70,163 @@ export default function CheckoutFlow({ cart, submitOrder, setActivePage }) {
       isicApplied,
       isicDiscount,
       finalTotal,
-      shippingMethod: shipping === 'zasilkovna' ? 'Zásilkovna' : shipping === 'pardubice' ? 'Osobní odběr Pardubice' : 'Česká pošta',
-      date: new Date().toLocaleDateString(),
+      shippingMethod: shipping === 'zasilkovna' 
+        ? (lang === 'CZ' ? 'Zásilkovna' : 'Packeta (Zásilkovna)') 
+        : shipping === 'pardubice' 
+          ? (lang === 'CZ' ? 'Osobní odběr Pardubice' : 'Local Pickup Pardubice') 
+          : (lang === 'CZ' ? 'Česká pošta' : 'Czech Post'),
+      date: new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
       invoiceUrl: '#'
     };
 
     // Make sure we subtract the credit correctly
     submitOrder(order, creditApplied);
-    alert(`Děkujeme za Váš nákup! Objednávka #${order.id} byla úspěšně vytvořena a uložena do Vašeho profilu.`);
+    alert(lang === 'CZ'
+      ? `Děkujeme za Váš nákup! Objednávka #${order.id} byla úspěšně vytvořena a uložena do Vašeho profilu.`
+      : `Thank you for your purchase! Order #${order.id} was successfully created and saved to your profile.`
+    );
     setActivePage('profile');
   };
 
   return (
     <div style={styles.container} className="container fade-in">
-      <h1 className="sr-only">Pokladna a dokončení objednávky - NORTHVALE</h1>
+      <h1 className="sr-only">
+        {lang === 'CZ' ? 'Pokladna a dokončení objednávky - NORTHVALE' : 'Checkout & Purchase - NORTHVALE'}
+      </h1>
 
       {cart.length === 0 ? (
         <div style={styles.emptyCart} className="glass-panel">
           <span style={{ fontSize: '48px' }}>🛒</span>
-          <h3>Váš košík je prázdný</h3>
+          <h3>{t('Cart.empty')}</h3>
           <button className="btn btn-primary" onClick={() => setActivePage('singles-catalog')}>
-            Přejít do katalogu
+            {t('common.backToCatalog')}
           </button>
         </div>
       ) : (
         <div style={styles.layout}>
           {/* Left Column: Form */}
           <form style={styles.leftCol} onSubmit={handlePlaceOrder} className="glass-panel">
-            <h2 style={styles.sectionHeading}>Doručovací údaje</h2>
+            <h2 style={styles.sectionHeading}>{lang === 'CZ' ? 'Osobní údaje' : 'Personal Information'}</h2>
             
             <div style={styles.formGrid}>
               <div style={styles.field}>
-                <label style={styles.label}>Jméno a příjmení:</label>
-                <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="Jan Novák" style={styles.input} />
+                <label style={styles.label}>{lang === 'CZ' ? 'Jméno a příjmení:' : 'Full Name:'}</label>
+                <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder={lang === 'CZ' ? 'Jan Novák' : 'John Doe'} style={styles.input} />
               </div>
               <div style={styles.field}>
-                <label style={styles.label}>E-mailová adresa:</label>
-                <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="novak@example.cz" style={styles.input} />
+                <label style={styles.label}>{t('Checkout.email')}:</label>
+                <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="email@example.com" style={styles.input} />
               </div>
               <div style={styles.field}>
-                <label style={styles.label}>Telefonní číslo:</label>
-                <input type="tel" required value={phone} onChange={e => setPhone(e.target.value)} placeholder="+420 123 456 789" style={styles.input} />
+                <label style={styles.label}>{t('Checkout.phone')}:</label>
+                <input type="tel" required value={phone} onChange={e => setPhone(e.target.value)} placeholder={lang === 'CZ' ? '+420 123 456 789' : '+44 20 7946 0958'} style={styles.input} />
               </div>
             </div>
 
-            <h2 style={{ ...styles.sectionHeading, marginTop: '24px' }}>Adresa doručení</h2>
+            <h2 style={{ ...styles.sectionHeading, marginTop: '24px' }}>{lang === 'CZ' ? 'Adresa doručení' : 'Shipping Address'}</h2>
             <div style={styles.formGrid}>
               <div style={{ ...styles.field, gridColumn: 'span 2' }}>
-                <label style={styles.label}>Ulice a číslo popisné:</label>
-                <input type="text" required value={street} onChange={e => setStreet(e.target.value)} placeholder="Zámecká 23" style={styles.input} />
+                <label style={styles.label}>{lang === 'CZ' ? 'Ulice a číslo popisné:' : 'Street & house number:'}</label>
+                <input type="text" required value={street} onChange={e => setStreet(e.target.value)} placeholder={lang === 'CZ' ? 'Bratří Čapků 1095' : '10 Downing Street'} style={styles.input} />
               </div>
               <div style={styles.field}>
-                <label style={styles.label}>Město:</label>
-                <input type="text" required value={city} onChange={e => setCity(e.target.value)} placeholder="Pardubice" style={styles.input} />
+                <label style={styles.label}>{lang === 'CZ' ? 'Město:' : 'City:'}</label>
+                <input type="text" required value={city} onChange={e => setCity(e.target.value)} placeholder={lang === 'CZ' ? 'Holice' : 'London'} style={styles.input} />
               </div>
               <div style={styles.field}>
-                <label style={styles.label}>PSČ:</label>
-                <input type="text" required value={zip} onChange={e => setZip(e.target.value)} placeholder="530 02" style={styles.input} />
+                <label style={styles.label}>{lang === 'CZ' ? 'PSČ:' : 'ZIP / Postal Code:'}</label>
+                <input type="text" required value={zip} onChange={e => setZip(e.target.value)} placeholder={lang === 'CZ' ? '534 01' : 'SW1A 2AA'} style={styles.input} />
               </div>
             </div>
 
-            <h2 style={{ ...styles.sectionHeading, marginTop: '24px' }}>Způsob přepravy</h2>
+            <h2 style={{ ...styles.sectionHeading, marginTop: '24px' }}>{t('Checkout.shippingMethod')}</h2>
             <div style={styles.optionsList}>
               <label style={styles.optionRow} className="glass-card">
                 <input type="radio" name="shipping" checked={shipping === 'zasilkovna'} onChange={() => setShipping('zasilkovna')} style={styles.radio} />
                 <div style={styles.optionInfo}>
-                  <span style={styles.optionName}>Zásilkovna - Výdejní místo / Z-BOX</span>
-                  <span style={styles.optionDesc}>Doručení do 24-48h na Vámi vybrané místo.</span>
+                  <span style={styles.optionName}>
+                    {lang === 'CZ' ? 'Zásilkovna - Výdejní místo / Z-BOX' : 'Packeta - Pickup Point / Z-BOX'}
+                  </span>
+                  <span style={styles.optionDesc}>
+                    {lang === 'CZ' ? 'Doručení do 24-48h na Vámi vybrané místo.' : 'Delivery within 24-48h to your selected location.'}
+                  </span>
                 </div>
-                <span style={styles.optionPrice}>{cartSubtotal > 2000 ? 'Zdarma' : '79 Kč'}</span>
+                <span style={styles.optionPrice}>{cartSubtotal > 2000 ? t('Cart.free') : (lang === 'CZ' ? '79 Kč' : '79 CZK')}</span>
               </label>
 
               <label style={styles.optionRow} className="glass-card">
                 <input type="radio" name="shipping" checked={shipping === 'pardubice'} onChange={() => setShipping('pardubice')} style={styles.radio} />
                 <div style={styles.optionInfo}>
-                  <span style={styles.optionName}>Osobní odběr Pardubice (Coffee &amp; Cards)</span>
-                  <span style={styles.optionDesc}>Vyzvednutí zdarma v kavárně v centru města. Slevový kód na kávu.</span>
+                  <span style={styles.optionName}>
+                    {lang === 'CZ' ? 'Osobní odběr Pardubice (Coffee & Cards)' : 'Local Pickup Pardubice (Coffee & Cards)'}
+                  </span>
+                  <span style={styles.optionDesc}>
+                    {lang === 'CZ' ? 'Vyzvednutí zdarma v kavárně v centru města. Slevový kód na kávu.' : 'Pickup for free in the café in the city center. Free coffee voucher included.'}
+                  </span>
                 </div>
-                <span style={styles.optionPrice}>Zdarma</span>
+                <span style={styles.optionPrice}>{t('Cart.free')}</span>
               </label>
 
               <label style={styles.optionRow} className="glass-card">
                 <input type="radio" name="shipping" checked={shipping === 'posta-doporucene'} onChange={() => setShipping('posta-doporucene')} style={styles.radio} />
                 <div style={styles.optionInfo}>
-                  <span style={styles.optionName}>Česká pošta - Doporučené psaní</span>
-                  <span style={styles.optionDesc}>Pojištěno do 880 Kč. Pouze pro menší zásilky.</span>
+                  <span style={styles.optionName}>
+                    {lang === 'CZ' ? 'Česká pošta - Doporučené psaní' : 'Czech Post - Registered Mail'}
+                  </span>
+                  <span style={styles.optionDesc}>
+                    {lang === 'CZ' ? 'Pojištěno do 880 Kč. Pouze pro menší zásilky.' : 'Insured up to 880 CZK. Available for light card shipments only.'}
+                  </span>
                 </div>
-                <span style={styles.optionPrice}>{cartSubtotal > 2000 ? 'Zdarma' : '85 Kč'}</span>
+                <span style={styles.optionPrice}>{cartSubtotal > 2000 ? t('Cart.free') : (lang === 'CZ' ? '85 Kč' : '85 CZK')}</span>
               </label>
 
               <label style={styles.optionRow} className="glass-card">
                 <input type="radio" name="shipping" checked={shipping === 'posta-cenne'} onChange={() => setShipping('posta-cenne')} style={styles.radio} />
                 <div style={styles.optionInfo}>
-                  <span style={styles.optionName}>Česká pošta - Cenné psaní</span>
-                  <span style={styles.optionDesc}>Speciální bezpečnostní obálka, plné pojištění hodnoty karet (doporučeno pro drahé kusovky).</span>
+                  <span style={styles.optionName}>
+                    {lang === 'CZ' ? 'Česká pošta - Cenné psaní' : 'Czech Post - Insured Letter'}
+                  </span>
+                  <span style={styles.optionDesc}>
+                    {lang === 'CZ' 
+                      ? 'Speciální bezpečnostní obálka, plné pojištění hodnoty karet (doporučeno pro drahé kusovky).' 
+                      : 'Special secure bubble envelop with full valuation insurance (highly recommended for high-end singles).'}
+                  </span>
                 </div>
-                <span style={styles.optionPrice}>110 Kč</span>
+                <span style={styles.optionPrice}>{lang === 'CZ' ? '110 Kč' : '110 CZK'}</span>
               </label>
             </div>
 
-            <h2 style={{ ...styles.sectionHeading, marginTop: '24px' }}>Způsob platby</h2>
+            <h2 style={{ ...styles.sectionHeading, marginTop: '24px' }}>{t('Checkout.paymentMethod')}</h2>
             <div style={styles.optionsList}>
               <label style={styles.optionRow} className="glass-card">
                 <input type="radio" name="payment" checked={payment === 'card'} onChange={() => setPayment('card')} style={styles.radio} />
                 <div style={styles.optionInfo}>
-                  <span style={styles.optionName}>Platební karta online</span>
-                  <span style={styles.optionDesc}>Okamžitá platba přes bránu.</span>
+                  <span style={styles.optionName}>{lang === 'CZ' ? 'Platební karta online' : 'Online Credit/Debit Card'}</span>
+                  <span style={styles.optionDesc}>{lang === 'CZ' ? 'Okamžitá platba přes bránu.' : 'Instant secure payment via gateway.'}</span>
                 </div>
               </label>
               <label style={styles.optionRow} className="glass-card">
                 <input type="radio" name="payment" checked={payment === 'transfer'} onChange={() => setPayment('transfer')} style={styles.radio} />
                 <div style={styles.optionInfo}>
-                  <span style={styles.optionName}>Bankovní převod</span>
-                  <span style={styles.optionDesc}>Platební údaje obdržíte v e-mailu. Expedujeme po připsání platby.</span>
+                  <span style={styles.optionName}>{lang === 'CZ' ? 'Bankovní převod' : 'Bank Transfer'}</span>
+                  <span style={styles.optionDesc}>
+                    {lang === 'CZ' 
+                      ? 'Platební údaje obdržíte v e-mailu. Expedujeme po připsání platby.' 
+                      : 'Payment coordinates will be sent by email. We ship immediately after transfer clears.'}
+                  </span>
                 </div>
               </label>
             </div>
 
             <button type="submit" className="btn btn-success" style={styles.submitBtn}>
-              Objednat a zaplatit ({finalTotal.toLocaleString()} Kč)
+              {lang === 'CZ' ? 'Objednat a zaplatit' : 'Place Order & Pay'} ({finalTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'})
             </button>
           </form>
 
           {/* Right Column */}
           <div style={styles.rightCol}>
             <div style={styles.summaryBox} className="glass-panel">
-              <h3 style={styles.summaryTitle}>Vaše objednávka</h3>
+              <h3 style={styles.summaryTitle}>{lang === 'CZ' ? 'Vaše objednávka' : 'Your Order Summary'}</h3>
               
               <div style={styles.itemsList}>
                 {cart.map((item, idx) => (
@@ -196,19 +235,23 @@ export default function CheckoutFlow({ cart, submitOrder, setActivePage }) {
                       <span style={styles.itemName}>{item.name || (item.product && item.product.name)}</span>
                       {item.condition && (
                         <span style={styles.itemVariant}>
-                          Stav: {item.condition} | {item.lang} | {item.foil ? 'Foil' : 'Non-Foil'}
+                          {lang === 'CZ' ? 'Stav' : 'Condition'}: {item.condition} | {item.lang} | {item.foil ? 'Foil' : 'Non-Foil'}
                         </span>
                       )}
                     </div>
-                    <span style={styles.itemPrice}>{item.quantity}x {item.price.toLocaleString('cs-CZ')} Kč</span>
+                    <span style={styles.itemPrice}>{item.quantity}x {item.price.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}</span>
                   </div>
                 ))}
               </div>
 
               {/* Student ISIC Discount code */}
               <div style={styles.creditApplySection} className="glass-card">
-                <h4 style={styles.creditHeading}>ISIC Studentská sleva (5%)</h4>
-                <p style={styles.creditDesc}>Zadejte číslo ISIC karty pro uplatnění slevy 5% na nákup.</p>
+                <h4 style={styles.creditHeading}>{lang === 'CZ' ? 'ISIC Studentská sleva (5%)' : 'ISIC Student Discount (5%)'}</h4>
+                <p style={styles.creditDesc}>
+                  {lang === 'CZ' 
+                    ? 'Zadejte číslo ISIC karty pro uplatnění slevy 5% na nákup.' 
+                    : 'Enter your ISIC card number to claim your 5% checkout discount.'}
+                </p>
                 <div style={styles.creditInputRow}>
                   <input 
                     type="text" 
@@ -225,29 +268,29 @@ export default function CheckoutFlow({ cart, submitOrder, setActivePage }) {
                     onClick={handleApplyIsic}
                     style={{ fontSize: '11px' }}
                   >
-                    {isicApplied ? 'OK' : 'Ověřit'}
+                    {isicApplied ? 'OK' : (lang === 'CZ' ? 'Ověřit' : 'Verify')}
                   </button>
                 </div>
               </div>
 
               <div style={styles.totalsRow}>
                 <div style={styles.totalDetail}>
-                  <span>Mezisoučet:</span>
-                  <span>{cartSubtotal.toLocaleString()} Kč</span>
+                  <span>{t('Cart.subtotal')}:</span>
+                  <span>{cartSubtotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}</span>
                 </div>
                 <div style={styles.totalDetail}>
-                  <span>Doprava:</span>
-                  <span>{shippingCost === 0 ? 'Zdarma' : `${shippingCost} Kč`}</span>
+                  <span>{t('Cart.shipping')}:</span>
+                  <span>{shippingCost === 0 ? t('Cart.free') : `${shippingCost} ${lang === 'CZ' ? 'Kč' : 'CZK'}`}</span>
                 </div>
                 {isicApplied && (
                   <div style={{ ...styles.totalDetail, color: 'var(--color-green)' }}>
-                    <span>ISIC Sleva (5%):</span>
-                    <span>-{isicDiscount.toLocaleString()} Kč</span>
+                    <span>{lang === 'CZ' ? 'ISIC Sleva (5%):' : 'ISIC Discount (5%):'}</span>
+                    <span>-{isicDiscount.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}</span>
                   </div>
                 )}
                 <div style={styles.finalTotalRow}>
-                  <span>Celkem:</span>
-                  <span style={{ color: 'var(--color-gold)' }}>{finalTotal.toLocaleString()} Kč</span>
+                  <span>{lang === 'CZ' ? 'Celkem:' : 'Total due:'}</span>
+                  <span style={{ color: 'var(--color-gold)' }}>{finalTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}</span>
                 </div>
               </div>
             </div>
@@ -255,10 +298,14 @@ export default function CheckoutFlow({ cart, submitOrder, setActivePage }) {
             <div style={styles.badgeBox} className="glass-panel">
               <div style={styles.badgeHeader}>
                 <span style={{ fontSize: '28px' }}>🛡️</span>
-                <h4 style={styles.badgeTitle}>GARANCE SBĚRATELSKÉHO BALENÍ</h4>
+                <h4 style={styles.badgeTitle}>
+                  {lang === 'CZ' ? 'GARANCE SBĚRATELSKÉHO BALENÍ' : 'COLLECTOR-GRADE PACKAGING'}
+                </h4>
               </div>
               <p style={styles.badgeText}>
-                Garantujeme, že Vaše sealed produkty i kusové karty zabalíme bezpečně podle nejvyšších sběratelských standardů. Žádná lepící páska na toploaderu, žádné promáčklé rohy ETB boxů.
+                {lang === 'CZ'
+                  ? 'Garantujeme, že Vaše sealed produkty i kusové karty zabalíme bezpečně podle nejvyšších sběratelských standardů. Žádná lepící páska na toploaderu, žádné promáčklé rohy ETB boxů.'
+                  : 'We guarantee that all sealed products and single cards are packaged safely using high-end collector criteria. No adhesive tapes on card toploaders, no dented corners on ETB displays.'}
               </p>
             </div>
           </div>

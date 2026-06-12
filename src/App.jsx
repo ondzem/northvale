@@ -21,9 +21,11 @@ import AboutPage from './components/AboutPage';
 import Cart from './components/Cart';
 import Favorites from './components/Favorites';
 import LoginModal from './components/LoginModal';
+import CookieConsent from './components/CookieConsent';
 
 import { mockProducts } from './mockData';
 import { FEATURE_FLAGS } from './config';
+import { LanguageProvider, useTranslation } from './context/LanguageContext';
 import './App.css';
 
 const parseUrlToState = () => {
@@ -164,7 +166,8 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
   return path + (searchStr ? `?${searchStr}` : '');
 };
 
-export default function App() {
+function AppContent() {
+  const { lang, setLang, t } = useTranslation();
   const initialUrlState = parseUrlToState();
 
   const toastTimeoutRef = useRef(null);
@@ -267,7 +270,12 @@ export default function App() {
       name: name || email.split('@')[0],
       avatar: avatar || '/user.png'
     }));
-    showToast(`Byl jste úspěšně přihlášen jako ${name || email}`, 'success');
+    showToast(
+      lang === 'CZ'
+        ? `Byl jste úspěšně přihlášen jako ${name || email}`
+        : `Successfully signed in as ${name || email}`,
+      'success'
+    );
   };
 
   const handleLogout = () => {
@@ -279,19 +287,28 @@ export default function App() {
       avatar: '/user.png'
     }));
     setActivePage('home');
-    showToast('Byl jste úspěšně odhlášen.', 'success');
+    showToast(
+      lang === 'CZ' ? 'Byl jste úspěšně odhlášen.' : 'Successfully signed out.',
+      'success'
+    );
   };
 
-  const handleRegister = (email, name = '', phone = '') => {
+  const handleRegister = (email, name = '', phone = '', newsletter = false) => {
     setIsLoggedIn(true);
     setUser(prev => ({
       ...prev,
       email: email,
       name: name || email.split('@')[0],
       phone: phone,
+      newsletter: newsletter,
       avatar: '/user.png'
     }));
-    showToast(`Registrace úspěšná! Vítejte, ${name || email}`, 'success');
+    showToast(
+      lang === 'CZ'
+        ? `Registrace úspěšná! Vítejte, ${name || email}${newsletter ? ' (odběr novinek aktivován)' : ''}`
+        : `Registration successful! Welcome, ${name || email}${newsletter ? ' (newsletter subscription activated)' : ''}`,
+      'success'
+    );
   };
   // Search and Filters are declared at the top
 
@@ -311,92 +328,91 @@ export default function App() {
 
   // Dynamic Page Title
   useEffect(() => {
-    let title = 'Northvaletcg.eu';
-    
+    let pageTitle = '';
     switch (activePage) {
       case 'home':
-        title = 'Domů - Northvaletcg.eu';
+        pageTitle = t('common.home');
         break;
       case 'singles-catalog':
-        title = 'Pokémon Singles - Northvaletcg.eu';
+        pageTitle = t('Catalogs.singlesTitle');
         break;
       case 'sealed-catalog':
-        title = 'Katalog - Northvaletcg.eu';
+        pageTitle = t('Catalogs.sealedTitle');
         break;
       case 'slabs-catalog':
-        title = 'Ohodnocené slabs - Northvaletcg.eu';
+        pageTitle = t('Catalogs.slabsTitle');
         break;
       case 'singles-detail':
       case 'sealed-detail': {
         const currentProduct = mockProducts.find(p => p.id === selectedProductId);
         if (currentProduct) {
-          title = `${currentProduct.name} - Northvaletcg.eu`;
+          pageTitle = currentProduct.name;
         }
         break;
       }
       case 'buylist':
-        title = 'Výkup karet (Buylist) - Northvaletcg.eu';
+        pageTitle = t('BuylistPortal.title');
         break;
       case 'grading':
-        title = 'Grading Servis - Northvaletcg.eu';
+        pageTitle = t('GradingPortal.title');
         break;
       case 'grading-guide':
-        title = 'Průvodce stavy karet - Northvaletcg.eu';
+        pageTitle = t('GradingGuide.title');
         break;
       case 'community':
-        title = 'Komunita a turnaje - Northvaletcg.eu';
+        pageTitle = t('Community.title');
         break;
       case 'support':
-        title = 'Kontakt - Northvaletcg.eu';
+        pageTitle = t('ContactPage.title');
         break;
       case 'faq':
-        title = 'Nejčastější dotazy (FAQ) - Northvaletcg.eu';
+        pageTitle = t('FaqPage.title');
         break;
       case 'about':
-        title = 'O nás - Northvaletcg.eu';
+        pageTitle = t('AboutPage.title');
         break;
       case 'admin':
-        title = 'Administrace - Northvaletcg.eu';
+        pageTitle = 'Administrace';
         break;
       case 'gdpr-vop':
         if (gdprVopTab === 'doprava') {
-          title = 'Doprava a platba - Northvaletcg.eu';
+          pageTitle = t('GdprVop.dopravaTitle');
         } else if (gdprVopTab === 'vop') {
-          title = 'Obchodní podmínky (VOP) - Northvaletcg.eu';
+          pageTitle = t('GdprVop.vopTitle');
         } else if (gdprVopTab === 'odstoupeni') {
-          title = 'Odstoupení od smlouvy - Northvaletcg.eu';
+          pageTitle = t('GdprVop.withdrawalTitle');
         } else {
-          title = 'Ochrana osobních údajů (GDPR) - Northvaletcg.eu';
+          pageTitle = t('GdprVop.gdprTitle');
         }
         break;
       case 'cart':
-        title = 'Nákupní košík - Northvaletcg.eu';
+        pageTitle = t('Cart.title');
         break;
       case 'favorites':
-        title = 'Oblíbené - Northvaletcg.eu';
+        pageTitle = t('Navbar.favorites');
         break;
       case 'profile':
-        title = 'Můj profil - Northvaletcg.eu';
+        pageTitle = t('UserPortal.title');
         break;
       default:
-        title = 'Northvaletcg.eu';
+        pageTitle = 'Northvaletcg.eu';
     }
     
-    document.title = title;
-  }, [activePage, selectedProductId, gdprVopTab]);
+    document.title = pageTitle ? `${pageTitle} - Northvaletcg.eu` : 'Northvaletcg.eu';
+  }, [activePage, selectedProductId, gdprVopTab, lang]);
 
   // Custom Toast helper
   const showToast = (message, type = 'success', title = '') => {
     // Determine title if not provided
-    let defaultTitle = 'Oznámení';
+    let defaultTitle = lang === 'CZ' ? 'Oznámení' : 'Notification';
     if (type === 'success') {
-      if (message.includes('košík') || message.includes('přidáno')) {
-        defaultTitle = 'Zboží přidáno do košíku';
+      if (message.includes('košík') || message.includes('přidáno') || message.includes('cart') || message.includes('added')) {
+        defaultTitle = lang === 'CZ' ? 'Zboží přidáno do košíku' : 'Item added to cart';
       } else {
-        defaultTitle = 'Úspěšná operace';
+        defaultTitle = lang === 'CZ' ? 'Úspěšná operace' : 'Success';
       }
     } else if (type === 'error') {
-      defaultTitle = 'Nastala chyba';
+      defaultTitle = lang === 'CZ' ? 'Nastala chyba' : 'An error occurred';
     }
 
     setToast({ message, visible: true, type, title: title || defaultTitle });
@@ -460,7 +476,12 @@ export default function App() {
         }];
       }
     });
-    showToast(`"${itemName}" (${quantityToAdd} ks) přidáno do košíku.`, 'success');
+    showToast(
+      lang === 'CZ'
+        ? `"${itemName}" (${quantityToAdd} ks) přidáno do košíku.`
+        : `"${itemName}" (${quantityToAdd} pcs) added to cart.`,
+      'success'
+    );
   };
 
   // Submit Order Action
@@ -495,7 +516,12 @@ export default function App() {
       
       const updated = { ...bl, status: 'Schváleno - Vyplaceno' };
 
-      showToast(`Výkup ${bl.id} schválen k bankovnímu převodu.`, 'success');
+      showToast(
+        lang === 'CZ'
+          ? `Výkup ${bl.id} schválen k bankovnímu převodu.`
+          : `Buylist ${bl.id} approved for bank transfer.`,
+        'success'
+      );
 
       return updated;
     }));
@@ -683,7 +709,7 @@ export default function App() {
 
       {/* Premium Custom Toast Banner */}
       {toast.visible && (() => {
-        const cartMatch = toast.message.match(/"([^"]+)"\s*\((\d+)\s*ks\)\s*přidáno do košíku\./);
+        const cartMatch = toast.message.match(/"([^"]+)"\s*\((\d+)\s*(?:ks|pcs)\)\s*(?:přidáno do košíku\.|added to cart\.)/);
         const isCartAddition = !!cartMatch;
         const productName = isCartAddition ? cartMatch[1] : '';
         const quantity = isCartAddition ? cartMatch[2] : '';
@@ -700,13 +726,19 @@ export default function App() {
               </div>
               <div className="premium-toast-title-container">
                 <span className="premium-toast-title">
-                  {isCartAddition ? 'Košík aktualizován' : (toast.title || 'Oznámení')}
+                  {isCartAddition ? (lang === 'CZ' ? 'Košík aktualizován' : 'Cart updated') : (toast.title || (lang === 'CZ' ? 'Oznámení' : 'Notification'))}
                 </span>
                 <span className="premium-toast-body">
                   {isCartAddition ? (
-                    <>
-                      Úspěšně jste přidali <strong>{productName}</strong> ({quantity} ks) do košíku.
-                    </>
+                    lang === 'CZ' ? (
+                      <>
+                        Úspěšně jste přidali <strong>{productName}</strong> ({quantity} ks) do košíku.
+                      </>
+                    ) : (
+                      <>
+                        Successfully added <strong>{productName}</strong> ({quantity} pcs) to your cart.
+                      </>
+                    )
                   ) : (
                     toast.message
                   )}
@@ -715,7 +747,7 @@ export default function App() {
               <button 
                 className="premium-toast-close" 
                 onClick={() => setToast(prev => ({ ...prev, visible: false }))}
-                aria-label="Zavřít"
+                aria-label={lang === 'CZ' ? 'Zavřít' : 'Close'}
               >
                 <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
@@ -731,7 +763,7 @@ export default function App() {
                   }}
                 >
                   <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                  Zobrazit košík
+                  {lang === 'CZ' ? 'Zobrazit košík' : 'View Cart'}
                 </button>
               </div>
             )}
@@ -740,7 +772,17 @@ export default function App() {
           </div>
         );
       })()}
+
+      <CookieConsent />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 }
 

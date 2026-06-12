@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FEATURE_FLAGS } from '../config';
+import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 import DealOfTheDay from './DealOfTheDay';
 
@@ -246,47 +247,225 @@ const subSubcategoriesConfig = {
     },
     'Lorcana': {
       title: 'Akrylové boxy pro Disney Lorcana',
-      desc: 'Prémiové ochranné boxy z masivního akrylátu s magnetickým uzávěrem vytvořené přesně podle rozměrů Lorcana Trove boxů. Skvělá UV ochrana pro cenné edice.',
+      desc: 'Prémiové ochranné boxy z masivního akrylátu s magnetickým víkem navržené speciálně na míru pro Disney Lorcana TCG. Nabízejí UV ochranu a prémiový vzhled pro vaše investiční produkty.',
       subsubcats: [
-        { id: 'all', name: 'Všechny akryly pro Lorcana', icon: '🏰' },
+        { id: 'all', name: 'Všechny akryly pro Lorcana', icon: '💎' },
         { id: 'Lorcana', name: 'Lorcana akryly', icon: '📦' }
-      ]
-    },
-    'Riftbound': {
-      title: 'Akrylové boxy pro Riftbound',
-      desc: 'Akrylové obaly s vysokou čistotou a magnetickým víkem pro bezpečné uložení a výstavku sealed booster boxů hry Riftbound.',
-      subsubcats: [
-        { id: 'all', name: 'Všechny akryly pro Riftbound', icon: '🌀' },
-        { id: 'Riftbound', name: 'Riftbound akryly', icon: '📦' }
-      ]
-    },
-    'PSA': {
-      title: 'Akrylové stojánky na PSA slabs',
-      desc: 'Prémiové stojánky a rámečky pro vystavení a dodatečnou ochranu vašich nejlepších graded karet od společnosti PSA.',
-      subsubcats: [
-        { id: 'all', name: 'Všechny akryly pro PSA', icon: '🌟' },
-        { id: 'PSA', name: 'PSA akryly', icon: '🛡️' }
       ]
     }
   }
 };
 
+const translateSubcatName = (sub, lang) => {
+  if (!sub) return '';
+  if (lang === 'CZ') return sub.name;
+  const mapping = {
+    'Booster Boxy': 'Booster Boxes',
+    'Elite Trainer Boxy': 'Elite Trainer Boxes',
+    'Bundles': 'Booster Bundles',
+    'Boostery': 'Booster Packs',
+    'Speciální kolekce': 'Special Collections',
+    'Ostatní': 'Others',
+    'Trove Boxy': 'Trove Boxes',
+    'Trial Decky': 'Trial Decks',
+    'Všechno příslušenství': 'All Accessories',
+    'Na karty': 'For Cards',
+    'Na toploadery': 'For Toploaders',
+    'Na graded karty': 'For Graded Cards',
+    'Sleevy': 'Sleeves',
+    'Toploadery': 'Toploaders',
+    'Všechny akryly': 'All Acrylic Cases',
+    'Psa karty': 'PSA Cards',
+    'Všechny produkty': 'All Products',
+    'Pokémon TCG': 'Pokémon TCG',
+    'Lorcana TCG': 'Lorcana TCG',
+    'One Piece TCG': 'One Piece TCG',
+    'Riftbound TCG': 'Riftbound TCG',
+    'Na graded karty': 'For Graded Cards',
+    'Všechny Booster Boxy': 'All Booster Boxes',
+    'Všechny ETB': 'All ETBs',
+    'Všechny Bundly': 'All Bundles',
+    'Všechny Boostery': 'All Boosters',
+    'Všechny Kolekce': 'All Collections',
+    'Všechno ostatní': 'All Others',
+    'Všechny Trove Boxy': 'All Trove Boxes',
+    'Vše ostatní': 'All Others',
+    'Všechny Trial Decky': 'All Trial Decks',
+    'Všechna alba': 'All Albums',
+    'Alba na karty': 'Card Albums',
+    'Všechna alba na toploadery': 'All Toploader Albums',
+    'Alba na toploadery': 'Toploader Albums',
+    'Všechna alba na slabs': 'All Slab Albums',
+    'Alba na graded karty': 'Graded Card Albums',
+    'Všechny obaly': 'All Sleeves',
+    'Všechny toploadery': 'All Toploaders',
+    'Standardní příslušenství': 'Standard Accessories',
+    'Všechny akryly pro Pokémon': 'All Pokémon Acrylics',
+    'Pokémon akryly': 'Pokémon Acrylics',
+    'Všechny akryly pro Lorcana': 'All Lorcana Acrylics',
+    'Lorcana akryly': 'Lorcana Acrylics'
+  };
+  return mapping[sub.name] || sub.name;
+};
+
+const getSubSubcatTitle = (game, subcat, lang) => {
+  const c = subSubcategoriesConfig[game]?.[subcat];
+  if (!c) return '';
+  if (lang === 'CZ') return c.title;
+  const titles = {
+    'Pokémon TCG Booster Boxy': 'Pokémon TCG Booster Boxes',
+    'Pokémon TCG Elite Trainer Boxy': 'Pokémon TCG Elite Trainer Boxes',
+    'Pokémon TCG Booster Bundles': 'Pokémon TCG Booster Bundles',
+    'Pokémon TCG Samostatné Boostery': 'Pokémon TCG Single Booster Packs',
+    'Pokémon TCG Speciální Kolekce': 'Pokémon TCG Special Collections',
+    'Pokémon TCG Ostatní': 'Pokémon TCG Others',
+    'Disney Lorcana Booster Boxy': 'Disney Lorcana Booster Boxes',
+    'Disney Lorcana Illumineer\'s Trove Boxy': 'Disney Lorcana Illumineer\'s Trove Boxes',
+    'Disney Lorcana Boostery': 'Disney Lorcana Booster Packs',
+    'Disney Lorcana Ostatní Produkty': 'Disney Lorcana Other Products',
+    'One Piece TCG Booster Boxy': 'One Piece TCG Booster Boxes',
+    'One Piece TCG Samostatné Boostery': 'One Piece TCG Single Booster Packs',
+    'One Piece TCG Ostatní Produkty': 'One Piece TCG Other Products',
+    'Riftbound TCG Booster Boxy': 'Riftbound TCG Booster Boxes',
+    'Riftbound TCG Samostatné Boostery': 'Riftbound TCG Single Booster Packs',
+    'Riftbound TCG Trial Decky': 'Riftbound TCG Trial Decks',
+    'Riftbound TCG Ostatní': 'Riftbound TCG Others',
+    'Alba na TCG karty': 'Albums for TCG Cards',
+    'Alba na toploadery': 'Albums for Toploaders',
+    'Alba a kufříky na graded karty': 'Albums & Cases for Graded Cards',
+    'Obaly na karty (Sleeves)': 'Card Sleeves',
+    'Pevné toploadery na karty': 'Rigid Toploaders for Cards',
+    'Ostatní příslušenství': 'Other Accessories',
+    'Akrylové boxy pro Pokémon': 'Acrylic Cases for Pokémon',
+    'Akrylové boxy pro Disney Lorcana': 'Acrylic Cases for Disney Lorcana'
+  };
+  return titles[c.title] || c.title;
+};
+
+const getSubSubcatDesc = (game, subcat, lang) => {
+  const c = subSubcategoriesConfig[game]?.[subcat];
+  if (!c) return '';
+  if (lang === 'CZ') return c.desc;
+  const descs = {
+    'Booster Boxy jsou královskou disciplínou pro všechny sběratele a investory do Pokémon karet. Každý standardní anglický booster box obsahuje 36 neotevřených booster balíčků po 10 kartách, což z něj činí cenově nejvýhodnější způsob nákupu většího množství karet. V japonských a čínských verzích booster boxů obvykle najdete 20 až 30 balíčků. Všechny naše booster boxy pocházejí z oficiální distribuce a jsou dodávány v originální smršťovací fólii (shrink wrap) s logem Pokémon Company, což zaručuje jejich pravost a netknutý stav.':
+      'Booster Boxes are the premier format for Pokémon collectors and investors. Each standard English booster box contains 36 sealed booster packs of 10 cards, making it the most cost-effective way to purchase cards in bulk. Japanese and Chinese booster boxes typically contain 20 to 30 packs. All our booster boxes are sourced from official distribution and arrive in their original manufacturer shrink wrap with the Pokémon Company logo, ensuring authenticity and mint condition.',
+    'Elite Trainer Box (ETB) je skvělá dárková sada obsahující booster balíčky, obaly na karty, promo kartu a herní doplňky. Ideální pro začínající sběratele i zkušené hráče.':
+      'An Elite Trainer Box (ETB) is a fantastic gift and collector bundle containing booster packs, card sleeves, a promo card, and gameplay accessories. Perfect for both beginners and experienced players alike.',
+    'Booster Bundles představují čistou radost z rozbalování balíčků bez zbytečného příslušenství okolo. Každá krabička obsahuje přesně 6 booster balíčků vybrané edice. Jedná se o skvělou a cenově dostupnou možnost, pokud chcete otestovat své štěstí v nové edici, aniž byste kupovali celý velký Booster Box nebo dárkový Elite Trainer Box.':
+      'Booster Bundles deliver the pure joy of opening packs without unnecessary extra accessories. Each bundle box contains exactly 6 booster packs of the selected set. It is a great and budget-friendly option if you want to test your luck on a new set without buying a full booster box.',
+    'Základní stavební kámen sbírání Pokémon karet. Samostatný booster balíček obsahuje náhodně namíchanou sadu karet (obvykle 10 v anglické verzi, 5 až 10 v japonské a čínské verzi). Můžete v nich najít cenné karty jako jsou Pokémon ex, Illustration Rare nebo dokonce Secret Rare. Nabízíme jak standardní anglické boostery, tak specifické japonské a čínské edice pro fajnšmekry.':
+      'The foundational unit of TCG collecting. An individual booster pack contains a randomized selection of cards (typically 10 in English sets, 5 to 10 in Japanese/Chinese editions). They offer a chance to pull valuable cards like Pokémon ex, Illustration Rares, or Secret Rares. We stock standard English packs as well as special Japanese and Chinese print runs.',
+    'Speciální dárkové sety (Collection Boxes, Premium Collections, Tins) jsou navrženy pro maximální vizuální zážitek a radost z rozbalování. Tyto produkty zpravidla obsahují jednu nebo více garantovaných promo karet oblíbených Pokémonů, nekolik booster balíčků z různých edic a tematické bonusové předměty jako jsou sběratelské mince, figurky, odznáčky nebo herní podložky.':
+      'Special gift sets (Collection Boxes, Premium Collections, Tins) are designed for a great opening experience. These products generally feature one or more guaranteed promo cards of popular characters, several booster packs from various sets, and themed bonus items like collector coins, figures, pins, or playmats.',
+    'V této kategorii naleznete nezařazené sběratelské produkty jako jsou sealed cased (celé krabice s více kusy produktů přímo z továrny), předpřipravené balíčky (Theme Decks / Battle Decks) nebo limitované sběratelské edice, které tvoří unikátní součást sběratelského světa.':
+      'In this category, you will find other TCG items like sealed cases (entire master cases direct from the factory), pre-built starter decks, and limited collector editions that form a unique part of the collecting hobby.',
+    'Booster boxy pro Disney Lorcana obsahují 24 booster balíčků po 12 kartách. Otevírání celého boxu vám dává nejlepší šanci na získání vzácných legendárních a extrémně cenných Enchanted karet s bezrámovou foilovou ilustrací.':
+      'Booster boxes for Disney Lorcana contain 24 booster packs of 12 cards each. Opening a full box offers the best value and chances for rare legendary pulls or highly coveted Enchanted borderless cards.',
+    'Illumineer\'s Trove je vlajkovou lodí dárkových sad pro hru Disney Lorcana. Každý Trove box obsahuje 8 boosterů, dvě papírové krabičky na balíčky, 15 žetonů poškození, sběratelského průvodce sadou a pevnou úložnou krabici s krásným celoplošným potiskem pro archivaci vaší rozrůstající se sbírky.':
+      'The Illumineer\'s Trove is the flagship gift bundle for Disney Lorcana. Each Trove contains 8 booster packs, two deck boxes, 15 damage counters, a player guide, and a heavy-duty cardboard storage box featuring full-art prints to archive your collection.',
+    'Samostatný booster balíček obsahuje 12 náhodných karet (6 běžných, 3 neobvyklé, 2 vzácné/epické/legendární a 1 garantovanou foilovou kartu libovolné vzácnosti). Skvělá a rychlá možnost, jak otestovat své štěstí při hledání oblíbených postav od Disneyho.':
+      'A single booster pack contains 12 random cards (6 commons, 3 uncommons, 2 rares/epics/legendaries, and 1 guaranteed foil card of any rarity). A quick and fun option to test your luck and find your favorite Disney characters.',
+    'Startovní balíčky (Starter Decks) obsahující předpřipravený 60-kartový balíček připravený k okamžité hře, dárkové sety s promo kartami a doplňkové herní sety pro začínající i pokročilé hráče.':
+      'Pre-built 60-card starter decks ready for immediate play, gift sets featuring exclusive promo cards, and special bundle sets for casual and competitive players alike.',
+    'Booster Boxy One Piece Card Game obsahují 24 booster balíčků. Tyto boxy jsou vysoce vyhledávané kvůli možnosti otevření extrémně vzácných Manga Rare karet a speciálních verzí karet vůdců (Alternate Art Leaders).':
+      'One Piece Card Game booster boxes contain 24 booster packs. These boxes are highly sought-after for the chance of pulling extremely rare Manga Rares or Alternate Art Leaders.',
+    'Booster balíčky pro oblíbenou karetní hru na motivy anime One Piece. Každý balíček obsahuje náhodně namíchané karty postav, událostí a stage karet pro sestavení vašeho vysněného pirátského balíčku.':
+      'Booster packs for the hit anime-based One Piece Card Game. Each pack contains a random mix of character, event, and stage cards to assemble your crew deck.',
+    'Startovní balíčky (Starter Decks) pro okamžitý start hry, speciální limitované edice a dárkové krabičky ze světa One Piece.':
+      'Starter decks for immediate out-of-the-box play, special limited release runs, and themed gift boxes from the world of One Piece.',
+    'Zapečetěné boxy s 24 booster balíčky české strategické fantasy hry Riftbound. Skvělý nákup pro získání kompletní sady karet a posílení vašich elementárních balíčků.':
+      'Sealed boxes containing 24 booster packs for the Czech strategic fantasy game Riftbound. A great purchase to compile a playset and reinforce your elemental decks.',
+    'Samostatné boostery s kartami hry Riftbound pro postupné vylepšování balíčku.':
+      'Individual booster packs containing Riftbound cards to gradually upgrade your decks.',
+    'Předpřipravené startovní Trial decky hry Riftbound navržené tak, aby dva hráči mohli okamžitě usednout k hernímu stolu a začít hrát.':
+      'Pre-constructed starter Trial decks designed for two players to immediately open and play against each other.',
+    'Oficiální herní podložky (playmaty) s fantastickými ilustracemi a další doplňkové materiály k Riftbound TCG.':
+      'Official playmats featuring stunning fantasy artwork and additional accessory materials for the Riftbound TCG.',
+    'Prémiová alba s bočním vkládáním karet pro maximální bezpečí a ochranu před vypadnutím. Ideální pro uspořádání a prezentaci vaší sbírky vzácných karet.':
+      'Premium side-loading pocket binders designed for maximum protection and ease of storage. Perfect to organize and showcase your card sets.',
+    'Speciálně navržená alba s širšími kapsami pro bezpečné uložení a pohodlné prohlížení karet, které máte uložené v pevných toploaderech. Dvojnásobné bezpečí pro vaše nejcennější kousky.':
+      'Specially designed albums with extra-wide pockets to hold cards inside standard rigid toploaders. Double security for your most prized assets.',
+    'Profesionální alba a kufříky s pevnými stěnami navržené pro bezpečné skladování a snadnou prezentaci graded karet v plastových pouzdrech (slabech) typu PSA nebo Beckett.':
+      'Professional heavy-duty binders and carrying cases designed for safe storage and easy viewing of graded cards (slabs) like PSA or Beckett.',
+    'Obaly na karty od předních světových výrobců jako Dragon Shield a Ultra Pro. Chrání karty před prachem, poškrábáním povrchu a poškozením hran při míchání a manipulaci.':
+      'Card sleeves from industry leaders like Dragon Shield and Ultra Pro. Protects cards from dust, scratching, and edge wear during gameplay.',
+    'Pevné plastové obaly (toploadery) pro nekompromisní ochranu cennějších karet před ohnutím a nárazy. Ideální pro karty určené k vystavení nebo bezpečné přepravě.':
+      'Rigid plastic toploaders for robust protection of your single cards against bending or impacts. Perfect for transit or display.',
+    'Krabičky na balíčky (deck boxy), kostky, počítadla a další užitečné doplňky pro hráče a sběratele stolních karetních her.':
+      'Deck boxes, dice, counters, and other gameplay accessories for tabletop trading card game players.',
+    'Vysoce kvalitní akrylové ochranné boxy s magnetickým víkem navržené speciálně na míru pro Pokémon Booster Boxy a Elite Trainer Boxy. Nabízejí UV ochranu a prémiový vzhled pro vaše investiční produkty.':
+      'Premium thick acrylic protector display cases with secure magnetic lids custom-sized for Pokémon booster boxes or ETBs. Offers UV protection and display aesthetics.',
+    'Prémiové ochranné boxy z masivního akrylátu s magnetickým víkem navržené speciálně na míru pro Disney Lorcana TCG. Nabízejí UV ochranu a prémiový vzhled pro vaše investiční produkty.':
+      'Premium thick acrylic protector display cases with secure magnetic lids custom-sized for Lorcana TCG. Offers UV protection and display aesthetics.'
+  };
+  return descs[c.desc] || c.desc;
+};
+
 export default function SealedCatalog({ products, addToCart, setSelectedProductId, setActivePage, filters, setFilters }) {
+  const { lang, t } = useTranslation();
   const [selectedGame, setSelectedGame] = useState(filters.game || 'all');
-  const [selectedLang, setSelectedLang] = useState(filters.lang || 'all');
-  const [investmentOnly, setInvestmentOnly] = useState(filters.investment || false);
+  const [selectedLangs, setSelectedLangs] = useState(filters.lang ? [filters.lang] : []);
   const [priceRange, setPriceRange] = useState(25000);
+  
+  // Custom states for filters
+  const [onlyInStock, setOnlyInStock] = useState(false);
+  const [onlyPreorder, setOnlyPreorder] = useState(false);
+  const [selectedEditions, setSelectedEditions] = useState([]);
+  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [selectedCompatibilities, setSelectedCompatibilities] = useState([]);
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [selectedThicknesses, setSelectedThicknesses] = useState([]);
+  const [selectedClosingTypes, setSelectedClosingTypes] = useState([]);
+  const [selectedPackagingTypes, setSelectedPackagingTypes] = useState(filters.type ? [filters.type] : []);
+
   const [activeSubcategory, setActiveSubcategory] = useState(filters.type || filters.subsubcat || filters.subcat || filters.gameFilter || 'all');
   const [activeSubsubcategory, setActiveSubsubcategory] = useState(filters.subsubcat || 'all');
 
+  // Collapsible sections state
+  const [expandedSections, setExpandedSections] = useState({
+    stock: true,
+    lang: false,
+    packaging: false,
+    editions: false,
+    brand: false,
+    compatibility: false,
+    color: false,
+    thickness: false,
+    closing: false,
+    price: true
+  });
+
+  const toggleSection = (sec) => {
+    setExpandedSections(prev => ({ ...prev, [sec]: !prev[sec] }));
+  };
+
+  // Reset other filters when game changes
+  const [prevGame, setPrevGame] = useState(selectedGame);
+  if (selectedGame !== prevGame) {
+    setPrevGame(selectedGame);
+    setSelectedLangs([]);
+    setOnlyInStock(false);
+    setOnlyPreorder(false);
+    setSelectedEditions([]);
+    setSelectedBrands([]);
+    setSelectedCompatibilities([]);
+    setSelectedColors([]);
+    setSelectedThicknesses([]);
+    setSelectedClosingTypes([]);
+    setSelectedPackagingTypes([]);
+    setActiveSubcategory('all');
+    setActiveSubsubcategory('all');
+  }
+
+  // Prev filters sync
   const [prevFilters, setPrevFilters] = useState(filters);
   if (filters !== prevFilters) {
     setPrevFilters(filters);
     setSelectedGame(filters.game || 'all');
-    setSelectedLang(filters.lang || 'all');
-    setInvestmentOnly(filters.investment || false);
+    setSelectedLangs(filters.lang ? [filters.lang] : []);
     setActiveSubcategory(filters.type || filters.subsubcat || filters.subcat || filters.gameFilter || 'all');
     setActiveSubsubcategory(filters.subsubcat || 'all');
+    setSelectedPackagingTypes(filters.type ? [filters.type] : []);
   }
 
   // Expandable description state
@@ -312,8 +491,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     };
   }, [mobileFiltersOpen]);
 
-
-
+  // Get sealed products
   const sealedProducts = products.filter(p => {
     if (p.type !== 'sealed' && p.type !== 'accessory') return false;
     if (!FEATURE_FLAGS.showSlabs) {
@@ -323,7 +501,188 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     return true;
   });
 
-  // Dynamic subcategories setup
+  // Base list for active game / type
+  const baseSealed = sealedProducts.filter(p => {
+    if (selectedGame === 'all') return true;
+    if (selectedGame === 'Accessories') return p.type === 'accessory' && p.category !== 'Acrylics';
+    if (selectedGame === 'Acrylics') return p.category === 'Acrylics';
+    return p.game === selectedGame && p.category !== 'Acrylics';
+  });
+
+  // Extract available editions dynamically
+  const editions = Array.from(new Set(baseSealed.map(p => p.edition).filter(Boolean)));
+
+  // Extract available packaging types dynamically
+  const packagingTypes = Array.from(new Set(baseSealed.map(p => p.packagingType).filter(Boolean)));
+
+  // Helper mappings
+  const getProductBrand = (p) => {
+    const nameLower = p.name.toLowerCase();
+    const descLower = (p.desc || '').toLowerCase();
+    if (nameLower.includes('dragon shield') || descLower.includes('dragon shield')) return 'Dragon Shield';
+    if (nameLower.includes('ultra pro') || descLower.includes('ultra pro')) return 'Ultra PRO';
+    if (nameLower.includes('ultimate guard') || descLower.includes('ultimate guard')) return 'Ultimate Guard';
+    if (nameLower.includes('gamegenic') || descLower.includes('gamegenic')) return 'Gamegenic';
+    return 'Other';
+  };
+
+  const getProductCompatibility = (p) => {
+    const nameLower = p.name.toLowerCase();
+    const descLower = (p.desc || '').toLowerCase();
+    if (nameLower.includes('japanese') || descLower.includes('japanese') || nameLower.includes('small size')) return 'Japanese cards';
+    if (nameLower.includes('booster box') || descLower.includes('booster box')) return 'Booster Box case';
+    if (nameLower.includes('etb') || nameLower.includes('elite trainer box') || descLower.includes('etb') || descLower.includes('elite trainer box')) return 'ETB case';
+    if (nameLower.includes('graded') || nameLower.includes('slab') || descLower.includes('graded') || descLower.includes('slab')) return 'Graded cards';
+    if (nameLower.includes('standard') || descLower.includes('standard') || p.subcat === 'Sleeves') return 'Standard cards';
+    return 'Other';
+  };
+
+  const getProductColor = (p) => {
+    const nameLower = p.name.toLowerCase();
+    const descLower = (p.desc || '').toLowerCase();
+    if (nameLower.includes('černý') || nameLower.includes('černá') || nameLower.includes('black') || descLower.includes('černá') || descLower.includes('black')) return 'Black';
+    if (nameLower.includes('červený') || nameLower.includes('červená') || nameLower.includes('red') || descLower.includes('červená') || descLower.includes('red')) return 'Red';
+    if (nameLower.includes('modrý') || nameLower.includes('modrá') || nameLower.includes('blue') || descLower.includes('modrá') || descLower.includes('blue')) return 'Blue';
+    if (nameLower.includes('zelený') || nameLower.includes('zelená') || nameLower.includes('green') || descLower.includes('zelená') || descLower.includes('green')) return 'Green';
+    if (nameLower.includes('clear') || nameLower.includes('průhledný') || nameLower.includes('průhledná') || nameLower.includes('transparent') || nameLower.includes('soft') || descLower.includes('clear') || descLower.includes('průhledná')) return 'Clear';
+    return 'Other';
+  };
+
+  const getAcrylicThickness = (p) => {
+    const nameLower = p.name.toLowerCase();
+    const descLower = (p.desc || '').toLowerCase();
+    if (p.acrylicThickness === 4 || nameLower.includes('4mm') || descLower.includes('4mm')) return '4mm';
+    if (p.acrylicThickness === 3 || nameLower.includes('3mm') || descLower.includes('3mm')) return '3mm';
+    return 'Other';
+  };
+
+  const getAcrylicClosingType = (p) => {
+    const nameLower = p.name.toLowerCase();
+    const descLower = (p.desc || '').toLowerCase();
+    if (p.closingType === 'Magnetické víko' || nameLower.includes('magnet') || descLower.includes('magnet')) return 'Magnetic';
+    if (p.closingType === 'Nasouvací systém' || nameLower.includes('nasouvací') || nameLower.includes('slip-in') || nameLower.includes('stojánek') || descLower.includes('nasouvací') || descLower.includes('slip-in')) return 'Slip-in';
+    return 'Other';
+  };
+
+  // Counts helpers
+  const getEditionCount = (ed) => {
+    return baseSealed.filter(p => p.edition === ed).length;
+  };
+
+  const getPackagingTypeCount = (pt) => {
+    return baseSealed.filter(p => p.packagingType === pt).length;
+  };
+
+  const getBrandCount = (br) => {
+    return baseSealed.filter(p => getProductBrand(p) === br).length;
+  };
+
+  const getCompatibilityCount = (comp) => {
+    return baseSealed.filter(p => getProductCompatibility(p) === comp).length;
+  };
+
+  const getColorCount = (col) => {
+    return baseSealed.filter(p => getProductColor(p) === col).length;
+  };
+
+  const getLangCount = (lang) => {
+    return baseSealed.filter(p => p.lang === lang).length;
+  };
+
+  const getThicknessCount = (th) => {
+    return baseSealed.filter(p => getAcrylicThickness(p) === th).length;
+  };
+
+  const getClosingTypeCount = (ct) => {
+    return baseSealed.filter(p => getAcrylicClosingType(p) === ct).length;
+  };
+
+  const getStockCount = (stockType) => {
+    if (stockType === 'inStock') {
+      return baseSealed.filter(p => p.stock > 0).length;
+    }
+    if (stockType === 'preorder') {
+      return baseSealed.filter(p => p.preorder === true).length;
+    }
+    return 0;
+  };
+
+  // Filter logic
+  const filteredProducts = sealedProducts.filter(product => {
+    // Game selection
+    if (selectedGame !== 'all') {
+      if (selectedGame === 'Accessories') {
+        if (product.type !== 'accessory' || product.category === 'Acrylics') return false;
+      } else if (selectedGame === 'Acrylics') {
+        if (product.category !== 'Acrylics') return false;
+      } else {
+        if (product.game !== selectedGame || product.category === 'Acrylics') return false;
+      }
+    }
+
+    // Language selection (multiple)
+    if (selectedLangs.length > 0 && !selectedLangs.includes(product.lang)) return false;
+
+    // Price range
+    if (product.price > priceRange) return false;
+
+    // Stock availability
+    if (onlyInStock && product.stock <= 0 && !product.preorder) return false;
+    if (onlyPreorder && !product.preorder) return false;
+
+    // Subcategories matching helper (tabs at the top)
+    if (activeSubcategory !== 'all') {
+      if (selectedGame === 'Accessories') {
+        if (activeSubcategory === 'cards' || activeSubcategory === 'toploaders' || activeSubcategory === 'graded') {
+          if (product.subcat !== 'Binders' || product.subsubcat !== activeSubcategory) return false;
+        } else {
+          if (product.subcat !== activeSubcategory) return false;
+        }
+      } else if (selectedGame === 'Acrylics') {
+        if (product.game !== activeSubcategory) return false;
+      } else {
+        if (product.packagingType !== activeSubcategory) return false;
+      }
+    }
+
+    // Subsubcategory matching helper
+    if (activeSubsubcategory !== 'all') {
+      if (product.subsubcategory !== activeSubsubcategory) return false;
+    }
+
+    // Packaging Type filter (multiple checkboxes in sidebar)
+    if (selectedPackagingTypes.length > 0 && !selectedPackagingTypes.includes(product.packagingType)) return false;
+
+    // Edition filter (multiple checkboxes in sidebar)
+    if (selectedEditions.length > 0 && !selectedEditions.includes(product.edition)) return false;
+
+    // Brand filter (multiple checkboxes in sidebar)
+    if (selectedBrands.length > 0 && !selectedBrands.includes(getProductBrand(product))) return false;
+
+    // Compatibility filter (multiple checkboxes in sidebar)
+    if (selectedCompatibilities.length > 0 && !selectedCompatibilities.includes(getProductCompatibility(product))) return false;
+
+    // Color filter (multiple checkboxes in sidebar)
+    if (selectedColors.length > 0 && !selectedColors.includes(getProductColor(product))) return false;
+
+    // Thickness filter (multiple checkboxes in sidebar)
+    if (selectedThicknesses.length > 0 && !selectedThicknesses.includes(getAcrylicThickness(product))) return false;
+
+    // Closing Type filter (multiple checkboxes in sidebar)
+    if (selectedClosingTypes.length > 0 && !selectedClosingTypes.includes(getAcrylicClosingType(product))) return false;
+
+    return true;
+  });
+
+  // Sort logic
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    if (sortBy === 'expensive') return b.price - a.price;
+    if (sortBy === 'cheap') return a.price - b.price;
+    if (sortBy === 'new') return b.id.localeCompare(a.id); // mock sort
+    return 0; // Default: top
+  });
+
+  // Determine subcategories to show based on game
   let subcategories = [];
   if (selectedGame === 'Pokémon') {
     subcategories = [
@@ -382,59 +741,398 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     ];
   }
 
-  // Filter logic
-  const filteredProducts = sealedProducts.filter(product => {
-    // Game selection
-    if (selectedGame !== 'all') {
-      if (selectedGame === 'Accessories') {
-        if (product.type !== 'accessory' || product.category === 'Acrylics') return false;
-      } else if (selectedGame === 'Acrylics') {
-        if (product.category !== 'Acrylics') return false;
-        if (filters.gameFilter && product.game !== filters.gameFilter) return false;
-      } else {
-        if (product.game !== selectedGame || product.category === 'Acrylics') return false;
-      }
-    }
+  // Sidebar Layout rendering functions
+  const renderStockFilter = () => {
+    const list = [
+      { id: 'inStock', name: lang === 'CZ' ? 'Pouze skladem' : 'Only in Stock' },
+      { id: 'preorder', name: lang === 'CZ' ? 'Možnost předobjednávky' : 'Pre-order available' }
+    ];
+    return (
+      <div className="sidebar-filter-section">
+        <h4 className={`sidebar-filter-title collapsible ${expandedSections.stock ? 'active' : ''}`} onClick={() => toggleSection('stock')}>
+          Skladová dostupnost
+          <span className="chevron-icon">{expandedSections.stock ? '▲' : '▼'}</span>
+        </h4>
+        {expandedSections.stock && (
+          <div className="sidebar-checkbox-list">
+            {list.map(st => {
+              const count = getStockCount(st.id);
+              const isDisabled = count === 0;
+              const isChecked = st.id === 'inStock' ? onlyInStock : onlyPreorder;
+              const handleToggle = () => {
+                if (st.id === 'inStock') {
+                  setOnlyInStock(!onlyInStock);
+                } else {
+                  setOnlyPreorder(!onlyPreorder);
+                }
+              };
+              return (
+                <label key={st.id} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={handleToggle}
+                    disabled={isDisabled}
+                    className="sidebar-checkbox"
+                  />
+                  <span>{st.name}</span>
+                  <span className="filter-badge">{count}</span>
+                </label>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
 
-    // Language selection
-    if (selectedLang !== 'all' && product.lang !== selectedLang) return false;
+  const renderLangFilter = () => {
+    const list = [
+      { code: 'EN', name: 'Angličtina (ENG) 🇬🇧' },
+      { code: 'JP', name: 'Japonština (JPN) 🇯🇵' },
+      { code: 'CN', name: 'Čínština (CHN) 🇨🇳' },
+      { code: 'KR', name: 'Korejština (KOR) 🇰🇷' }
+    ];
+    return (
+      <div className="sidebar-filter-section">
+        <h4 className={`sidebar-filter-title collapsible ${expandedSections.lang ? 'active' : ''}`} onClick={() => toggleSection('lang')}>
+          Jazyk balení
+          <span className="chevron-icon">{expandedSections.lang ? '▲' : '▼'}</span>
+        </h4>
+        {expandedSections.lang && (
+          <div className="sidebar-checkbox-list">
+            {list.map(lang => {
+              const count = getLangCount(lang.code);
+              const isDisabled = count === 0;
+              return (
+                <label key={lang.code} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                  <input
+                    type="checkbox"
+                    checked={selectedLangs.includes(lang.code)}
+                    onChange={() => {
+                      setSelectedLangs(prev =>
+                        prev.includes(lang.code) ? prev.filter(l => l !== lang.code) : [...prev, lang.code]
+                      );
+                    }}
+                    disabled={isDisabled}
+                    className="sidebar-checkbox"
+                  />
+                  <span>{lang.name}</span>
+                  <span className="filter-badge">{count}</span>
+                </label>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
 
-    // Investment checkbox
-    if (investmentOnly && !product.investment) return false;
+  const renderTcgFilters = () => {
+    return (
+      <>
+        {renderStockFilter()}
+        {renderLangFilter()}
+        {packagingTypes.length > 0 && (
+          <div className="sidebar-filter-section">
+            <h4 className={`sidebar-filter-title collapsible ${expandedSections.packaging ? 'active' : ''}`} onClick={() => toggleSection('packaging')}>
+              {lang === 'CZ' ? 'Typ balení' : 'Packaging Type'}
+              <span className="chevron-icon">{expandedSections.packaging ? '▲' : '▼'}</span>
+            </h4>
+            {expandedSections.packaging && (
+              <div className="sidebar-checkbox-list">
+                {packagingTypes.map(pt => {
+                  const count = getPackagingTypeCount(pt);
+                  const isDisabled = count === 0;
+                  return (
+                    <label key={pt} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                      <input
+                        type="checkbox"
+                        checked={selectedPackagingTypes.includes(pt)}
+                        onChange={() => {
+                          setSelectedPackagingTypes(prev => {
+                            const next = prev.includes(pt) ? prev.filter(p => p !== pt) : [...prev, pt];
+                            if (next.length === 1) {
+                              setActiveSubcategory(next[0]);
+                            } else {
+                              setActiveSubcategory('all');
+                            }
+                            return next;
+                          });
+                        }}
+                        disabled={isDisabled}
+                        className="sidebar-checkbox"
+                      />
+                      <span>{pt}</span>
+                      <span className="filter-badge">{count}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+        {editions.length > 0 && (
+          <div className="sidebar-filter-section">
+            <h4 className={`sidebar-filter-title collapsible ${expandedSections.editions ? 'active' : ''}`} onClick={() => toggleSection('editions')}>
+              {lang === 'CZ' ? 'Edice / Set' : 'Expansion / Set'}
+              <span className="chevron-icon">{expandedSections.editions ? '▲' : '▼'}</span>
+            </h4>
+            {expandedSections.editions && (
+              <div className="sidebar-checkbox-list scrollable">
+                {editions.map(ed => {
+                  const count = getEditionCount(ed);
+                  const isDisabled = count === 0;
+                  return (
+                    <label key={ed} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                      <input
+                        type="checkbox"
+                        checked={selectedEditions.includes(ed)}
+                        onChange={() => {
+                          setSelectedEditions(prev =>
+                            prev.includes(ed) ? prev.filter(e => e !== ed) : [...prev, ed]
+                          );
+                        }}
+                        disabled={isDisabled}
+                        className="sidebar-checkbox"
+                      />
+                      <span>{ed}</span>
+                      <span className="filter-badge">{count}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </>
+    );
+  };
 
-    // Price range
-    if (product.price > priceRange) return false;
+  const renderAccessoriesFilters = () => {
+    const brandsList = ['Dragon Shield', 'Ultra PRO', 'Ultimate Guard', 'Gamegenic'];
+    const compatibilityList = ['Standard cards', 'Japanese cards', 'Booster Box case', 'ETB case', 'Graded cards'];
+    const colorsList = [
+      { name: 'Black', color: '#1f2937', label: 'Černá (Black) ⬛' },
+      { name: 'Red', color: '#ef4444', label: 'Červená (Red) 🟥' },
+      { name: 'Blue', color: '#3b82f6', label: 'Modrá (Blue) 🟦' },
+      { name: 'Green', color: '#10b981', label: 'Zelená (Green) 🟩' },
+      { name: 'Clear', color: '#f3f4f6', label: 'Průhledná (Clear) ⚪' }
+    ];
 
-    // Subcategories matching helper
-    if (activeSubcategory !== 'all') {
-      if (selectedGame === 'Accessories') {
-        if (activeSubcategory === 'cards' || activeSubcategory === 'toploaders' || activeSubcategory === 'graded') {
-          if (product.subcat !== 'Binders' || product.subsubcat !== activeSubcategory) return false;
-        } else {
-          if (product.subcat !== activeSubcategory) return false;
-        }
-      } else if (selectedGame === 'Acrylics') {
-        if (product.game !== activeSubcategory) return false;
-      } else {
-        if (product.packagingType !== activeSubcategory) return false;
-      }
-    }
+    return (
+      <>
+        {renderStockFilter()}
+        <div className="sidebar-filter-section">
+          <h4 className={`sidebar-filter-title collapsible ${expandedSections.brand ? 'active' : ''}`} onClick={() => toggleSection('brand')}>
+            Výrobce / Značka
+            <span className="chevron-icon">{expandedSections.brand ? '▲' : '▼'}</span>
+          </h4>
+          {expandedSections.brand && (
+            <div className="sidebar-checkbox-list">
+              {brandsList.map(br => {
+                const count = getBrandCount(br);
+                const isDisabled = count === 0;
+                return (
+                  <label key={br} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={selectedBrands.includes(br)}
+                      onChange={() => {
+                        setSelectedBrands(prev =>
+                          prev.includes(br) ? prev.filter(b => b !== br) : [...prev, br]
+                        );
+                      }}
+                      disabled={isDisabled}
+                      className="sidebar-checkbox"
+                    />
+                    <span>{br}</span>
+                    <span className="filter-badge">{count}</span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
-    // Subsubcategory matching helper
-    if (activeSubsubcategory !== 'all') {
-      if (product.subsubcategory !== activeSubsubcategory) return false;
-    }
+        <div className="sidebar-filter-section">
+          <h4 className={`sidebar-filter-title collapsible ${expandedSections.compatibility ? 'active' : ''}`} onClick={() => toggleSection('compatibility')}>
+            Určeno pro (Kompatibilita)
+            <span className="chevron-icon">{expandedSections.compatibility ? '▲' : '▼'}</span>
+          </h4>
+          {expandedSections.compatibility && (
+            <div className="sidebar-checkbox-list">
+              {compatibilityList.map(comp => {
+                const count = getCompatibilityCount(comp);
+                const isDisabled = count === 0;
+                return (
+                  <label key={comp} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={selectedCompatibilities.includes(comp)}
+                      onChange={() => {
+                        setSelectedCompatibilities(prev =>
+                          prev.includes(comp) ? prev.filter(c => c !== comp) : [...prev, comp]
+                        );
+                      }}
+                      disabled={isDisabled}
+                      className="sidebar-checkbox"
+                    />
+                    <span>{comp === 'Standard cards' ? 'Standardní velikost' : comp === 'Japanese cards' ? 'Japonská velikost' : comp === 'Booster Box case' ? 'Booster Box Case' : comp === 'ETB case' ? 'Elite Trainer Box Case' : 'Graded slabs'}</span>
+                    <span className="filter-badge">{count}</span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
-    return true;
-  });
+        <div className="sidebar-filter-section">
+          <h4 className={`sidebar-filter-title collapsible ${expandedSections.color ? 'active' : ''}`} onClick={() => toggleSection('color')}>
+            Barva doplňku
+            <span className="chevron-icon">{expandedSections.color ? '▲' : '▼'}</span>
+          </h4>
+          {expandedSections.color && (
+            <div className="sidebar-checkbox-list">
+              {colorsList.map(col => {
+                const count = getColorCount(col.name);
+                const isDisabled = count === 0;
+                return (
+                  <label key={col.name} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={selectedColors.includes(col.name)}
+                      onChange={() => {
+                        setSelectedColors(prev =>
+                          prev.includes(col.name) ? prev.filter(c => c !== col.name) : [...prev, col.name]
+                        );
+                      }}
+                      disabled={isDisabled}
+                      className="sidebar-checkbox"
+                    />
+                    <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      <span className="color-dot-indicator" style={{ backgroundColor: col.color }} />
+                      {col.label}
+                    </span>
+                    <span className="filter-badge">{count}</span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </>
+    );
+  };
 
-  // Sort logic
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortBy === 'expensive') return b.price - a.price;
-    if (sortBy === 'cheap') return a.price - b.price;
-    if (sortBy === 'new') return b.id.localeCompare(a.id); // mock sort
-    return 0; // Default: top
-  });
+  const renderAcrylicsFilters = () => {
+    const compatibilityList = ['Pokémon', 'Lorcana', 'Riftbound', 'PSA'];
+    const thicknessList = ['4mm', '3mm'];
+    const closingTypeList = ['Magnetic', 'Slip-in'];
+
+    return (
+      <>
+        {renderStockFilter()}
+        <div className="sidebar-filter-section">
+          <h4 className={`sidebar-filter-title collapsible ${expandedSections.compatibility ? 'active' : ''}`} onClick={() => toggleSection('compatibility')}>
+            Kompatibilita boxu
+            <span className="chevron-icon">{expandedSections.compatibility ? '▲' : '▼'}</span>
+          </h4>
+          {expandedSections.compatibility && (
+            <div className="sidebar-checkbox-list">
+              {compatibilityList.map(comp => {
+                const count = baseSealed.filter(p => p.game === comp).length;
+                const isDisabled = count === 0;
+                return (
+                  <label key={comp} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={activeSubcategory === comp}
+                      onChange={() => {
+                        if (activeSubcategory === comp) {
+                          setActiveSubcategory('all');
+                        } else {
+                          setActiveSubcategory(comp);
+                        }
+                      }}
+                      disabled={isDisabled}
+                      className="sidebar-checkbox"
+                    />
+                    <span>{comp}</span>
+                    <span className="filter-badge">{count}</span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="sidebar-filter-section">
+          <h4 className={`sidebar-filter-title collapsible ${expandedSections.thickness ? 'active' : ''}`} onClick={() => toggleSection('thickness')}>
+            Tloušťka akrylu
+            <span className="chevron-icon">{expandedSections.thickness ? '▲' : '▼'}</span>
+          </h4>
+          {expandedSections.thickness && (
+            <div className="sidebar-checkbox-list">
+              {thicknessList.map(th => {
+                const count = getThicknessCount(th);
+                const isDisabled = count === 0;
+                return (
+                  <label key={th} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={selectedThicknesses.includes(th)}
+                      onChange={() => {
+                        setSelectedThicknesses(prev =>
+                          prev.includes(th) ? prev.filter(t => t !== th) : [...prev, th]
+                        );
+                      }}
+                      disabled={isDisabled}
+                      className="sidebar-checkbox"
+                    />
+                    <span>{th}</span>
+                    <span className="filter-badge">{count}</span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="sidebar-filter-section">
+          <h4 className={`sidebar-filter-title collapsible ${expandedSections.closing ? 'active' : ''}`} onClick={() => toggleSection('closing')}>
+            Systém zavírání
+            <span className="chevron-icon">{expandedSections.closing ? '▲' : '▼'}</span>
+          </h4>
+          {expandedSections.closing && (
+            <div className="sidebar-checkbox-list">
+              {closingTypeList.map(ct => {
+                const count = getClosingTypeCount(ct);
+                const isDisabled = count === 0;
+                return (
+                  <label key={ct} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={selectedClosingTypes.includes(ct)}
+                      onChange={() => {
+                        setSelectedClosingTypes(prev =>
+                          prev.includes(ct) ? prev.filter(c => c !== ct) : [...prev, ct]
+                        );
+                      }}
+                      disabled={isDisabled}
+                      className="sidebar-checkbox"
+                    />
+                    <span>{ct === 'Magnetic' ? 'Magnetické víko 🧲' : 'Nasouvací systém 🔓'}</span>
+                    <span className="filter-badge">{count}</span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </>
+    );
+  };
 
   return (
     <div className="container fade-in" style={{ paddingTop: '20px', paddingBottom: '40px' }}>
@@ -443,13 +1141,13 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       {/* Breadcrumbs Navigation */}
       {(selectedGame !== 'all' || activeSubcategory !== 'all') && (
         <nav className="breadcrumbs-nav" aria-label="Drobečková navigace">
-          <span className="breadcrumb-item" onClick={() => setActivePage('home')}>Domů</span>
+          <span className="breadcrumb-item" onClick={() => setActivePage('home')}>{t('common.home')}</span>
           
           {selectedGame !== 'all' && (
             <>
               <span className="breadcrumb-separator">/</span>
               {activeSubcategory === 'all' ? (
-                <span className="breadcrumb-item active">{selectedGame}</span>
+                <span className="breadcrumb-item active">{selectedGame === 'Accessories' ? 'Příslušenství' : selectedGame === 'Acrylics' ? 'Akryly' : selectedGame}</span>
               ) : (
                 <span 
                   className="breadcrumb-item" 
@@ -459,7 +1157,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                     setFilters(prev => ({ ...prev, type: undefined, subcat: undefined, subsubcat: undefined, gameFilter: undefined })); 
                   }}
                 >
-                  {selectedGame}
+                  {selectedGame === 'Accessories' ? 'Příslušenství' : selectedGame === 'Acrylics' ? 'Akryly' : selectedGame}
                 </span>
               )}
             </>
@@ -470,7 +1168,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
               <span className="breadcrumb-separator">/</span>
               {activeSubsubcategory === 'all' ? (
                 <span className="breadcrumb-item active">
-                  {subcategories.find(s => s.id === activeSubcategory)?.name}
+                  {subcategories.find(s => s.id === activeSubcategory)?.name || activeSubcategory}
                 </span>
               ) : (
                 <span 
@@ -480,7 +1178,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                     setFilters(prev => ({ ...prev, subsubcat: undefined })); 
                   }}
                 >
-                  {subcategories.find(s => s.id === activeSubcategory)?.name}
+                  {subcategories.find(s => s.id === activeSubcategory)?.name || activeSubcategory}
                 </span>
               )}
             </>
@@ -505,7 +1203,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
 
           {/* Mobile Sidebar Close Button */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 className="catalog-sidebar-title">Filtry a akce</h3>
+            <h3 className="catalog-sidebar-title">{lang === 'CZ' ? 'Filtry a akce' : 'Filters & Actions'}</h3>
             <button
               className="mobile-only-close-btn"
               onClick={() => setMobileFiltersOpen(false)}
@@ -522,68 +1220,53 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
             setActivePage={setActivePage}
           />
 
-          {/* Filter: Karetní hra */}
+          {/* Filter: {lang === 'CZ' ? 'Karetní hra' : 'Card Game'} */}
           <div className="sidebar-filter-section">
-            <h4 className="sidebar-filter-title">Karetní hra</h4>
+            <h4 className="sidebar-filter-title">{lang === 'CZ' ? 'Karetní hra' : 'Card Game'}</h4>
             <select
               value={selectedGame}
               onChange={(e) => setSelectedGame(e.target.value)}
               className="sidebar-select"
             >
-              <option value="all">Všechny hry</option>
+              <option value="all">{lang === 'CZ' ? 'Všechny sekce' : 'All sections'}</option>
               <option value="Pokémon">Pokémon TCG</option>
               <option value="Lorcana">Disney Lorcana</option>
               <option value="One Piece">One Piece TCG</option>
               <option value="Riftbound">Riftbound</option>
-              <option value="Accessories">Příslušenství</option>
-              <option value="Acrylics">Akryly</option>
+              <option value="Accessories">{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}</option>
+              <option value="Acrylics">{lang === 'CZ' ? 'Akryly' : 'Acrylic Cases'}</option>
             </select>
           </div>
 
-          {/* Filter: Jazyk */}
-          <div className="sidebar-filter-section">
-            <h4 className="sidebar-filter-title">Jazyk balení</h4>
-            <select
-              value={selectedLang}
-              onChange={(e) => setSelectedLang(e.target.value)}
-              className="sidebar-select"
-            >
-              <option value="all">Všechny jazyky</option>
-              <option value="EN">Angličtina (ENG) 🇬🇧</option>
-              <option value="JP">Japonština (JPN) 🇯🇵</option>
-              <option value="CN">Čínština (CHN) 🇨🇳</option>
-              <option value="KR">Korejština (KOR) 🇰🇷</option>
-            </select>
-          </div>
-
-          {/* Filter: Investiční edice */}
-          <div className="sidebar-filter-section">
-            <label className="sidebar-checkbox-label" style={{ fontWeight: '700' }}>
-              <input
-                type="checkbox"
-                checked={investmentOnly}
-                onChange={(e) => setInvestmentOnly(e.target.checked)}
-                className="sidebar-checkbox"
-              />
-              <span>Pouze investiční edice 💎</span>
-            </label>
-          </div>
+          {/* Render category specific filters */}
+          {selectedGame === 'Accessories' ? (
+            renderAccessoriesFilters()
+          ) : selectedGame === 'Acrylics' ? (
+            renderAcrylicsFilters()
+          ) : (
+            renderTcgFilters()
+          )}
 
           {/* Filter: Price Range slider */}
           <div className="sidebar-filter-section">
-            <h4 className="sidebar-filter-title">Maximální cena</h4>
-            <div className="sidebar-range-box">
-              <input
-                type="range"
-                min="0"
-                max="25000"
-                step="250"
-                value={priceRange}
-                onChange={(e) => setPriceRange(Number(e.target.value))}
-                className="sidebar-range-input"
-              />
-              <span className="sidebar-range-value">{priceRange.toLocaleString()} Kč</span>
-            </div>
+            <h4 className={`sidebar-filter-title collapsible ${expandedSections.price ? 'active' : ''}`} onClick={() => toggleSection('price')}>
+              {lang === 'CZ' ? 'Maximální cena' : 'Max Price'}
+              <span className="chevron-icon">{expandedSections.price ? '▲' : '▼'}</span>
+            </h4>
+            {expandedSections.price && (
+              <div className="sidebar-range-box">
+                <input
+                  type="range"
+                  min="0"
+                  max="25000"
+                  step="250"
+                  value={priceRange}
+                  onChange={(e) => setPriceRange(Number(e.target.value))}
+                  className="sidebar-range-input"
+                />
+                <span className="sidebar-range-value">{priceRange.toLocaleString()} {lang === 'CZ' ? 'Kč' : 'CZK'}</span>
+              </div>
+            )}
           </div>
 
           {/* Clear Filters Button */}
@@ -591,15 +1274,24 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
             className="btn btn-secondary sidebar-reset-btn"
             onClick={() => {
               setSelectedGame('all');
-              setSelectedLang('all');
-              setInvestmentOnly(false);
+              setSelectedLangs([]);
               setPriceRange(25000);
+              setOnlyInStock(false);
+              setOnlyPreorder(false);
+              setSelectedEditions([]);
+              setSelectedBrands([]);
+              setSelectedCompatibilities([]);
+              setSelectedColors([]);
+              setSelectedThicknesses([]);
+              setSelectedClosingTypes([]);
+              setSelectedPackagingTypes([]);
               setActiveSubcategory('all');
+              setActiveSubsubcategory('all');
               setFilters({});
               setMobileFiltersOpen(false);
             }}
           >
-            Smazat filtry
+            {lang === 'CZ' ? 'Smazat filtry' : 'Clear Filters'}
           </button>
         </aside>
 
@@ -609,39 +1301,39 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
           {/* Header Introduction Box */}
           {activeSubcategory === 'all' ? (
             <div className="category-intro-box">
-              <h2 className="category-title">{gameInfo[selectedGame]?.title || 'Katalog'}</h2>
+              <h2 className="category-title">{(lang === 'CZ' ? gameInfo[selectedGame]?.title : gameInfo[selectedGame]?.enTitle) || (lang === 'CZ' ? 'Sealed Katalog' : 'Sealed Products')}</h2>
               <div className="category-description-wrapper">
                 <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`}>
-                  {gameInfo[selectedGame]?.desc || 'Vstupte do světa originálních zapečetěných Pokémon, Disney Lorcana, One Piece, Riftbound produktů, herního příslušenství a prémiových akrylových boxů. Nabízíme široký výběr booster boxů, dárkových Elite Trainer Boxů, Trove boxů, booster bundlů i samostatných balíčků.'}
+                  {(lang === 'CZ' ? gameInfo[selectedGame]?.desc : gameInfo[selectedGame]?.enDesc) || (lang === 'CZ' ? 'Vstupte do světa originálních zapečetěných Pokémon, Disney Lorcana, One Piece, Riftbound produktů, herního příslušenství a prémiových akrylových boxů. Nabízíme široký výběr booster boxů, dárkových Elite Trainer Boxů, Trove boxů, booster bundlů i samostatných balíčků.' : 'Enter the world of original sealed Pokémon, Disney Lorcana, One Piece, Riftbound products, gaming accessories, and premium acrylic cases. We stock booster boxes, gift Elite Trainer Boxes, Trove boxes, bundles, and single booster packs.')}
                 </p>
                 <button
                   className="description-toggle-btn"
                   onClick={() => setIsDescExpanded(!isDescExpanded)}
                 >
-                  {isDescExpanded ? 'Méně informací ▲' : 'Více informací ▼'}
+                  {isDescExpanded ? (lang === 'CZ' ? 'Méně informací ▲' : 'Less info ▲') : (lang === 'CZ' ? 'Více informací ▼' : 'More info ▼')}
                 </button>
               </div>
             </div>
           ) : activeSubsubcategory !== 'all' ? (
             <div className="category-intro-box">
               <h2 className="category-title">
-                {`${selectedGame === 'Pokémon' ? 'Pokémon TCG' : selectedGame} ${subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.subsubcats?.find(s => s.id === activeSubsubcategory)?.name}`}
+                {`${selectedGame === 'Pokémon' ? 'Pokémon TCG' : (selectedGame === 'Accessories' ? (lang === 'CZ' ? 'Příslušenství' : 'Accessories') : selectedGame === 'Acrylics' ? (lang === 'CZ' ? 'Akryly' : 'Acrylic Cases') : selectedGame)} ${translateSubcatName(subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.subsubcats?.find(s => s.id === activeSubsubcategory), lang)}`}
               </h2>
             </div>
           ) : (
             <div className="category-intro-box">
               <h2 className="category-title">
-                {subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.title || `${selectedGame} - ${subcategories.find(s => s.id === activeSubcategory)?.name}`}
+                {getSubSubcatTitle(selectedGame, activeSubcategory, lang) || `${selectedGame === 'Accessories' ? (lang === 'CZ' ? 'Příslušenství' : 'Accessories') : selectedGame === 'Acrylics' ? (lang === 'CZ' ? 'Akryly' : 'Acrylic Cases') : selectedGame} - ${translateSubcatName(subcategories.find(s => s.id === activeSubcategory), lang)}`}
               </h2>
               <div className="category-description-wrapper">
                 <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`}>
-                  {subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.desc || 'Detailní popis subkategorie se připravuje.'}
+                  {getSubSubcatDesc(selectedGame, activeSubcategory, lang) || (lang === 'CZ' ? 'Detailní popis subkategorie se připravuje.' : 'Detailed description is being prepared.')}
                 </p>
                 <button
                   className="description-toggle-btn"
                   onClick={() => setIsDescExpanded(!isDescExpanded)}
                 >
-                  {isDescExpanded ? 'Méně informací ▲' : 'Více informací ▼'}
+                  {isDescExpanded ? (lang === 'CZ' ? 'Méně informací ▲' : 'Less info ▲') : (lang === 'CZ' ? 'Více informací ▼' : 'More info ▼')}
                 </button>
               </div>
             </div>
@@ -652,7 +1344,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
             subcategories.length > 0 && (
               <>
                 <div className="subcategories-section-title">
-                  {selectedGame === 'Accessories' ? 'Vyberte kategorii doplňků' : selectedGame === 'Acrylics' ? 'Kompatibilita akrylového boxu' : 'Vyberte typ balení'}
+                  {selectedGame === 'Accessories' ? (lang === 'CZ' ? 'Vyberte kategorii doplňků' : 'Select Accessory Category') : selectedGame === 'Acrylics' ? (lang === 'CZ' ? 'Kompatibilita akrylového boxu' : 'Acrylic Case Compatibility') : (lang === 'CZ' ? 'Vyberte typ balení' : 'Select Packaging Type')}
                 </div>
                 <div className="subcategory-grid">
                   {subcategories.map(sub => {
@@ -664,6 +1356,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                         onClick={() => {
                           setActiveSubcategory(sub.id);
                           setActiveSubsubcategory('all');
+                          setSelectedPackagingTypes(sub.id === 'all' ? [] : [sub.id]);
                           setFilters(prev => ({ 
                             ...prev, 
                             type: sub.id === 'all' ? undefined : sub.id, 
@@ -676,7 +1369,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                         <span className={`subcategory-icon ${hasImage ? 'clean-img-container' : ''}`}>
                           {sub.icon}
                         </span>
-                        <span className="subcategory-name">{sub.name}</span>
+                        <span className="subcategory-name">{translateSubcatName(sub, lang)}</span>
                       </div>
                     );
                   })}
@@ -687,7 +1380,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
             subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.subsubcats && activeSubsubcategory === 'all' && (
               <>
                 <div className="subcategories-section-title">
-                  Upřesněte typ balení
+                  {lang === 'CZ' ? 'Upřesněte typ balení' : 'Refine Packaging Type'}
                 </div>
                 <div className="subcategory-grid">
                   {subSubcategoriesConfig[selectedGame][activeSubcategory].subsubcats.filter(sub => sub.id !== 'all').map(sub => {
@@ -707,7 +1400,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                         <span className="subcategory-icon" style={{ fontSize: isEmoji ? '24px' : 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           {sub.icon}
                         </span>
-                        <span className="subcategory-name">{sub.name}</span>
+                        <span className="subcategory-name">{translateSubcatName(sub, lang)}</span>
                       </div>
                     );
                   })}
@@ -731,19 +1424,19 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                   className={`sort-tab-btn ${sortBy === 'expensive' ? 'active' : ''}`}
                   onClick={() => setSortBy('expensive')}
                 >
-                  Nejdražší
+                  {lang === 'CZ' ? 'Nejdražší' : 'Price: High to Low'}
                 </button>
                 <button
                   className={`sort-tab-btn ${sortBy === 'cheap' ? 'active' : ''}`}
                   onClick={() => setSortBy('cheap')}
                 >
-                  Nejlevnější
+                  {lang === 'CZ' ? 'Nejlevnější' : 'Price: Low to High'}
                 </button>
                 <button
                   className={`sort-tab-btn ${sortBy === 'new' ? 'active' : ''}`}
                   onClick={() => setSortBy('new')}
                 >
-                  Novinky
+                  {lang === 'CZ' ? 'Novinky' : 'New Releases'}
                 </button>
               </div>
             </div>
@@ -751,7 +1444,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
             <div className="toolbar-right-group">
               {/* Counter */}
               <span className="results-counter">
-                Celkem nalezeno: <strong>{sortedProducts.length}</strong> produktů
+                {lang === 'CZ' ? 'Celkem nalezeno: ' : 'Total found: '}<strong>{sortedProducts.length}</strong> {lang === 'CZ' ? 'produktů' : 'products'}
               </span>
 
               {/* Filters Trigger (Mobile only) */}
@@ -762,7 +1455,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
                 </svg>
-                Filtry
+                {lang === 'CZ' ? 'Filtry' : 'Filters'}
               </button>
             </div>
           </div>
@@ -771,8 +1464,8 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
           {sortedProducts.length === 0 ? (
             <div className="glass-panel" style={{ padding: '48px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', textAlign: 'center' }}>
               <span style={{ fontSize: '48px' }}>📦</span>
-              <h3>Nebyly nalezeny žádné produkty</h3>
-              <p style={{ color: 'var(--text-muted)' }}>Zkuste změnit výběr filtrů nebo subkategorií.</p>
+              <h3>{lang === 'CZ' ? 'Nebyly nalezeny žádné produkty' : 'No products found'}</h3>
+              <p style={{ color: 'var(--text-muted)' }}>{lang === 'CZ' ? 'Zkuste změnit výběr filtrů nebo subkategorií.' : 'Try changing your filter selections or subcategories.'}</p>
             </div>
           ) : (
             <div className="catalog-product-grid">
@@ -789,8 +1482,6 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
           )}
         </main>
       </div>
-
-      {/* Lightbox Modal overlay for subcategory icon zoom */}
     </div>
   );
 }
