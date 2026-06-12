@@ -222,15 +222,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
           ✕
         </button>
 
-        {/* API Config Panel Trigger */}
-        <button 
-          className="login-modal-close" 
-          style={{ right: '62px', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
-          onClick={() => setShowConfig(!showConfig)} 
-          title="Konfigurace API pro sociální sítě"
-        >
-          ⚙️
-        </button>
+
 
         {showConfig ? (
           <div style={{ padding: '32px 40px', textAlign: 'left' }}>

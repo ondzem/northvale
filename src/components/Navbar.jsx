@@ -76,7 +76,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
           {/* 1. TOP BAR (Zákaznická pomoc, Čeština, sociální sítě) */}
           <div style={styles.topBar}>
             <div className="container" style={styles.topBarContent}>
-              <div style={styles.topBarLeft} onClick={() => setActivePage('support')}>
+              <div style={styles.topBarLeft} onClick={() => setActivePage('faq')}>
                 Potřebujete poradit? <strong style={styles.faqLink}>Podívejte se na naše nejčastější dotazy</strong>
               </div>
               <div style={styles.topBarRight}>
@@ -1016,7 +1016,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 </div>
 
                 {/* FAQ Banner */}
-                <div style={styles.faqBanner} onClick={() => { setActivePage('support'); setDrawerOpen(false); }}>
+                <div style={styles.faqBanner} onClick={() => { setActivePage('faq'); setDrawerOpen(false); }}>
                   Potřebujete poradit? <span style={styles.faqBannerLink}>Nejčastější dotazy</span>
                 </div>
               </div>
