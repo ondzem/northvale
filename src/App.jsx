@@ -342,7 +342,7 @@ export default function App() {
         title = 'Komunita a turnaje - Northvaletcg.eu';
         break;
       case 'support':
-        title = 'Centrum podpory - Northvaletcg.eu';
+        title = 'Kontakt - Northvaletcg.eu';
         break;
       case 'about':
         title = 'O nás - Northvaletcg.eu';

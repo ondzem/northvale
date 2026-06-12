@@ -1,9 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FEATURE_FLAGS } from '../config';
 
 export default function SupportFAQ() {
   const [openAccordion, setOpenAccordion] = useState(null);
   const [contactSubmitted, setContactSubmitted] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 850);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 850);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const rawFaqData = [
     {
@@ -11,7 +18,7 @@ export default function SupportFAQ() {
       questions: [
         {
           q: 'Jaké jsou způsoby dopravy a kolik stojí?',
-          a: 'Nabízíme Zásilkovnu (79 Kč na výdejní místo), Českou poštu (Doporučené psaní za 75-85 Kč, Cenné psaní pro drahé karty za 90-110 Kč) a osobní odběr v kavárně Coffee & Cards v Pardubicích zdarma. Při nákupu nad 2000 Kč máte dopravu zcela zdarma.'
+          a: 'Nabízíme Zásilkovnu (79 Kč na výdejní místo), GLS (99 Kč doručení na adresu) a DPD (109 Kč doručení na adresu). Osobní odběr je zdarma na adrese Bratří Čapků 1095, Holice (případně dle domluvy v Pardubicích). Při nákupu nad 2 000 Kč máte dopravu zcela zdarma.'
         },
         {
           q: 'Jak balíte kusové karty (Singles)?',
@@ -19,7 +26,7 @@ export default function SupportFAQ() {
         },
         {
           q: 'Kdy obdržím svou objednávku?',
-          a: 'Zásilky odesíláme do 24 hodin od zaplacení (v pracovní dny). Zásilkovna obvykle doručuje do 24-48 hodin, takže při objednání do středy můžete mít karty bezpečně doma na víkendový turnaj.'
+          a: 'Zásilky odesíláme do 24 hodin od zaplacení (v pracovní dny). Doručení obvykle trvá 24-48 hodin od expedice.'
         }
       ]
     },
@@ -28,7 +35,7 @@ export default function SupportFAQ() {
       questions: [
         {
           q: 'Jak funguje výkup karet?',
-          a: 'Karty naklikáte do výkupního košíku v našem portálu, zvolíte stav a jazyk a odešlete. Následně karty zabalíte a zašlete na naši adresu nebo odevzdáte v Pardubicích. Jakmile karty zkontrolujeme (do 48h od přijetí), vyplatíme Vám peníze přímo na Váš bankovní účet.'
+          a: 'Karty naklikáte do výkupního košíku v našem portálu, zvolíte stav a jazyk a odešlete. Následně karty zabalíte a zašlete na naši adresu nebo odevzdáte osobně. Jakmile karty zkontrolujeme (do 48h od přijetí), vyplatíme Vám peníze přímo na Váš bankovní účet.'
         }
       ]
     },
@@ -37,11 +44,11 @@ export default function SupportFAQ() {
       questions: [
         {
           q: 'Jaké platební metody podporujete?',
-          a: 'Můžete platit platební kartou online přes zabezpečenou platební bránu, nebo klasickým bankovním převodem.'
+          a: 'Můžete platit platební kartou online přes zabezpečenou platební bránu ComGate, nebo klasickým bankovním převodem.'
         },
         {
           q: 'Jak mohu zboží reklamovat?',
-          a: 'Pokud se zásilka poškodila během přepravy (což se díky našemu balení stává výjimečně) nebo neodpovídá deklarovaný stav karty, kontaktujte nás e-mailem. Reklamace vyřizujeme obratem v souladu se zákonem.'
+          a: 'Pokud se zásilka poškodila během přepravy nebo neodpovídá deklarovaný stav karty, kontaktujte nás e-mailem. Reklamace vyřizujeme obratem v souladu se zákonem.'
         }
       ]
     }
@@ -63,90 +70,40 @@ export default function SupportFAQ() {
 
   return (
     <div style={styles.container} className="container fade-in">
-      <h1 className="sr-only">Centrum podpory, FAQ a kontakty - NORTHVALE</h1>
+      <h1 className="sr-only">Kontakt a FAQ - NORTHVALE</h1>
 
-      <div style={styles.layout}>
-        {/* Left Column: FAQ Accordion */}
-        <div style={styles.leftCol}>
-          <h2 style={styles.sectionHeading}>Často kladené dotazy</h2>
-          
-          <div style={styles.faqWrapper}>
-            {faqData.map((cat, catIdx) => (
-              <div key={catIdx} style={styles.catGroup}>
-                <h3 style={styles.catHeading}>{cat.category}</h3>
-                
-                <div style={styles.accordionList}>
-                  {cat.questions.map((item, qIdx) => {
-                    const globalIdx = `${catIdx}-${qIdx}`;
-                    const isOpen = openAccordion === globalIdx;
+      {/* Breadcrumbs */}
+      <nav className="breadcrumbs-nav" aria-label="Drobečková navigace" style={styles.breadcrumbs}>
+        <span className="breadcrumb-item" onClick={() => window.location.href = '/'}>Domů</span>
+        <span className="breadcrumb-separator">/</span>
+        <span className="breadcrumb-item active">Kontakt</span>
+      </nav>
 
-                    return (
-                      <div key={qIdx} style={styles.accordionItem} className="glass-card">
-                        <button 
-                          style={styles.accordionHeader} 
-                          onClick={() => toggleAccordion(globalIdx)}
-                        >
-                          <span style={styles.accordionQuestion}>{item.q}</span>
-                          <span style={{ 
-                            ...styles.accordionArrow,
-                            transform: isOpen ? 'rotate(180deg)' : 'rotate(0)' 
-                          }}>&darr;</span>
-                        </button>
-                        
-                        {isOpen && (
-                          <div style={styles.accordionBody}>
-                            <p style={styles.accordionAnswer}>{item.a}</p>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div style={styles.headerArea}>
+        <span className="testimonials-eyebrow" style={styles.eyebrow}>Spojte se s námi</span>
+        <h1 style={styles.title}>Kontakt</h1>
+        <p style={styles.subtitle}>
+          Máte jakýkoliv dotaz ohledně objednávky, produktů nebo doručení? Neváhejte nám napsat.
+        </p>
+      </div>
 
-        {/* Right Column: Contact Form */}
-        <div style={styles.rightCol} className="glass-panel">
-          <h2 style={styles.sectionHeading}>Napište nám</h2>
-          
-          {/* Direct Support Contacts */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-            padding: '16px',
-            backgroundColor: 'rgba(255, 255, 255, 0.015)',
-            border: '1px solid rgba(255, 255, 255, 0.05)',
-            borderRadius: 'var(--radius-md)',
-            fontSize: '13px',
-            lineHeight: '1.5',
-            color: 'var(--text-muted)'
-          }}>
-            <div>
-              <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '2px' }}>Centrum podpory:</strong>
-              Můžete nás kontaktovat přímo nebo využít formulář níže.
-            </div>
-            <div>
-              <strong>E-mail:</strong> <a href="mailto:info@northvaletcg.eu" style={{ color: 'var(--color-gold)', textDecoration: 'none', fontWeight: 'bold' }}>info@northvaletcg.eu</a>
-            </div>
-            <div>
-              <strong>Telefon:</strong> <a href="tel:+420739666779" style={{ color: 'var(--color-gold)', textDecoration: 'none', fontWeight: 'bold' }}>+420 739 666 779</a>
-            </div>
-            <div style={{ fontSize: '11px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '8px', marginTop: '4px' }}>
-              <strong>Provozovatel:</strong> NORTHVALE s.r.o.<br />
-              <strong>Sídlo:</strong> Bratří Čapků 1095, 534 01 Holice<br />
-              <strong>IČO:</strong> 29618142 | <strong>DIČ:</strong> CZ29618142
-            </div>
-          </div>
+      {/* Main Grid: Contact Form (Left) & Contact Details (Right) */}
+      <div style={{
+        ...styles.grid,
+        gridTemplateColumns: isMobile ? '1fr' : '1.2fr 0.8fr'
+      }}>
+        {/* Contact Form Column */}
+        <div style={styles.formContainer}>
+          <h2 style={styles.sectionTitle}>Napište nám</h2>
           
           {contactSubmitted ? (
             <div style={styles.successForm}>
-              <span style={{ fontSize: '48px' }}>✉️</span>
-              <h3>Zpráva byla úspěšně odeslána!</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
-                Děkujeme za Váš dotaz. Naši specialisté Vám odpoví na zadaný e-mail co nejdříve (obvykle do 2 hodin).
+              <span style={{ fontSize: '48px', color: 'var(--color-gold)' }}>✉️</span>
+              <h3 style={{ fontSize: '18px', fontWeight: '850', color: 'var(--text-main)', margin: '12px 0 8px 0' }}>
+                Zpráva byla úspěšně odeslána!
+              </h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', lineHeight: '1.6', marginBottom: '24px' }}>
+                Děkujeme za Váš dotaz. Naše podpora Vám odpoví na zadaný e-mail co nejdříve (obvykle do 2 hodin).
               </p>
               <button className="btn btn-secondary" onClick={() => setContactSubmitted(false)}>
                 Odeslat novou zprávu
@@ -155,10 +112,7 @@ export default function SupportFAQ() {
           ) : (
             <form style={styles.form} onSubmit={handleContactSubmit}>
               <p style={styles.formDesc}>
-                Máte dotaz k objednávce
-                {FEATURE_FLAGS.showBuylist ? ', výkupu' : ''}
-                {FEATURE_FLAGS.showGrading ? ' nebo gradingu' : ''}
-                ? Napište nám přes formulář níže.
+                Vyplňte prosím níže uvedený formulář a my se Vám ozveme co nejdříve zpět.
               </p>
               
               <div style={styles.formField}>
@@ -172,17 +126,106 @@ export default function SupportFAQ() {
               </div>
 
               <div style={styles.formField}>
+                <label style={styles.formLabel}>Předmět / Číslo objednávky (nepovinné):</label>
+                <input type="text" placeholder="Např. dotaz k objednávce #12345" style={styles.formInput} />
+              </div>
+
+              <div style={styles.formField}>
                 <label style={styles.formLabel}>Vaše zpráva:</label>
                 <textarea required rows="5" placeholder="Sem napište Váš dotaz..." style={styles.formTextarea} />
               </div>
 
               <button className="btn btn-primary" type="submit" style={styles.submitBtn}>
-                Odeslat dotaz
+                Odeslat zprávu
               </button>
             </form>
           )}
         </div>
+
+        {/* Contact Info Column */}
+        <div style={styles.infoContainer}>
+          <h2 style={styles.sectionTitle}>Kontaktní údaje</h2>
+          
+          <div style={styles.infoCard}>
+            <div style={styles.infoRow}>
+              <span style={styles.infoLabel}>E-mailová adresa</span>
+              <a href="mailto:info@northvaletcg.eu" style={styles.infoValueLink}>info@northvaletcg.eu</a>
+            </div>
+            
+            <div style={styles.infoRow}>
+              <span style={styles.infoLabel}>Telefonní číslo</span>
+              <a href="tel:+420739666779" style={styles.infoValueLink}>+420 739 666 779</a>
+            </div>
+
+            <div style={styles.infoRow}>
+              <span style={styles.infoLabel}>Provozovatel</span>
+              <span style={styles.infoValueText}>
+                <strong>NORTHVALE s.r.o.</strong><br />
+                IČO: 29618142 | DIČ: CZ29618142
+              </span>
+            </div>
+
+            <div style={styles.infoRow}>
+              <span style={styles.infoLabel}>Sídlo společnosti (Fakturační adresa)</span>
+              <span style={styles.infoValueText}>
+                Bratří Čapků 1095<br />
+                534 01 Holice
+              </span>
+            </div>
+
+            <div style={styles.infoRow} style={{ borderBottom: 'none', paddingBottom: 0 }}>
+              <span style={styles.infoLabel}>Adresa pro osobní odběr</span>
+              <span style={styles.infoValueText}>
+                Sladkovského 512, Pardubice (případně dle domluvy v Holicích)
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Bottom FAQ Section */}
+      <section id="faq-section" style={styles.faqSection}>
+        <div style={styles.faqHeader}>
+          <span className="testimonials-eyebrow" style={styles.eyebrow}>Často kladené otázky</span>
+          <h2 style={styles.faqTitle}>F.A.Q.</h2>
+        </div>
+
+        <div style={styles.faqGrid}>
+          {faqData.map((cat, catIdx) => (
+            <div key={catIdx} style={styles.catGroup}>
+              <h3 style={styles.catHeading}>{cat.category}</h3>
+              
+              <div style={styles.accordionList}>
+                {cat.questions.map((item, qIdx) => {
+                  const globalIdx = `${catIdx}-${qIdx}`;
+                  const isOpen = openAccordion === globalIdx;
+
+                  return (
+                    <div key={qIdx} style={styles.accordionItem} className="glass-card">
+                      <button 
+                        style={styles.accordionHeader} 
+                        onClick={() => toggleAccordion(globalIdx)}
+                      >
+                        <span style={styles.accordionQuestion}>{item.q}</span>
+                        <span style={{ 
+                          ...styles.accordionArrow,
+                          transform: isOpen ? 'rotate(180deg)' : 'rotate(0)' 
+                        }}>&darr;</span>
+                      </button>
+                      
+                      {isOpen && (
+                        <div style={styles.accordionBody}>
+                          <p style={styles.accordionAnswer}>{item.a}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
@@ -190,64 +233,220 @@ export default function SupportFAQ() {
 const styles = {
   container: {
     paddingTop: '20px',
-    paddingBottom: '20px',
+    paddingBottom: '80px',
   },
-  layout: {
-    display: 'flex',
-    gap: '32px',
-    flexWrap: 'wrap',
-  },
-  leftCol: {
-    flex: '1.5 1 450px',
+  breadcrumbs: {
+    marginBottom: '24px',
     textAlign: 'left',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px',
   },
-  sectionHeading: {
+  headerArea: {
+    textAlign: 'center',
+    marginBottom: '40px',
+    maxWidth: '800px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+  },
+  eyebrow: {
+    display: 'inline-block',
+    fontSize: '11px',
+    fontWeight: '700',
+    letterSpacing: '0.15em',
+    textTransform: 'uppercase',
+    color: 'var(--color-gold)',
+    marginBottom: '12px',
+  },
+  title: {
+    fontSize: '44px',
+    fontWeight: '800',
+    color: 'var(--text-main)',
+    margin: '0 0 16px 0',
+    fontFamily: 'var(--font-heading)',
+    letterSpacing: '-1px',
+  },
+  subtitle: {
+    fontSize: '16px',
+    lineHeight: '1.6',
+    color: 'var(--text-muted)',
+    margin: 0,
+  },
+  grid: {
+    display: 'grid',
+    gap: '32px',
+    alignItems: 'start',
+  },
+  formContainer: {
+    boxSizing: 'border-box',
+    backgroundColor: 'var(--bg-secondary)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-lg)',
+    padding: '40px',
+    textAlign: 'left',
+  },
+  infoContainer: {
+    boxSizing: 'border-box',
+    backgroundColor: 'var(--bg-secondary)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-lg)',
+    padding: '40px',
+    textAlign: 'left',
+  },
+  sectionTitle: {
     fontSize: '22px',
     fontWeight: '800',
-    margin: 0,
+    color: 'var(--text-main)',
     fontFamily: 'var(--font-heading)',
+    marginTop: 0,
+    marginBottom: '24px',
+    borderBottom: '1px solid rgba(255,255,255,0.06)',
+    paddingBottom: '12px',
   },
-  faqWrapper: {
+  form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '24px',
+    gap: '20px',
+  },
+  formDesc: {
+    fontSize: '14px',
+    color: 'var(--text-muted)',
+    lineHeight: '1.5',
+    margin: '0 0 8px 0',
+  },
+  formField: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  formLabel: {
+    fontSize: '13px',
+    fontWeight: '700',
+    color: 'var(--text-main)',
+  },
+  formInput: {
+    backgroundColor: 'var(--bg-page)',
+    border: '1px solid var(--border)',
+    padding: '12px 16px',
+    borderRadius: 'var(--radius-md)',
+    fontSize: '14px',
+    color: 'var(--text-main)',
+    outline: 'none',
+    transition: 'border-color 0.2s',
+  },
+  formTextarea: {
+    backgroundColor: 'var(--bg-page)',
+    border: '1px solid var(--border)',
+    padding: '12px 16px',
+    borderRadius: 'var(--radius-md)',
+    fontSize: '14px',
+    color: 'var(--text-main)',
+    outline: 'none',
+    resize: 'vertical',
+    transition: 'border-color 0.2s',
+  },
+  submitBtn: {
+    width: '100%',
+    padding: '14px',
+    fontSize: '14px',
+    fontWeight: '700',
+    marginTop: '10px',
+  },
+  successForm: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+    padding: '30px 0',
+  },
+  infoCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
+  },
+  infoRow: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+    paddingBottom: '16px',
+  },
+  infoLabel: {
+    fontSize: '11px',
+    fontWeight: '750',
+    textTransform: 'uppercase',
+    color: 'var(--text-muted)',
+    letterSpacing: '0.5px',
+  },
+  infoValueLink: {
+    fontSize: '15px',
+    fontWeight: '700',
+    color: 'var(--color-gold)',
+    textDecoration: 'none',
+    wordBreak: 'break-all',
+  },
+  infoValueText: {
+    fontSize: '14px',
+    lineHeight: '1.6',
+    color: 'var(--text-main)',
+  },
+  faqSection: {
+    marginTop: '64px',
+    textAlign: 'left',
+  },
+  faqHeader: {
+    textAlign: 'center',
+    marginBottom: '32px',
+  },
+  faqTitle: {
+    fontSize: '32px',
+    fontWeight: '800',
+    color: 'var(--text-main)',
+    margin: '0 0 16px 0',
+    fontFamily: 'var(--font-heading)',
+    letterSpacing: '-0.5px',
+  },
+  faqGrid: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '32px',
+    maxWidth: '900px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
   },
   catGroup: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
+    gap: '16px',
   },
   catHeading: {
     fontSize: '15px',
-    fontWeight: '700',
+    fontWeight: '800',
     color: 'var(--color-gold)',
     margin: 0,
     textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+    letterSpacing: '0.8px',
   },
   accordionList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
+    gap: '12px',
   },
   accordionItem: {
     overflow: 'hidden',
   },
   accordionHeader: {
     width: '100%',
-    padding: '16px 20px',
+    padding: '18px 24px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     textAlign: 'left',
     gap: '16px',
-    backgroundColor: 'rgba(255,255,255,0.01)',
+    backgroundColor: 'rgba(255,255,255,0.005)',
+    border: 'none',
+    cursor: 'pointer',
   },
   accordionQuestion: {
-    fontSize: '14px',
+    fontSize: '14.5px',
     fontWeight: '700',
     color: 'var(--text-main)',
   },
@@ -258,76 +457,14 @@ const styles = {
     transition: 'transform 0.2s',
   },
   accordionBody: {
-    padding: '0 20px 20px',
+    padding: '0 24px 20px',
     borderTop: '1px solid rgba(255,255,255,0.03)',
     backgroundColor: 'rgba(9,9,11,0.2)',
   },
   accordionAnswer: {
-    fontSize: '13px',
+    fontSize: '13.5px',
     color: 'var(--text-muted)',
-    lineHeight: '1.6',
+    lineHeight: '1.65',
     margin: '12px 0 0',
   },
-  rightCol: {
-    flex: '1 1 320px',
-    padding: '30px',
-    textAlign: 'left',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-    alignSelf: 'flex-start',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  formDesc: {
-    fontSize: '13px',
-    color: 'var(--text-muted)',
-    lineHeight: '1.5',
-    margin: 0,
-  },
-  formField: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-  },
-  formLabel: {
-    fontSize: '12px',
-    fontWeight: '700',
-  },
-  formInput: {
-    backgroundColor: 'var(--bg-page)',
-    border: '1px solid var(--border-light)',
-    padding: '10px 14px',
-    borderRadius: 'var(--radius-sm)',
-    fontSize: '13px',
-    color: 'var(--text-main)',
-    outline: 'none',
-  },
-  formTextarea: {
-    backgroundColor: 'var(--bg-page)',
-    border: '1px solid var(--border-light)',
-    padding: '10px 14px',
-    borderRadius: 'var(--radius-sm)',
-    fontSize: '13px',
-    color: 'var(--text-main)',
-    outline: 'none',
-    resize: 'vertical',
-  },
-  submitBtn: {
-    width: '100%',
-    padding: '12px',
-    marginTop: '6px',
-  },
-  successForm: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '16px',
-    textAlign: 'center',
-    padding: '20px 0',
-  }
 };
