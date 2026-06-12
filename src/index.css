@@ -1668,6 +1668,15 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   padding-bottom: 60px;
 }
 
+@media (min-width: 1025px) {
+  .footer-grid.has-three-cols .footer-col-purchase {
+    grid-column: 3;
+  }
+  .footer-grid.has-three-cols .footer-col-contacts {
+    grid-column: 4;
+  }
+}
+
 .footer-column {
   display: flex;
   flex-direction: column;

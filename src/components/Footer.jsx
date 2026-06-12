@@ -2,11 +2,14 @@
 import { FEATURE_FLAGS } from '../config';
 
 export default function Footer({ setActivePage }) {
+  const hasMiddleColumn = FEATURE_FLAGS.showBuylist || FEATURE_FLAGS.showGrading;
+  const gridClassName = `container footer-grid ${hasMiddleColumn ? 'has-four-cols' : 'has-three-cols'}`;
+
   return (
     <footer className="main-footer">
-      <div className="container footer-grid">
+      <div className={gridClassName}>
         {/* Column 1: About */}
-        <div className="footer-column">
+        <div className="footer-column footer-col-about">
           <img 
             src="/logo s popisem.webp" 
             alt="NORTHVALE TCG" 
@@ -30,7 +33,7 @@ export default function Footer({ setActivePage }) {
         </div>
 
         {/* Column 2: Purchasing Info */}
-        <div className="footer-column">
+        <div className="footer-column footer-col-purchase">
           <h4 className="footer-heading">Vše o nákupu</h4>
           <ul className="footer-list">
             <li className="footer-link" onClick={() => setActivePage('support')}>Centrum podpory</li>
@@ -43,8 +46,8 @@ export default function Footer({ setActivePage }) {
         </div>
 
         {/* Column 3: Customer Services */}
-        {(FEATURE_FLAGS.showBuylist || FEATURE_FLAGS.showGrading) && (
-          <div className="footer-column">
+        {hasMiddleColumn && (
+          <div className="footer-column footer-col-services">
             <h4 className="footer-heading">Pro zákazníky</h4>
             <ul className="footer-list">
               {FEATURE_FLAGS.showBuylist && (
@@ -61,7 +64,7 @@ export default function Footer({ setActivePage }) {
         )}
 
         {/* Column 4: Contacts */}
-        <div className="footer-column">
+        <div className="footer-column footer-col-contacts">
           <h4 className="footer-heading">Kontakty</h4>
           
           <div className="footer-contact-row">
