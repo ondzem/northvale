@@ -61,18 +61,18 @@ export default function FaqPage({ setActivePage }) {
 
   return (
     <div style={styles.container} className="container fade-in">
-      <h1 className="sr-only">FAQ - Často kladené dotazy - NORTHVALE</h1>
+      <h1 className="sr-only">Nejčastější dotazy (FAQ) - NORTHVALE</h1>
 
       {/* Breadcrumbs */}
       <nav className="breadcrumbs-nav" aria-label="Drobečková navigace" style={styles.breadcrumbs}>
         <span className="breadcrumb-item" onClick={() => setActivePage('home')}>Domů</span>
         <span className="breadcrumb-separator">/</span>
-        <span className="breadcrumb-item active">FAQ</span>
+        <span className="breadcrumb-item active">Nejčastější dotazy (FAQ)</span>
       </nav>
 
       <div style={styles.headerArea}>
         <span className="testimonials-eyebrow" style={styles.eyebrow}>Často kladené otázky</span>
-        <h1 style={styles.title}>FAQ</h1>
+        <h1 style={styles.title}>Nejčastější dotazy (FAQ)</h1>
         <p style={styles.subtitle}>
           Rychlé odpovědi na nejčastější dotazy ohledně nákupu, dopravy, plateb a dalších služeb.
         </p>

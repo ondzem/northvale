@@ -942,7 +942,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                         className="drawer-link-item"
                         onClick={() => { setActivePage('faq'); setDrawerOpen(false); }}
                       >
-                        FAQ
+                        Nejčastější dotazy (FAQ)
                       </li>
                       <li 
                         style={styles.drawerLinkItem} 

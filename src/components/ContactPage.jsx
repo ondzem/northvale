@@ -181,7 +181,7 @@ export default function ContactPage({ setActivePage }) {
       <section id="faq-section" style={styles.faqSection}>
         <div style={styles.faqHeader}>
           <span className="testimonials-eyebrow" style={styles.eyebrow}>Často kladené otázky</span>
-          <h2 style={styles.faqTitle}>FAQ</h2>
+          <h2 style={styles.faqTitle}>Nejčastější dotazy (FAQ)</h2>
         </div>
 
         <div style={styles.faqList}>

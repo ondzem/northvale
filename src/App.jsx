@@ -350,7 +350,7 @@ export default function App() {
         title = 'Kontakt - Northvaletcg.eu';
         break;
       case 'faq':
-        title = 'FAQ - Northvaletcg.eu';
+        title = 'Nejčastější dotazy (FAQ) - Northvaletcg.eu';
         break;
       case 'about':
         title = 'O nás - Northvaletcg.eu';
