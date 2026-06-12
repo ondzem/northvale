@@ -22,77 +22,44 @@ export default function AboutPage({ setActivePage }) {
         </p>
       </div>
 
-      <div style={styles.grid}>
-        {/* Left column: Story */}
-        <div style={styles.storyCol} className="glass-panel">
-          <h2 style={styles.sectionHeading}>Náš příběh</h2>
-          <p style={styles.paragraph}>
-            Myšlenka založit **Northvale** se zrodila po letech aktivního sbírání a hraní sběratelských karetních her, zejména Pokémonů, Disney Lorcana a One Piece. Jako sběratelé a hráči jsme se neustále potýkali s obtížnou dostupností nových edic a neúměrně vysokými cenami na našem trhu. Rozhodli jsme se proto proměnit náš koníček v poslání.
-          </p>
-          <p style={styles.paragraph}>
-            Naším cílem bylo vytvořit místo, kde sběratelé i investoři najdou vše potřebné pod jednou střechou, s garancí 100% pravosti a za férové ceny. Zakládáme si na tom, aby každá karta, kterou u nás zakoupíte, byla skladována a doručena s tou nejvyšší péčí.
-          </p>
+      {/* Centered Main Story Container */}
+      <div style={styles.mainCard}>
+        <h2 style={styles.sectionHeading}>Náš příběh</h2>
+        <p style={styles.paragraph}>
+          Myšlenka založit **Northvale** se zrodila po letech aktivního sbírání a hraní sběratelských karetních her, zejména Pokémonů, Disney Lorcana a One Piece. Jako sběratelé a hráči jsme se neustále potýkali s obtížnou dostupností nových edic a neúměrně vysokými cenami na našem trhu. Rozhodli jsme se proto proměnit náš koníček v poslání.
+        </p>
+        <p style={styles.paragraph}>
+          Naším cílem bylo vytvořit místo, kde sběratelé i investoři najdou vše potřebné pod jednou střechou, s garancí 100% pravosti a za férové ceny. Zakládáme si na tom, aby každá karta, kterou u nás zakoupíte, byla skladována a doručena s tou nejvyšší péčí.
+        </p>
 
-          <h3 style={styles.subHeading}>Naše hodnoty</h3>
-          <div style={styles.valuesList}>
-            <div style={styles.valueItem}>
-              <span style={styles.valueIcon}>🏆</span>
-              <div>
-                <strong style={styles.valueTitle}>100% Garance pravosti</strong>
-                <span style={styles.valueText}>Všechny produkty nakupujeme výhradně z oficiální distribuce. Padělky u nás nemají šanci.</span>
-              </div>
-            </div>
-            <div style={styles.valueItem}>
-              <span style={styles.valueIcon}>📦</span>
-              <div>
-                <strong style={styles.valueTitle}>Sběratelské balení</strong>
-                <span style={styles.valueText}>Sami víme, jak bolí poškozené rohy booster boxů nebo poškrábané karty. Zásilky balíme do pevných krabic a tlustých vrstev bublinkové fólie.</span>
-              </div>
-            </div>
-            <div style={styles.valueItem}>
-              <span style={styles.valueIcon}>💬</span>
-              <div>
-                <strong style={styles.valueTitle}>Osobní přístup</strong>
-                <span style={styles.valueText}>Nejsme jen bezejmenný e-shop. Jsme součástí komunity. Rádi poradíme s výběrem nebo se potkáme na turnaji.</span>
-              </div>
-            </div>
+        <h3 style={styles.subHeading}>Naše hodnoty</h3>
+        <div style={styles.valuesList}>
+          <div style={styles.valueItem}>
+            <strong style={styles.valueTitle}>100% Garance pravosti</strong>
+            <span style={styles.valueText}>Všechny produkty nakupujeme výhradně z oficiální distribuce. Padělky u nás nemají šanci.</span>
+          </div>
+          
+          <div style={styles.valueItem}>
+            <strong style={styles.valueTitle}>Sběratelské balení</strong>
+            <span style={styles.valueText}>Sami víme, jak bolí poškozené rohy booster boxů nebo poškrábané karty. Zásilky balíme do pevných krabic a tlustých vrstev bublinkové fólie.</span>
+          </div>
+          
+          <div style={styles.valueItem}>
+            <strong style={styles.valueTitle}>Osobní přístup</strong>
+            <span style={styles.valueText}>Nejsme jen bezejmenný e-shop. Jsme součástí komunity. Rádi poradíme s výběrem nebo se potkáme na turnaji.</span>
           </div>
         </div>
 
-        {/* Right column: Info card */}
-        <div style={styles.infoCol} className="glass-panel">
-          <h2 style={styles.sectionHeading}>Fakta o Northvale</h2>
-          
-          <div style={styles.factCard} className="glass-card">
-            <div style={styles.factRow}>
-              <span style={styles.factLabel}>Provozovatel</span>
-              <span style={styles.factValue}>NORTHVALE s.r.o.</span>
-            </div>
-            <div style={styles.factRow}>
-              <span style={styles.factLabel}>Sídlo společnosti</span>
-              <span style={styles.factValue}>Bratří Čapků 1095, Holice 534 01</span>
-            </div>
-            <div style={styles.factRow}>
-              <span style={styles.factLabel}>Identifikační číslo (IČO)</span>
-              <span style={styles.factValue}>29618142</span>
-            </div>
-            <div style={styles.factRow}>
-              <span style={styles.factLabel}>E-mail</span>
-              <span style={styles.factValue}>info@northvaletcg.eu</span>
-            </div>
-            <div style={styles.factRow}>
-              <span style={styles.factLabel}>Telefon</span>
-              <span style={styles.factValue}>+420 739 666 779</span>
-            </div>
-          </div>
+        {/* Motto / Quote */}
+        <div style={styles.quoteCard}>
+          <p style={styles.quoteText}>
+            „Chceme, aby nákup karet nebyl jen transakce, ale radost. Od chvíle, kdy kliknete na objednat, až po chvíli, kdy s nadšením rozbalujete balíček.“
+          </p>
+          <span style={styles.quoteAuthor}>— Tým Northvale</span>
+        </div>
 
-          <div style={styles.quoteCard}>
-            <p style={styles.quoteText}>
-              „Chceme, aby nákup karet nebyl jen transakce, ale radost. Od chvíle, kdy kliknete na objednat, až po chvíli, kdy s nadšením rozbalujete balíček.“
-            </p>
-            <span style={styles.quoteAuthor}>— Tým Northvale</span>
-          </div>
-
+        {/* Action Button */}
+        <div style={styles.actionArea}>
           <button 
             className="btn btn-primary" 
             style={styles.actionBtn}
@@ -116,7 +83,7 @@ const styles = {
   },
   headerArea: {
     textAlign: 'center',
-    marginBottom: '48px',
+    marginBottom: '40px',
     maxWidth: '800px',
     marginLeft: 'auto',
     marginRight: 'auto',
@@ -144,15 +111,16 @@ const styles = {
     color: 'var(--text-muted)',
     margin: 0,
   },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: '1.8fr 1.2fr',
-    gap: '32px',
-    alignItems: 'start',
-  },
-  storyCol: {
-    padding: '32px',
+  mainCard: {
+    maxWidth: '800px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    padding: '40px',
+    boxSizing: 'border-box',
+    backgroundColor: 'var(--bg-secondary)',
+    border: '1px solid var(--border)',
     borderRadius: 'var(--radius-lg)',
+    textAlign: 'left',
   },
   sectionHeading: {
     fontSize: '22px',
@@ -169,8 +137,8 @@ const styles = {
     fontWeight: '700',
     color: 'var(--text-main)',
     fontFamily: 'var(--font-heading)',
-    marginTop: '32px',
-    marginBottom: '20px',
+    marginTop: '36px',
+    marginBottom: '24px',
   },
   paragraph: {
     fontSize: '15px',
@@ -181,88 +149,57 @@ const styles = {
   valuesList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '24px',
+    gap: '20px',
     marginTop: '20px',
+    marginBottom: '36px',
   },
   valueItem: {
     display: 'flex',
-    gap: '16px',
-    alignItems: 'flex-start',
-  },
-  valueIcon: {
-    fontSize: '24px',
-    lineHeight: 1,
-    padding: '8px',
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    border: '1px solid rgba(255,255,255,0.06)',
-    borderRadius: 'var(--radius-md)',
+    flexDirection: 'column',
+    gap: '6px',
+    borderLeft: '2px solid var(--color-gold)',
+    paddingLeft: '16px',
   },
   valueTitle: {
-    display: 'block',
-    fontSize: '14px',
+    fontSize: '15px',
     fontWeight: '700',
     color: 'var(--text-main)',
-    marginBottom: '4px',
   },
   valueText: {
-    fontSize: '13px',
+    fontSize: '13.5px',
     lineHeight: '1.5',
     color: 'var(--text-muted)',
   },
-  infoCol: {
-    padding: '32px',
-    borderRadius: 'var(--radius-lg)',
-  },
-  factCard: {
-    padding: '20px',
-    borderRadius: 'var(--radius-md)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  factRow: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-    paddingBottom: '12px',
-  },
-  factLabel: {
-    fontSize: '10px',
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    color: 'var(--text-muted)',
-    letterSpacing: '0.5px',
-  },
-  factValue: {
-    fontSize: '13px',
-    fontWeight: '600',
-    color: 'var(--text-main)',
-  },
   quoteCard: {
-    marginTop: '24px',
-    padding: '20px',
+    marginTop: '36px',
+    padding: '24px',
     borderLeft: '2px solid var(--color-gold)',
-    backgroundColor: 'rgba(253, 189, 22, 0.02)',
+    backgroundColor: 'rgba(253, 189, 22, 0.015)',
     borderRadius: '0 var(--radius-md) var(--radius-md) 0',
+    borderTop: '1px solid rgba(255, 255, 255, 0.02)',
+    borderRight: '1px solid rgba(255, 255, 255, 0.02)',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.02)',
   },
   quoteText: {
-    fontSize: '13px',
+    fontSize: '14px',
     lineHeight: '1.6',
     fontStyle: 'italic',
     color: 'var(--text-muted)',
-    margin: '0 0 8px 0',
+    margin: '0 0 12px 0',
   },
   quoteAuthor: {
-    fontSize: '12px',
+    fontSize: '12.5px',
     fontWeight: '600',
     color: 'var(--text-main)',
   },
+  actionArea: {
+    marginTop: '40px',
+    display: 'flex',
+    justifyContent: 'center',
+  },
   actionBtn: {
-    marginTop: '28px',
-    width: '100%',
+    padding: '14px 36px',
+    fontSize: '14px',
+    fontWeight: '700',
   },
 };
-
-// CSS media overrides for responsive design are handled via App.css if needed,
-// but we also align our elements structurally.
