@@ -772,7 +772,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
           >
             <div style={{
               ...styles.drawerHeader,
-              borderBottom: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.08)',
+              borderBottom: 'none',
               paddingBottom: isMobile ? '0' : '16px',
               marginBottom: isMobile ? '72px' : '20px',
             }}>
