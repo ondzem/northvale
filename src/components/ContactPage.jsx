@@ -373,7 +373,7 @@ const styles = {
   infoValueLink: {
     fontSize: '15px',
     fontWeight: '700',
-    color: 'var(--color-gold)',
+    color: 'var(--text-main)',
     textDecoration: 'none',
     wordBreak: 'break-all',
   },
