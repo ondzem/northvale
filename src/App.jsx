@@ -16,6 +16,7 @@ import CheckoutFlow from './components/CheckoutFlow';
 import UserPortal from './components/UserPortal';
 import AdminPanel from './components/AdminPanel';
 import GdprVop from './components/GdprVop';
+import AboutPage from './components/AboutPage';
 import Cart from './components/Cart';
 import Favorites from './components/Favorites';
 import LoginModal from './components/LoginModal';
@@ -67,6 +68,8 @@ const parseUrlToState = () => {
     page = 'community';
   } else if (path === '/support') {
     page = 'support';
+  } else if (path === '/about') {
+    page = 'about';
   } else if (path === '/checkout') {
     page = 'checkout';
   } else if (path === '/profile') {
@@ -121,6 +124,8 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
     path = '/community';
   } else if (page === 'support') {
     path = '/support';
+  } else if (page === 'about') {
+    path = '/about';
   } else if (page === 'checkout') {
     path = '/checkout';
   } else if (page === 'profile') {
@@ -338,6 +343,9 @@ export default function App() {
         break;
       case 'support':
         title = 'Centrum podpory - Northvaletcg.eu';
+        break;
+      case 'about':
+        title = 'O nás - Northvaletcg.eu';
         break;
       case 'admin':
         title = 'Administrace - Northvaletcg.eu';
@@ -600,6 +608,10 @@ export default function App() {
 
         {activePage === 'support' && (
           <SupportFAQ />
+        )}
+
+        {activePage === 'about' && (
+          <AboutPage setActivePage={setActivePage} />
         )}
 
         {activePage === 'checkout' && (

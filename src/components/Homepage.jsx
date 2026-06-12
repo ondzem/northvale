@@ -830,6 +830,13 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             }}>
               Zakládáme si především na kvalitě a dostupnosti zboží.
             </p>
+            <button 
+              className="btn btn-secondary" 
+              style={{ marginTop: '8px', alignSelf: 'flex-start' }}
+              onClick={() => setActivePage('about')}
+            >
+              Přečíst více
+            </button>
           </div>
 
           {/* Right Side: Image with premium design effects */}

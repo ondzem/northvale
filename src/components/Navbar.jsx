@@ -826,6 +826,13 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     </div>
                   </div>
 
+                  {/* O nás mobile link */}
+                  <div style={styles.mobileNavSection}>
+                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { setActivePage('about'); setDrawerOpen(false); }}>
+                      <span>O nás</span>
+                    </div>
+                  </div>
+
                   {/* 7. Slabs */}
                   {FEATURE_FLAGS.showSlabs && (
                     <div style={styles.mobileNavSection}>
@@ -888,6 +895,20 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
               {/* Desktop Drawer Content (Only shown on desktop) */}
               {!isMobile && (
                 <>
+                  <div style={styles.drawerSection}>
+                    <h4 style={styles.drawerSectionTitle}>O nás</h4>
+                    <p style={styles.drawerText}>
+                      Jsme tým nadšených sběratelů, kteří se rozhodli přinést bezpečný a férový nákup sběratelských karet všem nadšencům a investorům.
+                    </p>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => { setActivePage('about'); setDrawerOpen(false); }}
+                      style={{ width: '100%', marginTop: '8px' }}
+                    >
+                      Více o nás
+                    </button>
+                  </div>
+
                   {FEATURE_FLAGS.showBuylist && (
                     <div style={styles.drawerSection}>
                       <h4 style={styles.drawerSectionTitle}>Výkup karet (Buylist)</h4>
@@ -904,47 +925,15 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     </div>
                   )}
 
-                  <div style={styles.drawerSection}>
-                    <h4 style={styles.drawerSectionTitle}>Osobní odběr Coffee &amp; Cards</h4>
-                    <p style={styles.drawerText}>
-                      Vyzvedněte si Své objednávky zdarma v Pardubicích. Ke každé objednávce získáte 10% slevu na kávu.
-                    </p>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => { setActivePage('community'); setDrawerOpen(false); }}
-                      style={{ width: '100%', marginTop: '8px' }}
-                    >
-                      Zobrazit mapu a turnaje
-                    </button>
-                  </div>
-
-                  <div style={styles.drawerSection}>
-                    <h4 style={styles.drawerSectionTitle}>Kontakty a otevírací doba</h4>
+                  <div style={{ ...styles.drawerSection, borderBottom: 'none', marginTop: 'auto', paddingBottom: '0' }}>
+                    <h4 style={styles.drawerSectionTitle}>Kontakty</h4>
                     <p style={styles.drawerText}>
                       <strong>Provozovatel:</strong> NORTHVALE s.r.o.<br />
                       <strong>Sídlo:</strong> Bratří Čapků 1095, Holice<br />
                       <strong>Odběr:</strong> Sladkovského 512, Pardubice<br />
                       <strong>E-mail:</strong> info@northvaletcg.eu<br />
-                      <strong>Telefon:</strong> +420 739 666 779<br />
-                      <strong>Otevřeno:</strong> Denně 9:00 - 20:00
+                      <strong>Telefon:</strong> +420 739 666 779
                     </p>
-                  </div>
-
-                  <div style={styles.drawerSection}>
-                    <h4 style={styles.drawerSectionTitle}>Studentská sleva 5 %</h4>
-                    <p style={styles.drawerText}>
-                      Pro studenty UPCE s platnou kartou ISIC nabízíme slevu na celý sortiment kusovek a doplňků. Zadejte Své číslo ISIC v pokladně.
-                    </p>
-                  </div>
-
-                  <div style={{ ...styles.drawerSection, borderBottom: 'none', marginTop: 'auto' }}>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => { setActivePage('admin'); setDrawerOpen(false); }}
-                      style={{ width: '100%', opacity: 0.6, fontSize: '12px' }}
-                    >
-                      Vstup do Administrace
-                    </button>
                   </div>
                 </>
               )}
