@@ -17,9 +17,6 @@ export default function AboutPage({ setActivePage }) {
       <div style={styles.headerArea}>
         <span className="testimonials-eyebrow" style={styles.eyebrow}>Příběh Northvale</span>
         <h1 style={styles.title}>O nás</h1>
-        <p style={styles.subtitle}>
-          Od sběratelské vášně až k budování spolehlivého partnerství pro TCG komunitu v České republice.
-        </p>
       </div>
 
       {/* Centered Main Story Container */}
@@ -38,15 +35,15 @@ export default function AboutPage({ setActivePage }) {
             <strong style={styles.valueTitle}>100% Garance pravosti</strong>
             <span style={styles.valueText}>Všechny produkty nakupujeme výhradně z oficiální distribuce. Padělky u nás nemají šanci.</span>
           </div>
-          
+
           <div style={styles.valueItem}>
             <strong style={styles.valueTitle}>Sběratelské balení</strong>
             <span style={styles.valueText}>Sami víme, jak bolí poškozené rohy booster boxů nebo poškrábané karty. Zásilky balíme do pevných krabic a tlustých vrstev bublinkové fólie.</span>
           </div>
-          
+
           <div style={styles.valueItem}>
             <strong style={styles.valueTitle}>Osobní přístup</strong>
-            <span style={styles.valueText}>Nejsme jen bezejmenný e-shop. Jsme součástí komunity. Rádi poradíme s výběrem nebo se potkáme na turnaji.</span>
+            <span style={styles.valueText}>Nejsme jen bezejmenný e-shop. Jsme součástí komunity. Rádi poradíme s výběrem.</span>
           </div>
         </div>
 
@@ -60,10 +57,18 @@ export default function AboutPage({ setActivePage }) {
 
         {/* Action Button */}
         <div style={styles.actionArea}>
-          <button 
-            className="btn btn-primary" 
+          <button
+            className="btn btn-primary"
             style={styles.actionBtn}
-            onClick={() => setActivePage('sealed-catalog')}
+            onClick={() => {
+              setActivePage('home');
+              setTimeout(() => {
+                const element = document.getElementById('popular-categories');
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }, 100);
+            }}
           >
             Prohlédnout produkty &rarr;
           </button>

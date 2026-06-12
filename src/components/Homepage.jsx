@@ -881,7 +881,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       </div>
 
         {/* Category Tiles */}
-        <section className="category-section container">
+        <section id="popular-categories" className="category-section container">
         <h2 style={styles.sectionHeading} className="section-title">Oblíbené kategorie</h2>
         <div className="category-tiles-grid">
           <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Pokémon' }); setActivePage('sealed-catalog'); }}>
