@@ -940,16 +940,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       <li 
                         style={styles.drawerLinkItem} 
                         className="drawer-link-item"
-                        onClick={() => {
-                          setActivePage('support');
-                          setDrawerOpen(false);
-                          setTimeout(() => {
-                            const element = document.getElementById('faq-section');
-                            if (element) {
-                              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }
-                          }, 100);
-                        }}
+                        onClick={() => { setActivePage('faq'); setDrawerOpen(false); }}
                       >
                         FAQ
                       </li>

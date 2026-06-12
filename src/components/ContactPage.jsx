@@ -1,67 +1,16 @@
 import { useState, useEffect } from 'react';
 import { FEATURE_FLAGS } from '../config';
 
-export default function SupportFAQ() {
-  const [openAccordion, setOpenAccordion] = useState(null);
+export default function ContactPage({ setActivePage }) {
   const [contactSubmitted, setContactSubmitted] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 850);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const handleResize = () => setIsMobile(window.innerWidth <= 850);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  const rawFaqData = [
-    {
-      category: 'Doprava a doručení',
-      questions: [
-        {
-          q: 'Jaké jsou způsoby dopravy a kolik stojí?',
-          a: 'Nabízíme Zásilkovnu (79 Kč na výdejní místo), GLS (99 Kč doručení na adresu) a DPD (109 Kč doručení na adresu). Osobní odběr je zdarma na adrese Bratří Čapků 1095, Holice (případně dle domluvy v Pardubicích). Při nákupu nad 2 000 Kč máte dopravu zcela zdarma.'
-        },
-        {
-          q: 'Jak balíte kusové karty (Singles)?',
-          a: 'Držíme se striktního sběratelského standardu: Karta jde do penny sleeve hlavou dolů, připevní se vytahovací páska (pull-tab), vloží se do toploaderu, ten jde do uzavíratelného team bagu, a ten se zafixuje v kartonovém sendviči (nepoužíváme izolepu na toploaderu). Nakonec vše vložíme do bublinkové obálky.'
-        },
-        {
-          q: 'Kdy obdržím svou objednávku?',
-          a: 'Zásilky odesíláme do 24 hodin od zaplacení (v pracovní dny). Doručení obvykle trvá 24-48 hodin od expedice.'
-        }
-      ]
-    },
-    {
-      category: 'Výkup karet (Buylist)',
-      questions: [
-        {
-          q: 'Jak funguje výkup karet?',
-          a: 'Karty naklikáte do výkupního košíku v našem portálu, zvolíte stav a jazyk a odešlete. Následně karty zabalíte a zašlete na naši adresu nebo odevzdáte osobně. Jakmile karty zkontrolujeme (do 48h od přijetí), vyplatíme Vám peníze přímo na Váš bankovní účet.'
-        }
-      ]
-    },
-    {
-      category: 'Platby a reklamace',
-      questions: [
-        {
-          q: 'Jaké platební metody podporujete?',
-          a: 'Můžete platit platební kartou online přes zabezpečenou platební bránu ComGate, nebo klasickým bankovním převodem.'
-        },
-        {
-          q: 'Jak mohu zboží reklamovat?',
-          a: 'Pokud se zásilka poškodila během přepravy nebo neodpovídá deklarovaný stav karty, kontaktujte nás e-mailem. Reklamace vyřizujeme obratem v souladu se zákonem.'
-        }
-      ]
-    }
-  ];
-
-  const faqData = rawFaqData.filter(cat => {
-    if (cat.category.includes('Výkup') && !FEATURE_FLAGS.showBuylist) return false;
-    return true;
-  });
-
-  const toggleAccordion = (index) => {
-    setOpenAccordion(openAccordion === index ? null : index);
-  };
 
   const handleContactSubmit = (e) => {
     e.preventDefault();
@@ -70,11 +19,11 @@ export default function SupportFAQ() {
 
   return (
     <div style={styles.container} className="container fade-in">
-      <h1 className="sr-only">Kontakt a FAQ - NORTHVALE</h1>
+      <h1 className="sr-only">Kontakt - NORTHVALE</h1>
 
       {/* Breadcrumbs */}
       <nav className="breadcrumbs-nav" aria-label="Drobečková navigace" style={styles.breadcrumbs}>
-        <span className="breadcrumb-item" onClick={() => window.location.href = '/'}>Domů</span>
+        <span className="breadcrumb-item" onClick={() => setActivePage('home')}>Domů</span>
         <span className="breadcrumb-separator">/</span>
         <span className="breadcrumb-item active">Kontakt</span>
       </nav>
@@ -165,67 +114,16 @@ export default function SupportFAQ() {
               </span>
             </div>
 
-            <div style={styles.infoRow}>
+            <div style={styles.infoRow} style={{ borderBottom: 'none', paddingBottom: 0 }}>
               <span style={styles.infoLabel}>Sídlo společnosti (Fakturační adresa)</span>
               <span style={styles.infoValueText}>
                 Bratří Čapků 1095<br />
                 534 01 Holice
               </span>
             </div>
-
-            <div style={styles.infoRow} style={{ borderBottom: 'none', paddingBottom: 0 }}>
-              <span style={styles.infoLabel}>Adresa pro osobní odběr</span>
-              <span style={styles.infoValueText}>
-                Sladkovského 512, Pardubice (případně dle domluvy v Holicích)
-              </span>
-            </div>
           </div>
         </div>
       </div>
-
-      {/* Bottom FAQ Section */}
-      <section id="faq-section" style={styles.faqSection}>
-        <div style={styles.faqHeader}>
-          <span className="testimonials-eyebrow" style={styles.eyebrow}>Často kladené otázky</span>
-          <h2 style={styles.faqTitle}>F.A.Q.</h2>
-        </div>
-
-        <div style={styles.faqGrid}>
-          {faqData.map((cat, catIdx) => (
-            <div key={catIdx} style={styles.catGroup}>
-              <h3 style={styles.catHeading}>{cat.category}</h3>
-              
-              <div style={styles.accordionList}>
-                {cat.questions.map((item, qIdx) => {
-                  const globalIdx = `${catIdx}-${qIdx}`;
-                  const isOpen = openAccordion === globalIdx;
-
-                  return (
-                    <div key={qIdx} style={styles.accordionItem} className="glass-card">
-                      <button 
-                        style={styles.accordionHeader} 
-                        onClick={() => toggleAccordion(globalIdx)}
-                      >
-                        <span style={styles.accordionQuestion}>{item.q}</span>
-                        <span style={{ 
-                          ...styles.accordionArrow,
-                          transform: isOpen ? 'rotate(180deg)' : 'rotate(0)' 
-                        }}>&darr;</span>
-                      </button>
-                      
-                      {isOpen && (
-                        <div style={styles.accordionBody}>
-                          <p style={styles.accordionAnswer}>{item.a}</p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }
@@ -387,84 +285,5 @@ const styles = {
     fontSize: '14px',
     lineHeight: '1.6',
     color: 'var(--text-main)',
-  },
-  faqSection: {
-    marginTop: '64px',
-    textAlign: 'left',
-  },
-  faqHeader: {
-    textAlign: 'center',
-    marginBottom: '32px',
-  },
-  faqTitle: {
-    fontSize: '32px',
-    fontWeight: '800',
-    color: 'var(--text-main)',
-    margin: '0 0 16px 0',
-    fontFamily: 'var(--font-heading)',
-    letterSpacing: '-0.5px',
-  },
-  faqGrid: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '32px',
-    maxWidth: '900px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-  },
-  catGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  catHeading: {
-    fontSize: '15px',
-    fontWeight: '800',
-    color: 'var(--color-gold)',
-    margin: 0,
-    textTransform: 'uppercase',
-    letterSpacing: '0.8px',
-  },
-  accordionList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  accordionItem: {
-    overflow: 'hidden',
-  },
-  accordionHeader: {
-    width: '100%',
-    padding: '18px 24px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    textAlign: 'left',
-    gap: '16px',
-    backgroundColor: 'rgba(255,255,255,0.005)',
-    border: 'none',
-    cursor: 'pointer',
-  },
-  accordionQuestion: {
-    fontSize: '14.5px',
-    fontWeight: '700',
-    color: 'var(--text-main)',
-  },
-  accordionArrow: {
-    fontSize: '14px',
-    fontWeight: '800',
-    color: 'var(--color-gold)',
-    transition: 'transform 0.2s',
-  },
-  accordionBody: {
-    padding: '0 24px 20px',
-    borderTop: '1px solid rgba(255,255,255,0.03)',
-    backgroundColor: 'rgba(9,9,11,0.2)',
-  },
-  accordionAnswer: {
-    fontSize: '13.5px',
-    color: 'var(--text-muted)',
-    lineHeight: '1.65',
-    margin: '12px 0 0',
   },
 };

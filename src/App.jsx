@@ -11,7 +11,8 @@ import BuylistPortal from './components/BuylistPortal';
 import GradingPortal from './components/GradingPortal';
 import GradingGuide from './components/GradingGuide';
 import CommunityTournaments from './components/CommunityTournaments';
-import SupportFAQ from './components/SupportFAQ';
+import ContactPage from './components/ContactPage';
+import FaqPage from './components/FaqPage';
 import CheckoutFlow from './components/CheckoutFlow';
 import UserPortal from './components/UserPortal';
 import AdminPanel from './components/AdminPanel';
@@ -68,6 +69,8 @@ const parseUrlToState = () => {
     page = 'community';
   } else if (path === '/support') {
     page = 'support';
+  } else if (path === '/faq') {
+    page = 'faq';
   } else if (path === '/about') {
     page = 'about';
   } else if (path === '/checkout') {
@@ -124,6 +127,8 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
     path = '/community';
   } else if (page === 'support') {
     path = '/support';
+  } else if (page === 'faq') {
+    path = '/faq';
   } else if (page === 'about') {
     path = '/about';
   } else if (page === 'checkout') {
@@ -343,6 +348,9 @@ export default function App() {
         break;
       case 'support':
         title = 'Kontakt - Northvaletcg.eu';
+        break;
+      case 'faq':
+        title = 'FAQ - Northvaletcg.eu';
         break;
       case 'about':
         title = 'O nás - Northvaletcg.eu';
@@ -607,7 +615,11 @@ export default function App() {
         )}
 
         {activePage === 'support' && (
-          <SupportFAQ />
+          <ContactPage setActivePage={setActivePage} />
+        )}
+
+        {activePage === 'faq' && (
+          <FaqPage setActivePage={setActivePage} />
         )}
 
         {activePage === 'about' && (

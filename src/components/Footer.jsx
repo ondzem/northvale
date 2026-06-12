@@ -56,15 +56,7 @@ export default function Footer({ setActivePage }) {
         <div className="footer-column footer-col-purchase">
           <h4 className="footer-heading">Vše o nákupu</h4>
           <ul className="footer-list">
-            <li className="footer-link" onClick={() => {
-              setActivePage('support');
-              setTimeout(() => {
-                const element = document.getElementById('faq-section');
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-              }, 100);
-            }}>FAQ</li>
+            <li className="footer-link" onClick={() => setActivePage('faq')}>FAQ</li>
             <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'doprava')}>Doprava a osobní odběr</li>
             <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'vop')}>Obchodní podmínky (VOP)</li>
             <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'gdpr')}>Ochrana osobních údajů (GDPR)</li>
