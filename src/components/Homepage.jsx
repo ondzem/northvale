@@ -831,7 +831,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               Zakládáme si především na kvalitě a dostupnosti zboží.
             </p>
             <button 
-              className="btn btn-secondary" 
+              className="btn btn-primary" 
               style={{ marginTop: '8px', alignSelf: 'flex-start' }}
               onClick={() => setActivePage('about')}
             >

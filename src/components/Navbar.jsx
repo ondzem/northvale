@@ -776,7 +776,6 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
               paddingBottom: isMobile ? '0' : '16px',
               marginBottom: isMobile ? '72px' : '20px',
             }}>
-              {!isMobile && <h3 style={styles.drawerHeading}>Více informací</h3>}
               <button style={styles.drawerCloseBtn} onClick={() => setDrawerOpen(false)}>&times;</button>
             </div>
 
@@ -895,39 +894,97 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
               {/* Desktop Drawer Content (Only shown on desktop) */}
               {!isMobile && (
                 <>
-                  <div style={styles.drawerSection}>
-                    <h4 style={styles.drawerSectionTitle}>O nás</h4>
-                    <p style={styles.drawerText}>
-                      Jsme tým nadšených sběratelů, kteří se rozhodli přinést bezpečný a férový nákup sběratelských karet všem nadšencům a investorům.
-                    </p>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => { setActivePage('about'); setDrawerOpen(false); }}
-                      style={{ width: '100%', marginTop: '8px' }}
-                    >
-                      Více o nás
-                    </button>
+                  {/* Skupina 1: Informace o společnosti */}
+                  <div style={styles.drawerGroup}>
+                    <h5 style={styles.drawerGroupHeader}>Informace o společnosti</h5>
+                    <ul style={styles.drawerLinkList}>
+                      <li 
+                        style={styles.drawerLinkItem} 
+                        className="drawer-link-item"
+                        onClick={() => { setActivePage('about'); setDrawerOpen(false); }}
+                      >
+                        O nás
+                      </li>
+                      <li 
+                        style={styles.drawerLinkItem} 
+                        className="drawer-link-item"
+                        onClick={() => { setActivePage('support'); setDrawerOpen(false); }}
+                      >
+                        Kontakt
+                      </li>
+                      {FEATURE_FLAGS.showBuylist && (
+                        <li 
+                          style={styles.drawerLinkItem} 
+                          className="drawer-link-item"
+                          onClick={() => { setActivePage('buylist'); setDrawerOpen(false); }}
+                        >
+                          Výkup karet (Buylist)
+                        </li>
+                      )}
+                      {FEATURE_FLAGS.showGrading && (
+                        <li 
+                          style={styles.drawerLinkItem} 
+                          className="drawer-link-item"
+                          onClick={() => { setActivePage('grading'); setDrawerOpen(false); }}
+                        >
+                          Grading servis
+                        </li>
+                      )}
+                    </ul>
                   </div>
 
-                  {FEATURE_FLAGS.showBuylist && (
-                    <div style={styles.drawerSection}>
-                      <h4 style={styles.drawerSectionTitle}>Výkup karet (Buylist)</h4>
-                      <p style={styles.drawerText}>
-                        Vykupujeme kusové karty her Pokémon, Lorcana a One Piece. Získejte peníze přímo na svůj bankovní účet!
-                      </p>
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => { setActivePage('buylist'); setDrawerOpen(false); }}
-                        style={{ width: '100%', marginTop: '8px' }}
+                  {/* Skupina 2: Vše o nákupu */}
+                  <div style={styles.drawerGroup}>
+                    <h5 style={styles.drawerGroupHeader}>Vše o nákupu</h5>
+                    <ul style={styles.drawerLinkList}>
+                      <li 
+                        style={styles.drawerLinkItem} 
+                        className="drawer-link-item"
+                        onClick={() => { setActivePage('support'); setDrawerOpen(false); }}
                       >
-                        Přejít na výkup
-                      </button>
-                    </div>
-                  )}
+                        Centrum podpory
+                      </li>
+                      <li 
+                        style={styles.drawerLinkItem} 
+                        className="drawer-link-item"
+                        onClick={() => { setActivePage('support'); setDrawerOpen(false); }}
+                      >
+                        FAQ
+                      </li>
+                      <li 
+                        style={styles.drawerLinkItem} 
+                        className="drawer-link-item"
+                        onClick={() => { setActivePage('gdpr-vop', 'doprava'); setDrawerOpen(false); }}
+                      >
+                        Doprava a osobní odběr
+                      </li>
+                      <li 
+                        style={styles.drawerLinkItem} 
+                        className="drawer-link-item"
+                        onClick={() => { setActivePage('gdpr-vop', 'vop'); setDrawerOpen(false); }}
+                      >
+                        Obchodní podmínky (VOP)
+                      </li>
+                      <li 
+                        style={styles.drawerLinkItem} 
+                        className="drawer-link-item"
+                        onClick={() => { setActivePage('gdpr-vop', 'gdpr'); setDrawerOpen(false); }}
+                      >
+                        Ochrana osobních údajů (GDPR)
+                      </li>
+                      <li 
+                        style={styles.drawerLinkItem} 
+                        className="drawer-link-item"
+                        onClick={() => { setActivePage('gdpr-vop', 'odstoupeni'); setDrawerOpen(false); }}
+                      >
+                        Odstoupení od smlouvy
+                      </li>
+                    </ul>
+                  </div>
 
-                  <div style={{ ...styles.drawerSection, borderBottom: 'none', marginTop: 'auto', paddingBottom: '0' }}>
-                    <h4 style={styles.drawerSectionTitle}>Kontakty</h4>
-                    <p style={styles.drawerText}>
+                  <div style={{ ...styles.drawerSection, borderBottom: 'none', marginTop: 'auto', paddingBottom: '0', alignItems: 'flex-start', textAlign: 'left' }}>
+                    <h4 style={{ ...styles.drawerSectionTitle, textAlign: 'left' }}>Kontakty</h4>
+                    <p style={{ ...styles.drawerText, textAlign: 'left' }}>
                       <strong>Provozovatel:</strong> NORTHVALE s.r.o.<br />
                       <strong>Sídlo:</strong> Bratří Čapků 1095, Holice<br />
                       <strong>Odběr:</strong> Sladkovského 512, Pardubice<br />
@@ -1366,6 +1423,46 @@ const styles = {
     gap: '24px',
     flexGrow: 1,
     overflowY: 'auto',
+  },
+  drawerGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '16px',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+    paddingBottom: '24px',
+    textAlign: 'left',
+    width: '100%',
+  },
+  drawerGroupHeader: {
+    fontSize: '11px',
+    fontWeight: '800',
+    color: 'var(--color-gold)',
+    textTransform: 'uppercase',
+    letterSpacing: '1px',
+    margin: 0,
+    textAlign: 'left',
+    width: '100%',
+  },
+  drawerLinkList: {
+    listStyle: 'none',
+    padding: 0,
+    margin: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '14px',
+    alignItems: 'flex-start',
+    width: '100%',
+  },
+  drawerLinkItem: {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: 'var(--text-main)',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    textAlign: 'left',
+    width: '100%',
+    padding: '4px 0',
   },
   drawerSection: {
     display: 'flex',

@@ -5128,4 +5128,14 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   }
 }
 
+.drawer-link-item {
+  position: relative;
+  display: inline-block;
+  color: var(--text-main);
+  transition: color 0.25s ease, transform 0.25s ease;
+}
 
+.drawer-link-item:hover {
+  color: var(--color-gold) !important;
+  transform: translateX(4px);
+}
