@@ -1663,14 +1663,14 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 
 .footer-grid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
   gap: 40px;
   padding-bottom: 60px;
 }
 
 @media (min-width: 1025px) {
   .footer-grid.has-five-cols {
-    grid-template-columns: 1.5fr 1fr 1fr 1fr 1.2fr;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
   }
 }
 
