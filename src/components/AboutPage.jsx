@@ -112,7 +112,7 @@ const styles = {
     margin: 0,
   },
   mainCard: {
-    maxWidth: '800px',
+    maxWidth: '100%',
     marginLeft: 'auto',
     marginRight: 'auto',
     padding: '40px',
