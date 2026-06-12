@@ -899,6 +899,9 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); }}>
             <img src="/Prislusentstvi.webp" alt="Příslušenství" className="category-tile-img" />
           </div>
+          <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Acrylics' }); setActivePage('sealed-catalog'); }}>
+            <img src="/Akryly.webp" alt="Akryly" className="category-tile-img" />
+          </div>
           {FEATURE_FLAGS.showSlabs && (
             <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
               <img src="/Ohodnoceni karet.webp" alt="Ohodnocené karty" className="category-tile-img" />
