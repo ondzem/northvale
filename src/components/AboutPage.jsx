@@ -16,7 +16,7 @@ export default function AboutPage({ setActivePage }) {
 
       <div style={styles.headerArea}>
         <span className="testimonials-eyebrow" style={styles.eyebrow}>Příběh Northvale</span>
-        <h1 style={styles.title}>O nás</h1>
+        <h1 style={styles.title}>Chcete vědět náš příběh?</h1>
       </div>
 
       {/* Centered Main Story Container */}
