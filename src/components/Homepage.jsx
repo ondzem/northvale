@@ -819,7 +819,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               lineHeight: '1.6',
               margin: 0
             }}>
-              Víme, jak těžké je dnes sehnat TCG produkty za rozumné ceny. Proto chceme nabídnout široký výběr produktů, ohodnocených karet i příslušenství za férové ceny.
+              Víme, jak těžké je dnes sehnat TCG produkty za rozumné ceny. Proto chceme nabídnout široký výběr produktů{FEATURE_FLAGS.showSlabs ? ', ohodnocených karet' : ''} i příslušenství za férové ceny.
             </p>
 
             <p style={{
