@@ -12,8 +12,8 @@ export default function AboutPage({ setActivePage }) {
   // Determine text based on FEATURE_FLAGS.showSlabs
   const showSlabs = FEATURE_FLAGS.showSlabs;
   const paragraph3Text = showSlabs
-    ? t('AboutPage.NVStoryP2Slabs') || t('AboutPage.storyP2Slabs')
-    : t('AboutPage.NVStoryP2NoSlabs') || t('AboutPage.storyP2NoSlabs');
+    ? t('AboutPage.storyP2Slabs')
+    : t('AboutPage.storyP2NoSlabs');
 
   return (
     <div className="container fade-in">
