@@ -1,3 +1,4 @@
+import { FEATURE_FLAGS } from '../config';
 
 export default function GradingGuide({ setActivePage }) {
   const standards = [
@@ -83,20 +84,37 @@ export default function GradingGuide({ setActivePage }) {
         </table>
       </div>
 
-      <div style={styles.bottomCard} className="glass-panel">
-        <h3 style={styles.bottomHeading}>Potřebujete ohodnotit Své karty profesionálně?</h3>
-        <p style={styles.bottomText}>
-          Pokud chcete mít jistotu a ochránit sběratelskou hodnotu Svých karet natrvalo, doporučujeme naši zprostředkovatelskou službu gradingu v USA (PSA, Beckett, TAG). Vaše karty před odesláním důkladně zkontrolujeme.
-        </p>
-        <div style={styles.btnRow}>
-          <button className="btn btn-primary" onClick={() => setActivePage('grading')}>
-            Přejít na objednávku gradingu
-          </button>
-          <button className="btn btn-secondary" onClick={() => setActivePage('buylist')}>
-            Přejít na výkup karet (Buylist)
-          </button>
+      {(FEATURE_FLAGS.showGrading || FEATURE_FLAGS.showBuylist) && (
+        <div style={styles.bottomCard} className="glass-panel">
+          {FEATURE_FLAGS.showGrading ? (
+            <>
+              <h3 style={styles.bottomHeading}>Potřebujete ohodnotit Své karty profesionálně?</h3>
+              <p style={styles.bottomText}>
+                Pokud chcete mít jistotu a ochránit sběratelskou hodnotu Svých karet natrvalo, doporučujeme naši zprostředkovatelskou službu gradingu v USA (PSA, Beckett, TAG). Vaše karty před odesláním důkladně zkontrolujeme.
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 style={styles.bottomHeading}>Chcete nám prodat Své karty?</h3>
+              <p style={styles.bottomText}>
+                Nabídněte nám své přebytečné kusové karty nebo celou sbírku a získejte peníze na bankovní účet nebo store credit.
+              </p>
+            </>
+          )}
+          <div style={styles.btnRow}>
+            {FEATURE_FLAGS.showGrading && (
+              <button className="btn btn-primary" onClick={() => setActivePage('grading')}>
+                Přejít na objednávku gradingu
+              </button>
+            )}
+            {FEATURE_FLAGS.showBuylist && (
+              <button className="btn btn-secondary" onClick={() => setActivePage('buylist')}>
+                Přejít na výkup karet (Buylist)
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

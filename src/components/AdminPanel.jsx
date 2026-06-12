@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { FEATURE_FLAGS } from '../config';
 
 export default function AdminPanel({ buylists, approveBuylist }) {
   const [syncLogs, setSyncLogs] = useState([
@@ -26,8 +25,7 @@ export default function AdminPanel({ buylists, approveBuylist }) {
 
       <div style={styles.layout}>
         {/* Left Column: Buylist approval (2/3 width) */}
-        {FEATURE_FLAGS.showBuylist && (
-          <div style={styles.leftCol} className="glass-panel">
+        <div style={styles.leftCol} className="glass-panel">
           <h2 style={styles.sectionHeading}>Správa podaných výkupů</h2>
           <p style={styles.desc}>
             Zde vidíte všechny výkupy, které uživatelé naklikali na webu. Fyzicky zkontrolujte stav doručených karet a kliknutím na schválit potvrdíte vyplacení částky na bankovní účet uživatele.
@@ -91,11 +89,10 @@ export default function AdminPanel({ buylists, approveBuylist }) {
               ))}
             </div>
           )}
-          </div>
-        )}
+        </div>
 
         {/* Right Column: Cardmarket Middleware logs (1/3 width) */}
-        <div style={{ ...styles.rightCol, flex: FEATURE_FLAGS.showBuylist ? '1 1 320px' : '1 1 100%' }} className="glass-panel">
+        <div style={styles.rightCol} className="glass-panel">
           <div style={styles.logsHeader}>
             <h3 style={styles.sectionHeading}>Cardmarket Synchronizace</h3>
             <button className="btn btn-secondary" style={styles.syncBtn} onClick={handleSimulateSync}>
