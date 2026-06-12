@@ -22,11 +22,23 @@ export default function AboutPage({ setActivePage }) {
       {/* Centered Main Story Container */}
       <div style={styles.mainCard}>
         <h2 style={styles.sectionHeading}>Náš příběh</h2>
-        <p style={styles.paragraph}>
-          Myšlenka založit **Northvale** se zrodila po letech aktivního sbírání a hraní sběratelských karetních her, zejména Pokémonů, Disney Lorcana a One Piece. Jako sběratelé a hráči jsme se neustále potýkali s obtížnou dostupností nových edic a neúměrně vysokými cenami na našem trhu. Rozhodli jsme se proto proměnit náš koníček v poslání.
+        <p style={{ ...styles.paragraph, fontSize: '17px', fontWeight: '600', color: 'var(--text-main)', marginBottom: '24px' }}>
+          Vítej na eshopu Northvale.
         </p>
         <p style={styles.paragraph}>
-          Naším cílem bylo vytvořit místo, kde sběratelé i investoři najdou vše potřebné pod jednou střechou, s garancí 100% pravosti a za férové ceny. Zakládáme si na tom, aby každá karta, kterou u nás zakoupíte, byla skladována a doručena s tou nejvyšší péčí.
+          Po dlouhých letech sbírání Pokémonů a různých dalších karetních her jsem se rozhodl posunout tento koníček o level výš.
+        </p>
+        <p style={styles.paragraph}>
+          V poslední době nevím o jediném sběrateli, nadšenci nebo hráči, který by nebyl alespoň trochu zklamaný z toho, že si chce koupit nějaký TCG produkt a ten je nedostupný. Pokud ho sežene, tak je jeho cena vyšší než přípustná.
+        </p>
+        <p style={styles.paragraph}>
+          To bychom chtěli změnit a chtěli bychom Vám nabízet velké množství produktů, ohodnocených karet a příslušenství.
+        </p>
+        <p style={styles.paragraph}>
+          Zaměřujeme se hlavně na kvalitu výrobků a dostupnost zboží.
+        </p>
+        <p style={styles.paragraph}>
+          Máme v plánu se zaměřit i na zprostředkování gradingu karet nejen u společnosti PSA, ale i dalších jako je Beckett, TAG, CGC a jiné.
         </p>
 
         <h3 style={styles.subHeading}>Naše hodnoty</h3>
