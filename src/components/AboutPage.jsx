@@ -26,10 +26,10 @@ export default function AboutPage({ setActivePage }) {
           Vítej na eshopu Northvale.
         </p>
         <p style={styles.paragraph}>
-          Po dlouhých letech sbírání Pokémonů a různých dalších karetních her jsem se rozhodl posunout tento koníček o level výš.
+          Po dlouhých letech sbírání Pokémonů a různých dalších karetních her jsme se rozhodli posunout tento koníček o level výš.
         </p>
         <p style={styles.paragraph}>
-          V poslední době nevím o jediném sběrateli, nadšenci nebo hráči, který by nebyl alespoň trochu zklamaný z toho, že si chce koupit nějaký TCG produkt a ten je nedostupný. Pokud ho sežene, tak je jeho cena vyšší než přípustná.
+          V poslední době nevíme o jediném sběrateli, nadšenci nebo hráči, který by nebyl alespoň trochu zklamaný z toho, že si chce koupit nějaký TCG produkt a ten je nedostupný. Pokud ho sežene, tak je jeho cena vyšší než přípustná.
         </p>
         <p style={styles.paragraph}>
           To bychom chtěli změnit a chtěli bychom Vám nabízet velké množství produktů, ohodnocených karet a příslušenství.
