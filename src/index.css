@@ -1669,11 +1669,8 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 }
 
 @media (min-width: 1025px) {
-  .footer-grid.has-three-cols .footer-col-purchase {
-    grid-column: 3;
-  }
-  .footer-grid.has-three-cols .footer-col-contacts {
-    grid-column: 4;
+  .footer-grid.has-five-cols {
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 1.2fr;
   }
 }
 

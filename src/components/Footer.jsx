@@ -3,7 +3,7 @@ import { FEATURE_FLAGS } from '../config';
 
 export default function Footer({ setActivePage }) {
   const hasMiddleColumn = FEATURE_FLAGS.showBuylist || FEATURE_FLAGS.showGrading;
-  const gridClassName = `container footer-grid ${hasMiddleColumn ? 'has-four-cols' : 'has-three-cols'}`;
+  const gridClassName = `container footer-grid ${hasMiddleColumn ? 'has-five-cols' : 'has-four-cols'}`;
 
   return (
     <footer className="main-footer">
@@ -30,6 +30,26 @@ export default function Footer({ setActivePage }) {
               <img src="/youtube.png" alt="YouTube" className="footer-social-icon" />
             </a>
           </div>
+        </div>
+
+        {/* Column: About the company */}
+        <div className="footer-column footer-col-company">
+          <h4 className="footer-heading">O společnosti</h4>
+          <ul className="footer-list">
+            <li className="footer-link" onClick={() => setActivePage('about')}>O nás</li>
+            <li className="footer-link" onClick={() => setActivePage('support')}>Kontakt</li>
+            <li className="footer-link" onClick={() => {
+              setActivePage('home');
+              setTimeout(() => {
+                const element = document.getElementById('popular-categories');
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }, 100);
+            }}>
+              Nabízené produkty
+            </li>
+          </ul>
         </div>
 
         {/* Column 2: Purchasing Info */}
