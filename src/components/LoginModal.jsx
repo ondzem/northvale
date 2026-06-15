@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { FEATURE_FLAGS } from '../config';
+import { supabase } from '../supabase';
 
 export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
-  const { t } = useTranslation();
+  const { lang, t } = useTranslation();
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -52,7 +53,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     let hasError = false;
 
@@ -97,9 +98,36 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
     if (hasError) return;
 
     if (isRegisterMode) {
-      onRegister(email, fullName, phone, newsletter);
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            phone: phone,
+            newsletter: newsletter
+          }
+        }
+      });
+
+      if (error) {
+        alert(lang === 'CZ' ? `Chyba registrace: ${error.message}` : `Registration error: ${error.message}`);
+        return;
+      }
+
+      onRegister(email, fullName);
     } else {
-      onLogin(email, fullName || email.split('@')[0]);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        alert(lang === 'CZ' ? `Chyba přihlášení: ${error.message}` : `Login error: ${error.message}`);
+        return;
+      }
+
+      onLogin(email, data.user?.user_metadata?.full_name || email.split('@')[0]);
     }
 
     // Clear fields & close
@@ -123,93 +151,33 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
     onClose();
   };
 
-  const handleGoogleLogin = () => {
-    if (!window.google) {
-      alert(t('LoginModal.googleSdkLoadError'));
-      handleSocialClick('Google');
-      return;
-    }
-
-    try {
-      const client = window.google.accounts.oauth2.initTokenClient({
-        client_id: googleClientId,
-        scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
-        callback: (tokenResponse) => {
-          if (tokenResponse.error) {
-            console.error('Google OAuth2 error:', tokenResponse);
-            alert(t('LoginModal.googleAuthError'));
-            return;
-          }
-
-          // Fetch real user metadata from Google userinfo API
-          fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-            headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-          })
-          .then(res => res.json())
-          .then(userInfo => {
-            if (userInfo.email) {
-              onLogin(userInfo.email, userInfo.name, userInfo.picture);
-              onClose();
-            } else {
-              alert(t('LoginModal.googleProfileError'));
-            }
-          })
-          .catch(err => {
-            console.error('Failed to fetch userinfo from google API:', err);
-            // Local fallback if Client ID is invalid or blocked
-            onLogin('ondra.skrba.google@gmail.com', 'Ondřej Google', 'https://lh3.googleusercontent.com/a/default-user');
-            onClose();
-          });
-        },
-      });
-      client.requestAccessToken();
-    } catch (e) {
-      console.error('Google Sign In SDK crash:', e);
-      handleSocialClick('Google');
+  const handleGoogleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+    if (error) {
+      console.error('Google login error:', error);
+      alert(lang === 'CZ' ? `Chyba Google přihlášení: ${error.message}` : `Google login error: ${error.message}`);
+    } else {
+      onClose();
     }
   };
 
-  const handleAppleLogin = () => {
-    if (!window.AppleID) {
-      alert(t('LoginModal.appleSdkLoadError'));
-      handleSocialClick('Apple');
-      return;
-    }
-
-    try {
-      window.AppleID.auth.init({
-        clientId: appleClientId,
-        scope: 'name email',
-        redirectURI: appleRedirectUri,
-        usePopup: true
-      });
-
-      window.AppleID.auth.signIn()
-        .then((response) => {
-          if (response && response.authorization) {
-            const idToken = response.authorization.id_token;
-            const payload = parseJwt(idToken);
-            const userEmail = payload?.email || 'apple.user@example.com';
-            
-            const userName = (response.user && response.user.name)
-              ? `${response.user.name.firstName} ${response.user.name.lastName}`
-              : (payload?.name || userEmail.split('@')[0]);
-
-            onLogin(userEmail, userName);
-            onClose();
-          } else {
-            alert(t('LoginModal.appleAuthError'));
-          }
-        })
-        .catch((error) => {
-          console.warn('Apple OAuth flow error (standard block for localhost without credentials):', error);
-          // Fallback icloud mockup profile since Apple strictly blocks localhost without SSL/credentials
-          onLogin('ondrej.skrba.apple@icloud.com', 'Ondřej Apple');
-          onClose();
-        });
-    } catch (e) {
-      console.error('Apple Sign In SDK crash:', e);
-      handleSocialClick('Apple');
+  const handleAppleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+    if (error) {
+      console.error('Apple login error:', error);
+      alert(lang === 'CZ' ? `Chyba Apple přihlášení: ${error.message}` : `Apple login error: ${error.message}`);
+    } else {
+      onClose();
     }
   };
 

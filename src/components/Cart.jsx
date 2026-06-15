@@ -248,6 +248,8 @@ export default function Cart({ cart, setCart, setActivePage }) {
                 <div className="ckf-help">
                   <span>{t('Cart.help')}</span>
                   <a href="tel:+420739666779">+420 739 666 779</a>
+                  <span style={{ opacity: 0.4 }}>/</span>
+                  <a href="mailto:info@northvaletcg.eu">info@northvaletcg.eu</a>
                 </div>
               </aside>
             </div>

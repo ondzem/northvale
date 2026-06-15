@@ -22,6 +22,7 @@ import Cart from './components/Cart';
 import Favorites from './components/Favorites';
 import LoginModal from './components/LoginModal';
 import CookieConsent from './components/CookieConsent';
+import { supabase } from './supabase';
 
 import { mockProducts } from './mockData';
 import { FEATURE_FLAGS } from './config';
@@ -179,6 +180,67 @@ function AppContent() {
   const [searchQuery, setSearchQuery] = useState(initialUrlState.searchQuery);
   const [filters, setFilters] = useState(initialUrlState.filters);
 
+  // Supabase auth state change handler
+  const handleAuthSession = async (session) => {
+    if (session) {
+      const authUser = session.user;
+      setIsLoggedIn(true);
+
+      // Fetch user profile from database
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching user profile:', error.message);
+      }
+
+      setUser(prev => ({
+        ...prev,
+        id: authUser.id,
+        email: authUser.email || '',
+        name: profile?.full_name || authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || '',
+        phone: profile?.phone || authUser.user_metadata?.phone || '',
+        role: profile?.role || 'customer',
+        storeCredit: profile?.store_credit || 0,
+        avatar: authUser.user_metadata?.avatar_url || '/user.png'
+      }));
+    } else {
+      setIsLoggedIn(false);
+      setUser({
+        id: '',
+        orderHistory: [],
+        gradingSubmissions: [],
+        buylistHistory: [],
+        storeCredit: 0,
+        name: '',
+        email: '',
+        phone: '',
+        role: 'customer',
+        avatar: '/user.png'
+      });
+    }
+  };
+
+  // Listen to Supabase Auth State Changes
+  useEffect(() => {
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      handleAuthSession(session);
+    });
+
+    // Listen to changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleAuthSession(session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const navigateToPage = (page, tab) => {
     if (page === 'buylist' && !FEATURE_FLAGS.showBuylist) {
       page = 'home';
@@ -262,14 +324,7 @@ function AppContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  const handleLogin = (email, name = '', avatar = '') => {
-    setIsLoggedIn(true);
-    setUser(prev => ({
-      ...prev,
-      email: email,
-      name: name || email.split('@')[0],
-      avatar: avatar || '/user.png'
-    }));
+  const handleLogin = (email, name = '') => {
     showToast(
       lang === 'CZ'
         ? `Byl jste úspěšně přihlášen jako ${name || email}`
@@ -278,35 +333,30 @@ function AppContent() {
     );
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUser(prev => ({
-      ...prev,
-      email: '',
-      name: '',
-      avatar: '/user.png'
-    }));
-    setActivePage('home');
-    showToast(
-      lang === 'CZ' ? 'Byl jste úspěšně odhlášen.' : 'Successfully signed out.',
-      'success'
-    );
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      showToast(
+        lang === 'CZ'
+          ? `Chyba při odhlášení: ${error.message}`
+          : `Logout error: ${error.message}`,
+        'error'
+      );
+    } else {
+      setIsLoggedIn(false);
+      setActivePage('home');
+      showToast(
+        lang === 'CZ' ? 'Byl jste úspěšně odhlášen.' : 'Successfully signed out.',
+        'success'
+      );
+    }
   };
 
-  const handleRegister = (email, name = '', phone = '', newsletter = false) => {
-    setIsLoggedIn(true);
-    setUser(prev => ({
-      ...prev,
-      email: email,
-      name: name || email.split('@')[0],
-      phone: phone,
-      newsletter: newsletter,
-      avatar: '/user.png'
-    }));
+  const handleRegister = (email, name = '') => {
     showToast(
       lang === 'CZ'
-        ? `Registrace úspěšná! Vítejte, ${name || email}${newsletter ? ' (odběr novinek aktivován)' : ''}`
-        : `Registration successful! Welcome, ${name || email}${newsletter ? ' (newsletter subscription activated)' : ''}`,
+        ? `Registrace úspěšná! Vítejte, ${name || email}`
+        : `Registration successful! Welcome, ${name || email}`,
       'success'
     );
   };
@@ -426,12 +476,17 @@ function AppContent() {
     }, 4000);
   };
 
-  // User State (Mock DB)
+  // User State
   const [user, setUser] = useState({
+    id: '',
     orderHistory: [],
     gradingSubmissions: [],
+    buylistHistory: [],
+    storeCredit: 0,
     name: '',
     email: '',
+    phone: '',
+    role: 'customer',
     avatar: '/user.png'
   });
 
@@ -485,11 +540,12 @@ function AppContent() {
   };
 
   // Submit Order Action
-  const submitOrder = (order) => {
+  const submitOrder = (order, creditApplied = 0) => {
     setUser(prev => {
       return {
         ...prev,
-        orderHistory: [order, ...prev.orderHistory]
+        orderHistory: [order, ...prev.orderHistory],
+        storeCredit: Math.max(0, prev.storeCredit - creditApplied)
       };
     });
 
@@ -499,6 +555,10 @@ function AppContent() {
   // Submit Buylist Action
   const submitBuylist = (submission) => {
     setBuylists(prev => [submission, ...prev]);
+    setUser(prev => ({
+      ...prev,
+      buylistHistory: [submission, ...prev.buylistHistory]
+    }));
   };
 
   // Submit Grading Action
@@ -515,11 +575,32 @@ function AppContent() {
       if (bl.id !== buylistId) return bl;
       
       const updated = { ...bl, status: 'Schváleno - Vyplaceno' };
+      const isStoreCredit = bl.payoutMethod && bl.payoutMethod.toLowerCase().includes('credit');
+
+      setUser(prevUser => {
+        const nextCredit = isStoreCredit 
+          ? prevUser.storeCredit + bl.totalPayout 
+          : prevUser.storeCredit;
+        
+        const updatedHistory = prevUser.buylistHistory.map(h => 
+          h.id === buylistId ? { ...h, status: 'Schváleno - Vyplaceno' } : h
+        );
+
+        return {
+          ...prevUser,
+          storeCredit: nextCredit,
+          buylistHistory: updatedHistory
+        };
+      });
 
       showToast(
         lang === 'CZ'
-          ? `Výkup ${bl.id} schválen k bankovnímu převodu.`
-          : `Buylist ${bl.id} approved for bank transfer.`,
+          ? (isStoreCredit 
+              ? `Výkup ${bl.id} schválen. Částka ${bl.totalPayout.toLocaleString('cs-CZ')} Kč připsána jako Store Kredit.`
+              : `Výkup ${bl.id} schválen k bankovnímu převodu.`)
+          : (isStoreCredit
+              ? `Buylist ${bl.id} approved. ${bl.totalPayout.toLocaleString('en-US')} CZK added as Store Credit.`
+              : `Buylist ${bl.id} approved for bank transfer.`),
         'success'
       );
 
@@ -655,6 +736,7 @@ function AppContent() {
         {activePage === 'checkout' && (
           <CheckoutFlow 
             cart={cart}
+            user={user}
             submitOrder={submitOrder}
             setActivePage={setActivePage}
             alert={showToast}

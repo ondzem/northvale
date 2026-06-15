@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
@@ -93,16 +93,84 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
     );
   }
 
-  // Treat Singles as a single entity mapping to the first variant or defaults
-  const activeVariant = product.variants && product.variants.length > 0 
-    ? product.variants[0] 
-    : { id: product.id, price: product.price || 0, stock: product.stock || 0, condition: 'NM', lang: 'EN', foil: true };
+  // React state for dynamic selection of variant parameters
+  const initialVariant = product.variants && product.variants.length > 0
+    ? product.variants[0]
+    : { id: product.id, price: product.price || 0, stock: product.stock || 0, condition: 'NM', lang: 'EN', foil: false };
+
+  const [selectedCondition, setSelectedCondition] = useState(initialVariant.condition);
+  const [selectedLang, setSelectedLang] = useState(initialVariant.lang);
+  const [selectedFoil, setSelectedFoil] = useState(initialVariant.foil);
+
+  // Sync state if product changes
+  useEffect(() => {
+    if (product.variants && product.variants.length > 0) {
+      setSelectedCondition(product.variants[0].condition);
+      setSelectedLang(product.variants[0].lang);
+      setSelectedFoil(product.variants[0].foil);
+    } else {
+      setSelectedCondition('NM');
+      setSelectedLang('EN');
+      setSelectedFoil(false);
+    }
+    setQty(1);
+  }, [productId, products]);
+
+  // Find exact matching variant
+  let activeVariant = product.variants && product.variants.length > 0
+    ? product.variants.find(v => v.condition === selectedCondition && v.lang === selectedLang && v.foil === selectedFoil)
+    : null;
+
+  // Fallback to avoid crashes
+  if (!activeVariant && product.variants && product.variants.length > 0) {
+    activeVariant = product.variants.find(v => v.condition === selectedCondition)
+      || product.variants.find(v => v.lang === selectedLang)
+      || product.variants[0];
+  }
+
+  if (!activeVariant) {
+    activeVariant = { id: product.id, price: product.price || 0, stock: product.stock || 0, condition: 'NM', lang: 'EN', foil: false };
+  }
 
   const price = activeVariant.price;
   const stock = activeVariant.stock;
   const condition = activeVariant.condition;
   const variantLang = activeVariant.lang;
   const foil = activeVariant.foil;
+
+  // Auto-sync handlers to prevent invalid states
+  const handleConditionChange = (cond) => {
+    setSelectedCondition(cond);
+    const matchingVariant = product.variants.find(v => v.condition === cond);
+    if (matchingVariant) {
+      setSelectedLang(matchingVariant.lang);
+      setSelectedFoil(matchingVariant.foil);
+    }
+  };
+
+  const handleLangChange = (lg) => {
+    setSelectedLang(lg);
+    const matchingVariant = product.variants.find(v => v.condition === selectedCondition && v.lang === lg) 
+      || product.variants.find(v => v.lang === lg);
+    if (matchingVariant) {
+      setSelectedCondition(matchingVariant.condition);
+      setSelectedFoil(matchingVariant.foil);
+    }
+  };
+
+  const handleFoilChange = (fl) => {
+    setSelectedFoil(fl);
+    const matchingVariant = product.variants.find(v => v.condition === selectedCondition && v.lang === selectedLang && v.foil === fl)
+      || product.variants.find(v => v.foil === fl);
+    if (matchingVariant) {
+      setSelectedCondition(matchingVariant.condition);
+      setSelectedLang(matchingVariant.lang);
+    }
+  };
+
+  const availableConditions = product.variants ? [...new Set(product.variants.map(v => v.condition))] : [];
+  const availableLangs = product.variants ? [...new Set(product.variants.map(v => v.lang))] : [];
+  const availableFoils = product.variants ? [...new Set(product.variants.map(v => v.foil))] : [];
 
   const images = [
     product.image,
@@ -182,7 +250,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
   const handleAskSubmit = (e) => {
     e.preventDefault();
     if (alert) {
-      alert(lang === 'CZ' ? 'Váš dotaz byl úspěšně odeslán prodejci. Brzy se vám ozveme.' : 'Your inquiry has been successfully sent to the seller. We will get back to you soon.', 'success');
+      alert(lang === 'CZ' ? 'Váš dotaz byl úspěšně odeslán prodejci. Brzy se Vám ozveme.' : 'Your inquiry has been successfully sent to the seller. We will get back to you soon.', 'success');
     }
     setAskEmail('');
     setAskPhone('');
@@ -341,13 +409,69 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
             </span>
           </div>
 
-          {/* Short description with more info link */}
-          <p className="product-short-desc">
-            {product.desc.split('.').slice(0, 2).filter(Boolean).join('. ') + '.'}
-            <span className="more-info-link" onClick={() => scrollToSection('popis')}>
-              {lang === 'CZ' ? 'Víc informací' : 'More info'}
-            </span>
-          </p>
+          {/* Variant Selectors */}
+          {product.variants && product.variants.length > 1 && (
+            <div style={styles.variantSelectorsContainer}>
+              <h4 style={styles.variantSelectorsTitle}>
+                {lang === 'CZ' ? 'Výběr varianty karty:' : 'Select Card Variant:'}
+              </h4>
+              <div style={styles.selectorsGrid}>
+                {/* Condition Selector */}
+                {availableConditions.length > 0 && (
+                  <div style={styles.selectorField}>
+                    <label style={styles.selectorLabel}>{lang === 'CZ' ? 'Stav karty:' : 'Card Condition:'}</label>
+                    <select 
+                      value={selectedCondition} 
+                      onChange={(e) => handleConditionChange(e.target.value)}
+                      style={styles.variantSelect}
+                    >
+                      {availableConditions.map(cond => (
+                        <option key={cond} value={cond}>
+                          {cond}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Language Selector */}
+                {availableLangs.length > 0 && (
+                  <div style={styles.selectorField}>
+                    <label style={styles.selectorLabel}>{lang === 'CZ' ? 'Jazyk karty:' : 'Card Language:'}</label>
+                    <select 
+                      value={selectedLang} 
+                      onChange={(e) => handleLangChange(e.target.value)}
+                      style={styles.variantSelect}
+                    >
+                      {availableLangs.map(lg => (
+                        <option key={lg} value={lg}>
+                          {lg === 'EN' ? (lang === 'CZ' ? 'Angličtina (EN)' : 'English (EN)') : lg === 'JP' ? (lang === 'CZ' ? 'Japonština (JP)' : 'Japanese (JP)') : lg}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Foil Selector */}
+                {availableFoils.length > 0 && (
+                  <div style={styles.selectorField}>
+                    <label style={styles.selectorLabel}>{lang === 'CZ' ? 'Provedení:' : 'Finish:'}</label>
+                    <select 
+                      value={selectedFoil ? 'foil' : 'non-foil'} 
+                      onChange={(e) => handleFoilChange(e.target.value === 'foil')}
+                      style={styles.variantSelect}
+                    >
+                      {availableFoils.map(fl => (
+                        <option key={fl ? 'foil' : 'non-foil'} value={fl ? 'foil' : 'non-foil'}>
+                          {fl ? (lang === 'CZ' ? 'Foil (lesklá)' : 'Foil (shiny)') : (lang === 'CZ' ? 'Non-Foil (klasická)' : 'Non-Foil (classic)')}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <hr className="product-detail-divider" />
 
@@ -901,7 +1025,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                 {lang === 'CZ' ? `Diskuze k produktu (${comments.length})` : `Product Discussion (${comments.length})`}
               </h3>
               <p className="discussions-dashboard-subtitle">
-                {lang === 'CZ' ? 'Máte k produktu nějaký dotaz? Náš tým vám rád odpoví.' : 'Do you have any questions about this product? Our team will gladly answer them.'}
+                {lang === 'CZ' ? 'Máte k produktu nějaký dotaz? Náš tým Vám rád odpoví.' : 'Do you have any questions about this product? Our team will gladly answer them.'}
               </p>
             </div>
             <button className="btn btn-primary discussions-add-btn" onClick={() => setIsCommentModalOpen(true)}>
@@ -1287,5 +1411,49 @@ const styles = {
     lineHeight: '1.3',
     margin: 0,
     fontFamily: 'var(--font-heading)',
+  },
+  variantSelectorsContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    padding: '16px',
+    borderRadius: 'var(--radius-lg)',
+    border: '1px solid var(--border)',
+    marginTop: '8px',
+  },
+  variantSelectorsTitle: {
+    fontSize: '14px',
+    fontWeight: '700',
+    margin: 0,
+    color: 'var(--text-main)',
+  },
+  selectorsGrid: {
+    display: 'flex',
+    gap: '16px',
+    flexWrap: 'wrap',
+  },
+  selectorField: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+    flex: '1 1 120px',
+  },
+  selectorLabel: {
+    fontSize: '11px',
+    color: 'var(--text-muted)',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  variantSelect: {
+    backgroundColor: 'var(--bg-page)',
+    border: '1px solid var(--border-light)',
+    padding: '8px 12px',
+    borderRadius: 'var(--radius-md)',
+    fontSize: '13px',
+    color: 'var(--text-main)',
+    outline: 'none',
+    cursor: 'pointer',
+    width: '100%',
   }
 };

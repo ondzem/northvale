@@ -81,6 +81,15 @@ button, input, select, textarea {
   border: none;
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-page) inset !important;
+  -webkit-text-fill-color: var(--text-main) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 button {
   cursor: pointer;
 }
@@ -5857,7 +5866,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 }
 
 .ckf-head .ckf-title {
-  font-size: clamp(32px, 4vw, 52px);
+  font-size: clamp(42px, 5vw, 52px);
   font-weight: 800;
   margin: 0;
   letter-spacing: -1.5px;
@@ -5892,6 +5901,8 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 .ckf-head .nv-link:hover .nv-link-arrow {
   transform: translateX(4px);
 }
+
+
 
 .ckf-grid {
   display: grid;
@@ -6039,9 +6050,12 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
     padding: 20px 0;
   }
   
-  .ckf-qty,
-  .ckf-item-price {
-    margin-left: 96px;
+  .ckf-item-info {
+    flex: 1 1 calc(100% - 96px);
+  }
+  
+  .ckf-qty {
+    margin-left: 88px;
   }
   
   .ckf-item-price {
@@ -6242,15 +6256,20 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 .ckf-help {
   color: var(--text-muted);
   font-size: 12.5px;
-  text-align: center;
   margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 8px;
+  row-gap: 6px;
 }
 
 .ckf-help a {
   color: var(--text-main);
   font-weight: 600;
   text-decoration: none;
-  margin-left: 6px;
+  white-space: nowrap;
 }
 
 .ckf-help a:hover {

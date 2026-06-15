@@ -48,6 +48,19 @@ export default function UserPortal({ user, setActivePage, onLogout }) {
             </button>
           </div>
 
+          {/* Store credit card */}
+          <div style={styles.creditCard} className="glass-panel">
+            <div style={styles.creditInfo}>
+              <span style={styles.creditTitle}>{t('UserPortal.storeCredit')}</span>
+              <span style={styles.creditValue}>{user.storeCredit.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč</span>
+              <p style={styles.creditDesc}>
+                {lang === 'CZ' 
+                  ? 'Zůstatek kreditu z Vašich schválených výkupů. Kredit můžete uplatnit v košíku jako slevu na novou objednávku.'
+                  : 'Store credit balance from your approved buylists. You can redeem this credit during checkout for new orders.'}
+              </p>
+            </div>
+          </div>
+
           {/* Order history */}
           <div style={styles.section} className="glass-panel">
             <h3 style={styles.sectionHeading}>{t('UserPortal.orderHistory')}</h3>
@@ -81,6 +94,68 @@ export default function UserPortal({ user, setActivePage, onLogout }) {
                         >
                           📄 {lang === 'CZ' ? 'Stáhnout fakturu (ERP Pohoda)' : 'Download Invoice (ERP Pohoda)'}
                         </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Buylist history */}
+          <div style={styles.section} className="glass-panel">
+            <h3 style={styles.sectionHeading}>{lang === 'CZ' ? 'Historie mých výkupů' : 'My Buylists History'}</h3>
+            {!user.buylistHistory || user.buylistHistory.length === 0 ? (
+              <p style={styles.emptyText}>
+                {lang === 'CZ' ? 'Zatím jste neodeslal(a) žádné karty k výkupu.' : 'You have not submitted any buylists yet.'}
+              </p>
+            ) : (
+              <div style={styles.list}>
+                {user.buylistHistory.map(buylist => (
+                  <div key={buylist.id} style={styles.orderItem} className="glass-card">
+                    <div style={styles.orderHeader}>
+                      <div>
+                        <span style={styles.orderId}>{lang === 'CZ' ? 'Výkup' : 'Buylist'} #{buylist.id}</span>
+                        <span style={styles.orderDate}>{buylist.date}</span>
+                      </div>
+                      <span style={styles.orderTotal}>
+                        {buylist.totalPayout.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč
+                      </span>
+                    </div>
+
+                    <div style={styles.orderBody}>
+                      <div style={styles.orderProducts}>
+                        <span style={styles.orderProdName}>
+                          <strong>{lang === 'CZ' ? 'Metoda výplaty:' : 'Payout Method:'}</strong>{' '}
+                          {buylist.payoutMethod === 'Store Credit' 
+                            ? (lang === 'CZ' ? 'Store Kredit (+25% bonus)' : 'Store Credit (+25% bonus)') 
+                            : (lang === 'CZ' ? 'Hotovost / Bankovní převod' : 'Cash / Bank Transfer')}
+                        </span>
+                        <span style={styles.orderProdName}>
+                          <strong>{lang === 'CZ' ? 'Karty:' : 'Cards:'}</strong>{' '}
+                          {buylist.items ? buylist.items.map(it => `${it.quantity}x ${it.name} (${it.condition})`).join(', ') : ''}
+                          {buylist.bulk && buylist.bulk.length > 0 ? (
+                            `, ${buylist.bulk.map(b => `${b.count}x ${b.type}`).join(', ')}`
+                          ) : ''}
+                        </span>
+                      </div>
+                      <div style={styles.orderActions}>
+                        <span 
+                          style={{
+                            fontSize: '11px',
+                            fontWeight: '800',
+                            backgroundColor: buylist.status && buylist.status.includes('Schváleno') 
+                              ? 'rgba(34, 197, 94, 0.15)' 
+                              : 'rgba(245, 158, 11, 0.15)',
+                            color: buylist.status && buylist.status.includes('Schváleno') 
+                              ? 'var(--color-green)' 
+                              : 'var(--color-gold)',
+                            padding: '4px 10px',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          {buylist.status}
+                        </span>
                       </div>
                     </div>
                   </div>

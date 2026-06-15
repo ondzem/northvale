@@ -19,7 +19,7 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
   const [bulkCounts, setBulkCounts] = useState(
     bulkRates.reduce((acc, rate) => ({ ...acc, [rate.id]: 0 }), {})
   );
-  const payoutMethod = 'cash';
+  const [payoutMethod, setPayoutMethod] = useState('cash');
 
   // Get only single cards for searching
   const singleCards = products.filter(p => p.type === 'single');
@@ -93,7 +93,7 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
   }, 0);
 
   const cashTotal = Math.round(singlesCashTotal + bulkCashTotal);
-  const finalTotal = cashTotal;
+  const finalTotal = payoutMethod === 'Store Credit' ? Math.round(cashTotal * 1.25) : cashTotal;
 
   const handleSubmit = () => {
     if (buylistCart.length === 0 && Object.values(bulkCounts).every(v => v === 0)) {
@@ -278,17 +278,35 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
           {/* Payout method info */}
           <div style={styles.payoutChoice}>
             <h4 style={styles.choiceHeading}>{lang === 'CZ' ? 'Způsob výplaty:' : 'Payout Method:'}</h4>
-            <div 
-              style={{
-                ...styles.choiceCard,
-                borderColor: 'rgba(63, 63, 70, 0.4)',
-                backgroundColor: 'transparent',
-                cursor: 'default'
-              }}
-              className="glass-card"
-            >
-              <span style={styles.choiceTitle}>{t('BuylistPortal.cashTitle')}</span>
-              <span style={styles.choiceDesc}>{t('BuylistPortal.cashDesc')}</span>
+            <div style={styles.choiceGrid}>
+              <div 
+                style={{
+                  ...styles.choiceCard,
+                  borderColor: payoutMethod === 'cash' ? 'var(--color-gold)' : 'rgba(255, 255, 255, 0.08)',
+                  backgroundColor: payoutMethod === 'cash' ? 'rgba(218, 165, 32, 0.05)' : 'transparent',
+                  transition: 'all 0.2s ease',
+                }}
+                className="glass-card"
+                onClick={() => setPayoutMethod('cash')}
+              >
+                <span style={styles.choiceTitle}>{t('BuylistPortal.cashTitle')}</span>
+                <span style={styles.choiceDesc}>{t('BuylistPortal.cashDesc')}</span>
+              </div>
+              <div 
+                style={{
+                  ...styles.choiceCard,
+                  borderColor: payoutMethod === 'Store Credit' ? 'var(--color-gold)' : 'rgba(255, 255, 255, 0.08)',
+                  backgroundColor: payoutMethod === 'Store Credit' ? 'rgba(218, 165, 32, 0.05)' : 'transparent',
+                  transition: 'all 0.2s ease',
+                }}
+                className="glass-card"
+                onClick={() => setPayoutMethod('Store Credit')}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={styles.choiceTitle}>{t('BuylistPortal.storeCreditTitle')}</span>
+                </div>
+                <span style={styles.choiceDesc}>{t('BuylistPortal.storeCreditDesc')}</span>
+              </div>
             </div>
           </div>
 
@@ -302,6 +320,14 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
               <span>{lang === 'CZ' ? 'Bulk výkup:' : 'Bulk cards:'}</span>
               <span>{bulkCashTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}</span>
             </div>
+            {payoutMethod === 'Store Credit' && (
+              <div style={styles.summaryRow}>
+                <span>{lang === 'CZ' ? 'Bonus za Store Credit (+25%):' : 'Store Credit Bonus (+25%):'}</span>
+                <span style={{ color: 'var(--color-green)', fontWeight: '600' }}>
+                  +{Math.round(cashTotal * 0.25).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}
+                </span>
+              </div>
+            )}
             
             <div style={styles.totalRow}>
               <span>{lang === 'CZ' ? 'Celková odhadovaná cena:' : 'Total Estimated Payout:'}</span>
