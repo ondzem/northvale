@@ -75,7 +75,7 @@ export default function Favorites({ products, addToCart, setSelectedProductId, s
         </h2>
 
         {favoriteProducts.length === 0 ? (
-          <div className="glass-panel" style={{ padding: '60px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', textAlign: 'center' }}>
+          <div className="glass-panel" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', padding: '60px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', textAlign: 'center' }}>
             <span style={{ fontSize: '56px' }}>❤️</span>
             <h3 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>{t('Favorites.emptyTitle')}</h3>
             <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>{t('Favorites.emptyDesc')}</p>
