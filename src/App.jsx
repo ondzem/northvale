@@ -180,6 +180,66 @@ function AppContent() {
   const [searchQuery, setSearchQuery] = useState(initialUrlState.searchQuery);
   const [filters, setFilters] = useState(initialUrlState.filters);
 
+  // User and Session State (Declared at top to avoid hoisting reference issues)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  // Cart State (Initialized from localStorage)
+  const [cart, setCart] = useState(() => {
+    try {
+      const stored = localStorage.getItem('northvale-cart');
+      return stored ? JSON.parse(stored) : [];
+    } catch (err) {
+      console.warn(err);
+      return [];
+    }
+  });
+
+  // Favorites State (Synchronized from individual fav-* local storage keys)
+  const [favorites, setFavorites] = useState(() => {
+    const list = [];
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('fav-')) {
+          const val = localStorage.getItem(key);
+          if (val === 'true') {
+            list.push(key.replace('fav-', ''));
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+    return list;
+  });
+
+  // User State
+  const [user, setUser] = useState({
+    id: '',
+    orderHistory: [],
+    gradingSubmissions: [],
+    buylistHistory: [],
+    storeCredit: 0,
+    name: '',
+    email: '',
+    phone: '',
+    role: 'customer',
+    avatar: '/user.png',
+    billingCompany: '',
+    billingName: '',
+    billingStreet: '',
+    billingCity: '',
+    billingZip: '',
+    billingCountry: '',
+    billingIco: '',
+    billingDic: '',
+    billingBankAccount: '',
+    shippingAddresses: [],
+    newsletter: false,
+    twoFactorEnabled: false
+  });
+
   // Supabase auth state change handler
   const handleAuthSession = async (session) => {
     if (session) {
@@ -385,9 +445,6 @@ function AppContent() {
 
 
   // selectedProductId is declared at the top
-  
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const handleLogin = (email, name = '') => {
     setIsLoggedIn(true);
@@ -428,36 +485,6 @@ function AppContent() {
     );
   };
   // Search and Filters are declared at the top
-
-  // Cart State (Initialized from localStorage)
-  const [cart, setCart] = useState(() => {
-    try {
-      const stored = localStorage.getItem('northvale-cart');
-      return stored ? JSON.parse(stored) : [];
-    } catch (err) {
-      console.warn(err);
-      return [];
-    }
-  });
-
-  // Favorites State (Synchronized from individual fav-* local storage keys)
-  const [favorites, setFavorites] = useState(() => {
-    const list = [];
-    try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('fav-')) {
-          const val = localStorage.getItem(key);
-          if (val === 'true') {
-            list.push(key.replace('fav-', ''));
-          }
-        }
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-    return list;
-  });
 
   // Listen to local favorites changes (triggered by card clicks)
   useEffect(() => {
@@ -633,32 +660,6 @@ function AppContent() {
       setToast(prev => ({ ...prev, visible: false }));
     }, 4000);
   };
-
-  // User State
-  const [user, setUser] = useState({
-    id: '',
-    orderHistory: [],
-    gradingSubmissions: [],
-    buylistHistory: [],
-    storeCredit: 0,
-    name: '',
-    email: '',
-    phone: '',
-    role: 'customer',
-    avatar: '/user.png',
-    billingCompany: '',
-    billingName: '',
-    billingStreet: '',
-    billingCity: '',
-    billingZip: '',
-    billingCountry: '',
-    billingIco: '',
-    billingDic: '',
-    billingBankAccount: '',
-    shippingAddresses: [],
-    newsletter: false,
-    twoFactorEnabled: false
-  });
 
   // Buylists State (Admin approvals)
   const [buylists, setBuylists] = useState([
