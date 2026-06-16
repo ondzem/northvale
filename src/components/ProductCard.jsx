@@ -79,6 +79,19 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
     }
   });
 
+  useEffect(() => {
+    const handleFavsChange = () => {
+      try {
+        const saved = localStorage.getItem(`fav-${product.id}`);
+        setIsFavorite(saved === 'true');
+      } catch {
+        setIsFavorite(false);
+      }
+    };
+    window.addEventListener('local-favorites-changed', handleFavsChange);
+    return () => window.removeEventListener('local-favorites-changed', handleFavsChange);
+  }, [product.id]);
+
   const isSingle = product.type === 'single';
   const hasVariants = isSingle && product.variants && product.variants.length > 0;
   const currentVariant = hasVariants ? product.variants[selectedVariantIndex] : null;

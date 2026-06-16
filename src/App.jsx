@@ -304,6 +304,11 @@ function AppContent() {
         console.warn(err);
       }
       setFavorites(dbFavorites);
+      try {
+        window.dispatchEvent(new Event('local-favorites-changed'));
+      } catch (err) {
+        console.warn(err);
+      }
 
     } else {
       setIsLoggedIn(false);
@@ -346,6 +351,11 @@ function AppContent() {
       }
       setCart([]);
       setFavorites([]);
+      try {
+        window.dispatchEvent(new Event('local-favorites-changed'));
+      } catch (err) {
+        console.warn(err);
+      }
     }
   };
 
