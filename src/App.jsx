@@ -205,8 +205,46 @@ function AppContent() {
         phone: profile?.phone || authUser.user_metadata?.phone || '',
         role: profile?.role || 'customer',
         storeCredit: profile?.store_credit || 0,
-        avatar: authUser.user_metadata?.avatar_url || '/user.png'
+        avatar: authUser.user_metadata?.avatar_url || '/user.png',
+        billingCompany: profile?.billing_company || '',
+        billingName: profile?.billing_name || '',
+        billingStreet: profile?.billing_street || '',
+        billingCity: profile?.billing_city || '',
+        billingZip: profile?.billing_zip || '',
+        billingCountry: profile?.billing_country || '',
+        billingIco: profile?.billing_ico || '',
+        billingDic: profile?.billing_dic || '',
+        billingBankAccount: profile?.billing_bank_account || '',
+        shippingAddresses: profile?.shipping_addresses || [],
+        newsletter: profile?.newsletter || false,
+        twoFactorEnabled: profile?.two_factor_enabled || false,
+        orderHistory: profile?.order_history || [],
+        buylistHistory: profile?.buylist_history || [],
+        gradingSubmissions: profile?.grading_submissions || []
       }));
+
+      // Load user's cart from database profile
+      if (profile?.cart) {
+        setCart(profile.cart);
+      }
+
+      // Load user's favorites from database profile and sync to local storage
+      const dbFavorites = profile?.favorites || [];
+      try {
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('fav-')) {
+            localStorage.removeItem(key);
+          }
+        }
+        dbFavorites.forEach(id => {
+          localStorage.setItem(`fav-${id}`, 'true');
+        });
+      } catch (err) {
+        console.warn(err);
+      }
+      setFavorites(dbFavorites);
+
     } else {
       setIsLoggedIn(false);
       setUser({
@@ -219,8 +257,35 @@ function AppContent() {
         email: '',
         phone: '',
         role: 'customer',
-        avatar: '/user.png'
+        avatar: '/user.png',
+        billingCompany: '',
+        billingName: '',
+        billingStreet: '',
+        billingCity: '',
+        billingZip: '',
+        billingCountry: '',
+        billingIco: '',
+        billingDic: '',
+        billingBankAccount: '',
+        shippingAddresses: [],
+        newsletter: false,
+        twoFactorEnabled: false
       });
+
+      // Clear cart and favorites from localStorage and state on sign out
+      try {
+        localStorage.removeItem('northvale-cart');
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('fav-')) {
+            localStorage.removeItem(key);
+          }
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+      setCart([]);
+      setFavorites([]);
     }
   };
 
@@ -325,9 +390,11 @@ function AppContent() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const handleLogin = (email, name = '') => {
+    setIsLoggedIn(true);
+    setActivePage('profile');
     showToast(
       lang === 'CZ'
-        ? `Byl jste úspěšně přihlášen jako ${name || email}`
+        ? `Byl(a) jste úspěšně přihlášen(a) jako ${name || email}`
         : `Successfully signed in as ${name || email}`,
       'success'
     );
@@ -362,8 +429,99 @@ function AppContent() {
   };
   // Search and Filters are declared at the top
 
-  // Cart State
-  const [cart, setCart] = useState([]);
+  // Cart State (Initialized from localStorage)
+  const [cart, setCart] = useState(() => {
+    try {
+      const stored = localStorage.getItem('northvale-cart');
+      return stored ? JSON.parse(stored) : [];
+    } catch (err) {
+      console.warn(err);
+      return [];
+    }
+  });
+
+  // Favorites State (Synchronized from individual fav-* local storage keys)
+  const [favorites, setFavorites] = useState(() => {
+    const list = [];
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('fav-')) {
+          const val = localStorage.getItem(key);
+          if (val === 'true') {
+            list.push(key.replace('fav-', ''));
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+    return list;
+  });
+
+  // Listen to local favorites changes (triggered by card clicks)
+  useEffect(() => {
+    const handleFavsChange = () => {
+      const list = [];
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('fav-')) {
+            const val = localStorage.getItem(key);
+            if (val === 'true') {
+              list.push(key.replace('fav-', ''));
+            }
+          }
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+      setFavorites(list);
+    };
+
+    window.addEventListener('local-favorites-changed', handleFavsChange);
+    return () => window.removeEventListener('local-favorites-changed', handleFavsChange);
+  }, []);
+
+  // Sync cart to localStorage and Supabase (if logged in)
+  useEffect(() => {
+    try {
+      localStorage.setItem('northvale-cart', JSON.stringify(cart));
+    } catch (err) {
+      console.warn(err);
+    }
+
+    const syncCart = async () => {
+      if (isLoggedIn && user.id) {
+        try {
+          await supabase
+            .from('profiles')
+            .update({ cart: cart })
+            .eq('id', user.id);
+        } catch (err) {
+          console.warn('Cart database sync failed:', err);
+        }
+      }
+    };
+    syncCart();
+  }, [cart, isLoggedIn, user.id]);
+
+  // Sync favorites to Supabase (if logged in)
+  useEffect(() => {
+    const syncFavorites = async () => {
+      if (isLoggedIn && user.id) {
+        try {
+          await supabase
+            .from('profiles')
+            .update({ favorites: favorites })
+            .eq('id', user.id);
+        } catch (err) {
+          console.warn('Favorites database sync failed:', err);
+        }
+      }
+    };
+    syncFavorites();
+  }, [favorites, isLoggedIn, user.id]);
 
   // Toast Notification State
   const [toast, setToast] = useState({ message: '', visible: false, type: 'success' });
@@ -487,7 +645,19 @@ function AppContent() {
     email: '',
     phone: '',
     role: 'customer',
-    avatar: '/user.png'
+    avatar: '/user.png',
+    billingCompany: '',
+    billingName: '',
+    billingStreet: '',
+    billingCity: '',
+    billingZip: '',
+    billingCountry: '',
+    billingIco: '',
+    billingDic: '',
+    billingBankAccount: '',
+    shippingAddresses: [],
+    newsletter: false,
+    twoFactorEnabled: false
   });
 
   // Buylists State (Admin approvals)
@@ -540,33 +710,86 @@ function AppContent() {
   };
 
   // Submit Order Action
-  const submitOrder = (order, creditApplied = 0) => {
+  const submitOrder = async (order, creditApplied = 0) => {
+    let updatedOrders = [];
+    let newCredit = 0;
     setUser(prev => {
+      updatedOrders = [order, ...prev.orderHistory];
+      newCredit = Math.max(0, prev.storeCredit - creditApplied);
       return {
         ...prev,
-        orderHistory: [order, ...prev.orderHistory],
-        storeCredit: Math.max(0, prev.storeCredit - creditApplied)
+        orderHistory: updatedOrders,
+        storeCredit: newCredit
       };
     });
 
     setCart([]);
+
+    // Save to Supabase if logged in
+    try {
+      const sessionRes = await supabase.auth.getSession();
+      const session = sessionRes.data?.session;
+      if (session) {
+        await supabase
+          .from('profiles')
+          .upsert({
+            id: session.user.id,
+            order_history: updatedOrders,
+            store_credit: newCredit
+          });
+      }
+    } catch (err) {
+      console.error('Failed to sync order history to Supabase:', err);
+    }
   };
 
   // Submit Buylist Action
-  const submitBuylist = (submission) => {
+  const submitBuylist = async (submission) => {
     setBuylists(prev => [submission, ...prev]);
-    setUser(prev => ({
-      ...prev,
-      buylistHistory: [submission, ...prev.buylistHistory]
-    }));
+    let updatedBuylists = [];
+    setUser(prev => {
+      updatedBuylists = [submission, ...prev.buylistHistory];
+      return {
+        ...prev,
+        buylistHistory: updatedBuylists
+      };
+    });
+
+    try {
+      const sessionRes = await supabase.auth.getSession();
+      const session = sessionRes.data?.session;
+      if (session) {
+        await supabase
+          .from('profiles')
+          .upsert({ id: session.user.id, buylist_history: updatedBuylists });
+      }
+    } catch (err) {
+      console.error('Failed to sync buylist history to Supabase:', err);
+    }
   };
 
   // Submit Grading Action
-  const submitGrading = (submission) => {
-    setUser(prev => ({
-      ...prev,
-      gradingSubmissions: [submission, ...prev.gradingSubmissions]
-    }));
+  const submitGrading = async (submission) => {
+    let updatedGrading = [];
+    setUser(prev => {
+      updatedGrading = [submission, ...prev.gradingSubmissions];
+      return {
+        ...prev,
+        gradingSubmissions: updatedGrading
+      };
+    });
+
+    try {
+      const sessionRes = await supabase.auth.getSession();
+      const session = sessionRes.data?.session;
+      if (session) {
+        await supabase
+          .from('profiles')
+          .upsert({ id: session.user.id, grading_submissions: updatedGrading });
+      }
+    } catch (err) {
+      console.error('Failed to sync grading submissions to Supabase:', err);
+    }
   };
 
   // Approve Buylist Action (Admin)
@@ -746,8 +969,10 @@ function AppContent() {
         {activePage === 'profile' && (
           <UserPortal 
             user={user}
+            setUser={setUser}
             setActivePage={setActivePage}
             onLogout={handleLogout}
+            showToast={showToast}
           />
         )}
 

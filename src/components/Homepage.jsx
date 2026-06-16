@@ -1538,7 +1538,7 @@ const styles = {
   preorderBadge: {
     fontSize: '9px',
     fontWeight: '800',
-    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    backgroundColor: 'rgba(253, 189, 22, 0.15)',
     color: 'var(--color-gold)',
     padding: '2px 6px',
     borderRadius: '2px',

@@ -74,7 +74,7 @@ export default function AdminPanel({ buylists, approveBuylist }) {
                     <span 
                       style={{
                         ...styles.statusBadge,
-                        backgroundColor: bl.status === 'Schváleno - Vyplaceno' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                        backgroundColor: bl.status === 'Schváleno - Vyplaceno' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(253, 189, 22, 0.15)',
                         color: bl.status === 'Schváleno - Vyplaceno' ? 'var(--color-green)' : 'var(--color-gold)'
                       }}
                     >

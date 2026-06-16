@@ -113,6 +113,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
     setIsFavorite(nextVal);
     try {
       localStorage.setItem(`fav-${product.id}`, String(nextVal));
+      window.dispatchEvent(new Event('local-favorites-changed'));
     } catch (err) {
       console.error(err);
     }

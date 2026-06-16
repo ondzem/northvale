@@ -105,7 +105,7 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
                   style={{
                     ...styles.selectionCard,
                     borderColor: company === 'PSA' ? 'var(--color-gold)' : 'rgba(63, 63, 70, 0.4)',
-                    backgroundColor: company === 'PSA' ? 'rgba(245, 158, 11, 0.04)' : 'transparent'
+                    backgroundColor: company === 'PSA' ? 'rgba(253, 189, 22, 0.04)' : 'transparent'
                   }}
                   onClick={() => setCompany('PSA')}
                   className="glass-card"
@@ -123,7 +123,7 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
                   style={{
                     ...styles.selectionCard,
                     borderColor: company === 'Beckett' ? 'var(--color-gold)' : 'rgba(63, 63, 70, 0.4)',
-                    backgroundColor: company === 'Beckett' ? 'rgba(245, 158, 11, 0.04)' : 'transparent'
+                    backgroundColor: company === 'Beckett' ? 'rgba(253, 189, 22, 0.04)' : 'transparent'
                   }}
                   onClick={() => setCompany('Beckett')}
                   className="glass-card"
@@ -141,7 +141,7 @@ export default function GradingPortal({ submitGrading, setActivePage }) {
                   style={{
                     ...styles.selectionCard,
                     borderColor: company === 'TAG' ? 'var(--color-gold)' : 'rgba(63, 63, 70, 0.4)',
-                    backgroundColor: company === 'TAG' ? 'rgba(245, 158, 11, 0.04)' : 'transparent'
+                    backgroundColor: company === 'TAG' ? 'rgba(253, 189, 22, 0.04)' : 'transparent'
                   }}
                   onClick={() => setCompany('TAG')}
                   className="glass-card"

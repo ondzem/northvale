@@ -241,7 +241,7 @@ const styles = {
   condBadge: {
     fontSize: '11px',
     fontWeight: '800',
-    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    backgroundColor: 'rgba(253, 189, 22, 0.15)',
     color: 'var(--color-gold)',
     padding: '4px 10px',
     borderRadius: 'var(--radius-sm)',

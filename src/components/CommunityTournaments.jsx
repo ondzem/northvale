@@ -178,7 +178,7 @@ const styles = {
   badge: {
     fontSize: '9px',
     fontWeight: '800',
-    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    backgroundColor: 'rgba(253, 189, 22, 0.15)',
     color: 'var(--color-gold)',
     padding: '3px 8px',
     borderRadius: 'var(--radius-sm)',

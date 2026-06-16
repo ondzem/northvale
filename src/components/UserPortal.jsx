@@ -1,545 +1,1359 @@
-
-import { FEATURE_FLAGS } from '../config';
+import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
+import { FEATURE_FLAGS } from '../config';
+import { supabase } from '../supabase';
 
-export default function UserPortal({ user, setActivePage, onLogout }) {
+export default function UserPortal({ user, setUser, setActivePage, onLogout, showToast }) {
   const { lang, t } = useTranslation();
+  const [activeTab, setActiveTab] = useState('settings');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  const getGradingStepIndex = (status) => {
-    const steps = ['Příprava', 'Odesláno do USA', 'Zpracování', 'Nagradováno', 'Na cestě zpět', 'Připraveno'];
-    const stepsEN = ['Preparation', 'Sent to USA', 'Processing', 'Graded', 'On way back', 'Ready'];
-    
-    const idx = steps.indexOf(status);
-    if (idx !== -1) return idx;
-    return stepsEN.indexOf(status);
+  // Contact Info states
+  const [isEditingContact, setIsEditingContact] = useState(false);
+  const [contactName, setContactName] = useState(user.name || '');
+  const [contactPhone, setContactPhone] = useState(user.phone || '');
+
+  // Billing Info states
+  const [isEditingBilling, setIsEditingBilling] = useState(false);
+  const [billingCompany, setBillingCompany] = useState(user.billingCompany || '');
+  const [billingName, setBillingName] = useState(user.billingName || '');
+  const [billingStreet, setBillingStreet] = useState(user.billingStreet || '');
+  const [billingCity, setBillingCity] = useState(user.billingCity || '');
+  const [billingZip, setBillingZip] = useState(user.billingZip || '');
+  const [billingCountry, setBillingCountry] = useState(user.billingCountry || 'Česká republika');
+  const [billingIco, setBillingIco] = useState(user.billingIco || '');
+  const [billingDic, setBillingDic] = useState(user.billingDic || '');
+  const [billingBankAccount, setBillingBankAccount] = useState(user.billingBankAccount || '');
+
+  // Shipping Address states
+  const [isAddingAddress, setIsAddingAddress] = useState(false);
+  const [editingAddressIndex, setEditingAddressIndex] = useState(null);
+  const [shipName, setShipName] = useState('');
+  const [shipCompany, setShipCompany] = useState('');
+  const [shipStreet, setShipStreet] = useState('');
+  const [shipCity, setShipCity] = useState('');
+  const [shipZip, setShipZip] = useState('');
+  const [shipCountry, setShipCountry] = useState('Česká republika');
+  const [shipPhone, setShipPhone] = useState('');
+
+  // Security Password state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  // 2FA Setup states
+  const [isSettingUp2FA, setIsSettingUp2FA] = useState(false);
+  const [enrolledFactor, setEnrolledFactor] = useState(null); // stores { id, qrCode, secret }
+  const [authCode, setAuthCode] = useState('');
+  const [authCodeError, setAuthCodeError] = useState(false);
+
+  // Custom Confirm Dialog state
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    cancelText: '',
+    onConfirm: null,
+    isDanger: false
+  });
+
+  const showConfirm = ({ title, message, confirmText, cancelText, onConfirm, isDanger = false }) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      confirmText: confirmText || (lang === 'CZ' ? 'Potvrdit' : 'Confirm'),
+      cancelText: cancelText || (lang === 'CZ' ? 'Zrušit' : 'Cancel'),
+      onConfirm: () => {
+        onConfirm();
+        closeConfirm();
+      },
+      isDanger
+    });
   };
 
-  const gradingSteps = lang === 'CZ'
-    ? ['Příprava', 'Odesláno do USA', 'Zpracování', 'Nagradováno', 'Na cestě zpět', 'Připraveno']
-    : ['Preparation', 'Sent to USA', 'Processing', 'Graded', 'On way back', 'Ready'];
+  const closeConfirm = () => {
+    setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+  };
+
+  // Responsive state
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Synchronize input fields when user object changes from Supabase fetch
+  useEffect(() => {
+    setContactName(user.name || '');
+    setContactPhone(user.phone || '');
+    setBillingCompany(user.billingCompany || '');
+    setBillingName(user.billingName || '');
+    setBillingStreet(user.billingStreet || '');
+    setBillingCity(user.billingCity || '');
+    setBillingZip(user.billingZip || '');
+    setBillingCountry(user.billingCountry || 'Česká republika');
+    setBillingIco(user.billingIco || '');
+    setBillingDic(user.billingDic || '');
+    setBillingBankAccount(user.billingBankAccount || '');
+  }, [user]);
+
+  // Save Contact Info Action
+  const handleSaveContact = async () => {
+    if (contactName.trim().length < 3) {
+      showToast(lang === 'CZ' ? 'Celé jméno musí mít alespoň 3 znaky.' : 'Full name must be at least 3 characters.', 'error');
+      return;
+    }
+    
+    let isSuccess = false;
+    if (user.id) {
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .upsert({ id: user.id, full_name: contactName, phone: contactPhone });
+
+        if (!error) {
+          isSuccess = true;
+        } else {
+          console.warn('Database save failed (falling back to state):', error.message);
+        }
+      } catch (err) {
+        console.warn('Database connection error:', err);
+      }
+    }
+
+    // Always update local React state so UI is functional
+    setUser(prev => ({ ...prev, name: contactName, phone: contactPhone }));
+    setIsEditingContact(false);
+    
+    if (isSuccess) {
+      showToast(lang === 'CZ' ? 'Kontaktní údaje byly úspěšně uloženy.' : 'Contact info was successfully saved.', 'success');
+    } else {
+      showToast(
+        lang === 'CZ' 
+          ? 'Kontaktní údaje uloženy v prohlížeči (pro trvalé uložení spusťte SQL skript v Supabase).' 
+          : 'Contact info saved in memory (run the SQL script in Supabase to save permanently).', 
+        'warning'
+      );
+    }
+  };
+
+  // Save Billing Info Action
+  const handleSaveBilling = async () => {
+    const billingData = {
+      billing_company: billingCompany,
+      billing_name: billingName,
+      billing_street: billingStreet,
+      billing_city: billingCity,
+      billing_zip: billingZip,
+      billing_country: billingCountry,
+      billing_ico: billingIco,
+      billing_dic: billingDic,
+      billing_bank_account: billingBankAccount
+    };
+
+    let isSuccess = false;
+    if (user.id) {
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .upsert({ id: user.id, ...billingData });
+
+        if (!error) {
+          isSuccess = true;
+        } else {
+          console.warn('Database save failed (falling back to state):', error.message);
+        }
+      } catch (err) {
+        console.warn('Database connection error:', err);
+      }
+    }
+
+    setUser(prev => ({
+      ...prev,
+      billingCompany,
+      billingName,
+      billingStreet,
+      billingCity,
+      billingZip,
+      billingCountry,
+      billingIco,
+      billingDic,
+      billingBankAccount
+    }));
+    setIsEditingBilling(false);
+
+    if (isSuccess) {
+      showToast(lang === 'CZ' ? 'Fakturační údaje byly úspěšně uloženy.' : 'Billing details were successfully saved.', 'success');
+    } else {
+      showToast(
+        lang === 'CZ' 
+          ? 'Fakturační údaje uloženy v prohlížeči (pro trvalé uložení spusťte SQL skript v Supabase).' 
+          : 'Billing details saved in memory (run the SQL script in Supabase to save permanently).', 
+        'warning'
+      );
+    }
+  };
+
+  // Address form cleanup
+  const clearAddressForm = () => {
+    setShipName('');
+    setShipCompany('');
+    setShipStreet('');
+    setShipCity('');
+    setShipZip('');
+    setShipCountry('Česká republika');
+    setShipPhone('');
+  };
+
+  // Add / Edit Shipping Address Action
+  const handleSaveAddress = async (e) => {
+    e.preventDefault();
+    if (!shipName || !shipStreet || !shipCity || !shipZip || !shipPhone) {
+      showToast(lang === 'CZ' ? 'Prosím vyplňte všechna povinná pole.' : 'Please fill in all required fields.', 'error');
+      return;
+    }
+
+    const newAddr = {
+      name: shipName,
+      company: shipCompany,
+      street: shipStreet,
+      city: shipCity,
+      zip: shipZip,
+      country: shipCountry,
+      phone: shipPhone
+    };
+
+    let updatedAddresses = [...(user.shippingAddresses || [])];
+    if (editingAddressIndex !== null) {
+      updatedAddresses[editingAddressIndex] = newAddr;
+    } else {
+      updatedAddresses.push(newAddr);
+    }
+
+    let isSuccess = false;
+    if (user.id) {
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .upsert({ id: user.id, shipping_addresses: updatedAddresses });
+
+        if (!error) {
+          isSuccess = true;
+        } else {
+          console.warn('Database save failed (falling back to state):', error.message);
+        }
+      } catch (err) {
+        console.warn('Database connection error:', err);
+      }
+    }
+
+    setUser(prev => ({ ...prev, shippingAddresses: updatedAddresses }));
+    setIsAddingAddress(false);
+    setEditingAddressIndex(null);
+    clearAddressForm();
+
+    if (isSuccess) {
+      showToast(lang === 'CZ' ? 'Adresa byla úspěšně uložena.' : 'Address was successfully saved.', 'success');
+    } else {
+      showToast(
+        lang === 'CZ' 
+          ? 'Adresa byla uložena v prohlížeči (pro trvalé uložení spusťte SQL skript v Supabase).' 
+          : 'Address was saved in memory (run the SQL script in Supabase to save permanently).', 
+        'warning'
+      );
+    }
+  };
+
+  // Edit address trigger
+  const triggerEditAddress = (idx) => {
+    const addr = user.shippingAddresses[idx];
+    setEditingAddressIndex(idx);
+    setShipName(addr.name || '');
+    setShipCompany(addr.company || '');
+    setShipStreet(addr.street || '');
+    setShipCity(addr.city || '');
+    setShipZip(addr.zip || '');
+    setShipCountry(addr.country || 'Česká republika');
+    setShipPhone(addr.phone || '');
+    setIsAddingAddress(true);
+  };
+
+  // Delete address action
+  const handleDeleteAddress = (idx) => {
+    showConfirm({
+      title: lang === 'CZ' ? 'Odstranit adresu' : 'Delete Address',
+      message: lang === 'CZ' ? 'Opravdu chcete tuto doručovací adresu trvale odstranit?' : 'Are you sure you want to permanently delete this shipping address?',
+      confirmText: lang === 'CZ' ? 'Smazat' : 'Delete',
+      isDanger: true,
+      onConfirm: async () => {
+        const updatedAddresses = (user.shippingAddresses || []).filter((_, i) => i !== idx);
+        
+        let isSuccess = false;
+        if (user.id) {
+          try {
+            const { error } = await supabase
+              .from('profiles')
+              .upsert({ id: user.id, shipping_addresses: updatedAddresses });
+
+            if (!error) {
+              isSuccess = true;
+            } else {
+              console.warn('Database save failed (falling back to state):', error.message);
+            }
+          } catch (err) {
+            console.warn('Database connection error:', err);
+          }
+        }
+
+        setUser(prev => ({ ...prev, shippingAddresses: updatedAddresses }));
+
+        if (isSuccess) {
+          showToast(lang === 'CZ' ? 'Adresa byla úspěšně odstraněna.' : 'Address was successfully deleted.', 'success');
+        } else {
+          showToast(
+            lang === 'CZ' 
+              ? 'Adresa odstraněna v prohlížeči (pro trvalé uložení spusťte SQL skript v Supabase).' 
+              : 'Address deleted in memory (run the SQL script in Supabase to save permanently).', 
+            'warning'
+          );
+        }
+      }
+    });
+  };
+
+  // Password update action
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (!currentPassword) {
+      showToast(lang === 'CZ' ? 'Zadejte prosím současné heslo.' : 'Please enter your current password.', 'error');
+      return;
+    }
+    if (newPassword.length < 6) {
+      showToast(lang === 'CZ' ? 'Nové heslo musí mít alespoň 6 znaků.' : 'New password must be at least 6 characters long.', 'error');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showToast(lang === 'CZ' ? 'Nová hesla se neshodují.' : 'New passwords do not match.', 'error');
+      return;
+    }
+
+    // Step 1: Verify current password by signing in
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword
+    });
+
+    if (verifyError) {
+      showToast(
+        lang === 'CZ' 
+          ? 'Současné heslo je nesprávné.' 
+          : 'Current password is incorrect.', 
+        'error'
+      );
+      return;
+    }
+
+    // Step 2: Update to the new password
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+    if (updateError) {
+      showToast(
+        lang === 'CZ' 
+          ? `Chyba při změně hesla: ${updateError.message}` 
+          : `Password change error: ${updateError.message}`, 
+        'error'
+      );
+    } else {
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      showToast(lang === 'CZ' ? 'Heslo bylo úspěšně změněno.' : 'Password was successfully updated.', 'success');
+    }
+  };
+
+  // Start 2FA Setup (Enroll factor)
+  const handleStart2FASetup = async () => {
+    try {
+      // Check if we have a real Supabase session
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        // Fallback to Mock mode
+        setEnrolledFactor({
+          id: 'mock-factor-id',
+          qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent('otpauth://totp/NORTHVALE:' + (user.email || 'test@example.com') + '?secret=JBSWY3DPEHPK3PXP&issuer=NORTHVALE')}`,
+          secret: 'JBSWY3DPEHPK3PXP',
+          isMock: true
+        });
+        setIsSettingUp2FA(true);
+        showToast(
+          lang === 'CZ' 
+            ? 'Spuštěn testovací režim 2FA (bez aktivní relace Supabase).' 
+            : 'Started mock 2FA mode (no active Supabase session).', 
+          'warning'
+        );
+        return;
+      }
+
+      // Enroll the factor
+      const { data, error } = await supabase.auth.mfa.enroll({
+        factorType: 'totp',
+        issuer: 'NORTHVALE',
+        friendlyName: user.email || 'customer'
+      });
+
+      if (error) {
+        console.error('MFA enroll error:', error);
+        showToast(lang === 'CZ' ? `Chyba při spuštění 2FA: ${error.message}` : `MFA init error: ${error.message}`, 'error');
+        return;
+      }
+
+      setEnrolledFactor({
+        id: data.id,
+        qrCode: data.totp.qr_code, // Base64 SVG data URI
+        secret: data.totp.secret,
+        isMock: false
+      });
+      setIsSettingUp2FA(true);
+    } catch (err) {
+      console.error('MFA setup error:', err);
+      showToast(lang === 'CZ' ? 'Chyba při spuštění nastavení 2FA.' : 'Error starting 2FA setup.', 'error');
+    }
+  };
+
+  // Cancel 2FA Setup
+  const handleCancel2FASetup = async () => {
+    if (enrolledFactor?.id && !enrolledFactor.isMock) {
+      try {
+        await supabase.auth.mfa.unenroll({ factorId: enrolledFactor.id });
+      } catch (err) {
+        console.warn('Failed to unenroll unverified factor:', err);
+      }
+    }
+    setEnrolledFactor(null);
+    setIsSettingUp2FA(false);
+    setAuthCode('');
+    setAuthCodeError(false);
+  };
+
+  // Setup 2FA validation
+  const handleVerify2FA = async (e) => {
+    e.preventDefault();
+    if (!authCode.trim() || authCode.trim().length !== 6) {
+      setAuthCodeError(true);
+      showToast(lang === 'CZ' ? 'Zadejte platný šestimístný kód.' : 'Please enter valid 6-digit code.', 'error');
+      return;
+    }
+
+    if (!enrolledFactor?.id) {
+      showToast(lang === 'CZ' ? 'Chyba: Chybí aktivní relace registrace 2FA.' : 'Error: Missing active 2FA enrollment session.', 'error');
+      return;
+    }
+
+    // Mock verification fallback
+    if (enrolledFactor.isMock) {
+      let isSuccess = false;
+      if (user.id) {
+        try {
+          const { error } = await supabase
+            .from('profiles')
+            .upsert({ id: user.id, two_factor_enabled: true });
+
+          if (!error) isSuccess = true;
+        } catch (err) {
+          console.warn(err);
+        }
+      }
+
+      setUser(prev => ({ ...prev, twoFactorEnabled: true }));
+      setIsSettingUp2FA(false);
+      setEnrolledFactor(null);
+      setAuthCode('');
+      setAuthCodeError(false);
+
+      if (isSuccess) {
+        showToast(lang === 'CZ' ? 'Dvoufaktorové ověření (2FA) bylo úspěšně aktivováno.' : 'Two-factor authentication (2FA) was successfully activated.', 'success');
+      } else {
+        showToast(lang === 'CZ' ? '2FA aktivováno v testovacím režimu.' : '2FA activated in test mode.', 'warning');
+      }
+      return;
+    }
+
+    // Real Supabase verification
+    try {
+      // Create challenge
+      const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({
+        factorId: enrolledFactor.id
+      });
+
+      if (challengeError) {
+        setAuthCodeError(true);
+        showToast(lang === 'CZ' ? `Chyba ověření: ${challengeError.message}` : `Verification error: ${challengeError.message}`, 'error');
+        return;
+      }
+
+      // Verify challenge
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId: enrolledFactor.id,
+        challengeId: challengeData.id,
+        code: authCode.trim()
+      });
+
+      if (verifyError) {
+        setAuthCodeError(true);
+        showToast(lang === 'CZ' ? 'Neplatný ověřovací kód.' : 'Invalid validation code.', 'error');
+        return;
+      }
+
+      // Successfully verified! Save in DB
+      let isSuccess = false;
+      if (user.id) {
+        try {
+          const { error } = await supabase
+            .from('profiles')
+            .upsert({ id: user.id, two_factor_enabled: true });
+
+          if (!error) isSuccess = true;
+        } catch (err) {
+          console.warn(err);
+        }
+      }
+
+      setUser(prev => ({ ...prev, twoFactorEnabled: true }));
+      setIsSettingUp2FA(false);
+      setEnrolledFactor(null);
+      setAuthCode('');
+      setAuthCodeError(false);
+
+      if (isSuccess) {
+        showToast(lang === 'CZ' ? 'Dvoufaktorové ověření (2FA) bylo úspěšně aktivováno.' : 'Two-factor authentication (2FA) was successfully activated.', 'success');
+      } else {
+        showToast(lang === 'CZ' ? '2FA aktivováno lokálně (pro trvalé uložení spusťte SQL skript v Supabase).' : '2FA activated locally (run the SQL script in Supabase to save permanently).', 'warning');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast(lang === 'CZ' ? 'Chyba při ověřování 2FA kódu.' : 'Error verifying 2FA code.', 'error');
+    }
+  };
+
+  // Disable 2FA
+  const handleDisable2FA = () => {
+    showConfirm({
+      title: lang === 'CZ' ? 'Deaktivovat 2FA' : 'Deactivate 2FA',
+      message: lang === 'CZ' ? 'Opravdu chcete deaktivovat dvoufaktorové ověření pro Váš účet?' : 'Are you sure you want to deactivate two-factor authentication for your account?',
+      confirmText: lang === 'CZ' ? 'Deaktivovat' : 'Deactivate',
+      isDanger: true,
+      onConfirm: async () => {
+        try {
+          // Check session
+          const { data: { session } } = await supabase.auth.getSession();
+
+          if (session) {
+            // Unenroll all verified TOTP factors
+            const { data: factors, error: listError } = await supabase.auth.mfa.listFactors();
+            if (!listError && factors?.all) {
+              const totpFactors = factors.all.filter(f => f.factor_type === 'totp' && f.status === 'verified');
+              for (const f of totpFactors) {
+                await supabase.auth.mfa.unenroll({ factorId: f.id });
+              }
+            }
+          }
+
+          let isSuccess = false;
+          if (user.id) {
+            try {
+              const { error } = await supabase
+                .from('profiles')
+                .upsert({ id: user.id, two_factor_enabled: false });
+
+              if (!error) isSuccess = true;
+            } catch (err) {
+              console.warn(err);
+            }
+          }
+
+          setUser(prev => ({ ...prev, twoFactorEnabled: false }));
+
+          if (isSuccess) {
+            showToast(lang === 'CZ' ? 'Dvoufaktorové ověření bylo deaktivováno.' : '2FA has been deactivated.', 'success');
+          } else {
+            showToast(lang === 'CZ' ? '2FA deaktivováno.' : '2FA deactivated.', 'warning');
+          }
+        } catch (err) {
+          console.error(err);
+          showToast(lang === 'CZ' ? 'Chyba při vypínání 2FA.' : 'Error disabling 2FA.', 'error');
+        }
+      }
+    });
+  };
+
+  // Toggle Newsletter
+  const handleToggleNewsletter = async (checked) => {
+    let isSuccess = false;
+    if (user.id) {
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .upsert({ id: user.id, newsletter: checked });
+
+        if (!error) isSuccess = true;
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+
+    setUser(prev => ({ ...prev, newsletter: checked }));
+
+    if (isSuccess) {
+      showToast(
+        lang === 'CZ' 
+          ? (checked ? 'Odběr newsletteru byl přihlášen.' : 'Odběr newsletteru byl odhlášen.')
+          : (checked ? 'Subscribed to newsletter.' : 'Unsubscribed from newsletter.'),
+        'success'
+      );
+    } else {
+      showToast(
+        lang === 'CZ' 
+          ? (checked ? 'Odběr newsletteru přihlášen lokálně.' : 'Odběr newsletteru odhlášen lokálně.')
+          : (checked ? 'Subscribed to newsletter (local).' : 'Unsubscribed from newsletter (local).'),
+        'warning'
+      );
+    }
+  };
+
+  // Delete User Account
+  const handleDeleteAccount = () => {
+    showConfirm({
+      title: lang === 'CZ' ? 'Zrušit klientský účet' : 'Close Account',
+      message: lang === 'CZ' 
+        ? 'Opravdu chcete zrušit svůj účet? Tato akce je nevratná a dojde k odstranění Vašeho profilu, uložených adres i fakturačních údajů.' 
+        : 'Are you sure you want to close your account? This action is permanent and will completely delete your profile, billing preferences, and addresses.',
+      confirmText: lang === 'CZ' ? 'Zrušit účet' : 'Delete Account',
+      isDanger: true,
+      onConfirm: async () => {
+        const { error } = await supabase
+          .from('profiles')
+          .delete()
+          .eq('id', user.id);
+
+        if (error) {
+          showToast(lang === 'CZ' ? `Chyba při rušení: ${error.message}` : `Error deleting: ${error.message}`, 'error');
+        } else {
+          showToast(lang === 'CZ' ? 'Váš klientský účet byl úspěšně zrušen.' : 'Your client account was successfully deleted.', 'success');
+          onLogout();
+        }
+      }
+    });
+  };
 
   return (
-    <div style={styles.container} className="container fade-in">
+    <div className="nv-profile-container fade-in">
       <h1 className="sr-only">
-        {lang === 'CZ' ? 'Můj uživatelský účet a zůstatky - NORTHVALE' : 'My Account & Submissions - NORTHVALE'}
+        {lang === 'CZ' ? 'Můj klientský účet - NORTHVALE' : 'My Account - NORTHVALE'}
       </h1>
 
-      <div style={styles.layout}>
-        {/* Left Column: Account Details & History */}
-        <div style={{ ...styles.leftCol, flex: FEATURE_FLAGS.showGrading ? '1.8 1 500px' : '1 1 100%' }}>
-          {/* User profile card */}
-          <div style={styles.profileCard} className="glass-panel">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-              {user.avatar && (
-                <img 
-                  src={user.avatar} 
-                  alt="Avatar" 
-                  style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-gold)' }} 
-                />
-              )}
-              <div style={styles.profileInfo}>
-                <span style={styles.profileLabel}>{lang === 'CZ' ? 'Přihlášen jako' : 'Logged in as'}</span>
-                <span style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-main)', display: 'block' }}>{user.name || user.email.split('@')[0]}</span>
-                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{user.email || (lang === 'CZ' ? 'sběratel@northvaletcg.eu' : 'collector@northvaletcg.eu')}</span>
-              </div>
-            </div>
-            <button className="btn btn-secondary" style={styles.logoutBtn} onClick={onLogout}>
-              {t('UserPortal.logoutBtn')}
-            </button>
-          </div>
+      {/* Top Banner (smarty.cz style) */}
+      <div className="prf-topbar">
+        <span className="prf-topbar-user">
+          {lang === 'CZ' ? 'Přihlášen jako' : 'Logged in as'}:{' '}
+          <strong>{user.name || user.email.split('@')[0]}</strong>
+        </span>
+        <button className="prf-topbar-logout" onClick={onLogout}>
+          {t('UserPortal.logoutBtn')}
+        </button>
+      </div>
 
-          {/* Store credit card */}
-          <div style={styles.creditCard} className="glass-panel">
-            <div style={styles.creditInfo}>
-              <span style={styles.creditTitle}>{t('UserPortal.storeCredit')}</span>
-              <span style={styles.creditValue}>{user.storeCredit.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč</span>
-              <p style={styles.creditDesc}>
-                {lang === 'CZ' 
-                  ? 'Zůstatek kreditu z Vašich schválených výkupů. Kredit můžete uplatnit v košíku jako slevu na novou objednávku.'
-                  : 'Store credit balance from your approved buylists. You can redeem this credit during checkout for new orders.'}
-              </p>
-            </div>
-          </div>
+      <div className="prf-shell">
+        {/* Left Navigation Menu */}
+        <aside className="prf-nav">
+          <button 
+            className={`prf-nav-item ${activeTab === 'settings' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('settings')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+            <span>{lang === 'CZ' ? 'Nastavení účtu' : 'Account Settings'}</span>
+          </button>
+          <button 
+            className={`prf-nav-item ${activeTab === 'orders' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('orders')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg>
+            <span>{lang === 'CZ' ? 'Moje objednávky' : 'My Orders'}</span>
+          </button>
+          <button 
+            className={`prf-nav-item ${activeTab === 'invoices' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('invoices')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h7M9 17h7"/></svg>
+            <span>{lang === 'CZ' ? 'Faktury' : 'Invoices'}</span>
+          </button>
+          <button 
+            className={`prf-nav-item ${activeTab === 'security' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('security')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/></svg>
+            <span>{lang === 'CZ' ? 'Zabezpečení' : 'Security'}</span>
+          </button>
+          <button 
+            className={`prf-nav-item ${activeTab === 'newsletters' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('newsletters')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+            <span>{lang === 'CZ' ? 'Newslettery' : 'Newsletters'}</span>
+          </button>
+          <div className="prf-nav-divider"></div>
+          <button 
+            className="prf-nav-item prf-nav-logout"
+            onClick={onLogout}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            <span>{lang === 'CZ' ? 'Odhlásit se' : 'Logout'}</span>
+          </button>
+        </aside>
 
-          {/* Order history */}
-          <div style={styles.section} className="glass-panel">
-            <h3 style={styles.sectionHeading}>{t('UserPortal.orderHistory')}</h3>
-            {user.orderHistory.length === 0 ? (
-              <p style={styles.emptyText}>{t('UserPortal.noOrders')}</p>
-            ) : (
-              <div style={styles.list}>
-                {user.orderHistory.map(order => (
-                  <div key={order.id} style={styles.orderItem} className="glass-card">
-                    <div style={styles.orderHeader}>
-                      <div>
-                        <span style={styles.orderId}>{lang === 'CZ' ? 'Objednávka' : 'Order'} #{order.id}</span>
-                        <span style={styles.orderDate}>{order.date}</span>
-                      </div>
-                      <span style={styles.orderTotal}>{order.finalTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč</span>
+        {/* Right Content Area */}
+        <main className="prf-main">
+          
+          {/* TAB 1: SETTINGS */}
+          {activeTab === 'settings' && (
+            <div className="prf-tab-content">
+              <span className="nv-eyebrow">{lang === 'CZ' ? 'Můj účet' : 'My Account'}</span>
+              <h2 className="prf-title">{lang === 'CZ' ? 'Nastavení účtu' : 'Account Settings'}</h2>
+              
+              {/* Contact details */}
+              <section className="prf-block">
+                <div className="prf-block-head">
+                  <h3>{lang === 'CZ' ? 'Kontaktní údaje' : 'Contact Details'}</h3>
+                  {!isEditingContact && (
+                    <button className="prf-edit" onClick={() => setIsEditingContact(true)}>
+                      {lang === 'CZ' ? 'Upravit' : 'Edit'}
+                    </button>
+                  )}
+                </div>
+
+                {isEditingContact ? (
+                  <div className="prf-form">
+                    <div className="prf-input-group">
+                      <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Celé jméno' : 'Full Name'}</label>
+                      <input 
+                        type="text" 
+                        value={contactName} 
+                        onChange={e => setContactName(e.target.value)} 
+                        className="prf-input" 
+                      />
                     </div>
-
-                    <div style={styles.orderBody}>
-                      <div style={styles.orderProducts}>
-                        {order.items.map((it, idx) => (
-                          <span key={idx} style={styles.orderProdName}>
-                            {it.quantity}x {it.name} ({it.price.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč)
-                          </span>
-                        ))}
-                      </div>
-                      <div style={styles.orderActions}>
-                        <a 
-                          href="#invoice-download" 
-                          onClick={(e) => { e.preventDefault(); alert(lang === 'CZ' ? 'Simulované stažení faktury z ERP Pohoda.' : 'Simulated invoice download from ERP Pohoda.'); }}
-                          style={styles.invoiceLink}
-                        >
-                          📄 {lang === 'CZ' ? 'Stáhnout fakturu (ERP Pohoda)' : 'Download Invoice (ERP Pohoda)'}
-                        </a>
-                      </div>
+                    <div className="prf-input-group" style={{ marginTop: '12px' }}>
+                      <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Telefon' : 'Phone'}</label>
+                      <input 
+                        type="tel" 
+                        value={contactPhone} 
+                        onChange={e => setContactPhone(e.target.value)} 
+                        className="prf-input" 
+                      />
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Buylist history */}
-          <div style={styles.section} className="glass-panel">
-            <h3 style={styles.sectionHeading}>{lang === 'CZ' ? 'Historie mých výkupů' : 'My Buylists History'}</h3>
-            {!user.buylistHistory || user.buylistHistory.length === 0 ? (
-              <p style={styles.emptyText}>
-                {lang === 'CZ' ? 'Zatím jste neodeslal(a) žádné karty k výkupu.' : 'You have not submitted any buylists yet.'}
-              </p>
-            ) : (
-              <div style={styles.list}>
-                {user.buylistHistory.map(buylist => (
-                  <div key={buylist.id} style={styles.orderItem} className="glass-card">
-                    <div style={styles.orderHeader}>
-                      <div>
-                        <span style={styles.orderId}>{lang === 'CZ' ? 'Výkup' : 'Buylist'} #{buylist.id}</span>
-                        <span style={styles.orderDate}>{buylist.date}</span>
-                      </div>
-                      <span style={styles.orderTotal}>
-                        {buylist.totalPayout.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč
+                    <div className="prf-input-group" style={{ marginTop: '12px' }}>
+                      <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'E-mail' : 'Email'}</label>
+                      <input 
+                        type="email" 
+                        value={user.email} 
+                        disabled 
+                        className="prf-input"
+                        style={{ opacity: 0.5, cursor: 'not-allowed' }} 
+                      />
+                      <span className="helper-text" style={{ fontSize: '11px', color: '#8a8a92', marginTop: '4px', display: 'block' }}>
+                        {lang === 'CZ' ? 'E-mailovou adresu nelze změnit.' : 'Email address cannot be changed.'}
                       </span>
                     </div>
-
-                    <div style={styles.orderBody}>
-                      <div style={styles.orderProducts}>
-                        <span style={styles.orderProdName}>
-                          <strong>{lang === 'CZ' ? 'Metoda výplaty:' : 'Payout Method:'}</strong>{' '}
-                          {buylist.payoutMethod === 'Store Credit' 
-                            ? (lang === 'CZ' ? 'Store Kredit (+25% bonus)' : 'Store Credit (+25% bonus)') 
-                            : (lang === 'CZ' ? 'Hotovost / Bankovní převod' : 'Cash / Bank Transfer')}
-                        </span>
-                        <span style={styles.orderProdName}>
-                          <strong>{lang === 'CZ' ? 'Karty:' : 'Cards:'}</strong>{' '}
-                          {buylist.items ? buylist.items.map(it => `${it.quantity}x ${it.name} (${it.condition})`).join(', ') : ''}
-                          {buylist.bulk && buylist.bulk.length > 0 ? (
-                            `, ${buylist.bulk.map(b => `${b.count}x ${b.type}`).join(', ')}`
-                          ) : ''}
-                        </span>
-                      </div>
-                      <div style={styles.orderActions}>
-                        <span 
-                          style={{
-                            fontSize: '11px',
-                            fontWeight: '800',
-                            backgroundColor: buylist.status && buylist.status.includes('Schváleno') 
-                              ? 'rgba(34, 197, 94, 0.15)' 
-                              : 'rgba(245, 158, 11, 0.15)',
-                            color: buylist.status && buylist.status.includes('Schváleno') 
-                              ? 'var(--color-green)' 
-                              : 'var(--color-gold)',
-                            padding: '4px 10px',
-                            borderRadius: '4px'
-                          }}
-                        >
-                          {buylist.status}
-                        </span>
-                      </div>
+                    <div className="prf-btn-group">
+                      <button className="prf-btn-primary" onClick={handleSaveContact}>
+                        {lang === 'CZ' ? 'Uložit' : 'Save'}
+                      </button>
+                      <button className="prf-btn-secondary" onClick={() => { setIsEditingContact(false); setContactName(user.name); setContactPhone(user.phone); }}>
+                        {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+                      </button>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+                ) : (
+                  <dl className="prf-dl">
+                    <div className="prf-dl-row">
+                      <dt>{lang === 'CZ' ? 'Uživatelské jméno / E-mail' : 'Username / Email'}</dt>
+                      <dd>{user.email}</dd>
+                    </div>
+                    <div className="prf-dl-row">
+                      <dt>{lang === 'CZ' ? 'Jméno' : 'Name'}</dt>
+                      <dd>{user.name || '—'}</dd>
+                    </div>
+                    <div className="prf-dl-row">
+                      <dt>{lang === 'CZ' ? 'Telefon' : 'Phone'}</dt>
+                      <dd>{user.phone || '—'}</dd>
+                    </div>
+                  </dl>
+                )}
+              </section>
 
-        {/* Right Column: Grading Submissions (1/3 width) */}
-        {FEATURE_FLAGS.showGrading && (
-          <div style={styles.rightCol} className="glass-panel">
-            <h3 style={styles.sectionHeading}>{t('UserPortal.gradingHistory')}</h3>
-            <p style={styles.desc}>
-              {lang === 'CZ' 
-                ? 'Sledujte aktuální stav svých odeslaných karet do PSA, Beckett nebo TAG.' 
-                : 'Track the status of your submissions shipped to PSA, Beckett, or TAG.'}
-            </p>
+              {/* Billing details */}
+              <section className="prf-block">
+                <div className="prf-block-head">
+                  <h3>{lang === 'CZ' ? 'Fakturační údaje' : 'Billing Details'}</h3>
+                  {!isEditingBilling && (
+                    <button className="prf-edit" onClick={() => setIsEditingBilling(true)}>
+                      {lang === 'CZ' ? 'Upravit' : 'Edit'}
+                    </button>
+                  )}
+                </div>
 
-            {user.gradingSubmissions.length === 0 ? (
-              <div style={styles.emptyGrading} className="glass-card">
-                <span style={{ fontSize: '32px' }}>🔬</span>
-                <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                  {t('UserPortal.noGrading')}
-                </p>
-                <button 
-                  className="btn btn-secondary" 
-                  style={{ marginTop: '8px', fontSize: '12px' }}
-                  onClick={() => setActivePage('grading')}
-                >
-                  {lang === 'CZ' ? 'Vytvořit zakázku' : 'Create Submission'}
-                </button>
-              </div>
-            ) : (
-              <div style={styles.gradingList}>
-                {user.gradingSubmissions.map(sub => {
-                  const currentStepIdx = getGradingStepIndex(sub.status);
-                  
-                  // Translate status if in English mode
-                  let displayStatus = sub.status;
-                  if (lang === 'EN') {
-                    const statusMapping = {
-                      'Příprava': 'Preparation',
-                      'Odesláno do USA': 'Sent to USA',
-                      'Zpracování': 'Processing',
-                      'Nagradováno': 'Graded',
-                      'Na cestě zpět': 'On way back',
-                      'Připraveno': 'Ready'
-                    };
-                    displayStatus = statusMapping[sub.status] || sub.status;
-                  }
-
-                  return (
-                    <div key={sub.id} style={styles.gradingItem} className="glass-card">
-                      <div style={styles.gradingItemHeader}>
-                        <div>
-                          <span style={styles.gradingId}>{lang === 'CZ' ? 'Zakázka' : 'Submission'} {sub.id}</span>
-                          <span style={styles.gradingMeta}>{sub.company} - {sub.cardCount} {lang === 'CZ' ? 'karet' : 'cards'}</span>
-                        </div>
-                        <span style={styles.gradingStatusBadge}>{displayStatus}</span>
+                {isEditingBilling ? (
+                  <div className="prf-form">
+                    <div className="prf-dl-2col">
+                      <div className="prf-input-group">
+                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Firma' : 'Company'}</label>
+                        <input type="text" value={billingCompany} onChange={e => setBillingCompany(e.target.value)} className="prf-input" />
                       </div>
-
-                      {/* Stepper Timeline */}
-                      <div style={styles.timeline}>
-                        {gradingSteps.map((stepName, sIdx) => {
-                          const isCompleted = sIdx <= currentStepIdx;
-                          const isActive = sIdx === currentStepIdx;
-
-                          return (
-                            <div key={sIdx} style={styles.timelineStep}>
-                              <div style={styles.timelineDotWrapper}>
-                                <div 
-                                  style={{
-                                    ...styles.timelineDot,
-                                    backgroundColor: isActive ? 'var(--color-gold)' : isCompleted ? 'var(--color-green)' : 'rgba(255,255,255,0.06)'
-                                  }}
-                                />
-                                {sIdx < gradingSteps.length - 1 && (
-                                  <div 
-                                    style={{
-                                      ...styles.timelineLine,
-                                      backgroundColor: sIdx < currentStepIdx ? 'var(--color-green)' : 'rgba(255,255,255,0.04)'
-                                    }}
-                                  />
-                                )}
-                              </div>
-                              <span 
-                                style={{
-                                  ...styles.timelineLabel,
-                                  color: isActive ? 'var(--color-gold)' : isCompleted ? 'var(--text-main)' : 'var(--text-muted)',
-                                  fontWeight: isActive ? '700' : 'normal'
-                                }}
-                              >
-                                {stepName}
-                              </span>
-                            </div>
-                          );
-                        })}
+                      <div className="prf-input-group">
+                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Jméno' : 'Name'}</label>
+                        <input type="text" value={billingName} onChange={e => setBillingName(e.target.value)} className="prf-input" />
+                      </div>
+                      <div className="prf-input-group">
+                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Ulice a č.p.' : 'Street'}</label>
+                        <input type="text" value={billingStreet} onChange={e => setBillingStreet(e.target.value)} className="prf-input" />
+                      </div>
+                      <div className="prf-input-group">
+                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Město a PSČ' : 'City & ZIP'}</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <input type="text" value={billingCity} onChange={e => setBillingCity(e.target.value)} className="prf-input" style={{ flex: 2 }} placeholder="Město" />
+                          <input type="text" value={billingZip} onChange={e => setBillingZip(e.target.value)} className="prf-input" style={{ flex: 1 }} placeholder="PSČ" />
+                        </div>
+                      </div>
+                      <div className="prf-input-group">
+                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Země' : 'Country'}</label>
+                        <input type="text" value={billingCountry} onChange={e => setBillingCountry(e.target.value)} className="prf-input" />
+                      </div>
+                      <div className="prf-input-group">
+                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'IČ' : 'Company ID'}</label>
+                        <input type="text" value={billingIco} onChange={e => setBillingIco(e.target.value)} className="prf-input" />
+                      </div>
+                      <div className="prf-input-group">
+                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'DIČ' : 'VAT ID'}</label>
+                        <input type="text" value={billingDic} onChange={e => setBillingDic(e.target.value)} className="prf-input" />
+                      </div>
+                      <div className="prf-input-group">
+                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Číslo účtu' : 'Bank Account'}</label>
+                        <input type="text" value={billingBankAccount} onChange={e => setBillingBankAccount(e.target.value)} className="prf-input" />
                       </div>
                     </div>
-                  );
-                })}
+                    <div className="prf-btn-group" style={{ marginTop: '20px' }}>
+                      <button className="prf-btn-primary" onClick={handleSaveBilling}>
+                        {lang === 'CZ' ? 'Uložit' : 'Save'}
+                      </button>
+                      <button className="prf-btn-secondary" onClick={() => setIsEditingBilling(false)}>
+                        {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <dl className="prf-dl prf-dl-2col">
+                    <div className="prf-dl-row">
+                      <dt>{lang === 'CZ' ? 'Firma' : 'Company'}</dt>
+                      <dd>{user.billingCompany || '—'}</dd>
+                    </div>
+                    <div className="prf-dl-row">
+                      <dt>{lang === 'CZ' ? 'Jméno' : 'Name'}</dt>
+                      <dd>{user.billingName || '—'}</dd>
+                    </div>
+                    <div className="prf-dl-row">
+                      <dt>{lang === 'CZ' ? 'Ulice a č.p.' : 'Street'}</dt>
+                      <dd>{user.billingStreet || '—'}</dd>
+                    </div>
+                    <div className="prf-dl-row">
+                      <dt>{lang === 'CZ' ? 'Město a PSČ' : 'City & ZIP'}</dt>
+                      <dd>{user.billingCity ? `${user.billingCity}, ${user.billingZip}` : '—'}</dd>
+                    </div>
+                    <div className="prf-dl-row">
+                      <dt>{lang === 'CZ' ? 'Země' : 'Country'}</dt>
+                      <dd>{user.billingCountry || '—'}</dd>
+                    </div>
+                    <div className="prf-dl-row">
+                      <dt>{lang === 'CZ' ? 'IČ' : 'Company ID'}</dt>
+                      <dd>{user.billingIco || '—'}</dd>
+                    </div>
+                    <div className="prf-dl-row">
+                      <dt>{lang === 'CZ' ? 'DIČ' : 'VAT ID'}</dt>
+                      <dd>{user.billingDic || '—'}</dd>
+                    </div>
+                    <div className="prf-dl-row">
+                      <dt>{lang === 'CZ' ? 'Číslo účtu' : 'Bank Account'}</dt>
+                      <dd>{user.billingBankAccount || '—'}</dd>
+                    </div>
+                  </dl>
+                )}
+              </section>
+
+              {/* Shipping Addresses */}
+              <section className="prf-block">
+                <div className="prf-block-head">
+                  <h3>{lang === 'CZ' ? 'Doručovací adresy' : 'Delivery Addresses'}</h3>
+                  {!isAddingAddress && (
+                    <button className="prf-edit" onClick={() => { clearAddressForm(); setIsAddingAddress(true); setEditingAddressIndex(null); }}>
+                      + {lang === 'CZ' ? 'Přidat adresu' : 'Add address'}
+                    </button>
+                  )}
+                </div>
+
+                {isAddingAddress ? (
+                  <form onSubmit={handleSaveAddress} className="prf-form">
+                    <div className="prf-dl-2col">
+                      <div className="prf-input-group">
+                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Jméno a příjmení' : 'Name'} *</label>
+                        <input type="text" value={shipName} onChange={e => setShipName(e.target.value)} className="prf-input" required />
+                      </div>
+                      <div className="prf-input-group">
+                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Firma (nepovinné)' : 'Company (optional)'}</label>
+                        <input type="text" value={shipCompany} onChange={e => setShipCompany(e.target.value)} className="prf-input" />
+                      </div>
+                      <div className="prf-input-group">
+                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Ulice a č.p.' : 'Street'} *</label>
+                        <input type="text" value={shipStreet} onChange={e => setShipStreet(e.target.value)} className="prf-input" required />
+                      </div>
+                      <div className="prf-input-group">
+                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Město a PSČ' : 'City & ZIP'} *</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <input type="text" value={shipCity} onChange={e => setShipCity(e.target.value)} className="prf-input" style={{ flex: 2 }} placeholder="Město" required />
+                          <input type="text" value={shipZip} onChange={e => setShipZip(e.target.value)} className="prf-input" style={{ flex: 1 }} placeholder="PSČ" required />
+                        </div>
+                      </div>
+                      <div className="prf-input-group">
+                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Země' : 'Country'}</label>
+                        <input type="text" value={shipCountry} onChange={e => setShipCountry(e.target.value)} className="prf-input" />
+                      </div>
+                      <div className="prf-input-group">
+                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Telefon' : 'Phone'} *</label>
+                        <input type="tel" value={shipPhone} onChange={e => setShipPhone(e.target.value)} className="prf-input" required />
+                      </div>
+                    </div>
+                    <div className="prf-btn-group" style={{ marginTop: '20px' }}>
+                      <button type="submit" className="prf-btn-primary">
+                        {lang === 'CZ' ? 'Uložit adresu' : 'Save address'}
+                      </button>
+                      <button type="button" className="prf-btn-secondary" onClick={() => { setIsAddingAddress(false); setEditingAddressIndex(null); clearAddressForm(); }}>
+                        {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div>
+                    {!user.shippingAddresses || user.shippingAddresses.length === 0 ? (
+                      <p style={{ color: '#8a8a92', fontSize: '13px' }}>{lang === 'CZ' ? 'Nemáte žádné uložené doručovací adresy.' : 'No saved delivery addresses.'}</p>
+                    ) : (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+                        {user.shippingAddresses.map((addr, idx) => (
+                          <div key={idx} className="prf-addr">
+                            <div className="prf-addr-name">{addr.name}</div>
+                            <div className="prf-addr-lines">
+                              {addr.company && <span>{addr.company}</span>}
+                              <span>{addr.street}</span>
+                              <span>{addr.city}, {addr.zip}</span>
+                              <span>{addr.country}</span>
+                            </div>
+                            <div className="prf-addr-phone">{addr.phone}</div>
+                            <div className="prf-addr-actions">
+                              <button onClick={() => triggerEditAddress(idx)}>{lang === 'CZ' ? 'Upravit' : 'Edit'}</button>
+                              <span className="prf-addr-sep"></span>
+                              <button className="prf-addr-del" onClick={() => handleDeleteAddress(idx)}>{lang === 'CZ' ? 'Smazat' : 'Delete'}</button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </section>
+
+              {/* Account Deletion */}
+              <section className="prf-danger">
+                <div className="prf-danger-text">
+                  <h3>{lang === 'CZ' ? 'Zrušení klientského účtu' : 'Close Account'}</h3>
+                  <p>
+                    {lang === 'CZ'
+                      ? 'Zrušením dojde k permanentnímu smazání profilu, fakturačních údajů i doručovacích adres. Akce je nevratná.'
+                      : 'Deactivating your account will permanently delete your billing preferences, contact details, and shipping addresses. This action is irreversible.'}
+                  </p>
+                </div>
+                <button className="prf-danger-btn" onClick={handleDeleteAccount}>
+                  {lang === 'CZ' ? 'Zrušit účet' : 'Delete Account'}
+                </button>
+              </section>
+
+            </div>
+          )}
+
+          {/* TAB 2: MY ORDERS */}
+          {activeTab === 'orders' && (
+            <div className="prf-tab-content">
+              <span className="nv-eyebrow">{lang === 'CZ' ? 'Můj účet' : 'My Account'}</span>
+              <h2 className="prf-title">{lang === 'CZ' ? 'Moje objednávky' : 'My Orders'}</h2>
+              
+              {!user.orderHistory || user.orderHistory.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                  <p style={{ color: '#8a8a92', fontSize: '13px' }}>{lang === 'CZ' ? 'Zatím jste u nás neprovedl(a) žádnou objednávku.' : 'You have not placed any orders yet.'}</p>
+                  <button className="prf-btn-primary" style={{ marginTop: '16px' }} onClick={() => setActivePage('home')}>
+                    {lang === 'CZ' ? 'Přejít do e-shopu' : 'Continue Shopping'}
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {user.orderHistory.map((order, idx) => (
+                    <div key={idx} className="prf-block" style={{ paddingBottom: '24px' }}>
+                      <div className="prf-block-head" style={{ marginBottom: '12px' }}>
+                        <h3 style={{ fontSize: '14px', textTransform: 'none', letterSpacing: 'normal' }}>
+                          {lang === 'CZ' ? 'Objednávka' : 'Order'} <strong style={{ color: '#f0f0f0' }}>#{order.id}</strong>
+                          <span style={{ color: '#8a8a92', marginLeft: '12px', fontSize: '12px' }}>{order.date}</span>
+                        </h3>
+                        <span style={{ color: 'var(--color-gold)', fontWeight: '800', fontSize: '15px' }}>
+                          {(order.finalTotal || order.total || 0).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          {order.items && order.items.map((it, itemIdx) => (
+                            <span key={itemIdx} style={{ fontSize: '13px', color: '#8a8a92' }}>
+                              {it.quantity}x {it.name} ({it.price.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč)
+                            </span>
+                          ))}
+                        </div>
+                        <div>
+                          <span style={{ fontSize: '11px', fontWeight: '700', backgroundColor: 'rgba(16, 185, 129, 0.08)', color: '#10b981', padding: '4px 10px', borderRadius: '4px' }}>
+                            {lang === 'CZ' ? 'Vyřízeno' : 'Completed'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 3: INVOICES */}
+          {activeTab === 'invoices' && (
+            <div className="prf-tab-content">
+              <span className="nv-eyebrow">{lang === 'CZ' ? 'Můj účet' : 'My Account'}</span>
+              <h2 className="prf-title">{lang === 'CZ' ? 'Faktury' : 'Invoices'}</h2>
+              
+              <div className="prf-block" style={{ borderBottom: 'none', paddingBottom: '0' }}>
+                <div style={{ display: 'flex', gap: '12px', padding: '16px 20px', backgroundColor: 'rgba(253, 189, 22, 0.02)', borderLeft: '3px solid var(--color-gold)', borderRadius: '4px', marginBottom: '24px' }}>
+                  <span style={{ color: 'var(--color-gold)' }}>ℹ️</span>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#8a8a92', lineHeight: '1.5' }}>
+                    {lang === 'CZ' 
+                      ? 'Faktury jsou automaticky synchronizovány a vystavovány prostřednictvím našeho firemního ekonomického softwaru ERP Pohoda.'
+                      : 'Invoices are automatically issued and synced through our corporate accounting software ERP Pohoda.'}
+                  </p>
+                </div>
+
+                {!user.orderHistory || user.orderHistory.length === 0 ? (
+                  <p style={{ color: '#8a8a92', fontSize: '13px' }}>{lang === 'CZ' ? 'Žádné faktury k dispozici.' : 'No invoices available.'}</p>
+                ) : (
+                  <div style={{ border: '1px solid rgba(240, 240, 240, 0.07)', borderRadius: '8px', overflow: 'hidden' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1.2fr 1fr 1fr' : '1.5fr 1fr 1fr 1fr', padding: '12px 20px', backgroundColor: 'rgba(255, 255, 255, 0.02)', borderBottom: '1px solid rgba(240, 240, 240, 0.07)', fontSize: '11px', fontWeight: 'bold', color: '#8a8a92', textTransform: 'uppercase' }}>
+                      <span>{lang === 'CZ' ? 'Číslo faktury' : 'Invoice ID'}</span>
+                      {!isMobile && <span>{lang === 'CZ' ? 'Datum' : 'Date'}</span>}
+                      <span>{lang === 'CZ' ? 'Částka' : 'Amount'}</span>
+                      <span style={{ textAlign: 'right' }}>{lang === 'CZ' ? 'Akce' : 'Action'}</span>
+                    </div>
+                    {user.orderHistory.map((order, idx) => {
+                      const invoiceNum = `FA-${order.id || `2026${String(idx).padStart(4, '0')}`}`;
+                      return (
+                        <div key={idx} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1.2fr 1fr 1fr' : '1.5fr 1fr 1fr 1fr', padding: '16px 20px', borderBottom: '1px solid rgba(240, 240, 240, 0.04)', fontSize: '13px', alignItems: 'center' }}>
+                          <span style={{ fontWeight: 'bold', color: '#f0f0f0' }}>{invoiceNum}</span>
+                          {!isMobile && <span style={{ color: '#8a8a92' }}>{order.date}</span>}
+                          <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>
+                            {(order.finalTotal || order.total || 0).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč
+                          </span>
+                          <div style={{ textAlign: 'right' }}>
+                            <button 
+                              className="prf-edit"
+                              onClick={() => alert(lang === 'CZ' ? `Stahování PDF faktury ${invoiceNum} ze systému Pohoda...` : `Downloading PDF invoice ${invoiceNum} from ERP Pohoda...`)}
+                            >
+                              📥 {lang === 'CZ' ? 'Stáhnout' : 'Download'}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+
+          {/* TAB 4: SECURITY */}
+          {activeTab === 'security' && (
+            <div className="prf-tab-content">
+              <span className="nv-eyebrow">{lang === 'CZ' ? 'Můj účet' : 'My Account'}</span>
+              <h2 className="prf-title">{lang === 'CZ' ? 'Zabezpečení účtu' : 'Account Security'}</h2>
+              
+              {/* Change Password */}
+              <section className="prf-block">
+                <div className="prf-block-head">
+                  <h3>{lang === 'CZ' ? 'Změna přístupového hesla' : 'Change Account Password'}</h3>
+                </div>
+                <form onSubmit={handleChangePassword} className="prf-form" style={{ maxWidth: '400px' }}>
+                  <div className="prf-input-group">
+                    <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Současné heslo' : 'Current Password'} *</label>
+                    <input 
+                      type="password" 
+                      value={currentPassword} 
+                      onChange={e => setCurrentPassword(e.target.value)} 
+                      className="prf-input"
+                      placeholder="••••••••" 
+                      required 
+                    />
+                  </div>
+                  <div className="prf-input-group" style={{ marginTop: '12px' }}>
+                    <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Nové heslo' : 'New Password'} *</label>
+                    <input 
+                      type="password" 
+                      value={newPassword} 
+                      onChange={e => setNewPassword(e.target.value)} 
+                      className="prf-input"
+                      placeholder="••••••••" 
+                      required 
+                    />
+                  </div>
+                  <div className="prf-input-group" style={{ marginTop: '12px' }}>
+                    <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Potvrzení nového hesla' : 'Confirm New Password'} *</label>
+                    <input 
+                      type="password" 
+                      value={confirmPassword} 
+                      onChange={e => setConfirmPassword(e.target.value)} 
+                      className="prf-input"
+                      placeholder="••••••••" 
+                      required 
+                    />
+                  </div>
+                  <button type="submit" className="prf-btn-primary" style={{ marginTop: '16px' }}>
+                    {lang === 'CZ' ? 'Uložit nové heslo' : 'Save New Password'}
+                  </button>
+                </form>
+              </section>
+
+              {/* Two-Factor Authentication (2FA) */}
+              <section className="prf-block">
+                <div className="prf-block-head">
+                  <h3>{lang === 'CZ' ? 'Dvoufaktorové ověření (2FA)' : 'Two-Factor Authentication (2FA)'}</h3>
+                  <span style={{
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                    backgroundColor: user.twoFactorEnabled ? 'rgba(16, 185, 129, 0.08)' : 'rgba(224, 82, 77, 0.08)',
+                    color: user.twoFactorEnabled ? '#10b981' : '#e0524d',
+                    padding: '3px 8px',
+                    borderRadius: '4px'
+                  }}>
+                    {user.twoFactorEnabled ? (lang === 'CZ' ? 'AKTIVNÍ' : 'ACTIVE') : (lang === 'CZ' ? 'NEAKTIVNÍ' : 'INACTIVE')}
+                  </span>
+                </div>
+                
+                <p style={{ color: '#8a8a92', fontSize: '13px', lineHeight: '1.5', marginBottom: '20px' }}>
+                  {lang === 'CZ'
+                    ? 'Zabezpečte svůj klientský účet pomocí jednorázových ověřovacích kódů generovaných ve Vaší mobilní aplikaci Google Authenticator nebo Microsoft Authenticator.'
+                    : 'Secure your login sessions with 6-digit codes generated inside your Google Authenticator or Microsoft Authenticator application.'}
+                </p>
+
+                {user.twoFactorEnabled ? (
+                  <button className="prf-btn-secondary" style={{ color: '#e0524d', borderColor: 'rgba(224,82,77,0.3)' }} onClick={handleDisable2FA}>
+                    {lang === 'CZ' ? 'Deaktivovat 2FA' : 'Deactivate 2FA'}
+                  </button>
+                ) : (
+                  <div>
+                    {!isSettingUp2FA ? (
+                      <button className="prf-btn-primary" onClick={handleStart2FASetup}>
+                        {lang === 'CZ' ? 'Aktivovat dvoufaktorové ověření' : 'Setup Two-Factor Verification'}
+                      </button>
+                    ) : (
+                      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '140px 1fr', gap: '24px', padding: '20px', border: '1px solid rgba(240, 240, 240, 0.07)', borderRadius: '8px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                          <div style={{ width: '120px', height: '120px', border: '2px solid var(--color-gold)', borderRadius: '8px', padding: '6px', position: 'relative', overflow: 'hidden', background: '#fff' }}>
+                            <div style={{ width: '100%', height: '100%' }}>
+                              {enrolledFactor?.qrCode ? (
+                                <img 
+                                  src={enrolledFactor.qrCode} 
+                                  alt="2FA QR Code" 
+                                  style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} 
+                                />
+                              ) : (
+                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888', fontSize: '10px' }}>
+                                  Načítání...
+                                </div>
+                              )}
+                            </div>
+                            <div className="qr-scanner-line" style={{ position: 'absolute', left: 0, width: '100%', height: '2px', background: 'var(--color-gold)', boxShadow: '0 0 8px var(--color-gold)', animation: 'scan 2.5s infinite linear' }}></div>
+                          </div>
+                          <span style={{ fontSize: '10px', color: '#8a8a92', marginTop: '8px', display: 'block', wordBreak: 'break-all', textAlign: 'center', fontFamily: 'monospace' }}>
+                            Klíč: {enrolledFactor?.secret || 'Načítání...'}
+                          </span>
+                        </div>
+                        <div>
+                          <ol style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', color: '#8a8a92', lineHeight: '1.6' }}>
+                            <li>{lang === 'CZ' ? 'Otevřete ve Vašem telefonu aplikaci Authenticator.' : 'Open Authenticator app on your smartphone.'}</li>
+                            <li>{lang === 'CZ' ? 'Naskenujte QR kód nebo zadejte ručně klíč.' : 'Scan QR code or type key manually.'}</li>
+                            <li>{lang === 'CZ' ? 'Vložte vygenerovaný šestimístný ověřovací kód.' : 'Enter the generated 6-digit confirmation code.'}</li>
+                          </ol>
+                          <form onSubmit={handleVerify2FA} style={{ marginTop: '16px', maxWidth: '300px' }}>
+                            <div className="prf-input-group">
+                              <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Ověřovací kód' : '6-digit code'}</label>
+                              <input 
+                                type="text" 
+                                value={authCode} 
+                                onChange={e => setAuthCode(e.target.value)} 
+                                placeholder="123456" 
+                                maxLength={6} 
+                                className="prf-input"
+                                style={{ letterSpacing: '4px', textAlign: 'center', fontSize: '18px', fontWeight: 'bold' }} 
+                              />
+                              {authCodeError && <p style={{ color: '#e0524d', fontSize: '12px', margin: '4px 0 0' }}>{lang === 'CZ' ? 'Zadejte platný kód.' : 'Please enter valid code.'}</p>}
+                            </div>
+                            <div className="prf-btn-group" style={{ marginTop: '12px' }}>
+                              <button type="submit" className="prf-btn-primary">
+                                {lang === 'CZ' ? 'Aktivovat' : 'Activate'}
+                              </button>
+                              <button type="button" className="prf-btn-secondary" onClick={handleCancel2FASetup}>
+                                {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </section>
+            </div>
+          )}
+
+          {/* TAB 5: NEWSLETTERS */}
+          {activeTab === 'newsletters' && (
+            <div className="prf-tab-content">
+              <span className="nv-eyebrow">{lang === 'CZ' ? 'Můj účet' : 'My Account'}</span>
+              <h2 className="prf-title">{lang === 'CZ' ? 'Newslettery' : 'Newsletters'}</h2>
+              
+              <section className="prf-block">
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                  <input 
+                    type="checkbox" 
+                    id="newsletter-sub" 
+                    checked={user.newsletter}
+                    onChange={(e) => handleToggleNewsletter(e.target.checked)}
+                    style={{ width: '16px', height: '16px', cursor: 'pointer', marginTop: '4px' }}
+                  />
+                  <label htmlFor="newsletter-sub" style={{ cursor: 'pointer', userSelect: 'none' }}>
+                    <strong style={{ display: 'block', fontSize: '14px', color: '#f0f0f0' }}>
+                      {lang === 'CZ' ? 'Chci odebírat newsletter a novinky ze světa NORTHVALE TCG' : 'I wish to receive newsletters and card market updates from NORTHVALE TCG'}
+                    </strong>
+                    <span style={{ display: 'block', fontSize: '13px', color: '#8a8a92', marginTop: '6px', lineHeight: '1.5' }}>
+                      {lang === 'CZ'
+                        ? 'Budete dostávat exkluzivní přednostní informace o naskladnění nových booster boxů, speciálních slevových akcích a chystaných turnajích.'
+                        : 'Receive priority announcements regarding booster box stock arrivals, special promotion campaigns, and local card tournaments.'}
+                    </span>
+                  </label>
+                </div>
+              </section>
+            </div>
+          )}
+        </main>
       </div>
+
+      {/* Custom Confirmation Modal */}
+      {confirmDialog.isOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 99999,
+          animation: 'fadeIn 0.2s ease-out'
+        }} onClick={closeConfirm}>
+          <div style={{
+            backgroundColor: '#1C1C22',
+            border: `1px solid ${confirmDialog.isDanger ? 'rgba(239, 68, 68, 0.25)' : 'rgba(253, 189, 22, 0.25)'}`,
+            borderRadius: '12px',
+            padding: '28px',
+            width: '420px',
+            maxWidth: '90%',
+            boxShadow: '0 25px 50px rgba(0,0,0,0.8)',
+            transform: 'scale(1)',
+            animation: 'slideUpScale 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+            textAlign: 'left'
+          }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{
+              margin: '0 0 12px 0',
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: '18px',
+              fontWeight: '700',
+              color: confirmDialog.isDanger ? '#ef4444' : 'var(--color-gold)'
+            }}>
+              {confirmDialog.title}
+            </h3>
+            <p style={{
+              margin: '0 0 24px 0',
+              fontSize: '14px',
+              lineHeight: '1.6',
+              color: '#8a8a92'
+            }}>
+              {confirmDialog.message}
+            </p>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px'
+            }}>
+              <button 
+                type="button" 
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(240, 240, 240, 0.12)',
+                  color: '#8a8a92',
+                  borderRadius: '6px',
+                  padding: '10px 20px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.18s'
+                }}
+                className="prf-btn-secondary"
+                onClick={closeConfirm}
+              >
+                {confirmDialog.cancelText}
+              </button>
+              <button 
+                type="button" 
+                style={{
+                  backgroundColor: confirmDialog.isDanger ? '#ef4444' : 'var(--color-gold)',
+                  border: 'none',
+                  color: confirmDialog.isDanger ? '#fff' : '#000',
+                  borderRadius: '6px',
+                  padding: '10px 20px',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  transition: 'all 0.18s'
+                }}
+                onClick={confirmDialog.onConfirm}
+              >
+                {confirmDialog.confirmText}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-const styles = {
-  container: {
-    paddingTop: '20px',
-    paddingBottom: '20px',
-  },
-  layout: {
-    display: 'flex',
-    gap: '32px',
-    flexWrap: 'wrap',
-  },
-  leftCol: {
-    flex: '1.8 1 500px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px',
-  },
-  profileCard: {
-    padding: '20px 30px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: '24px',
-    flexWrap: 'wrap',
-    textAlign: 'left',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-  },
-  profileInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  },
-  profileLabel: {
-    fontSize: '11px',
-    fontWeight: '700',
-    color: 'var(--text-muted)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-  },
-  profileEmail: {
-    fontSize: '18px',
-    fontWeight: '700',
-    color: 'var(--text-main)',
-  },
-  logoutBtn: {
-    padding: '8px 16px',
-    fontSize: '13px',
-  },
-  creditCard: {
-    padding: '30px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: '24px',
-    flexWrap: 'wrap',
-    textAlign: 'left',
-    backgroundColor: 'rgba(245, 158, 11, 0.03)',
-    border: '1px solid rgba(245, 158, 11, 0.2)',
-  },
-  creditInfo: {
-    flex: '1 1 300px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  creditTitle: {
-    fontSize: '13px',
-    fontWeight: '700',
-    color: 'var(--text-muted)',
-    textTransform: 'uppercase',
-  },
-  creditValue: {
-    fontSize: '32px',
-    fontWeight: '800',
-    color: 'var(--color-gold)',
-    fontFamily: 'var(--font-heading)',
-  },
-  creditDesc: {
-    fontSize: '13px',
-    color: 'var(--text-muted)',
-    lineHeight: '1.5',
-    margin: 0,
-  },
-  creditActions: {
-    display: 'flex',
-    alignItems: 'center',
-  },
-  section: {
-    padding: '24px',
-    textAlign: 'left',
-  },
-  sectionHeading: {
-    fontSize: '16px',
-    fontWeight: '800',
-    margin: '0 0 16px',
-    borderBottom: '1px solid rgba(255,255,255,0.06)',
-    paddingBottom: '10px',
-    fontFamily: 'var(--font-heading)',
-  },
-  emptyText: {
-    fontSize: '13px',
-    color: 'var(--text-muted)',
-    margin: 0,
-  },
-  list: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  listItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '12px 20px',
-  },
-  trMeta: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    gap: '4px',
-  },
-  trDesc: {
-    fontSize: '13px',
-    fontWeight: '700',
-  },
-  trDate: {
-    fontSize: '11px',
-    color: 'var(--text-muted)',
-  },
-  trAmount: {
-    fontSize: '14px',
-    fontWeight: '800',
-  },
-  orderItem: {
-    padding: '16px 20px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  orderHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottom: '1px solid rgba(255,255,255,0.04)',
-    paddingBottom: '8px',
-  },
-  orderId: {
-    fontSize: '13px',
-    fontWeight: '700',
-    display: 'block',
-  },
-  orderDate: {
-    fontSize: '11px',
-    color: 'var(--text-muted)',
-  },
-  orderTotal: {
-    fontSize: '14px',
-    fontWeight: '800',
-    color: 'var(--color-gold)',
-  },
-  orderBody: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    flexWrap: 'wrap',
-    gap: '12px',
-  },
-  orderProducts: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    gap: '4px',
-  },
-  orderProdName: {
-    fontSize: '12px',
-    color: 'var(--text-muted)',
-  },
-  orderActions: {
-    display: 'flex',
-  },
-  invoiceLink: {
-    fontSize: '12px',
-    color: 'var(--color-gold)',
-    fontWeight: '600',
-    textDecoration: 'underline',
-  },
-  rightCol: {
-    flex: '1 1 320px',
-    padding: '24px',
-    textAlign: 'left',
-    alignSelf: 'flex-start',
-  },
-  desc: {
-    fontSize: '13px',
-    color: 'var(--text-muted)',
-    lineHeight: '1.4',
-    margin: '0 0 16px',
-  },
-  emptyGrading: {
-    padding: '24px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '8px',
-    textAlign: 'center',
-  },
-  gradingList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  gradingItem: {
-    padding: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  gradingItemHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottom: '1px solid rgba(255,255,255,0.04)',
-    paddingBottom: '8px',
-  },
-  gradingId: {
-    fontSize: '13px',
-    fontWeight: '700',
-    display: 'block',
-  },
-  gradingMeta: {
-    fontSize: '11px',
-    color: 'var(--text-muted)',
-  },
-  gradingStatusBadge: {
-    fontSize: '9px',
-    fontWeight: '800',
-    backgroundColor: 'rgba(245, 158, 11, 0.15)',
-    color: 'var(--color-gold)',
-    padding: '2px 8px',
-    borderRadius: '2px',
-  },
-  timeline: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-    paddingLeft: '10px',
-  },
-  timelineStep: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-  },
-  timelineDotWrapper: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  timelineDot: {
-    width: '10px',
-    height: '10px',
-    borderRadius: '50%',
-    zIndex: 2,
-  },
-  timelineLine: {
-    position: 'absolute',
-    top: '10px',
-    left: '4px',
-    width: '2px',
-    height: '24px',
-    zIndex: 1,
-  },
-  timelineLabel: {
-    fontSize: '12px',
-  }
-};

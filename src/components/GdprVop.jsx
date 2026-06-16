@@ -953,7 +953,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
               {isSubmitted ? (
                 <div style={{
                   border: '1px solid var(--color-gold)',
-                  backgroundColor: 'rgba(245, 158, 11, 0.02)',
+                  backgroundColor: 'rgba(253, 189, 22, 0.02)',
                   padding: '24px',
                   borderRadius: 'var(--radius-lg)',
                   marginBottom: '24px',
@@ -1105,7 +1105,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                         cursor: 'pointer',
                         border: refundMethod === 'bank' ? '1px solid var(--color-gold)' : '1px solid var(--border-light)',
                         borderRadius: 'var(--radius-md)',
-                        backgroundColor: refundMethod === 'bank' ? 'rgba(245, 158, 11, 0.03)' : 'transparent',
+                        backgroundColor: refundMethod === 'bank' ? 'rgba(253, 189, 22, 0.03)' : 'transparent',
                         transition: 'all 0.2s'
                       }}>
                         <input
@@ -1133,7 +1133,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                         cursor: 'pointer',
                         border: refundMethod === 'credit' ? '1px solid var(--color-gold)' : '1px solid var(--border-light)',
                         borderRadius: 'var(--radius-md)',
-                        backgroundColor: refundMethod === 'credit' ? 'rgba(245, 158, 11, 0.03)' : 'transparent',
+                        backgroundColor: refundMethod === 'credit' ? 'rgba(253, 189, 22, 0.03)' : 'transparent',
                         transition: 'all 0.2s'
                       }}>
                         <input
@@ -1158,8 +1158,8 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   </div>
 
                   <div style={{
-                    border: '1px dashed rgba(245, 158, 11, 0.25)',
-                    backgroundColor: 'rgba(245, 158, 11, 0.02)',
+                    border: '1px dashed rgba(253, 189, 22, 0.25)',
+                    backgroundColor: 'rgba(253, 189, 22, 0.02)',
                     padding: '20px',
                     borderRadius: '8px',
                     fontSize: '12.5px',
