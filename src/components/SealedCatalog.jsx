@@ -1383,7 +1383,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                   {lang === 'CZ' ? 'Upřesněte typ balení' : 'Refine Packaging Type'}
                 </div>
                 <div className="subcategory-grid">
-                  {subSubcategoriesConfig[selectedGame][activeSubcategory].subsubcats.filter(sub => sub.id !== 'all').map(sub => {
+                  {subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.subsubcats?.filter(sub => sub.id !== 'all').map(sub => {
                     const isEmoji = typeof sub.icon === 'string';
                     return (
                       <div

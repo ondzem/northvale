@@ -673,6 +673,14 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
     return matchingVariants.length > 0;
   });
 
+  // Sort logic
+  const sortedSingles = [...filteredSingles].sort((a, b) => {
+    if (sortBy === 'expensive') return b.price - a.price;
+    if (sortBy === 'cheap') return a.price - b.price;
+    if (sortBy === 'new') return b.id.localeCompare(a.id); // mock sort
+    return 0; // Default: top
+  });
+
   const renderRarityFilter = () => {
     let list = [];
     if (selectedGame === 'Pokémon') {
@@ -1231,7 +1239,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
                   {lang === 'CZ' ? 'Upřesněte vzácnost' : 'Refine Rarity'}
                 </div>
                 <div className="subcategory-grid">
-                  {subSubcategoriesConfig[selectedGame][activeSubcategory].subsubcats.map(sub => {
+                  {subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.subsubcats?.map(sub => {
                     const isEmoji = typeof sub.icon === 'string';
                     return (
                       <div

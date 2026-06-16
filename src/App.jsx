@@ -25,6 +25,7 @@ import CookieConsent from './components/CookieConsent';
 import { supabase } from './supabase';
 
 import { mockProducts } from './mockData';
+import { fetchProductsFromDB } from './services/products';
 import { FEATURE_FLAGS } from './config';
 import { LanguageProvider, useTranslation } from './context/LanguageContext';
 import './App.css';
@@ -240,20 +241,84 @@ function AppContent() {
     twoFactorEnabled: false
   });
 
+  // Centralized Products Fetching from Database with Fallbacks
+  const [dbProducts, setDbProducts] = useState(mockProducts);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const loadProducts = async () => {
+      setIsLoadingProducts(true);
+      let queryOptions = {};
+
+      if (activePage === 'singles-catalog') {
+        queryOptions.types = ['single', 'slab'];
+        queryOptions.game = filters.game || 'Pokémon';
+      } else if (activePage === 'sealed-catalog') {
+        queryOptions.types = ['sealed', 'accessory'];
+        if (filters.game && filters.game !== 'all') {
+          queryOptions.game = filters.game;
+        }
+      } else if (activePage === 'slabs-catalog') {
+        queryOptions.type = 'slab';
+        if (filters.game && filters.game !== 'all') {
+          queryOptions.game = filters.game;
+        }
+      }
+
+      if (searchQuery) {
+        queryOptions.searchQuery = searchQuery;
+      }
+
+      const result = await fetchProductsFromDB(queryOptions);
+      if (active) {
+        setDbProducts(result);
+        setIsLoadingProducts(false);
+      }
+    };
+
+    loadProducts();
+    return () => {
+      active = false;
+    };
+  }, [activePage, filters.game, searchQuery]);
+
   // Supabase auth state change handler
-  const handleAuthSession = async (session) => {
+  const handleAuthSession = async (session, event) => {
     if (session) {
       const authUser = session.user;
       setIsLoggedIn(true);
 
       // Fetch user profile from database
-      const { data: profile, error } = await supabase
+      let { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', authUser.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error && error.code === 'PGRST116') {
+        // Profile row does not exist! Create it dynamically to avoid database trigger dependency.
+        const defaultProfile = {
+          id: authUser.id,
+          full_name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || '',
+          role: 'customer',
+          store_credit: 0,
+          cart: cart || [],
+          favorites: favorites || []
+        };
+        const { data: insertedData, error: insertErr } = await supabase
+          .from('profiles')
+          .upsert(defaultProfile)
+          .select()
+          .single();
+
+        if (insertErr) {
+          console.error('Failed to create missing profile row:', insertErr.message);
+        } else if (insertedData) {
+          profile = insertedData;
+          error = null;
+        }
+      } else if (error) {
         console.error('Error fetching user profile:', error.message);
       }
 
@@ -338,23 +403,25 @@ function AppContent() {
       });
 
       // Clear cart and favorites from localStorage and state on sign out
-      try {
-        localStorage.removeItem('northvale-cart');
-        for (let i = localStorage.length - 1; i >= 0; i--) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith('fav-')) {
-            localStorage.removeItem(key);
+      if (event === 'SIGNED_OUT') {
+        try {
+          localStorage.removeItem('northvale-cart');
+          for (let i = localStorage.length - 1; i >= 0; i--) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('fav-')) {
+              localStorage.removeItem(key);
+            }
           }
+        } catch (err) {
+          console.warn(err);
         }
-      } catch (err) {
-        console.warn(err);
-      }
-      setCart([]);
-      setFavorites([]);
-      try {
-        window.dispatchEvent(new Event('local-favorites-changed'));
-      } catch (err) {
-        console.warn(err);
+        setCart([]);
+        setFavorites([]);
+        try {
+          window.dispatchEvent(new Event('local-favorites-changed'));
+        } catch (err) {
+          console.warn(err);
+        }
       }
     }
   };
@@ -363,12 +430,12 @@ function AppContent() {
   useEffect(() => {
     // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      handleAuthSession(session);
+      handleAuthSession(session, 'INITIAL_SESSION');
     });
 
     // Listen to changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      handleAuthSession(session);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      handleAuthSession(session, event);
     });
 
     return () => {
@@ -589,7 +656,7 @@ function AppContent() {
         break;
       case 'singles-detail':
       case 'sealed-detail': {
-        const currentProduct = mockProducts.find(p => p.id === selectedProductId);
+        const currentProduct = dbProducts.find(p => p.id === selectedProductId);
         if (currentProduct) {
           pageTitle = currentProduct.name;
         }
@@ -853,6 +920,7 @@ function AppContent() {
         setSearchQuery={setSearchQuery}
         isLoggedIn={isLoggedIn}
         onOpenLogin={() => setIsLoginModalOpen(true)}
+        setSelectedProductId={setSelectedProductId}
       />
       
       <main style={styles.mainContent}>
@@ -860,7 +928,7 @@ function AppContent() {
           <Homepage 
             setActivePage={setActivePage} 
             addToCart={addToCart} 
-            products={mockProducts}
+            products={dbProducts}
             setSelectedProductId={setSelectedProductId}
             setFilters={setFilters}
           />
@@ -868,7 +936,7 @@ function AppContent() {
         
         {activePage === 'singles-catalog' && (
           <SinglesCatalog 
-            products={mockProducts}
+            products={dbProducts}
             addToCart={addToCart}
             setSelectedProductId={setSelectedProductId}
             setActivePage={setActivePage}
@@ -882,7 +950,7 @@ function AppContent() {
 
         {activePage === 'sealed-catalog' && (
           <SealedCatalog 
-            products={mockProducts}
+            products={dbProducts}
             addToCart={addToCart}
             setSelectedProductId={setSelectedProductId}
             setActivePage={setActivePage}
@@ -893,7 +961,7 @@ function AppContent() {
 
         {activePage === 'slabs-catalog' && FEATURE_FLAGS.showSlabs && (
           <SlabsCatalog 
-            products={mockProducts}
+            products={dbProducts}
             addToCart={addToCart}
             setSelectedProductId={setSelectedProductId}
             setActivePage={setActivePage}
@@ -905,7 +973,7 @@ function AppContent() {
         {activePage === 'sealed-detail' && (
           <SealedDetail 
             productId={selectedProductId}
-            products={mockProducts}
+            products={dbProducts}
             addToCart={addToCart}
             setSelectedProductId={setSelectedProductId}
             setActivePage={setActivePage}
@@ -917,7 +985,7 @@ function AppContent() {
         {activePage === 'singles-detail' && (
           <SinglesDetail 
             productId={selectedProductId}
-            products={mockProducts}
+            products={dbProducts}
             addToCart={addToCart}
             setSelectedProductId={setSelectedProductId}
             setActivePage={setActivePage}
@@ -928,7 +996,7 @@ function AppContent() {
 
         {activePage === 'buylist' && FEATURE_FLAGS.showBuylist && (
           <BuylistPortal 
-            products={mockProducts}
+            products={dbProducts}
             submitBuylist={submitBuylist}
             user={user}
             setActivePage={setActivePage}
@@ -1008,7 +1076,7 @@ function AppContent() {
 
         {activePage === 'favorites' && (
           <Favorites 
-            products={mockProducts}
+            products={dbProducts}
             addToCart={addToCart}
             setSelectedProductId={setSelectedProductId}
             setActivePage={setActivePage}

@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
+import { fetchProductsFromDB } from '../services/products';
 
-export default function Navbar({ setActivePage, cart, user, setFilters, setSearchQuery, isLoggedIn, onOpenLogin }) {
+export default function Navbar({ setActivePage, cart, user, setFilters, setSearchQuery, isLoggedIn, onOpenLogin, setSelectedProductId }) {
   const [drawerOpen, _setDrawerOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -21,6 +22,103 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [searchInput, setSearchInput] = useState('');
   const { lang, setLang, t } = useTranslation();
+
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [btnHovered, setBtnHovered] = useState(false);
+  const searchContainerRef = useRef(null);
+  const mobileSearchContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (!searchInput.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const results = await fetchProductsFromDB({ searchQuery: searchInput });
+        setSuggestions(results.slice(0, 6));
+      } catch (err) {
+        console.error('Error fetching suggestions:', err);
+      }
+    }, 150);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchInput]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) &&
+        (mobileSearchContainerRef.current && !mobileSearchContainerRef.current.contains(event.target))
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const renderSuggestions = () => {
+    if (!showSuggestions || suggestions.length === 0) return null;
+    return (
+      <div style={styles.searchSuggestions}>
+        {suggestions.map((p, index) => (
+          <div
+            key={p.id}
+            style={{
+              ...styles.suggestionItem,
+              backgroundColor: hoveredIndex === index ? 'rgba(253, 189, 22, 0.08)' : 'transparent',
+              borderBottom: index === suggestions.length - 1 ? 'none' : undefined
+            }}
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex(null)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedProductId(p.id);
+              if (p.type === 'single' || p.type === 'slab') {
+                setActivePage('singles-detail');
+              } else {
+                setActivePage('sealed-detail');
+              }
+              setShowSuggestions(false);
+              setSearchInput('');
+            }}
+          >
+            <img 
+              src={p.image || '/logo.png'} 
+              alt={p.name} 
+              style={styles.suggestionThumb} 
+              onError={(e) => { e.target.src = '/logo.png'; }}
+            />
+            <span style={styles.suggestionName}>{p.name}</span>
+          </div>
+        ))}
+        <button
+          type="button"
+          style={{
+            ...styles.allResultsBtn,
+            backgroundColor: btnHovered ? 'rgba(255, 255, 255, 0.03)' : 'var(--bg-secondary)',
+            color: btnHovered ? 'var(--text-main)' : 'var(--text-muted)'
+          }}
+          onMouseEnter={() => setBtnHovered(true)}
+          onMouseLeave={() => setBtnHovered(false)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setSearchQuery(searchInput);
+            setActivePage('singles-catalog');
+            setShowSuggestions(false);
+          }}
+        >
+          {lang === 'CZ' ? 'Všechny výsledky hledání' : 'All search results'}
+        </button>
+      </div>
+    );
+  };
   
   const translateSubcat = (text) => {
     if (lang === 'CZ') return text;
@@ -267,17 +365,26 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 <img src="/logo s popisem.webp" alt="NORTHVALE TCG" style={styles.logoImg} />
               </div>
 
-              <form onSubmit={handleSearchSubmit} style={styles.searchForm}>
+              <form 
+                ref={searchContainerRef}
+                onSubmit={handleSearchSubmit} 
+                style={styles.searchForm}
+                onFocus={() => setShowSuggestions(true)}
+              >
                 <input
                   type="text"
                   placeholder={t('Navbar.searchPlaceholder')}
                   value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
+                  onChange={(e) => {
+                    setSearchInput(e.target.value);
+                    setShowSuggestions(true);
+                  }}
                   style={styles.searchInput}
                 />
                 <button type="submit" style={styles.searchBtn}>
                   <img src="/search.png" alt={t('common.search')} style={styles.searchIcon} />
                 </button>
+                {renderSuggestions()}
               </form>
 
               <div style={styles.navActions}>
@@ -817,17 +924,26 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
           {/* Mobile Search Row */}
           <div style={styles.mobileSearchRow}>
             <div className="container">
-              <form onSubmit={handleSearchSubmit} style={styles.mobileSearchForm}>
+              <form 
+                ref={mobileSearchContainerRef}
+                onSubmit={handleSearchSubmit} 
+                style={styles.mobileSearchForm}
+                onFocus={() => setShowSuggestions(true)}
+              >
                 <input
                   type="text"
                   placeholder={t('Navbar.searchPlaceholder')}
                   value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
+                  onChange={(e) => {
+                    setSearchInput(e.target.value);
+                    setShowSuggestions(true);
+                  }}
                   style={styles.mobileSearchInput}
                 />
                 <button type="submit" style={styles.mobileSearchBtn}>
                   <img src="/search.png" alt="Hledat" style={styles.searchIcon} />
                 </button>
+                {renderSuggestions()}
               </form>
             </div>
           </div>
@@ -1797,5 +1913,70 @@ const styles = {
     width: '100%',
     gap: '8px',
     marginTop: 'auto',
+  },
+  searchSuggestions: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    marginTop: '6px',
+    backgroundColor: '#1C1C22',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-md)',
+    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)',
+    zIndex: 9999,
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    fontFamily: 'var(--font-outfit)',
+  },
+  suggestionItem: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '10px 14px',
+    gap: '12px',
+    cursor: 'pointer',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.015)',
+    transition: 'background-color 0.2s',
+    textDecoration: 'none',
+  },
+  suggestionThumb: {
+    width: '32px',
+    height: '32px',
+    objectFit: 'contain',
+    borderRadius: '4px',
+    backgroundColor: 'transparent',
+  },
+  suggestionName: {
+    fontSize: '13px',
+    fontWeight: '500',
+    color: 'var(--text-main)',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    flexGrow: 1,
+    textAlign: 'left',
+  },
+  suggestionEdition: {
+    fontSize: '11px',
+    color: 'var(--text-muted)',
+    marginLeft: 'auto',
+  },
+  allResultsBtn: {
+    display: 'block',
+    width: '100%',
+    padding: '12px 14px',
+    textAlign: 'center',
+    fontSize: '13px',
+    fontWeight: '600',
+    color: 'var(--text-muted)',
+    textDecoration: 'underline',
+    backgroundColor: 'var(--bg-secondary)',
+    border: 'none',
+    borderTop: '1px solid rgba(255, 255, 255, 0.015)',
+    cursor: 'pointer',
+    transition: 'color 0.2s, background-color 0.2s',
+    fontFamily: 'var(--font-outfit)',
+    marginTop: '8px',
   },
 };
