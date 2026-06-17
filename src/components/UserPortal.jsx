@@ -661,9 +661,20 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
           {lang === 'CZ' ? 'Přihlášen jako' : 'Logged in as'}:{' '}
           <strong>{user.name || user.email.split('@')[0]}</strong>
         </span>
-        <button className="prf-topbar-logout" onClick={onLogout}>
-          {t('UserPortal.logoutBtn')}
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {user.role === 'admin' && (
+            <button 
+              className="prf-topbar-logout" 
+              style={{ borderColor: 'var(--color-gold)', color: 'var(--color-gold)', backgroundColor: 'rgba(253, 189, 22, 0.05)' }} 
+              onClick={() => setActivePage('admin')}
+            >
+              👑 {lang === 'CZ' ? 'Vstoupit do administrace' : 'Enter Admin Panel'}
+            </button>
+          )}
+          <button className="prf-topbar-logout" onClick={onLogout}>
+            {t('UserPortal.logoutBtn')}
+          </button>
+        </div>
       </div>
 
       <div className="prf-shell">
@@ -705,6 +716,18 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
             <span>{lang === 'CZ' ? 'Newslettery' : 'Newsletters'}</span>
           </button>
           <div className="prf-nav-divider"></div>
+          {user.role === 'admin' && (
+            <>
+              <button 
+                className="prf-nav-item"
+                style={{ color: 'var(--color-gold)', backgroundColor: 'rgba(253, 189, 22, 0.03)' }}
+                onClick={() => setActivePage('admin')}
+              >
+                👑 <span>{lang === 'CZ' ? 'Administrace' : 'Admin Panel'}</span>
+              </button>
+              <div className="prf-nav-divider"></div>
+            </>
+          )}
           <button 
             className="prf-nav-item prf-nav-logout"
             onClick={onLogout}

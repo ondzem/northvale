@@ -184,6 +184,7 @@ function AppContent() {
   // User and Session State (Declared at top to avoid hoisting reference issues)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
 
   // Cart State (Initialized from localStorage)
   const [cart, setCart] = useState(() => {
@@ -285,6 +286,7 @@ function AppContent() {
 
   // Supabase auth state change handler
   const handleAuthSession = async (session, event) => {
+    setIsAuthChecking(true);
     if (session) {
       const authUser = session.user;
       setIsLoggedIn(true);
@@ -424,6 +426,7 @@ function AppContent() {
         }
       }
     }
+    setIsAuthChecking(false);
   };
 
   // Listen to Supabase Auth State Changes
@@ -453,11 +456,47 @@ function AppContent() {
     if (page === 'slabs-catalog' && !FEATURE_FLAGS.showSlabs) {
       page = 'home';
     }
+    if (page === 'admin') {
+      if (!isLoggedIn || user.role !== 'admin') {
+        showToast(
+          lang === 'CZ' 
+            ? 'Přístup odepřen. Tuto stránku mohou navštěvovat pouze administrátoři.' 
+            : 'Access denied. Only administrators can visit this page.', 
+          'error'
+        );
+        page = 'home';
+      }
+    }
     setActivePage(page);
     if (page === 'gdpr-vop' && tab) {
       setGdprVopTab(tab);
     }
   };
+
+  // Admin Page Security Route Guard
+  useEffect(() => {
+    if (activePage === 'admin') {
+      if (isAuthChecking) return;
+
+      if (isLoggedIn && user.role !== 'admin') {
+        setActivePage('home');
+        showToast(
+          lang === 'CZ' 
+            ? 'Přístup odepřen. Tuto stránku mohou navštěvovat pouze administrátoři.' 
+            : 'Access denied. Only administrators can visit this page.', 
+          'error'
+        );
+      } else if (!isLoggedIn) {
+        setActivePage('home');
+        showToast(
+          lang === 'CZ' 
+            ? 'Pro vstup do administrace se musíte nejdříve přihlásit.' 
+            : 'You must log in to access the administration panel.', 
+          'error'
+        );
+      }
+    }
+  }, [activePage, isLoggedIn, user.role, isAuthChecking]);
 
   const isPoppingState = useRef(false);
 
@@ -556,8 +595,8 @@ function AppContent() {
   const handleRegister = (email, name = '') => {
     showToast(
       lang === 'CZ'
-        ? `Registrace úspěšná! Vítejte, ${name || email}`
-        : `Registration successful! Welcome, ${name || email}`,
+        ? `Registrace byla úspěšná! Na e-mail ${email} byl odeslán potvrzovací odkaz. Před prvním přihlášením na něj prosím klikněte.`
+        : `Registration successful! A confirmation link was sent to ${email}. Please click it before logging in.`,
       'success'
     );
   };
@@ -714,7 +753,7 @@ function AppContent() {
   }, [activePage, selectedProductId, gdprVopTab, lang]);
 
   // Custom Toast helper
-  const showToast = (message, type = 'success', title = '') => {
+  function showToast(message, type = 'success', title = '') {
     // Determine title if not provided
     let defaultTitle = lang === 'CZ' ? 'Oznámení' : 'Notification';
     if (type === 'success') {
@@ -1057,8 +1096,7 @@ function AppContent() {
 
         {activePage === 'admin' && (
           <AdminPanel 
-            buylists={buylists}
-            approveBuylist={approveBuylist}
+            showToast={showToast}
           />
         )}
 
@@ -1091,6 +1129,7 @@ function AppContent() {
         onClose={() => setIsLoginModalOpen(false)} 
         onLogin={handleLogin} 
         onRegister={handleRegister} 
+        showToast={showToast}
       />
 
       {/* Premium Custom Toast Banner */}

@@ -136,3 +136,95 @@ export async function fetchProductByIdFromDB(id) {
     return mock || null;
   }
 }
+
+/**
+ * Maps frontend product representation to database snake_case structure.
+ */
+export function mapProductToDb(p) {
+  if (!p) return null;
+  return {
+    id: p.id,
+    name: p.name,
+    type: p.type,
+    game: p.game,
+    edition: p.edition,
+    category: p.category,
+    subcat: p.subcat,
+    subsubcat: p.subsubcat,
+    subsubcategory: p.subsubcategory,
+    rarity: p.rarity,
+    image: p.image,
+    back_image: p.backImage || p.back_image || null,
+    description: p.desc || p.description || null,
+    price: p.price !== undefined && p.price !== null ? Number(p.price) : null,
+    stock: p.stock !== undefined && p.stock !== null ? Number(p.stock) : null,
+    lang: p.lang || null,
+    packaging_type: p.packagingType || p.packaging_type || null,
+    booster_count: p.boosterCount !== undefined && p.boosterCount !== null ? Number(p.boosterCount) : null,
+    year: p.year !== undefined && p.year !== null ? Number(p.year) : null,
+    foil_condition: p.foilCondition || p.foil_condition || null,
+    preorder: !!p.preorder,
+    investment: !!p.investment,
+    company: p.company || null,
+    grade: p.grade !== undefined && p.grade !== null ? Number(p.grade) : null,
+    cert_number: p.certNumber || p.cert_number || null,
+    acrylic_thickness: p.acrylicThickness !== undefined && p.acrylicThickness !== null ? Number(p.acrylicThickness) : null,
+    uv_protection: !!(p.uvProtection || p.uv_protection),
+    closing_type: p.closingType || p.closing_type || null,
+    inner_dimensions: p.innerDimensions || p.inner_dimensions || null,
+    variants: p.variants || null,
+    category_id: p.category_id || null
+  };
+}
+
+/**
+ * Create or update a product in Supabase.
+ */
+export async function saveProductToDB(product) {
+  try {
+    if (!supabase.from) {
+      throw new Error('Supabase client is not initialized');
+    }
+
+    const mapped = mapProductToDb(product);
+    const { data, error } = await supabase
+      .from('products')
+      .upsert(mapped)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return { data: mapDbProduct(data), error: null };
+  } catch (err) {
+    console.error('Failed to save product to database:', err.message || err);
+    return { data: null, error: err };
+  }
+}
+
+/**
+ * Delete a product from Supabase.
+ */
+export async function deleteProductFromDB(id) {
+  try {
+    if (!supabase.from) {
+      throw new Error('Supabase client is not initialized');
+    }
+
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
+
+    return { error: null };
+  } catch (err) {
+    console.error(`Failed to delete product ${id} from database:`, err.message || err);
+    return { error: err };
+  }
+}

@@ -3,20 +3,26 @@ import { useTranslation } from '../context/LanguageContext';
 import { FEATURE_FLAGS } from '../config';
 import { supabase } from '../supabase';
 
-export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
+export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showToast }) {
   const { lang, t } = useTranslation();
+
+  const triggerAlert = (message, type = 'error') => {
+    if (showToast) {
+      showToast(message, type);
+    } else {
+      alert(message);
+    }
+  };
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
   const [newsletter, setNewsletter] = useState(false);
 
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [fullNameError, setFullNameError] = useState(false);
-  const [phoneError, setPhoneError] = useState(false);
 
   // Developer OAuth Configurations Panel State
   const [showConfig, setShowConfig] = useState(false);
@@ -82,15 +88,8 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
         setFullNameError(false);
       }
 
-      if (phone.trim().length < 9) {
-        setPhoneError(true);
-        hasError = true;
-      } else {
-        setPhoneError(false);
-      }
-
       if (password !== confirmPassword) {
-        alert(t('LoginModal.passwordsDoNotMatch'));
+        triggerAlert(t('LoginModal.passwordsDoNotMatch'), 'error');
         return;
       }
     }
@@ -104,14 +103,13 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
         options: {
           data: {
             full_name: fullName,
-            phone: phone,
             newsletter: newsletter
           }
         }
       });
 
       if (error) {
-        alert(lang === 'CZ' ? `Chyba registrace: ${error.message}` : `Registration error: ${error.message}`);
+        triggerAlert(lang === 'CZ' ? `Chyba registrace: ${error.message}` : `Registration error: ${error.message}`, 'error');
         return;
       }
 
@@ -123,7 +121,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
       });
 
       if (error) {
-        alert(lang === 'CZ' ? `Chyba přihlášení: ${error.message}` : `Login error: ${error.message}`);
+        triggerAlert(lang === 'CZ' ? `Chyba přihlášení: ${error.message}` : `Login error: ${error.message}`, 'error');
         return;
       }
 
@@ -135,12 +133,10 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
     setPassword('');
     setConfirmPassword('');
     setFullName('');
-    setPhone('');
     setNewsletter(false);
     setEmailError(false);
     setPasswordError(false);
     setFullNameError(false);
-    setPhoneError(false);
     onClose();
   };
 
@@ -160,7 +156,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
     });
     if (error) {
       console.error('Google login error:', error);
-      alert(lang === 'CZ' ? `Chyba Google přihlášení: ${error.message}` : `Google login error: ${error.message}`);
+      triggerAlert(lang === 'CZ' ? `Chyba Google přihlášení: ${error.message}` : `Google login error: ${error.message}`, 'error');
     } else {
       onClose();
     }
@@ -175,7 +171,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
     });
     if (error) {
       console.error('Apple login error:', error);
-      alert(lang === 'CZ' ? `Chyba Apple přihlášení: ${error.message}` : `Apple login error: ${error.message}`);
+      triggerAlert(lang === 'CZ' ? `Chyba Apple přihlášení: ${error.message}` : `Apple login error: ${error.message}`, 'error');
     } else {
       onClose();
     }
@@ -271,30 +267,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                   </div>
                 )}
 
-                {/* Registration Only: Phone */}
-                {isRegisterMode && (
-                  <div className="login-form-group">
-                    <label className="login-form-label">
-                      {t('LoginModal.phoneLabel')} <span className="text-red">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => {
-                        setPhone(e.target.value);
-                        if (phoneError) setPhoneError(e.target.value.trim().length < 9);
-                      }}
-                      className={`login-form-input ${phoneError ? 'input-error' : ''}`}
-                      placeholder={t('LoginModal.phonePlaceholder')}
-                      required
-                    />
-                    {phoneError && (
-                      <p className="login-form-error-msg">
-                        {t('LoginModal.phoneError')}
-                      </p>
-                    )}
-                  </div>
-                )}
+
 
                 {/* Email Input */}
                 <div className="login-form-group">
@@ -389,7 +362,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                 <button 
                   type="button" 
                   className="forgot-password-link"
-                  onClick={() => alert(t('LoginModal.resetLinkSent'))}
+                  onClick={() => triggerAlert(t('LoginModal.resetLinkSent'), 'success')}
                 >
                   {t('LoginModal.forgotPasswordLink')}
                 </button>
@@ -469,7 +442,6 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister }) {
                     setEmailError(false);
                     setPasswordError(false);
                     setFullNameError(false);
-                    setPhoneError(false);
                     setNewsletter(false);
                   }}
                 >
