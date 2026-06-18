@@ -24,7 +24,8 @@ function mapDbProduct(p) {
     setCode: p.set_code || null,
     stage: p.stage || null,
     element: p.element || null,
-    releaseDate: p.preorder ? p.foil_condition : null
+    releaseDate: p.preorder ? p.foil_condition : null,
+    customParams: p.custom_params || []
   };
 }
 
@@ -193,7 +194,8 @@ export function mapProductToDb(p) {
     illustrator: p.illustrator || null,
     set_code: p.setCode || null,
     stage: p.stage || null,
-    element: p.element || null
+    element: p.element || null,
+    custom_params: p.customParams || []
   };
 }
 

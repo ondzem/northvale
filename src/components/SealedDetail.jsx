@@ -888,6 +888,12 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                             <td>{product.foilCondition}</td>
                           </tr>
                         )}
+                        {product.customParams && Array.isArray(product.customParams) && product.customParams.map((cp, idx) => (
+                          <tr key={idx}>
+                            <td>{cp.label}</td>
+                            <td>{cp.value}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   )}
@@ -937,6 +943,12 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                             <td>{accColor}</td>
                           </tr>
                         )}
+                        {product.customParams && Array.isArray(product.customParams) && product.customParams.map((cp, idx) => (
+                          <tr key={idx}>
+                            <td>{cp.label}</td>
+                            <td>{cp.value}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   )}
@@ -980,6 +992,12 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                             <td>{product.innerDimensions}</td>
                           </tr>
                         )}
+                        {product.customParams && Array.isArray(product.customParams) && product.customParams.map((cp, idx) => (
+                          <tr key={idx}>
+                            <td>{cp.label}</td>
+                            <td>{cp.value}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   )}

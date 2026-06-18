@@ -359,6 +359,7 @@ export default function ProductsTab({ showToast }) {
   const [formIllustrator, setFormIllustrator] = useState('');
   const [formStage, setFormStage] = useState('');
   const [formElement, setFormElement] = useState('');
+  const [formCustomParams, setFormCustomParams] = useState([]);
   const [isFullPreviewOpen, setIsFullPreviewOpen] = useState(false);
   const [previewActiveTab, setPreviewActiveTab] = useState('popis');
   const [previewCondition, setPreviewCondition] = useState('NM');
@@ -465,6 +466,7 @@ export default function ProductsTab({ showToast }) {
     setFormStage('');
     setFormElement('');
     setFormIllustrator('');
+    setFormCustomParams([]);
 
     setIsModalOpen(true);
   };
@@ -544,6 +546,7 @@ export default function ProductsTab({ showToast }) {
     setFormStage(p.stage || '');
     setFormElement(p.element || '');
     setFormIllustrator(p.illustrator || '');
+    setFormCustomParams(p.customParams || p.custom_params || []);
 
     setIsModalOpen(true);
   };
@@ -610,7 +613,8 @@ export default function ProductsTab({ showToast }) {
       stage: formStage || null,
       element: formElement || null,
       illustrator: formIllustrator || null,
-      year: formYear ? Number(formYear) : null
+      year: formYear ? Number(formYear) : null,
+      customParams: formCustomParams
     };
 
     if (formType === 'single') {
@@ -2263,6 +2267,112 @@ export default function ProductsTab({ showToast }) {
                           </div>
                         )}
 
+                        {/* Custom parameters manager */}
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', marginTop: '16px' }}>
+                          <label className="pmf-label" style={{ display: 'block', marginBottom: '8px', color: 'var(--nv-gold, #fdbd16)', fontSize: '12px', fontWeight: 'bold' }}>
+                            {lang === 'CZ' ? 'Vlastní parametry a specifikace' : 'Custom Specifications'}
+                          </label>
+                          
+                          {/* List of custom params */}
+                          {formCustomParams.length > 0 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                              {formCustomParams.map((param, index) => (
+                                <div key={index} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                                  <input 
+                                    type="text" 
+                                    className="pmf-input" 
+                                    style={{ flex: 1, padding: '6px 10px', fontSize: '12px' }} 
+                                    value={param.label} 
+                                    onChange={(e) => {
+                                      const newParams = [...formCustomParams];
+                                      newParams[index].label = e.target.value;
+                                      setFormCustomParams(newParams);
+                                    }} 
+                                    placeholder={lang === 'CZ' ? 'Název parametru' : 'Parameter Name'}
+                                  />
+                                  <input 
+                                    type="text" 
+                                    className="pmf-input" 
+                                    style={{ flex: 2, padding: '6px 10px', fontSize: '12px' }} 
+                                    value={param.value} 
+                                    onChange={(e) => {
+                                      const newParams = [...formCustomParams];
+                                      newParams[index].value = e.target.value;
+                                      setFormCustomParams(newParams);
+                                    }} 
+                                    placeholder={lang === 'CZ' ? 'Hodnota parametru' : 'Parameter Value'}
+                                  />
+                                  <button 
+                                    type="button" 
+                                    onClick={() => setFormCustomParams(formCustomParams.filter((_, i) => i !== index))}
+                                    style={{
+                                      background: 'rgba(239, 68, 68, 0.1)',
+                                      border: '1px solid rgba(239, 68, 68, 0.2)',
+                                      color: '#ef4444',
+                                      padding: '6px 10px',
+                                      borderRadius: '4px',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center'
+                                    }}
+                                    title={lang === 'CZ' ? 'Odstranit' : 'Delete'}
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Form to add a new parameter */}
+                          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                            <div style={{ flex: 1 }}>
+                              <input 
+                                id="new-param-label"
+                                type="text" 
+                                className="pmf-input" 
+                                style={{ padding: '8px 12px', fontSize: '13px' }} 
+                                placeholder={lang === 'CZ' ? 'Např. Jazyk karty' : 'E.g. Language'} 
+                              />
+                            </div>
+                            <div style={{ flex: 2 }}>
+                              <input 
+                                id="new-param-value"
+                                type="text" 
+                                className="pmf-input" 
+                                style={{ padding: '8px 12px', fontSize: '13px' }} 
+                                placeholder={lang === 'CZ' ? 'Např. Čeština (CZ)' : 'E.g. Czech (CZ)'} 
+                              />
+                            </div>
+                            <button 
+                              type="button" 
+                              className="pmf-variants-add" 
+                              style={{ 
+                                padding: '8px 16px', 
+                                height: '38px', 
+                                whiteSpace: 'nowrap',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                              onClick={() => {
+                                const labelInput = document.getElementById('new-param-label');
+                                const valueInput = document.getElementById('new-param-value');
+                                if (labelInput && valueInput && labelInput.value.trim() && valueInput.value.trim()) {
+                                  setFormCustomParams([...formCustomParams, { label: labelInput.value.trim(), value: valueInput.value.trim() }]);
+                                  labelInput.value = '';
+                                  valueInput.value = '';
+                                } else {
+                                  alert(lang === 'CZ' ? 'Vyplňte prosím název i hodnotu parametru.' : 'Please fill both the parameter name and value.');
+                                }
+                              }}
+                            >
+                              <span>+</span> {lang === 'CZ' ? 'Přidat' : 'Add'}
+                            </button>
+                          </div>
+                        </div>
+
                       </div>
                     </div>
 
@@ -3570,6 +3680,12 @@ export default function ProductsTab({ showToast }) {
                                       </tr>
                                     </>
                                   )}
+                                  {formCustomParams && formCustomParams.map((cp, idx) => (
+                                    <tr key={idx}>
+                                      <td>{cp.label}</td>
+                                      <td>{cp.value}</td>
+                                    </tr>
+                                  ))}
                                 </tbody>
                               </table>
                             </div>

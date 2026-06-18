@@ -1011,6 +1011,12 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                             <td>{yearReleased}</td>
                           </tr>
                         )}
+                        {product.customParams && Array.isArray(product.customParams) && product.customParams.map((cp, idx) => (
+                          <tr key={idx}>
+                            <td>{cp.label}</td>
+                            <td>{cp.value}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   ) : (
@@ -1058,7 +1064,12 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
                             <td><code>{product.certNumber}</code></td>
                           </tr>
                         )}
-
+                        {product.customParams && Array.isArray(product.customParams) && product.customParams.map((cp, idx) => (
+                          <tr key={idx}>
+                            <td>{cp.label}</td>
+                            <td>{cp.value}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   )}
