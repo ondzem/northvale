@@ -3,7 +3,7 @@ import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 import DealOfTheDay from './DealOfTheDay';
-import { fetchCategoriesFromDB } from '../services/categories';
+import { fetchCategoriesFromDB, mockCategories } from '../services/categories';
 
 function getGameFallbackLogo(game) {
   switch (game) {
@@ -607,8 +607,8 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
   const [isDescExpanded, setIsDescExpanded] = useState(false);
 
   // Active subcategory (rarity filter)
-  const [dbCategories, setDbCategories] = useState([]);
-  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
+  const [dbCategories, setDbCategories] = useState(mockCategories);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(true);
 
   const [activeSubcategory, setActiveSubcategory] = useState('all');
   const [activeSubsubcategory, setActiveSubsubcategory] = useState('all');
