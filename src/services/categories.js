@@ -106,10 +106,20 @@ export const mockCategories = [
   { id: 'acrylic-lorcana-trove', name_cz: 'Lorcana akryly', name_en: 'Lorcana Acrylics', type: 'accessory', game: 'Acrylics', parent_id: 'cat-acrylics-trove' }
 ];
 
+// In-memory cache for categories
+let cachedCategories = null;
+let categoriesCacheTime = 0;
+const CATEGORIES_CACHE_TTL = 300000; // 5 minutes cache TTL
+
 /**
  * Fetch all categories from Supabase, falling back to mockCategories on error.
  */
 export async function fetchCategoriesFromDB() {
+  const now = Date.now();
+  if (cachedCategories && (now - categoriesCacheTime < CATEGORIES_CACHE_TTL)) {
+    return cachedCategories;
+  }
+
   try {
     if (!supabase.from) {
       throw new Error('Supabase client is not initialized');
@@ -135,6 +145,9 @@ export async function fetchCategoriesFromDB() {
         }
       });
     }
+    
+    cachedCategories = finalCategories;
+    categoriesCacheTime = now;
     return finalCategories;
   } catch (err) {
     console.warn('Database categories query failed, using local fallback:', err.message || err);
@@ -161,6 +174,10 @@ export async function saveCategoryToDB(category) {
       throw error;
     }
 
+    // Invalidate categories cache
+    cachedCategories = null;
+    categoriesCacheTime = 0;
+
     return { data, error: null };
   } catch (err) {
     console.error('Failed to save category to database:', err.message || err);
@@ -185,6 +202,10 @@ export async function deleteCategoryFromDB(id) {
     if (error) {
       throw error;
     }
+
+    // Invalidate categories cache
+    cachedCategories = null;
+    categoriesCacheTime = 0;
 
     return { error: null };
   } catch (err) {

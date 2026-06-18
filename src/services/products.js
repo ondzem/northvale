@@ -28,6 +28,10 @@ function mapDbProduct(p) {
     customParams: p.custom_params || []
   };
 }
+// In-memory cache for raw products list
+let cachedRawProducts = null;
+let productsCacheTime = 0;
+const PRODUCTS_CACHE_TTL = 30000; // 30 seconds cache TTL
 
 /**
  * Fetch products from Supabase database with filters and search query.
@@ -37,55 +41,62 @@ export async function fetchProductsFromDB(options = {}) {
   const { type, types, game, searchQuery, edition } = options;
 
   try {
-    // Check if supabase client is active
     if (!supabase.from) {
       throw new Error('Supabase client is not initialized');
     }
 
-    let query = supabase.from('products').select('*');
+    const now = Date.now();
+    let rawData;
+    if (cachedRawProducts && (now - productsCacheTime < PRODUCTS_CACHE_TTL)) {
+      rawData = cachedRawProducts;
+    } else {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*');
 
-    // Filter by type or types array
-    if (types && types.length > 0) {
-      query = query.in('type', types);
-    } else if (type) {
-      query = query.eq('type', type);
+      if (error) {
+        throw error;
+      }
+      cachedRawProducts = data || [];
+      productsCacheTime = now;
+      rawData = cachedRawProducts;
     }
 
-    // Filter by game
+    // Filter rawData in memory
+    let filtered = rawData.map(mapDbProduct);
+
+    if (types && types.length > 0) {
+      filtered = filtered.filter(p => types.includes(p.type));
+    } else if (type) {
+      filtered = filtered.filter(p => p.type === type);
+    }
+
     if (game && game !== 'all' && game !== 'all-games') {
       if (game === 'Accessories') {
-        query = query.eq('type', 'accessory').or('category.is.null,category.neq.Acrylics');
+        filtered = filtered.filter(p => p.type === 'accessory' && (!p.category || p.category !== 'Acrylics'));
       } else if (game === 'Acrylics') {
-        query = query.eq('category', 'Acrylics');
+        filtered = filtered.filter(p => p.category === 'Acrylics');
       } else {
-        query = query.eq('game', game).or('category.is.null,category.neq.Acrylics');
+        filtered = filtered.filter(p => p.game === game && (!p.category || p.category !== 'Acrylics'));
       }
     }
 
-    // Filter by edition
     if (edition && edition !== 'all') {
-      query = query.eq('edition', edition);
+      filtered = filtered.filter(p => p.edition === edition);
     }
 
-    // Text Search (case-insensitive substring match on name or edition)
     if (searchQuery && searchQuery.trim() !== '') {
-      const cleanSearch = searchQuery.trim();
-      query = query.or(`name.ilike.%${cleanSearch}%,edition.ilike.%${cleanSearch}%`);
+      const lowerSearch = searchQuery.trim().toLowerCase();
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(lowerSearch) || 
+        (p.edition && p.edition.toLowerCase().includes(lowerSearch))
+      );
     }
 
     // Sort by id for deterministic order
-    query = query.order('id', { ascending: true });
+    filtered.sort((a, b) => (a.id > b.id ? 1 : -1));
 
-    const { data, error } = await query;
-
-    if (error) {
-      throw error;
-    }
-
-    if (data) {
-      return data.map(mapDbProduct);
-    }
-    return [];
+    return filtered;
 
   } catch (err) {
     console.warn('Database products query failed, using local mock fallback:', err.message || err);
@@ -219,6 +230,10 @@ export async function saveProductToDB(product) {
       throw error;
     }
 
+    // Invalidate products cache
+    cachedRawProducts = null;
+    productsCacheTime = 0;
+
     return { data: mapDbProduct(data), error: null };
   } catch (err) {
     console.error('Failed to save product to database, using mock fallback:', err.message || err);
@@ -258,6 +273,10 @@ export async function deleteProductFromDB(id) {
     if (error) {
       throw error;
     }
+
+    // Invalidate products cache
+    cachedRawProducts = null;
+    productsCacheTime = 0;
 
     return { error: null };
   } catch (err) {
