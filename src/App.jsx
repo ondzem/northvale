@@ -671,6 +671,9 @@ function AppContent() {
 
   // Smooth scroll to top on page or legal tab change
   useEffect(() => {
+    if (sessionStorage.getItem('scrollToPreorderInfo') === 'true') {
+      return;
+    }
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
@@ -858,6 +861,33 @@ function AppContent() {
     } catch (err) {
       console.error('Failed to sync order history to Supabase:', err);
     }
+
+    // Call Edge Function to export order to Pohoda
+    try {
+      await supabase.functions.invoke('pohoda-connector/export-order', {
+        body: {
+          order: {
+            id: order.id,
+            created_at: new Date().toISOString(),
+            customer_name: order.customerName,
+            customer_city: order.shippingCity,
+            customer_street: order.shippingStreet,
+            customer_zip: order.shippingZip,
+            customer_email: order.customerEmail,
+            customer_phone: order.customerPhone,
+            payment_method: order.paymentMethod
+          },
+          items: order.items.map(item => ({
+            name: item.name,
+            product_id: item.id || item.product_id || item.name,
+            quantity: item.quantity,
+            price: item.price
+          }))
+        }
+      });
+    } catch (exportErr) {
+      console.error('Pohoda order export invocation failed:', exportErr);
+    }
   };
 
   // Submit Buylist Action
@@ -965,7 +995,7 @@ function AppContent() {
       <main style={styles.mainContent}>
         {activePage === 'home' && (
           <Homepage 
-            setActivePage={setActivePage} 
+            setActivePage={navigateToPage} 
             addToCart={addToCart} 
             products={dbProducts}
             setSelectedProductId={setSelectedProductId}
@@ -978,7 +1008,7 @@ function AppContent() {
             products={dbProducts}
             addToCart={addToCart}
             setSelectedProductId={setSelectedProductId}
-            setActivePage={setActivePage}
+            setActivePage={navigateToPage}
             filters={filters}
             setFilters={setFilters}
             searchQuery={searchQuery}
@@ -992,7 +1022,7 @@ function AppContent() {
             products={dbProducts}
             addToCart={addToCart}
             setSelectedProductId={setSelectedProductId}
-            setActivePage={setActivePage}
+            setActivePage={navigateToPage}
             filters={filters}
             setFilters={setFilters}
           />
@@ -1003,7 +1033,7 @@ function AppContent() {
             products={dbProducts}
             addToCart={addToCart}
             setSelectedProductId={setSelectedProductId}
-            setActivePage={setActivePage}
+            setActivePage={navigateToPage}
             filters={filters}
             setFilters={setFilters}
           />
@@ -1015,7 +1045,7 @@ function AppContent() {
             products={dbProducts}
             addToCart={addToCart}
             setSelectedProductId={setSelectedProductId}
-            setActivePage={setActivePage}
+            setActivePage={navigateToPage}
             setFilters={setFilters}
             alert={showToast}
           />
@@ -1027,7 +1057,7 @@ function AppContent() {
             products={dbProducts}
             addToCart={addToCart}
             setSelectedProductId={setSelectedProductId}
-            setActivePage={setActivePage}
+            setActivePage={navigateToPage}
             setFilters={setFilters}
             alert={showToast}
           />
@@ -1038,7 +1068,7 @@ function AppContent() {
             products={dbProducts}
             submitBuylist={submitBuylist}
             user={user}
-            setActivePage={setActivePage}
+            setActivePage={navigateToPage}
             alert={showToast}
           />
         )}
@@ -1047,14 +1077,14 @@ function AppContent() {
           <GradingPortal 
             submitGrading={submitGrading}
             user={user}
-            setActivePage={setActivePage}
+            setActivePage={navigateToPage}
             alert={showToast}
           />
         )}
 
         {activePage === 'grading-guide' && FEATURE_FLAGS.showGrading && (
           <GradingGuide 
-            setActivePage={setActivePage}
+            setActivePage={navigateToPage}
           />
         )}
 
@@ -1063,15 +1093,15 @@ function AppContent() {
         )}
 
         {activePage === 'support' && (
-          <ContactPage setActivePage={setActivePage} />
+          <ContactPage setActivePage={navigateToPage} />
         )}
 
         {activePage === 'faq' && (
-          <FaqPage setActivePage={setActivePage} />
+          <FaqPage setActivePage={navigateToPage} />
         )}
 
         {activePage === 'about' && (
-          <AboutPage setActivePage={setActivePage} />
+          <AboutPage setActivePage={navigateToPage} />
         )}
 
         {activePage === 'checkout' && (
@@ -1079,8 +1109,9 @@ function AppContent() {
             cart={cart}
             user={user}
             submitOrder={submitOrder}
-            setActivePage={setActivePage}
+            setActivePage={navigateToPage}
             alert={showToast}
+            onOpenLogin={() => setIsLoginModalOpen(true)}
           />
         )}
 
@@ -1088,7 +1119,7 @@ function AppContent() {
           <UserPortal 
             user={user}
             setUser={setUser}
-            setActivePage={setActivePage}
+            setActivePage={navigateToPage}
             onLogout={handleLogout}
             showToast={showToast}
           />
@@ -1097,6 +1128,7 @@ function AppContent() {
         {activePage === 'admin' && (
           <AdminPanel 
             showToast={showToast}
+            setActivePage={navigateToPage}
           />
         )}
 
@@ -1108,7 +1140,7 @@ function AppContent() {
           <Cart 
             cart={cart} 
             setCart={setCart} 
-            setActivePage={setActivePage} 
+            setActivePage={navigateToPage} 
           />
         )}
 
@@ -1117,7 +1149,7 @@ function AppContent() {
             products={dbProducts}
             addToCart={addToCart}
             setSelectedProductId={setSelectedProductId}
-            setActivePage={setActivePage}
+            setActivePage={navigateToPage}
           />
         )}
       </main>

@@ -1052,6 +1052,58 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                           </span>
                         </div>
                       </div>
+
+                      {(order.isCompany || order.companyName) && (
+                        <div style={{
+                          marginTop: '16px',
+                          padding: '12px 16px',
+                          background: 'rgba(255, 255, 255, 0.02)',
+                          borderLeft: '2px solid var(--color-gold, #fdbd16)',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          color: '#8a8a92',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '4px'
+                        }}>
+                          <span style={{ fontWeight: 'bold', color: '#f0f0f0', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '1px', marginBottom: '2px' }}>
+                            {lang === 'CZ' ? 'Fakturační údaje (Firma)' : 'Billing Details (Company)'}
+                          </span>
+                          <div>
+                            <span style={{ color: '#aaa' }}>{lang === 'CZ' ? 'Název: ' : 'Company: '}</span>
+                            <span style={{ color: '#eee' }}>{order.companyName}</span>
+                          </div>
+                          <div style={{ display: 'flex', gap: '16px' }}>
+                            <div>
+                              <span style={{ color: '#aaa' }}>{lang === 'CZ' ? 'IČO: ' : 'ID (IČO): '}</span>
+                              <span style={{ color: '#eee' }}>{order.ico}</span>
+                            </div>
+                            {order.dic && (
+                              <div>
+                                <span style={{ color: '#aaa' }}>{lang === 'CZ' ? 'DIČ: ' : 'Tax ID (DIČ): '}</span>
+                                <span style={{ color: '#eee' }}>{order.dic}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {order.notes && (
+                        <div style={{
+                          marginTop: '12px',
+                          padding: '12px 16px',
+                          background: 'rgba(255, 255, 255, 0.01)',
+                          border: '1px dashed rgba(240, 240, 240, 0.08)',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          color: '#8a8a92'
+                        }}>
+                          <span style={{ fontWeight: 'bold', color: '#f0f0f0', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '1px', display: 'block', marginBottom: '4px' }}>
+                            {lang === 'CZ' ? 'Poznámka k objednávce' : 'Order Note'}
+                          </span>
+                          <span style={{ color: '#ccc', fontStyle: 'italic' }}>{order.notes}</span>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

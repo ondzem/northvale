@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 
 export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
@@ -21,6 +21,29 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
+
+  useEffect(() => {
+    if (activeTab === 'doprava' && sessionStorage.getItem('scrollToPreorderInfo') === 'true') {
+      let attempts = 0;
+      const tryScroll = () => {
+        const el = document.getElementById('preorder-info-section');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('highlight-section');
+          sessionStorage.removeItem('scrollToPreorderInfo');
+          setTimeout(() => el.classList.remove('highlight-section'), 2000);
+        } else if (attempts < 10) {
+          attempts++;
+          setTimeout(tryScroll, 100);
+        } else {
+          sessionStorage.removeItem('scrollToPreorderInfo');
+        }
+      };
+      
+      const timer = setTimeout(tryScroll, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab]);
 
   const handleWithdrawalSubmit = (e) => {
     e.preventDefault();
@@ -263,6 +286,25 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   <li><strong>Cash on Delivery (25 CZK surcharge):</strong> Pay in cash or by card directly to the courier upon receiving the parcel.</li>
                   <li><strong>Store Credit – Customer Balance (FREE):</strong> If you have a Store Credit balance on your user account (e.g., from buylist trade-ins), you can apply it as a discount on all or part of your purchase.</li>
                 </ul>
+
+                <div id="preorder-info-section" className="preorder-info-section-container" style={{
+                  marginTop: '40px',
+                  padding: '16px 12px 16px 16px',
+                  borderRadius: 'var(--radius-md)',
+                  borderLeft: '3px solid transparent',
+                  transition: 'all 0.3s ease-in-out'
+                }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-gold)', margin: '0 0 12px 0' }}>4. HOW DO PRE-ORDERS WORK?</h3>
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                    Pre-orders allow you to reserve rare and limited edition products before they are officially released. We follow these transparent guidelines:
+                  </p>
+                  <ul style={{ paddingLeft: '20px', fontSize: '13px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <li><strong>Allocation Guarantee:</strong> By pre-ordering, you secure a piece of the distributor allocation. We guarantee the reservation of your purchased quantity from our confirmed deliveries.</li>
+                    <li><strong>Price Guarantee:</strong> The price you pay at pre-order is final. Even if market value increases after release (common in TCG), you will not pay anything extra.</li>
+                    <li><strong>Consolidated Shipping:</strong> If you purchase a pre-order item along with in-stock items, the entire order will ship together once the pre-ordered item is released. If you wish to receive in-stock items immediately, please place two separate orders.</li>
+                    <li><strong>Expected Release Date:</strong> Expected release dates are based on publisher/distributor information. Rare release delays by the publisher may occur, in which case we will notify you immediately.</li>
+                  </ul>
+                </div>
               </div>
             ) : (
               <div>
@@ -314,6 +356,25 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   <li><strong>Platba na dobírku (Příplatek 25 Kč):</strong> Objednávku zaplatíte hotově nebo kartou přímo kurýrovi při převzetí zásilky.</li>
                   <li><strong>Store Credit – Zákaznický kredit (ZDARMA):</strong> Pokud máte na svém uživatelském účtu zůstatek Store Kreditu (např. z výkupu), můžete jej uplatnit jako slevu na celou objednávku nebo její část.</li>
                 </ul>
+
+                <div id="preorder-info-section" className="preorder-info-section-container" style={{
+                  marginTop: '40px',
+                  padding: '16px 12px 16px 16px',
+                  borderRadius: 'var(--radius-md)',
+                  borderLeft: '3px solid transparent',
+                  transition: 'all 0.3s ease-in-out'
+                }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-gold)', margin: '0 0 12px 0' }}>4. JAK FUNGUJÍ PŘEDOBJEDNÁVKY?</h3>
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                    Předobjednávky vám umožňují zajistit si vzácné a limitované sběratelské edice ještě před jejich oficiálním vydáním. Fungují podle následujících přehledných pravidel:
+                  </p>
+                  <ul style={{ paddingLeft: '20px', fontSize: '13px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <li><strong>Garance alokace:</strong> Předobjednávkou si zajišťujete kus z budoucí alokace výrobce. Garantujeme vám rezervaci zakoupeného počtu kusů z našich potvrzených dodávek.</li>
+                    <li><strong>Garance ceny:</strong> Cena, za kterou produkt předobjednáte, je konečná a pevná. Pokud se tržní cena po vydání zvýší (což je u sběratelských karet běžné), vy nic nedoplácíte.</li>
+                    <li><strong>Společné odeslání zásilky (DŮLEŽITÉ):</strong> Pokud v rámci jedné objednávky zakoupíte předobjednávku i produkty, které jsou aktuálně skladem, celou zásilku odešleme společně, jakmile bude předobjednaný produkt naskladněn. Pokud si přejete skladové produkty obdržet ihned, vytvořte prosím dvě samostatné objednávky.</li>
+                    <li><strong>Očekávané termíny vydání:</strong> Očekávané datum vydání uvádíme na základě oficiálních informací od výrobce/distributora. V případě nepředvídaného zpoždění ze strany výrobce vás budeme neprodleně informovat.</li>
+                  </ul>
+                </div>
               </div>
             )
           )}

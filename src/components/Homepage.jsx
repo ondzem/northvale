@@ -973,7 +973,6 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     <div className="ca-grain"></div>
                   </div>
                 </div>
-                <div className="vf-shadow"></div>
                 <div className="vf-info">
                   <div className="vf-name">{product.name.split(' (')[0]}</div>
                   <div className="vf-rule"></div>
@@ -1034,7 +1033,6 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     <div className="ca-grain"></div>
                   </div>
                 </div>
-                <div className="vf-shadow"></div>
                 <div className="vf-info">
                   <div className="vf-name">{product.name}</div>
                   <div className="vf-rule"></div>
@@ -1101,7 +1099,6 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                       <div className="ca-grain"></div>
                     </div>
                   </div>
-                  <div className="vf-shadow"></div>
                   <div className="vf-info">
                     <div className="vf-name">{product.name}</div>
                     <div className="vf-rule"></div>
@@ -1148,7 +1145,6 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     <div className="ca-grain"></div>
                   </div>
                 </div>
-                <div className="vf-shadow"></div>
                 <div className="vf-info">
                   <div className="vf-name">{product.name}</div>
                   <div className="vf-rule"></div>

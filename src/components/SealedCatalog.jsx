@@ -3,6 +3,230 @@ import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 import DealOfTheDay from './DealOfTheDay';
+import { fetchCategoriesFromDB } from '../services/categories';
+
+function getGameFallbackLogo(game) {
+  switch (game) {
+    case 'Pokémon': return '/Pokemon.webp';
+    case 'Lorcana': return '/lorcana logo.webp';
+    case 'One Piece': return '/One piece.webp';
+    case 'Riftbound': return '/Riftbound.webp';
+    case 'Accessories': return '/Prislusentstvi.webp';
+    case 'Acrylics': return '/acrylic-etb-box.png';
+    default: return '/Northvale Logo.webp';
+  }
+}
+
+export function getHistoricalFilterForCategory(catId) {
+  const mapping = {
+    'pokemon-booster-box': { packagingType: 'Booster Box' },
+    'pokemon-etb': { packagingType: 'Elite Trainer Box' },
+    'pokemon-bundles': { packagingType: 'Booster Bundle' },
+    'pokemon-boostery': { packagingType: 'Booster' },
+    'pokemon-special': { packagingType: 'Special Collection' },
+    'pokemon-other': { packagingType: 'Other' },
+    
+    'lorcana-booster-box': { packagingType: 'Booster Box' },
+    'lorcana-trove-box': { packagingType: 'Trove Box' },
+    'lorcana-boostery': { packagingType: 'Booster' },
+    'lorcana-other': { packagingType: 'Other' },
+    
+    'onepiece-booster-box': { packagingType: 'Booster Box' },
+    'onepiece-boostery': { packagingType: 'Booster' },
+    'onepiece-other': { packagingType: 'Other' },
+    
+    'riftbound-booster-box': { packagingType: 'Booster Box' },
+    'riftbound-boostery': { packagingType: 'Booster' },
+    'riftbound-trial-decky': { packagingType: 'Trial Deck' },
+    'riftbound-other': { packagingType: 'Other' },
+    
+    'cat-sleeves': { subcat: 'Sleeves' },
+    'cat-toploaders': { subcat: 'Toploaders' },
+    'cat-binders': { subcat: 'Binders' },
+    'cat-other-acc': { subcat: 'Other' },
+    
+    'acc-albums-cards': { subcat: 'Binders', subsubcat: 'cards' },
+    'acc-albums-toploaders': { subcat: 'Binders', subsubcat: 'toploaders' },
+    'acc-albums-graded': { subcat: 'Binders', subsubcat: 'graded' },
+    
+    // Sub-subcategories for sealed
+    'pokemon-draft-booster-box': { subsubcategory: 'Draft Booster Box' },
+    'pokemon-collector-booster-box': { subsubcategory: 'Collector Booster Box' },
+    'pokemon-set-booster-box': { subsubcategory: 'Set Booster Box' },
+    'pokemon-jumpstart-booster-box': { subsubcategory: 'Jumpstart Booster Box' },
+    'pokemon-japanese-booster-box': { subsubcategory: 'Japanese Booster Box' },
+    'pokemon-chinese-booster-box': { subsubcategory: 'Chinese Booster Box' },
+    'pokemon-standard-etb': { subsubcategory: 'Standard ETB' },
+    'pokemon-center-etb': { subsubcategory: 'Pokémon Center ETB' },
+    'pokemon-booster-bundle': { subsubcategory: 'Booster Bundle' },
+    'pokemon-standard-booster': { subsubcategory: 'Standard Booster' },
+    'pokemon-japanese-booster': { subsubcategory: 'Japanese Booster' },
+    'pokemon-chinese-booster': { subsubcategory: 'Chinese Booster' },
+    'pokemon-premium-collection': { subsubcategory: 'Premium Collection' },
+    'pokemon-japanese-special-set': { subsubcategory: 'Japanese Special Set' },
+    'pokemon-sealed-case': { subsubcategory: 'Sealed Case' },
+    'pokemon-japanese-other': { subsubcategory: 'Japanese Other' },
+    
+    'lorcana-standard-booster-box': { subsubcategory: 'Standard Booster Box' },
+    'lorcana-illumineers-trove': { subsubcategory: 'Illumineer\'s Trove' },
+    'lorcana-standard-booster': { subsubcategory: 'Standard Booster' },
+    'lorcana-starter-deck': { subsubcategory: 'Starter Deck' },
+    
+    'onepiece-english-booster-box': { subsubcategory: 'English Booster Box' },
+    'onepiece-english-booster-pack': { subsubcategory: 'English Booster Pack' },
+    'onepiece-starter-deck': { subsubcategory: 'Starter Deck' },
+    
+    'riftbound-standard-booster-box': { subsubcategory: 'Standard Booster Box' },
+    'riftbound-standard-booster-pack': { subsubcategory: 'Standard Booster Pack' },
+    'riftbound-standard-trial-deck': { subsubcategory: 'Standard Trial Deck' },
+    'riftbound-official-playmat': { subsubcategory: 'Official Playmat' },
+  };
+  
+  return mapping[catId] || null;
+}
+
+export function matchesHistoricalCategory(product, catId) {
+  if (product.category_id === catId) {
+    return true;
+  }
+  
+  const hist = getHistoricalFilterForCategory(catId);
+  if (!hist) {
+    const nameLower = product.name?.toLowerCase() || '';
+    switch (catId) {
+      case 'cat-acrylics-booster':
+        return product.category === 'Acrylics' && nameLower.includes('booster box');
+      case 'cat-acrylics-etb':
+        return product.category === 'Acrylics' && (nameLower.includes('elite trainer') || nameLower.includes('etb'));
+      case 'cat-acrylics-trove':
+        return product.category === 'Acrylics' && nameLower.includes('trove');
+      case 'cat-acrylics-slabs':
+        return product.category === 'Acrylics' && (nameLower.includes('slab') || nameLower.includes('graded') || nameLower.includes('stojánky'));
+      case 'acrylic-pokemon-booster':
+        return product.category === 'Acrylics' && product.game === 'Pokémon' && nameLower.includes('booster box');
+      case 'acrylic-pokemon-etb':
+        return product.category === 'Acrylics' && product.game === 'Pokémon' && (nameLower.includes('elite trainer') || nameLower.includes('etb'));
+      case 'acrylic-lorcana-trove':
+        return product.category === 'Acrylics' && product.game === 'Lorcana' && nameLower.includes('trove');
+      default:
+        return false;
+    }
+  }
+  
+  for (const [key, val] of Object.entries(hist)) {
+    if (product[key] !== val) return false;
+  }
+  return true;
+}
+
+export function getCategoryAndDescendantIds(catId, categories) {
+  const ids = [catId];
+  const queue = [catId];
+  while (queue.length > 0) {
+    const current = queue.shift();
+    const children = categories.filter(c => c.parent_id === current);
+    for (const child of children) {
+      if (!ids.includes(child.id)) {
+        ids.push(child.id);
+        queue.push(child.id);
+      }
+    }
+  }
+  return ids;
+}
+
+export function resolveActiveCategoryFromFilters(game, filters, categories) {
+  if (filters.category_id) {
+    return filters.category_id;
+  }
+  
+  const gameCats = categories.filter(c => c.game === game);
+  for (const cat of gameCats) {
+    const hist = getHistoricalFilterForCategory(cat.id);
+    if (hist) {
+      let match = true;
+      for (const [key, val] of Object.entries(hist)) {
+        const filterVal = filters[key] || (key === 'packagingType' ? filters.type : null) || (key === 'subcat' ? filters.subcat : null) || (key === 'subsubcat' ? filters.subsubcat : null);
+        if (filterVal !== val) {
+          match = false;
+          break;
+        }
+      }
+      if (match) return cat.id;
+    }
+  }
+  return 'all';
+}
+
+export function getDisplaySubcategories(game, type, categories, lang) {
+  const root = categories.find(c => c.game === game && c.parent_id === null);
+  if (!root) {
+    return [{
+      id: 'all',
+      name: game ? `${game} TCG` : 'Všechny',
+      icon: <img src={getGameFallbackLogo(game)} alt="" className="subcategory-img" />
+    }];
+  }
+  
+  let children = categories.filter(c => c.parent_id === root.id);
+  
+  if (type === 'single') {
+    children = children.filter(c => c.type === 'single');
+  } else if (type === 'sealed') {
+    children = children.filter(c => c.type === 'sealed' || c.type === 'accessory');
+  }
+  
+  if (children.length === 0 && type === 'single') {
+    if (game === 'Pokémon') {
+      return [
+        { id: 'all', name: 'Pokémon TCG', icon: <img src="/Pokemon.webp" alt="" className="subcategory-img" /> },
+        { id: 'Alternate Art', name: 'Alternate Art', icon: <img src="https://images.pokemontcg.io/swsh11/186.png" alt="" className="subcategory-img" /> },
+        { id: 'Special Illustration Rare', name: 'Special Illustration', icon: <img src="https://images.pokemontcg.io/sv3/223.png" alt="" className="subcategory-img" /> },
+        { id: 'Secret Rare', name: 'Secret Rare', icon: <img src="https://images.pokemontcg.io/swsh7/218.png" alt="" className="subcategory-img" /> },
+        { id: 'Rainbow Rare', name: 'Rainbow Rare', icon: <img src="https://images.pokemontcg.io/swsh4/188.png" alt="" className="subcategory-img" /> },
+      ];
+    } else if (game === 'Lorcana') {
+      return [
+        { id: 'all', name: 'Lorcana TCG', icon: <img src="/lorcana logo.webp" alt="" className="subcategory-img" /> },
+        { id: 'Common', name: 'Common', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+        { id: 'Uncommon', name: 'Uncommon', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+        { id: 'Rare', name: 'Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+        { id: 'Super Rare', name: 'Super Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+        { id: 'Legendary', name: 'Legendary', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+        { id: 'Enchanted', name: 'Enchanted', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+      ];
+    } else if (game === 'One Piece') {
+      return [
+        { id: 'all', name: 'One Piece TCG', icon: <img src="/One piece.webp" alt="" className="subcategory-img" /> },
+        { id: 'Common', name: 'Common', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+        { id: 'Uncommon', name: 'Uncommon', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+        { id: 'Rare', name: 'Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+        { id: 'Super Rare', name: 'Super Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+        { id: 'Secret Rare', name: 'Secret Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+        { id: 'Leader', name: 'Leader', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+        { id: 'Alternate Art', name: 'Alternate Art', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+      ];
+    }
+  }
+  
+  const formatted = [
+    {
+      id: 'all',
+      name: lang === 'CZ' ? root.name_cz : root.name_en,
+      icon: <img src={root.image_url || getGameFallbackLogo(game)} alt="" className="subcategory-img" />
+    }
+  ];
+  
+  children.forEach(child => {
+    formatted.push({
+      id: child.id,
+      name: lang === 'CZ' ? child.name_cz : child.name_en,
+      icon: <img src={child.image_url || getGameFallbackLogo(game)} alt="" className="subcategory-img" />
+    });
+  });
+  
+  return formatted;
+}
 
 const gameInfo = {
   'Pokémon': {
@@ -418,8 +642,56 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
   const [selectedClosingTypes, setSelectedClosingTypes] = useState([]);
   const [selectedPackagingTypes, setSelectedPackagingTypes] = useState(filters.type ? [filters.type] : []);
 
-  const [activeSubcategory, setActiveSubcategory] = useState(filters.type || filters.subsubcat || filters.subcat || filters.gameFilter || 'all');
-  const [activeSubsubcategory, setActiveSubsubcategory] = useState(filters.subsubcat || 'all');
+  const [dbCategories, setDbCategories] = useState([]);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
+
+  const [activeSubcategory, setActiveSubcategory] = useState('all');
+  const [activeSubsubcategory, setActiveSubsubcategory] = useState('all');
+
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      const data = await fetchCategoriesFromDB();
+      if (active) {
+        setDbCategories(data || []);
+        setCategoriesLoaded(true);
+      }
+    }
+    load();
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (categoriesLoaded && dbCategories.length > 0) {
+      const resolved = resolveActiveCategoryFromFilters(selectedGame, filters, dbCategories);
+      const matchedCat = dbCategories.find(c => c.id === resolved);
+      if (matchedCat && matchedCat.parent_id && matchedCat.parent_id !== 'game-pokemon' && matchedCat.parent_id !== 'game-lorcana' && matchedCat.parent_id !== 'game-onepiece' && matchedCat.parent_id !== 'game-riftbound' && matchedCat.parent_id !== 'game-accessories' && matchedCat.parent_id !== 'game-acrylics') {
+        setActiveSubcategory(matchedCat.parent_id);
+        setActiveSubsubcategory(matchedCat.id);
+      } else {
+        setActiveSubcategory(resolved);
+        setActiveSubsubcategory('all');
+      }
+    }
+  }, [filters, selectedGame, dbCategories, categoriesLoaded]);
+
+  const getSubSubcategories = (parentCatId) => {
+    if (parentCatId === 'all') return [];
+    const children = dbCategories.filter(c => c.parent_id === parentCatId);
+    if (children.length === 0) return [];
+    
+    const formatted = [
+      { id: 'all', name: lang === 'CZ' ? 'Všechny' : 'All', icon: '💎' }
+    ];
+    children.forEach(child => {
+      formatted.push({
+        id: child.id,
+        name: lang === 'CZ' ? child.name_cz : child.name_en,
+        icon: child.image_url ? <img src={child.image_url} alt="" className="subcategory-img" style={{ width: '18px', height: '18px', borderRadius: '4px', objectFit: 'cover' }} /> : '📁'
+      });
+    });
+    return formatted;
+  };
 
   // Collapsible sections state
   const [expandedSections, setExpandedSections] = useState({
@@ -632,26 +904,24 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
 
     // Subcategories matching helper (tabs at the top)
     if (activeSubcategory !== 'all') {
-      if (selectedGame === 'Accessories') {
-        if (activeSubcategory === 'cards' || activeSubcategory === 'toploaders' || activeSubcategory === 'graded') {
-          if (product.subcat !== 'Binders' || product.subsubcat !== activeSubcategory) return false;
-        } else {
-          if (product.subcat !== activeSubcategory) return false;
-        }
-      } else if (selectedGame === 'Acrylics') {
-        if (product.game !== activeSubcategory) return false;
+      const targetCatId = activeSubsubcategory !== 'all' ? activeSubsubcategory : activeSubcategory;
+      const matchedCatIds = getCategoryAndDescendantIds(targetCatId, dbCategories);
+      
+      let catMatch = false;
+      if (product.category_id) {
+        catMatch = matchedCatIds.includes(product.category_id);
       } else {
-        if (product.packagingType !== activeSubcategory) return false;
+        // Fallback using historical fields
+        catMatch = matchedCatIds.some(catId => matchesHistoricalCategory(product, catId));
       }
-    }
-
-    // Subsubcategory matching helper
-    if (activeSubsubcategory !== 'all') {
-      if (product.subsubcategory !== activeSubsubcategory) return false;
+      
+      if (!catMatch) return false;
     }
 
     // Packaging Type filter (multiple checkboxes in sidebar)
-    if (selectedPackagingTypes.length > 0 && !selectedPackagingTypes.includes(product.packagingType)) return false;
+    if (selectedGame !== 'Accessories' && selectedGame !== 'Acrylics') {
+      if (selectedPackagingTypes.length > 0 && !selectedPackagingTypes.includes(product.packagingType)) return false;
+    }
 
     // Edition filter (multiple checkboxes in sidebar)
     if (selectedEditions.length > 0 && !selectedEditions.includes(product.edition)) return false;
@@ -683,63 +953,9 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
   });
 
   // Determine subcategories to show based on game
-  let subcategories = [];
-  if (selectedGame === 'Pokémon') {
-    subcategories = [
-      { id: 'all', name: 'Pokémon TCG', icon: <img src="/Pokemon.webp" alt="" className="subcategory-img" /> },
-      { id: 'Booster Box', name: 'Booster Boxy', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/552309_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'Elite Trainer Box', name: 'Elite Trainer Boxy', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/506307_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'Booster Bundle', name: 'Bundles', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/530267_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'Booster', name: 'Boostery', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/550201_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'Special Collection', name: 'Speciální kolekce', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/561990_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'Other', name: 'Ostatní', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/450463_in_1000x1000.jpg" alt="" className="subcategory-img" /> }
-    ];
-  } else if (selectedGame === 'Lorcana') {
-    subcategories = [
-      { id: 'all', name: 'Lorcana TCG', icon: <img src="/lorcana logo.webp" alt="" className="subcategory-img" /> },
-      { id: 'Booster Box', name: 'Booster Boxy', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/501783_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'Trove Box', name: 'Trove Boxy', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/559441_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'Booster', name: 'Boostery', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/482406_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'Other', name: 'Ostatní', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/482407_in_1000x1000.jpg" alt="" className="subcategory-img" /> }
-    ];
-  } else if (selectedGame === 'One Piece') {
-    subcategories = [
-      { id: 'all', name: 'One Piece TCG', icon: <img src="/One piece.webp" alt="" className="subcategory-img" /> },
-      { id: 'Booster Box', name: 'Booster Boxy', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/532107_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'Booster', name: 'Boostery', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/536109_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'Other', name: 'Ostatní', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/513361_in_1000x1000.jpg" alt="" className="subcategory-img" /> }
-    ];
-  } else if (selectedGame === 'Riftbound') {
-    subcategories = [
-      { id: 'all', name: 'Riftbound TCG', icon: <img src="/Riftbound.webp" alt="" className="subcategory-img" /> },
-      { id: 'Booster Box', name: 'Booster Boxy', icon: <img src="/Riftbound.webp" alt="" className="subcategory-img" /> },
-      { id: 'Booster', name: 'Boostery', icon: <img src="/Riftbound.webp" alt="" className="subcategory-img" /> },
-      { id: 'Trial Deck', name: 'Trial Decky', icon: <img src="/Riftbound.webp" alt="" className="subcategory-img" /> },
-      { id: 'Other', name: 'Ostatní', icon: <img src="/Riftbound.webp" alt="" className="subcategory-img" /> }
-    ];
-  } else if (selectedGame === 'Accessories') {
-    subcategories = [
-      { id: 'all', name: 'Všechno příslušenství', icon: <img src="/Prislusentstvi.webp" alt="" className="subcategory-img" /> },
-      { id: 'cards', name: 'Na karty', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'toploaders', name: 'Na toploadery', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      FEATURE_FLAGS.showSlabs && { id: 'graded', name: 'Na graded karty', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'Sleeves', name: 'Sleevy', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/122159_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'Toploaders', name: 'Toploadery', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/142981_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-      { id: 'Other', name: 'Ostatní', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="subcategory-img" /> }
-    ].filter(Boolean);
-  } else if (selectedGame === 'Acrylics') {
-    subcategories = [
-      { id: 'all', name: 'Všechny akryly', icon: <img src="/acrylic-etb-box.png" alt="" className="subcategory-img" /> },
-      { id: 'Pokémon', name: 'Pokémon', icon: <img src="/acrylic-etb-box.png" alt="" className="subcategory-img" /> },
-      { id: 'Lorcana', name: 'Lorcana', icon: <img src="/acrylic-etb-box.png" alt="" className="subcategory-img" /> },
-      { id: 'Riftbound', name: 'Riftbound', icon: <img src="/acrylic-etb-box.png" alt="" className="subcategory-img" /> },
-      FEATURE_FLAGS.showSlabs && { id: 'PSA', name: 'Psa karty', icon: <img src="/acrylic-etb-box.png" alt="" className="subcategory-img" /> }
-    ].filter(Boolean);
-  } else {
-    subcategories = [
-      { id: 'all', name: 'Všechny produkty', icon: <img src="/Pokemon.webp" alt="" className="subcategory-img" /> }
-    ];
-  }
+  const subcategories = categoriesLoaded 
+    ? getDisplaySubcategories(selectedGame, 'sealed', dbCategories, lang)
+    : [];
 
   // Sidebar Layout rendering functions
   const renderStockFilter = () => {
@@ -1188,7 +1404,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
             <>
               <span className="breadcrumb-separator">/</span>
               <span className="breadcrumb-item active">
-                {subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.subsubcats?.find(s => s.id === activeSubsubcategory)?.name || activeSubsubcategory}
+                {dbCategories.find(s => s.id === activeSubsubcategory)?.[lang === 'CZ' ? 'name_cz' : 'name_en'] || activeSubsubcategory}
               </span>
             </>
           )}
@@ -1314,29 +1530,33 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                 </button>
               </div>
             </div>
-          ) : activeSubsubcategory !== 'all' ? (
-            <div className="category-intro-box">
-              <h2 className="category-title">
-                {`${selectedGame === 'Pokémon' ? 'Pokémon TCG' : (selectedGame === 'Accessories' ? (lang === 'CZ' ? 'Příslušenství' : 'Accessories') : selectedGame === 'Acrylics' ? (lang === 'CZ' ? 'Akryly' : 'Acrylic Cases') : selectedGame)} ${translateSubcatName(subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.subsubcats?.find(s => s.id === activeSubsubcategory), lang)}`}
-              </h2>
-            </div>
           ) : (
-            <div className="category-intro-box">
-              <h2 className="category-title">
-                {getSubSubcatTitle(selectedGame, activeSubcategory, lang) || `${selectedGame === 'Accessories' ? (lang === 'CZ' ? 'Příslušenství' : 'Accessories') : selectedGame === 'Acrylics' ? (lang === 'CZ' ? 'Akryly' : 'Acrylic Cases') : selectedGame} - ${translateSubcatName(subcategories.find(s => s.id === activeSubcategory), lang)}`}
-              </h2>
-              <div className="category-description-wrapper">
-                <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`}>
-                  {getSubSubcatDesc(selectedGame, activeSubcategory, lang) || (lang === 'CZ' ? 'Detailní popis subkategorie se připravuje.' : 'Detailed description is being prepared.')}
-                </p>
-                <button
-                  className="description-toggle-btn"
-                  onClick={() => setIsDescExpanded(!isDescExpanded)}
-                >
-                  {isDescExpanded ? (lang === 'CZ' ? 'Méně informací ▲' : 'Less info ▲') : (lang === 'CZ' ? 'Více informací ▼' : 'More info ▼')}
-                </button>
-              </div>
-            </div>
+            (() => {
+              const currentCat = dbCategories.find(c => c.id === (activeSubsubcategory !== 'all' ? activeSubsubcategory : activeSubcategory));
+              const title = currentCat ? (lang === 'CZ' ? currentCat.name_cz : currentCat.name_en) : activeSubcategory;
+              const desc = currentCat ? (lang === 'CZ' ? currentCat.description_cz : currentCat.description_en) : '';
+              
+              return (
+                <div className="category-intro-box">
+                  <h2 className="category-title">
+                    {title}
+                  </h2>
+                  {desc && (
+                    <div className="category-description-wrapper">
+                      <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`}>
+                        {desc}
+                      </p>
+                      <button
+                        className="description-toggle-btn"
+                        onClick={() => setIsDescExpanded(!isDescExpanded)}
+                      >
+                        {isDescExpanded ? (lang === 'CZ' ? 'Méně informací ▲' : 'Less info ▲') : (lang === 'CZ' ? 'Více informací ▼' : 'More info ▼')}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })()
           )}
 
           {/* Subcategories or Sub-subcategories Grid Selection */}
@@ -1344,7 +1564,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
             subcategories.length > 0 && (
               <>
                 <div className="subcategories-section-title">
-                  {selectedGame === 'Accessories' ? (lang === 'CZ' ? 'Vyberte kategorii doplňků' : 'Select Accessory Category') : selectedGame === 'Acrylics' ? (lang === 'CZ' ? 'Kompatibilita akrylového boxu' : 'Acrylic Case Compatibility') : (lang === 'CZ' ? 'Vyberte typ balení' : 'Select Packaging Type')}
+                  {selectedGame === 'Accessories' ? (lang === 'CZ' ? 'Vyberte kategorii doplňků' : 'Select Accessory Category') : selectedGame === 'Acrylics' ? (lang === 'CZ' ? 'Kompatibilita akrylového boxu' : 'Select Acrylic Category') : (lang === 'CZ' ? 'Vyberte typ balení' : 'Select Packaging Type')}
                 </div>
                 <div className="subcategory-grid">
                   {subcategories.map(sub => {
@@ -1356,10 +1576,10 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                         onClick={() => {
                           setActiveSubcategory(sub.id);
                           setActiveSubsubcategory('all');
-                          setSelectedPackagingTypes(sub.id === 'all' ? [] : [sub.id]);
                           setFilters(prev => ({ 
                             ...prev, 
-                            type: sub.id === 'all' ? undefined : sub.id, 
+                            category_id: sub.id === 'all' ? undefined : sub.id, 
+                            type: undefined,
                             subcat: undefined, 
                             subsubcat: undefined, 
                             gameFilter: undefined 
@@ -1369,7 +1589,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                         <span className={`subcategory-icon ${hasImage ? 'clean-img-container' : ''}`}>
                           {sub.icon}
                         </span>
-                        <span className="subcategory-name">{translateSubcatName(sub, lang)}</span>
+                        <span className="subcategory-name">{sub.name}</span>
                       </div>
                     );
                   })}
@@ -1377,36 +1597,40 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
               </>
             )
           ) : (
-            subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.subsubcats && activeSubsubcategory === 'all' && (
-              <>
-                <div className="subcategories-section-title">
-                  {lang === 'CZ' ? 'Upřesněte typ balení' : 'Refine Packaging Type'}
-                </div>
-                <div className="subcategory-grid">
-                  {subSubcategoriesConfig[selectedGame]?.[activeSubcategory]?.subsubcats?.filter(sub => sub.id !== 'all').map(sub => {
-                    const isEmoji = typeof sub.icon === 'string';
-                    return (
-                      <div
-                        key={sub.id}
-                        className={`subcategory-box ${activeSubsubcategory === sub.id ? 'active' : ''}`}
-                        onClick={() => {
-                          setActiveSubsubcategory(sub.id);
-                          setFilters(prev => ({
-                            ...prev,
-                            subsubcat: sub.id === 'all' ? undefined : sub.id
-                          }));
-                        }}
-                      >
-                        <span className="subcategory-icon" style={{ fontSize: isEmoji ? '24px' : 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {sub.icon}
-                        </span>
-                        <span className="subcategory-name">{translateSubcatName(sub, lang)}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )
+            (() => {
+              const currentSubsubcats = getSubSubcategories(activeSubcategory);
+              return currentSubsubcats.length > 0 && activeSubsubcategory === 'all' && (
+                <>
+                  <div className="subcategories-section-title">
+                    {lang === 'CZ' ? 'Upřesněte typ balení' : 'Refine Packaging Type'}
+                  </div>
+                  <div className="subcategory-grid">
+                    {currentSubsubcats.filter(sub => sub.id !== 'all').map(sub => {
+                      const isEmoji = typeof sub.icon === 'string';
+                      return (
+                        <div
+                          key={sub.id}
+                          className={`subcategory-box ${activeSubsubcategory === sub.id ? 'active' : ''}`}
+                          onClick={() => {
+                            setActiveSubsubcategory(sub.id);
+                            setFilters(prev => ({
+                              ...prev,
+                              category_id: sub.id === 'all' ? activeSubcategory : sub.id,
+                              subsubcat: undefined
+                            }));
+                          }}
+                        >
+                          <span className="subcategory-icon" style={{ fontSize: isEmoji ? '24px' : 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {sub.icon}
+                          </span>
+                          <span className="subcategory-name">{sub.name}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              );
+            })()
           )}
 
           {/* Toolbar panel */}

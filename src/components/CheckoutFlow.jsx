@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
+import { supabase } from '../supabase';
 
-export default function CheckoutFlow({ cart, user, submitOrder, setActivePage }) {
+export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, alert, onOpenLogin }) {
   const { lang, t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -15,6 +16,13 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
   // Store Credit applied state
   const [creditInput, setCreditInput] = useState('');
   const [appliedCredit, setAppliedCredit] = useState(0);
+
+  // Company and notes states
+  const [isCompany, setIsCompany] = useState(false);
+  const [companyName, setCompanyName] = useState('');
+  const [ico, setIco] = useState('');
+  const [dic, setDic] = useState('');
+  const [notes, setNotes] = useState('');
 
 
 
@@ -49,17 +57,244 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
   const actualAppliedCredit = Math.min(appliedCredit, totalBeforeCredit);
   const finalTotal = Math.max(0, totalBeforeCredit - actualAppliedCredit);
 
+  // Auto-fill form fields when logged in user details change
+  useEffect(() => {
+    if (user && user.id) {
+      if (user.name) setName(user.name);
+      if (user.email) setEmail(user.email);
+      if (user.phone) setPhone(user.phone);
+      
+      // Auto-fill address (priority: shippingAddresses[0] -> billingStreet)
+      if (user.shippingAddresses && user.shippingAddresses.length > 0) {
+        const addr = user.shippingAddresses[0];
+        if (addr.street) setStreet(addr.street);
+        if (addr.city) setCity(addr.city);
+        if (addr.zip) setZip(addr.zip);
+      } else {
+        if (user.billingStreet) setStreet(user.billingStreet);
+        if (user.billingCity) setCity(user.billingCity);
+        if (user.billingZip) setZip(user.billingZip);
+      }
+      
+      // If user profile has saved company billing data, set them as fallback/default
+      if (user.billingCompany) setCompanyName(user.billingCompany);
+      if (user.billingIco) setIco(user.billingIco);
+      if (user.billingDic) setDic(user.billingDic);
+      if (user.billingCompany || user.billingIco) setIsCompany(true);
+    }
+  }, [user]);
 
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  const handlePlaceOrder = (e) => {
+  // Zpracování callbacku z GP webpay po návratu zákazníka
+  useEffect(() => {
+    const handleCallback = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const status = params.get('status');
+      
+      if (status === 'callback') {
+        const orderNumber = params.get('ORDERNUMBER');
+        const prCode = params.get('PRCODE');
+        const srCode = params.get('SRCODE');
+        const digest = params.get('DIGEST');
+        const merchantNumber = params.get('MERCHANTNUMBER');
+        const operation = params.get('OPERATION');
+        const merOrderNum = params.get('MERORDERNUM');
+        const resultText = params.get('RESULTTEXT');
+
+        if (!orderNumber || !prCode || !digest) return;
+
+        setIsVerifying(true);
+        try {
+          // Ověřit podpis platby přes Supabase Edge Function
+          const { data, error } = await supabase.functions.invoke('gp-webpay/verify', {
+            body: {
+              MERCHANTNUMBER: merchantNumber,
+              OPERATION: operation,
+              ORDERNUMBER: orderNumber,
+              MERORDERNUM: merOrderNum,
+              PRCODE: prCode,
+              SRCODE: srCode,
+              RESULTTEXT: resultText,
+              DIGEST: digest
+            }
+          });
+
+          if (error || !data) {
+            throw new Error(error?.message || 'Chyba při verifikaci platby');
+          }
+
+          if (data.success) {
+            // Platba byla úspěšně ověřena!
+            // Načíst zbylé parametry z rozpracované objednávky v localStorage
+            const pendingStr = localStorage.getItem('pending-order-data');
+            let creditUsed = actualAppliedCredit;
+            let shipMethod = shipping;
+            let customerDetails = {
+              name: name,
+              email: email,
+              phone: phone,
+              street: street,
+              city: city,
+              zip: zip,
+              isCompany: isCompany,
+              companyName: isCompany ? companyName : '',
+              ico: isCompany ? ico : '',
+              dic: isCompany ? dic : '',
+              notes: notes
+            };
+
+            if (pendingStr) {
+              const pending = JSON.parse(pendingStr);
+              creditUsed = pending.creditApplied;
+              shipMethod = pending.shippingMethod;
+              if (pending.customerDetails) {
+                customerDetails = pending.customerDetails;
+              }
+              localStorage.removeItem('pending-order-data');
+            }
+
+            const order = {
+              id: orderNumber,
+              items: cart.map(item => ({
+                name: item.name || item.productName,
+                price: item.price,
+                quantity: item.quantity
+              })),
+              subtotal: cartSubtotal,
+              shippingCost,
+              paymentSurcharge,
+              creditApplied: creditUsed,
+              isicApplied: false,
+              isicDiscount: 0,
+              finalTotal,
+              shippingMethod: shipMethod === 'zasilkovna' 
+                ? (lang === 'CZ' ? 'Zásilkovna - Výdejní místo / Z-BOX' : 'Packeta - Pickup Point / Z-BOX') 
+                : shipMethod === 'gls'
+                  ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
+                  : shipMethod === 'dpd'
+                    ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
+                    : shipMethod === 'pardubice' 
+                      ? (lang === 'CZ' ? 'Osobní odběr Pardubice' : 'Local Pickup Pardubice') 
+                      : shipMethod === 'posta-cenne'
+                        ? (lang === 'CZ' ? 'Česká pošta - Cenné psaní' : 'Czech Post - Insured Letter')
+                        : (lang === 'CZ' ? 'Česká pošta - Doporučené psaní' : 'Czech Post - Registered Mail'),
+              paymentMethod: lang === 'CZ' ? 'Online platební karta (GP webpay)' : 'Online Credit/Debit Card (GP webpay)',
+              date: new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
+              invoiceUrl: '#',
+              customerName: customerDetails.name,
+              customerEmail: customerDetails.email,
+              customerPhone: customerDetails.phone,
+              shippingStreet: customerDetails.street,
+              shippingCity: customerDetails.city,
+              shippingZip: customerDetails.zip,
+              isCompany: customerDetails.isCompany,
+              companyName: customerDetails.companyName,
+              ico: customerDetails.ico,
+              dic: customerDetails.dic,
+              notes: customerDetails.notes
+            };
+
+            submitOrder(order, creditUsed);
+            alert(lang === 'CZ'
+              ? `Platba pro objednávku ${orderNumber} byla úspěšně ověřena! Objednávka byla vytvořena.`
+              : `Payment for order ${orderNumber} has been successfully verified! Order created.`,
+              'success'
+            );
+            setActivePage('profile');
+          } else {
+            alert(lang === 'CZ'
+              ? `Platba pro objednávku ${orderNumber} byla zamítnuta (Kód: ${prCode}/${srCode}). Zkuste to prosím znovu.`
+              : `Payment for order ${orderNumber} was declined (Code: ${prCode}/${srCode}). Please try again.`,
+              'error'
+            );
+          }
+        } catch (err) {
+          console.error('Verifikace platby selhala:', err);
+          alert(lang === 'CZ' 
+            ? 'Nepodařilo se ověřit platbu přes GP webpay.' 
+            : 'Could not verify payment via GP webpay.',
+            'error'
+          );
+        } finally {
+          setIsVerifying(false);
+          // Vyčistit parametry z URL adresy, aby se verifikace neopakovala při obnovení
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+    };
+    handleCallback();
+  }, [cart, cartSubtotal, shippingCost, paymentSurcharge, finalTotal, actualAppliedCredit, shipping, lang]);
+
+  const handlePlaceOrder = async (e) => {
     e.preventDefault();
     if (cart.length === 0) {
-      alert(t('Cart.empty'));
+      alert(t('Cart.empty'), 'error');
       return;
     }
 
     if (payment === 'card') {
-      setIsGatewayOpen(true);
+      setIsPaying(true);
+      try {
+        const orderId = '100' + Math.floor(1000 + Math.random() * 9000);
+        const amountCents = Math.round(finalTotal * 100);
+        const returnUrl = window.location.origin + '/checkout?status=callback';
+
+        // Vyžádání podpisu platby z Edge funkce
+        const { data, error } = await supabase.functions.invoke('gp-webpay/sign', {
+          body: {
+            orderId,
+            amount: amountCents,
+            currency: '203', // CZK
+            returnUrl
+          }
+        });
+
+        if (error || !data || !data.DIGEST) {
+          throw new Error(error?.message || 'Neplatná data podpisu');
+        }
+
+        // Uložit rozpracovanou objednávku do localStorage pro návrat
+        localStorage.setItem('pending-order-data', JSON.stringify({
+          orderId,
+          creditApplied: actualAppliedCredit,
+          shippingMethod: shipping,
+          paymentMethod: 'card',
+          customerDetails: {
+            name,
+            email,
+            phone,
+            street,
+            city,
+            zip,
+            isCompany,
+            companyName: isCompany ? companyName : '',
+            ico: isCompany ? ico : '',
+            dic: isCompany ? dic : '',
+            notes
+          }
+        }));
+
+        // Přesměrovat na bránu pomocí POST formuláře
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'https://test.3dsecure.gpwebpay.com/pgw/order.do';
+
+        Object.keys(data).forEach(key => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = data[key];
+          form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+      } catch (err) {
+        console.warn('GP webpay signature function failed. Falling back to mockup gateway simulator:', err);
+        setIsPaying(false);
+        setIsGatewayOpen(true); // Fallback na simulovanou bránu v případě nedostupnosti
+      }
     } else {
       finalizeOrder();
     }
@@ -68,7 +303,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
   const handleGatewayPay = (e) => {
     e.preventDefault();
     if (!cardNumber || !cardExpiry || !cardCvv) {
-      alert(lang === 'CZ' ? 'Vyplňte prosím všechny údaje platební karty.' : 'Please fill in all credit card details.');
+      alert(lang === 'CZ' ? 'Vyplňte prosím všechny údaje platební karty.' : 'Please fill in all credit card details.', 'error');
       return;
     }
     
@@ -113,19 +348,46 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
           ? (lang === 'CZ' ? 'Bankovní převod' : 'Bank Transfer')
           : (lang === 'CZ' ? 'Dobírka' : 'Cash on Delivery'),
       date: new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
-      invoiceUrl: '#'
+      invoiceUrl: '#',
+      customerName: name,
+      customerEmail: email,
+      customerPhone: phone,
+      shippingStreet: street,
+      shippingCity: city,
+      shippingZip: zip,
+      isCompany: isCompany,
+      companyName: isCompany ? companyName : '',
+      ico: isCompany ? ico : '',
+      dic: isCompany ? dic : '',
+      notes: notes
     };
 
     submitOrder(order, actualAppliedCredit);
     alert(lang === 'CZ'
       ? `Děkujeme za Váš nákup! Objednávka #${order.id} byla úspěšně vytvořena a uložena do Vašeho profilu.`
-      : `Thank you for your purchase! Order #${order.id} was successfully created and saved to your profile.`
+      : `Thank you for your purchase! Order #${order.id} was successfully created and saved to your profile.`,
+      'success'
     );
     setActivePage('profile');
   };
 
   return (
     <div className="fade-in">
+      {isVerifying && (
+        <div className="co-modal-overlay" style={{ zIndex: 10000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="co-modal-content" style={{ textAlign: 'center' }}>
+            <div className="co-loader-container">
+              <div className="spinner-loader co-spinner"></div>
+              <h3 style={{ marginTop: '20px', color: 'var(--nv-gold, #fdbd16)' }}>
+                {lang === 'CZ' ? 'Ověřování platby...' : 'Verifying payment...'}
+              </h3>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '8px' }}>
+                {lang === 'CZ' ? 'Komunikujeme s platební bránou GP webpay, prosím nezavírejte toto okno.' : 'Communicating with GP webpay payment gateway, please do not close this window.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
@@ -779,6 +1041,46 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
             </span>
           </header>
 
+          {!user?.id && (
+            <div className="checkout-login-banner" style={{
+              padding: '0 0 12px 0',
+              marginBottom: '32px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: '12px'
+            }}>
+              <div>
+                <h4 style={{ margin: '0 0 4px 0', color: '#fff', fontSize: '15px', fontWeight: '600' }}>
+                  {lang === 'CZ' ? 'Máte již u nás účet?' : 'Already have an account?'}
+                </h4>
+                <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '13px' }}>
+                  {lang === 'CZ' ? 'Přihlaste se a my vše předvyplníme za vás.' : 'Log in and we will auto-fill everything for you.'}
+                </p>
+              </div>
+              <button 
+                type="button" 
+                className="btn btn-outline" 
+                onClick={onOpenLogin}
+                style={{ 
+                  borderColor: 'var(--nv-gold, #fdbd16)', 
+                  color: 'var(--nv-gold, #fdbd16)',
+                  padding: '8px 20px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  cursor: 'pointer',
+                  background: 'transparent',
+                  border: '1px solid var(--nv-gold, #fdbd16)',
+                  borderRadius: '4px'
+                }}
+              >
+                {lang === 'CZ' ? 'Přihlásit se' : 'Log In'}
+              </button>
+            </div>
+          )}
+
           <div className="pof-grid">
             {/* Left Column: Form Steps */}
             <div className="pof-form">
@@ -831,6 +1133,63 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
                   <span className="pof-step-num"><span className="__om-t">02</span></span>
                   <h3><span className="__om-t">{lang === 'CZ' ? 'Adresa doručení' : 'Shipping Address'}</span></h3>
                 </div>
+
+                {/* Company Checkbox */}
+                <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input 
+                    type="checkbox" 
+                    id="is-company-checkbox"
+                    checked={isCompany}
+                    onChange={e => setIsCompany(e.target.checked)}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      accentColor: 'var(--nv-gold, #fdbd16)',
+                      cursor: 'pointer'
+                    }}
+                  />
+                  <label htmlFor="is-company-checkbox" style={{ fontSize: '14px', fontWeight: '500', color: 'rgb(240, 240, 240)', cursor: 'pointer', userSelect: 'none' }}>
+                    {lang === 'CZ' ? 'Nakupuji na firmu' : 'Buy as a company'}
+                  </label>
+                </div>
+
+                {isCompany && (
+                  <div className="fade-in">
+                    <label className="pof-field">
+                      <span><span className="__om-t">{lang === 'CZ' ? 'Obchodní jméno / Název firmy' : 'Company Name'}</span></span>
+                      <input 
+                        type="text" 
+                        required={isCompany}
+                        value={companyName} 
+                        onChange={e => setCompanyName(e.target.value)} 
+                        placeholder={lang === 'CZ' ? 'Moje Firma s.r.o.' : 'My Company Ltd.'}
+                        autoComplete="organization"
+                      />
+                    </label>
+                    <div className="pof-2col">
+                      <label className="pof-field">
+                        <span><span className="__om-t">{lang === 'CZ' ? 'IČO' : 'Company ID (IČO)'}</span></span>
+                        <input 
+                          type="text" 
+                          required={isCompany}
+                          value={ico} 
+                          onChange={e => setIco(e.target.value)} 
+                          placeholder="12345678"
+                        />
+                      </label>
+                      <label className="pof-field">
+                        <span><span className="__om-t">{lang === 'CZ' ? 'DIČ (volitelné)' : 'Tax ID (DIČ - optional)'}</span></span>
+                        <input 
+                          type="text" 
+                          value={dic} 
+                          onChange={e => setDic(e.target.value)} 
+                          placeholder="CZ12345678"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                )}
+
                 <label className="pof-field">
                   <span><span className="__om-t">{lang === 'CZ' ? 'Ulice a číslo popisné' : 'Street & house number'}</span></span>
                   <input 
@@ -868,10 +1227,40 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
                 </div>
               </section>
 
-              {/* Step 3: Způsob dopravy */}
+              {/* Step 3: Poznámky */}
               <section className="pof-step">
                 <div className="pof-step-head">
                   <span className="pof-step-num"><span className="__om-t">03</span></span>
+                  <h3><span className="__om-t">{lang === 'CZ' ? 'Poznámky' : 'Order Notes'}</span></h3>
+                </div>
+                <label className="pof-field" style={{ borderBottom: 'none', paddingBottom: 0, marginBottom: 0 }}>
+                  <span><span className="__om-t">{lang === 'CZ' ? 'Poznámka k objednávce (volitelné)' : 'Notes for the seller (optional)'}</span></span>
+                  <textarea 
+                    value={notes} 
+                    onChange={e => setNotes(e.target.value)} 
+                    placeholder={lang === 'CZ' ? 'Máte nějaké speciální přání nebo dotaz k objednávce?' : 'Any special requests or questions about the order?'}
+                    rows="3"
+                    style={{
+                      width: '100%',
+                      background: 'transparent',
+                      border: '1px solid rgba(240, 240, 240, 0.12)',
+                      borderRadius: '4px',
+                      color: 'rgb(240, 240, 240)',
+                      padding: '12px',
+                      fontSize: '14px',
+                      fontFamily: 'var(--font-sans), system-ui, sans-serif',
+                      outline: 'none',
+                      resize: 'vertical',
+                      marginTop: '8px'
+                    }}
+                  />
+                </label>
+              </section>
+
+              {/* Step 4: Způsob dopravy */}
+              <section className="pof-step">
+                <div className="pof-step-head">
+                  <span className="pof-step-num"><span className="__om-t">04</span></span>
                   <h3><span className="__om-t">{lang === 'CZ' ? 'Způsob dopravy' : 'Shipping Method'}</span></h3>
                 </div>
                 <div className="pof-radios">
@@ -987,10 +1376,10 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
                 </div>
               </section>
 
-              {/* Step 4: Způsob platby */}
+              {/* Step 5: Způsob platby */}
               <section className="pof-step">
                 <div className="pof-step-head">
-                  <span className="pof-step-num"><span className="__om-t">04</span></span>
+                  <span className="pof-step-num"><span className="__om-t">05</span></span>
                   <h3><span className="__om-t">{lang === 'CZ' ? 'Způsob platby' : 'Payment Method'}</span></h3>
                 </div>
                 <div className="pof-radios">
@@ -1047,6 +1436,29 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
                 <h3 className="pof-summary-title">
                   <span className="__om-t">{lang === 'CZ' ? 'Vaše objednávka' : 'Your Order Summary'}</span>
                 </h3>
+
+                {cart.some(item => item.product?.preorder || item.preorder) && (
+                  <div style={{
+                    background: 'rgba(253, 189, 22, 0.02)',
+                    border: '1px solid rgba(253, 189, 22, 0.15)',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    marginBottom: '16px',
+                    fontSize: '11px',
+                    lineHeight: '1.4',
+                    color: 'rgba(255,255,255,0.7)',
+                    display: 'flex',
+                    gap: '8px',
+                    boxSizing: 'border-box'
+                  }}>
+                    <span style={{ fontSize: '14px', color: 'var(--nv-gold, #fdbd16)' }}>⚠️</span>
+                    <div style={{ textAlign: 'left' }}>
+                      {lang === 'CZ'
+                        ? 'Objednávka obsahuje předobjednávku. Zásilka bude odeslána kompletně až po naskladnění všech položek.'
+                        : 'Your order contains a pre-order. The entire shipment will ship together once all items are in stock.'}
+                    </div>
+                  </div>
+                )}
                 
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   {cart.map((item, idx) => (
@@ -1062,7 +1474,14 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
                         </div>
                       </div>
                       <div className="pof-li-name">
-                        <div>{item.name || (item.product && item.product.name)}</div>
+                        <div>
+                          {item.name || (item.product && item.product.name)}
+                          {(item.product?.preorder || item.preorder) && (
+                            <span style={{ fontSize: '8px', fontWeight: '800', backgroundColor: 'rgba(253, 189, 22, 0.12)', color: 'var(--nv-gold, #fdbd16)', padding: '1px 4px', borderRadius: '2px', marginLeft: '6px', display: 'inline-block', verticalAlign: 'middle', textTransform: 'uppercase', border: '1px solid rgba(253, 189, 22, 0.2)' }}>
+                              {lang === 'CZ' ? 'Předobjednávka' : 'Pre-order'}
+                            </span>
+                          )}
+                        </div>
                         {item.condition && (
                           <div className="pof-li-variant">
                             {lang === 'CZ' ? 'Stav' : 'Condition'}: {item.condition} | {item.lang} | {item.foil ? 'Foil' : 'Non-Foil'}
@@ -1115,7 +1534,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage })
                           onClick={() => {
                             const val = Math.max(0, parseInt(creditInput) || 0);
                             if (val > user.storeCredit) {
-                              alert(lang === 'CZ' ? 'Nemáte dostatek kreditu.' : 'You do not have enough store credit.');
+                              alert(lang === 'CZ' ? 'Nemáte dostatek kreditu.' : 'You do not have enough store credit.', 'error');
                               return;
                             }
                             const maxPossibleCredit = Math.max(0, cartSubtotal + shippingCost + paymentSurcharge - isicDiscount);

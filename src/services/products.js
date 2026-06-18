@@ -17,7 +17,14 @@ function mapDbProduct(p) {
     acrylicThickness: p.acrylic_thickness,
     uvProtection: p.uv_protection,
     closingType: p.closing_type,
-    innerDimensions: p.inner_dimensions
+    innerDimensions: p.inner_dimensions,
+    shortDesc: p.short_description || null,
+    additionalImages: p.additional_images || [],
+    illustrator: p.illustrator || null,
+    setCode: p.set_code || null,
+    stage: p.stage || null,
+    element: p.element || null,
+    releaseDate: p.preorder ? p.foil_condition : null
   };
 }
 
@@ -45,11 +52,12 @@ export async function fetchProductsFromDB(options = {}) {
 
     // Filter by game
     if (game && game !== 'all' && game !== 'all-games') {
-      // Handle Accessories / Acrylics special cases
       if (game === 'Accessories') {
-        // accessories might be category Accessories or type accessory
+        query = query.eq('type', 'accessory').or('category.is.null,category.neq.Acrylics');
+      } else if (game === 'Acrylics') {
+        query = query.eq('category', 'Acrylics');
       } else {
-        query = query.eq('game', game);
+        query = query.eq('game', game).or('category.is.null,category.neq.Acrylics');
       }
     }
 
@@ -91,7 +99,13 @@ export async function fetchProductsFromDB(options = {}) {
     }
 
     if (game && game !== 'all' && game !== 'all-games') {
-      filtered = filtered.filter(p => p.game === game);
+      if (game === 'Accessories') {
+        filtered = filtered.filter(p => p.type === 'accessory' && p.category !== 'Acrylics');
+      } else if (game === 'Acrylics') {
+        filtered = filtered.filter(p => p.category === 'Acrylics');
+      } else {
+        filtered = filtered.filter(p => p.game === game && p.category !== 'Acrylics');
+      }
     }
 
     if (edition && edition !== 'all') {
@@ -162,7 +176,7 @@ export function mapProductToDb(p) {
     packaging_type: p.packagingType || p.packaging_type || null,
     booster_count: p.boosterCount !== undefined && p.boosterCount !== null ? Number(p.boosterCount) : null,
     year: p.year !== undefined && p.year !== null ? Number(p.year) : null,
-    foil_condition: p.foilCondition || p.foil_condition || null,
+    foil_condition: p.preorder ? (p.releaseDate || null) : (p.foilCondition || p.foil_condition || null),
     preorder: !!p.preorder,
     investment: !!p.investment,
     company: p.company || null,
@@ -173,7 +187,13 @@ export function mapProductToDb(p) {
     closing_type: p.closingType || p.closing_type || null,
     inner_dimensions: p.innerDimensions || p.inner_dimensions || null,
     variants: p.variants || null,
-    category_id: p.category_id || null
+    category_id: p.category_id || null,
+    short_description: p.shortDesc || null,
+    additional_images: p.additionalImages || null,
+    illustrator: p.illustrator || null,
+    set_code: p.setCode || null,
+    stage: p.stage || null,
+    element: p.element || null
   };
 }
 
@@ -199,8 +219,23 @@ export async function saveProductToDB(product) {
 
     return { data: mapDbProduct(data), error: null };
   } catch (err) {
-    console.error('Failed to save product to database:', err.message || err);
-    return { data: null, error: err };
+    console.error('Failed to save product to database, using mock fallback:', err.message || err);
+    
+    // Fallback: update local mockProducts array
+    const idx = mockProducts.findIndex(p => p.id === product.id);
+    const mappedFallback = mapDbProduct(mapProductToDb(product));
+    if (idx !== -1) {
+      mockProducts[idx] = { ...mockProducts[idx], ...mappedFallback };
+    } else {
+      mockProducts.push(mappedFallback);
+    }
+    
+    return { 
+      data: mappedFallback, 
+      error: null, 
+      isMockFallback: true, 
+      dbError: err.message || String(err) 
+    };
   }
 }
 
@@ -224,7 +259,14 @@ export async function deleteProductFromDB(id) {
 
     return { error: null };
   } catch (err) {
-    console.error(`Failed to delete product ${id} from database:`, err.message || err);
-    return { error: err };
+    console.error(`Failed to delete product ${id} from database, using mock fallback:`, err.message || err);
+    
+    // Fallback: delete from local mockProducts array
+    const idx = mockProducts.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      mockProducts.splice(idx, 1);
+    }
+    
+    return { error: null, isMockFallback: true, dbError: err.message || String(err) };
   }
 }

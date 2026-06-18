@@ -38,7 +38,7 @@ const ProductImage = ({ src, alt, className = '' }) => {
 };
 
 const getCardThemeClass = (product) => {
-  const name = (product.name || '').toLowerCase();
+  const name = (product?.name || '').toLowerCase();
   if (name.includes('charizard')) return 'ca-base-charizard';
   if (name.includes('pikachu')) return 'ca-base-pikachu';
   if (name.includes('umbreon')) return 'ca-base-umbreon';
@@ -46,23 +46,25 @@ const getCardThemeClass = (product) => {
   if (name.includes('rayquaza')) return 'ca-base-rayquaza';
   
   const themes = ['ca-base-charizard', 'ca-base-pikachu', 'ca-base-umbreon', 'ca-base-giratina', 'ca-base-rayquaza'];
-  const code = (product.id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const code = (product?.id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return themes[code % themes.length];
 };
 
 const getCardCode = (product) => {
-  const match = product.name.match(/(\d+\/\d+)/);
+  const name = product?.name || '';
+  const id = product?.id || '';
+  const match = name.match(/(\d+\/\d+)/);
   if (match) return match[1];
   
   // Custom parsing for codes
-  if (product.id.includes('charizard')) return 'SV3-223';
-  if (product.id.includes('pikachu')) return 'SWSH4-188';
-  if (product.id.includes('umbreon')) return 'SWSH7-215';
-  if (product.id.includes('giratina')) return 'SWSH11-186';
-  if (product.id.includes('rayquaza')) return 'SWSH7-218';
+  if (id.includes('charizard')) return 'SV3-223';
+  if (id.includes('pikachu')) return 'SWSH4-188';
+  if (id.includes('umbreon')) return 'SWSH7-215';
+  if (id.includes('giratina')) return 'SWSH11-186';
+  if (id.includes('rayquaza')) return 'SWSH7-218';
   
-  const shortName = product.name.substring(0, 3).toUpperCase();
-  const hash = Math.abs(product.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0));
+  const shortName = name.substring(0, 3).toUpperCase() || 'PRE';
+  const hash = Math.abs(id.split('').reduce((a, b) => a + b.charCodeAt(0), 0));
   return `${shortName}-${hash % 250 + 1}`;
 };
 
@@ -97,8 +99,8 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
   const currentVariant = hasVariants ? product.variants[selectedVariantIndex] : null;
 
   // Determine pricing and stock
-  const price = hasVariants ? currentVariant.price : product.price;
-  const stock = hasVariants ? currentVariant.stock : product.stock;
+  const price = (hasVariants ? currentVariant?.price : product.price) ?? 0;
+  const stock = (hasVariants ? currentVariant?.stock : product.stock) ?? 0;
   const originalPrice = product.originalPrice || null;
 
   const handleCardClick = () => {
@@ -134,7 +136,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
 
   return (
     <div 
-      className={`vf-card type-${product.type} ${stock === 0 ? 'out-of-stock' : ''}`}
+      className={`vf-card type-${product.type} ${(stock === 0 && !product.preorder) ? 'out-of-stock' : ''}`}
       onClick={handleCardClick}
       style={{
         display: 'flex',
@@ -180,7 +182,6 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           )}
         </div>
       </div>
-      <div className="vf-shadow"></div>
 
       <div className="vf-info">
         {/* Card Title - Using homepage styling */}
@@ -222,75 +223,6 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           </div>
         </div>
 
-        {/* Dynamic Specifications Table */}
-        <table className="card-specs-table">
-          <tbody>
-            {isSingle && (
-              <>
-                <tr>
-                  <td>{t('ProductCard.rarity')}</td>
-                  <td>{product.rarity || 'Secret Rare'}</td>
-                </tr>
-                <tr>
-                  <td>{t('ProductCard.cardCode')}</td>
-                  <td className="spec-gold">{getCardCode(product)}</td>
-                </tr>
-                <tr>
-                  <td>{t('ProductCard.stateLang')}</td>
-                  <td>
-                    {hasVariants ? `${currentVariant.condition} - ${currentVariant.lang}` : 'NM - EN'}
-                  </td>
-                </tr>
-                <tr>
-                  <td>{t('ProductCard.finish')}</td>
-                  <td>
-                    {hasVariants ? (currentVariant.foil ? 'Foil ✨' : 'Non-Foil ▱') : 'Foil ✨'}
-                  </td>
-                </tr>
-              </>
-            )}
-
-            {product.type === 'slab' && (
-              <>
-                <tr>
-                  <td>{t('ProductCard.certCompany')}</td>
-                  <td>{product.company}</td>
-                </tr>
-                <tr>
-                  <td>{t('ProductCard.grade')}</td>
-                  <td className="spec-gold">{product.grade} / 10</td>
-                </tr>
-                <tr>
-                  <td>{t('ProductCard.certNumber')}</td>
-                  <td className="spec-monospace">#{product.certNumber}</td>
-                </tr>
-              </>
-            )}
-
-            {(product.type === 'sealed' || product.type === 'accessory') && (
-              <>
-                <tr>
-                  <td>{t('ProductCard.edition')}</td>
-                  <td>{product.edition || 'Scarlet & Violet'}</td>
-                </tr>
-                <tr>
-                  <td>{t('ProductCard.langPackaging')}</td>
-                  <td>
-                    {product.lang === 'JP' ? t('ProductCard.japanese') : product.lang === 'EN' ? t('ProductCard.english') : t('ProductCard.allLanguages')}
-                  </td>
-                </tr>
-                <tr>
-                  <td>{t('ProductCard.category')}</td>
-                  <td style={{ textTransform: 'capitalize' }}>
-                    {product.type === 'sealed' ? 'Sealed' : t('ProductCard.accessory')}
-                  </td>
-                </tr>
-              </>
-            )}
-          </tbody>
-        </table>
-
-
         {/* Add to Cart and Favorite footer block */}
         <div className="card-buy-container" style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
           <button 
@@ -314,13 +246,13 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
 
           <button 
             className="btn btn-primary do-kosiku-btn"
-            disabled={stock === 0}
+            disabled={stock === 0 && !product.preorder}
             onClick={handleBuyClick}
             style={{
               flexGrow: 1,
               backgroundColor: isAdded ? 'var(--color-green)' : 'var(--color-gold)',
-              cursor: stock > 0 ? 'pointer' : 'not-allowed',
-              opacity: stock > 0 ? 1 : 0.4
+              cursor: (stock > 0 || product.preorder) ? 'pointer' : 'not-allowed',
+              opacity: (stock > 0 || product.preorder) ? 1 : 0.4
             }}
           >
             <svg 
@@ -343,7 +275,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
                 </>
               )}
             </svg>
-            {isAdded ? t('ProductCard.added') : t('ProductCard.addToCart')}
+            {isAdded ? t('ProductCard.added') : (product.preorder ? (lang === 'CZ' ? 'Předobjednat' : 'Pre-order') : t('ProductCard.addToCart'))}
           </button>
         </div>
       </div>

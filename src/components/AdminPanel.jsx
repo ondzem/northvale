@@ -3,7 +3,7 @@ import { useTranslation } from '../context/LanguageContext';
 import ProductsTab from './admin/ProductsTab';
 import CategoriesTab from './admin/CategoriesTab';
 
-export default function AdminPanel({ showToast }) {
+export default function AdminPanel({ showToast, setActivePage }) {
   const { lang } = useTranslation();
   const [activeTab, setActiveTab] = useState('products'); // default to products CMS
 
@@ -16,49 +16,76 @@ export default function AdminPanel({ showToast }) {
   };
 
   const tabsConfig = [
-    { id: 'products', name_cz: 'Správa produktů', name_en: 'Products CMS', icon: '📦' },
-    { id: 'categories', name_cz: 'Správa kategorií', name_en: 'Categories CMS', icon: '📁' },
+    { id: 'products', name_cz: 'Správa produktů', name_en: 'Products CMS' },
+    { id: 'categories', name_cz: 'Správa kategorií', name_en: 'Categories CMS' },
   ];
 
   return (
-    <div style={styles.container} className="container fade-in">
+    <div className="container fade-in" style={{ paddingTop: '48px', paddingBottom: '64px' }}>
       <h1 className="sr-only">
         {lang === 'CZ' ? 'Administrační rozhraní NORTHVALE' : 'NORTHVALE Administration Panel'}
       </h1>
 
-      <div style={styles.header}>
-        <div style={styles.titleGroup}>
-          <h2 style={styles.title}>{lang === 'CZ' ? 'Administrace NORTHVALE' : 'NORTHVALE Administration'}</h2>
-          <p style={styles.subtitle}>
-            {lang === 'CZ' 
-              ? 'Vítejte v centrálním ovládacím panelu e-shopu.' 
-              : 'Welcome to the central store control panel.'}
-          </p>
+      {/* Header section matching A _ Floating _ Minimal */}
+      <div className="adf-mhead">
+        <div className="adf-mhead-left">
+          <div className="nv-eyebrow">
+            {activeTab === 'categories'
+              ? (lang === 'CZ' ? 'Administrace · Katalog' : 'Administration · Catalog')
+              : (lang === 'CZ' ? 'Centrální ovládací panel' : 'Central Control Panel')}
+          </div>
+          <h2 className="adf-mtitle">
+            {activeTab === 'categories' ? (
+              lang === 'CZ' ? 'Správa kategorií' : 'Categories CMS'
+            ) : (
+              <>
+                {lang === 'CZ' ? 'Administrace ' : 'Administration '}
+                <span className="adf-mtitle-gold">Northvale</span>
+              </>
+            )}
+          </h2>
         </div>
+        <button 
+          type="button"
+          className="adf-mhead-user-btn"
+          onClick={() => setActivePage && setActivePage('profile')}
+          title={lang === 'CZ' ? 'Zpět na nastavení účtu' : 'Back to account settings'}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>{lang === 'CZ' ? 'Nastavení účtu' : 'Account Settings'}</span>
+        </button>
       </div>
 
-      <div style={styles.layout}>
+      {/* Shell layout matching A _ Floating _ Minimal */}
+      <div className="adf-shell">
         {/* Navigation Sidebar */}
-        <div style={styles.sidebar} className="glass-panel">
+        <nav className="adf-nav">
           {tabsConfig.map(tab => (
             <button
               key={tab.id}
-              style={{
-                ...styles.tabBtn,
-                backgroundColor: activeTab === tab.id ? 'rgba(253, 189, 22, 0.1)' : 'transparent',
-                borderColor: activeTab === tab.id ? 'var(--color-gold)' : 'transparent',
-                color: activeTab === tab.id ? 'var(--color-gold)' : 'var(--text-muted)'
-              }}
+              className={`adf-nav-item ${activeTab === tab.id ? 'is-active' : ''}`}
               onClick={() => setActiveTab(tab.id)}
             >
-              <span style={styles.tabIcon}>{tab.icon}</span>
+              {tab.id === 'products' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+                  <path d="M3 7l9-4 9 4v10l-9 4-9-4z"></path>
+                  <path d="M3 7l9 4 9-4M12 11v10"></path>
+                </svg>
+              ) : tab.id === 'categories' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+                  <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                </svg>
+              ) : null}
               <span>{lang === 'CZ' ? tab.name_cz : tab.name_en}</span>
             </button>
           ))}
-        </div>
+        </nav>
 
         {/* Content Pane */}
-        <div style={styles.contentPane}>
+        <main className="adf-main">
           {activeTab === 'products' && (
             <ProductsTab 
               showToast={handleShowToastPlaceholder} 
@@ -70,85 +97,8 @@ export default function AdminPanel({ showToast }) {
               showToast={handleShowToastPlaceholder} 
             />
           )}
-        </div>
+        </main>
       </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    paddingTop: '30px',
-    paddingBottom: '50px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    textAlign: 'left',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-    paddingBottom: '20px',
-  },
-  titleGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  },
-  title: {
-    fontSize: '24px',
-    fontWeight: '800',
-    margin: 0,
-    fontFamily: 'var(--font-heading)',
-    color: 'var(--text-main)',
-  },
-  subtitle: {
-    fontSize: '14px',
-    color: 'var(--text-muted)',
-    margin: 0,
-  },
-  layout: {
-    display: 'flex',
-    gap: '30px',
-    flexWrap: 'wrap',
-  },
-  sidebar: {
-    flex: '1 1 240px',
-    padding: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-    alignSelf: 'flex-start',
-    backgroundColor: 'var(--bg-secondary)',
-    border: '1px solid var(--border)',
-    borderRadius: 'var(--radius-lg)',
-  },
-  tabBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '12px 16px',
-    fontSize: '14px',
-    fontWeight: '700',
-    background: 'none',
-    borderLeft: '3px solid',
-    borderTop: 'none',
-    borderRight: 'none',
-    borderBottom: 'none',
-    borderRadius: '0 var(--radius-sm) var(--radius-sm) 0',
-    cursor: 'pointer',
-    textAlign: 'left',
-    transition: 'all 0.2s',
-  },
-  tabIcon: {
-    fontSize: '16px',
-  },
-  contentPane: {
-    flex: '3 1 600px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  }
-};
