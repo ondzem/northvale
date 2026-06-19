@@ -73,7 +73,7 @@ pro prodej zboží prostřednictvím on-line obchodu umístěného na internetov
 
 4.1. Cenu zboží a případné náklady spojené s dodáním zboží podle kupní smlouvy může kupující uhradit prodávajícímu následujícími způsoby:
 *   v hotovosti nebo platební kartou při osobním odběru v provozovně/odběrném místě prodávajícího;
-*   bezhotovostně platební kartou nebo zrychleným bankovním převodem prostřednictvím platební brány **ComGate** (provozuje ComGate Payments, a.s.);
+*   bezhotovostně platební kartou nebo zrychleným bankovním převodem prostřednictvím platební brány **GP Webpay** (provozuje Global Payments s.r.o.);
 *   bezhotovostně převodem na bankovní účet prodávajícího (dále jen „**účet prodávajícího**“);
 *   na dobírku v hotovosti či kartou při převzetí zboží od přepravce;
 *   uplatněním nahromaděného **Store Kreditu** v souladu s čl. 2.6 těchto obchodních podmínek.
@@ -82,7 +82,7 @@ pro prodej zboží prostřednictvím on-line obchodu umístěného na internetov
 
 4.3. Prodávající nepožaduje od kupujícího zálohu či jinou obdobnou platbu. Tímto není dotčeno ustanovení čl. 4.6 obchodních podmínek ohledně povinnosti zaplatit kupní cenu zboží předem.
 
-4.4. V případě platby v hotovosti či v případě platby na dobírku je kupní cena splatná při převzetí zboží. V případě bezhotovostního převodu na bankovní účet je kupní cena splatná do 5 pracovních dnů od odeslání objednávky. V případě platby prostřednictvím platební brány ComGate je platba splatná ihned po dokončení objednávky.
+4.4. V případě platby v hotovosti či v případě platby na dobírku je kupní cena splatná při převzetí zboží. V případě bezhotovostního převodu na bankovní účet je kupní cena splatná do 5 pracovních dnů od odeslání objednávky. V případě platby prostřednictvím platební brány GP Webpay je platba splatná ihned po dokončení objednávky.
 
 4.5. V případě bezhotovostní platby převodem je kupující povinen uhradit kupní cenu zboží společně s uvedením variabilního symbolu platby (číslo objednávky). V případě bezhotovostní platby je závazek kupujícího splnit kupní cenu splněn okamžikem připsání příslušné částky na účet prodávajícího.
 

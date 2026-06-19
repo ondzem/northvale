@@ -57,10 +57,10 @@ Způsob balení sběratelských karet rozhoduje o jejich stavu a budoucí hodnot
 
 Nabízíme bezpečné a rychlé platební metody pro okamžité vyřízení vaší objednávky:
 
-### Platební brána ComGate (ZDARMA)
+### Platební brána GP Webpay (ZDARMA)
 *   **Platba kartou online:** Rychlá platba kartami Visa, Mastercard nebo Maestro.
 *   **Zrychlený bankovní převod:** Okamžitá platba prostřednictvím internetového bankovnictví vaší banky (platba je připsána během několika vteřin).
-*   Provozovatelem platební brány je společnost ComGate Payments, a.s. Veškeré transakce jsou zabezpečené a šifrované.
+*   Provozovatelem platební brány je společnost Global Payments s.r.o. Veškeré transakce jsou zabezpečené a šifrované.
 
 ### Klasický bankovní převod (ZDARMA)
 *   Po dokončení objednávky obdržíte e-mail s podklady pro platbu (číslo účtu, variabilní symbol a QR kód). Zboží expedujeme ihned po připsání platby na náš bankovní účet. Platbu očekáváme do 5 pracovních dnů.

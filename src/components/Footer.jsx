@@ -125,14 +125,14 @@ export default function Footer({ setActivePage }) {
           justifyContent: 'center',
           alignItems: 'center'
         }}>
-          <img src="/comgate-logos.png" alt={lang === 'CZ' ? 'Platební metody ComGate' : 'ComGate Payment Methods'} style={{ maxHeight: '35px', opacity: 0.8 }} />
+          <img src="/comgate-logos.png" alt={lang === 'CZ' ? 'Platební metody' : 'Payment Methods'} style={{ maxHeight: '35px', opacity: 0.8 }} />
         </div>
       </div>
 
       <div className="footer-bottom">
         <div className="container footer-bottom-content">
           <span>&copy; {new Date().getFullYear()} NORTHVALE s.r.o.</span>
-          <img src="/comgate-logos.png" alt={lang === 'CZ' ? 'Platební metody ComGate' : 'ComGate Payment Methods'} className="footer-payment-desktop" style={{ maxHeight: '28px', opacity: 0.8 }} />
+          <img src="/comgate-logos.png" alt={lang === 'CZ' ? 'Platební metody' : 'Payment Methods'} className="footer-payment-desktop" style={{ maxHeight: '28px', opacity: 0.8 }} />
           <span>{lang === 'CZ' ? 'Vytvořil' : 'Created by'} <a href="https://ozeman.cz" target="_blank" rel="noopener noreferrer" className="credits-link">ozeman.cz</a></span>
         </div>
       </div>

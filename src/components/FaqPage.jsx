@@ -42,7 +42,7 @@ export default function FaqPage({ setActivePage }) {
       questions: [
         {
           q: 'Jaké platební metody podporujete?',
-          a: 'Můžete platit platební kartou online přes zabezpečenou platební bránu ComGate, nebo klasickým bankovním převodem.'
+          a: 'Můžete platit platební kartou online přes zabezpečenou platební bránu GP Webpay, nebo klasickým bankovním převodem.'
         },
         {
           q: 'Jak mohu zboží reklamovat?',
@@ -82,7 +82,7 @@ export default function FaqPage({ setActivePage }) {
       questions: [
         {
           q: 'What payment methods do you accept?',
-          a: 'You can pay online by card via the secure ComGate payment gateway, or via standard bank transfer.'
+          a: 'You can pay online by card via the secure GP Webpay payment gateway, or via standard bank transfer.'
         },
         {
           q: 'How do I file a claim or return items?',

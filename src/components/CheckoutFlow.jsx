@@ -1610,7 +1610,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '18px' }}>💳</span>
                 <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-gold)' }}>
-                  {lang === 'CZ' ? 'Zabezpečená platba ComGate' : 'Secure ComGate Payment'}
+                  {lang === 'CZ' ? 'Zabezpečená platba GP Webpay' : 'Secure GP Webpay Payment'}
                 </span>
               </div>
               <button 

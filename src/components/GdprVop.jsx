@@ -281,7 +281,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   We offer secure and rapid payment methods for immediate processing of your order:
                 </p>
                 <ul style={{ paddingLeft: '20px', fontSize: '13px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <li><strong>ComGate Payment Gateway (FREE):</strong> Fast payments via Visa, Mastercard, or instant online bank transfers. The gateway is operated by ComGate Payments, a.s. All transactions are secure and encrypted.</li>
+                  <li><strong>GP Webpay Payment Gateway (FREE):</strong> Fast payments via Visa, Mastercard, or instant online bank transfers. The gateway is operated by Global Payments s.r.o. All transactions are secure and encrypted.</li>
                   <li><strong>Standard Bank Transfer (FREE):</strong> After completing your order, you will receive an email with payment instructions (account number, variable symbol, and a QR code).</li>
                   <li><strong>Cash on Delivery (25 CZK surcharge):</strong> Pay in cash or by card directly to the courier upon receiving the parcel.</li>
                   <li><strong>Store Credit – Customer Balance (FREE):</strong> If you have a Store Credit balance on your user account (e.g., from buylist trade-ins), you can apply it as a discount on all or part of your purchase.</li>
@@ -351,7 +351,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   Nabízíme bezpečné a rychlé platební metody pro okamžité vyřízení vaší objednávky:
                 </p>
                 <ul style={{ paddingLeft: '20px', fontSize: '13px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <li><strong>Platební brána ComGate (ZDARMA):</strong> Rychlá platba kartami Visa, Mastercard nebo zrychleným bankovním převodem. Provozovatelem platební brány je společnost ComGate Payments, a.s. Veškeré transakce jsou zabezpečené a šifrované.</li>
+                  <li><strong>Platební brána GP Webpay (ZDARMA):</strong> Rychlá platba kartami Visa, Mastercard nebo zrychleným bankovním převodem. Provozovatelem platební brány je společnost Global Payments s.r.o. Veškeré transakce jsou zabezpečené a šifrované.</li>
                   <li><strong>Klasický bankovní převod (ZDARMA):</strong> Po dokončení objednávky obdržíte e-mail s podklady pro platbu (číslo účtu, variabilní symbol a QR kód).</li>
                   <li><strong>Platba na dobírku (Příplatek 25 Kč):</strong> Objednávku zaplatíte hotově nebo kartou přímo kurýrovi při převzetí zásilky.</li>
                   <li><strong>Store Credit – Zákaznický kredit (ZDARMA):</strong> Pokud máte na svém uživatelském účtu zůstatek Store Kreditu (např. z výkupu), můžete jej uplatnit jako slevu na celou objednávku nebo její část.</li>
@@ -462,10 +462,10 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>4. PRICE OF GOODS AND PAYMENT TERMS</h3>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  4.1. The price of goods can be paid in cash upon personal pickup, cashless via the ComGate payment gateway, by standard bank transfer, on delivery (COD), or by applying Store Credit.
+                  4.1. The price of goods can be paid in cash upon personal pickup, cashless via the GP Webpay payment gateway, by standard bank transfer, on delivery (COD), or by applying Store Credit.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  4.1.1. Cashless payments by card and instant bank transfers are processed via the secure ComGate gateway. Transmission of sensitive data is fully encrypted using SSL / TLS protocols.
+                  4.1.1. Cashless payments by card and instant bank transfers are processed via the secure GP Webpay gateway. Transmission of sensitive data is fully encrypted using SSL / TLS protocols.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   4.2. Along with the purchase price, the Buyer must pay packaging and delivery costs.
@@ -547,7 +547,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   8.1. Complaints are handled via email at info@northvaletcg.eu.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  8.2. The Czech Trade Inspection (Česká obchodní inspekce, Štěpánská 15, Prague 2, coi.cz) is authorized for out-of-court resolution of consumer disputes. Online dispute resolution can be accessed via the European ODR platform (ec.europa.eu/consumers/odr).
+                  8.2. The Czech Trade Inspection, with registered office at Štěpánská 567/15, 120 00 Prague 2, ID: 000 20 869, website: <a href="https://adr.coi.cz/cs" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', textDecoration: 'underline' }}>https://adr.coi.cz/cs</a>, is authorized for out-of-court resolution of consumer disputes arising from the Purchase Agreement. The online dispute resolution platform located at <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', textDecoration: 'underline' }}>http://ec.europa.eu/consumers/odr</a> can be used to resolve disputes between the seller and the buyer from a purchase agreement concluded by electronic means.
                 </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>9. FINAL PROVISIONS</h3>
@@ -671,10 +671,10 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>4. CENA ZBOŽÍ A PLATEBNÍ PODMÍNKY</h3>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  4.1. Cenu zboží může kupující uhradit v hotovosti při osobním odběru, bezhotovostně přes platební bránu ComGate, převodem na bankovní účet, na dobírku, nebo uplatněním Store Kreditu.
+                  4.1. Cenu zboží může kupující uhradit v hotovosti při osobním odběru, bezhotovostně přes platební bránu GP Webpay, převodem na bankovní účet, na dobírku, nebo uplatněním Store Kreditu.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  4.1.1. Bezhotovostní platby platební kartou a zrychleným převodem jsou zabezpečeny platební bránou ComGate. Přenos citlivých dat a informací o platbách probíhá v šifrované podobě s využitím standardu SSL / TLS.
+                  4.1.1. Bezhotovostní platby platební kartou a zrychleným převodem jsou zabezpečeny platební bránou GP Webpay. Přenos citlivých dat a informací o platbách probíhá v šifrované podobě s využitím standardu SSL / TLS.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   4.2. Společně s kupní cenou je kupující povinen zaplatit náklady spojené s balením a dodáním.
@@ -683,7 +683,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   4.3. Prodávající nepožaduje zálohu, s výjimkou případů dle čl. 4.6.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  4.4. Při platbě v hotovosti či dobírkou je cena splatná při převzetí. U bankovního převodu je splatná do 5 pracovních dnů. U platební brány ComGate ihned.
+                  4.4. Při platbě v hotovosti či dobírkou je cena splatná při převzetí. U bankovního převodu je splatná do 5 pracovních dnů. U platební brány GP Webpay ihned.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   4.5. U bankovního převodu je kupující povinen uvést variabilní symbol (číslo objednávky).
@@ -756,7 +756,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   8.1. Stížnosti vyřizujeme přes e-mail info@northvaletcg.eu.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  8.2. K mimosoudnímu řešení spotřebitelských sporů je příslušná Česká obchodní inspekce (Štěpánská 15, Praha 2, coi.cz). K řešení sporů online lze využít evropskou platformu ODR (ec.europa.eu/consumers/odr).
+                  8.2. K mimosoudnímu řešení spotřebitelských sporů z kupní smlouvy je věcně příslušná Česká obchodní inspekce, se sídlem Štěpánská 567/15, 120 00 Praha 2, IČ: 000 20 869, internetová adresa: <a href="https://adr.coi.cz/cs" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', textDecoration: 'underline' }}>https://adr.coi.cz/cs</a>. Platformu pro řešení sporů on-line nacházející se na internetové adrese <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', textDecoration: 'underline' }}>http://ec.europa.eu/consumers/odr</a> je možné využít při řešení sporů mezi prodávajícím a kupujícím z kupní smlouvy uzavřené elektronickými prostředky.
                 </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>9. ZÁVĚREČNÁ USTANOVENÍ</h3>
@@ -857,7 +857,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   We share your data with the following processor categories:
                   <br />• <strong>Carriers:</strong> Zásilkovna s.r.o. (Packeta), DPD CZ s.r.o., GLS Czech Republic s.r.o., Czech Post, s.p.
-                  <br />• <strong>Payment Gateway:</strong> ComGate Payments, a.s.
+                  <br />• <strong>Payment Gateway:</strong> Global Payments s.r.o.
                   <br />• <strong>Analytics:</strong> Google Ireland Limited (Google Analytics), Microsoft Corporation (Microsoft Clarity).
                   <br />• <strong>IT & Accounting Services:</strong> Hosting providers, Pohoda ERP software.
                   <br />• <strong>Grading Services (USA):</strong> Card submissions to PSA/BGS/TAG are made anonymously under our business accounts, without sharing your personal data.
@@ -943,7 +943,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   Vaše data předáváme těmto kategoriím příjemců:
                   <br />• <strong>Dopravci:</strong> Zásilkovna s.r.o., DPD CZ s.r.o., GLS Czech Republic s.r.o., Česká pošta, s.p.
-                  <br />• <strong>Platební brána:</strong> ComGate Payments, a.s.
+                  <br />• <strong>Platební brána:</strong> Global Payments s.r.o.
                   <br />• <strong>Analytické nástroje:</strong> Google Ireland Limited (Google Analytics), Microsoft Corporation (Microsoft Clarity).
                   <br />• <strong>IT a účetní služby:</strong> Webhosting a externí účetní software (Pohoda).
                   <br />• <strong>Gradingové autority (USA):</strong> Odeslání karet do USA u asistovaného gradingu probíhá anonymně pod naším partnerským účtem (bez vašich osobních dat).

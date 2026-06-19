@@ -80,7 +80,7 @@ Pro zajištění chodu e-shopu a poskytování služeb využíváme služeb prov
 *   **Česká pošta, s.p.** (se sídlem Politických vězňů 909/4, 225 99 Praha 1)
 
 4.2. **Poskytovatel platební brány:**
-*   **ComGate Payments, a.s.** (se sídlem Gočárova třída 1754/48b, 500 02 Hradec Králové) – zpracovává údaje pro realizaci bezhotovostních plateb.
+*   **Global Payments s.r.o.** (se sídlem V Olšinách 626/80, Strašnice, 100 00 Praha 10, IČO: 04235452) – zpracovává údaje pro realizaci bezhotovostních plateb přes platební bránu GP Webpay.
 
 4.3. **Poskytovatelé analytických a marketingových nástrojů:**
 *   **Google Ireland Limited** (Gordon House, Barrow Street, Dublin 4, Irsko) – nástroj **Google Analytics** (analýza návštěvnosti).
