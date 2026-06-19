@@ -3923,8 +3923,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       <img src="/logo s popisem.webp" alt="NORTHVALE TCG" style={{ height: '36px', width: 'fit-content', objectFit: 'contain' }} />
                       <p className="footer-desc" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.5', margin: 0 }}>
                         {lang === 'CZ' 
-                          ? `Prémiový TCG e-shop tvořený sběrateli pro sběratele. Nabízíme originální Pokémon, Disney Lorcana a One Piece produkty, kusové karty i doplňky s garancí pravosti, bezpečným balením${FEATURE_FLAGS.showGrading ? ' a zprostředkováním gradingu v USA' : ''}.`
-                          : `Premium TCG e-shop run by collectors for collectors. We offer authentic Pokémon, Disney Lorcana, and One Piece products, single cards, and accessories with guaranteed authenticity, collector-grade packaging${FEATURE_FLAGS.showGrading ? ', and professional grading submissions to the US' : ''}.`}
+                          ? 'Karetní hry a TCG produkty tvořené srdcem sběratelů. Nakupujte bezpečně a zažijte radost z každého rozbaleného balíčku u nás.'
+                          : 'Card games and TCG products built from the heart of collectors. Shop securely and experience the joy of opening every pack with us.'}
                       </p>
                       <div className="footer-socials" style={{ display: 'flex', gap: '12px' }}>
                         <img src="/instagram.png" alt="Instagram" style={{ width: '20px', height: '20px' }} />

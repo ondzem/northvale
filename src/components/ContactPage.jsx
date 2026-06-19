@@ -128,9 +128,9 @@ export default function ContactPage({ setActivePage }) {
             <div className="nv-eyebrow">{lang === 'CZ' ? 'Spojte se s námi' : 'Get in touch'}</div>
             <h2 className="ktf-title">{t('Navbar.contact')}</h2>
             <p className="ktf-sub">
-              {lang === 'CZ' 
-                ? 'Dotaz k objednávce, produktům nebo doručení? Odpovídáme zpravidla do 24 hodin.' 
-                : 'Have questions about orders, products or delivery? We usually reply within 24 hours.'}
+              {lang === 'CZ'
+                ? 'Dotaz k objednávce, produktům nebo doručení? Odpovídáme zpravidla do 48 hodin.'
+                : 'Have questions about orders, products or delivery? We usually reply within 48 hours.'}
             </p>
 
             <dl className="ktf-info">
@@ -175,8 +175,8 @@ export default function ContactPage({ setActivePage }) {
                   {t('ContactPage.formSuccess')}
                 </h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', lineHeight: '1.6', marginBottom: '24px', maxWidth: '380px' }}>
-                  {lang === 'CZ' 
-                    ? 'Děkujeme za Váš dotaz. Naše podpora Vám odpoví na zadaný e-mail co nejdříve (obvykle do 24 hodin).' 
+                  {lang === 'CZ'
+                    ? 'Děkujeme za Váš dotaz. Naše podpora Vám odpoví na zadaný e-mail co nejdříve (obvykle do 24 hodin).'
                     : 'Thank you for your message. Our support team will reply to your email as soon as possible (usually within 24 hours).'}
                 </p>
                 <button className="btn btn-secondary" onClick={() => setContactSubmitted(false)}>
@@ -233,9 +233,9 @@ export default function ContactPage({ setActivePage }) {
 
                     return (
                       <div key={qIdx} className="ktf-qa">
-                        <button 
-                          type="button" 
-                          className="ktf-q" 
+                        <button
+                          type="button"
+                          className="ktf-q"
                           onClick={() => toggleAccordion(globalIdx)}
                           aria-expanded={isOpen}
                         >
