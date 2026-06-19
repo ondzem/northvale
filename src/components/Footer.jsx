@@ -43,6 +43,7 @@ export default function Footer({ setActivePage }) {
           <ul className="footer-list">
             <li className="footer-link" onClick={() => setActivePage('about')}>{t('Navbar.aboutUs')}</li>
             <li className="footer-link" onClick={() => setActivePage('support')}>{t('Navbar.contact')}</li>
+            <li className="footer-link" onClick={() => setActivePage('faq')}>{t('Footer.faq')}</li>
             <li className="footer-link" onClick={() => {
               setActivePage('home');
               setTimeout(() => {

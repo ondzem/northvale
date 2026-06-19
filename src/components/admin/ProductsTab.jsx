@@ -3941,6 +3941,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       <ul className="footer-list" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>
                         <li style={{ cursor: 'pointer' }}>{lang === 'CZ' ? 'O nás' : 'About Us'}</li>
                         <li style={{ cursor: 'pointer' }}>{lang === 'CZ' ? 'Kontakt' : 'Contact'}</li>
+                        <li style={{ cursor: 'pointer' }}>{lang === 'CZ' ? 'Časté dotazy (FAQ)' : 'FAQ'}</li>
                         <li style={{ cursor: 'pointer' }}>{lang === 'CZ' ? 'Nabízené produkty' : 'Our Products'}</li>
                       </ul>
                     </div>
