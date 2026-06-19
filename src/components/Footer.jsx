@@ -20,8 +20,8 @@ export default function Footer({ setActivePage }) {
           />
           <p className="footer-desc">
             {lang === 'CZ' 
-              ? 'Karetní hry a TCG produkty tvořené srdcem sběratelů. Nakupujte bezpečně a zažijte radost z každého rozbaleného balíčku u nás.'
-              : 'Card games and TCG products built from the heart of collectors. Shop securely and experience the joy of opening every pack with us.'
+              ? 'TCG e-shop od sběratelů pro sběratele. Nakupte originální karetní produkty se 100% garancí pravosti a špičkovým sběratelským balením.'
+              : 'TCG shop run by collectors for collectors. Purchase authentic card products with 100% guaranteed authenticity and premium collector packaging.'
             }
           </p>
           <div className="footer-socials">

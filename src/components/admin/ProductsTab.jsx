@@ -3923,8 +3923,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       <img src="/logo s popisem.webp" alt="NORTHVALE TCG" style={{ height: '36px', width: 'fit-content', objectFit: 'contain' }} />
                       <p className="footer-desc" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.5', margin: 0 }}>
                         {lang === 'CZ' 
-                          ? 'Karetní hry a TCG produkty tvořené srdcem sběratelů. Nakupujte bezpečně a zažijte radost z každého rozbaleného balíčku u nás.'
-                          : 'Card games and TCG products built from the heart of collectors. Shop securely and experience the joy of opening every pack with us.'}
+                          ? 'TCG e-shop od sběratelů pro sběratele. Nakupte originální karetní produkty se 100% garancí pravosti a špičkovým sběratelským balením.'
+                          : 'TCG shop run by collectors for collectors. Purchase authentic card products with 100% guaranteed authenticity and premium collector packaging.'}
                       </p>
                       <div className="footer-socials" style={{ display: 'flex', gap: '12px' }}>
                         <img src="/instagram.png" alt="Instagram" style={{ width: '20px', height: '20px' }} />
