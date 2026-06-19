@@ -3,6 +3,7 @@ import { useTranslation } from '../context/LanguageContext';
 import ProductsTab from './admin/ProductsTab';
 import CategoriesTab from './admin/CategoriesTab';
 import HomepageTab from './admin/HomepageTab';
+import FaqTab from './admin/FaqTab';
 
 export default function AdminPanel({ showToast, setActivePage }) {
   const { lang } = useTranslation();
@@ -26,6 +27,7 @@ export default function AdminPanel({ showToast, setActivePage }) {
     { id: 'products', name_cz: 'Správa produktů', name_en: 'Products CMS' },
     { id: 'categories', name_cz: 'Správa kategorií', name_en: 'Categories CMS' },
     { id: 'homepage', name_cz: 'Správa úvodní stránky', name_en: 'Homepage CMS' },
+    { id: 'faq', name_cz: 'Správa FAQ', name_en: 'FAQ CMS' },
   ];
 
   return (
@@ -92,6 +94,10 @@ export default function AdminPanel({ showToast, setActivePage }) {
                   <line x1="3" y1="9" x2="21" y2="9"></line>
                   <line x1="9" y1="21" x2="9" y2="9"></line>
                 </svg>
+              ) : tab.id === 'faq' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
               ) : null}
               <span>{lang === 'CZ' ? tab.name_cz : tab.name_en}</span>
             </button>
@@ -118,6 +124,12 @@ export default function AdminPanel({ showToast, setActivePage }) {
             <HomepageTab 
               showToast={handleShowToastPlaceholder} 
               onEditProduct={handleEditProductFromOtherTab}
+            />
+          )}
+
+          {activeTab === 'faq' && (
+            <FaqTab 
+              showToast={handleShowToastPlaceholder} 
             />
           )}
         </main>
