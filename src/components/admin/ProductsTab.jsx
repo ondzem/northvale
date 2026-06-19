@@ -593,6 +593,20 @@ export default function ProductsTab({ showToast }) {
       return;
     }
 
+    // Automatické zachycení rozepsaného vlastního parametru, pokud ho uživatel zapomněl přidat tlačítkem
+    let finalCustomParams = [...formCustomParams];
+    const labelInput = document.getElementById('new-param-label');
+    const valueInput = document.getElementById('new-param-value');
+    if (labelInput && valueInput && labelInput.value.trim() && valueInput.value.trim()) {
+      finalCustomParams.push({
+        label: labelInput.value.trim(),
+        value: valueInput.value.trim()
+      });
+      // Vyčistíme políčka v DOM
+      labelInput.value = '';
+      valueInput.value = '';
+    }
+
     const productPayload = {
       id: finalId,
       name: combinedName,
@@ -614,7 +628,7 @@ export default function ProductsTab({ showToast }) {
       element: formElement || null,
       illustrator: formIllustrator || null,
       year: formYear ? Number(formYear) : null,
-      customParams: formCustomParams
+      customParams: finalCustomParams
     };
 
     if (formType === 'single') {
@@ -1207,6 +1221,9 @@ export default function ProductsTab({ showToast }) {
     uvProtection: formUvProtection,
     closingType: formClosingType,
     innerDimensions: formInnerDimensions,
+    
+    // Custom specifications/parameters
+    customParams: formCustomParams
   };
 
   return (
@@ -1451,20 +1468,6 @@ export default function ProductsTab({ showToast }) {
                             <option value="Riftbound">Riftbound</option>
                             <option value="Accessories">Accessories</option>
                             <option value="Acrylics">Acrylics</option>
-                          </select>
-                          <svg className="pmf-select-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="pmf-form-col" style={styles.col}>
-                      <div className="pmf-field">
-                        <label className="pmf-label">{lang === 'CZ' ? 'Typ produktu' : 'Product Type'}</label>
-                        <div className="pmf-select-wrapper">
-                          <select className="pmf-select" value={formType} onChange={e => setFormType(e.target.value)}>
-                            <option value="single">{lang === 'CZ' ? 'Kusová karta' : 'Single Card'}</option>
-                            <option value="sealed">{lang === 'CZ' ? 'Zapečetěný produkt' : 'Sealed Product'}</option>
-                            <option value="slab">{lang === 'CZ' ? 'Graded Slab' : 'Graded Slab'}</option>
-                            <option value="accessory">{lang === 'CZ' ? 'Příslušenství' : 'Accessory'}</option>
                           </select>
                           <svg className="pmf-select-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
                         </div>
@@ -2168,7 +2171,16 @@ export default function ProductsTab({ showToast }) {
                         <div className="pmf-field">
                           <label className="pmf-label">{lang === 'CZ' ? 'Zařadit pod kategorii' : 'Assign to Category'}</label>
                           <div className="pmf-select-wrapper">
-                            <select className="pmf-select" value={formCategoryId} onChange={e => setFormCategoryId(e.target.value)}>
+                            <select className="pmf-select" value={formCategoryId} onChange={e => {
+                              const selectedId = e.target.value;
+                              setFormCategoryId(selectedId);
+                              if (selectedId) {
+                                const cat = categories.find(c => String(c.id) === String(selectedId));
+                                if (cat && cat.type) {
+                                  setFormType(cat.type);
+                                }
+                              }
+                            }}>
                               <option value="">{lang === 'CZ' ? '-- Žádná --' : '-- None --'}</option>
                               {categories
                                 .filter(c => c.game === formGame || formGame === 'Accessories' || formGame === 'Acrylics')
@@ -2284,8 +2296,9 @@ export default function ProductsTab({ showToast }) {
                                     style={{ flex: 1, padding: '6px 10px', fontSize: '12px' }} 
                                     value={param.label} 
                                     onChange={(e) => {
-                                      const newParams = [...formCustomParams];
-                                      newParams[index].label = e.target.value;
+                                      const newParams = formCustomParams.map((p, i) => 
+                                        i === index ? { ...p, label: e.target.value } : p
+                                      );
                                       setFormCustomParams(newParams);
                                     }} 
                                     placeholder={lang === 'CZ' ? 'Název parametru' : 'Parameter Name'}
@@ -2296,8 +2309,9 @@ export default function ProductsTab({ showToast }) {
                                     style={{ flex: 2, padding: '6px 10px', fontSize: '12px' }} 
                                     value={param.value} 
                                     onChange={(e) => {
-                                      const newParams = [...formCustomParams];
-                                      newParams[index].value = e.target.value;
+                                      const newParams = formCustomParams.map((p, i) => 
+                                        i === index ? { ...p, value: e.target.value } : p
+                                      );
                                       setFormCustomParams(newParams);
                                     }} 
                                     placeholder={lang === 'CZ' ? 'Hodnota parametru' : 'Parameter Value'}
@@ -2750,6 +2764,12 @@ export default function ProductsTab({ showToast }) {
                                 </tr>
                               </>
                             )}
+                            {formCustomParams && formCustomParams.map((cp, idx) => (
+                              <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                                <td style={{ padding: '6px 0', color: 'rgba(255,255,255,0.4)', textAlign: 'left' }}>{cp.label}</td>
+                                <td style={{ padding: '6px 0', textAlign: 'right', color: '#fff', fontWeight: '600' }}>{cp.value}</td>
+                              </tr>
+                            ))}
                           </tbody>
                         </table>
                       </div>
@@ -3850,25 +3870,27 @@ export default function ProductsTab({ showToast }) {
                 </div>
 
                 {/* 5. NEWSLETTER ROW ABOVE FOOTER */}
-                <section className="newsletter-section-wrapper" style={{ margin: 0, borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-                  <div className="container newsletter-section" style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '32px' }}>
-                    <div className="newsletter-content" style={{ textAlign: 'left' }}>
-                      <div className="newsletter-eyebrow" style={{ letterSpacing: '2px', fontSize: '11px', color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>NEWSLETTER • 028</div>
-                      <h2 className="newsletter-heading" style={{ fontSize: '24px', fontWeight: '900', color: '#fff', margin: '8px 0 0 0' }}>
-                        {lang === 'CZ' ? 'Nové edice & akce jako první.' : 'New editions & sales first.'}
-                      </h2>
-                    </div>
-                    <form className="newsletter-form" style={{ display: 'flex', gap: '16px', flex: 1, maxWidth: '500px' }} onSubmit={(e) => e.preventDefault()}>
-                      <div className="newsletter-input-group" style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, textAlign: 'left' }}>
-                        <label className="newsletter-input-label" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 'bold' }}>{lang === 'CZ' ? 'VÁŠ E-MAIL' : 'YOUR EMAIL'}</label>
-                        <input type="email" required placeholder="jmeno@example.com" disabled className="newsletter-underline-input" style={{ width: '100%', backgroundColor: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.2)', padding: '8px 0', color: '#fff', outline: 'none' }} />
+                {FEATURE_FLAGS.showNewsletter && (
+                  <section className="newsletter-section-wrapper" style={{ margin: 0, borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+                    <div className="container newsletter-section" style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '32px' }}>
+                      <div className="newsletter-content" style={{ textAlign: 'left' }}>
+                        <div className="newsletter-eyebrow" style={{ letterSpacing: '2px', fontSize: '11px', color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>NEWSLETTER • 028</div>
+                        <h2 className="newsletter-heading" style={{ fontSize: '24px', fontWeight: '900', color: '#fff', margin: '8px 0 0 0' }}>
+                          {lang === 'CZ' ? 'Nové edice & akce jako první.' : 'New editions & sales first.'}
+                        </h2>
                       </div>
-                      <button className="newsletter-submit-btn" type="button" disabled style={{ backgroundColor: 'var(--nv-gold, #fdbd16)', color: '#000', border: 'none', borderRadius: '4px', padding: '0 24px', fontWeight: 'bold', fontSize: '13px', cursor: 'not-allowed' }}>
-                        {lang === 'CZ' ? 'ODEBÍRAT' : 'SUBSCRIBE'}
-                      </button>
-                    </form>
-                  </div>
-                </section>
+                      <form className="newsletter-form" style={{ display: 'flex', gap: '16px', flex: 1, maxWidth: '500px' }} onSubmit={(e) => e.preventDefault()}>
+                        <div className="newsletter-input-group" style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, textAlign: 'left' }}>
+                          <label className="newsletter-input-label" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 'bold' }}>{lang === 'CZ' ? 'VÁŠ E-MAIL' : 'YOUR EMAIL'}</label>
+                          <input type="email" required placeholder="jmeno@example.com" disabled className="newsletter-underline-input" style={{ width: '100%', backgroundColor: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.2)', padding: '8px 0', color: '#fff', outline: 'none' }} />
+                        </div>
+                        <button className="newsletter-submit-btn" type="button" disabled style={{ backgroundColor: 'var(--nv-gold, #fdbd16)', color: '#000', border: 'none', borderRadius: '4px', padding: '0 24px', fontWeight: 'bold', fontSize: '13px', cursor: 'not-allowed' }}>
+                          {lang === 'CZ' ? 'ODEBÍRAT' : 'SUBSCRIBE'}
+                        </button>
+                      </form>
+                    </div>
+                  </section>
+                )}
 
                 {/* 6. STOREFRONT FOOTER */}
                 <footer className="main-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>

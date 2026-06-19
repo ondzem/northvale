@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
+import { fetchSlidesFromDB, DEFAULT_SLIDES } from '../services/slides';
 
 const ProductImage = ({ src, alt, className = '' }) => {
   const [aspectRatio, setAspectRatio] = useState(1.0);
@@ -22,6 +23,7 @@ const ProductImage = ({ src, alt, className = '' }) => {
       alt={alt}
       onLoad={handleLoad}
       className={`${className} ${fitClass} ${loaded ? 'loaded' : ''}`}
+      loading="lazy"
     />
   );
 };
@@ -35,6 +37,96 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   const [useMobileImage, setUseMobileImage] = useState(window.innerWidth <= 650);
   // USP slider detection (970px breakpoint for USP carousel)
   const [isUspMobile, setIsUspMobile] = useState(window.innerWidth < 970);
+
+  // Dynamic slides state initialized from SWR cache or empty array
+  const [slides, setSlides] = useState(() => {
+    try {
+      const cached = localStorage.getItem('northvale-cached-slides');
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (err) {
+      console.warn('Failed to load cached slides:', err);
+    }
+    return [];
+  });
+
+  const [loadedImages, setLoadedImages] = useState({});
+
+  useEffect(() => {
+    let active = true;
+    async function loadSlides() {
+      const dbSlides = await fetchSlidesFromDB();
+      if (!active) return;
+      const mapped = (dbSlides || []).map(slide => ({
+        mobileImage: slide.mobile_image_url,
+        desktopImage: slide.desktop_image_url,
+        page: slide.redirect_page || null
+      }));
+      
+      if (mapped.length > 0) {
+        try {
+          localStorage.setItem('northvale-cached-slides', JSON.stringify(mapped));
+        } catch (err) {
+          console.warn('Failed to cache slides:', err);
+        }
+
+        // Preload first slide images in background for both mobile and desktop
+        let loadedCount = 0;
+        const targetImages = [mapped[0].desktopImage, mapped[0].mobileImage].filter(Boolean);
+        if (targetImages.length > 0) {
+          targetImages.forEach(src => {
+            const img = new Image();
+            img.src = src;
+            const onDone = () => {
+              loadedCount++;
+              if (loadedCount === targetImages.length && active) {
+                setSlides(mapped);
+              }
+            };
+            img.onload = onDone;
+            img.onerror = onDone;
+          });
+          return;
+        }
+      } else {
+        // If DB has no slides, fall back to DEFAULT_SLIDES but cache it too
+        try {
+          const defaultMapped = DEFAULT_SLIDES.map(slide => ({
+            mobileImage: slide.mobile_image_url,
+            desktopImage: slide.desktop_image_url,
+            page: slide.redirect_page || null
+          }));
+          localStorage.setItem('northvale-cached-slides', JSON.stringify(defaultMapped));
+          setSlides(defaultMapped);
+          return;
+        } catch (err) {
+          console.warn('Failed to set default fallback:', err);
+        }
+      }
+      setSlides(mapped);
+    }
+    loadSlides();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Preload remaining slide images in the background to prevent flashing during transitions
+  useEffect(() => {
+    if (slides.length > 1) {
+      slides.forEach((slide) => {
+        if (slide.desktopImage) {
+          const img1 = new Image();
+          img1.src = slide.desktopImage;
+        }
+        if (slide.mobileImage) {
+          const img2 = new Image();
+          img2.src = slide.mobileImage;
+        }
+      });
+    }
+  }, [slides]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -91,43 +183,13 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       prevSlide();
     }
   };
-  const rawSlides = [
-    { 
-      mobileImage: '/Mobile - Grading karet.webp', 
-      desktopImage: '/Desktop - Grading Karet.webp', 
-      page: 'grading' 
-    },
-    { 
-      title: lang === 'CZ' ? 'Zprostředkování gradingu v USA' : 'Grading Service in the US', 
-      desc: lang === 'CZ' ? 'Pošlete své karty do PSA, Beckett nebo TAG s pre-grading kontrolou.' : 'Submit your cards to PSA, Beckett, or TAG with pre-grading assessment.', 
-      buttonText: lang === 'CZ' ? 'Více o gradingu' : 'Learn More', 
-      page: 'grading' 
-    },
-    { 
-      title: 'One Piece Card Game', 
-      desc: lang === 'CZ' ? 'Nové booster boxy a starter decky skladem.' : 'New booster boxes and starter decks in stock.', 
-      buttonText: lang === 'CZ' ? 'Prohlížet One Piece' : 'Browse One Piece', 
-      page: 'sealed-catalog' 
-    },
-    { 
-      title: lang === 'CZ' ? 'Investiční produkty' : 'Investment Products', 
-      desc: lang === 'CZ' ? 'Vybrané ETB a booster boxy v bezchybném stavu vhodné do sbírky.' : 'Selected ETBs and booster boxes in pristine condition perfect for collecting.', 
-      buttonText: lang === 'CZ' ? 'Investovat' : 'Invest', 
-      page: 'sealed-catalog' 
-    },
-    { 
-      title: lang === 'CZ' ? 'Výkup karet za hotové' : 'Sell Cards for Cash', 
-      desc: lang === 'CZ' ? 'Nabídněte nám své přebytečné karty a získejte peníze na bankovní účet.' : 'Sell us your spare cards and receive a direct bank transfer payout.', 
-      buttonText: lang === 'CZ' ? 'Prodat karty' : 'Sell Cards', 
-      page: 'buylist' 
-    }
-  ];
 
-  const slides = rawSlides.filter(slide => {
-    if (slide.page === 'grading' && !FEATURE_FLAGS.showGrading) return false;
-    if (slide.page === 'buylist' && !FEATURE_FLAGS.showBuylist) return false;
-    return true;
-  });
+  // Safety check to keep current slide selection within bounds on array changes
+  useEffect(() => {
+    if (currentSlide >= slides.length && slides.length > 0) {
+      setCurrentSlide(slides.length - 1);
+    }
+  }, [slides, currentSlide]);
 
   // Deal of the day countdown timer
   const [timeLeft, setTimeLeft] = useState({ hours: 14, minutes: 35, seconds: 22 });
@@ -159,6 +221,14 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   const prevSlide = () => {
     setCurrentSlide((currentSlide - 1 + slides.length) % slides.length);
   };
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const interval = setInterval(() => {
+      nextSlide();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [slides, currentSlide]);
 
   const newArrivals = products.filter(p => p.type === 'single').slice(0, 5);
   const preorders = products.filter(p => p.type === 'sealed' && p.preorder).slice(0, 5);
@@ -238,6 +308,10 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       setDealAdded(false);
     }, 1500);
   };
+  const currentImageUrl = slides && slides.length > 0 && slides[currentSlide]
+    ? (useMobileImage ? slides[currentSlide].mobileImage : slides[currentSlide].desktopImage)
+    : null;
+  const isCurrentLoaded = !!loadedImages[currentImageUrl];
 
   return (
     <div style={{ ...styles.container, paddingTop: isMobile ? '12px' : '24px', gap: isMobile ? '48px' : '88px' }} className="fade-in">
@@ -257,47 +331,97 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               ...styles.slideshow, 
               flex: 'none', 
               width: '100%', 
-              height: isMobile ? (useMobileImage ? 'clamp(360px, max(calc(93vw - 20px), calc(33.3vw + 278px)), 610px)' : '420px') : '420px', 
-              aspectRatio: 'auto',
-              padding: slides[currentSlide].desktopImage ? '0' : (isMobile ? '20px' : '40px'),
-              backgroundImage: slides[currentSlide].desktopImage 
-                ? `url("${useMobileImage ? slides[currentSlide].mobileImage : slides[currentSlide].desktopImage}")` 
-                : 'none',
-              backgroundSize: 'cover',
-              backgroundPosition: slides[currentSlide].desktopImage ? 'center bottom' : 'center',
-              backgroundRepeat: 'no-repeat',
-              cursor: slides[currentSlide].page ? 'pointer' : 'default',
-              ...(!slides[currentSlide].desktopImage ? {
-                background: 'var(--bg-secondary)',
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid transparent',
-                boxShadow: '0 24px 50px rgba(0, 0, 0, 0.45)',
-                backdropFilter: 'none',
-                WebkitBackdropFilter: 'none'
-              } : {})
+              height: 'auto',
+              aspectRatio: useMobileImage ? '800 / 1000' : '1920 / 840',
+              padding: '0',
+              backgroundColor: 'var(--bg-secondary)', 
+              cursor: (slides && slides[currentSlide]?.page) ? 'pointer' : 'default',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              boxShadow: '0 24px 50px rgba(0, 0, 0, 0.45)',
+              backdropFilter: 'none',
+              WebkitBackdropFilter: 'none',
+              position: 'relative',
+              overflow: 'hidden'
             }} 
-            className={slides[currentSlide].desktopImage ? "glass-panel" : ""}
             onClick={() => {
-              if (slides[currentSlide].page) {
-                setFilters({});
-                setActivePage(slides[currentSlide].page);
+              if (slides && slides[currentSlide]?.page) {
+                const path = slides[currentSlide].page;
+                if (path.startsWith('http') || path.startsWith('/') || path.includes('.')) {
+                  if (path.startsWith('http')) {
+                    window.open(path, '_blank');
+                  } else {
+                    const pageMap = {
+                      'home': 'home',
+                      'sealed-catalog': 'sealed-catalog',
+                      'singles-catalog': 'singles-catalog',
+                      'slabs-catalog': 'slabs-catalog',
+                      'grading': 'grading',
+                      'buylist': 'buylist',
+                      'about': 'about',
+                      'support': 'support'
+                    };
+                    const cleanPath = path.replace(/^\//, '');
+                    if (pageMap[cleanPath]) {
+                      setFilters({});
+                      setActivePage(pageMap[cleanPath]);
+                    } else {
+                      window.location.href = path;
+                    }
+                  }
+                } else {
+                  setFilters({});
+                  setActivePage(path);
+                }
               }
             }}
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
-            {!slides[currentSlide].desktopImage && (
-              <div style={styles.slideContent}>
-                <h2 style={{ ...styles.slideTitle, fontSize: isMobile ? '24px' : '28px' }}>{slides[currentSlide].title}</h2>
-                <p style={{ ...styles.slideDesc, fontSize: isMobile ? '14px' : '15px' }}>{slides[currentSlide].desc}</p>
-                <button 
-                  className="btn btn-primary" 
-                  style={styles.slideBtn}
-                >
-                  {slides[currentSlide].buttonText}
-                </button>
-              </div>
+            {currentImageUrl && (
+              <img 
+                src={currentImageUrl}
+                alt=""
+                loading="eager"
+                fetchpriority="high"
+                onLoad={() => {
+                  setLoadedImages(prev => ({ ...prev, [currentImageUrl]: true }));
+                }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
+                  opacity: isCurrentLoaded ? 1 : 0,
+                  transition: 'opacity 0.2s ease-in-out',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  zIndex: 1
+                }}
+              />
+            )}
+
+            {slides && slides.length > 1 && (
+              <button 
+                type="button" 
+                onClick={(e) => { e.stopPropagation(); prevSlide(); }} 
+                style={{ ...styles.slideArrow, left: '20px', zIndex: 2 }}
+                aria-label="Předchozí snímek"
+              >
+                ‹
+              </button>
+            )}
+            {slides && slides.length > 1 && (
+              <button 
+                type="button" 
+                onClick={(e) => { e.stopPropagation(); nextSlide(); }} 
+                style={{ ...styles.slideArrow, right: '20px', zIndex: 2 }}
+                aria-label="Další snímek"
+              >
+                ›
+              </button>
             )}
           </div>
 
@@ -320,7 +444,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         <div style={{ 
           ...styles.dealWidget, 
           flex: !isMobile ? '2.7 1 22%' : '3 1 25%',
-          height: !isMobile ? '420px' : (useMobileImage ? '410px' : '380px'), 
+          height: !isMobile ? 'auto' : (useMobileImage ? '410px' : '380px'), 
           padding: (!isMobile || useMobileImage) ? '16px 16px 0 16px' : '0 16px 0 0',
           flexDirection: (!isMobile || useMobileImage) ? 'column' : 'row',
           alignItems: 'stretch',

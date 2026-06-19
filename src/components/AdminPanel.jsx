@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import ProductsTab from './admin/ProductsTab';
 import CategoriesTab from './admin/CategoriesTab';
+import HomepageTab from './admin/HomepageTab';
 
 export default function AdminPanel({ showToast, setActivePage }) {
   const { lang } = useTranslation();
@@ -18,6 +19,7 @@ export default function AdminPanel({ showToast, setActivePage }) {
   const tabsConfig = [
     { id: 'products', name_cz: 'Správa produktů', name_en: 'Products CMS' },
     { id: 'categories', name_cz: 'Správa kategorií', name_en: 'Categories CMS' },
+    { id: 'homepage', name_cz: 'Správa úvodní stránky', name_en: 'Homepage CMS' },
   ];
 
   return (
@@ -78,6 +80,12 @@ export default function AdminPanel({ showToast, setActivePage }) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
                   <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 </svg>
+              ) : tab.id === 'homepage' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="3" y1="9" x2="21" y2="9"></line>
+                  <line x1="9" y1="21" x2="9" y2="9"></line>
+                </svg>
               ) : null}
               <span>{lang === 'CZ' ? tab.name_cz : tab.name_en}</span>
             </button>
@@ -94,6 +102,12 @@ export default function AdminPanel({ showToast, setActivePage }) {
 
           {activeTab === 'categories' && (
             <CategoriesTab 
+              showToast={handleShowToastPlaceholder} 
+            />
+          )}
+
+          {activeTab === 'homepage' && (
+            <HomepageTab 
               showToast={handleShowToastPlaceholder} 
             />
           )}

@@ -1359,7 +1359,8 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
     </div>
 
     {/* Newsletter above footer */}
-    <section className="newsletter-section-wrapper" style={{ margin: '40px 0 -20px 0' }}>
+    {FEATURE_FLAGS.showNewsletter && (
+      <section className="newsletter-section-wrapper" style={{ margin: '40px 0 -20px 0' }}>
         <div className="container newsletter-section">
           <div className="newsletter-content">
             <div className="newsletter-eyebrow">NEWSLETTER • 028</div>
@@ -1378,6 +1379,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
           </form>
         </div>
       </section>
+    )}
 
       {/* Lightbox Modal Overlay */}
       {isLightboxOpen && (
