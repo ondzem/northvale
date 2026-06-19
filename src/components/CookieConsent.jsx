@@ -43,6 +43,17 @@ export default function CookieConsent() {
     };
   }, []);
 
+  const updateConsentMode = (prefs) => {
+    if (window.gtag) {
+      window.gtag('consent', 'update', {
+        'analytics_storage': prefs.analytics ? 'granted' : 'denied',
+        'ad_storage': prefs.marketing ? 'granted' : 'denied',
+        'ad_user_data': prefs.marketing ? 'granted' : 'denied',
+        'ad_personalization': prefs.marketing ? 'granted' : 'denied'
+      });
+    }
+  };
+
   const handleAcceptAll = () => {
     const allPrefs = {
       necessary: true,
@@ -53,6 +64,7 @@ export default function CookieConsent() {
     setPreferences(allPrefs);
     localStorage.setItem('northvale-cookie-consent', 'true');
     localStorage.setItem('northvale-cookie-preferences', JSON.stringify(allPrefs));
+    updateConsentMode(allPrefs);
     setConsentGiven(true);
     setIsOpen(false);
   };
@@ -67,6 +79,7 @@ export default function CookieConsent() {
     setPreferences(necessaryPrefs);
     localStorage.setItem('northvale-cookie-consent', 'true');
     localStorage.setItem('northvale-cookie-preferences', JSON.stringify(necessaryPrefs));
+    updateConsentMode(necessaryPrefs);
     setConsentGiven(true);
     setIsOpen(false);
   };
@@ -74,6 +87,7 @@ export default function CookieConsent() {
   const handleSavePreferences = () => {
     localStorage.setItem('northvale-cookie-consent', 'true');
     localStorage.setItem('northvale-cookie-preferences', JSON.stringify(preferences));
+    updateConsentMode(preferences);
     setConsentGiven(true);
     setIsOpen(false);
   };

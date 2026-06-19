@@ -7,6 +7,40 @@
     <title>Northvaletcg.eu</title>
     <!-- Preload Hero Banner for LCP Optimization -->
     <link rel="preload" href="/Akce - NORTHVALE.webp" as="image" fetchpriority="high" />
+    
+    <!-- Google Consent Mode V2 Initial State Setup -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+
+      // Load saved preferences or default to denied for analytical/marketing cookies
+      (function() {
+        var savedPrefs = localStorage.getItem('northvale-cookie-preferences');
+        var consent = {
+          analytics: 'denied',
+          marketing: 'denied'
+        };
+        if (savedPrefs) {
+          try {
+            var parsed = JSON.parse(savedPrefs);
+            consent.analytics = parsed.analytics ? 'granted' : 'denied';
+            consent.marketing = parsed.marketing ? 'granted' : 'denied';
+          } catch (e) {
+            console.error('Error parsing cookie preferences', e);
+          }
+        }
+        
+        gtag('consent', 'default', {
+          'ad_storage': consent.marketing,
+          'ad_user_data': consent.marketing,
+          'ad_personalization': consent.marketing,
+          'analytics_storage': consent.analytics,
+          'wait_for_update': 500
+        });
+        
+        gtag('set', 'ads_data_redaction', true);
+      })();
+    </script>
     <!-- Google Identity Services SDK -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- Apple Sign-in SDK -->
