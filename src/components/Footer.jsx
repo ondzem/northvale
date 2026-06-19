@@ -20,8 +20,8 @@ export default function Footer({ setActivePage }) {
           />
           <p className="footer-desc">
             {lang === 'CZ' 
-              ? `Váš spolehlivý partner ve světě sběratelských karetních her. Sealed produkty, kusové karty${FEATURE_FLAGS.showGrading ? ' i profesionální zprostředkování gradingu v USA' : ''}.`
-              : `Your reliable partner in the world of collectible card games. Sealed products, singles${FEATURE_FLAGS.showGrading ? ' and professional grading submissions to the US' : ''}.`
+              ? `Prémiový TCG e-shop tvořený sběrateli pro sběratele. Nabízíme originální Pokémon, Disney Lorcana a One Piece produkty, kusové karty i doplňky s garancí pravosti, bezpečným balením${FEATURE_FLAGS.showGrading ? ' a zprostředkováním gradingu v USA' : ''}.`
+              : `Premium TCG e-shop run by collectors for collectors. We offer authentic Pokémon, Disney Lorcana, and One Piece products, single cards, and accessories with guaranteed authenticity, collector-grade packaging${FEATURE_FLAGS.showGrading ? ', and professional grading submissions to the US' : ''}.`
             }
           </p>
           <div className="footer-socials">
