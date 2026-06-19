@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from '../../context/LanguageContext';
 import { fetchSlidesFromDB, saveSlideToDB, deleteSlideFromDB } from '../../services/slides';
+import { fetchDailyDealFromDB, saveDailyDealToDB } from '../../services/dailyDeal';
+import { fetchProductsFromDB } from '../../services/products';
 
 export default function HomepageTab({ showToast }) {
   const { lang } = useTranslation();
@@ -21,9 +23,25 @@ export default function HomepageTab({ showToast }) {
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, slideId: '' });
 
   // Cropping State
-  const [cropTarget, setCropTarget] = useState('desktop'); // 'desktop' or 'mobile'
+  const [cropTarget, setCropTarget] = useState('desktop'); // 'desktop', 'mobile' or 'deal'
   const [cropImageSrc, setCropImageSrc] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
+
+  // Deal of the Day Form State
+  const [dealLoading, setDealLoading] = useState(true);
+  const [dealSaving, setDealSaving] = useState(false);
+  const [dealProductsList, setDealProductsList] = useState([]);
+  
+  const [dealName, setDealName] = useState('');
+  const [dealProductId, setDealProductId] = useState('');
+  const [dealStock, setDealStock] = useState('0');
+  const [dealPrice, setDealPrice] = useState('0');
+  const [dealOriginalPrice, setDealOriginalPrice] = useState('');
+  const [dealDays, setDealDays] = useState('0');
+  const [dealHours, setDealHours] = useState('14');
+  const [dealMinutes, setDealMinutes] = useState('35');
+  const [dealSeconds, setDealSeconds] = useState('0');
+  const [dealImageUrl, setDealImageUrl] = useState('');
 
   // Cropper Refs
   const canvasRef = useRef(null);
@@ -52,6 +70,7 @@ export default function HomepageTab({ showToast }) {
 
   useEffect(() => {
     loadSlides();
+    loadDailyDeal();
   }, []);
 
   const loadSlides = async () => {
@@ -59,6 +78,89 @@ export default function HomepageTab({ showToast }) {
     const data = await fetchSlidesFromDB();
     setSlides(data || []);
     setLoading(false);
+  };
+
+  const loadDailyDeal = async () => {
+    setDealLoading(true);
+    try {
+      const allProducts = await fetchProductsFromDB();
+      setDealProductsList(allProducts || []);
+
+      const dbDeal = await fetchDailyDealFromDB();
+      if (dbDeal) {
+        setDealName(dbDeal.name || '');
+        setDealProductId(dbDeal.product_id || '');
+        setDealStock(String(dbDeal.stock || 0));
+        setDealPrice(String(dbDeal.price || 0));
+        setDealOriginalPrice(dbDeal.original_price ? String(dbDeal.original_price) : '');
+        setDealImageUrl(dbDeal.image_url || '');
+
+        const endsAt = new Date(dbDeal.ends_at).getTime();
+        const diff = Math.max(0, endsAt - Date.now());
+        const totalSecs = Math.floor(diff / 1000);
+        setDealDays(String(Math.floor(totalSecs / (3600 * 24))));
+        setDealHours(String(Math.floor((totalSecs % (3600 * 24)) / 3600)));
+        setDealMinutes(String(Math.floor((totalSecs % 3600) / 60)));
+        setDealSeconds(String(totalSecs % 60));
+      }
+    } catch (err) {
+      console.error('Failed to load daily deal in admin:', err);
+    }
+    setDealLoading(false);
+  };
+
+  const handleAutoFillFromProduct = (prodId) => {
+    const prod = dealProductsList.find(p => p.id === prodId);
+    if (prod) {
+      setDealName(prod.name || '');
+      setDealStock(String(prod.stock || 0));
+      const activePrice = prod.variants && prod.variants.length > 0 
+        ? prod.variants[0].price 
+        : (prod.price || 0);
+      setDealPrice(String(activePrice));
+      
+      const activeOriginalPrice = prod.originalPrice || (prod.variants && prod.variants.length > 0 ? prod.variants[0].originalPrice : null);
+      setDealOriginalPrice(activeOriginalPrice ? String(activeOriginalPrice) : String(Math.round(activePrice * 1.3)));
+      
+      setDealImageUrl(prod.image || '');
+      showToast(lang === 'CZ' ? 'Pole předvyplněna z produktu!' : 'Form pre-filled from product!', 'success');
+    }
+  };
+
+  const handleSaveDailyDeal = async (e) => {
+    e.preventDefault();
+    setDealSaving(true);
+
+    const daysOffset = Number(dealDays || 0) * 24 * 3600 * 1000;
+    const hoursOffset = Number(dealHours || 0) * 3600 * 1000;
+    const minsOffset = Number(dealMinutes || 0) * 60 * 1000;
+    const secsOffset = Number(dealSeconds || 0) * 1000;
+
+    const endsAtIso = new Date(Date.now() + daysOffset + hoursOffset + minsOffset + secsOffset).toISOString();
+
+    const payload = {
+      name: dealName,
+      product_id: dealProductId || null,
+      stock: Number(dealStock || 0),
+      price: Number(dealPrice || 0),
+      original_price: dealOriginalPrice ? Number(dealOriginalPrice) : null,
+      image_url: dealImageUrl || null,
+      ends_at: endsAtIso
+    };
+
+    const { data, error, isMockFallback } = await saveDailyDealToDB(payload);
+
+    if (error) {
+      showToast(lang === 'CZ' ? 'Chyba při ukládání akce dne!' : 'Error saving Deal of the Day!', 'error');
+    } else {
+      showToast(
+        isMockFallback
+          ? (lang === 'CZ' ? 'Akce dne uložena pouze lokálně (Chyba DB)!' : 'Daily deal saved locally only (DB error)!')
+          : (lang === 'CZ' ? 'Akce dne úspěšně uložena!' : 'Deal of the Day successfully saved!'),
+        isMockFallback ? 'warning' : 'success'
+      );
+    }
+    setDealSaving(false);
   };
 
   const handleSelectSlide = (slide) => {
@@ -141,8 +243,8 @@ export default function HomepageTab({ showToast }) {
         loadedImage.current = img;
 
         // frame resolution helper
-        const frameW = cropTarget === 'desktop' ? 280 : 256;
-        const frameH = cropTarget === 'desktop' ? 122 : 320;
+        const frameW = cropTarget === 'desktop' ? 280 : (cropTarget === 'mobile' ? 256 : 220);
+        const frameH = cropTarget === 'desktop' ? 122 : (cropTarget === 'mobile' ? 320 : 220);
 
         // Calculate min scale to cover the frame
         const minScaleX = frameW / img.width;
@@ -180,8 +282,8 @@ export default function HomepageTab({ showToast }) {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const frameW = cropTarget === 'desktop' ? 280 : 256;
-    const frameH = cropTarget === 'desktop' ? 122 : 320;
+    const frameW = cropTarget === 'desktop' ? 280 : (cropTarget === 'mobile' ? 256 : 220);
+    const frameH = cropTarget === 'desktop' ? 122 : (cropTarget === 'mobile' ? 320 : 220);
     const frameX = (canvas.width - frameW) / 2;
     const frameY = (canvas.height - frameH) / 2;
 
@@ -289,8 +391,8 @@ export default function HomepageTab({ showToast }) {
     if (!loadedImage.current || !canvasRef.current) return;
 
     const img = loadedImage.current;
-    const frameW = cropTarget === 'desktop' ? 280 : 256;
-    const frameH = cropTarget === 'desktop' ? 122 : 320;
+    const frameW = cropTarget === 'desktop' ? 280 : (cropTarget === 'mobile' ? 256 : 220);
+    const frameH = cropTarget === 'desktop' ? 122 : (cropTarget === 'mobile' ? 320 : 220);
 
     const scale = cropRefScale.current;
     const drawW = img.width * scale;
@@ -309,7 +411,7 @@ export default function HomepageTab({ showToast }) {
       return;
     }
 
-    const baseW = cropTarget === 'desktop' ? 1920 : 800;
+    const baseW = cropTarget === 'desktop' ? 1920 : (cropTarget === 'mobile' ? 800 : 500);
     const scaleFactor = baseW / frameW;
 
     const cropCanvas = document.createElement('canvas');
@@ -328,8 +430,12 @@ export default function HomepageTab({ showToast }) {
     cropCtx.imageSmoothingEnabled = true;
     cropCtx.imageSmoothingQuality = 'high';
 
-    cropCtx.fillStyle = '#1c1c22';
-    cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
+    if (cropTarget !== 'deal') {
+      cropCtx.fillStyle = '#1c1c22';
+      cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
+    } else {
+      cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+    }
 
     cropCtx.drawImage(
       img,
@@ -343,11 +449,15 @@ export default function HomepageTab({ showToast }) {
       cropCanvas.height
     );
 
-    const croppedUrl = cropCanvas.toDataURL('image/jpeg', 0.85);
+    const format = cropTarget === 'deal' ? 'image/png' : 'image/jpeg';
+    const quality = cropTarget === 'deal' ? undefined : 0.85;
+    const croppedUrl = cropCanvas.toDataURL(format, quality);
     if (cropTarget === 'desktop') {
       setFormDesktopUrl(croppedUrl);
-    } else {
+    } else if (cropTarget === 'mobile') {
       setFormMobileUrl(croppedUrl);
+    } else if (cropTarget === 'deal') {
+      setDealImageUrl(croppedUrl);
     }
 
     setIsCropping(false);
@@ -405,9 +515,15 @@ export default function HomepageTab({ showToast }) {
     if (opt) return lang === 'CZ' ? opt.labelCz : opt.labelEn;
     return pageVal;
   };
+  const previewDiscount = dealOriginalPrice && dealPrice
+    ? Math.round(((Number(dealOriginalPrice) - Number(dealPrice)) / Number(dealOriginalPrice)) * 100)
+    : 0;
 
   return (
-    <div className="ctf-shell">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
+      
+      {/* SECTION 1: HERO SLIDESHOW */}
+      <div className="ctf-shell">
       {/* Left panel: Slide list */}
       <section className="ctf-tree-col" style={{ flex: '1.2 1 0%', maxWidth: 'none' }}>
         <div>
@@ -730,6 +846,413 @@ export default function HomepageTab({ showToast }) {
           </div>
         </form>
       </section>
+      </div>
+
+      <hr style={{ border: 'none', borderTop: '1px solid rgba(255, 255, 255, 0.08)', margin: '0' }} />
+
+      {/* SECTION 2: DEAL OF THE DAY CMS */}
+      <div>
+        <h3 className="ctf-col-title" style={{ fontSize: '20px', marginBottom: '8px' }}>
+          {lang === 'CZ' ? 'Správa Akce dne (Deal of the Day)' : 'Deal of the Day Administration'}
+        </h3>
+        <p className="ctf-col-sub" style={{ marginBottom: '24px' }}>
+          {lang === 'CZ'
+            ? 'Zde můžete upravit název, cenu, skladové zásoby, fotku a odpočet pro aktivní Akci dne. Akce se propíše na homepage i do katalogů.'
+            : 'Here you can configure the title, pricing, stock count, picture and timer for the active Daily Deal. Changes apply storefront-wide.'}
+        </p>
+
+        {dealLoading ? (
+          <p className="ctf-col-sub">{lang === 'CZ' ? 'Načítání konfigurace akce...' : 'Loading deal configuration...'}</p>
+        ) : (
+          <div className="ctf-shell" style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
+            {/* Left Column: Form */}
+            <form onSubmit={handleSaveDailyDeal} className="ctf-form" style={{ flex: '1.2 1 0%', minWidth: '0' }}>
+              
+              {/* Propojený produkt */}
+              <div className="ctf-field">
+                <label className="ctf-label">{lang === 'CZ' ? 'Propojený katalogový produkt' : 'Linked Catalog Product'}</label>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <select 
+                    className="ctf-input" 
+                    value={dealProductId} 
+                    onChange={(e) => setDealProductId(e.target.value)}
+                    style={{ flex: 1 }}
+                  >
+                    <option value="">{lang === 'CZ' ? '-- Nepropojeno (Čistě grafická karta) --' : '-- Not Linked (Graphical card only) --'}</option>
+                    {dealProductsList.map(prod => (
+                      <option key={prod.id} value={prod.id}>
+                        {prod.name} ({prod.price} Kč)
+                      </option>
+                    ))}
+                  </select>
+                  {dealProductId && (
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      style={{ padding: '0 16px', fontSize: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      onClick={() => handleAutoFillFromProduct(dealProductId)}
+                    >
+                      {lang === 'CZ' ? 'Předvyplnit' : 'Pre-fill'}
+                    </button>
+                  )}
+                </div>
+                <p className="ctf-hint">
+                  {lang === 'CZ' 
+                    ? 'Vyberte produkt pro automatické přesměrování a nákupní tlačítko "Do košíku".'
+                    : 'Select a product to map card redirects and "Add to Cart" button.'}
+                </p>
+              </div>
+
+              {/* Název */}
+              <div className="ctf-field" style={{ marginTop: '20px' }}>
+                <label className="ctf-label">{lang === 'CZ' ? 'Název akce / produktu' : 'Deal / Product Title'}<span style={{ color: '#ef4444' }}> *</span></label>
+                <input 
+                  type="text" 
+                  className="ctf-input"
+                  value={dealName} 
+                  onChange={e => setDealName(e.target.value)} 
+                  placeholder={lang === 'CZ' ? 'Zadejte název pro zobrazení na kartě...' : 'Enter a title for the deal...'}
+                  required 
+                />
+              </div>
+
+              {/* Ceny a sklad */}
+              <div style={{ display: 'flex', gap: '16px', marginTop: '20px' }} className="slide-list-split">
+                <div className="ctf-field" style={{ flex: 1 }}>
+                  <label className="ctf-label">{lang === 'CZ' ? 'Akční cena (Kč)' : 'Deal Price (CZK)'}<span style={{ color: '#ef4444' }}> *</span></label>
+                  <input 
+                    type="number" 
+                    className="ctf-input"
+                    value={dealPrice} 
+                    onChange={e => setDealPrice(e.target.value)} 
+                    placeholder="0"
+                    required 
+                  />
+                </div>
+                <div className="ctf-field" style={{ flex: 1 }}>
+                  <label className="ctf-label">{lang === 'CZ' ? 'Původní cena (Kč)' : 'Original Price (CZK)'}</label>
+                  <input 
+                    type="number" 
+                    className="ctf-input"
+                    value={dealOriginalPrice} 
+                    onChange={e => setDealOriginalPrice(e.target.value)} 
+                    placeholder="Např. 3590"
+                  />
+                </div>
+                <div className="ctf-field" style={{ flex: 1 }}>
+                  <label className="ctf-label">{lang === 'CZ' ? 'Kusů zbývá' : 'Pieces Left'}<span style={{ color: '#ef4444' }}> *</span></label>
+                  <input 
+                    type="number" 
+                    className="ctf-input"
+                    value={dealStock} 
+                    onChange={e => setDealStock(e.target.value)} 
+                    placeholder="0"
+                    required 
+                  />
+                </div>
+              </div>
+
+              {/* Ořez obrázku */}
+              <div className="ctf-field" style={{ marginTop: '20px' }}>
+                <label className="ctf-label">{lang === 'CZ' ? 'Obrázek akce (poměr 1:1)' : 'Deal Image (1:1 aspect ratio)'}<span style={{ color: '#ef4444' }}> *</span></label>
+                
+                {dealImageUrl ? (
+                  <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', padding: '12px' }}>
+                    <div style={{ height: '110px', width: '100%', background: '#0e0e11', borderRadius: '6px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src={dealImageUrl} alt="Preview deal" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                      <button type="button" className="btn btn-secondary" style={{ flex: 1, fontSize: '11px', padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} onClick={() => document.getElementById('deal-file-input').click()}>{lang === 'CZ' ? 'Změnit fotku' : 'Change Photo'}</button>
+                      <button type="button" className="btn btn-secondary" style={{ flex: 1, fontSize: '11px', padding: '6px 12px', color: '#ef4444', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.15)' }} onClick={() => setDealImageUrl('')}>{lang === 'CZ' ? 'Odstranit' : 'Remove'}</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div 
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, 'deal')}
+                    onClick={() => document.getElementById('deal-file-input').click()}
+                    style={{
+                      border: '2px dashed rgba(255, 255, 255, 0.15)',
+                      borderRadius: '10px',
+                      padding: '32px 16px',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      background: 'rgba(255, 255, 255, 0.01)',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                    className="crop-upload-zone"
+                  >
+                    <span style={{ fontSize: '24px' }}>📁</span>
+                    <span style={{ fontSize: '13px', fontWeight: '600', color: 'rgba(255,255,255,0.7)' }}>
+                      {lang === 'CZ' ? 'Přetáhněte obrázek sem nebo klikněte k výběru' : 'Drag image here or click to select'}
+                    </span>
+                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
+                      {lang === 'CZ' ? 'Podporuje JPG, PNG, WEBP (ořez 1:1)' : 'Supports JPG, PNG, WEBP (1:1 crop)'}
+                    </span>
+                  </div>
+                )}
+                <input 
+                  id="deal-file-input" 
+                  type="file" 
+                  accept="image/*" 
+                  style={{ display: 'none' }} 
+                  onChange={(e) => handleFileChange(e, 'deal')} 
+                />
+              </div>
+
+              {/* Countdown Fields */}
+              <div className="ctf-field" style={{ marginTop: '20px' }}>
+                <label className="ctf-label">{lang === 'CZ' ? 'Odpočet času do konce akce' : 'Countdown Duration'}</label>
+                <div style={{ display: 'flex', gap: '12px' }} className="countdown-inputs-row">
+                  <div style={{ flex: 1 }}>
+                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '4px' }}>{lang === 'CZ' ? 'Dny' : 'Days'}</span>
+                    <input type="number" min="0" className="ctf-input" value={dealDays} onChange={e => setDealDays(e.target.value)} placeholder="0" />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '4px' }}>{lang === 'CZ' ? 'Hodiny' : 'Hours'}</span>
+                    <input type="number" min="0" max="23" className="ctf-input" value={dealHours} onChange={e => setDealHours(e.target.value)} placeholder="14" />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '4px' }}>{lang === 'CZ' ? 'Minuty' : 'Minutes'}</span>
+                    <input type="number" min="0" max="59" className="ctf-input" value={dealMinutes} onChange={e => setDealMinutes(e.target.value)} placeholder="35" />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '4px' }}>{lang === 'CZ' ? 'Sekundy' : 'Seconds'}</span>
+                    <input type="number" min="0" max="59" className="ctf-input" value={dealSeconds} onChange={e => setDealSeconds(e.target.value)} placeholder="0" />
+                  </div>
+                </div>
+                <p className="ctf-hint">
+                  {lang === 'CZ'
+                    ? 'Zadejte čas zbývající do konce akce. Odpočet se po uložení začne odpočítávat v reálném čase.'
+                    : 'Enter the remaining duration for the deal. The live timer will compute the deadline relative to saving moment.'}
+                </p>
+              </div>
+
+              {/* Submit */}
+              <button 
+                type="submit" 
+                className="btn btn-primary" 
+                style={{ marginTop: '28px', width: '100%', padding: '12px' }}
+                disabled={dealSaving}
+              >
+                {dealSaving 
+                  ? (lang === 'CZ' ? 'Ukládání...' : 'Saving...') 
+                  : (lang === 'CZ' ? 'Uložit akci dne' : 'Save Deal of the Day')}
+              </button>
+
+            </form>
+
+            {/* Right Column: Live Preview */}
+            <section className="ctf-form-col" style={{ flex: '0 0 320px', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
+              <h4 className="ctf-col-title" style={{ fontSize: '14px', marginBottom: '16px', color: 'var(--color-gold)' }}>
+                {lang === 'CZ' ? 'Živý náhled karty' : 'Live Card Preview'}
+              </h4>
+
+              {/* Deal Card Layout Markup */}
+              <div 
+                className="glass-panel deal-widget-banner"
+                style={{ 
+                  height: '420px', 
+                  padding: '16px 16px 0 16px',
+                  flexDirection: 'column',
+                  alignItems: 'stretch',
+                  justifyContent: 'space-between',
+                  display: 'flex',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  background: 'rgba(255,255,255,0.02)',
+                  borderRadius: '12px'
+                }}
+              >
+                {/* Title */}
+                <h3 style={{ 
+                  fontSize: '17px', 
+                  fontWeight: '700', 
+                  color: 'var(--text-main)', 
+                  margin: '4px 0 0 0',
+                  textAlign: 'left',
+                  lineHeight: '1.4',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  height: '48px',
+                  fontFamily: 'var(--font-heading)'
+                }}>
+                  {dealName || (lang === 'CZ' ? 'Vyberte produkt...' : 'Select product...')}
+                </h3>
+
+                {/* Image */}
+                <div style={{
+                  height: '145px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative',
+                  marginTop: '34px',
+                  marginBottom: '8px'
+                }}>
+                  <img 
+                    src={dealImageUrl || '/logo s popisem.webp'} 
+                    alt="" 
+                    style={{ 
+                      maxHeight: '100%', 
+                      maxWidth: '100%', 
+                      objectFit: 'contain',
+                      transform: 'scale(1.22) translateY(12px)'
+                    }} 
+                  />
+                  <span style={{
+                    position: 'absolute',
+                    top: '4px',
+                    left: '4px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    color: 'var(--text-main)',
+                    fontWeight: '700',
+                    fontSize: '9px',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                  }}>
+                    {lang === 'CZ' ? `Zbývá ${dealStock} kusů` : `${dealStock} pcs left`}
+                  </span>
+                </div>
+
+                {/* Prices & Button */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px',
+                  width: '100%',
+                  marginBottom: '14px',
+                  marginTop: 'auto'
+                }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {previewDiscount > 0 && (
+                        <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-red)' }}>
+                          -{previewDiscount} %
+                        </span>
+                      )}
+                      {dealOriginalPrice && (
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                          {Number(dealOriginalPrice).toLocaleString()} Kč
+                        </span>
+                      )}
+                    </div>
+                    <span style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-gold)', marginTop: '2px', whiteSpace: 'nowrap' }}>
+                      {Number(dealPrice).toLocaleString()} Kč
+                    </span>
+                  </div>
+
+                  <button 
+                    type="button"
+                    className="btn btn-primary" 
+                    style={{
+                      backgroundColor: 'var(--color-gold)',
+                      color: '#000',
+                      fontWeight: '700',
+                      padding: '10px 14px',
+                      borderRadius: 'var(--radius-md)',
+                      fontSize: '13px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      border: 'none',
+                      opacity: dealProductId ? 1 : 0.5,
+                      cursor: 'default',
+                      minWidth: '110px'
+                    }}
+                  >
+                    <img 
+                      src="/shopping-cart.png" 
+                      alt="" 
+                      style={{ 
+                        width: '14px', 
+                        height: '14px', 
+                        filter: 'brightness(0)' 
+                      }} 
+                    />
+                    {lang === 'CZ' ? 'Do košíku' : 'Add to Cart'}
+                  </button>
+                </div>
+
+                {/* Countdown */}
+                <div style={{
+                  background: 'var(--color-gold)', 
+                  borderRadius: 'var(--radius-md)',
+                  padding: '16px 12px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 'calc(100% + 2px)',
+                  margin: '0 -1px 15px -1px',
+                  boxSizing: 'border-box'
+                }}>
+                  <span style={{ 
+                    fontSize: '10px', 
+                    fontWeight: '800', 
+                    color: '#000', 
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    marginBottom: '6px'
+                  }}>
+                    {lang === 'CZ' ? 'Akce dne' : 'Deal of the day'}
+                  </span>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: Number(dealDays) > 0 ? '8px' : '14px',
+                    color: '#000'
+                  }}>
+                    {Number(dealDays) > 0 && (
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                        <span style={{ fontSize: '18px', fontWeight: '800' }}>
+                          {Number(dealDays)}
+                        </span>
+                        <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>
+                          {lang === 'CZ' ? (Number(dealDays) === 1 ? 'den' : Number(dealDays) < 5 ? 'dny' : 'dní') : (Number(dealDays) === 1 ? 'day' : 'days')}
+                        </span>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                      <span style={{ fontSize: '18px', fontWeight: '800' }}>
+                        {Number(dealHours || 0).toString().padStart(2, '0')}
+                      </span>
+                      <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>{lang === 'CZ' ? 'hodin' : 'hours'}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                      <span style={{ fontSize: '18px', fontWeight: '800' }}>
+                        {Number(dealMinutes || 0).toString().padStart(2, '0')}
+                      </span>
+                      <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>{lang === 'CZ' ? 'minut' : 'mins'}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                      <span style={{ fontSize: '18px', fontWeight: '800' }}>
+                        {Number(dealSeconds || 0).toString().padStart(2, '0')}
+                      </span>
+                      <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>{lang === 'CZ' ? 'sekund' : 'secs'}</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </section>
+          </div>
+        )}
+      </div>
 
       {/* Canvas Cropper Portal Dialog */}
       {isCropping && createPortal(
@@ -760,13 +1283,17 @@ export default function HomepageTab({ showToast }) {
             boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
           }} className="fade-in">
             <h3 style={{ margin: 0, color: '#fff', fontSize: '15px', textTransform: 'uppercase', letterSpacing: '0.5px', fontFamily: 'var(--font-heading)' }}>
-              {lang === 'CZ' ? 'Ořez banneru' : 'Crop Banner'}
+              {cropTarget === 'deal' 
+                ? (lang === 'CZ' ? 'Ořez fotky akce' : 'Crop Deal Photo')
+                : (lang === 'CZ' ? 'Ořez banneru' : 'Crop Banner')}
             </h3>
             
             <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)', textAlign: 'center', lineHeight: '1.4' }}>
               {cropTarget === 'desktop'
                 ? (lang === 'CZ' ? 'Poměr stran je uzamčen na šířku (2.28:1 - pro desktop)' : 'Aspect ratio locked to landscape (2.28:1 - for desktop)')
-                : (lang === 'CZ' ? 'Poměr stran je uzamčen na výšku (4:5 - pro mobil)' : 'Aspect ratio locked to portrait (4:5 - for mobile)')
+                : (cropTarget === 'mobile'
+                  ? (lang === 'CZ' ? 'Poměr stran je uzamčen na výšku (4:5 - pro mobil)' : 'Aspect ratio locked to portrait (4:5 - for mobile)')
+                  : (lang === 'CZ' ? 'Poměr stran je uzamčen na čtverec (1:1 - pro produkt)' : 'Aspect ratio locked to square (1:1 - for product)'))
               }
             </div>
             

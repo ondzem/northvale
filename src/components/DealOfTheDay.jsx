@@ -1,38 +1,91 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
+import { fetchDailyDealFromDB } from '../services/dailyDeal';
 
 export default function DealOfTheDay({ products, addToCart, setSelectedProductId, setActivePage }) {
   const { lang } = useTranslation();
-  const dealProduct = products.find(p => p.id === 'deal-of-the-day') || products.find(p => p.price !== undefined) || products[0];
-  const dealProductHasVariants = dealProduct.variants && dealProduct.variants.length > 0;
-  const dealProductPrice = dealProductHasVariants ? dealProduct.variants[0].price : (dealProduct.price || 0);
-  const dealProductStock = dealProductHasVariants ? dealProduct.variants[0].stock : (dealProduct.stock || 0);
-  const dealProductOriginalPrice = dealProduct.originalPrice || (dealProductHasVariants ? dealProduct.variants[0].originalPrice : null);
   
-  // Deal of the day countdown timer
-  const [timeLeft, setTimeLeft] = useState({ hours: 14, minutes: 35, seconds: 22 });
-  const [dealAdded, setDealAdded] = useState(false);
+  // Deal data state with localStorage fallback
+  const [deal, setDeal] = useState(() => {
+    try {
+      const cached = localStorage.getItem('northvale-cached-deal');
+      if (cached) return JSON.parse(cached);
+    } catch (e) {
+      console.warn('Failed to load cached daily deal:', e);
+    }
+    return null;
+  });
 
+  const [dealAdded, setDealAdded] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  // Load daily deal from Supabase on mount
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev.seconds > 0) {
-          return { ...prev, seconds: prev.seconds - 1 };
-        } else if (prev.minutes > 0) {
-          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        } else if (prev.hours > 0) {
-          return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        } else {
-          return { hours: 23, minutes: 59, seconds: 59 };
+    let active = true;
+    async function loadDailyDeal() {
+      const dbDeal = await fetchDailyDealFromDB();
+      if (active && dbDeal) {
+        setDeal(dbDeal);
+        try {
+          localStorage.setItem('northvale-cached-deal', JSON.stringify(dbDeal));
+        } catch (e) {
+          console.warn('Failed to cache daily deal:', e);
         }
-      });
-    }, 1000);
-    return () => clearInterval(timer);
+      }
+    }
+    loadDailyDeal();
+    return () => {
+      active = false;
+    };
   }, []);
 
+  const activeDeal = deal || {
+    name: 'Booster Box SV06 Twilight Masquerade',
+    image_url: '/9.png',
+    stock: 14,
+    price: 2690,
+    original_price: 3590,
+    ends_at: new Date(Date.now() + 14.5 * 3600 * 1000).toISOString(),
+    product_id: 'deal-of-the-day'
+  };
+
+  // Find linked product in catalog
+  const catalogProduct = products.find(p => p.id === activeDeal.product_id);
+  const dealProductPrice = Number(activeDeal.price || 0);
+  const dealProductStock = Number(activeDeal.stock || 0);
+  const dealProductOriginalPrice = activeDeal.original_price ? Number(activeDeal.original_price) : null;
+
+  // Countdown timer logic based on absolute ends_at timestamp
+  useEffect(() => {
+    if (!activeDeal.ends_at) return;
+
+    const updateTimer = () => {
+      const endsAt = new Date(activeDeal.ends_at).getTime();
+      const diff = endsAt - Date.now();
+
+      if (diff <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+
+      const totalSecs = Math.floor(diff / 1000);
+      const d = Math.floor(totalSecs / (3600 * 24));
+      const h = Math.floor((totalSecs % (3600 * 24)) / 3600);
+      const m = Math.floor((totalSecs % 3600) / 60);
+      const s = totalSecs % 60;
+
+      setTimeLeft({ days: d, hours: h, minutes: m, seconds: s });
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [activeDeal.ends_at]);
+
   const handleCardClick = () => {
-    setSelectedProductId(dealProduct.id);
-    if (dealProduct.type === 'single' || dealProduct.type === 'slab') {
+    if (!catalogProduct) return;
+    setSelectedProductId(catalogProduct.id);
+    if (catalogProduct.type === 'single' || catalogProduct.type === 'slab') {
       setActivePage('singles-detail');
     } else {
       setActivePage('sealed-detail');
@@ -41,7 +94,27 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
 
   const handleBuyDealClick = (e) => {
     e.stopPropagation();
-    addToCart(dealProduct.variants ? dealProduct.variants[0] : dealProduct, dealProduct);
+    if (!catalogProduct) return;
+
+    // Create a modified product payload carrying the deal overrides
+    const cartProduct = {
+      ...catalogProduct,
+      name: activeDeal.name,
+      price: dealProductPrice,
+      originalPrice: dealProductOriginalPrice,
+      image: activeDeal.image_url || catalogProduct.image,
+      stock: dealProductStock
+    };
+
+    const cartVariant = catalogProduct.variants && catalogProduct.variants.length > 0 
+      ? { 
+          ...catalogProduct.variants[0], 
+          price: dealProductPrice, 
+          stock: dealProductStock 
+        } 
+      : cartProduct;
+
+    addToCart(cartVariant, cartProduct);
     setDealAdded(true);
     setTimeout(() => {
       setDealAdded(false);
@@ -50,7 +123,7 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
 
   const discountPercent = dealProductOriginalPrice 
     ? Math.round(((dealProductOriginalPrice - dealProductPrice) / dealProductOriginalPrice) * 100)
-    : 33;
+    : 0;
 
   return (
     <div 
@@ -65,11 +138,12 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
         display: 'flex',
         overflow: 'hidden',
         position: 'relative',
-        cursor: 'pointer',
+        cursor: catalogProduct ? 'pointer' : 'default',
         width: '100%',
         boxSizing: 'border-box',
         marginBottom: '20px'
       }}
+      onClick={handleCardClick}
     >
       {/* Top: Title */}
       <h3 style={{ 
@@ -79,7 +153,7 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
         margin: '4px 0 0 0',
         textAlign: 'left',
         lineHeight: '1.4',
-        cursor: 'pointer',
+        cursor: catalogProduct ? 'pointer' : 'default',
         display: '-webkit-box',
         WebkitLineClamp: 2,
         WebkitBoxOrient: 'vertical',
@@ -89,8 +163,8 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
         fontFamily: 'var(--font-heading)',
         position: 'relative',
         zIndex: 10
-      }} onClick={handleCardClick}>
-        {dealProduct.name}
+      }}>
+        {activeDeal.name}
       </h3>
 
       {/* Center: Image Container */}
@@ -101,13 +175,13 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
         justifyContent: 'center',
         position: 'relative',
         zIndex: 1,
-        cursor: 'pointer',
+        cursor: catalogProduct ? 'pointer' : 'default',
         marginTop: '34px',
         marginBottom: '8px'
-      }} onClick={handleCardClick}>
+      }}>
         <img 
-          src={dealProduct.image} 
-          alt={dealProduct.name} 
+          src={activeDeal.image_url || '/logo s popisem.webp'} 
+          alt={activeDeal.name} 
           style={{ 
             maxHeight: '100%', 
             maxWidth: '100%', 
@@ -148,12 +222,16 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-red)' }}>
-              -{discountPercent} %
-            </span>
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-              {dealProductOriginalPrice ? dealProductOriginalPrice.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US') : '2 690'} {lang === 'CZ' ? 'Kč' : 'CZK'}
-            </span>
+            {discountPercent > 0 && (
+              <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-red)' }}>
+                -{discountPercent} %
+              </span>
+            )}
+            {dealProductOriginalPrice && (
+              <span style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                {dealProductOriginalPrice.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}
+              </span>
+            )}
           </div>
           <span style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-gold)', marginTop: '2px', whiteSpace: 'nowrap' }}>
             {dealProductPrice.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}
@@ -174,14 +252,15 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
             justifyContent: 'center',
             gap: '6px',
             border: 'none',
-            cursor: dealProductStock > 0 ? 'pointer' : 'not-allowed',
+            cursor: (catalogProduct && dealProductStock > 0) ? 'pointer' : 'not-allowed',
+            opacity: catalogProduct ? 1 : 0.5,
             flex: '0 0 auto',
             minWidth: '110px',
             transform: dealAdded ? 'scale(0.95)' : 'scale(1)',
             transition: 'all 0.15s ease',
             boxShadow: '0 4px 12px rgba(253, 189, 22, 0.15)'
           }}
-          disabled={dealProductStock === 0}
+          disabled={!catalogProduct || dealProductStock === 0}
           onClick={handleBuyDealClick}
         >
           <img 
@@ -224,9 +303,19 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '14px',
+          gap: timeLeft.days > 0 ? '8px' : '14px',
           color: '#000'
         }}>
+          {timeLeft.days > 0 && (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+              <span style={{ fontSize: '18px', fontWeight: '800' }}>
+                {timeLeft.days}
+              </span>
+              <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>
+                {lang === 'CZ' ? (timeLeft.days === 1 ? 'den' : timeLeft.days < 5 ? 'dny' : 'dní') : (timeLeft.days === 1 ? 'day' : 'days')}
+              </span>
+            </div>
+          )}
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
             <span style={{ fontSize: '18px', fontWeight: '800' }}>
               {timeLeft.hours.toString().padStart(2, '0')}
@@ -250,3 +339,4 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
     </div>
   );
 }
+

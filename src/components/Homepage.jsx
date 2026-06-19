@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import { fetchSlidesFromDB, DEFAULT_SLIDES } from '../services/slides';
+import { fetchDailyDealFromDB } from '../services/dailyDeal';
 
 const ProductImage = ({ src, alt, className = '' }) => {
   const [aspectRatio, setAspectRatio] = useState(1.0);
@@ -191,28 +192,77 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     }
   }, [slides, currentSlide]);
 
+  // Deal data state with localStorage fallback
+  const [deal, setDeal] = useState(() => {
+    try {
+      const cached = localStorage.getItem('northvale-cached-deal');
+      if (cached) return JSON.parse(cached);
+    } catch (e) {
+      console.warn('Failed to load cached daily deal on homepage:', e);
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    let active = true;
+    async function loadDailyDeal() {
+      const dbDeal = await fetchDailyDealFromDB();
+      if (active && dbDeal) {
+        setDeal(dbDeal);
+        try {
+          localStorage.setItem('northvale-cached-deal', JSON.stringify(dbDeal));
+        } catch (e) {
+          console.warn('Failed to cache daily deal:', e);
+        }
+      }
+    }
+    loadDailyDeal();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const activeDeal = deal || {
+    name: 'Booster Box SV06 Twilight Masquerade',
+    image_url: '/9.png',
+    stock: 14,
+    price: 2690,
+    original_price: 3590,
+    ends_at: new Date(Date.now() + 14.5 * 3600 * 1000).toISOString(),
+    product_id: 'deal-of-the-day'
+  };
+
   // Deal of the day countdown timer
-  const [timeLeft, setTimeLeft] = useState({ hours: 14, minutes: 35, seconds: 22 });
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   
   // Deal Button micro-animation state
   const [dealAdded, setDealAdded] = useState(false);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev.seconds > 0) {
-          return { ...prev, seconds: prev.seconds - 1 };
-        } else if (prev.minutes > 0) {
-          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        } else if (prev.hours > 0) {
-          return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        } else {
-          return { hours: 23, minutes: 59, seconds: 59 };
-        }
-      });
-    }, 1000);
+    if (!activeDeal.ends_at) return;
+
+    const updateTimer = () => {
+      const endsAt = new Date(activeDeal.ends_at).getTime();
+      const diff = endsAt - Date.now();
+
+      if (diff <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+
+      const totalSecs = Math.floor(diff / 1000);
+      const d = Math.floor(totalSecs / (3600 * 24));
+      const h = Math.floor((totalSecs % (3600 * 24)) / 3600);
+      const m = Math.floor((totalSecs % 3600) / 60);
+      const s = totalSecs % 60;
+
+      setTimeLeft({ days: d, hours: h, minutes: m, seconds: s });
+    };
+
+    updateTimer();
+    const timer = setInterval(updateTimer, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeDeal.ends_at]);
 
   const nextSlide = () => {
     setCurrentSlide((currentSlide + 1) % slides.length);
@@ -286,13 +336,26 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     }
   };
 
-  const dealProduct = products.find(p => p.id === 'deal-of-the-day') || products.find(p => p.price !== undefined) || products[0];
-  const dealProductHasVariants = dealProduct.variants && dealProduct.variants.length > 0;
-  const dealProductPrice = dealProductHasVariants ? dealProduct.variants[0].price : (dealProduct.price || 0);
-  const dealProductStock = dealProductHasVariants ? dealProduct.variants[0].stock : (dealProduct.stock || 0);
-  const dealProductOriginalPrice = dealProduct.originalPrice || (dealProductHasVariants ? dealProduct.variants[0].originalPrice : null);
+  const dealProductStock = Number(activeDeal.stock || 0);
+  const dealProductPrice = Number(activeDeal.price || 0);
+  const dealProductOriginalPrice = activeDeal.original_price ? Number(activeDeal.original_price) : null;
+  const discountPercent = dealProductOriginalPrice 
+    ? Math.round(((dealProductOriginalPrice - dealProductPrice) / dealProductOriginalPrice) * 100)
+    : 0;
+
+  const catalogProduct = products.find(p => p.id === activeDeal.product_id);
+  const dealProduct = catalogProduct || {
+    id: activeDeal.product_id || 'deal-of-the-day',
+    name: activeDeal.name,
+    image: activeDeal.image_url || '/9.png',
+    stock: dealProductStock,
+    price: dealProductPrice,
+    originalPrice: dealProductOriginalPrice,
+    type: 'sealed'
+  };
 
   const handleCardClick = (product) => {
+    if (!catalogProduct || product.id === 'deal-of-the-day') return;
     setSelectedProductId(product.id);
     if (product.type === 'single' || product.type === 'slab') {
       setActivePage('singles-detail');
@@ -302,7 +365,25 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   };
 
   const handleBuyDealClick = () => {
-    addToCart(dealProduct.variants ? dealProduct.variants[0] : dealProduct, dealProduct);
+    if (!catalogProduct) return;
+    const cartProduct = {
+      ...catalogProduct,
+      name: activeDeal.name,
+      price: dealProductPrice,
+      originalPrice: dealProductOriginalPrice,
+      image: activeDeal.image_url || catalogProduct.image,
+      stock: dealProductStock
+    };
+
+    const cartVariant = catalogProduct.variants && catalogProduct.variants.length > 0 
+      ? { 
+          ...catalogProduct.variants[0], 
+          price: dealProductPrice, 
+          stock: dealProductStock 
+        } 
+      : cartProduct;
+
+    addToCart(cartVariant, cartProduct);
     setDealAdded(true);
     setTimeout(() => {
       setDealAdded(false);
@@ -423,20 +504,32 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 ›
               </button>
             )}
-          </div>
-
-          <div style={{ ...styles.indicators, marginTop: '14px', marginBottom: isMobile ? '24px' : '0' }}>
-            {slides.map((_, idx) => (
-              <span 
-                key={idx} 
-                style={{
-                  ...styles.dot, 
-                  width: currentSlide === idx ? '32px' : '16px',
-                  backgroundColor: currentSlide === idx ? 'var(--color-gold)' : 'rgba(255,255,255,0.2)'
+            {slides && slides.length > 1 && (
+              <div 
+                style={{ 
+                  ...styles.indicators, 
+                  position: 'absolute', 
+                  bottom: '16px', 
+                  left: '50%', 
+                  transform: 'translateX(-50%)', 
+                  zIndex: 10,
+                  margin: 0
                 }}
-                onClick={() => setCurrentSlide(idx)}
-              />
-            ))}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {slides.map((_, idx) => (
+                  <span 
+                    key={idx} 
+                    style={{
+                      ...styles.dot, 
+                      width: currentSlide === idx ? '32px' : '16px',
+                      backgroundColor: currentSlide === idx ? 'var(--color-gold)' : 'rgba(255,255,255,0.2)'
+                    }}
+                    onClick={() => setCurrentSlide(idx)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -463,7 +556,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 margin: '4px 0 0 0',
                 textAlign: 'left',
                 lineHeight: '1.4',
-                cursor: 'pointer',
+                cursor: catalogProduct ? 'pointer' : 'default',
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical',
@@ -474,7 +567,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 position: 'relative',
                 zIndex: 10
               }} onClick={() => handleCardClick(dealProduct)}>
-                {dealProduct.name}
+                {activeDeal.name}
               </h3>
 
               {/* Center: Image Container */}
@@ -485,13 +578,13 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 justifyContent: 'center',
                 position: 'relative',
                 zIndex: 1,
-                cursor: 'pointer',
+                cursor: catalogProduct ? 'pointer' : 'default',
                 marginTop: '34px',
                 marginBottom: '8px'
               }} onClick={() => handleCardClick(dealProduct)}>
                 <img 
-                  src={dealProduct.image} 
-                  alt={dealProduct.name} 
+                  src={activeDeal.image_url || '/logo s popisem.webp'} 
+                  alt={activeDeal.name} 
                   style={{ 
                     maxHeight: '100%', 
                     maxWidth: '100%', 
@@ -532,12 +625,16 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-red)' }}>
-                      -{dealProductOriginalPrice ? Math.round(((dealProductOriginalPrice - dealProductPrice) / dealProductOriginalPrice) * 100) : 33} %
-                    </span>
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                      {dealProductOriginalPrice ? dealProductOriginalPrice.toLocaleString() : '2 690'} Kč
-                    </span>
+                    {discountPercent > 0 && (
+                      <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-red)' }}>
+                        -{discountPercent} %
+                      </span>
+                    )}
+                    {dealProductOriginalPrice && (
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                        {dealProductOriginalPrice.toLocaleString()} Kč
+                      </span>
+                    )}
                   </div>
                   <span style={{ fontSize: !isMobile ? '19px' : '18px', fontWeight: '800', color: 'var(--color-gold)', marginTop: '2px', whiteSpace: 'nowrap' }}>
                     {dealProductPrice.toLocaleString()} Kč
@@ -558,14 +655,15 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     justifyContent: 'center',
                     gap: '6px',
                     border: 'none',
-                    cursor: 'pointer',
+                    cursor: (catalogProduct && dealProductStock > 0) ? 'pointer' : 'not-allowed',
+                    opacity: catalogProduct ? 1 : 0.5,
                     flex: '0 0 auto',
                     minWidth: '110px',
                     transform: dealAdded ? 'scale(0.95)' : 'scale(1)',
                     transition: 'all 0.15s ease',
                     boxShadow: '0 4px 12px rgba(253, 189, 22, 0.15)'
                   }}
-                  disabled={dealProduct.stock === 0}
+                  disabled={!catalogProduct || dealProductStock === 0}
                   onClick={handleBuyDealClick}
                 >
                   <img 
@@ -608,9 +706,19 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '14px',
+                  gap: timeLeft.days > 0 ? '8px' : '14px',
                   color: '#000'
                 }}>
+                  {timeLeft.days > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                      <span style={{ fontSize: '18px', fontWeight: '800' }}>
+                        {timeLeft.days}
+                      </span>
+                      <span style={{ fontSize: '10px', color: 'rgba(0, 0, 0, 0.65)', fontWeight: '500' }}>
+                        {lang === 'CZ' ? (timeLeft.days === 1 ? 'den' : timeLeft.days < 5 ? 'dny' : 'dní') : (timeLeft.days === 1 ? 'day' : 'days')}
+                      </span>
+                    </div>
+                  )}
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
                     <span style={{ fontSize: '18px', fontWeight: '800' }}>
                       {timeLeft.hours.toString().padStart(2, '0')}
@@ -665,9 +773,19 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '20px',
+                  gap: timeLeft.days > 0 ? '12px' : '20px',
                   color: '#000'
                 }}>
+                  {timeLeft.days > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                      <span style={{ fontSize: '24px', fontWeight: '800', lineHeight: '1' }}>
+                        {timeLeft.days}
+                      </span>
+                      <span style={{ fontSize: '9px', color: 'rgba(0, 0, 0, 0.65)', textTransform: 'uppercase', fontWeight: '500' }}>
+                        {lang === 'CZ' ? (timeLeft.days === 1 ? 'den' : timeLeft.days < 5 ? 'dny' : 'dní') : (timeLeft.days === 1 ? 'day' : 'days')}
+                      </span>
+                    </div>
+                  )}
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                     <span style={{ fontSize: '24px', fontWeight: '800', lineHeight: '1' }}>
                       {timeLeft.hours.toString().padStart(2, '0')}
@@ -706,7 +824,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   margin: '0 0 8px 0',
                   textAlign: 'left',
                   lineHeight: '1.3',
-                  cursor: 'pointer',
+                  cursor: catalogProduct ? 'pointer' : 'default',
                   display: '-webkit-box',
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
@@ -714,7 +832,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   textOverflow: 'ellipsis',
                   fontFamily: 'var(--font-heading)'
                 }} onClick={() => handleCardClick(dealProduct)}>
-                  {dealProduct.name}
+                  {activeDeal.name}
                 </h3>
 
                 {/* Split row: Left (enlarged image shifted left) & Right (stacked details) */}
@@ -733,11 +851,11 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     alignItems: 'center',
                     justifyContent: 'flex-start',
                     position: 'relative',
-                    cursor: 'pointer'
+                    cursor: catalogProduct ? 'pointer' : 'default'
                   }} onClick={() => handleCardClick(dealProduct)}>
                     <img 
-                      src={dealProduct.image} 
-                      alt={dealProduct.name} 
+                      src={activeDeal.image_url || '/logo s popisem.webp'} 
+                      alt={activeDeal.name} 
                       style={{ 
                         maxHeight: '100%', 
                         maxWidth: '100%', 
@@ -775,12 +893,16 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     {/* Pricing */}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-red)' }}>
-                          -{dealProductOriginalPrice ? Math.round(((dealProductOriginalPrice - dealProductPrice) / dealProductOriginalPrice) * 100) : 33} %
-                        </span>
-                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                          {dealProductOriginalPrice ? dealProductOriginalPrice.toLocaleString() : '2 690'} Kč
-                        </span>
+                        {discountPercent > 0 && (
+                          <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-red)' }}>
+                            -{discountPercent} %
+                          </span>
+                        )}
+                        {dealProductOriginalPrice && (
+                          <span style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                            {dealProductOriginalPrice.toLocaleString()} Kč
+                          </span>
+                        )}
                       </div>
                       <span style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-gold)', marginTop: '1px' }}>
                         {dealProductPrice.toLocaleString()} Kč
@@ -802,13 +924,14 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                         justifyContent: 'center',
                         gap: '8px',
                         border: 'none',
-                        cursor: 'pointer',
+                        cursor: (catalogProduct && dealProductStock > 0) ? 'pointer' : 'not-allowed',
+                        opacity: catalogProduct ? 1 : 0.5,
                         width: '120px',
                         transform: dealAdded ? 'scale(0.95)' : 'scale(1)',
                         transition: 'all 0.15s ease',
                         boxShadow: '0 4px 12px rgba(253, 189, 22, 0.15)'
                       }}
-                      disabled={dealProductStock === 0}
+                      disabled={!catalogProduct || dealProductStock === 0}
                       onClick={handleBuyDealClick}
                     >
                       <img 
