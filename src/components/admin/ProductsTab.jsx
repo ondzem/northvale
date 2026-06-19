@@ -361,6 +361,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [formElement, setFormElement] = useState('');
   const [formCustomParams, setFormCustomParams] = useState([]);
   const [isFullPreviewOpen, setIsFullPreviewOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, productId: '' });
   const [previewActiveTab, setPreviewActiveTab] = useState('popis');
   const [previewCondition, setPreviewCondition] = useState('NM');
   const [previewLang, setPreviewLang] = useState('EN');
@@ -564,25 +565,30 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setIsModalOpen(true);
   };
 
-  const handleDeleteProduct = async (id) => {
-    const confirmMsg = lang === 'CZ'
-      ? `Opravdu chcete smazat produkt "${id}"?`
-      : `Are you sure you want to delete product "${id}"?`;
-      
-    if (window.confirm(confirmMsg)) {
-      const { error, isMockFallback, dbError } = await deleteProductFromDB(id);
-      if (error) {
-        showToast(lang === 'CZ' ? `Chyba při mazání produktu: ${error.message || error}` : `Error deleting product: ${error.message || error}`, 'error');
+  const handleDeleteProduct = (id) => {
+    setDeleteConfirm({
+      isOpen: true,
+      productId: id
+    });
+  };
+
+  const handleConfirmDeleteProduct = async () => {
+    const id = deleteConfirm.productId;
+    if (!id) return;
+
+    const { error, isMockFallback, dbError } = await deleteProductFromDB(id);
+    if (error) {
+      showToast(lang === 'CZ' ? `Chyba při mazání produktu: ${error.message || error}` : `Error deleting product: ${error.message || error}`, 'error');
+    } else {
+      if (isMockFallback) {
+        console.warn("Product deleted from mock data fallback due to DB error:", dbError);
+        showToast(lang === 'CZ' ? `Smazáno lokálně (Chyba DB: ${dbError})` : `Deleted locally (DB Error: ${dbError})`, 'warning');
       } else {
-        if (isMockFallback) {
-          console.warn("Product deleted from mock data fallback due to DB error:", dbError);
-          showToast(lang === 'CZ' ? `Smazáno lokálně (Chyba DB: ${dbError})` : `Deleted locally (DB Error: ${dbError})`, 'warning');
-        } else {
-          showToast(lang === 'CZ' ? 'Produkt byl smazán z databáze.' : 'Product was deleted from database.', 'success');
-        }
-        loadData();
+        showToast(lang === 'CZ' ? 'Produkt byl smazán z databáze.' : 'Product was deleted from database.', 'success');
       }
+      loadData();
     }
+    setDeleteConfirm({ isOpen: false, productId: '' });
   };
 
   const handleSaveProduct = async (e) => {
@@ -4228,6 +4234,73 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                   </button>
                 )}
               </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {deleteConfirm.isOpen && createPortal(
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.85)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'var(--bg-secondary, #141416)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '12px',
+            padding: '28px',
+            maxWidth: '400px',
+            width: '90%',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
+          }}>
+            <h4 style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff', margin: '0 0 12px 0' }}>
+              {lang === 'CZ' ? 'Opravdu smazat?' : 'Confirm Delete?'}
+            </h4>
+            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', margin: '0 0 24px 0', lineHeight: '1.5' }}>
+              {lang === 'CZ'
+                ? `Opravdu chcete smazat produkt "${deleteConfirm.productId}"? Tuto akci nelze vzít zpět.`
+                : `Are you sure you want to delete product "${deleteConfirm.productId}"? This action cannot be undone.`}
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#fff',
+                  padding: '10px 16px',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setDeleteConfirm({ isOpen: false, productId: '' })}
+              >
+                {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                style={{
+                  background: '#ef4444',
+                  border: 'none',
+                  color: '#fff',
+                  padding: '10px 16px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+                onClick={handleConfirmDeleteProduct}
+              >
+                {lang === 'CZ' ? 'Smazat' : 'Delete'}
+              </button>
             </div>
           </div>
         </div>,

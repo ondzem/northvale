@@ -24,6 +24,9 @@ export default function FaqTab({ showToast }) {
   // Expand state for categories in the list
   const [expandedCats, setExpandedCats] = useState({});
 
+  // Delete confirmation modal state
+  const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, type: '', target: null });
+
   useEffect(() => {
     loadData();
   }, []);
@@ -120,23 +123,12 @@ export default function FaqTab({ showToast }) {
   };
 
   // Delete category
-  const handleDeleteCategoryClick = async (cat) => {
-    const confirmMsg = lang === 'CZ'
-      ? `Opravdu chcete smazat kategorii "${cat.name_cz}" a všechny její dotazy?`
-      : `Are you sure you want to delete category "${cat.name_en}" and all its questions?`;
-
-    if (window.confirm(confirmMsg)) {
-      const res = await deleteFaqCategory(cat.id);
-      if (res.error) {
-        showToast(lang === 'CZ' ? 'Chyba při mazání kategorie.' : 'Error deleting category.', 'error');
-      } else {
-        showToast(lang === 'CZ' ? 'Kategorie byla smazána.' : 'Category was deleted.', 'success');
-        if (formState?.type === 'category' && formState?.data?.id === cat.id) {
-          setFormState(null);
-        }
-        loadData();
-      }
-    }
+  const handleDeleteCategoryClick = (cat) => {
+    setDeleteConfirm({
+      isOpen: true,
+      type: 'category',
+      target: cat
+    });
   };
 
   // Start adding an item
@@ -168,23 +160,44 @@ export default function FaqTab({ showToast }) {
   };
 
   // Delete item
-  const handleDeleteItemClick = async (item) => {
-    const confirmMsg = lang === 'CZ'
-      ? `Opravdu chcete smazat tento dotaz?`
-      : `Are you sure you want to delete this question?`;
+  const handleDeleteItemClick = (item) => {
+    setDeleteConfirm({
+      isOpen: true,
+      type: 'item',
+      target: item
+    });
+  };
 
-    if (window.confirm(confirmMsg)) {
-      const res = await deleteFaqItem(item.id);
+  // Handle actual deletion confirmation
+  const handleConfirmDelete = async () => {
+    const { type, target } = deleteConfirm;
+    if (!target) return;
+
+    if (type === 'category') {
+      const res = await deleteFaqCategory(target.id);
+      if (res.error) {
+        showToast(lang === 'CZ' ? 'Chyba při mazání kategorie.' : 'Error deleting category.', 'error');
+      } else {
+        showToast(lang === 'CZ' ? 'Kategorie byla smazána.' : 'Category was deleted.', 'success');
+        if (formState?.type === 'category' && formState?.data?.id === target.id) {
+          setFormState(null);
+        }
+        loadData();
+      }
+    } else if (type === 'item') {
+      const res = await deleteFaqItem(target.id);
       if (res.error) {
         showToast(lang === 'CZ' ? 'Chyba při mazání dotazu.' : 'Error deleting question.', 'error');
       } else {
         showToast(lang === 'CZ' ? 'Dotaz byl smazán.' : 'Question was deleted.', 'success');
-        if (formState?.type === 'item' && formState?.data?.id === item.id) {
+        if (formState?.type === 'item' && formState?.data?.id === target.id) {
           setFormState(null);
         }
         loadData();
       }
     }
+
+    setDeleteConfirm({ isOpen: false, type: '', target: null });
   };
 
   // Handle Form Submission
@@ -593,6 +606,79 @@ export default function FaqTab({ showToast }) {
           </form>
         )}
       </section>
+
+      {/* Delete Confirmation Modal Portal */}
+      {deleteConfirm.isOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.85)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'var(--bg-secondary, #141416)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '12px',
+            padding: '28px',
+            maxWidth: '400px',
+            width: '90%',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
+          }}>
+            <h4 style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff', margin: '0 0 12px 0' }}>
+              {lang === 'CZ' ? 'Opravdu smazat?' : 'Confirm Delete?'}
+            </h4>
+            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', margin: '0 0 24px 0', lineHeight: '1.5' }}>
+              {deleteConfirm.type === 'category' ? (
+                lang === 'CZ'
+                  ? `Opravdu chcete smazat kategorii "${deleteConfirm.target?.name_cz}" a všechny její dotazy? Tuto akci nelze vzít zpět.`
+                  : `Are you sure you want to delete category "${deleteConfirm.target?.name_en}" and all its questions? This action cannot be undone.`
+              ) : (
+                lang === 'CZ'
+                  ? `Opravdu chcete smazat tento dotaz? Tuto akci nelze vzít zpět.`
+                  : `Are you sure you want to delete this question? This action cannot be undone.`
+              )}
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#fff',
+                  padding: '10px 16px',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setDeleteConfirm({ isOpen: false, type: '', target: null })}
+              >
+                {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                style={{
+                  background: '#ef4444',
+                  border: 'none',
+                  color: '#fff',
+                  padding: '10px 16px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+                onClick={handleConfirmDelete}
+              >
+                {lang === 'CZ' ? 'Smazat' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
