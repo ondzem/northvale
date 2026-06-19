@@ -4,8 +4,9 @@ import { useTranslation } from '../../context/LanguageContext';
 import { fetchSlidesFromDB, saveSlideToDB, deleteSlideFromDB } from '../../services/slides';
 import { fetchDailyDealFromDB, saveDailyDealToDB } from '../../services/dailyDeal';
 import { fetchProductsFromDB } from '../../services/products';
+import { fetchHomepageSectionsFromDB, saveHomepageSectionToDB } from '../../services/homepageSections';
 
-export default function HomepageTab({ showToast }) {
+export default function HomepageTab({ showToast, onEditProduct }) {
   const { lang } = useTranslation();
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +27,7 @@ export default function HomepageTab({ showToast }) {
   const [cropTarget, setCropTarget] = useState('desktop'); // 'desktop', 'mobile' or 'deal'
   const [cropImageSrc, setCropImageSrc] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
+  const [cropImageFormat, setCropImageFormat] = useState('image/jpeg');
 
   // Deal of the Day Form State
   const [dealLoading, setDealLoading] = useState(true);
@@ -42,6 +44,23 @@ export default function HomepageTab({ showToast }) {
   const [dealMinutes, setDealMinutes] = useState('35');
   const [dealSeconds, setDealSeconds] = useState('0');
   const [dealImageUrl, setDealImageUrl] = useState('');
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
+  const [slideshowExpanded, setSlideshowExpanded] = useState(false);
+  const [dealExpanded, setDealExpanded] = useState(false);
+  const [newsExpanded, setNewsExpanded] = useState(false);
+  const [preordersExpanded, setPreordersExpanded] = useState(false);
+  const [accessoriesExpanded, setAccessoriesExpanded] = useState(false);
+
+  const [sections, setSections] = useState({ newArrivals: [], preorders: [], accessories: [] });
+  const [sectionsLoading, setSectionsLoading] = useState(true);
+  const [searchQueries, setSearchQueries] = useState({ newArrivals: '', preorders: '', accessories: '' });
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 900);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Cropper Refs
   const canvasRef = useRef(null);
@@ -73,6 +92,360 @@ export default function HomepageTab({ showToast }) {
     loadDailyDeal();
   }, []);
 
+  const loadSections = async (productsList = []) => {
+    setSectionsLoading(true);
+    const data = await fetchHomepageSectionsFromDB();
+    
+    const resolvedSections = {
+      newArrivals: data?.newArrivals?.length > 0 
+        ? data.newArrivals 
+        : productsList.filter(p => p.type === 'single').slice(0, 5).map(p => p.id),
+      preorders: data?.preorders?.length > 0 
+        ? data.preorders 
+        : productsList.filter(p => p.type === 'sealed' && p.preorder).slice(0, 5).map(p => p.id),
+      accessories: data?.accessories?.length > 0 
+        ? data.accessories 
+        : productsList.filter(p => p.type === 'accessory').slice(0, 5).map(p => p.id)
+    };
+
+    setSections(resolvedSections);
+    setSectionsLoading(false);
+  };
+
+  const handleSaveSection = async (sectionKey) => {
+    const productIds = sections[sectionKey] || [];
+    const { data, error, isMockFallback } = await saveHomepageSectionToDB(sectionKey, productIds);
+    if (error) {
+      showToast(lang === 'CZ' ? 'Chyba při ukládání sekce!' : 'Error saving section!', 'error');
+    } else {
+      if (data) {
+        setSections(data);
+      }
+      showToast(
+        isMockFallback
+          ? (lang === 'CZ' ? 'Sekce uložena lokálně (Chyba DB)!' : 'Section saved locally (DB error)!')
+          : (lang === 'CZ' ? 'Sekce úspěšně uložena!' : 'Section successfully saved!'),
+        isMockFallback ? 'warning' : 'success'
+      );
+    }
+  };
+
+  const handleAddProductToSection = (sectionKey, productId) => {
+    const currentList = sections[sectionKey] || [];
+    if (currentList.includes(productId)) {
+      showToast(lang === 'CZ' ? 'Tento produkt již v sekci je!' : 'This product is already in the section!', 'warning');
+      return;
+    }
+    setSections(prev => ({
+      ...prev,
+      [sectionKey]: [...currentList, productId]
+    }));
+    setSearchQueries(prev => ({
+      ...prev,
+      [sectionKey]: ''
+    }));
+  };
+
+  const handleRemoveProductFromSection = (sectionKey, productId) => {
+    setSections(prev => ({
+      ...prev,
+      [sectionKey]: (prev[sectionKey] || []).filter(id => id !== productId)
+    }));
+  };
+
+  const handleMoveProduct = (sectionKey, index, direction) => {
+    const list = [...(sections[sectionKey] || [])];
+    if (direction === 'up' && index > 0) {
+      const temp = list[index];
+      list[index] = list[index - 1];
+      list[index - 1] = temp;
+    } else if (direction === 'down' && index < list.length - 1) {
+      const temp = list[index];
+      list[index] = list[index + 1];
+      list[index + 1] = temp;
+    }
+    setSections(prev => ({
+      ...prev,
+      [sectionKey]: list
+    }));
+  };
+
+  const renderSectionCms = (sectionKey) => {
+    const query = searchQueries[sectionKey] || '';
+    const currentIds = sections[sectionKey] || [];
+    
+    let matches = [];
+    if (query.trim().length >= 2) {
+      const q = query.toLowerCase().trim();
+      matches = dealProductsList.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8);
+    }
+
+    const selectedProducts = currentIds
+      .map(id => dealProductsList.find(p => p.id === id))
+      .filter(Boolean);
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <p className="ctf-col-sub" style={{ marginBottom: '8px' }}>
+          {sectionKey === 'newArrivals' 
+            ? (lang === 'CZ' ? 'Vyberte produkty, které se zobrazí v sekci Novinky na hlavní stránce. Můžete měnit jejich pořadí.' : 'Select products to display in the New Releases section on the homepage. You can change their sorting order.')
+            : sectionKey === 'preorders'
+            ? (lang === 'CZ' ? 'Vyberte produkty, které se zobrazí v sekci Předobjednávky na hlavní stránce. Můžete měnit jejich pořadí.' : 'Select products to display in the Pre-orders section on the homepage. You can change their sorting order.')
+            : (lang === 'CZ' ? 'Vyberte produkty, které se zobrazí v sekci Příslušenství na hlavní stránce. Můžete měnit jejich pořadí.' : 'Select products to display in the Accessories section on the homepage. You can change their sorting order.')}
+        </p>
+
+        <div className="ctf-field" style={{ position: 'relative' }}>
+          <label className="ctf-label">{lang === 'CZ' ? 'Přidat produkt (vyhledat podle názvu)' : 'Add Product (search by title)'}</label>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <input 
+              type="text" 
+              className="ctf-input"
+              value={query}
+              onChange={e => setSearchQueries(prev => ({ ...prev, [sectionKey]: e.target.value }))}
+              placeholder={lang === 'CZ' ? 'Začněte psát název produktu (např. Booster, Charizard)...' : 'Type product title (e.g. Booster, Charizard)...'}
+            />
+            {query && (
+              <button 
+                type="button" 
+                className="btn btn-secondary"
+                style={{ padding: '0 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '6px', cursor: 'pointer' }}
+                onClick={() => setSearchQueries(prev => ({ ...prev, [sectionKey]: '' }))}
+              >
+                {lang === 'CZ' ? 'Zrušit' : 'Clear'}
+              </button>
+            )}
+          </div>
+
+          {query.trim().length >= 2 && (
+            <div style={{ 
+              position: 'absolute', 
+              top: '100%', 
+              left: 0, 
+              right: 0, 
+              background: '#18181c', 
+              border: '1px solid rgba(255,255,255,0.1)', 
+              borderRadius: '8px', 
+              marginTop: '6px', 
+              zIndex: 100, 
+              maxHeight: '280px', 
+              overflowY: 'auto',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+              padding: '8px'
+            }}>
+              {matches.length === 0 ? (
+                <p className="ctf-col-sub" style={{ margin: '12px', fontStyle: 'italic', fontSize: '12px' }}>
+                  {lang === 'CZ' ? 'Žádné produkty nenalezeny.' : 'No products found.'}
+                </p>
+              ) : (
+                matches.map(prod => {
+                  const isAdded = currentIds.includes(prod.id);
+                  return (
+                    <div 
+                      key={prod.id} 
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between', 
+                        padding: '8px 12px', 
+                        borderBottom: '1px solid rgba(255,255,255,0.04)',
+                        borderRadius: '6px',
+                        cursor: isAdded ? 'default' : 'pointer',
+                        transition: 'background 0.2s',
+                        background: isAdded ? 'rgba(255,255,255,0.01)' : 'transparent'
+                      }}
+                      className={isAdded ? '' : 'search-result-row-hover'}
+                      onClick={() => !isAdded && handleAddProductToSection(sectionKey, prod.id)}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
+                        <img 
+                          src={prod.image || '/logo s popisem.webp'} 
+                          alt="" 
+                          style={{ width: '32px', height: '32px', objectFit: 'contain', background: '#0c0c0e', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.06)' }} 
+                          onError={e => { e.target.src = '/logo s popisem.webp'; }}
+                        />
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#fff', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{prod.name}</span>
+                          <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{prod.price} Kč • {prod.type}</span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        style={{
+                          background: isAdded ? 'rgba(255,255,255,0.06)' : 'rgba(253, 189, 22, 0.1)',
+                          border: isAdded ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(253, 189, 22, 0.2)',
+                          color: isAdded ? 'rgba(255,255,255,0.4)' : 'var(--color-gold, #fdbd16)',
+                          borderRadius: '4px',
+                          padding: '4px 10px',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          cursor: isAdded ? 'default' : 'pointer'
+                        }}
+                      >
+                        {isAdded ? (lang === 'CZ' ? 'Přidáno' : 'Added') : (lang === 'CZ' ? 'Přidat +' : 'Add +')}
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label className="ctf-label" style={{ marginBottom: '12px', display: 'block' }}>
+            {lang === 'CZ' ? `Aktuální karty v sekci (${selectedProducts.length})` : `Current Cards in Section (${selectedProducts.length})`}
+          </label>
+
+          {selectedProducts.length === 0 ? (
+            <div style={{ padding: '32px', textAlign: 'center', background: 'rgba(255,255,255,0.01)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: '8px' }}>
+              <p className="ctf-col-sub" style={{ margin: 0, fontStyle: 'italic' }}>
+                {lang === 'CZ' ? 'Žádné vybrané produkty. Na hlavní stránce se budou zobrazovat výchozí (nejnovější) produkty.' : 'No selected products. The homepage will display fallback (newest) products.'}
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {selectedProducts.map((prod, index) => (
+                <div 
+                  key={prod.id} 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: 'rgba(255, 255, 255, 0.01)',
+                    border: '1px solid rgba(255, 255, 255, 0.06)',
+                    borderRadius: '8px',
+                    padding: '12px 16px',
+                    transition: 'all 0.2s'
+                  }}
+                  className="slide-list-item-card"
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0, flex: 1 }}>
+                    <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--color-gold)', width: '20px' }}>
+                      {index + 1}.
+                    </span>
+                    <img 
+                      src={prod.image || '/logo s popisem.webp'} 
+                      alt="" 
+                      style={{ width: '40px', height: '40px', objectFit: 'contain', background: '#0c0c0e', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.08)' }} 
+                      onError={e => { e.target.src = '/logo s popisem.webp'; }}
+                    />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#fff', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {prod.name}
+                      </span>
+                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
+                        {prod.price.toLocaleString('cs-CZ')} Kč • {prod.stock > 0 ? (lang === 'CZ' ? 'Skladem' : 'In Stock') : (lang === 'CZ' ? 'Nedostupné' : 'Out of stock')}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'row', gap: '4px' }}>
+                      <button
+                        type="button"
+                        disabled={index === 0}
+                        style={{
+                          background: 'rgba(255,255,255,0.03)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          color: '#fff',
+                          opacity: index === 0 ? 0.3 : 1,
+                          cursor: index === 0 ? 'not-allowed' : 'pointer',
+                          borderRadius: '4px',
+                          padding: '4px 8px',
+                          fontSize: '11px'
+                        }}
+                        onClick={() => handleMoveProduct(sectionKey, index, 'up')}
+                        title={lang === 'CZ' ? 'Posunout nahoru' : 'Move up'}
+                      >
+                        ▲
+                      </button>
+                      <button
+                        type="button"
+                        disabled={index === selectedProducts.length - 1}
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.03)',
+                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                          color: '#fff',
+                          opacity: index === selectedProducts.length - 1 ? 0.3 : 1,
+                          cursor: index === selectedProducts.length - 1 ? 'not-allowed' : 'pointer',
+                          borderRadius: '4px',
+                          padding: '4px 8px',
+                          fontSize: '11px'
+                        }}
+                        onClick={() => handleMoveProduct(sectionKey, index, 'down')}
+                        title={lang === 'CZ' ? 'Posunout dolů' : 'Move down'}
+                      >
+                        ▼
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      style={{
+                        background: 'rgba(253, 189, 22, 0.08)',
+                        border: '1px solid rgba(253, 189, 22, 0.15)',
+                        color: 'var(--color-gold)',
+                        borderRadius: '4px',
+                        padding: '6px 10px',
+                        cursor: 'pointer',
+                        fontSize: '11px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                      onClick={() => {
+                        if (onEditProduct) {
+                          onEditProduct(prod.id);
+                        } else {
+                          showToast(lang === 'CZ' ? 'Rychlá úprava není dostupná.' : 'Quick edit is not available.', 'error');
+                        }
+                      }}
+                      title={lang === 'CZ' ? 'Upravit kartu v katalogu' : 'Edit card in catalog'}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                      {lang === 'CZ' ? 'Upravit' : 'Edit'}
+                    </button>
+
+                    <button
+                      type="button"
+                      style={{
+                        background: 'rgba(239, 68, 68, 0.08)',
+                        border: '1px solid rgba(239, 68, 68, 0.15)',
+                        color: '#ef4444',
+                        borderRadius: '4px',
+                        padding: '6px 10px',
+                        cursor: 'pointer',
+                        fontSize: '11px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                      onClick={() => handleRemoveProductFromSection(sectionKey, prod.id)}
+                      title={lang === 'CZ' ? 'Odebrat z úvodní stránky' : 'Remove from homepage'}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      {lang === 'CZ' ? 'Odebrat' : 'Remove'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Save Button */}
+        <button
+          type="button"
+          className="btn btn-primary"
+          style={{ width: '100%', padding: '12px', marginTop: '12px' }}
+          onClick={() => handleSaveSection(sectionKey)}
+        >
+          {lang === 'CZ' ? 'Uložit změny v sekci' : 'Save Section Changes'}
+        </button>
+      </div>
+    );
+  };
+
   const loadSlides = async () => {
     setLoading(true);
     const data = await fetchSlidesFromDB();
@@ -85,6 +458,9 @@ export default function HomepageTab({ showToast }) {
     try {
       const allProducts = await fetchProductsFromDB();
       setDealProductsList(allProducts || []);
+      
+      // Load sections with products preloaded so defaults can be computed
+      await loadSections(allProducts || []);
 
       const dbDeal = await fetchDailyDealFromDB();
       if (dbDeal) {
@@ -204,6 +580,7 @@ export default function HomepageTab({ showToast }) {
     reader.onload = (event) => {
       setCropTarget(target);
       setCropImageSrc(event.target.result);
+      setCropImageFormat(file.type || 'image/jpeg');
       setIsCropping(true);
       
       // Reset cropping refs
@@ -430,7 +807,9 @@ export default function HomepageTab({ showToast }) {
     cropCtx.imageSmoothingEnabled = true;
     cropCtx.imageSmoothingQuality = 'high';
 
-    if (cropTarget !== 'deal') {
+    const isPng = cropImageFormat === 'image/png' || cropTarget === 'deal';
+
+    if (!isPng) {
       cropCtx.fillStyle = '#1c1c22';
       cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
     } else {
@@ -449,8 +828,8 @@ export default function HomepageTab({ showToast }) {
       cropCanvas.height
     );
 
-    const format = cropTarget === 'deal' ? 'image/png' : 'image/jpeg';
-    const quality = cropTarget === 'deal' ? undefined : 0.85;
+    const format = isPng ? 'image/png' : 'image/jpeg';
+    const quality = isPng ? undefined : 0.85;
     const croppedUrl = cropCanvas.toDataURL(format, quality);
     if (cropTarget === 'desktop') {
       setFormDesktopUrl(croppedUrl);
@@ -519,15 +898,44 @@ export default function HomepageTab({ showToast }) {
     ? Math.round(((Number(dealOriginalPrice) - Number(dealPrice)) / Number(dealOriginalPrice)) * 100)
     : 0;
 
+  const allCollapsed = !slideshowExpanded && !dealExpanded && !newsExpanded && !preordersExpanded && !accessoriesExpanded;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      gap: allCollapsed ? '16px' : '36px', 
+      transition: 'gap 0.3s cubic-bezier(0.4, 0, 0.2, 1)' 
+    }}>
       
       {/* SECTION 1: HERO SLIDESHOW */}
-      <div className="ctf-shell">
-      {/* Left panel: Slide list */}
-      <section className="ctf-tree-col" style={{ flex: '1.2 1 0%', maxWidth: 'none' }}>
-        <div>
-          <h3 className="ctf-col-title">{lang === 'CZ' ? 'Bannery v slideshow' : 'Slideshow Banners'}</h3>
+      <div className="admin-accordion-item">
+        <div 
+          className={`admin-accordion-header ${slideshowExpanded ? 'is-open' : ''}`}
+          onClick={() => setSlideshowExpanded(!slideshowExpanded)}
+        >
+          <h3 className="admin-accordion-header-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-gold)' }}>
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="3" y1="9" x2="21" y2="9"></line>
+              <line x1="9" y1="21" x2="9" y2="9"></line>
+            </svg>
+            <span>{lang === 'CZ' ? 'Bannery v slideshow' : 'Slideshow Banners'}</span>
+          </h3>
+          <div className="admin-accordion-header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        {slideshowExpanded && (
+          <div className="admin-accordion-content">
+            <div className="ctf-shell">
+            {/* Left panel: Slide list */}
+            <section className="ctf-tree-col" style={{ flex: '1.2 1 0%', maxWidth: 'none' }}>
+              <div>
+                <h3 className="ctf-col-title">{lang === 'CZ' ? 'Aktuální snímky' : 'Current Slides'}</h3>
           <p className="ctf-col-sub">
             {lang === 'CZ' 
               ? 'Seznam bannerů v úvodní hero sekci. Snímky se seřadí podle nastaveného pořadí vzestupně.'
@@ -599,7 +1007,13 @@ export default function HomepageTab({ showToast }) {
                       </div>
                     )}
 
-                    <div style={{ display: 'flex', gap: '16px', marginTop: '24px', alignItems: 'stretch' }} className="slide-list-split">
+                    <div style={{ 
+                      display: 'flex', 
+                      flexDirection: isMobile ? 'column' : 'row', 
+                      gap: '16px', 
+                      marginTop: '24px', 
+                      alignItems: 'stretch' 
+                    }} className="slide-list-split">
                       {/* Desktop preview */}
                       <div style={{ flex: '1 1 50%', minWidth: '0' }}>
                         <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>Desktop</span>
@@ -609,9 +1023,9 @@ export default function HomepageTab({ showToast }) {
                       </div>
 
                       {/* Mobile preview */}
-                      <div style={{ flex: '0 0 90px' }}>
+                      <div style={{ flex: isMobile ? '1 1 auto' : '0 0 90px' }}>
                         <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>Mobil</span>
-                        <div style={{ height: '90px', width: '90px', background: '#0e0e11', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ height: '90px', width: isMobile ? '100%' : '90px', background: '#0e0e11', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '6px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <img src={slide.mobile_image_url} alt="Mobile slide" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} onError={(e) => { e.target.src = '/logo s popisem.webp'; }} />
                         </div>
                       </div>
@@ -847,26 +1261,49 @@ export default function HomepageTab({ showToast }) {
         </form>
       </section>
       </div>
-
-      <hr style={{ border: 'none', borderTop: '1px solid rgba(255, 255, 255, 0.08)', margin: '0' }} />
+          </div>
+        )}
+      </div>
 
       {/* SECTION 2: DEAL OF THE DAY CMS */}
-      <div>
-        <h3 className="ctf-col-title" style={{ fontSize: '20px', marginBottom: '8px' }}>
-          {lang === 'CZ' ? 'Správa Akce dne (Deal of the Day)' : 'Deal of the Day Administration'}
-        </h3>
-        <p className="ctf-col-sub" style={{ marginBottom: '24px' }}>
-          {lang === 'CZ'
-            ? 'Zde můžete upravit název, cenu, skladové zásoby, fotku a odpočet pro aktivní Akci dne. Akce se propíše na homepage i do katalogů.'
-            : 'Here you can configure the title, pricing, stock count, picture and timer for the active Daily Deal. Changes apply storefront-wide.'}
-        </p>
+      <div className="admin-accordion-item">
+        <div 
+          className={`admin-accordion-header ${dealExpanded ? 'is-open' : ''}`}
+          onClick={() => setDealExpanded(!dealExpanded)}
+        >
+          <h3 className="admin-accordion-header-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-gold)' }}>
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>{lang === 'CZ' ? 'Správa Akce dne (Deal of the Day)' : 'Deal of the Day Administration'}</span>
+          </h3>
+          <div className="admin-accordion-header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        {dealExpanded && (
+          <div className="admin-accordion-content">
+            <p className="ctf-col-sub" style={{ marginBottom: '24px' }}>
+              {lang === 'CZ'
+                ? 'Zde můžete upravit název, cenu, skladové zásoby, fotku a odpočet pro aktivní Akci dne. Akce se propíše na homepage i do katalogů.'
+                : 'Here you can configure the title, pricing, stock count, picture and timer for the active Daily Deal. Changes apply storefront-wide.'}
+            </p>
 
         {dealLoading ? (
           <p className="ctf-col-sub">{lang === 'CZ' ? 'Načítání konfigurace akce...' : 'Loading deal configuration...'}</p>
         ) : (
-          <div className="ctf-shell" style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
+          <div className="ctf-shell" style={{ 
+            display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row', 
+            gap: isMobile ? '24px' : '32px', 
+            alignItems: 'stretch' 
+          }}>
             {/* Left Column: Form */}
-            <form onSubmit={handleSaveDailyDeal} className="ctf-form" style={{ flex: '1.2 1 0%', minWidth: '0' }}>
+            <form onSubmit={handleSaveDailyDeal} className="ctf-form" style={{ flex: '1.2 1 0%', minWidth: '0', width: '100%' }}>
               
               {/* Propojený produkt */}
               <div className="ctf-field">
@@ -1047,7 +1484,13 @@ export default function HomepageTab({ showToast }) {
             </form>
 
             {/* Right Column: Live Preview */}
-            <section className="ctf-form-col" style={{ flex: '0 0 320px', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
+            <section className="ctf-form-col" style={{ 
+              flex: isMobile ? '1' : '0 0 320px', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: isMobile ? 'center' : 'stretch',
+              width: '100%'
+            }}>
               <h4 className="ctf-col-title" style={{ fontSize: '14px', marginBottom: '16px', color: 'var(--color-gold)' }}>
                 {lang === 'CZ' ? 'Živý náhled karty' : 'Live Card Preview'}
               </h4>
@@ -1065,10 +1508,12 @@ export default function HomepageTab({ showToast }) {
                   overflow: 'hidden',
                   position: 'relative',
                   width: '100%',
+                  maxWidth: '320px',
                   boxSizing: 'border-box',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
                   background: 'rgba(255,255,255,0.02)',
-                  borderRadius: '12px'
+                  borderRadius: '12px',
+                  margin: isMobile ? '0 auto' : '0'
                 }}
               >
                 {/* Title */}
@@ -1092,12 +1537,13 @@ export default function HomepageTab({ showToast }) {
 
                 {/* Image */}
                 <div style={{
-                  height: '145px',
+                  height: '185px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   position: 'relative',
-                  marginTop: '34px',
+                  zIndex: 1,
+                  marginTop: '16px',
                   marginBottom: '8px'
                 }}>
                   <img 
@@ -1114,13 +1560,9 @@ export default function HomepageTab({ showToast }) {
                     position: 'absolute',
                     top: '4px',
                     left: '4px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                    color: 'var(--text-main)',
+                    color: 'var(--color-green)',
                     fontWeight: '700',
-                    fontSize: '9px',
-                    padding: '3px 8px',
-                    borderRadius: '4px',
-                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                    fontSize: '11px'
                   }}>
                     {lang === 'CZ' ? `Zbývá ${dealStock} kusů` : `${dealStock} pcs left`}
                   </span>
@@ -1134,8 +1576,10 @@ export default function HomepageTab({ showToast }) {
                   justifyContent: 'space-between',
                   gap: '8px',
                   width: '100%',
+                  marginTop: 'auto',
                   marginBottom: '14px',
-                  marginTop: 'auto'
+                  position: 'relative',
+                  zIndex: 10
                 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -1252,6 +1696,89 @@ export default function HomepageTab({ showToast }) {
             </section>
           </div>
         )}
+          </div>
+        )}
+      </div>
+
+      {/* SECTION 3: NOVINKY SECTION */}
+      <div className="admin-accordion-item">
+        <div 
+          className={`admin-accordion-header ${newsExpanded ? 'is-open' : ''}`}
+          onClick={() => setNewsExpanded(!newsExpanded)}
+        >
+          <h3 className="admin-accordion-header-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-gold)' }}>
+              <path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1m2 4h-4V7a3 3 0 0 0-3-3m5 5v10a2 2 0 0 1-2 2H9"></path>
+            </svg>
+            <span>{lang === 'CZ' ? 'Správa sekce Novinky' : 'New Releases Section CMS'}</span>
+          </h3>
+          <div className="admin-accordion-header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        {newsExpanded && (
+          <div className="admin-accordion-content">
+            {renderSectionCms('newArrivals')}
+          </div>
+        )}
+      </div>
+
+      {/* SECTION 4: PREORDERS SECTION */}
+      <div className="admin-accordion-item">
+        <div 
+          className={`admin-accordion-header ${preordersExpanded ? 'is-open' : ''}`}
+          onClick={() => setPreordersExpanded(!preordersExpanded)}
+        >
+          <h3 className="admin-accordion-header-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-gold)' }}>
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>{lang === 'CZ' ? 'Správa sekce Předobjednávky' : 'Pre-orders Section CMS'}</span>
+          </h3>
+          <div className="admin-accordion-header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        {preordersExpanded && (
+          <div className="admin-accordion-content">
+            {renderSectionCms('preorders')}
+          </div>
+        )}
+      </div>
+
+      {/* SECTION 5: ACCESSORIES SECTION */}
+      <div className="admin-accordion-item">
+        <div 
+          className={`admin-accordion-header ${accessoriesExpanded ? 'is-open' : ''}`}
+          onClick={() => setAccessoriesExpanded(!accessoriesExpanded)}
+        >
+          <h3 className="admin-accordion-header-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-gold)' }}>
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+            </svg>
+            <span>{lang === 'CZ' ? 'Správa sekce Příslušenství' : 'Accessories Section CMS'}</span>
+          </h3>
+          <div className="admin-accordion-header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        {accessoriesExpanded && (
+          <div className="admin-accordion-content">
+            {renderSectionCms('accessories')}
+          </div>
+        )}
       </div>
 
       {/* Canvas Cropper Portal Dialog */}
@@ -1306,7 +1833,9 @@ export default function HomepageTab({ showToast }) {
                 border: '1px solid rgba(255,255,255,0.1)',
                 borderRadius: '8px',
                 cursor: 'move',
-                backgroundColor: '#0c0c0e'
+                backgroundColor: '#0c0c0e',
+                maxWidth: '100%',
+                height: 'auto'
               }}
               onMouseDown={handleCanvasMouseDown}
               onMouseMove={handleCanvasMouseMove}

@@ -3,6 +3,7 @@ import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import { fetchSlidesFromDB, DEFAULT_SLIDES } from '../services/slides';
 import { fetchDailyDealFromDB } from '../services/dailyDeal';
+import { fetchHomepageSectionsFromDB } from '../services/homepageSections';
 
 const ProductImage = ({ src, alt, className = '' }) => {
   const [aspectRatio, setAspectRatio] = useState(1.0);
@@ -280,10 +281,44 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     return () => clearInterval(interval);
   }, [slides, currentSlide]);
 
-  const newArrivals = products.filter(p => p.type === 'single').slice(0, 5);
-  const preorders = products.filter(p => p.type === 'sealed' && p.preorder).slice(0, 5);
+  const [sectionConfig, setSectionConfig] = useState(() => {
+    try {
+      const cached = localStorage.getItem('northvale-cached-sections');
+      if (cached) return JSON.parse(cached);
+    } catch (e) {
+      console.warn('Failed to parse cached sections:', e);
+    }
+    return {
+      newArrivals: [],
+      preorders: [],
+      accessories: []
+    };
+  });
+
+  useEffect(() => {
+    async function loadSections() {
+      const data = await fetchHomepageSectionsFromDB();
+      if (data) {
+        setSectionConfig(data);
+      }
+    }
+    loadSections();
+  }, []);
+
+  const getSectionProducts = (sectionKey, defaultFilter) => {
+    const configuredIds = sectionConfig[sectionKey] || [];
+    if (configuredIds.length > 0) {
+      return configuredIds
+        .map(id => products.find(p => p.id === id))
+        .filter(Boolean);
+    }
+    return products.filter(defaultFilter).slice(0, 5);
+  };
+
+  const newArrivals = getSectionProducts('newArrivals', p => p.type === 'single');
+  const preorders = getSectionProducts('preorders', p => p.type === 'sealed' && p.preorder);
   const gradedCards = products.filter(p => p.type === 'slab').slice(0, 5);
-  const accessories = products.filter(p => p.type === 'accessory').slice(0, 5);
+  const accessories = getSectionProducts('accessories', p => p.type === 'accessory');
   const newArrivalsRef = useRef(null);
   const preordersRef = useRef(null);
   const gradedCardsRef = useRef(null);
@@ -365,19 +400,19 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   };
 
   const handleBuyDealClick = () => {
-    if (!catalogProduct) return;
+    const productToBuy = catalogProduct || dealProduct;
     const cartProduct = {
-      ...catalogProduct,
+      ...productToBuy,
       name: activeDeal.name,
       price: dealProductPrice,
       originalPrice: dealProductOriginalPrice,
-      image: activeDeal.image_url || catalogProduct.image,
+      image: activeDeal.image_url || productToBuy.image,
       stock: dealProductStock
     };
 
-    const cartVariant = catalogProduct.variants && catalogProduct.variants.length > 0 
+    const cartVariant = productToBuy.variants && productToBuy.variants.length > 0 
       ? { 
-          ...catalogProduct.variants[0], 
+          ...productToBuy.variants[0], 
           price: dealProductPrice, 
           stock: dealProductStock 
         } 
@@ -395,7 +430,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   const isCurrentLoaded = !!loadedImages[currentImageUrl];
 
   return (
-    <div style={{ ...styles.container, paddingTop: isMobile ? '12px' : '24px', gap: isMobile ? '48px' : '88px' }} className="fade-in">
+    <div style={{ ...styles.container, paddingTop: isMobile ? '12px' : '24px', paddingBottom: isMobile ? '40px' : '96px', gap: isMobile ? '48px' : '88px' }} className="fade-in">
       <h1 className="sr-only">{lang === 'CZ' ? 'NORTHVALE TCG - Váš specializovaný e-shop pro Pokémon, Lorcana, One Piece a grading karet' : 'NORTHVALE TCG - Your specialized store for Pokémon, Lorcana, One Piece and card grading'}</h1>
 
       {/* Hero Section */}
@@ -572,14 +607,14 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
               {/* Center: Image Container */}
               <div style={{
-                height: !isMobile ? '145px' : '135px',
+                height: !isMobile ? '185px' : '135px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 position: 'relative',
                 zIndex: 1,
                 cursor: catalogProduct ? 'pointer' : 'default',
-                marginTop: '34px',
+                marginTop: '16px',
                 marginBottom: '8px'
               }} onClick={() => handleCardClick(dealProduct)}>
                 <img 
@@ -610,7 +645,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 </span>
               </div>
 
-              {/* Below Image: Price & Button Row */}
+              {/* Below Title: Price & Button Row */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'row',
@@ -618,8 +653,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 justifyContent: 'space-between',
                 gap: '8px',
                 width: '100%',
-                marginBottom: '14px',
                 marginTop: 'auto',
+                marginBottom: '14px',
                 position: 'relative',
                 zIndex: 10
               }}>
@@ -655,15 +690,15 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     justifyContent: 'center',
                     gap: '6px',
                     border: 'none',
-                    cursor: (catalogProduct && dealProductStock > 0) ? 'pointer' : 'not-allowed',
-                    opacity: catalogProduct ? 1 : 0.5,
+                    cursor: (dealProductStock > 0) ? 'pointer' : 'not-allowed',
+                    opacity: 1,
                     flex: '0 0 auto',
                     minWidth: '110px',
                     transform: dealAdded ? 'scale(0.95)' : 'scale(1)',
                     transition: 'all 0.15s ease',
                     boxShadow: '0 4px 12px rgba(253, 189, 22, 0.15)'
                   }}
-                  disabled={!catalogProduct || dealProductStock === 0}
+                  disabled={dealProductStock === 0}
                   onClick={handleBuyDealClick}
                 >
                   <img 
@@ -673,7 +708,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                       width: '14px', 
                       height: '14px', 
                       filter: 'brightness(0)' 
-                    }} 
+                     }} 
                   />
                   {dealAdded ? (lang === 'CZ' ? 'Přidáno' : 'Added') : (lang === 'CZ' ? 'Do košíku' : 'Add to Cart')}
                 </button>
@@ -924,14 +959,14 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                         justifyContent: 'center',
                         gap: '8px',
                         border: 'none',
-                        cursor: (catalogProduct && dealProductStock > 0) ? 'pointer' : 'not-allowed',
-                        opacity: catalogProduct ? 1 : 0.5,
+                        cursor: (dealProductStock > 0) ? 'pointer' : 'not-allowed',
+                        opacity: 1,
                         width: '120px',
                         transform: dealAdded ? 'scale(0.95)' : 'scale(1)',
                         transition: 'all 0.15s ease',
                         boxShadow: '0 4px 12px rgba(253, 189, 22, 0.15)'
                       }}
-                      disabled={!catalogProduct || dealProductStock === 0}
+                      disabled={dealProductStock === 0}
                       onClick={handleBuyDealClick}
                     >
                       <img 
@@ -1203,9 +1238,6 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             <div className="nv-eyebrow">{lang === 'CZ' ? 'Nové přírůstky' : 'New Additions'}</div>
             <h2 className="nv-title">{lang === 'CZ' ? 'Novinky' : 'New Releases'}</h2>
           </div>
-          <span className="nv-link more-link-desktop" onClick={() => { setFilters({}); setActivePage('singles-catalog'); }}>
-            {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
-          </span>
         </header>
         <div className="slider-container-wrapper">
           <button onClick={() => handleScroll(newArrivalsRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
@@ -1236,11 +1268,6 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           </div>
           <button onClick={() => handleScroll(newArrivalsRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
         </div>
-        <div className="more-link-mobile-wrapper">
-          <span className="nv-link more-link-mobile" onClick={() => { setFilters({}); setActivePage('singles-catalog'); }}>
-            {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
-          </span>
-        </div>
       </section>
 
       {/* 2. & 3. Propojené sekce s pozadím na celou šířku (full-bleed) */}
@@ -1263,9 +1290,6 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               <div className="nv-eyebrow">{lang === 'CZ' ? 'Připravované edice' : 'Upcoming Expansions'}</div>
               <h2 className="nv-title">{lang === 'CZ' ? 'Předobjednávky' : 'Pre-orders'}</h2>
             </div>
-            <span className="nv-link more-link-desktop" onClick={() => { setFilters({}); setActivePage('sealed-catalog'); }}>
-              {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
-            </span>
           </header>
           <div className="slider-container-wrapper">
             <button onClick={() => handleScroll(preordersRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
@@ -1295,11 +1319,6 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             ))}
             </div>
             <button onClick={() => handleScroll(preordersRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
-          </div>
-          <div className="more-link-mobile-wrapper">
-            <span className="nv-link more-link-mobile" onClick={() => { setFilters({}); setActivePage('sealed-catalog'); }}>
-              {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
-            </span>
           </div>
         </section>
 
@@ -1416,56 +1435,60 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       </section>
 
       {/* Testimonials */}
-      <section style={styles.sectionContainer} className="container testimonials-section">
-        <header className="testimonials-header">
-          <div className="testimonials-header-left">
-            <div className="testimonials-eyebrow">{lang === 'CZ' ? 'RECENZE OVĚŘENÝCH ZÁKAZNÍKŮ' : 'VERIFIED CUSTOMER REVIEWS'}</div>
-            <h2 className="testimonials-title">{lang === 'CZ' ? 'Co o nás říkají' : 'What they say about us'}</h2>
-          </div>
-          <div className="testimonials-rating-desktop">
-            <span className="testimonials-stars">★★★★★</span>
-            <span className="testimonials-rating-text">{lang === 'CZ' ? '4,8 • 312 hodnocení' : '4.8 • 312 reviews'}</span>
-          </div>
-        </header>
-        <div className="slider-container-wrapper testimonials-slider-wrapper">
-          <button onClick={() => handleScroll(testimonialsRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
-          <div ref={testimonialsRef} className="testimonials-grid-scroll">
-            {testimonials.map((t, idx) => (
-              <div key={idx} className="testimonial-card">
-                <div className="testimonial-quote">“</div>
-                <p className="testimonial-text">{t.text.replace(/^[„"“]/, '').replace(/[“"“]$/, '')}</p>
-                <div className="testimonial-footer">
-                  <div className="testimonial-avatar">{t.initials}</div>
-                  <div className="testimonial-author-info">
-                    <span className="testimonial-author-name">{t.name}</span>
-                    <span className="testimonial-author-desc">{t.desc}</span>
+      {FEATURE_FLAGS.showTestimonials && (
+        <section style={styles.sectionContainer} className="container testimonials-section">
+          <header className="testimonials-header">
+            <div className="testimonials-header-left">
+              <div className="testimonials-eyebrow">{lang === 'CZ' ? 'RECENZE OVĚŘENÝCH ZÁKAZNÍKŮ' : 'VERIFIED CUSTOMER REVIEWS'}</div>
+              <h2 className="testimonials-title">{lang === 'CZ' ? 'Co o nás říkají' : 'What they say about us'}</h2>
+            </div>
+            <div className="testimonials-rating-desktop">
+              <span className="testimonials-stars">★★★★★</span>
+              <span className="testimonials-rating-text">{lang === 'CZ' ? '4,8 • 312 hodnocení' : '4.8 • 312 reviews'}</span>
+            </div>
+          </header>
+          <div className="slider-container-wrapper testimonials-slider-wrapper">
+            <button onClick={() => handleScroll(testimonialsRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
+            <div ref={testimonialsRef} className="testimonials-grid-scroll">
+              {testimonials.map((t, idx) => (
+                <div key={idx} className="testimonial-card">
+                  <div className="testimonial-quote">“</div>
+                  <p className="testimonial-text">{t.text.replace(/^[„"“]/, '').replace(/[“"“]$/, '')}</p>
+                  <div className="testimonial-footer">
+                    <div className="testimonial-avatar">{t.initials}</div>
+                    <div className="testimonial-author-info">
+                      <span className="testimonial-author-name">{t.name}</span>
+                      <span className="testimonial-author-desc">{t.desc}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <button onClick={() => handleScroll(testimonialsRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
           </div>
-          <button onClick={() => handleScroll(testimonialsRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Newsletter */}
-      <section className="newsletter-section-wrapper">
-        <div className="container newsletter-section">
-          <div className="newsletter-content">
-            <div className="newsletter-eyebrow">NEWSLETTER • 028</div>
-            <h2 className="newsletter-heading">
-              {lang === 'CZ' ? (FEATURE_FLAGS.showBuylist ? 'Nové edice & výkupy jako první.' : 'Nové edice & akce jako první.') : (FEATURE_FLAGS.showBuylist ? 'New expansions & buylists first.' : 'New expansions & deals first.')}
-            </h2>
-          </div>
-          <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); alert(lang === 'CZ' ? 'Děkujeme za přihlášení k newsletteru!' : 'Thank you for subscribing to our newsletter!'); }}>
-            <div className="newsletter-input-group">
-              <label className="newsletter-input-label">{lang === 'CZ' ? 'VÁŠ E-MAIL' : 'YOUR EMAIL'}</label>
-              <input type="email" required placeholder="jmeno@example.com" className="newsletter-underline-input" />
+      {FEATURE_FLAGS.showNewsletter && (
+        <section className="newsletter-section-wrapper">
+          <div className="container newsletter-section">
+            <div className="newsletter-content">
+              <div className="newsletter-eyebrow">NEWSLETTER • 028</div>
+              <h2 className="newsletter-heading">
+                {lang === 'CZ' ? (FEATURE_FLAGS.showBuylist ? 'Nové edice & výkupy jako první.' : 'Nové edice & akce jako první.') : (FEATURE_FLAGS.showBuylist ? 'New expansions & buylists first.' : 'New expansions & deals first.')}
+              </h2>
             </div>
-            <button className="newsletter-submit-btn" type="submit">{lang === 'CZ' ? 'SUBSCRIBE' : 'SUBSCRIBE'} &rarr;</button>
-          </form>
-        </div>
-      </section>
+            <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); alert(lang === 'CZ' ? 'Děkujeme za přihlášení k newsletteru!' : 'Thank you for subscribing to our newsletter!'); }}>
+              <div className="newsletter-input-group">
+                <label className="newsletter-input-label">{lang === 'CZ' ? 'VÁŠ E-MAIL' : 'YOUR EMAIL'}</label>
+                <input type="email" required placeholder="jmeno@example.com" className="newsletter-underline-input" />
+              </div>
+              <button className="newsletter-submit-btn" type="submit">{lang === 'CZ' ? 'SUBSCRIBE' : 'SUBSCRIBE'} &rarr;</button>
+            </form>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

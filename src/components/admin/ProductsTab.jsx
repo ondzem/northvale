@@ -289,7 +289,7 @@ function parseCSV(text) {
   return results;
 }
 
-export default function ProductsTab({ showToast }) {
+export default function ProductsTab({ showToast, initialEditProductId, onClearInitialEditProduct }) {
   const { lang } = useTranslation();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -370,6 +370,7 @@ export default function ProductsTab({ showToast }) {
   // Image Crop State (Using Refs for 60fps performance to bypass React renders during drag/zoom)
   const [cropImageSrc, setCropImageSrc] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
+  const [cropImageFormat, setCropImageFormat] = useState('image/jpeg');
   const [cropOrientation, setCropOrientation] = useState('portrait');
   const cropRefX = useRef(0);
   const cropRefY = useRef(0);
@@ -385,6 +386,18 @@ export default function ProductsTab({ showToast }) {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (initialEditProductId && products.length > 0) {
+      const prod = products.find(p => p.id === initialEditProductId);
+      if (prod) {
+        handleOpenEditModal(prod);
+        if (onClearInitialEditProduct) {
+          onClearInitialEditProduct();
+        }
+      }
+    }
+  }, [initialEditProductId, products]);
 
   useEffect(() => {
     setPreviewActiveImage(formImage || '/Northvale Logo.webp');
@@ -749,6 +762,7 @@ export default function ProductsTab({ showToast }) {
     const reader = new FileReader();
     reader.onload = (event) => {
       setCropImageSrc(event.target.result);
+      setCropImageFormat(file.type || 'image/jpeg');
       setIsCropping(true);
       
       // Default crop orientation based on target type
@@ -983,9 +997,15 @@ export default function ProductsTab({ showToast }) {
     cropCtx.imageSmoothingEnabled = true;
     cropCtx.imageSmoothingQuality = 'high';
 
-    // Fill background with white to avoid transparent areas turning black in JPEG
-    cropCtx.fillStyle = '#ffffff';
-    cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
+    const isPng = cropImageFormat === 'image/png';
+
+    if (!isPng) {
+      // Fill background with white to avoid transparent areas turning black in JPEG
+      cropCtx.fillStyle = '#ffffff';
+      cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
+    } else {
+      cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+    }
 
     cropCtx.drawImage(
       img,
@@ -999,7 +1019,9 @@ export default function ProductsTab({ showToast }) {
       cropCanvas.height
     );
 
-    const croppedUrl = cropCanvas.toDataURL('image/jpeg', 0.85);
+    const outputFormat = isPng ? 'image/png' : 'image/jpeg';
+    const outputQuality = isPng ? undefined : 0.85;
+    const croppedUrl = cropCanvas.toDataURL(outputFormat, outputQuality);
     if (cropTarget.type === 'front') {
       setFormImage(croppedUrl);
     } else if (cropTarget.type === 'back') {

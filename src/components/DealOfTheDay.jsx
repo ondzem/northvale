@@ -94,21 +94,29 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
 
   const handleBuyDealClick = (e) => {
     e.stopPropagation();
-    if (!catalogProduct) return;
+    const productToBuy = catalogProduct || {
+      id: activeDeal.product_id || 'deal-of-the-day',
+      name: activeDeal.name,
+      image: activeDeal.image_url || '/9.png',
+      stock: dealProductStock,
+      price: dealProductPrice,
+      originalPrice: dealProductOriginalPrice,
+      type: 'sealed'
+    };
 
     // Create a modified product payload carrying the deal overrides
     const cartProduct = {
-      ...catalogProduct,
+      ...productToBuy,
       name: activeDeal.name,
       price: dealProductPrice,
       originalPrice: dealProductOriginalPrice,
-      image: activeDeal.image_url || catalogProduct.image,
+      image: activeDeal.image_url || productToBuy.image,
       stock: dealProductStock
     };
 
-    const cartVariant = catalogProduct.variants && catalogProduct.variants.length > 0 
+    const cartVariant = productToBuy.variants && productToBuy.variants.length > 0 
       ? { 
-          ...catalogProduct.variants[0], 
+          ...productToBuy.variants[0], 
           price: dealProductPrice, 
           stock: dealProductStock 
         } 
@@ -176,7 +184,7 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
         position: 'relative',
         zIndex: 1,
         cursor: catalogProduct ? 'pointer' : 'default',
-        marginTop: '34px',
+        marginTop: '22px',
         marginBottom: '8px'
       }}>
         <img 
@@ -186,7 +194,7 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
             maxHeight: '100%', 
             maxWidth: '100%', 
             objectFit: 'contain',
-            transform: 'scale(1.22) translateY(12px)',
+            transform: 'scale(1.22) translateY(8px)',
             transition: 'transform 0.3s ease'
           }} 
         />
@@ -207,7 +215,7 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
         </span>
       </div>
 
-      {/* Below Image: Price & Button Row */}
+      {/* Below Title: Price & Button Row */}
       <div style={{
         display: 'flex',
         flexDirection: 'row',
@@ -215,8 +223,8 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
         justifyContent: 'space-between',
         gap: '8px',
         width: '100%',
-        marginBottom: '14px',
         marginTop: 'auto',
+        marginBottom: '14px',
         position: 'relative',
         zIndex: 10
       }}>
@@ -252,15 +260,15 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
             justifyContent: 'center',
             gap: '6px',
             border: 'none',
-            cursor: (catalogProduct && dealProductStock > 0) ? 'pointer' : 'not-allowed',
-            opacity: catalogProduct ? 1 : 0.5,
+            cursor: (dealProductStock > 0) ? 'pointer' : 'not-allowed',
+            opacity: 1,
             flex: '0 0 auto',
             minWidth: '110px',
             transform: dealAdded ? 'scale(0.95)' : 'scale(1)',
             transition: 'all 0.15s ease',
             boxShadow: '0 4px 12px rgba(253, 189, 22, 0.15)'
           }}
-          disabled={!catalogProduct || dealProductStock === 0}
+          disabled={dealProductStock === 0}
           onClick={handleBuyDealClick}
         >
           <img 

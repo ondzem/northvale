@@ -88,6 +88,7 @@ export default function CategoriesTab({ showToast }) {
   const [cropTarget, setCropTarget] = useState({ type: 'category' });
   const [cropImageSrc, setCropImageSrc] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
+  const [cropImageFormat, setCropImageFormat] = useState('image/jpeg');
   const [cropOrientation, setCropOrientation] = useState('landscape');
 
   // Cropper Refs
@@ -192,6 +193,7 @@ export default function CategoriesTab({ showToast }) {
     const reader = new FileReader();
     reader.onload = (event) => {
       setCropImageSrc(event.target.result);
+      setCropImageFormat(file.type || 'image/jpeg');
       setIsCropping(true);
       
       // Default to landscape for categories
@@ -401,9 +403,15 @@ export default function CategoriesTab({ showToast }) {
     cropCtx.imageSmoothingEnabled = true;
     cropCtx.imageSmoothingQuality = 'high';
 
-    // Fill background with theme color to avoid transparent areas turning black in JPEG
-    cropCtx.fillStyle = '#1c1c22';
-    cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
+    const isPng = cropImageFormat === 'image/png';
+
+    if (!isPng) {
+      // Fill background with theme color to avoid transparent areas turning black in JPEG
+      cropCtx.fillStyle = '#1c1c22';
+      cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
+    } else {
+      cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+    }
 
     cropCtx.drawImage(
       img,
@@ -417,7 +425,9 @@ export default function CategoriesTab({ showToast }) {
       cropCanvas.height
     );
 
-    const croppedUrl = cropCanvas.toDataURL('image/jpeg', 0.85);
+    const outputFormat = isPng ? 'image/png' : 'image/jpeg';
+    const outputQuality = isPng ? undefined : 0.85;
+    const croppedUrl = cropCanvas.toDataURL(outputFormat, outputQuality);
     setFormImageUrl(croppedUrl);
 
     setIsCropping(false);

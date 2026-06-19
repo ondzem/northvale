@@ -331,18 +331,20 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
                     </div>
 
                     {/* Newsletter Checkbox Option */}
-                    <div className="login-form-group" style={{ flexDirection: 'row', gap: '10px', alignItems: 'flex-start' }}>
-                      <input 
-                        type="checkbox" 
-                        id="register-newsletter" 
-                        checked={newsletter} 
-                        onChange={(e) => setNewsletter(e.target.checked)} 
-                        style={{ marginTop: '3px', cursor: 'pointer' }} 
-                      />
-                      <label htmlFor="register-newsletter" style={{ fontSize: '12px', color: 'var(--text-muted)', cursor: 'pointer', lineHeight: '1.4', fontWeight: '500', textTransform: 'none' }}>
-                        {t('LoginModal.newsletterOptIn')}
-                      </label>
-                    </div>
+                    {FEATURE_FLAGS.showNewsletter && (
+                      <div className="login-form-group" style={{ flexDirection: 'row', gap: '10px', alignItems: 'flex-start' }}>
+                        <input 
+                          type="checkbox" 
+                          id="register-newsletter" 
+                          checked={newsletter} 
+                          onChange={(e) => setNewsletter(e.target.checked)} 
+                          style={{ marginTop: '3px', cursor: 'pointer' }} 
+                        />
+                        <label htmlFor="register-newsletter" style={{ fontSize: '12px', color: 'var(--text-muted)', cursor: 'pointer', lineHeight: '1.4', fontWeight: '500', textTransform: 'none' }}>
+                          {t('LoginModal.newsletterOptIn')}
+                        </label>
+                      </div>
+                    )}
                   </div>
                 )}
 

@@ -708,13 +708,15 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/></svg>
             <span>{lang === 'CZ' ? 'Zabezpečení' : 'Security'}</span>
           </button>
-          <button 
-            className={`prf-nav-item ${activeTab === 'newsletters' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('newsletters')}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-            <span>{lang === 'CZ' ? 'Newslettery' : 'Newsletters'}</span>
-          </button>
+          {FEATURE_FLAGS.showNewsletter && (
+            <button 
+              className={`prf-nav-item ${activeTab === 'newsletters' ? 'is-active' : ''}`}
+              onClick={() => setActiveTab('newsletters')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+              <span>{lang === 'CZ' ? 'Newslettery' : 'Newsletters'}</span>
+            </button>
+          )}
           <div className="prf-nav-divider"></div>
           {user.role === 'admin' && (
             <>
@@ -1308,7 +1310,7 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
           )}
 
           {/* TAB 5: NEWSLETTERS */}
-          {activeTab === 'newsletters' && (
+          {FEATURE_FLAGS.showNewsletter && activeTab === 'newsletters' && (
             <div className="prf-tab-content">
               <span className="nv-eyebrow">{lang === 'CZ' ? 'Můj účet' : 'My Account'}</span>
               <h2 className="prf-title">{lang === 'CZ' ? 'Newslettery' : 'Newsletters'}</h2>

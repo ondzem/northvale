@@ -7,6 +7,12 @@ import HomepageTab from './admin/HomepageTab';
 export default function AdminPanel({ showToast, setActivePage }) {
   const { lang } = useTranslation();
   const [activeTab, setActiveTab] = useState('products'); // default to products CMS
+  const [editProductId, setEditProductId] = useState(null);
+
+  const handleEditProductFromOtherTab = (productId) => {
+    setEditProductId(productId);
+    setActiveTab('products');
+  };
 
   const handleShowToastPlaceholder = (msg, type) => {
     if (showToast) {
@@ -97,6 +103,8 @@ export default function AdminPanel({ showToast, setActivePage }) {
           {activeTab === 'products' && (
             <ProductsTab 
               showToast={handleShowToastPlaceholder} 
+              initialEditProductId={editProductId}
+              onClearInitialEditProduct={() => setEditProductId(null)}
             />
           )}
 
@@ -109,6 +117,7 @@ export default function AdminPanel({ showToast, setActivePage }) {
           {activeTab === 'homepage' && (
             <HomepageTab 
               showToast={handleShowToastPlaceholder} 
+              onEditProduct={handleEditProductFromOtherTab}
             />
           )}
         </main>
