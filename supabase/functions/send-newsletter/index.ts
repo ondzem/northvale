@@ -265,7 +265,6 @@ serve(async (req) => {
           "accept": "application/json"
         },
         body: JSON.stringify({
-          tag: "newsletter",
           sender: {
             name: senderName,
             email: senderEmail
