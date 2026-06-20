@@ -53,7 +53,6 @@ serve(async (req) => {
 
     if (dbError) {
       console.error("Database upsert error:", dbError.message);
-      // We continue anyway, because adding to Brevo is the primary action
     }
 
     // 3. Call Brevo Double Opt-in API endpoint
@@ -74,8 +73,6 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      // If the contact already exists or is pending confirmation, Brevo might return an error.
-      // If it's a "contact already exists" warning, we can ignore or return success.
       if (errorText.includes("CONTACT_EXIST") || errorText.includes("already_exist")) {
         return new Response(JSON.stringify({ success: true, message: "Already pending or subscribed" }), {
           status: 200,
