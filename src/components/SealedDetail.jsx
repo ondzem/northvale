@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
-import { subscribeToNewsletter } from '../services/newsletter';
 
 const getGameImage = (product) => {
   if (product.category === 'Acrylics') return '/acrylic-etb-box.png';
@@ -136,12 +135,6 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
   const [activeTab, setActiveTab] = useState('popis');
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
   const [isWatchdogModalOpen, setIsWatchdogModalOpen] = useState(false);
-
-  // Newsletter states
-  const [newsletterEmail, setNewsletterEmail] = useState('');
-  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
-  const [newsletterSuccess, setNewsletterSuccess] = useState(false);
-  const [newsletterError, setNewsletterError] = useState(null);
   const [isFavorite, setIsFavorite] = useState(() => {
     try {
       const saved = localStorage.getItem(`fav-${productId}`);
@@ -404,21 +397,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
     scrollToSection('diskuse');
   };
 
-  const handleNewsletterSubmit = async (e) => {
-    e.preventDefault();
-    setNewsletterSubmitting(true);
-    setNewsletterError(null);
-    try {
-      await subscribeToNewsletter(newsletterEmail);
-      setNewsletterSuccess(true);
-      setNewsletterEmail('');
-    } catch (err) {
-      console.error('Newsletter error:', err);
-      setNewsletterError(lang === 'CZ' ? 'Nepodařilo se přihlásit k odběru. Zkuste to prosím znovu.' : 'Failed to subscribe. Please try again.');
-    } finally {
-      setNewsletterSubmitting(false);
-    }
-  };
+
 
   return (
     <div style={styles.container} className="fade-in">
@@ -1309,54 +1288,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
       )}
     </div>
 
-    {/* Newsletter above footer */}
-    {FEATURE_FLAGS.showNewsletter && (
-      <section className="newsletter-section-wrapper" style={{ margin: '40px 0 -20px 0' }}>
-        <div className="container newsletter-section">
-          <div className="newsletter-content">
-            <div className="newsletter-eyebrow">NEWSLETTER • 028</div>
-            <h2 className="newsletter-heading">
-              {FEATURE_FLAGS.showBuylist 
-                ? (lang === 'CZ' ? 'Nové edice & výkupy jako první.' : 'New editions & buybacks first.')
-                : (lang === 'CZ' ? 'Nové edice & akce jako první.' : 'New editions & sales first.')}
-            </h2>
-          </div>
-          <form className="newsletter-form" onSubmit={handleNewsletterSubmit}>
-            {newsletterSuccess ? (
-              <div style={{ color: 'var(--color-gold)', fontSize: '14.5px', fontWeight: '700', padding: '10px 0', textAlign: 'left' }}>
-                ✓ {lang === 'CZ' ? 'Děkujeme za přihlášení k newsletteru!' : 'Thank you for subscribing!'}
-              </div>
-            ) : (
-              <>
-                <div className="newsletter-input-group">
-                  <label className="newsletter-input-label">{lang === 'CZ' ? 'VÁŠ E-MAIL' : 'YOUR EMAIL'}</label>
-                  <input 
-                    type="email" 
-                    required 
-                    placeholder="jmeno@example.com" 
-                    className="newsletter-underline-input" 
-                    value={newsletterEmail}
-                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                    disabled={newsletterSubmitting}
-                  />
-                  {newsletterError && (
-                    <span style={{ color: '#ff4d4f', fontSize: '11px', marginTop: '4px', textAlign: 'left', display: 'block' }}>
-                      ⚠️ {newsletterError}
-                    </span>
-                  )}
-                </div>
-                <button className="newsletter-submit-btn" type="submit" disabled={newsletterSubmitting}>
-                  {newsletterSubmitting 
-                    ? (lang === 'CZ' ? 'Přihlašování...' : 'Subscribing...') 
-                    : (lang === 'CZ' ? 'ODEBÍRAT' : 'SUBSCRIBE')
-                  } &rarr;
-                </button>
-              </>
-            )}
-          </form>
-        </div>
-      </section>
-    )}
+
 
       {/* Lightbox Modal Overlay */}
       {isLightboxOpen && (

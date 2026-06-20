@@ -1,14 +1,84 @@
-
+import { useState } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
+import { subscribeToNewsletter } from '../services/newsletter';
 
-export default function Footer({ setActivePage }) {
+export default function Footer({ setActivePage, activePage }) {
   const { lang, t } = useTranslation();
   const hasMiddleColumn = FEATURE_FLAGS.showBuylist || FEATURE_FLAGS.showGrading;
   const gridClassName = `container footer-grid ${hasMiddleColumn ? 'has-five-cols' : 'has-four-cols'}`;
 
+  // Newsletter states
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
+  const [newsletterSuccess, setNewsletterSuccess] = useState(false);
+  const [newsletterError, setNewsletterError] = useState(null);
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    setNewsletterSubmitting(true);
+    setNewsletterError(null);
+    try {
+      await subscribeToNewsletter(newsletterEmail);
+      setNewsletterSuccess(true);
+      setNewsletterEmail('');
+    } catch (err) {
+      console.error('Newsletter error:', err);
+      setNewsletterError(lang === 'CZ' ? 'Nepodařilo se přihlásit k odběru. Zkuste to prosím znovu.' : 'Failed to subscribe. Please try again.');
+    } finally {
+      setNewsletterSubmitting(false);
+    }
+  };
+
   return (
     <footer className="main-footer">
+      {FEATURE_FLAGS.showNewsletter && activePage !== 'admin' && (
+        <section className="newsletter-section-wrapper">
+          <div className="container newsletter-section">
+            <div className="newsletter-content">
+              <div className="newsletter-eyebrow">NEWSLETTER • 028</div>
+              <h2 className="newsletter-heading">
+                {lang === 'CZ' 
+                  ? (FEATURE_FLAGS.showBuylist ? 'Nové edice & výkupy jako první.' : 'Nové edice & akce jako první.') 
+                  : (FEATURE_FLAGS.showBuylist ? 'New expansions & buylists first.' : 'New expansions & deals first.')}
+              </h2>
+            </div>
+            <form className="newsletter-form" onSubmit={handleNewsletterSubmit}>
+              {newsletterSuccess ? (
+                <div style={{ color: 'var(--color-gold)', fontSize: '14.5px', fontWeight: '700', padding: '10px 0', textAlign: 'left' }}>
+                  ✓ {lang === 'CZ' ? 'Děkujeme za přihlášení! Zkontrolujte prosím svůj e-mail pro potvrzení odběru.' : 'Thank you for subscribing! Please check your email to confirm.'}
+                </div>
+              ) : (
+                <>
+                  <div className="newsletter-input-group">
+                    <label className="newsletter-input-label">{lang === 'CZ' ? 'VÁŠ E-MAIL' : 'YOUR EMAIL'}</label>
+                    <input 
+                      type="email" 
+                      required 
+                      placeholder="jmeno@example.com" 
+                      className="newsletter-underline-input" 
+                      value={newsletterEmail}
+                      onChange={(e) => setNewsletterEmail(e.target.value)}
+                      disabled={newsletterSubmitting}
+                    />
+                    {newsletterError && (
+                      <span style={{ color: '#ff4d4f', fontSize: '11px', marginTop: '4px', textAlign: 'left', display: 'block' }}>
+                        ⚠️ {newsletterError}
+                      </span>
+                    )}
+                  </div>
+                  <button className="newsletter-submit-btn" type="submit" disabled={newsletterSubmitting}>
+                    {newsletterSubmitting 
+                      ? (lang === 'CZ' ? 'Přihlašování...' : 'Subscribing...') 
+                      : (lang === 'CZ' ? 'ODEBÍRAT' : 'SUBSCRIBE')
+                    } &rarr;
+                  </button>
+                </>
+              )}
+            </form>
+          </div>
+        </section>
+      )}
       <div className={gridClassName}>
         {/* Column 1: About */}
         <div className="footer-column footer-col-about">

@@ -1163,7 +1163,7 @@ function AppContent() {
         )}
       </main>
 
-      <Footer setActivePage={navigateToPage} />
+      <Footer setActivePage={navigateToPage} activePage={activePage} />
 
       <LoginModal 
         isOpen={isLoginModalOpen} 
