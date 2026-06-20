@@ -21,6 +21,7 @@ export default function NewsletterTab({ showToast }) {
     { id: '1', type: 'text', content: '' }
   ]);
   const [isSending, setIsSending] = useState(false);
+  const [targetLang, setTargetLang] = useState('all'); // 'all', 'cz', 'en'
 
   // Modals state
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -120,7 +121,8 @@ export default function NewsletterTab({ showToast }) {
         body: {
           campaignName,
           subject,
-          blocks
+          blocks,
+          targetLang
         }
       });
 
@@ -603,6 +605,7 @@ export default function NewsletterTab({ showToast }) {
                   <thead>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.01)' }}>
                       <th style={{ padding: '6px', textAlign: 'left', color: 'var(--text-muted)' }}>E-mail</th>
+                      <th style={{ padding: '6px', textAlign: 'center', color: 'var(--text-muted)', width: '45px' }}>Jazyk</th>
                       <th style={{ padding: '6px', textAlign: 'left', color: 'var(--text-muted)', width: '60px' }}>Stav</th>
                       <th style={{ padding: '6px', textAlign: 'center', color: 'var(--text-muted)', width: '30px' }}></th>
                     </tr>
@@ -611,6 +614,7 @@ export default function NewsletterTab({ showToast }) {
                     {filteredSubscribers.map(sub => (
                       <tr key={sub.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                         <td style={{ padding: '6px', color: '#fff', wordBreak: 'break-all' }}>{sub.email}</td>
+                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--text-muted)' }}>{sub.lang || 'CZ'}</td>
                         <td style={{ padding: '6px', color: sub.confirmed ? '#10b981' : '#f59e0b', fontWeight: 'bold' }}>
                           {sub.confirmed ? (lang === 'CZ' ? 'Aktiv' : 'Active') : (lang === 'CZ' ? 'Čeká' : 'DOI')}
                         </td>
@@ -701,6 +705,23 @@ export default function NewsletterTab({ showToast }) {
               style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: '12.5px' }}
               required
             />
+          </div>
+
+          {/* Target Language/Audience selection */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <label style={{ fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              {lang === 'CZ' ? 'Cílová skupina (Příjemci)' : 'Target Audience'}
+            </label>
+            <select
+              value={targetLang}
+              onChange={(e) => setTargetLang(e.target.value)}
+              className="ctf-input"
+              style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: '12.5px', background: '#0b0b0c', color: '#fff', border: '1px solid rgba(255,255,255,0.08)' }}
+            >
+              <option value="all">{lang === 'CZ' ? 'Všichni odběratelé (CZ + EN)' : 'All subscribers (CZ + EN)'}</option>
+              <option value="cz">{lang === 'CZ' ? 'Pouze čeští odběratelé (CZ list)' : 'Czech subscribers only (CZ list)'}</option>
+              <option value="en">{lang === 'CZ' ? 'Pouze angličtí odběratelé (EN list)' : 'English subscribers only (EN list)'}</option>
+            </select>
           </div>
 
           {/* Blocks Layout Area */}

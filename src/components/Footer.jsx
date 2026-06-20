@@ -19,7 +19,7 @@ export default function Footer({ setActivePage, activePage }) {
     setNewsletterSubmitting(true);
     setNewsletterError(null);
     try {
-      await subscribeToNewsletter(newsletterEmail);
+      await subscribeToNewsletter(newsletterEmail, lang);
       setNewsletterSuccess(true);
       setNewsletterEmail('');
     } catch (err) {

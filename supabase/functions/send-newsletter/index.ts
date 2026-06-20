@@ -21,7 +21,8 @@ serve(async (req) => {
     const brevoApiKey = Deno.env.get("BREVO_API_KEY");
     const senderEmail = Deno.env.get("BREVO_SENDER_EMAIL") || "info@northvaletcg.eu";
     const senderName = Deno.env.get("BREVO_SENDER_NAME") || "NORTHVALE";
-    const brevoListId = parseInt(Deno.env.get("BREVO_NEWSLETTER_LIST_ID") || "3", 10);
+    const brevoListIdCZ = parseInt(Deno.env.get("BREVO_NEWSLETTER_LIST_ID") || "3", 10);
+    const brevoListIdEN = parseInt(Deno.env.get("BREVO_NEWSLETTER_LIST_ID_EN") || "4", 10);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -57,7 +58,7 @@ serve(async (req) => {
 
     // 2. POST Request: Create and send a new custom campaign
     if (req.method === "POST") {
-      const { campaignName, subject, blocks } = await req.json();
+      const { campaignName, subject, blocks, targetLang = 'all' } = await req.json();
 
       if (!campaignName || !subject || !blocks || !Array.isArray(blocks)) {
         return new Response(JSON.stringify({ error: "Missing required fields (campaignName, subject, blocks)" }), {
@@ -260,6 +261,14 @@ serve(async (req) => {
 </body>
 </html>`;
 
+      // Determine recipient lists based on targetLang
+      let recipientListIds = [brevoListIdCZ];
+      if (targetLang === 'en') {
+        recipientListIds = [brevoListIdEN];
+      } else if (targetLang === 'all') {
+        recipientListIds = [brevoListIdCZ, brevoListIdEN];
+      }
+
       // Step E: Call Brevo API to create the classical email campaign with htmlContent
       const createResponse = await fetch("https://api.brevo.com/v3/emailCampaigns", {
         method: "POST",
@@ -277,7 +286,7 @@ serve(async (req) => {
           subject: subject,
           htmlContent: compiledHtml,
           recipients: {
-            listIds: [brevoListId]
+            listIds: recipientListIds
           }
         })
       });

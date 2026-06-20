@@ -18,10 +18,10 @@ serve(async (req) => {
 
   try {
     const brevoApiKey = Deno.env.get("BREVO_API_KEY");
-    const brevoListIdStr = Deno.env.get("BREVO_NEWSLETTER_LIST_ID") || "3";
-    const brevoListId = parseInt(brevoListIdStr, 10);
-    const brevoTemplateIdStr = Deno.env.get("BREVO_NEWSLETTER_TEMPLATE_ID") || "1";
-    const brevoTemplateId = parseInt(brevoTemplateIdStr, 10);
+    const brevoListIdCZStr = Deno.env.get("BREVO_NEWSLETTER_LIST_ID") || "3";
+    const brevoListIdENStr = Deno.env.get("BREVO_NEWSLETTER_LIST_ID_EN") || "4";
+    const brevoTemplateIdCZStr = Deno.env.get("BREVO_NEWSLETTER_TEMPLATE_ID") || "1";
+    const brevoTemplateIdENStr = Deno.env.get("BREVO_NEWSLETTER_TEMPLATE_ID_EN") || brevoTemplateIdCZStr;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -30,7 +30,7 @@ serve(async (req) => {
       throw new Error("Missing BREVO_API_KEY environment variable in Supabase dashboard.");
     }
 
-    const { email } = await req.json();
+    const { email, lang = 'CZ' } = await req.json();
 
     if (!email) {
       return new Response(JSON.stringify({ error: "Missing required field (email)" }), {
@@ -39,14 +39,18 @@ serve(async (req) => {
       });
     }
 
+    // Determine IDs based on language
+    const brevoListId = lang === 'EN' ? parseInt(brevoListIdENStr, 10) : parseInt(brevoListIdCZStr, 10);
+    const brevoTemplateId = lang === 'EN' ? parseInt(brevoTemplateIdENStr, 10) : parseInt(brevoTemplateIdCZStr, 10);
+
     // 1. Initialize Supabase Client with service key (bypasses RLS to write to DB)
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 2. Save subscriber in local database with confirmed: false (Double Opt-in)
+    // 2. Save subscriber in local database with confirmed: false (Double Opt-in) and lang
     const { data: dbData, error: dbError } = await supabase
       .from("newsletter_subscribers")
       .upsert(
-        { email, unsubscribed: false, confirmed: false },
+        { email, unsubscribed: false, confirmed: false, lang },
         { onConflict: "email" }
       )
       .select();
@@ -56,6 +60,10 @@ serve(async (req) => {
     }
 
     // 3. Call Brevo Double Opt-in API endpoint
+    const redirectUrl = lang === 'EN' 
+      ? "https://northvaletcg.eu?confirmed=true&lang=en" 
+      : "https://northvaletcg.eu?confirmed=true";
+
     const response = await fetch("https://api.brevo.com/v3/contacts/doubleOptinConfirmation", {
       method: "POST",
       headers: {
@@ -67,7 +75,7 @@ serve(async (req) => {
         email: email,
         includeListIds: [brevoListId],
         templateId: brevoTemplateId,
-        redirectionUrl: "https://northvaletcg.eu?confirmed=true"
+        redirectionUrl: redirectUrl
       })
     });
 

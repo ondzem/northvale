@@ -6,13 +6,13 @@ import { supabase } from '../supabase';
  * @param {string} email - The email address to subscribe.
  * @returns {Promise<{success: boolean, message?: string}>}
  */
-export async function subscribeToNewsletter(email) {
+export async function subscribeToNewsletter(email, lang = 'CZ') {
   if (!email) {
     throw new Error('Email is required');
   }
 
   const { data, error } = await supabase.functions.invoke('subscribe-newsletter', {
-    body: { email }
+    body: { email, lang }
   });
 
   if (error) {
