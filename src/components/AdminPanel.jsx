@@ -4,6 +4,7 @@ import ProductsTab from './admin/ProductsTab';
 import CategoriesTab from './admin/CategoriesTab';
 import HomepageTab from './admin/HomepageTab';
 import FaqTab from './admin/FaqTab';
+import NewsletterTab from './admin/NewsletterTab';
 
 export default function AdminPanel({ showToast, setActivePage }) {
   const { lang } = useTranslation();
@@ -28,6 +29,7 @@ export default function AdminPanel({ showToast, setActivePage }) {
     { id: 'categories', name_cz: 'Správa kategorií', name_en: 'Categories CMS' },
     { id: 'homepage', name_cz: 'Správa úvodní stránky', name_en: 'Homepage CMS' },
     { id: 'faq', name_cz: 'Správa FAQ', name_en: 'FAQ CMS' },
+    { id: 'newsletter', name_cz: 'Newsletter', name_en: 'Newsletter' },
   ];
 
   return (
@@ -98,6 +100,11 @@ export default function AdminPanel({ showToast, setActivePage }) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
+              ) : tab.id === 'newsletter' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
               ) : null}
               <span>{lang === 'CZ' ? tab.name_cz : tab.name_en}</span>
             </button>
@@ -129,6 +136,12 @@ export default function AdminPanel({ showToast, setActivePage }) {
 
           {activeTab === 'faq' && (
             <FaqTab 
+              showToast={handleShowToastPlaceholder} 
+            />
+          )}
+
+          {activeTab === 'newsletter' && (
+            <NewsletterTab 
               showToast={handleShowToastPlaceholder} 
             />
           )}
