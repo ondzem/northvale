@@ -138,19 +138,23 @@ serve(async (req) => {
             ? block.content 
             : block.content.replace(/\n/g, '<br />');
           blocksHtml += `
-            <div class="block-text" style="font-size: 16px; line-height: 1.6; color: #d1d1d6; margin-bottom: 24px; font-family: sans-serif;">
+            <div class="block-text" style="font-size: 16px; line-height: 1.6; color: #d1d1d6; padding: 20px 30px 10px 30px; font-family: sans-serif; word-break: break-word;">
               ${formattedContent}
             </div>
           `;
         } else if (block.type === 'image') {
+          const imgTag = `<img src="${block.content}" alt="Banner" style="width: 100%; max-width: 100%; height: auto; display: block; border: 0;" />`;
+          const wrappedImg = block.linkUrl
+            ? `<a href="${block.linkUrl}" target="_blank" style="display: block; text-decoration: none; border: 0;">${imgTag}</a>`
+            : imgTag;
           blocksHtml += `
-            <div class="block-image" style="margin-bottom: 24px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06);">
-              <img src="${block.content}" alt="Banner" style="width: 100%; max-width: 100%; height: auto; display: block; border: 0;" />
+            <div class="block-image" style="padding: 0 0 16px 0; margin: 0; overflow: hidden;">
+              ${wrappedImg}
             </div>
           `;
         } else if (block.type === 'button') {
           blocksHtml += `
-            <div class="block-button" style="text-align: center; margin-bottom: 28px;">
+            <div class="block-button" style="text-align: center; padding: 12px 30px 20px 30px;">
               <a href="${block.url}" class="btn" target="_blank" style="display: inline-block; background-color: #E2BA5E; color: #0b0b0c !important; padding: 13px 32px; border-radius: 6px; font-weight: bold; text-decoration: none; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; font-family: sans-serif;">
                 ${block.text}
               </a>
@@ -190,7 +194,7 @@ serve(async (req) => {
       padding: 40px 0;
     }
     .container {
-      max-width: 600px;
+      max-width: 660px;
       margin: 0 auto;
       background-color: #131316;
       border: 1px solid rgba(255, 255, 255, 0.06);
@@ -204,7 +208,7 @@ serve(async (req) => {
       background-color: #131316;
     }
     .content {
-      padding: 40px 30px;
+      padding: 0;
     }
     .footer {
       padding: 30px;
@@ -222,17 +226,17 @@ serve(async (req) => {
     <table cellpadding="0" cellspacing="0" border="0" width="100%">
       <tr>
         <td align="center">
-          <div class="container" style="max-width: 600px; width: 100%; background-color: #131316; border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; overflow: hidden; text-align: left;">
+          <div class="container" style="max-width: 660px; width: 100%; background-color: #131316; border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; overflow: hidden; text-align: left;">
             
             <!-- Header Logo -->
             <div class="header" style="padding: 24px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); background-color: #131316;">
               <a href="https://northvaletcg.eu" target="_blank" style="text-decoration: none; display: inline-block;">
-                <img src="https://northvaletcg.eu/logo%20s%20popisem.webp" alt="NORTHVALE" style="max-height: 40px; margin: 0 auto; display: block; border: 0;" />
+                <img src="https://northvaletcg.eu/logo%20s%20popisem.webp" alt="NORTHVALE" style="max-height: 65px; margin: 0 auto; display: block; border: 0;" />
               </a>
             </div>
             
             <!-- Email Body Blocks -->
-            <div class="content" style="padding: 32px 24px;">
+            <div class="content" style="padding: 0;">
               ${blocksHtml}
             </div>
             
@@ -243,8 +247,8 @@ serve(async (req) => {
               <p style="margin: 0 0 12px 0; font-size: 10px; color: #6e6e73;">
                 Tento e-mail byl odeslán na základě přihlášení k odběru newsletteru na našem webu northvaletcg.eu.
               </p>
-              <p style="margin: 0;">
-                <a href="{{ unsubscribe }}" style="color: #ff4d4f; text-decoration: underline; font-weight: bold;">Odhlásit se z odběru</a>
+              <p style="margin: 16px 0 0 0;">
+                <a href="{{ unsubscribe }}" style="color: #55555c; text-decoration: underline; font-size: 11px; font-weight: normal; display: inline-block; font-family: sans-serif;">Odhlásit se z odběru</a>
               </p>
             </div>
 
