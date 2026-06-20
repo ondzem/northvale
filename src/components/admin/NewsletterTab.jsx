@@ -17,11 +17,12 @@ export default function NewsletterTab({ showToast }) {
   // Form states
   const [campaignName, setCampaignName] = useState('');
   const [subject, setSubject] = useState('');
+  const [subjectEN, setSubjectEN] = useState('');
   const [blocks, setBlocks] = useState([
-    { id: '1', type: 'text', content: '' }
+    { id: '1', type: 'text', content: '', contentEN: '' }
   ]);
   const [isSending, setIsSending] = useState(false);
-  const [targetLang, setTargetLang] = useState('all'); // 'all', 'cz', 'en'
+  const [previewLang, setPreviewLang] = useState('CZ'); // 'CZ' or 'EN'
 
   // Modals state
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -121,8 +122,8 @@ export default function NewsletterTab({ showToast }) {
         body: {
           campaignName,
           subject,
-          blocks,
-          targetLang
+          subjectEN,
+          blocks
         }
       });
 
@@ -134,7 +135,8 @@ export default function NewsletterTab({ showToast }) {
       // Reset form
       setCampaignName('');
       setSubject('');
-      setBlocks([{ id: Date.now().toString(), type: 'text', content: '' }]);
+      setSubjectEN('');
+      setBlocks([{ id: Date.now().toString(), type: 'text', content: '', contentEN: '' }]);
 
       loadCampaigns();
     } catch (err) {
@@ -175,8 +177,9 @@ export default function NewsletterTab({ showToast }) {
       id: Date.now().toString(),
       type,
       content: '',
-      ...(type === 'image' ? { ratio: 'original', linkUrl: '' } : {}),
-      ...(type === 'button' ? { text: 'Prohlížet nabídku', url: 'https://northvaletcg.eu' } : {})
+      ...(type === 'text' ? { contentEN: '' } : {}),
+      ...(type === 'image' ? { ratio: 'original', linkUrl: '', contentEN: '', linkUrlEN: '' } : {}),
+      ...(type === 'button' ? { text: 'Prohlížet nabídku', textEN: 'View offer', url: 'https://northvaletcg.eu', urlEN: 'https://northvaletcg.eu/?lang=en' } : {})
     };
     setBlocks(prev => [...prev, newBlock]);
   };
@@ -197,10 +200,18 @@ export default function NewsletterTab({ showToast }) {
     });
   };
 
-  const updateBlockContent = (index, value) => {
+  const updateBlockContent = (index, value, field = 'content') => {
     setBlocks(prev => {
       const next = [...prev];
-      next[index] = { ...next[index], content: value };
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
+  };
+
+  const updateBlockContentEN = (index, value) => {
+    setBlocks(prev => {
+      const next = [...prev];
+      next[index] = { ...next[index], contentEN: value };
       return next;
     });
   };
@@ -208,8 +219,8 @@ export default function NewsletterTab({ showToast }) {
   const updateBlockRatio = (index, value) => {
     setBlocks(prev => {
       const next = [...prev];
-      // Reset image content when ratio changes so they recrop if needed
-      next[index] = { ...next[index], ratio: value, content: '' };
+      // Reset image contents when ratio changes so they recrop if needed
+      next[index] = { ...next[index], ratio: value, content: '', contentEN: '' };
       return next;
     });
   };
@@ -222,6 +233,14 @@ export default function NewsletterTab({ showToast }) {
     });
   };
 
+  const updateBlockLinkUrlEN = (index, value) => {
+    setBlocks(prev => {
+      const next = [...prev];
+      next[index] = { ...next[index], linkUrlEN: value };
+      return next;
+    });
+  };
+
   const updateBlockButtonText = (index, value) => {
     setBlocks(prev => {
       const next = [...prev];
@@ -230,10 +249,26 @@ export default function NewsletterTab({ showToast }) {
     });
   };
 
+  const updateBlockButtonTextEN = (index, value) => {
+    setBlocks(prev => {
+      const next = [...prev];
+      next[index] = { ...next[index], textEN: value };
+      return next;
+    });
+  };
+
   const updateBlockButtonUrl = (index, value) => {
     setBlocks(prev => {
       const next = [...prev];
       next[index] = { ...next[index], url: value };
+      return next;
+    });
+  };
+
+  const updateBlockButtonUrlEN = (index, value) => {
+    setBlocks(prev => {
+      const next = [...prev];
+      next[index] = { ...next[index], urlEN: value };
       return next;
     });
   };
@@ -254,10 +289,10 @@ export default function NewsletterTab({ showToast }) {
   };
 
   // --- Image Handling & Cropping ---
-  const handleFileChange = (e, index) => {
+  const handleFileChange = (e, index, field = 'content') => {
     const file = e.target.files[0];
     if (file) {
-      processSelectedImage(file, index);
+      processSelectedImage(file, index, field);
     }
   };
 
@@ -265,15 +300,15 @@ export default function NewsletterTab({ showToast }) {
     e.preventDefault();
   };
 
-  const handleDrop = (e, index) => {
+  const handleDrop = (e, index, field = 'content') => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (file) {
-      processSelectedImage(file, index);
+      processSelectedImage(file, index, field);
     }
   };
 
-  const processSelectedImage = (file, index) => {
+  const processSelectedImage = (file, index, field = 'content') => {
     const targetBlock = blocks[index];
     const ratio = targetBlock ? targetBlock.ratio : 'original';
 
@@ -281,12 +316,12 @@ export default function NewsletterTab({ showToast }) {
     reader.onload = (event) => {
       if (ratio === 'original') {
         // No crop required: set content directly to original base64
-        updateBlockContent(index, event.target.result);
+        updateBlockContent(index, event.target.result, field);
       } else {
         // Crop is required: launch cropper modal
         setCropImageSrc(event.target.result);
         setCropImageFormat(file.type || 'image/jpeg');
-        setCropTarget({ index });
+        setCropTarget({ index, field });
         setIsCropping(true);
 
         cropRefX.current = 0;
@@ -691,37 +726,36 @@ export default function NewsletterTab({ showToast }) {
             />
           </div>
 
-          {/* Subject */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              {lang === 'CZ' ? 'Předmět e-mailu' : 'Email Subject'} <span style={{ color: '#ef4444' }}>*</span>
-            </label>
-            <input 
-              type="text" 
-              className="ctf-input"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder={lang === 'CZ' ? 'např. Získejte slevu 15%!' : 'e.g., Get 15% off!'}
-              style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: '12.5px' }}
-              required
-            />
-          </div>
-
-          {/* Target Language/Audience selection */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              {lang === 'CZ' ? 'Cílová skupina (Příjemci)' : 'Target Audience'}
-            </label>
-            <select
-              value={targetLang}
-              onChange={(e) => setTargetLang(e.target.value)}
-              className="ctf-input"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: '12.5px', background: '#0b0b0c', color: '#fff', border: '1px solid rgba(255,255,255,0.08)' }}
-            >
-              <option value="all">{lang === 'CZ' ? 'Všichni odběratelé (CZ + EN)' : 'All subscribers (CZ + EN)'}</option>
-              <option value="cz">{lang === 'CZ' ? 'Pouze čeští odběratelé (CZ list)' : 'Czech subscribers only (CZ list)'}</option>
-              <option value="en">{lang === 'CZ' ? 'Pouze angličtí odběratelé (EN list)' : 'English subscribers only (EN list)'}</option>
-            </select>
+          {/* Subjects (CZ & EN) */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label style={{ fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {lang === 'CZ' ? 'Předmět CZ' : 'Subject CZ'} <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <input 
+                type="text" 
+                className="ctf-input"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="např. Získejte slevu 15%!"
+                style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: '12.5px' }}
+                required
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label style={{ fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {lang === 'CZ' ? 'Předmět EN (Překlad)' : 'Subject EN (Translation)'} <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <input 
+                type="text" 
+                className="ctf-input"
+                value={subjectEN}
+                onChange={(e) => setSubjectEN(e.target.value)}
+                placeholder="e.g., Get 15% off!"
+                style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: '12.5px' }}
+                required
+              />
+            </div>
           </div>
 
           {/* Blocks Layout Area */}
@@ -776,22 +810,39 @@ export default function NewsletterTab({ showToast }) {
 
                 {/* Block Content Inputs */}
                 {block.type === 'text' && (
-                  <textarea 
-                    className="ctf-textarea"
-                    rows={3}
-                    value={block.content}
-                    onChange={(e) => updateBlockContent(index, e.target.value)}
-                    placeholder={lang === 'CZ' ? 'Zde napište text... (lze použít HTML tagy jako <h2>, <p>)' : 'Write text here... (HTML tags allowed)'}
-                    style={{ width: '100%', boxSizing: 'border-box', height: '80px', resize: 'vertical', fontSize: '12px' }}
-                    required
-                  />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ fontSize: '9px', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>Čeština (CZ)</label>
+                      <textarea 
+                        className="ctf-textarea"
+                        rows={3}
+                        value={block.content}
+                        onChange={(e) => updateBlockContent(index, e.target.value, 'content')}
+                        placeholder={lang === 'CZ' ? 'Zde napište český text... (lze použít HTML tagy jako <h2>, <p>)' : 'Write Czech text here... (HTML tags allowed)'}
+                        style={{ width: '100%', boxSizing: 'border-box', height: '80px', resize: 'vertical', fontSize: '12px' }}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '9px', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>Angličtina (EN)</label>
+                      <textarea 
+                        className="ctf-textarea"
+                        rows={3}
+                        value={block.contentEN || ''}
+                        onChange={(e) => updateBlockContentEN(index, e.target.value)}
+                        placeholder={lang === 'CZ' ? 'Zde napište anglický překlad...' : 'Write English translation here...'}
+                        style={{ width: '100%', boxSizing: 'border-box', height: '80px', resize: 'vertical', fontSize: '12px' }}
+                        required
+                      />
+                    </div>
+                  </div>
                 )}
 
                 {block.type === 'image' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {/* Ratio & Link Row */}
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <div style={{ flex: 1.2 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.4fr 1.4fr', gap: '8px' }}>
+                      <div>
                         <label style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{lang === 'CZ' ? 'Poměr stran' : 'Aspect ratio'}</label>
                         <select 
                           value={block.ratio || 'original'}
@@ -804,8 +855,8 @@ export default function NewsletterTab({ showToast }) {
                           <option value="portrait">{lang === 'CZ' ? 'Portrét (4:5)' : 'Portrait (4:5)'}</option>
                         </select>
                       </div>
-                      <div style={{ flex: 1.8 }}>
-                        <label style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{lang === 'CZ' ? 'Proklik (URL)' : 'Click URL'}</label>
+                      <div>
+                        <label style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{lang === 'CZ' ? 'Proklik CZ (URL)' : 'Click CZ (URL)'}</label>
                         <input 
                           type="url" 
                           className="ctf-input"
@@ -815,100 +866,202 @@ export default function NewsletterTab({ showToast }) {
                           style={{ width: '100%', padding: '5px 8px', fontSize: '11px', boxSizing: 'border-box' }}
                         />
                       </div>
+                      <div>
+                        <label style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{lang === 'CZ' ? 'Proklik EN (URL)' : 'Click EN (URL)'}</label>
+                        <input 
+                          type="url" 
+                          className="ctf-input"
+                          placeholder="https://northvaletcg.eu/products?lang=en"
+                          value={block.linkUrlEN || ''}
+                          onChange={(e) => updateBlockLinkUrlEN(index, e.target.value)}
+                          style={{ width: '100%', padding: '5px 8px', fontSize: '11px', boxSizing: 'border-box' }}
+                        />
+                      </div>
                     </div>
 
-                    {/* Image File Box */}
-                    {block.content ? (
-                      <div style={{ position: 'relative', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', background: '#000', padding: '6px' }}>
-                        <img 
-                          src={block.content} 
-                          alt="Banner Preview" 
-                          style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '110px', objectFit: 'contain' }} 
-                        />
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                          <label 
-                            className="btn btn-secondary" 
-                            style={{ flex: 1, fontSize: '10px', padding: '4px 0', textAlign: 'center', cursor: 'pointer' }}
+                    {/* Image File Box - CZ & EN */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '4px' }}>
+                      {/* CZ image column */}
+                      <div>
+                        <span style={{ fontSize: '9px', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>{lang === 'CZ' ? 'Obrázek CZ' : 'Image CZ'}</span>
+                        {block.content ? (
+                          <div style={{ position: 'relative', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', background: '#000', padding: '4px' }}>
+                            <img 
+                              src={block.content} 
+                              alt="CZ Banner" 
+                              style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '70px', objectFit: 'contain' }} 
+                            />
+                            <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
+                              <label 
+                                className="btn btn-secondary" 
+                                style={{ flex: 1, fontSize: '9px', padding: '3px 0', textAlign: 'center', cursor: 'pointer' }}
+                              >
+                                📷 {lang === 'CZ' ? 'Změnit' : 'Change'}
+                                <input 
+                                  type="file" 
+                                  accept="image/*" 
+                                  onChange={(e) => handleFileChange(e, index, 'content')} 
+                                  style={{ display: 'none' }} 
+                                />
+                              </label>
+                              <button 
+                                type="button" 
+                                className="btn" 
+                                style={{ flex: 1, fontSize: '9px', padding: '3px 0', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none' }}
+                                onClick={() => updateBlockContent(index, '', 'content')}
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div 
+                            onDragOver={handleDragOver}
+                            onDrop={(e) => handleDrop(e, index, 'content')}
+                            onClick={() => {
+                              const fileInput = document.getElementById(`file-cz-${block.id}`);
+                              if (fileInput) fileInput.click();
+                            }}
+                            style={{
+                              border: '1px dashed rgba(255, 255, 255, 0.12)',
+                              borderRadius: '4px',
+                              padding: '12px 6px',
+                              textAlign: 'center',
+                              background: 'rgba(255, 255, 255, 0.01)',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              gap: '2px'
+                            }}
                           >
-                            📷 {lang === 'CZ' ? 'Změnit' : 'Change'}
+                            <span style={{ fontSize: '12px' }}>📥</span>
+                            <span style={{ fontSize: '9.5px', color: '#fff', fontWeight: 'bold' }}>
+                              {lang === 'CZ' ? 'Nahrát CZ obrázek' : 'Upload CZ Image'}
+                            </span>
                             <input 
+                              id={`file-cz-${block.id}`}
                               type="file" 
                               accept="image/*" 
-                              onChange={(e) => handleFileChange(e, index)} 
+                              onChange={(e) => handleFileChange(e, index, 'content')} 
                               style={{ display: 'none' }} 
                             />
-                          </label>
-                          <button 
-                            type="button" 
-                            className="btn" 
-                            style={{ flex: 1, fontSize: '10px', padding: '4px 0', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none' }}
-                            onClick={() => updateBlockContent(index, '')}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* EN image column */}
+                      <div>
+                        <span style={{ fontSize: '9px', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>{lang === 'CZ' ? 'Obrázek EN (Nepovinný)' : 'Image EN (Optional)'}</span>
+                        {block.contentEN ? (
+                          <div style={{ position: 'relative', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', background: '#000', padding: '4px' }}>
+                            <img 
+                              src={block.contentEN} 
+                              alt="EN Banner" 
+                              style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '70px', objectFit: 'contain' }} 
+                            />
+                            <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
+                              <label 
+                                className="btn btn-secondary" 
+                                style={{ flex: 1, fontSize: '9px', padding: '3px 0', textAlign: 'center', cursor: 'pointer' }}
+                              >
+                                📷 {lang === 'CZ' ? 'Změnit' : 'Change'}
+                                <input 
+                                  type="file" 
+                                  accept="image/*" 
+                                  onChange={(e) => handleFileChange(e, index, 'contentEN')} 
+                                  style={{ display: 'none' }} 
+                                />
+                              </label>
+                              <button 
+                                type="button" 
+                                className="btn" 
+                                style={{ flex: 1, fontSize: '9px', padding: '3px 0', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none' }}
+                                onClick={() => updateBlockContent(index, '', 'contentEN')}
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div 
+                            onDragOver={handleDragOver}
+                            onDrop={(e) => handleDrop(e, index, 'contentEN')}
+                            onClick={() => {
+                              const fileInput = document.getElementById(`file-en-${block.id}`);
+                              if (fileInput) fileInput.click();
+                            }}
+                            style={{
+                              border: '1px dashed rgba(255, 255, 255, 0.12)',
+                              borderRadius: '4px',
+                              padding: '12px 6px',
+                              textAlign: 'center',
+                              background: 'rgba(255, 255, 255, 0.01)',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              gap: '2px'
+                            }}
                           >
-                            ❌ {lang === 'CZ' ? 'Smazat' : 'Delete'}
-                          </button>
-                        </div>
+                            <span style={{ fontSize: '12px' }}>📥</span>
+                            <span style={{ fontSize: '9.5px', color: '#fff', fontWeight: 'bold' }}>
+                              {lang === 'CZ' ? 'Nahrát EN obrázek' : 'Upload EN Image'}
+                            </span>
+                            <input 
+                              id={`file-en-${block.id}`}
+                              type="file" 
+                              accept="image/*" 
+                              onChange={(e) => handleFileChange(e, index, 'contentEN')} 
+                              style={{ display: 'none' }} 
+                            />
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div 
-                        onDragOver={handleDragOver}
-                        onDrop={(e) => handleDrop(e, index)}
-                        onClick={() => {
-                          const fileInput = document.getElementById(`file-input-${block.id}`);
-                          if (fileInput) fileInput.click();
-                        }}
-                        style={{
-                          border: '1.5px dashed rgba(255, 255, 255, 0.12)',
-                          borderRadius: '6px',
-                          padding: '16px 12px',
-                          textAlign: 'center',
-                          background: 'rgba(255, 255, 255, 0.01)',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          gap: '4px',
-                          transition: 'border-color 0.2s ease'
-                        }}
-                      >
-                        <span style={{ fontSize: '16px' }}>📥</span>
-                        <span style={{ fontSize: '11px', color: '#fff', fontWeight: 'bold' }}>
-                          {lang === 'CZ' ? 'Přetáhněte obrázek' : 'Drag & drop image'}
-                        </span>
-                        <span style={{ fontSize: '9px', color: 'var(--text-muted)' }}>
-                          {lang === 'CZ' ? 'nebo klikněte pro výběr' : 'or click to browse'}
-                        </span>
-                        <input 
-                          id={`file-input-${block.id}`}
-                          type="file" 
-                          accept="image/*" 
-                          onChange={(e) => handleFileChange(e, index)} 
-                          style={{ display: 'none' }} 
-                        />
-                      </div>
-                    )}
+                    </div>
                   </div>
                 )}
 
                 {block.type === 'button' && (
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1.2 }}>
-                      <label style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{lang === 'CZ' ? 'Text tlačítka' : 'Button text'}</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '9.5px', fontWeight: 'bold', color: 'var(--text-muted)' }}>České tlačítko (CZ)</label>
                       <input 
                         type="text" 
                         className="ctf-input"
+                        placeholder="Text tlačítka (CZ)"
                         value={block.text || ''}
                         onChange={(e) => updateBlockButtonText(index, e.target.value)}
                         style={{ width: '100%', boxSizing: 'border-box', fontSize: '11px', padding: '5px 8px' }}
                         required
                       />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1.8 }}>
-                      <label style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{lang === 'CZ' ? 'Odkaz (URL)' : 'Link (URL)'}</label>
                       <input 
                         type="url" 
                         className="ctf-input"
+                        placeholder="Odkaz CZ (https://...)"
                         value={block.url || ''}
                         onChange={(e) => updateBlockButtonUrl(index, e.target.value)}
+                        style={{ width: '100%', boxSizing: 'border-box', fontSize: '11px', padding: '5px 8px' }}
+                        required
+                      />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '9.5px', fontWeight: 'bold', color: 'var(--text-muted)' }}>Anglické tlačítko (EN)</label>
+                      <input 
+                        type="text" 
+                        className="ctf-input"
+                        placeholder="Button text (EN)"
+                        value={block.textEN || ''}
+                        onChange={(e) => updateBlockButtonTextEN(index, e.target.value)}
+                        style={{ width: '100%', boxSizing: 'border-box', fontSize: '11px', padding: '5px 8px' }}
+                        required
+                      />
+                      <input 
+                        type="url" 
+                        className="ctf-input"
+                        placeholder="Link EN (https://...)"
+                        value={block.urlEN || ''}
+                        onChange={(e) => updateBlockButtonUrlEN(index, e.target.value)}
                         style={{ width: '100%', boxSizing: 'border-box', fontSize: '11px', padding: '5px 8px' }}
                         required
                       />
@@ -964,9 +1117,27 @@ export default function NewsletterTab({ showToast }) {
 
       {/* RIGHT COLUMN: Real-time Live Preview */}
       <section className="ctf-preview-col" style={{ flex: '1.1 1 0', background: '#0b0b0c', borderRadius: 'var(--radius-lg)', border: '1px solid rgba(255,255,255,0.08)', padding: '16px', boxSizing: 'border-box', minWidth: '280px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: '700', color: 'var(--color-gold)' }}>
-          👁️ {lang === 'CZ' ? 'Živý náhled e-mailu' : 'Live email preview'}
-        </h4>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-gold)' }}>
+            👁️ {lang === 'CZ' ? 'Živý náhled e-mailu' : 'Live email preview'}
+          </h4>
+          <div style={{ display: 'flex', gap: '4px', background: 'rgba(255,255,255,0.03)', padding: '2px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <button 
+              type="button"
+              onClick={() => setPreviewLang('CZ')}
+              style={{ background: previewLang === 'CZ' ? 'var(--color-gold)' : 'transparent', color: previewLang === 'CZ' ? '#000' : '#fff', border: 'none', borderRadius: '3px', padding: '2px 8px', fontSize: '9px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+            >
+              CZ
+            </button>
+            <button 
+              type="button"
+              onClick={() => setPreviewLang('EN')}
+              style={{ background: previewLang === 'EN' ? 'var(--color-gold)' : 'transparent', color: previewLang === 'EN' ? '#000' : '#fff', border: 'none', borderRadius: '3px', padding: '2px 8px', fontSize: '9px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+            >
+              EN
+            </button>
+          </div>
+        </div>
 
         {/* Browser Mockup Frame */}
         <div style={{ 
@@ -984,7 +1155,9 @@ export default function NewsletterTab({ showToast }) {
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }}></span>
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
             <div style={{ flex: 1, background: '#0b0b0c', borderRadius: '4px', fontSize: '9px', color: 'var(--text-muted)', padding: '2px 8px', marginLeft: '10px', textAlign: 'center', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-              {subject || (lang === 'CZ' ? 'Předmět e-mailu' : 'Subject of email')}
+              {previewLang === 'EN' 
+                ? (subjectEN || subject || '[Empty English Subject]') 
+                : (subject || '[Prázdný předmět CZ]')}
             </div>
           </div>
 
@@ -1014,6 +1187,7 @@ export default function NewsletterTab({ showToast }) {
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {blocks.map((block) => {
                   if (block.type === 'text') {
+                    const textValue = previewLang === 'EN' ? (block.contentEN || block.content) : block.content;
                     return (
                       <div 
                         key={block.id} 
@@ -1026,8 +1200,8 @@ export default function NewsletterTab({ showToast }) {
                           fontFamily: 'sans-serif'
                         }}
                         dangerouslySetInnerHTML={{ 
-                          __html: block.content 
-                             ? block.content.replace(/\n/g, '<br />') 
+                          __html: textValue 
+                             ? textValue.replace(/\n/g, '<br />') 
                              : `<span style="font-style: italic; color: #6e6e73;">${lang === 'CZ' ? '[Prázdný textový blok]' : '[Empty text block]'}</span>` 
                         }}
                       />
@@ -1035,7 +1209,8 @@ export default function NewsletterTab({ showToast }) {
                   }
 
                   if (block.type === 'image') {
-                    const hasLink = !!block.linkUrl;
+                    const imgValue = previewLang === 'EN' ? (block.contentEN || block.content) : block.content;
+                    const hasLink = previewLang === 'EN' ? (block.linkUrlEN || block.linkUrl) : block.linkUrl;
                     const aspectStyles = {
                       landscape: { aspectRatio: '2.5 / 1' },
                       square: { aspectRatio: '1 / 1' },
@@ -1045,10 +1220,10 @@ export default function NewsletterTab({ showToast }) {
 
                     return (
                       <div key={block.id} style={{ width: '100%', padding: '0 0 10px 0', position: 'relative' }}>
-                        {block.content ? (
+                        {imgValue ? (
                           <div style={{ position: 'relative', width: '100%' }}>
                             <img 
-                              src={block.content} 
+                              src={imgValue} 
                               alt="Banner" 
                               style={{ 
                                 width: '100%', 
@@ -1086,6 +1261,7 @@ export default function NewsletterTab({ showToast }) {
                   }
 
                   if (block.type === 'button') {
+                    const btnText = previewLang === 'EN' ? (block.textEN || block.text) : block.text;
                     return (
                       <div key={block.id} style={{ textAlign: 'center', padding: '8px 18px 12px 18px' }}>
                         <span style={{ 
@@ -1100,7 +1276,7 @@ export default function NewsletterTab({ showToast }) {
                           letterSpacing: '0.5px',
                           fontFamily: 'sans-serif'
                         }}>
-                          {block.text || 'CTA BUTTON'}
+                          {btnText || 'CTA BUTTON'}
                         </span>
                       </div>
                     );
@@ -1121,13 +1297,17 @@ export default function NewsletterTab({ showToast }) {
                 lineHeight: '1.5',
                 fontFamily: 'sans-serif'
               }}>
-                <p style={{ margin: '0 0 4px 0', fontWeight: 'bold', color: '#fff' }}>NORTHVALE s.r.o.</p>
+                <p style={{ margin: '0 0 4px 0', fontWeight: 'bold', color: '#fff' }}>
+                  {previewLang === 'EN' ? 'NORTHVALE s.r.o. | All rights reserved.' : 'NORTHVALE s.r.o. | Všechna práva vyhrazena.'}
+                </p>
                 <p style={{ margin: '0 0 10px 0' }}>info@northvaletcg.eu | +420 739 666 779</p>
                 <p style={{ margin: '0 0 10px 0', fontSize: '8px', color: '#555' }}>
-                  {lang === 'CZ' ? 'Tento e-mail byl odeslán na základě přihlášení k odběru.' : 'This email was sent based on subscription.'}
+                  {previewLang === 'EN' 
+                    ? 'This email was sent based on newsletter subscription on our website northvaletcg.eu.' 
+                    : 'Tento e-mail byl odeslán na základě přihlášení k odběru newsletteru na našem webu northvaletcg.eu.'}
                 </p>
                 <span style={{ color: '#55555c', textDecoration: 'underline', fontSize: '9px', cursor: 'default' }}>
-                  {lang === 'CZ' ? 'Odhlásit se z odběru' : 'Unsubscribe'}
+                  {previewLang === 'EN' ? 'Unsubscribe' : 'Odhlásit se z odběru'}
                 </span>
               </div>
 
