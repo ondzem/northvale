@@ -22,6 +22,7 @@ import Cart from './components/Cart';
 import Favorites from './components/Favorites';
 import LoginModal from './components/LoginModal';
 import CookieConsent from './components/CookieConsent';
+import ErrorPage from './components/ErrorPage';
 import { supabase } from './supabase';
 
 import { mockProducts } from './mockData';
@@ -90,8 +91,10 @@ const parseUrlToState = () => {
     page = 'cart';
   } else if (path === '/favorites') {
     page = 'favorites';
-  } else {
+  } else if (path === '/' || path === '') {
     page = 'home';
+  } else {
+    page = 'error';
   }
   
   searchParams.forEach((value, key) => {
@@ -150,6 +153,8 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
     path = '/cart';
   } else if (page === 'favorites') {
     path = '/favorites';
+  } else if (page === 'error') {
+    path = window.location.pathname;
   }
   
   if (filtersObj && Object.keys(filtersObj).length > 0) {
@@ -1151,6 +1156,10 @@ function AppContent() {
             setSelectedProductId={setSelectedProductId}
             setActivePage={navigateToPage}
           />
+        )}
+
+        {activePage === 'error' && (
+          <ErrorPage setActivePage={navigateToPage} />
         )}
       </main>
 

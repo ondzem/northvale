@@ -49,7 +49,7 @@ export default function Footer({ setActivePage }) {
               setTimeout(() => {
                 const element = document.getElementById('popular-categories');
                 if (element) {
-                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
               }, 100);
             }}>

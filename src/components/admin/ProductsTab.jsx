@@ -367,6 +367,10 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [previewLang, setPreviewLang] = useState('EN');
   const [previewFoil, setPreviewFoil] = useState(false);
   const [previewActiveImage, setPreviewActiveImage] = useState('');
+  
+  // Custom Category Dropdown State
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const categoryDropdownRef = useRef(null);
 
   // Image Crop State (Using Refs for 60fps performance to bypass React renders during drag/zoom)
   const [cropImageSrc, setCropImageSrc] = useState(null);
@@ -386,6 +390,16 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(e.target)) {
+        setIsCategoryDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -563,6 +577,38 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormCustomParams(p.customParams || p.custom_params || []);
 
     setIsModalOpen(true);
+  };
+
+  const getHierarchicalCategoryOptions = () => {
+    const list = [];
+    const gameCats = categories.filter(c => c.game === formGame);
+    const roots = gameCats.filter(c => !c.parent_id);
+    
+    const traverse = (cat, depth = 0) => {
+      list.push({
+        id: cat.id,
+        name: lang === 'CZ' ? cat.name_cz : cat.name_en,
+        depth: depth
+      });
+      const children = gameCats.filter(c => c.parent_id === cat.id);
+      children.forEach(child => traverse(child, depth + 1));
+    };
+    
+    roots.forEach(root => traverse(root, 0));
+    return list;
+  };
+
+  const getCategoryPath = (catId) => {
+    if (!catId) return '';
+    const path = [];
+    let current = categories.find(c => String(c.id) === String(catId));
+    const visited = new Set();
+    while (current && !visited.has(current.id)) {
+      visited.add(current.id);
+      path.unshift(lang === 'CZ' ? current.name_cz : current.name_en);
+      current = categories.find(c => String(c.id) === String(current.parent_id));
+    }
+    return path.join(' ➔ ');
   };
 
   const handleDeleteProduct = (id) => {
@@ -1489,7 +1535,11 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       <div className="pmf-field">
                         <label className="pmf-label">{lang === 'CZ' ? 'Hra' : 'Game'}</label>
                         <div className="pmf-select-wrapper">
-                          <select className="pmf-select" value={formGame} onChange={e => setFormGame(e.target.value)}>
+                          <select className="pmf-select" value={formGame} onChange={e => {
+                            const nextGame = e.target.value;
+                            setFormGame(nextGame);
+                            setFormCategoryId(''); // reset category selection
+                          }}>
                             <option value="Pokémon">Pokémon</option>
                             <option value="Lorcana">Lorcana</option>
                             <option value="One Piece">One Piece</option>
@@ -1498,6 +1548,206 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             <option value="Acrylics">Acrylics</option>
                           </select>
                           <svg className="pmf-select-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pmf-form-col" style={{ ...styles.col, flex: 1.8 }}>
+                      <div className="pmf-field" style={{ position: 'relative' }}>
+                        <label className="pmf-label">{lang === 'CZ' ? 'Zařadit pod kategorii' : 'Assign to Category'}</label>
+                        <div ref={categoryDropdownRef} className="pmf-select-wrapper">
+                          <style>{`
+                            .pmf-select.is-open {
+                              border-bottom: 1px solid var(--nv-gold, #fdbd16) !important;
+                            }
+                          `}</style>
+                          <button
+                            type="button"
+                            onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                            className={`pmf-select ctf-parent-trigger ${isCategoryDropdownOpen ? 'is-open' : ''}`}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              textAlign: 'left',
+                              paddingRight: '28px',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              boxSizing: 'border-box'
+                            }}
+                          >
+                            <span style={{ 
+                              whiteSpace: 'nowrap', 
+                              overflow: 'hidden', 
+                              textOverflow: 'ellipsis',
+                              fontSize: '15px',
+                              color: 'rgb(240, 240, 240)'
+                            }}>
+                              {formCategoryId ? (
+                                getCategoryPath(formCategoryId)
+                              ) : (
+                                lang === 'CZ' ? '— Bez kategorie (Hlavní) —' : '— No Category (Top-level) —'
+                              )}
+                            </span>
+                          </button>
+                          <svg 
+                            className="pmf-select-chevron" 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            width="14" 
+                            height="14" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                            style={{
+                              transform: isCategoryDropdownOpen ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%) rotate(0deg)',
+                              transition: 'transform 0.2s ease, stroke 0.2s ease'
+                            }}
+                          >
+                            <path d="M6 9l6 6 6-6" />
+                          </svg>
+                          
+                          {isCategoryDropdownOpen && (
+                            <div
+                              style={{
+                                position: 'absolute',
+                                top: 'calc(100% + 6px)',
+                                left: 0,
+                                width: '100%',
+                                minWidth: '360px',
+                                maxHeight: '320px',
+                                overflowY: 'auto',
+                                background: '#1E1E24',
+                                border: '1px solid rgba(255, 255, 255, 0.12)',
+                                borderRadius: '8px',
+                                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6)',
+                                zIndex: 9999,
+                                padding: '8px',
+                                boxSizing: 'border-box',
+                              }}
+                              className="ctf-parent-dropdown"
+                            >
+                              {/* Option for None */}
+                              <div
+                                onClick={() => { 
+                                  setFormCategoryId(''); 
+                                  setIsCategoryDropdownOpen(false); 
+                                }}
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  fontSize: '13px',
+                                  color: !formCategoryId ? 'var(--color-gold)' : '#fff',
+                                  background: !formCategoryId ? 'rgba(253, 189, 22, 0.08)' : 'transparent',
+                                  transition: 'background 0.15s, color 0.15s',
+                                  marginBottom: '6px',
+                                  borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                                  boxSizing: 'border-box'
+                                }}
+                                className="ctf-parent-opt-none"
+                              >
+                                <span>🌐</span>
+                                <span style={{ fontWeight: !formCategoryId ? '600' : '400' }}>
+                                  {lang === 'CZ' ? '— Bez kategorie (Hlavní) —' : '— No Category (Top-level) —'}
+                                </span>
+                              </div>
+
+                              {/* Hierarchical Options */}
+                              {getHierarchicalCategoryOptions().length === 0 ? (
+                                <div style={{ padding: '8px 12px', color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontStyle: 'italic', textAlign: 'center' }}>
+                                  {lang === 'CZ' ? 'Žádné kategorie k dispozici' : 'No categories available'}
+                                </div>
+                              ) : (
+                                getHierarchicalCategoryOptions().map((opt, idx) => {
+                                  const isOptSelected = formCategoryId === opt.id;
+                                  const isLevel0 = opt.depth === 0;
+                                  const isLevel1 = opt.depth === 1;
+                                  
+                                  const showSeparator = isLevel1 && idx > 1;
+
+                                  return (
+                                    <div key={opt.id}>
+                                      {showSeparator && (
+                                        <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.05)', margin: '10px 8px 8px 8px' }}></div>
+                                      )}
+                                      <div
+                                        onClick={() => {
+                                          setFormCategoryId(opt.id);
+                                          const cat = categories.find(c => String(c.id) === String(opt.id));
+                                          if (cat && cat.type) {
+                                            setFormType(cat.type);
+                                          }
+                                          setIsCategoryDropdownOpen(false);
+                                        }}
+                                        style={{
+                                          padding: isLevel0 ? '10px 12px' : '8px 12px',
+                                          paddingLeft: `${12 + opt.depth * 24}px`,
+                                          borderRadius: '6px',
+                                          cursor: 'pointer',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '8px',
+                                          fontSize: isLevel0 ? '13.5px' : '13px',
+                                          transition: 'background 0.15s, color 0.15s',
+                                          marginTop: isLevel0 ? '8px' : '2px',
+                                          marginBottom: isLevel0 ? '4px' : '0px',
+                                          background: isOptSelected 
+                                            ? 'rgba(253, 189, 22, 0.08)' 
+                                            : isLevel0 
+                                              ? 'rgba(255, 255, 255, 0.025)' 
+                                              : 'transparent',
+                                          border: isOptSelected 
+                                            ? '1px solid rgba(253, 189, 22, 0.2)' 
+                                            : isLevel0 
+                                              ? '1px solid rgba(255, 255, 255, 0.06)' 
+                                              : '1px solid transparent',
+                                          boxSizing: 'border-box'
+                                        }}
+                                        className="ctf-parent-option-row"
+                                      >
+                                        <span 
+                                          style={{ 
+                                            opacity: 0.8, 
+                                            fontSize: '11px',
+                                            color: isOptSelected 
+                                              ? 'var(--color-gold)' 
+                                              : isLevel1 
+                                                ? '#FDBD16' 
+                                                : 'inherit'
+                                          }}
+                                        >
+                                          {opt.depth > 0 ? '↳' : '📁'}
+                                        </span>
+                                        <span 
+                                          style={{ 
+                                            fontWeight: isOptSelected || isLevel0 ? '700' : isLevel1 ? '600' : '400',
+                                            color: isOptSelected 
+                                              ? 'var(--color-gold)' 
+                                              : isLevel0 
+                                                ? '#ffffff' 
+                                                : isLevel1 
+                                                  ? '#FDBD16' 
+                                                  : 'rgba(255, 255, 255, 0.65)'
+                                          }}
+                                        >
+                                          {opt.name}
+                                        </span>
+                                        <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px', marginLeft: 'auto' }}>
+                                          {opt.id}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -2195,33 +2445,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           </div>
                         </div>
 
-                        {/* Category select dropdown */}
-                        <div className="pmf-field">
-                          <label className="pmf-label">{lang === 'CZ' ? 'Zařadit pod kategorii' : 'Assign to Category'}</label>
-                          <div className="pmf-select-wrapper">
-                            <select className="pmf-select" value={formCategoryId} onChange={e => {
-                              const selectedId = e.target.value;
-                              setFormCategoryId(selectedId);
-                              if (selectedId) {
-                                const cat = categories.find(c => String(c.id) === String(selectedId));
-                                if (cat && cat.type) {
-                                  setFormType(cat.type);
-                                }
-                              }
-                            }}>
-                              <option value="">{lang === 'CZ' ? '-- Žádná --' : '-- None --'}</option>
-                              {categories
-                                .filter(c => c.game === formGame || formGame === 'Accessories' || formGame === 'Acrylics')
-                                .map(c => (
-                                  <option key={c.id} value={c.id}>
-                                    {c.game} - {lang === 'CZ' ? c.name_cz : c.name_en} ({c.id})
-                                  </option>
-                                ))
-                              }
-                            </select>
-                            <svg className="pmf-select-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-                          </div>
-                        </div>
+
 
 
 

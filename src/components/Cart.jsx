@@ -77,7 +77,7 @@ export default function Cart({ cart, setCart, setActivePage }) {
                   setTimeout(() => {
                     const element = document.getElementById('popular-categories');
                     if (element) {
-                      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
                   }, 100);
                 }}
@@ -101,7 +101,7 @@ export default function Cart({ cart, setCart, setActivePage }) {
                   setTimeout(() => {
                     const element = document.getElementById('popular-categories');
                     if (element) {
-                      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
                   }, 100);
                 }} 

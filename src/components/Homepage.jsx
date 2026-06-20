@@ -1232,7 +1232,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
       {/* Product Grids */}
       {/* 1. {lang === 'CZ' ? 'Novinky' : 'New Releases'} (New arrivals) */}
-      <section style={{ ...styles.sectionContainer, paddingBottom: isMobile ? '48px' : '0' }} className="container">
+      <section style={{ ...styles.sectionContainer, paddingBottom: isMobile ? '12px' : '0' }} className="container">
         <header className="nv-header">
           <div className="nv-header-left">
             <div className="nv-eyebrow">{lang === 'CZ' ? 'Nové přírůstky' : 'New Additions'}</div>
@@ -1277,14 +1277,14 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
         width: '100%',
         paddingTop: isMobile ? '48px' : '88px',
-        paddingBottom: isMobile ? '48px' : '88px',
+        paddingBottom: isMobile ? '24px' : '88px',
         display: 'flex',
         flexDirection: 'column',
-        gap: isMobile ? '72px' : '88px',
+        gap: isMobile ? '36px' : '88px',
         boxSizing: 'border-box'
       }}>
         {/* 2. {lang === 'CZ' ? 'Předobjednávky' : 'Pre-orders'} (Preorders) */}
-        <section style={{ ...styles.sectionContainer, marginBottom: isMobile ? '24px' : '40px' }} className="container">
+        <section style={{ ...styles.sectionContainer, marginBottom: isMobile ? '8px' : '40px' }} className="container">
           <header className="nv-header">
             <div className="nv-header-left">
               <div className="nv-eyebrow">{lang === 'CZ' ? 'Připravované edice' : 'Upcoming Expansions'}</div>
@@ -1388,7 +1388,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       </div>
 
       {/* 4. {lang === 'CZ' ? 'Příslušenství' : 'Accessories'} (Accessories) */}
-      <section style={{ ...styles.sectionContainer, marginBottom: isMobile ? '24px' : '40px', paddingBottom: isMobile ? '48px' : '0' }} className="container">
+      <section style={{ ...styles.sectionContainer, marginBottom: isMobile ? '8px' : '40px', paddingBottom: isMobile ? '27px' : '0' }} className="container">
         <header className="nv-header">
           <div className="nv-header-left">
             <div className="nv-eyebrow">{lang === 'CZ' ? 'Doplňky pro sběratele' : 'Collector Accessories'}</div>
@@ -1427,7 +1427,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           </div>
           <button onClick={() => handleScroll(accessoriesRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
         </div>
-        <div className="more-link-mobile-wrapper">
+        <div className="more-link-mobile-wrapper" style={{ marginTop: isMobile ? '-55px' : '16px' }}>
           <span className="nv-link more-link-mobile" onClick={() => { setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); }}>
             {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
           </span>
