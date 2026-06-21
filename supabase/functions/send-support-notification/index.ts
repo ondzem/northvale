@@ -25,7 +25,7 @@ serve(async (req) => {
       throw new Error("Missing BREVO_API_KEY environment variable in Supabase dashboard.");
     }
 
-    const { type, productName, authorName, text, rating, productId } = await req.json();
+    const { type, productName, authorName, authorEmail, text, rating, productId, productUrl } = await req.json();
 
     if (!type || !productName || !authorName || !text) {
       return new Response(JSON.stringify({ error: "Missing required fields (type, productName, authorName, text)" }), {
@@ -36,48 +36,99 @@ serve(async (req) => {
 
     let subject = "";
     let headerText = "";
+    let eventName = "";
     let detailsHtml = "";
 
     if (type === "review") {
-      subject = `[Nová recenze] ${productName} - ${rating}★ od ${authorName}`;
-      headerText = "Byla přidána nová recenze k produktu";
+      subject = `⭐ [HODNOCENÍ] Nová recenze k produktu: ${productName}`;
+      headerText = "Byla přidána nová recenze";
+      eventName = "Nové hodnocení (recenze)";
       detailsHtml = `
         <tr>
-          <td style="padding: 8px 0; font-weight: bold; width: 150px;">Hodnocení:</td>
-          <td style="padding: 8px 0; color: #fdbd16; font-size: 16px;">${"★".repeat(rating || 5)}${"☆".repeat(5 - (rating || 5))} (${rating}/5)</td>
+          <td style="padding: 10px 0; font-weight: bold; width: 140px; color: #8a8a92; border-bottom: 1px solid rgba(255,255,255,0.08);">Hodnocení:</td>
+          <td style="padding: 10px 0; color: #fdbd16; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); font-weight: bold;">
+            ${"★".repeat(rating || 5)}${"☆".repeat(5 - (rating || 5))} (${rating}/5)
+          </td>
         </tr>
       `;
     } else if (type === "reply") {
-      subject = `[Nová odpověď v diskuzi] ${productName} od ${authorName}`;
-      headerText = "Byla přidána odpověď v diskuzi u produktu";
+      subject = `💬 [DISKUSE - ODPOVĚĎ] Odpověď u produktu: ${productName}`;
+      headerText = "Byla přidána odpověď v diskuzi";
+      eventName = "Odpověď na dotaz";
     } else {
-      subject = `[Nový dotaz v diskuzi] ${productName} od ${authorName}`;
+      subject = `❓ [DISKUSE - DOTAZ] Nový dotaz u produktu: ${productName}`;
       headerText = "Byl přidán nový dotaz k produktu";
+      eventName = "Nový dotaz v diskuzi";
     }
 
-    // Build email HTML payload
+    // Build email HTML payload with Northvale TCG dark premium aesthetic
     const htmlContent = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 5px;">
-        <h2 style="color: #fdbd16; border-bottom: 2px solid #fdbd16; padding-bottom: 10px; margin-top: 0;">${headerText}</h2>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14.5px;">
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>${subject}</title>
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #0E0E11; color: #E4E4E7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+        <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 40px auto; background-color: #141419; border: 1px solid rgba(253, 189, 22, 0.15); border-radius: 12px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+          <!-- Header Banner -->
           <tr>
-            <td style="padding: 8px 0; font-weight: bold; width: 150px;">Produkt:</td>
-            <td style="padding: 8px 0;"><strong>${productName}</strong> (ID: ${productId || '—'})</td>
+            <td style="background: linear-gradient(135deg, #1C1C22 0%, #111115 100%); padding: 32px 40px; text-align: center; border-bottom: 1px solid rgba(253, 189, 22, 0.1);">
+              <div style="font-size: 11px; font-weight: 700; color: #fdbd16; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">UPOZORNĚNÍ PRO PODPORU</div>
+              <h1 style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">${headerText}</h1>
+            </td>
           </tr>
+          
+          <!-- Content Body -->
           <tr>
-            <td style="padding: 8px 0; font-weight: bold;">Autor:</td>
-            <td style="padding: 8px 0;">${authorName}</td>
+            <td style="padding: 40px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 14px; line-height: 1.5;">
+                <tr>
+                  <td style="padding: 10px 0; font-weight: bold; width: 140px; color: #8a8a92; border-bottom: 1px solid rgba(255,255,255,0.08);">Typ akce:</td>
+                  <td style="padding: 10px 0; color: #FFFFFF; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.08);">${eventName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; font-weight: bold; width: 140px; color: #8a8a92; border-bottom: 1px solid rgba(255,255,255,0.08);">Produkt:</td>
+                  <td style="padding: 10px 0; color: #fdbd16; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.08);">${productName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; font-weight: bold; color: #8a8a92; border-bottom: 1px solid rgba(255,255,255,0.08);">Autor:</td>
+                  <td style="padding: 10px 0; color: #FFFFFF; border-bottom: 1px solid rgba(255,255,255,0.08);">${authorName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; font-weight: bold; color: #8a8a92; border-bottom: 1px solid rgba(255,255,255,0.08);">E-mail autora:</td>
+                  <td style="padding: 10px 0; color: #FFFFFF; border-bottom: 1px solid rgba(255,255,255,0.08);">${authorEmail || "Neuveden"}</td>
+                </tr>
+                ${detailsHtml}
+              </table>
+              
+              <!-- Message Textbox -->
+              <div style="margin-top: 30px; padding: 20px; background-color: #1C1C22; border-left: 4px solid #fdbd16; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
+                <div style="font-size: 11px; font-weight: 700; color: #8a8a92; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">TEXT ZPRÁVY:</div>
+                <div style="color: #E4E4E7; font-size: 14.5px; line-height: 1.6; white-space: pre-wrap;">${text}</div>
+              </div>
+              
+              <!-- Action Button -->
+              ${productUrl ? `
+              <div style="margin-top: 35px; text-align: center;">
+                <a href="${productUrl}" target="_blank" style="display: inline-block; background-color: #fdbd16; color: #000000; font-weight: 800; font-size: 13.5px; text-decoration: none; padding: 14px 28px; border-radius: 6px; box-shadow: 0 4px 14px rgba(253, 189, 22, 0.25); transition: transform 0.2s;">
+                  Zobrazit produkt na e-shopu
+                </a>
+              </div>
+              ` : ''}
+            </td>
           </tr>
-          ${detailsHtml}
+          
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #111115; padding: 24px 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); font-size: 11px; color: #52525B;">
+              Tento e-mail byl automaticky vygenerován z backendu systému NORTHVALE.<br>
+              Prosíme, neodpovídejte přímo na tento e-mail.
+            </td>
+          </tr>
         </table>
-        <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #fdbd16; border-radius: 4px;">
-          <h4 style="margin-top: 0; margin-bottom: 8px; color: #333;">Obsah zprávy:</h4>
-          <p style="margin: 0; white-space: pre-wrap; line-height: 1.5; color: #555;">${text}</p>
-        </div>
-        <p style="font-size: 11px; color: #888; margin-top: 30px; border-top: 1px solid #eaeaea; padding-top: 10px;">
-          Tento e-mail byl odeslán automaticky z backendu e-shopu NORTHVALE.
-        </p>
-      </div>
+      </body>
+      </html>
     `;
 
     // Call Brevo transactional email API

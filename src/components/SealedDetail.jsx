@@ -129,6 +129,12 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
   const { lang, t } = useTranslation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [deleteConfirm, setDeleteConfirm] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: null,
+  });
 
   useEffect(() => {
     const handleResize = () => {
@@ -318,38 +324,50 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
     setIsReplyModalOpen(true);
   };
 
-  const handleDeleteReview = async (revId) => {
-    if (!window.confirm(lang === 'CZ' ? 'Opravdu chcete tuto recenzi smazat?' : 'Are you sure you want to delete this review?')) return;
-    try {
-      const { error } = await supabase.from('product_reviews').delete().eq('id', revId);
-      if (error) throw error;
-      setReviews(prev => prev.filter(r => r.id !== revId));
-      if (alert) {
-        alert(lang === 'CZ' ? 'Recenze byla úspěšně smazána.' : 'Review has been successfully deleted.', 'success');
+  const handleDeleteReview = (revId) => {
+    setDeleteConfirm({
+      isOpen: true,
+      title: lang === 'CZ' ? 'Smazat recenzi' : 'Delete Review',
+      message: lang === 'CZ' ? 'Opravdu chcete tuto recenzi smazat?' : 'Are you sure you want to delete this review?',
+      onConfirm: async () => {
+        try {
+          const { error } = await supabase.from('product_reviews').delete().eq('id', revId);
+          if (error) throw error;
+          setReviews(prev => prev.filter(r => r.id !== revId));
+          if (alert) {
+            alert(lang === 'CZ' ? 'Recenze byla úspěšně smazána.' : 'Review has been successfully deleted.', 'success');
+          }
+        } catch (err) {
+          console.error(err);
+          if (alert) {
+            alert(lang === 'CZ' ? 'Chyba při mazání recenze: ' + err.message : 'Error deleting review: ' + err.message, 'error');
+          }
+        }
       }
-    } catch (err) {
-      console.error(err);
-      if (alert) {
-        alert(lang === 'CZ' ? 'Chyba při mazání recenze: ' + err.message : 'Error deleting review: ' + err.message, 'error');
-      }
-    }
+    });
   };
 
-  const handleDeleteComment = async (comId) => {
-    if (!window.confirm(lang === 'CZ' ? 'Opravdu chcete tento dotaz/odpověď smazat?' : 'Are you sure you want to delete this comment/reply?')) return;
-    try {
-      const { error } = await supabase.from('product_comments').delete().eq('id', comId);
-      if (error) throw error;
-      setComments(prev => prev.filter(c => c.id !== comId && c.parent_id !== comId));
-      if (alert) {
-        alert(lang === 'CZ' ? 'Komentář byl úspěšně smazán.' : 'Comment has been successfully deleted.', 'success');
+  const handleDeleteComment = (comId) => {
+    setDeleteConfirm({
+      isOpen: true,
+      title: lang === 'CZ' ? 'Smazat komentář / odpověď' : 'Delete Comment / Reply',
+      message: lang === 'CZ' ? 'Opravdu chcete tento dotaz/odpověď smazat?' : 'Are you sure you want to delete this comment/reply?',
+      onConfirm: async () => {
+        try {
+          const { error } = await supabase.from('product_comments').delete().eq('id', comId);
+          if (error) throw error;
+          setComments(prev => prev.filter(c => c.id !== comId && c.parent_id !== comId));
+          if (alert) {
+            alert(lang === 'CZ' ? 'Komentář byl úspěšně smazán.' : 'Comment has been successfully deleted.', 'success');
+          }
+        } catch (err) {
+          console.error(err);
+          if (alert) {
+            alert(lang === 'CZ' ? 'Chyba při mazání komentáře: ' + err.message : 'Error deleting comment: ' + err.message, 'error');
+          }
+        }
       }
-    } catch (err) {
-      console.error(err);
-      if (alert) {
-        alert(lang === 'CZ' ? 'Chyba při mazání komentáře: ' + err.message : 'Error deleting comment: ' + err.message, 'error');
-      }
-    }
+    });
   };
 
 
@@ -573,9 +591,11 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
             type: 'review',
             productName: product.name,
             authorName: formattedName,
+            authorEmail: user.email,
             text: reviewText.trim(),
             rating: reviewRating,
-            productId: productId
+            productId: productId,
+            productUrl: `https://northvaletcg.eu/sealed-detail/${productId}`
           }
         });
       } catch (emailErr) {
@@ -647,8 +667,10 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
             type: 'comment',
             productName: product.name,
             authorName: formattedName,
+            authorEmail: user.email,
             text: commentText.trim(),
-            productId: productId
+            productId: productId,
+            productUrl: `https://northvaletcg.eu/sealed-detail/${productId}`
           }
         });
       } catch (emailErr) {
@@ -724,8 +746,10 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
             type: 'reply',
             productName: product.name,
             authorName: authorName,
+            authorEmail: user?.email || '',
             text: replyText.trim(),
-            productId: productId
+            productId: productId,
+            productUrl: `https://northvaletcg.eu/sealed-detail/${productId}`
           }
         });
       } catch (emailErr) {
@@ -1932,6 +1956,99 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
               </div>
               <button type="submit" className="login-submit-btn">{lang === 'CZ' ? 'Odeslat odpověď' : 'Submit Reply'}</button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Confirmation Modal */}
+      {deleteConfirm.isOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 99999,
+          animation: 'fadeIn 0.2s ease-out'
+        }} onClick={() => setDeleteConfirm(prev => ({ ...prev, isOpen: false }))}>
+          <div style={{
+            backgroundColor: '#1C1C22',
+            border: '1px solid rgba(239, 68, 68, 0.25)',
+            borderRadius: '12px',
+            padding: '28px',
+            width: '420px',
+            maxWidth: '90%',
+            boxShadow: '0 25px 50px rgba(0,0,0,0.8)',
+            transform: 'scale(1)',
+            animation: 'slideUpScale 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+            textAlign: 'left'
+          }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{
+              margin: '0 0 12px 0',
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: '18px',
+              fontWeight: '700',
+              color: '#ef4444'
+            }}>
+              {deleteConfirm.title}
+            </h3>
+            <p style={{
+              margin: '0 0 24px 0',
+              fontSize: '14px',
+              lineHeight: '1.6',
+              color: '#8a8a92'
+            }}>
+              {deleteConfirm.message}
+            </p>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px'
+            }}>
+              <button 
+                type="button" 
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(240, 240, 240, 0.12)',
+                  color: '#8a8a92',
+                  borderRadius: '6px',
+                  padding: '10px 20px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.18s'
+                }}
+                onClick={() => setDeleteConfirm(prev => ({ ...prev, isOpen: false }))}
+              >
+                {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+              </button>
+              <button 
+                type="button" 
+                style={{
+                  backgroundColor: '#ef4444',
+                  border: 'none',
+                  color: '#fff',
+                  borderRadius: '6px',
+                  padding: '10px 20px',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  transition: 'all 0.18s'
+                }}
+                onClick={() => {
+                  if (deleteConfirm.onConfirm) deleteConfirm.onConfirm();
+                  setDeleteConfirm(prev => ({ ...prev, isOpen: false }));
+                }}
+              >
+                {lang === 'CZ' ? 'Smazat' : 'Delete'}
+              </button>
+            </div>
           </div>
         </div>
       )}
