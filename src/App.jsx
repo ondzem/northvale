@@ -441,15 +441,28 @@ function AppContent() {
 
   // Listen to Supabase Auth State Changes
   useEffect(() => {
-    // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      handleAuthSession(session, 'INITIAL_SESSION');
-    });
+    const isInitialRecoveryLink = window.location.hash.includes('type=recovery');
+    
+    if (localStorage.getItem('supabase_recovery_active') === 'true' && !isInitialRecoveryLink) {
+      // Clear flag and sign out since they didn't complete the password reset
+      localStorage.removeItem('supabase_recovery_active');
+      supabase.auth.signOut().then(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          handleAuthSession(session, 'SIGNED_OUT');
+        });
+      });
+    } else {
+      // Check initial session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        handleAuthSession(session, 'INITIAL_SESSION');
+      });
+    }
 
     // Listen to changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       handleAuthSession(session, event);
       if (event === 'PASSWORD_RECOVERY') {
+        localStorage.setItem('supabase_recovery_active', 'true');
         setIsResetPasswordModalOpen(true);
       }
     });

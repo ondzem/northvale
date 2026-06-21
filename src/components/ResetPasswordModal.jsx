@@ -32,10 +32,13 @@ export default function ResetPasswordModal({ isOpen, onClose, showToast }) {
       const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
       if (updateError) throw updateError;
 
-      // 2. Sign out to clear the temporary recovery session
+      // 2. Clear recovery state flag
+      localStorage.removeItem('supabase_recovery_active');
+
+      // 3. Sign out to clear the temporary recovery session
       await supabase.auth.signOut();
 
-      // 3. Inform user and close modal
+      // 4. Inform user and close modal
       showToast(
         lang === 'CZ'
           ? 'Vaše heslo bylo úspěšně změněno. Nyní se můžete přihlásit s novým heslem.'
@@ -46,6 +49,19 @@ export default function ResetPasswordModal({ isOpen, onClose, showToast }) {
     } catch (err) {
       console.error('Password reset update error:', err);
       setErrorMessage(lang === 'CZ' ? `Chyba při ukládání: ${err.message}` : `Error saving new password: ${err.message}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    setIsSaving(true);
+    try {
+      localStorage.removeItem('supabase_recovery_active');
+      await supabase.auth.signOut();
+      onClose();
+    } catch (err) {
+      console.error('Cancel password reset error:', err);
     } finally {
       setIsSaving(false);
     }
@@ -140,6 +156,22 @@ export default function ResetPasswordModal({ isOpen, onClose, showToast }) {
               {isSaving 
                 ? (lang === 'CZ' ? 'Ukládání...' : 'Saving...') 
                 : (lang === 'CZ' ? 'Uložit nové heslo' : 'Save New Password')}
+            </button>
+
+            <button 
+              type="button"
+              onClick={handleCancel}
+              className="login-submit-btn" 
+              style={{ 
+                width: '100%', 
+                marginTop: '12px', 
+                background: 'transparent', 
+                border: '1px solid rgba(255, 255, 255, 0.2)', 
+                color: 'var(--text-color)' 
+              }}
+              disabled={isSaving}
+            >
+              {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
             </button>
           </form>
         </div>
