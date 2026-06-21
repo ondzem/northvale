@@ -167,7 +167,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin
+        redirectTo: 'https://northvaletcg.eu'
       });
 
       if (error) throw error;
