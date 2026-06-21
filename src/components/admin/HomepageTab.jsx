@@ -196,19 +196,20 @@ export default function HomepageTab({ showToast, onEditProduct }) {
 
         <div className="ctf-field" style={{ position: 'relative' }}>
           <label className="ctf-label">{lang === 'CZ' ? 'Přidat produkt (vyhledat podle názvu)' : 'Add Product (search by title)'}</label>
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '12px' }}>
             <input 
               type="text" 
               className="ctf-input"
               value={query}
               onChange={e => setSearchQueries(prev => ({ ...prev, [sectionKey]: e.target.value }))}
               placeholder={lang === 'CZ' ? 'Začněte psát název produktu (např. Booster, Charizard)...' : 'Type product title (e.g. Booster, Charizard)...'}
+              style={{ width: '100%', boxSizing: 'border-box' }}
             />
             {query && (
               <button 
                 type="button" 
                 className="btn btn-secondary"
-                style={{ padding: '0 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '6px', cursor: 'pointer' }}
+                style={{ padding: isMobile ? '10px 16px' : '0 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '6px', cursor: 'pointer', width: isMobile ? '100%' : 'auto' }}
                 onClick={() => setSearchQueries(prev => ({ ...prev, [sectionKey]: '' }))}
               >
                 {lang === 'CZ' ? 'Zrušit' : 'Clear'}
@@ -309,13 +310,15 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                   key={prod.id} 
                   style={{
                     display: 'flex',
-                    alignItems: 'center',
+                    flexDirection: isMobile ? 'column' : 'row',
+                    alignItems: isMobile ? 'stretch' : 'center',
                     justifyContent: 'space-between',
                     background: 'rgba(255, 255, 255, 0.01)',
                     border: '1px solid rgba(255, 255, 255, 0.06)',
                     borderRadius: '8px',
-                    padding: '12px 16px',
-                    transition: 'all 0.2s'
+                    padding: isMobile ? '12px' : '12px 16px',
+                    transition: 'all 0.2s',
+                    gap: isMobile ? '12px' : '16px'
                   }}
                   className="slide-list-item-card"
                 >
@@ -330,7 +333,17 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                       onError={e => { e.target.src = '/logo s popisem.webp'; }}
                     />
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#fff', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <span style={{ 
+                        fontSize: '13px', 
+                        fontWeight: 'bold', 
+                        color: '#fff', 
+                        display: 'block', 
+                        lineHeight: '1.4',
+                        wordBreak: 'break-word',
+                        whiteSpace: isMobile ? 'normal' : 'nowrap',
+                        overflow: isMobile ? 'visible' : 'hidden',
+                        textOverflow: isMobile ? 'clip' : 'ellipsis'
+                      }}>
                         {prod.name}
                       </span>
                       <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
@@ -339,8 +352,17 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'row', gap: '4px' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: isMobile ? '8px' : '12px',
+                    justifyContent: isMobile ? 'space-between' : 'flex-end',
+                    flexWrap: isMobile ? 'wrap' : 'nowrap',
+                    borderTop: isMobile ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
+                    paddingTop: isMobile ? '10px' : '0',
+                    marginTop: isMobile ? '2px' : '0'
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', flex: isMobile ? '1 1 auto' : 'none' }}>
                       <button
                         type="button"
                         disabled={index === 0}
@@ -351,8 +373,10 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                           opacity: index === 0 ? 0.3 : 1,
                           cursor: index === 0 ? 'not-allowed' : 'pointer',
                           borderRadius: '4px',
-                          padding: '4px 8px',
-                          fontSize: '11px'
+                          padding: isMobile ? '8px 12px' : '4px 8px',
+                          fontSize: isMobile ? '13px' : '11px',
+                          flex: isMobile ? 1 : 'none',
+                          textAlign: 'center'
                         }}
                         onClick={() => handleMoveProduct(sectionKey, index, 'up')}
                         title={lang === 'CZ' ? 'Posunout nahoru' : 'Move up'}
@@ -369,8 +393,10 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                           opacity: index === selectedProducts.length - 1 ? 0.3 : 1,
                           cursor: index === selectedProducts.length - 1 ? 'not-allowed' : 'pointer',
                           borderRadius: '4px',
-                          padding: '4px 8px',
-                          fontSize: '11px'
+                          padding: isMobile ? '8px 12px' : '4px 8px',
+                          fontSize: isMobile ? '13px' : '11px',
+                          flex: isMobile ? 1 : 'none',
+                          textAlign: 'center'
                         }}
                         onClick={() => handleMoveProduct(sectionKey, index, 'down')}
                         title={lang === 'CZ' ? 'Posunout dolů' : 'Move down'}
@@ -386,12 +412,14 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                         border: '1px solid rgba(253, 189, 22, 0.15)',
                         color: 'var(--color-gold)',
                         borderRadius: '4px',
-                        padding: '6px 10px',
+                        padding: isMobile ? '8px 12px' : '6px 10px',
                         cursor: 'pointer',
-                        fontSize: '11px',
+                        fontSize: isMobile ? '12px' : '11px',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '4px'
+                        justifyContent: 'center',
+                        gap: '4px',
+                        flex: isMobile ? '1 1 auto' : 'none'
                       }}
                       onClick={() => {
                         if (onEditProduct) {
@@ -413,12 +441,14 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                         border: '1px solid rgba(239, 68, 68, 0.15)',
                         color: '#ef4444',
                         borderRadius: '4px',
-                        padding: '6px 10px',
+                        padding: isMobile ? '8px 12px' : '6px 10px',
                         cursor: 'pointer',
-                        fontSize: '11px',
+                        fontSize: isMobile ? '12px' : '11px',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '4px'
+                        justifyContent: 'center',
+                        gap: '4px',
+                        flex: isMobile ? '1 1 auto' : 'none'
                       }}
                       onClick={() => handleRemoveProductFromSection(sectionKey, prod.id)}
                       title={lang === 'CZ' ? 'Odebrat z úvodní stránky' : 'Remove from homepage'}

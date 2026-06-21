@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { FEATURE_FLAGS } from '../config';
 import { supabase } from '../supabase';
@@ -23,6 +23,18 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [fullNameError, setFullNameError] = useState(false);
+  const [localMessage, setLocalMessage] = useState(null);
+  const [isResetting, setIsResetting] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setLocalMessage(null);
+      setIsResetting(false);
+      setEmailError(false);
+      setPasswordError(false);
+      setFullNameError(false);
+    }
+  }, [isOpen]);
 
   // Developer OAuth Configurations Panel State
   const [showConfig, setShowConfig] = useState(false);
@@ -140,6 +152,41 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
     onClose();
   };
 
+  const handleForgotPassword = async () => {
+    if (!validateEmail(email)) {
+      setEmailError(true);
+      setLocalMessage({
+        text: lang === 'CZ' ? 'Zadejte prosím platný přihlašovací e-mail do pole výše.' : 'Please enter a valid login email in the field above.',
+        type: 'error'
+      });
+      return;
+    }
+    setEmailError(false);
+    setLocalMessage(null);
+    setIsResetting(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin
+      });
+
+      if (error) throw error;
+
+      setLocalMessage({
+        text: t('LoginModal.resetLinkSent'),
+        type: 'success'
+      });
+    } catch (err) {
+      console.error('Password reset error:', err);
+      setLocalMessage({
+        text: lang === 'CZ' ? `Chyba při odesílání: ${err.message}` : `Error sending reset link: ${err.message}`,
+        type: 'error'
+      });
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   const handleSocialClick = (platform) => {
     const mockEmail = `uzivatel.${platform.toLowerCase()}@example.com`;
     const mockName = `${platform} Sběratel`;
@@ -239,6 +286,43 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
               <h2 className="login-modal-title">
                 {isRegisterMode ? t('LoginModal.tabRegister') : t('LoginModal.tabLogin')}
               </h2>
+
+              {localMessage && (
+                <div style={{
+                  padding: '12px 16px',
+                  borderRadius: 'var(--radius-md, 8px)',
+                  fontSize: '13px',
+                  lineHeight: '1.5',
+                  marginBottom: '20px',
+                  border: '1px solid',
+                  borderColor: localMessage.type === 'success' ? '#2e7d32' : '#c62828',
+                  backgroundColor: localMessage.type === 'success' ? 'rgba(46, 125, 50, 0.1)' : 'rgba(198, 40, 40, 0.1)',
+                  color: localMessage.type === 'success' ? '#81c784' : '#e57373',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                }}>
+                  <span style={{ fontSize: '16px' }}>{localMessage.type === 'success' ? '✓' : '⚠'}</span>
+                  <span style={{ flex: 1 }}>{localMessage.text}</span>
+                  <button 
+                    type="button"
+                    onClick={() => setLocalMessage(null)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'inherit',
+                      cursor: 'pointer',
+                      fontSize: '16px',
+                      padding: '0 4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
 
               <form onSubmit={handleSubmit} className="login-modal-form" noValidate>
                 
@@ -364,9 +448,12 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
                 <button 
                   type="button" 
                   className="forgot-password-link"
-                  onClick={() => triggerAlert(t('LoginModal.resetLinkSent'), 'success')}
+                  disabled={isResetting}
+                  onClick={handleForgotPassword}
                 >
-                  {t('LoginModal.forgotPasswordLink')}
+                  {isResetting 
+                    ? (lang === 'CZ' ? 'Odesílání...' : 'Sending...') 
+                    : t('LoginModal.forgotPasswordLink')}
                 </button>
               )}
 
@@ -434,6 +521,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
                     setPasswordError(false);
                     setFullNameError(false);
                     setNewsletter(false);
+                    setLocalMessage(null);
                   }}
                 >
                   {isRegisterMode ? t('LoginModal.wantToSignIn') : t('LoginModal.wantToRegister')}

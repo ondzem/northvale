@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
+import { supabase } from '../supabase';
 
 const getGameImage = (product) => {
   if (product.category === 'Acrylics') return '/acrylic-etb-box.png';
@@ -124,7 +125,7 @@ const parseFormattedText = (text, isMini = false) => {
   return elements;
 };
 
-export default function SealedDetail({ productId, products, addToCart, setSelectedProductId, setActivePage, setFilters, alert }) {
+export default function SealedDetail({ productId, products, addToCart, setSelectedProductId, setActivePage, setFilters, alert, user, onOpenLogin }) {
   const { lang, t } = useTranslation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -180,23 +181,176 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
   const [watchdogEmail, setWatchdogEmail] = useState('');
   const [watchdogGdpr, setWatchdogGdpr] = useState(false);
 
-  // Local state for reviews & comments (mock database)
-  const [reviews, setReviews] = useState([
-    { author: 'Jindřich L.', rating: 5, date: '15. 5. 2026', text: 'Krabice přišla zabalená v neprůstřelném kartonovém obalu, rohy naprosto ostré. Pro sběratele sealed věcí bezkonkurenční služba!' },
-    { author: 'Filip K.', rating: 4, date: '28. 4. 2026', text: 'Rychlé doručení, booster box v bezvadném stavu. Rozbalování bylo super.' }
-  ]);
+  // Local state for reviews & comments (dynamic database)
+  const [reviews, setReviews] = useState([]);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewAuthor, setReviewAuthor] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
 
-  const [comments, setComments] = useState([
-    { author: 'Tomáš M.', date: '10. 5. 2026', text: 'Dobrý den, jsou tyto boxy z originálních cases od Pokémon Company?' },
-    { author: 'Northvale Team', date: '11. 5. 2026', text: 'Dobrý den, ano, veškeré booster boxy odebíráme od oficiálních distributorů a garantujeme jejich původ i neporušenost.' }
-  ]);
+  const [comments, setComments] = useState([]);
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [commentAuthor, setCommentAuthor] = useState('');
   const [commentText, setCommentText] = useState('');
+
+  // Reply state
+  const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
+  const [replyingToComment, setReplyingToComment] = useState(null);
+  const [replyAuthor, setReplyAuthor] = useState('');
+  const [replyText, setReplyText] = useState('');
+
+  const isAdmin = user && (user.role === 'admin' || user.email === 'info@northvaletcg.eu');
+
+  const formatAuthorName = (name, email) => {
+    let displayName = name;
+    if (!displayName && email) {
+      const localPart = email.split('@')[0];
+      displayName = localPart.replace(/[._\-+]/g, ' ');
+    }
+    if (!displayName) displayName = 'Uživatel';
+    
+    const parts = displayName.trim().split(/\s+/);
+    if (parts.length === 1) {
+      const word = parts[0];
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    }
+    const firstName = parts[0];
+    const lastName = parts[parts.length - 1];
+    return `${firstName.charAt(0).toUpperCase() + firstName.slice(1)} ${lastName.charAt(0).toUpperCase()}.`;
+  };
+
+  useEffect(() => {
+    let active = true;
+    const fetchReviewsAndComments = async () => {
+      if (!supabase.from) return;
+      try {
+        const { data: revData, error: revError } = await supabase
+          .from('product_reviews')
+          .select('*')
+          .eq('product_id', productId)
+          .order('created_at', { ascending: false });
+        
+        if (revError) {
+          console.warn('Error fetching reviews:', revError);
+        } else if (active) {
+          setReviews((revData || []).map(r => ({
+            id: r.id,
+            author: r.author_name,
+            rating: r.rating,
+            date: new Date(r.created_at).toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
+            text: r.comment_text
+          })));
+        }
+
+        const { data: comData, error: comError } = await supabase
+          .from('product_comments')
+          .select('*')
+          .eq('product_id', productId)
+          .order('created_at', { ascending: true });
+        
+        if (comError) {
+          console.warn('Error fetching comments:', comError);
+        } else if (active) {
+          setComments((comData || []).map(c => ({
+            id: c.id,
+            author: c.author_name,
+            date: new Date(c.created_at).toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
+            text: c.comment_text,
+            parent_id: c.parent_id,
+            is_admin_reply: c.is_admin_reply
+          })));
+        }
+      } catch (err) {
+        console.warn('Failed to load reviews/comments from Supabase:', err);
+      }
+    };
+
+    setReviews([]);
+    setComments([]);
+    fetchReviewsAndComments();
+
+    return () => {
+      active = false;
+    };
+  }, [productId, lang]);
+
+  const handleOpenReviewModal = () => {
+    if (!user || !user.id) {
+      if (alert) {
+        alert(lang === 'CZ' ? 'Pro napsání recenze se musíte nejprve přihlásit.' : 'You must log in to write a review.', 'warning');
+      }
+      if (onOpenLogin) {
+        onOpenLogin();
+      }
+      return;
+    }
+    setReviewAuthor(formatAuthorName(user.name, user.email));
+    setIsReviewModalOpen(true);
+  };
+
+  const handleOpenCommentModal = () => {
+    if (!user || !user.id) {
+      if (alert) {
+        alert(lang === 'CZ' ? 'Pro položení dotazu se musíte nejprve přihlásit.' : 'You must log in to ask a question.', 'warning');
+      }
+      if (onOpenLogin) {
+        onOpenLogin();
+      }
+      return;
+    }
+    setCommentAuthor(formatAuthorName(user.name, user.email));
+    setIsCommentModalOpen(true);
+  };
+
+  const handleOpenReplyModal = (parentComment) => {
+    if (!user || !user.id) {
+      if (alert) {
+        alert(lang === 'CZ' ? 'Pro odpověď v diskuzi se musíte nejprve přihlásit.' : 'You must log in to reply to the discussion.', 'warning');
+      }
+      if (onOpenLogin) {
+        onOpenLogin();
+      }
+      return;
+    }
+    const isUserAdmin = user && (user.role === 'admin' || user.email === 'info@northvaletcg.eu');
+    setReplyAuthor(isUserAdmin ? 'Northvale Team' : formatAuthorName(user.name, user.email));
+    setReplyingToComment(parentComment);
+    setIsReplyModalOpen(true);
+  };
+
+  const handleDeleteReview = async (revId) => {
+    if (!window.confirm(lang === 'CZ' ? 'Opravdu chcete tuto recenzi smazat?' : 'Are you sure you want to delete this review?')) return;
+    try {
+      const { error } = await supabase.from('product_reviews').delete().eq('id', revId);
+      if (error) throw error;
+      setReviews(prev => prev.filter(r => r.id !== revId));
+      if (alert) {
+        alert(lang === 'CZ' ? 'Recenze byla úspěšně smazána.' : 'Review has been successfully deleted.', 'success');
+      }
+    } catch (err) {
+      console.error(err);
+      if (alert) {
+        alert(lang === 'CZ' ? 'Chyba při mazání recenze: ' + err.message : 'Error deleting review: ' + err.message, 'error');
+      }
+    }
+  };
+
+  const handleDeleteComment = async (comId) => {
+    if (!window.confirm(lang === 'CZ' ? 'Opravdu chcete tento dotaz/odpověď smazat?' : 'Are you sure you want to delete this comment/reply?')) return;
+    try {
+      const { error } = await supabase.from('product_comments').delete().eq('id', comId);
+      if (error) throw error;
+      setComments(prev => prev.filter(c => c.id !== comId && c.parent_id !== comId));
+      if (alert) {
+        alert(lang === 'CZ' ? 'Komentář byl úspěšně smazán.' : 'Comment has been successfully deleted.', 'success');
+      }
+    } catch (err) {
+      console.error(err);
+      if (alert) {
+        alert(lang === 'CZ' ? 'Chyba při mazání komentáře: ' + err.message : 'Error deleting comment: ' + err.message, 'error');
+      }
+    }
+  };
 
 
 
@@ -370,45 +524,250 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
     }
   };
 
-  const handleReviewSubmit = (e) => {
+  const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    const dateStr = new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US');
-    const newRev = {
-      author: reviewAuthor,
-      rating: reviewRating,
-      date: dateStr,
-      text: reviewText
-    };
-    setReviews([newRev, ...reviews]);
-    if (alert) {
-      alert(lang === 'CZ' ? 'Děkujeme! Vaše hodnocení bylo úspěšně přidáno.' : 'Thank you! Your review has been successfully added.', 'success');
+    if (!user || !user.id) {
+      if (alert) {
+        alert(lang === 'CZ' ? 'Pro napsání recenze se musíte nejprve přihlásit.' : 'You must log in to write a review.', 'warning');
+      }
+      return;
     }
-    setReviewAuthor('');
-    setReviewRating(5);
-    setReviewText('');
-    setIsReviewModalOpen(false);
-    scrollToSection('hodnoceni');
+    if (reviewText.trim().length > 300) {
+      if (alert) {
+        alert(lang === 'CZ' ? 'Recenze může mít maximálně 300 znaků.' : 'Review can have a maximum of 300 characters.', 'warning');
+      }
+      return;
+    }
+
+    try {
+      if (!supabase.from) throw new Error('Supabase client is not initialized');
+      
+      const formattedName = formatAuthorName(user.name, user.email);
+      const { data, error } = await supabase
+        .from('product_reviews')
+        .insert([{
+          product_id: productId,
+          user_id: user.id,
+          author_name: formattedName,
+          rating: reviewRating,
+          comment_text: reviewText.trim()
+        }])
+        .select();
+
+      if (error) throw error;
+
+      const dateStr = new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US');
+      const newRev = {
+        id: data && data[0] ? data[0].id : null,
+        author: formattedName,
+        rating: reviewRating,
+        date: dateStr,
+        text: reviewText.trim()
+      };
+      setReviews([newRev, ...reviews]);
+
+      // Call the Edge Function to send email alert
+      try {
+        await supabase.functions.invoke('send-support-notification', {
+          body: {
+            type: 'review',
+            productName: product.name,
+            authorName: formattedName,
+            text: reviewText.trim(),
+            rating: reviewRating,
+            productId: productId
+          }
+        });
+      } catch (emailErr) {
+        console.warn('Failed to send support email notification:', emailErr);
+      }
+
+      if (alert) {
+        alert(lang === 'CZ' ? 'Děkujeme! Vaše hodnocení bylo úspěšně přidáno.' : 'Thank you! Your review has been successfully added.', 'success');
+      }
+      setReviewAuthor('');
+      setReviewRating(5);
+      setReviewText('');
+      setIsReviewModalOpen(false);
+      scrollToSection('hodnoceni');
+    } catch (err) {
+      console.error(err);
+      if (alert) {
+        alert(lang === 'CZ' ? 'Chyba při ukládání recenze: ' + err.message : 'Error saving review: ' + err.message, 'error');
+      }
+    }
   };
 
-  const handleCommentSubmit = (e) => {
+  const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    const dateStr = new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US');
-    const newComm = {
-      author: commentAuthor,
-      date: dateStr,
-      text: commentText
-    };
-    setComments([...comments, newComm]);
-    if (alert) {
-      alert(lang === 'CZ' ? 'Komentář byl úspěšně přidán do diskuze.' : 'Comment has been successfully added to the discussion.', 'success');
+    if (!user || !user.id) {
+      if (alert) {
+        alert(lang === 'CZ' ? 'Pro položení dotazu se musíte nejprve přihlásit.' : 'You must log in to ask a question.', 'warning');
+      }
+      return;
     }
-    setCommentAuthor('');
-    setCommentText('');
-    setIsCommentModalOpen(false);
-    scrollToSection('diskuse');
+    if (commentText.trim().length > 300) {
+      if (alert) {
+        alert(lang === 'CZ' ? 'Dotaz může mít maximálně 300 znaků.' : 'Question can have a maximum of 300 characters.', 'warning');
+      }
+      return;
+    }
+
+    try {
+      if (!supabase.from) throw new Error('Supabase client is not initialized');
+
+      const formattedName = formatAuthorName(user.name, user.email);
+      const { data, error } = await supabase
+        .from('product_comments')
+        .insert([{
+          product_id: productId,
+          user_id: user.id,
+          author_name: formattedName,
+          comment_text: commentText.trim()
+        }])
+        .select();
+
+      if (error) throw error;
+
+      const dateStr = new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US');
+      const newComm = {
+        id: data && data[0] ? data[0].id : null,
+        author: formattedName,
+        date: dateStr,
+        text: commentText.trim(),
+        parent_id: null,
+        is_admin_reply: false
+      };
+      setComments([...comments, newComm]);
+
+      // Call the Edge Function to send email alert
+      try {
+        await supabase.functions.invoke('send-support-notification', {
+          body: {
+            type: 'comment',
+            productName: product.name,
+            authorName: formattedName,
+            text: commentText.trim(),
+            productId: productId
+          }
+        });
+      } catch (emailErr) {
+        console.warn('Failed to send support email notification:', emailErr);
+      }
+
+      if (alert) {
+        alert(lang === 'CZ' ? 'Komentář byl úspěšně přidán do diskuze.' : 'Comment has been successfully added to the discussion.', 'success');
+      }
+      setCommentAuthor('');
+      setCommentText('');
+      setIsCommentModalOpen(false);
+      scrollToSection('diskuse');
+    } catch (err) {
+      console.error(err);
+      if (alert) {
+        alert(lang === 'CZ' ? 'Chyba při ukládání dotazu: ' + err.message : 'Error saving comment: ' + err.message, 'error');
+      }
+    }
   };
 
+  const handleReplySubmit = async (e) => {
+    e.preventDefault();
+    if (!user || !user.id) {
+      if (alert) {
+        alert(lang === 'CZ' ? 'Pro odeslání odpovědi se musíte nejprve přihlásit.' : 'You must log in to reply.', 'warning');
+      }
+      return;
+    }
+    if (replyText.trim().length > 300) {
+      if (alert) {
+        alert(lang === 'CZ' ? 'Odpověď může mít maximálně 300 znaků.' : 'Reply can have a maximum of 300 characters.', 'warning');
+      }
+      return;
+    }
 
+    try {
+      if (!supabase.from) throw new Error('Supabase client is not initialized');
+
+      const isUserAdmin = user && (user.role === 'admin' || user.email === 'info@northvaletcg.eu');
+      const authorName = isUserAdmin ? 'Northvale Team' : formatAuthorName(user.name, user.email);
+
+      const { data, error } = await supabase
+        .from('product_comments')
+        .insert([{
+          product_id: productId,
+          user_id: user.id,
+          author_name: authorName,
+          comment_text: replyText.trim(),
+          parent_id: replyingToComment.id,
+          is_admin_reply: isUserAdmin
+        }])
+        .select();
+
+      if (error) throw error;
+
+      const dateStr = new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US');
+      const newReplyObj = {
+        id: data && data[0] ? data[0].id : null,
+        author: authorName,
+        date: dateStr,
+        text: replyText.trim(),
+        parent_id: replyingToComment.id,
+        is_admin_reply: isUserAdmin
+      };
+
+      setComments([...comments, newReplyObj]);
+
+      // Call the Edge Function to send email alert
+      try {
+        await supabase.functions.invoke('send-support-notification', {
+          body: {
+            type: 'reply',
+            productName: product.name,
+            authorName: authorName,
+            text: replyText.trim(),
+            productId: productId
+          }
+        });
+      } catch (emailErr) {
+        console.warn('Failed to send support email notification:', emailErr);
+      }
+
+      if (alert) {
+        alert(lang === 'CZ' ? 'Odpověď byla úspěšně přidána.' : 'Reply has been successfully added.', 'success');
+      }
+      setReplyText('');
+      setReplyingToComment(null);
+      setIsReplyModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      if (alert) {
+        alert(lang === 'CZ' ? 'Chyba při ukládání odpovědi: ' + err.message : 'Error saving reply: ' + err.message, 'error');
+      }
+    }
+  };
+
+  const averageRating = reviews.length > 0
+    ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+    : '0.0';
+
+  const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  reviews.forEach(r => {
+    if (ratingCounts[r.rating] !== undefined) {
+      ratingCounts[r.rating]++;
+    }
+  });
+
+  const getPercentage = (stars) => {
+    if (reviews.length === 0) return 0;
+    return Math.round((ratingCounts[stars] / reviews.length) * 100);
+  };
+
+  const renderAverageStars = (ratingVal) => {
+    const numeric = parseFloat(ratingVal);
+    if (isNaN(numeric) || numeric === 0) return '☆☆☆☆☆';
+    const rounded = Math.round(numeric);
+    return '★'.repeat(rounded) + '☆'.repeat(5 - rounded);
+  };
 
   return (
     <div style={styles.container} className="fade-in">
@@ -742,17 +1101,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
             </svg>
             <span>{lang === 'CZ' ? 'Popis a parametry' : 'Description & Specs'}</span>
           </button>
-          {product.investment && (
-            <button 
-              className={`product-tab-btn ${activeTab === 'trend' ? 'active' : ''}`} 
-              onClick={() => scrollToSection('trend')}
-            >
-              <svg className="tab-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-              </svg>
-              <span>{lang === 'CZ' ? 'Vývoj ceny' : 'Price Trend'}</span>
-            </button>
-          )}
+
           <button 
             className={`product-tab-btn ${activeTab === 'hodnoceni' ? 'active' : ''}`} 
             onClick={() => scrollToSection('hodnoceni')}
@@ -1038,134 +1387,30 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
         );
       })()}
 
-      {/* Vývoj ceny Section */}
-      {activeTab === 'trend' && product.investment && (() => {
-        const history = getPriceHistory();
-        const prices = history.map(h => h.price);
-        const minP = Math.min(...prices) * 0.98;
-        const maxP = Math.max(...prices) * 1.02;
-        const rangeP = maxP - minP || 1;
-
-        const getX = (idx) => 60 + idx * (705 / 11);
-        const getY = (val) => 260 - ((val - minP) / rangeP) * 230;
-
-        const points = history.map((h, i) => `${getX(i)},${getY(h.price)}`).join(' ');
-        const areaPoints = `60,260 ${points} 765,260`;
-
-        const yTicks = [
-          minP,
-          minP + rangeP * 0.33,
-          minP + rangeP * 0.66,
-          maxP
-        ];
-
-        return (
-          <section id="trend" className="detail-section" style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '24px', textAlign: 'left', marginBottom: '40px' }}>
-            <h3 className="detail-section-title" style={{ marginTop: 0, marginBottom: '8px', color: 'var(--nv-gold, #fdbd16)' }}>
-              {lang === 'CZ' ? 'Historický vývoj tržní ceny' : 'Historical Market Price Trend'}
-            </h3>
-            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', margin: '0 0 24px 0', lineHeight: '1.4' }}>
-              {lang === 'CZ'
-                ? 'Níže uvedený graf zobrazuje odhadovaný vývoj tržní ceny tohoto produktu za posledních 12 měsíců. Údaje jsou pravidelně aktualizovány na základě prodejů z hlavních světových trhů (Cardmarket, eBay).'
-                : 'The chart below shows the estimated market price development of this product over the last 12 months. Data is regularly updated based on sales from major global card marketplaces (Cardmarket, eBay).'}
-            </p>
-
-            <div style={{ width: '100%', overflowX: 'auto', background: 'rgba(0,0,0,0.15)', borderRadius: '12px', padding: '16px 8px 8px 8px', border: '1px solid rgba(255,255,255,0.03)' }}>
-              <svg viewBox="0 0 800 300" style={{ width: '100%', height: 'auto', minWidth: '600px', display: 'block' }}>
-                <defs>
-                  <linearGradient id="chart-line-grad" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#fdbd16" />
-                    <stop offset="100%" stopColor="#c4900a" />
-                  </linearGradient>
-                  <linearGradient id="chart-area-grad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#fdbd16" stopOpacity="0.15" />
-                    <stop offset="100%" stopColor="#fdbd16" stopOpacity="0.00" />
-                  </linearGradient>
-                </defs>
-
-                {yTicks.map((val, idx) => (
-                  <g key={idx}>
-                    <line x1="60" y1={getY(val)} x2="765" y2={getY(val)} stroke="rgba(255,255,255,0.06)" strokeDasharray="4 4" />
-                    <text x="50" y={getY(val) + 4} fill="rgba(255,255,255,0.4)" fontSize="10" textAnchor="end" fontFamily="monospace">
-                      {Math.round(val).toLocaleString()} Kč
-                    </text>
-                  </g>
-                ))}
-
-                <line x1="60" y1="260" x2="765" y2="260" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-                <polygon points={areaPoints} fill="url(#chart-area-grad)" />
-                <polyline points={points} fill="none" stroke="url(#chart-line-grad)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-
-                {history.map((h, i) => (
-                  <text key={i} x={getX(i)} y="280" fill="rgba(255,255,255,0.4)" fontSize="10" textAnchor="middle">
-                    {h.month}
-                  </text>
-                ))}
-
-                {history.map((h, i) => {
-                  const x = getX(i);
-                  const y = getY(h.price);
-                  return (
-                    <g key={i} className="chart-dot-group">
-                      <circle cx={x} cy={y} r="4.5" fill="#fdbd16" />
-                      <g className="chart-tooltip">
-                        <rect x={x - 45} y={y - 32} width="90" height="22" rx="4" fill="#181920" stroke="rgba(253, 189, 22, 0.4)" strokeWidth="1" />
-                        <text x={x} y={y - 18} fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
-                          {h.price.toLocaleString()} Kč
-                        </text>
-                      </g>
-                    </g>
-                  );
-                })}
-              </svg>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '16px', color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>
-              <span style={{ color: 'var(--color-green)' }}>●</span>
-              <span>{lang === 'CZ' ? 'Data jsou synchronizována v reálném čase.' : 'Data is synced in real-time.'}</span>
-            </div>
-          </section>
-        );
-      })()}
 
       {/* Hodnocení Section */}
       {activeTab === 'hodnoceni' && (
         <section id="hodnoceni" className="detail-section custom-detail-panel">
           <div className="reviews-dashboard">
             <div className="reviews-dashboard-score">
-              <div className="reviews-average-number">4.8</div>
-              <div className="reviews-average-stars">★★★★★</div>
+              <div className="reviews-average-number">{averageRating}</div>
+              <div className="reviews-average-stars">{renderAverageStars(averageRating)}</div>
               <div className="reviews-average-count">
                 {lang === 'CZ' ? `Založeno na ${reviews.length} hodnoceních` : `Based on ${reviews.length} reviews`}
               </div>
             </div>
             
             <div className="reviews-dashboard-bars">
-              <div className="reviews-bar-row">
-                <span className="bar-label">5 ★</span>
-                <div className="bar-track"><div className="bar-fill" style={{ width: '85%' }}></div></div>
-                <span className="bar-percentage">85%</span>
-              </div>
-              <div className="reviews-bar-row">
-                <span className="bar-label">4 ★</span>
-                <div className="bar-track"><div className="bar-fill" style={{ width: '15%' }}></div></div>
-                <span className="bar-percentage">15%</span>
-              </div>
-              <div className="reviews-bar-row">
-                <span className="bar-label">3 ★</span>
-                <div className="bar-track"><div className="bar-fill" style={{ width: '0%' }}></div></div>
-                <span className="bar-percentage">0%</span>
-              </div>
-              <div className="reviews-bar-row">
-                <span className="bar-label">2 ★</span>
-                <div className="bar-track"><div className="bar-fill" style={{ width: '0%' }}></div></div>
-                <span className="bar-percentage">0%</span>
-              </div>
-              <div className="reviews-bar-row">
-                <span className="bar-label">1 ★</span>
-                <div className="bar-track"><div className="bar-fill" style={{ width: '0%' }}></div></div>
-                <span className="bar-percentage">0%</span>
-              </div>
+              {[5, 4, 3, 2, 1].map(stars => {
+                const pct = getPercentage(stars);
+                return (
+                  <div key={stars} className="reviews-bar-row">
+                    <span className="bar-label">{stars} ★</span>
+                    <div className="bar-track"><div className="bar-fill" style={{ width: `${pct}%` }}></div></div>
+                    <span className="bar-percentage">{pct}%</span>
+                  </div>
+                );
+              })}
             </div>
 
             <div className="reviews-dashboard-action">
@@ -1174,7 +1419,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                   ? 'Podělte se o své zkušenosti s tímto produktem a pomozte ostatním sběratelům.' 
                   : 'Share your experience with this product and help other collectors.'}
               </p>
-              <button className="btn btn-primary reviews-add-btn" onClick={() => setIsReviewModalOpen(true)}>
+              <button className="btn btn-primary reviews-add-btn" onClick={handleOpenReviewModal}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '6px' }}>
                   <path d="M12 20h9" />
                   <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
@@ -1189,7 +1434,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
               {reviews.map((rev, i) => {
                 const initials = rev.author.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
                 return (
-                  <div key={i} className="premium-review-card">
+                  <div key={rev.id || i} className="premium-review-card">
                     <div className="review-avatar-col">
                       <div className="review-avatar">{initials}</div>
                     </div>
@@ -1204,7 +1449,31 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                             {lang === 'CZ' ? 'Ověřený nákup' : 'Verified Purchase'}
                           </span>
                         </div>
-                        <span className="review-date">{rev.date}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span className="review-date">{rev.date}</span>
+                          {isAdmin && (
+                            <button
+                              onClick={() => handleDeleteReview(rev.id)}
+                              className="review-delete-btn"
+                              style={{
+                                background: 'rgba(239, 68, 68, 0.1)',
+                                color: '#ef4444',
+                                border: '1px solid rgba(239, 68, 68, 0.2)',
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                fontSize: '11px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                transition: 'all 0.2s ease'
+                              }}
+                            >
+                              ✕ {lang === 'CZ' ? 'Smazat' : 'Delete'}
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="review-stars-row">
                         {'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)}
@@ -1235,7 +1504,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                 {lang === 'CZ' ? 'Máte k produktu nějaký dotaz? Náš tým vám rád odpoví.' : 'Do you have any questions about this product? Our team will gladly answer them.'}
               </p>
             </div>
-            <button className="btn btn-primary discussions-add-btn" onClick={() => setIsCommentModalOpen(true)}>
+            <button className="btn btn-primary discussions-add-btn" onClick={handleOpenCommentModal}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '6px' }}>
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
@@ -1243,30 +1512,132 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
             </button>
           </div>
 
-          {comments.length > 0 ? (
+          {comments.filter(c => !c.parent_id).length > 0 ? (
             <div className="comments-list-wrapper">
-              {comments.map((comm, i) => {
-                const isReply = comm.author.includes('Team') || comm.author.includes('Support');
+              {comments.filter(c => !c.parent_id).map((comm) => {
                 const initials = comm.author.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                const repliesList = comments.filter(c => c.parent_id === comm.id);
                 
                 return (
-                  <div key={i} className={`premium-comment-card ${isReply ? 'reply-card' : 'question-card'}`}>
-                    {isReply && <div className="reply-connector-line"></div>}
-                    <div className="comment-avatar-col">
-                      <div className={`comment-avatar ${isReply ? 'admin-avatar' : ''}`}>
-                        {isReply ? '🛡️' : initials}
+                  <div key={comm.id} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {/* Parent Comment (Question) */}
+                    <div className="premium-comment-card question-card">
+                      <div className="comment-avatar-col">
+                        <div className="comment-avatar">
+                          {initials}
+                        </div>
+                      </div>
+                      <div className="comment-main-col">
+                        <div className="comment-header-row">
+                          <span className="comment-author">
+                            {comm.author}
+                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span className="comment-date">{comm.date}</span>
+                            {isAdmin && (
+                              <button
+                                onClick={() => handleDeleteComment(comm.id)}
+                                className="review-delete-btn"
+                                style={{
+                                  background: 'rgba(239, 68, 68, 0.1)',
+                                  color: '#ef4444',
+                                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                                  padding: '4px 8px',
+                                  borderRadius: '4px',
+                                  fontSize: '11px',
+                                  fontWeight: '600',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  transition: 'all 0.2s ease'
+                                }}
+                              >
+                                ✕ {lang === 'CZ' ? 'Smazat' : 'Delete'}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <p className="comment-text">{comm.text}</p>
+                        
+                        {/* Reply trigger button */}
+                        <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-start' }}>
+                          <button
+                            onClick={() => handleOpenReplyModal(comm)}
+                            style={{
+                              background: 'transparent',
+                              color: 'var(--color-gold, #fdbd16)',
+                              border: 'none',
+                              padding: '0',
+                              fontSize: '13.5px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              transition: 'color 0.2s ease'
+                            }}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <path d="M10 9l-5 5 5 5" />
+                              <path d="M20 20a8 8 0 0 0-8-8H5" />
+                            </svg>
+                            {lang === 'CZ' ? 'Odpovědět' : 'Reply'}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div className="comment-main-col">
-                      <div className="comment-header-row">
-                        <span className={`comment-author ${isReply ? 'admin-author' : ''}`}>
-                          {comm.author}
-                          {isReply && <span className="admin-badge">{lang === 'CZ' ? 'Podpora' : 'Support'}</span>}
-                        </span>
-                        <span className="comment-date">{comm.date}</span>
-                      </div>
-                      <p className="comment-text">{comm.text}</p>
-                    </div>
+
+                    {/* Child Replies */}
+                    {repliesList.map((reply) => {
+                      const isSupportReply = reply.is_admin_reply || reply.author.includes('Team') || reply.author.includes('Support');
+                      const replyInitials = reply.author.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                      
+                      return (
+                        <div key={reply.id} className="premium-comment-card reply-card">
+                          <div className="reply-connector-line"></div>
+                          <div className="comment-avatar-col">
+                            <div className={`comment-avatar ${isSupportReply ? 'admin-avatar' : ''}`}>
+                              {isSupportReply ? '🛡️' : replyInitials}
+                            </div>
+                          </div>
+                          <div className="comment-main-col">
+                            <div className="comment-header-row">
+                              <span className={`comment-author ${isSupportReply ? 'admin-author' : ''}`}>
+                                {reply.author}
+                                {isSupportReply && <span className="admin-badge">{lang === 'CZ' ? 'Podpora' : 'Support'}</span>}
+                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <span className="comment-date">{reply.date}</span>
+                                {isAdmin && (
+                                  <button
+                                    onClick={() => handleDeleteComment(reply.id)}
+                                    className="review-delete-btn"
+                                    style={{
+                                      background: 'rgba(239, 68, 68, 0.1)',
+                                      color: '#ef4444',
+                                      border: '1px solid rgba(239, 68, 68, 0.2)',
+                                      padding: '4px 8px',
+                                      borderRadius: '4px',
+                                      fontSize: '11px',
+                                      fontWeight: '600',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '4px',
+                                      transition: 'all 0.2s ease'
+                                    }}
+                                  >
+                                    ✕ {lang === 'CZ' ? 'Smazat' : 'Delete'}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                            <p className="comment-text">{reply.text}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               })}
@@ -1494,7 +1865,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
             <form onSubmit={handleReviewSubmit} className="login-modal-form">
               <div className="login-form-group">
                 <label className="login-form-label">{lang === 'CZ' ? 'Vaše jméno' : 'Your Name'} <span className="text-red">*</span></label>
-                <input type="text" required className="login-form-input" value={reviewAuthor} onChange={e => setReviewAuthor(e.target.value)} placeholder="Jan N." />
+                <input type="text" required readOnly className="login-form-input" style={{ opacity: 0.8, cursor: 'not-allowed' }} value={reviewAuthor} placeholder="Jan N." />
               </div>
               <div className="login-form-group">
                 <label className="login-form-label">{lang === 'CZ' ? 'Počet hvězdiček' : 'Star Rating'} <span className="text-red">*</span></label>
@@ -1508,7 +1879,10 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
               </div>
               <div className="login-form-group">
                 <label className="login-form-label">{lang === 'CZ' ? 'Text recenze' : 'Review Content'} <span className="text-red">*</span></label>
-                <textarea required className="login-form-input" style={{ minHeight: '100px', resize: 'vertical' }} value={reviewText} onChange={e => setReviewText(e.target.value)} placeholder={lang === 'CZ' ? 'Jak jste spokojen s tímto produktem?' : 'How satisfied are you with this product?'} />
+                <textarea required className="login-form-input" style={{ minHeight: '100px', resize: 'vertical' }} maxLength={300} value={reviewText} onChange={e => setReviewText(e.target.value.substring(0, 300))} placeholder={lang === 'CZ' ? 'Jak jste spokojen s tímto produktem?' : 'How satisfied are you with this product?'} />
+                <div style={{ textAlign: 'right', fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>
+                  {reviewText.length}/300
+                </div>
               </div>
               <button type="submit" className="login-submit-btn">{lang === 'CZ' ? 'Odeslat recenzi' : 'Submit Review'}</button>
             </form>
@@ -1524,11 +1898,14 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
             <form onSubmit={handleCommentSubmit} className="login-modal-form">
               <div className="login-form-group">
                 <label className="login-form-label">{lang === 'CZ' ? 'Vaše jméno' : 'Your Name'} <span className="text-red">*</span></label>
-                <input type="text" required className="login-form-input" value={commentAuthor} onChange={e => setCommentAuthor(e.target.value)} placeholder="Jan N." />
+                <input type="text" required readOnly className="login-form-input" style={{ opacity: 0.8, cursor: 'not-allowed' }} value={commentAuthor} placeholder="Jan N." />
               </div>
               <div className="login-form-group">
                 <label className="login-form-label">{lang === 'CZ' ? 'Text komentáře' : 'Comment Text'} <span className="text-red">*</span></label>
-                <textarea required className="login-form-input" style={{ minHeight: '100px', resize: 'vertical' }} value={commentText} onChange={e => setCommentText(e.target.value)} placeholder={lang === 'CZ' ? 'Zde napište svůj dotaz nebo postřeh...' : 'Write your question or feedback here...'} />
+                <textarea required className="login-form-input" style={{ minHeight: '100px', resize: 'vertical' }} maxLength={300} value={commentText} onChange={e => setCommentText(e.target.value.substring(0, 300))} placeholder={lang === 'CZ' ? 'Zde napište svůj dotaz nebo postřeh...' : 'Write your question or feedback here...'} />
+                <div style={{ textAlign: 'right', fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>
+                  {commentText.length}/300
+                </div>
               </div>
               <button type="submit" className="login-submit-btn">{lang === 'CZ' ? 'Odeslat komentář' : 'Submit Comment'}</button>
             </form>
@@ -1536,7 +1913,28 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
         </div>
       )}
 
-
+      {isReplyModalOpen && (
+        <div className="product-modal-overlay" onClick={() => setIsReplyModalOpen(false)}>
+          <div className="product-modal-container" onClick={e => e.stopPropagation()}>
+            <button className="product-modal-close" onClick={() => setIsReplyModalOpen(false)}>✕</button>
+            <h3 className="product-modal-title">{lang === 'CZ' ? 'Odpovědět na dotaz' : 'Reply to Question'}</h3>
+            <form onSubmit={handleReplySubmit} className="login-modal-form">
+              <div className="login-form-group">
+                <label className="login-form-label">{lang === 'CZ' ? 'Vaše jméno' : 'Your Name'} <span className="text-red">*</span></label>
+                <input type="text" required readOnly className="login-form-input" style={{ opacity: 0.8, cursor: 'not-allowed' }} value={replyAuthor} placeholder="Jan N." />
+              </div>
+              <div className="login-form-group">
+                <label className="login-form-label">{lang === 'CZ' ? 'Text odpovědi' : 'Reply Text'} <span className="text-red">*</span></label>
+                <textarea required className="login-form-input" style={{ minHeight: '100px', resize: 'vertical' }} maxLength={300} value={replyText} onChange={e => setReplyText(e.target.value.substring(0, 300))} placeholder={lang === 'CZ' ? 'Zde napište svou odpověď...' : 'Write your reply here...'} />
+                <div style={{ textAlign: 'right', fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>
+                  {replyText.length}/300
+                </div>
+              </div>
+              <button type="submit" className="login-submit-btn">{lang === 'CZ' ? 'Odeslat odpověď' : 'Submit Reply'}</button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

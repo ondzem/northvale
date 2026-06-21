@@ -21,6 +21,7 @@ import AboutPage from './components/AboutPage';
 import Cart from './components/Cart';
 import Favorites from './components/Favorites';
 import LoginModal from './components/LoginModal';
+import ResetPasswordModal from './components/ResetPasswordModal';
 import CookieConsent from './components/CookieConsent';
 import ErrorPage from './components/ErrorPage';
 import { supabase } from './supabase';
@@ -189,6 +190,7 @@ function AppContent() {
   // User and Session State (Declared at top to avoid hoisting reference issues)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
   // Applied Discount Code State
@@ -447,6 +449,9 @@ function AppContent() {
     // Listen to changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       handleAuthSession(session, event);
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsResetPasswordModalOpen(true);
+      }
     });
 
     return () => {
@@ -1061,6 +1066,8 @@ function AppContent() {
             setActivePage={navigateToPage}
             setFilters={setFilters}
             alert={showToast}
+            user={user}
+            onOpenLogin={() => setIsLoginModalOpen(true)}
           />
         )}
 
@@ -1073,6 +1080,8 @@ function AppContent() {
             setActivePage={navigateToPage}
             setFilters={setFilters}
             alert={showToast}
+            user={user}
+            onOpenLogin={() => setIsLoginModalOpen(true)}
           />
         )}
 
@@ -1183,6 +1192,12 @@ function AppContent() {
         onClose={() => setIsLoginModalOpen(false)} 
         onLogin={handleLogin} 
         onRegister={handleRegister} 
+        showToast={showToast}
+      />
+
+      <ResetPasswordModal
+        isOpen={isResetPasswordModalOpen}
+        onClose={() => setIsResetPasswordModalOpen(false)}
         showToast={showToast}
       />
 

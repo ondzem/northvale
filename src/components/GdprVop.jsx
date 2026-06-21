@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
+import { supabase } from '../supabase';
 
 export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
   const { lang, t } = useTranslation();
@@ -21,6 +22,8 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   useEffect(() => {
     if (activeTab === 'doprava' && sessionStorage.getItem('scrollToPreorderInfo') === 'true') {
@@ -45,7 +48,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
     }
   }, [activeTab]);
 
-  const handleWithdrawalSubmit = (e) => {
+  const handleWithdrawalSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
@@ -57,7 +60,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = t('GdprVop.errors.emailInvalid');
     }
-    if (!bankAccount.trim()) {
+    if (refundMethod === 'bank' && !bankAccount.trim()) {
       newErrors.bankAccount = t('GdprVop.errors.bankAccount');
     }
     if (returnType === 'pouze' && !partialItemsText.trim()) {
@@ -70,21 +73,70 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
     }
 
     setErrors({});
-    const now = new Date();
-    const formattedDate = now.toLocaleDateString(lang === 'EN' ? 'en-US' : 'cs-CZ');
-    const formattedTime = now.toLocaleTimeString(lang === 'EN' ? 'en-US' : 'cs-CZ', { hour: '2-digit', minute: '2-digit' });
+    setIsSubmitting(true);
+    setSubmitError(null);
 
-    setSubmittedData({
-      orderNumber,
-      email,
-      bankAccount,
-      returnType,
-      partialItemsText,
-      refundMethod,
-      date: formattedDate,
-      time: formattedTime
-    });
-    setIsSubmitted(true);
+    try {
+      if (!supabase.from) {
+        throw new Error('Supabase client is not initialized');
+      }
+
+      // Save to database
+      const { error: dbError } = await supabase
+        .from('withdrawals')
+        .insert([{
+          order_number: orderNumber.trim(),
+          email: email.trim(),
+          bank_account: refundMethod === 'bank' ? bankAccount.trim() : null,
+          return_type: returnType,
+          partial_items_text: returnType === 'pouze' ? partialItemsText.trim() : null,
+          refund_method: refundMethod,
+          status: 'Čeká na zpracování'
+        }]);
+
+      if (dbError) throw dbError;
+
+      // Trigger Edge Function to send email confirmation
+      try {
+        const { error: fnError } = await supabase.functions.invoke('send-withdrawal-email', {
+          body: {
+            orderNumber: orderNumber.trim(),
+            email: email.trim(),
+            bankAccount: refundMethod === 'bank' ? bankAccount.trim() : null,
+            returnType: returnType,
+            partialItemsText: returnType === 'pouze' ? partialItemsText.trim() : null,
+            refundMethod: refundMethod,
+            lang: lang
+          }
+        });
+        if (fnError) console.warn('Edge Function email dispatch failed:', fnError);
+      } catch (errFn) {
+        console.warn('Edge Function email invoke failed:', errFn);
+      }
+
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString(lang === 'EN' ? 'en-US' : 'cs-CZ');
+      const formattedTime = now.toLocaleTimeString(lang === 'EN' ? 'en-US' : 'cs-CZ', { hour: '2-digit', minute: '2-digit' });
+
+      setSubmittedData({
+        orderNumber,
+        email,
+        bankAccount: refundMethod === 'bank' ? bankAccount : '',
+        returnType,
+        partialItemsText,
+        refundMethod,
+        date: formattedDate,
+        time: formattedTime
+      });
+      setIsSubmitted(true);
+    } catch (err) {
+      console.error('Error submitting withdrawal form:', err);
+      setSubmitError(lang === 'CZ'
+        ? 'Nepodařilo se odeslat odstoupení od smlouvy. Zkontrolujte prosím připojení nebo zda je vytvořena příslušná tabulka.'
+        : 'Failed to submit withdrawal request. Please check your connection or database setup.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -1042,7 +1094,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                       </tr>
                       <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                         <td style={{ padding: '10px 0', fontWeight: '700', color: 'var(--text-main)' }}>{t('GdprVop.bankAccountLabel')}</td>
-                        <td style={{ padding: '10px 0', textAlign: 'right' }}>{submittedData?.bankAccount}</td>
+                        <td style={{ padding: '10px 0', textAlign: 'right' }}>{submittedData?.bankAccount || '—'}</td>
                       </tr>
                       <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                         <td style={{ padding: '10px 0', fontWeight: '700', color: 'var(--text-main)' }}>{t('GdprVop.withdrawnItems')}</td>
@@ -1057,12 +1109,12 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                         <td style={{ padding: '10px 0', textAlign: 'right' }}>
                           {submittedData?.refundMethod === 'bank' 
                             ? t('GdprVop.refundMethodBank') 
-                            : t('GdprVop.refundMethodCredit')}
+                            : t('GdprVop.refundMethodCard')}
                         </td>
                       </tr>
                       <tr>
                         <td style={{ padding: '10px 0', fontWeight: '700', color: 'var(--text-main)' }}>{t('GdprVop.submittedOn')}</td>
-                        <td style={{ padding: '10px 0', textAlign: 'right' }}>{submittedData?.date} o {submittedData?.time}</td>
+                        <td style={{ padding: '10px 0', textAlign: 'right' }}>{submittedData?.date} {lang === 'EN' ? 'at' : 'o'} {submittedData?.time}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -1099,13 +1151,21 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   </div>
 
                   <div className="login-form-group">
-                    <label className="login-form-label">{t('GdprVop.bankAccountLabel')} *</label>
+                    <label className="login-form-label">
+                      {t('GdprVop.bankAccountLabel')}{refundMethod === 'bank' ? ' *' : ''}
+                    </label>
                     <input
                       type="text"
                       className={`login-form-input ${errors.bankAccount ? 'input-error' : ''}`}
                       value={bankAccount}
                       onChange={(e) => setBankAccount(e.target.value)}
                       placeholder="e.g. 123456789/0100"
+                      disabled={refundMethod !== 'bank'}
+                      style={{
+                        opacity: refundMethod === 'bank' ? 1 : 0.5,
+                        backgroundColor: refundMethod === 'bank' ? 'transparent' : 'rgba(255, 255, 255, 0.05)',
+                        cursor: refundMethod === 'bank' ? 'text' : 'not-allowed'
+                      }}
                     />
                     {errors.bankAccount && (
                       <p className="login-form-error-msg">{errors.bankAccount}</p>
@@ -1178,10 +1238,10 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                         />
                         <div style={{ textAlign: 'left' }}>
                           <span style={{ fontSize: '13px', fontWeight: '700', display: 'block', color: 'var(--text-main)' }}>
-                            {lang === 'EN' ? 'Bank Transfer' : 'Převodem na bankovní účet'}
+                            {t('GdprVop.refundMethodBank')}
                           </span>
                           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                            {lang === 'EN' ? 'Standard money refund option' : 'Standardní možnost vrácení peněz'}
+                            {lang === 'EN' ? 'Refund will be transferred to your bank account' : 'Standardní bankovní převod na zadaný účet'}
                           </span>
                         </div>
                       </label>
@@ -1192,26 +1252,26 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                         alignItems: 'center',
                         gap: '12px',
                         cursor: 'pointer',
-                        border: refundMethod === 'credit' ? '1px solid var(--color-gold)' : '1px solid var(--border-light)',
+                        border: refundMethod === 'gateway' ? '1px solid var(--color-gold)' : '1px solid var(--border-light)',
                         borderRadius: 'var(--radius-md)',
-                        backgroundColor: refundMethod === 'credit' ? 'rgba(253, 189, 22, 0.03)' : 'transparent',
+                        backgroundColor: refundMethod === 'gateway' ? 'rgba(253, 189, 22, 0.03)' : 'transparent',
                         transition: 'all 0.2s'
                       }}>
                         <input
                           type="radio"
                           name="refundMethod"
-                          checked={refundMethod === 'credit'}
-                          onChange={() => setRefundMethod('credit')}
+                          checked={refundMethod === 'gateway'}
+                          onChange={() => setRefundMethod('gateway')}
                           style={{ cursor: 'pointer' }}
                         />
                         <div style={{ textAlign: 'left' }}>
                           <span style={{ fontSize: '13px', fontWeight: '700', display: 'block', color: 'var(--text-main)' }}>
-                            {lang === 'EN' ? 'Store Credit to my user account (with 5% bonus)' : 'Formou Store Kreditu na můj uživatelský účet (s 5% bonusem)'}
+                            {t('GdprVop.refundMethodCard')}
                           </span>
                           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                             {lang === 'EN' 
-                              ? 'For registered customers; credited instantly after checking cards for future purchases' 
-                              : 'Pro registrované zákazníky; připíše se ihned po kontrole karet a lze využít na další nákupy'}
+                              ? 'Funds will be returned to the card used for the purchase' 
+                              : 'Prostředky budou vráceny zpět na kartu, kterou byla provedena platba'}
                           </span>
                         </div>
                       </label>
@@ -1242,9 +1302,30 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                     </p>
                   </div>
 
+                  {submitError && (
+                    <div style={{
+                      backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                      border: '1px solid rgba(239, 68, 68, 0.25)',
+                      padding: '12px 16px',
+                      borderRadius: 'var(--radius-md)',
+                      color: 'rgb(248, 113, 113)',
+                      fontSize: '13px',
+                      textAlign: 'left'
+                    }}>
+                      ⚠️ {submitError}
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
-                    <button type="submit" className="btn btn-primary" style={{ padding: '14px', width: '100%', fontWeight: '800', fontSize: '14px', cursor: 'pointer' }}>
-                      {t('GdprVop.btnSubmitWithdrawal')}
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      style={{ padding: '14px', width: '100%', fontWeight: '800', fontSize: '14px', cursor: 'pointer' }}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting
+                        ? (lang === 'EN' ? 'Sending Request...' : 'Odesílání žádosti...')
+                        : t('GdprVop.btnSubmitWithdrawal')}
                     </button>
                     <span style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center' }}>
                       {lang === 'EN'
@@ -1276,8 +1357,8 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 <li>
                   <strong>{lang === 'EN' ? 'Inspection & Payout:' : 'Kontrola a vrácení peněz:'}</strong>{' '}
                   {lang === 'EN'
-                    ? 'Once received, we will inspect the cards or shrink wrap seal. We will process your refund via bank transfer or Store Credit within 14 days of receiving the package (or receiving proof of shipment).'
-                    : 'Jakmile zásilku převezmeme, zkontrolujeme stav karet či neporušenost fólií u sealed produktů. Nejpozději do 14 dnů od převzetí vráceného zboží (nebo od okamžiku, kdy nám prokážete, že bylo zboží odesláno) vám vrátíme peníze na bankovní účet nebo připíšeme Store Credit.'}
+                    ? 'Once received, we will inspect the cards or shrink wrap seal. We will process your refund via bank transfer or back to your card within 14 days of receiving the package (or receiving proof of shipment).'
+                    : 'Jakmile zásilku převezmeme, zkontrolujeme stav karet či neporušenost fólií u sealed produktů. Nejpozději do 14 dnů od převzetí vráceného zboží (nebo od okamžiku, kdy nám prokážete, že bylo zboží odesláno) vám vrátíme peníze na bankovní účet nebo zpět na platební kartu.'}
                 </li>
               </ol>
             </div>

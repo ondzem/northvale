@@ -9063,6 +9063,9 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
     max-height: none !important;
     overflow-y: visible !important;
   }
+  .admin-accordion-content {
+    padding: 16px 12px !important;
+  }
 }
 
 
