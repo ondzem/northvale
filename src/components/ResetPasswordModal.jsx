@@ -150,7 +150,7 @@ export default function ResetPasswordModal({ isOpen, onClose, showToast }) {
             <button 
               type="submit" 
               className="login-submit-btn" 
-              style={{ width: '100%', marginTop: '24px' }}
+              style={{ width: '100%', marginTop: '20px' }}
               disabled={isSaving}
             >
               {isSaving 
@@ -164,10 +164,11 @@ export default function ResetPasswordModal({ isOpen, onClose, showToast }) {
               className="login-submit-btn" 
               style={{ 
                 width: '100%', 
-                marginTop: '12px', 
+                marginTop: '8px', 
                 background: 'transparent', 
                 border: '1px solid rgba(255, 255, 255, 0.2)', 
-                color: 'var(--text-color)' 
+                color: 'var(--text-color)',
+                boxShadow: 'none'
               }}
               disabled={isSaving}
             >
