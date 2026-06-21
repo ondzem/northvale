@@ -8569,7 +8569,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  max-height: 650px;
+  max-height: calc(100vh - 280px);
   overflow-y: auto;
   padding-right: 8px;
 }
@@ -9051,5 +9051,19 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 .search-result-row-hover:hover {
   background: rgba(253, 189, 22, 0.06) !important;
 }
+
+/* Enforce full height for ctf columns on mobile to enable page scrolling */
+@media (max-width: 768px) {
+  .ctf-tree {
+    max-height: none !important;
+    overflow-y: visible !important;
+    padding-right: 0 !important;
+  }
+  .ctf-form-col {
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+}
+
 
 

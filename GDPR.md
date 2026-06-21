@@ -85,6 +85,7 @@ Pro zajištění chodu e-shopu a poskytování služeb využíváme služeb prov
 4.3. **Poskytovatelé analytických a marketingových nástrojů:**
 *   **Google Ireland Limited** (Gordon House, Barrow Street, Dublin 4, Irsko) – nástroj **Google Analytics** (analýza návštěvnosti).
 *   **Microsoft Corporation** (One Microsoft Way, Redmond, WA 98052, USA) – nástroj **Microsoft Clarity** (vizuální analýza chování uživatelů, mapy kliknutí).
+*   **Brevo (Sendinblue SAS)** (se sídlem 106 boulevard Haussmann, 75008 Paříž, Francie) – nástroj pro rozesílání e-mailových kampaní a newsletterů.
 
 4.4. **Poskytovatelé IT služeb, hostingu a účetního ERP:**
 *   Dodavatelé webhostingu, databázových serverů, a programátoři zajišťující vývoj webu.

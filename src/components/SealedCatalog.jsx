@@ -625,7 +625,27 @@ const getSubSubcatDesc = (game, subcat, lang) => {
   return descs[c.desc] || c.desc;
 };
 
-export default function SealedCatalog({ products, addToCart, setSelectedProductId, setActivePage, filters, setFilters }) {
+function ChevronIcon() {
+  return (
+    <span className="chevron-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="10" 
+        height="10" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="3" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      >
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </span>
+  );
+}
+
+export default function SealedCatalog({ products, addToCart, setSelectedProductId, setActivePage, filters, setFilters, searchQuery, setSearchQuery }) {
   const { lang, t } = useTranslation();
   const [selectedGame, setSelectedGame] = useState(filters.game || 'all');
   const [selectedLangs, setSelectedLangs] = useState(filters.lang ? [filters.lang] : []);
@@ -648,6 +668,10 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
   const [activeSubcategory, setActiveSubcategory] = useState('all');
   const [activeSubsubcategory, setActiveSubsubcategory] = useState('all');
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [showAllSubcats, setShowAllSubcats] = useState(false);
+  const [showAllSubsubcats, setShowAllSubsubcats] = useState(false);
+
   useEffect(() => {
     let active = true;
     async function load() {
@@ -658,8 +682,18 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       }
     }
     load();
-    return () => { active = false; };
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      active = false;
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
+
 
   useEffect(() => {
     if (categoriesLoaded && dbCategories.length > 0) {
@@ -695,9 +729,10 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
 
   // Collapsible sections state
   const [expandedSections, setExpandedSections] = useState({
+    search: true,
     stock: true,
     lang: false,
-    packaging: false,
+    packaging: true,
     editions: false,
     brand: false,
     compatibility: false,
@@ -733,12 +768,106 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
   const [prevFilters, setPrevFilters] = useState(filters);
   if (filters !== prevFilters) {
     setPrevFilters(filters);
-    setSelectedGame(filters.game || 'all');
+    const nextGame = filters.game || 'all';
+    setSelectedGame(nextGame);
     setSelectedLangs(filters.lang ? [filters.lang] : []);
-    setActiveSubcategory(filters.type || filters.subsubcat || filters.subcat || filters.gameFilter || 'all');
-    setActiveSubsubcategory(filters.subsubcat || 'all');
-    setSelectedPackagingTypes(filters.type ? [filters.type] : []);
+    
+    // Resolve active subcategory & subsubcategory
+    let subcat = 'all';
+    let subsubcat = 'all';
+    if (filters.category_id) {
+      const cat = dbCategories.find(c => c.id === filters.category_id);
+      if (cat) {
+        if (cat.parent_id && cat.parent_id !== 'game-pokemon' && cat.parent_id !== 'game-lorcana' && cat.parent_id !== 'game-onepiece' && cat.parent_id !== 'game-riftbound' && cat.parent_id !== 'game-accessories' && cat.parent_id !== 'game-acrylics') {
+          subcat = cat.parent_id;
+          subsubcat = cat.id;
+        } else {
+          subcat = cat.id;
+        }
+      }
+    } else {
+      const resolved = resolveActiveCategoryFromFilters(nextGame, filters, dbCategories);
+      const cat = dbCategories.find(c => c.id === resolved);
+      if (cat) {
+        if (cat.parent_id && cat.parent_id !== 'game-pokemon' && cat.parent_id !== 'game-lorcana' && cat.parent_id !== 'game-onepiece' && cat.parent_id !== 'game-riftbound' && cat.parent_id !== 'game-accessories' && cat.parent_id !== 'game-acrylics') {
+          subcat = cat.parent_id;
+          subsubcat = cat.id;
+        } else {
+          subcat = cat.id;
+        }
+      }
+    }
+    
+    setActiveSubcategory(subcat);
+    setActiveSubsubcategory(subsubcat);
+    
+    // Set packaging types based on category_id or type
+    if (filters.category_id) {
+      const cat = dbCategories.find(c => c.id === filters.category_id);
+      if (cat) {
+        const isLevel2 = cat.parent_id === 'game-pokemon' || cat.parent_id === 'game-lorcana' || cat.parent_id === 'game-onepiece' || cat.parent_id === 'game-riftbound';
+        if (isLevel2) {
+          setSelectedPackagingTypes([cat.id]);
+        } else if (cat.parent_id) {
+          setSelectedPackagingTypes([cat.parent_id]);
+        }
+      }
+    } else if (filters.type) {
+      const root = dbCategories.find(c => c.game === nextGame && c.parent_id === null);
+      if (root) {
+        const matchedSubcat = dbCategories.find(c => c.parent_id === root.id && getHistoricalFilterForCategory(c.id)?.packagingType === filters.type);
+        if (matchedSubcat) {
+          setSelectedPackagingTypes([matchedSubcat.id]);
+        }
+      }
+    } else {
+      setSelectedPackagingTypes([]);
+    }
   }
+
+  const getSubcategoryCount = (catId) => {
+    const matchedIds = getCategoryAndDescendantIds(catId, dbCategories);
+    return baseSealed.filter(product => {
+      if (product.category_id) {
+        return matchedIds.includes(product.category_id);
+      } else {
+        return matchedIds.some(cid => matchesHistoricalCategory(product, cid));
+      }
+    }).length;
+  };
+
+  const handlePackagingTypeToggle = (catId) => {
+    setSelectedPackagingTypes(prev => {
+      const next = prev.includes(catId) ? prev.filter(id => id !== catId) : [...prev, catId];
+      
+      if (next.length === 1) {
+        setActiveSubcategory(next[0]);
+        setActiveSubsubcategory('all');
+        setFilters(f => ({ 
+          ...f, 
+          category_id: next[0], 
+          type: undefined, 
+          subcat: undefined, 
+          subsubcat: undefined, 
+          gameFilter: undefined 
+        }));
+      } else {
+        setActiveSubcategory('all');
+        setActiveSubsubcategory('all');
+        setFilters(f => ({ 
+          ...f, 
+          category_id: undefined, 
+          type: undefined, 
+          subcat: undefined, 
+          subsubcat: undefined, 
+          gameFilter: undefined 
+        }));
+      }
+      
+      return next;
+    });
+  };
+
 
   // Expandable description state
   const [isDescExpanded, setIsDescExpanded] = useState(false);
@@ -781,11 +910,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     return p.game === selectedGame && p.category !== 'Acrylics';
   });
 
-  // Extract available editions dynamically
-  const editions = Array.from(new Set(baseSealed.map(p => p.edition).filter(Boolean)));
 
-  // Extract available packaging types dynamically
-  const packagingTypes = Array.from(new Set(baseSealed.map(p => p.packagingType).filter(Boolean)));
 
   // Helper mappings
   const getProductBrand = (p) => {
@@ -836,14 +961,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     return 'Other';
   };
 
-  // Counts helpers
-  const getEditionCount = (ed) => {
-    return baseSealed.filter(p => p.edition === ed).length;
-  };
 
-  const getPackagingTypeCount = (pt) => {
-    return baseSealed.filter(p => p.packagingType === pt).length;
-  };
 
   const getBrandCount = (br) => {
     return baseSealed.filter(p => getProductBrand(p) === br).length;
@@ -881,6 +999,13 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
 
   // Filter logic
   const filteredProducts = sealedProducts.filter(product => {
+    // Search query filter
+    if (searchQuery && 
+        !product.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
+        !(product.edition && product.edition.toLowerCase().includes(searchQuery.toLowerCase()))) {
+      return false;
+    }
+
     // Game selection
     if (selectedGame !== 'all') {
       if (selectedGame === 'Accessories') {
@@ -918,10 +1043,21 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       if (!catMatch) return false;
     }
 
-    // Packaging Type filter (multiple checkboxes in sidebar)
-    if (selectedGame !== 'Accessories' && selectedGame !== 'Acrylics') {
-      if (selectedPackagingTypes.length > 0 && !selectedPackagingTypes.includes(product.packagingType)) return false;
+    // Packaging Type filter (multiple checkboxes in sidebar - using category IDs and descendants)
+    if (selectedGame !== 'Accessories' && selectedGame !== 'Acrylics' && selectedGame !== 'all') {
+      if (selectedPackagingTypes.length > 0) {
+        const matchesAnyChecked = selectedPackagingTypes.some(catId => {
+          const matchedIds = getCategoryAndDescendantIds(catId, dbCategories);
+          if (product.category_id) {
+            return matchedIds.includes(product.category_id);
+          } else {
+            return matchedIds.some(cid => matchesHistoricalCategory(product, cid));
+          }
+        });
+        if (!matchesAnyChecked) return false;
+      }
     }
+
 
     // Edition filter (multiple checkboxes in sidebar)
     if (selectedEditions.length > 0 && !selectedEditions.includes(product.edition)) return false;
@@ -967,7 +1103,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       <div className="sidebar-filter-section">
         <h4 className={`sidebar-filter-title collapsible ${expandedSections.stock ? 'active' : ''}`} onClick={() => toggleSection('stock')}>
           Skladová dostupnost
-          <span className="chevron-icon">{expandedSections.stock ? '▲' : '▼'}</span>
+          <ChevronIcon />
         </h4>
         {expandedSections.stock && (
           <div className="sidebar-checkbox-list">
@@ -1013,7 +1149,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       <div className="sidebar-filter-section">
         <h4 className={`sidebar-filter-title collapsible ${expandedSections.lang ? 'active' : ''}`} onClick={() => toggleSection('lang')}>
           Jazyk balení
-          <span className="chevron-icon">{expandedSections.lang ? '▲' : '▼'}</span>
+          <ChevronIcon />
         </h4>
         {expandedSections.lang && (
           <div className="sidebar-checkbox-list">
@@ -1044,86 +1180,59 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     );
   };
 
+  const renderPackagingFilter = () => {
+    if (selectedGame === 'all' || selectedGame === 'Accessories' || selectedGame === 'Acrylics') {
+      return null;
+    }
+
+    const root = dbCategories.find(c => c.game === selectedGame && c.parent_id === null);
+    if (!root) return null;
+
+    const gameSubcats = dbCategories.filter(c => c.parent_id === root.id && (c.type === 'sealed' || c.type === 'accessory'));
+    if (gameSubcats.length === 0) return null;
+
+    return (
+      <div className="sidebar-filter-section">
+        <h4 className={`sidebar-filter-title collapsible ${expandedSections.packaging ? 'active' : ''}`} onClick={() => toggleSection('packaging')}>
+          {lang === 'CZ' ? 'Typ balení' : 'Packaging Type'}
+          <ChevronIcon />
+        </h4>
+        {expandedSections.packaging && (
+          <div className="sidebar-checkbox-list">
+            {gameSubcats.map(sub => {
+              const count = getSubcategoryCount(sub.id);
+              const isDisabled = count === 0;
+              const isChecked = selectedPackagingTypes.includes(sub.id);
+              return (
+                <label key={sub.id} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => handlePackagingTypeToggle(sub.id)}
+                    disabled={isDisabled}
+                    className="sidebar-checkbox"
+                  />
+                  <span>{lang === 'CZ' ? sub.name_cz : sub.name_en}</span>
+                  <span className="filter-badge">{count}</span>
+                </label>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderTcgFilters = () => {
     return (
       <>
         {renderStockFilter()}
+        {renderPackagingFilter()}
         {renderLangFilter()}
-        {packagingTypes.length > 0 && (
-          <div className="sidebar-filter-section">
-            <h4 className={`sidebar-filter-title collapsible ${expandedSections.packaging ? 'active' : ''}`} onClick={() => toggleSection('packaging')}>
-              {lang === 'CZ' ? 'Typ balení' : 'Packaging Type'}
-              <span className="chevron-icon">{expandedSections.packaging ? '▲' : '▼'}</span>
-            </h4>
-            {expandedSections.packaging && (
-              <div className="sidebar-checkbox-list">
-                {packagingTypes.map(pt => {
-                  const count = getPackagingTypeCount(pt);
-                  const isDisabled = count === 0;
-                  return (
-                    <label key={pt} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
-                      <input
-                        type="checkbox"
-                        checked={selectedPackagingTypes.includes(pt)}
-                        onChange={() => {
-                          setSelectedPackagingTypes(prev => {
-                            const next = prev.includes(pt) ? prev.filter(p => p !== pt) : [...prev, pt];
-                            if (next.length === 1) {
-                              setActiveSubcategory(next[0]);
-                            } else {
-                              setActiveSubcategory('all');
-                            }
-                            return next;
-                          });
-                        }}
-                        disabled={isDisabled}
-                        className="sidebar-checkbox"
-                      />
-                      <span>{pt}</span>
-                      <span className="filter-badge">{count}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-        {editions.length > 0 && (
-          <div className="sidebar-filter-section">
-            <h4 className={`sidebar-filter-title collapsible ${expandedSections.editions ? 'active' : ''}`} onClick={() => toggleSection('editions')}>
-              {lang === 'CZ' ? 'Edice / Set' : 'Expansion / Set'}
-              <span className="chevron-icon">{expandedSections.editions ? '▲' : '▼'}</span>
-            </h4>
-            {expandedSections.editions && (
-              <div className="sidebar-checkbox-list scrollable">
-                {editions.map(ed => {
-                  const count = getEditionCount(ed);
-                  const isDisabled = count === 0;
-                  return (
-                    <label key={ed} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
-                      <input
-                        type="checkbox"
-                        checked={selectedEditions.includes(ed)}
-                        onChange={() => {
-                          setSelectedEditions(prev =>
-                            prev.includes(ed) ? prev.filter(e => e !== ed) : [...prev, ed]
-                          );
-                        }}
-                        disabled={isDisabled}
-                        className="sidebar-checkbox"
-                      />
-                      <span>{ed}</span>
-                      <span className="filter-badge">{count}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
       </>
     );
   };
+
 
   const renderAccessoriesFilters = () => {
     const brandsList = ['Dragon Shield', 'Ultra PRO', 'Ultimate Guard', 'Gamegenic'];
@@ -1142,7 +1251,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
         <div className="sidebar-filter-section">
           <h4 className={`sidebar-filter-title collapsible ${expandedSections.brand ? 'active' : ''}`} onClick={() => toggleSection('brand')}>
             Výrobce / Značka
-            <span className="chevron-icon">{expandedSections.brand ? '▲' : '▼'}</span>
+            <ChevronIcon />
           </h4>
           {expandedSections.brand && (
             <div className="sidebar-checkbox-list">
@@ -1174,7 +1283,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
         <div className="sidebar-filter-section">
           <h4 className={`sidebar-filter-title collapsible ${expandedSections.compatibility ? 'active' : ''}`} onClick={() => toggleSection('compatibility')}>
             Určeno pro (Kompatibilita)
-            <span className="chevron-icon">{expandedSections.compatibility ? '▲' : '▼'}</span>
+            <ChevronIcon />
           </h4>
           {expandedSections.compatibility && (
             <div className="sidebar-checkbox-list">
@@ -1206,7 +1315,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
         <div className="sidebar-filter-section">
           <h4 className={`sidebar-filter-title collapsible ${expandedSections.color ? 'active' : ''}`} onClick={() => toggleSection('color')}>
             Barva doplňku
-            <span className="chevron-icon">{expandedSections.color ? '▲' : '▼'}</span>
+            <ChevronIcon />
           </h4>
           {expandedSections.color && (
             <div className="sidebar-checkbox-list">
@@ -1252,7 +1361,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
         <div className="sidebar-filter-section">
           <h4 className={`sidebar-filter-title collapsible ${expandedSections.compatibility ? 'active' : ''}`} onClick={() => toggleSection('compatibility')}>
             Kompatibilita boxu
-            <span className="chevron-icon">{expandedSections.compatibility ? '▲' : '▼'}</span>
+            <ChevronIcon />
           </h4>
           {expandedSections.compatibility && (
             <div className="sidebar-checkbox-list">
@@ -1286,7 +1395,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
         <div className="sidebar-filter-section">
           <h4 className={`sidebar-filter-title collapsible ${expandedSections.thickness ? 'active' : ''}`} onClick={() => toggleSection('thickness')}>
             Tloušťka akrylu
-            <span className="chevron-icon">{expandedSections.thickness ? '▲' : '▼'}</span>
+            <ChevronIcon />
           </h4>
           {expandedSections.thickness && (
             <div className="sidebar-checkbox-list">
@@ -1318,7 +1427,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
         <div className="sidebar-filter-section">
           <h4 className={`sidebar-filter-title collapsible ${expandedSections.closing ? 'active' : ''}`} onClick={() => toggleSection('closing')}>
             Systém zavírání
-            <span className="chevron-icon">{expandedSections.closing ? '▲' : '▼'}</span>
+            <ChevronIcon />
           </h4>
           {expandedSections.closing && (
             <div className="sidebar-checkbox-list">
@@ -1437,21 +1546,41 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
           />
 
           {/* Filter: {lang === 'CZ' ? 'Karetní hra' : 'Card Game'} */}
+          {selectedGame === 'all' && (
+            <div className="sidebar-filter-section">
+              <h4 className="sidebar-filter-title">{lang === 'CZ' ? 'Karetní hra' : 'Card Game'}</h4>
+              <select
+                value={selectedGame}
+                onChange={(e) => setSelectedGame(e.target.value)}
+                className="sidebar-select"
+              >
+                <option value="all">{lang === 'CZ' ? 'Všechny sekce' : 'All sections'}</option>
+                <option value="Pokémon">Pokémon TCG</option>
+                <option value="Lorcana">Disney Lorcana</option>
+                <option value="One Piece">One Piece TCG</option>
+                <option value="Riftbound">Riftbound</option>
+                <option value="Accessories">{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}</option>
+                <option value="Acrylics">{lang === 'CZ' ? 'Akryly' : 'Acrylic Cases'}</option>
+              </select>
+            </div>
+          )}
+
+
+          {/* Filter: Search within category */}
           <div className="sidebar-filter-section">
-            <h4 className="sidebar-filter-title">{lang === 'CZ' ? 'Karetní hra' : 'Card Game'}</h4>
-            <select
-              value={selectedGame}
-              onChange={(e) => setSelectedGame(e.target.value)}
-              className="sidebar-select"
-            >
-              <option value="all">{lang === 'CZ' ? 'Všechny sekce' : 'All sections'}</option>
-              <option value="Pokémon">Pokémon TCG</option>
-              <option value="Lorcana">Disney Lorcana</option>
-              <option value="One Piece">One Piece TCG</option>
-              <option value="Riftbound">Riftbound</option>
-              <option value="Accessories">{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}</option>
-              <option value="Acrylics">{lang === 'CZ' ? 'Akryly' : 'Acrylic Cases'}</option>
-            </select>
+            <h4 className={`sidebar-filter-title collapsible ${expandedSections.search ? 'active' : ''}`} onClick={() => toggleSection('search')}>
+              {lang === 'CZ' ? 'Hledat produkt' : 'Search Product'}
+              <ChevronIcon />
+            </h4>
+            {expandedSections.search && (
+              <input 
+                type="text" 
+                placeholder={lang === 'CZ' ? 'Zadejte název...' : 'Search by name...'} 
+                value={searchQuery || ''} 
+                onChange={(e) => setSearchQuery(e.target.value)} 
+                className="sidebar-search-input"
+              />
+            )}
           </div>
 
           {/* Render category specific filters */}
@@ -1467,7 +1596,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
           <div className="sidebar-filter-section">
             <h4 className={`sidebar-filter-title collapsible ${expandedSections.price ? 'active' : ''}`} onClick={() => toggleSection('price')}>
               {lang === 'CZ' ? 'Maximální cena' : 'Max Price'}
-              <span className="chevron-icon">{expandedSections.price ? '▲' : '▼'}</span>
+              <ChevronIcon />
             </h4>
             {expandedSections.price && (
               <div className="sidebar-range-box">
@@ -1503,6 +1632,20 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
               setSelectedPackagingTypes([]);
               setActiveSubcategory('all');
               setActiveSubsubcategory('all');
+              setExpandedSections({
+                search: true,
+                stock: true,
+                lang: false,
+                packaging: false,
+                editions: false,
+                brand: false,
+                compatibility: false,
+                color: false,
+                thickness: false,
+                closing: false,
+                price: true
+              });
+              setSearchQuery('');
               setFilters({});
               setMobileFiltersOpen(false);
             }}
@@ -1526,7 +1669,24 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                   className="description-toggle-btn"
                   onClick={() => setIsDescExpanded(!isDescExpanded)}
                 >
-                  {isDescExpanded ? (lang === 'CZ' ? 'Méně informací ▲' : 'Less info ▲') : (lang === 'CZ' ? 'Více informací ▼' : 'More info ▼')}
+                  <span>{isDescExpanded ? (lang === 'CZ' ? 'Méně informací' : 'Less info') : (lang === 'CZ' ? 'Více informací' : 'More info')}</span>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="12" 
+                    height="12" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    style={{ 
+                      transition: 'transform 0.25s ease', 
+                      transform: isDescExpanded ? 'rotate(180deg)' : 'rotate(0deg)' 
+                    }}
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -1550,7 +1710,24 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                         className="description-toggle-btn"
                         onClick={() => setIsDescExpanded(!isDescExpanded)}
                       >
-                        {isDescExpanded ? (lang === 'CZ' ? 'Méně informací ▲' : 'Less info ▲') : (lang === 'CZ' ? 'Více informací ▼' : 'More info ▼')}
+                        <span>{isDescExpanded ? (lang === 'CZ' ? 'Méně informací' : 'Less info') : (lang === 'CZ' ? 'Více informací' : 'More info')}</span>
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          width="12" 
+                          height="12" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2.5" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          style={{ 
+                            transition: 'transform 0.25s ease', 
+                            transform: isDescExpanded ? 'rotate(180deg)' : 'rotate(0deg)' 
+                          }}
+                        >
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
                       </button>
                     </div>
                   )}
@@ -1566,8 +1743,8 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                 <div className="subcategories-section-title">
                   {selectedGame === 'Accessories' ? (lang === 'CZ' ? 'Vyberte kategorii doplňků' : 'Select Accessory Category') : selectedGame === 'Acrylics' ? (lang === 'CZ' ? 'Kompatibilita akrylového boxu' : 'Select Acrylic Category') : (lang === 'CZ' ? 'Vyberte typ balení' : 'Select Packaging Type')}
                 </div>
-                <div className="subcategory-grid">
-                  {subcategories.map(sub => {
+                <div className="subcategory-grid" style={isMobile && subcategories.length > 6 ? { marginBottom: '12px' } : { marginBottom: '48px' }}>
+                  {((isMobile && !showAllSubcats) ? subcategories.slice(0, 6) : subcategories).map(sub => {
                     const hasImage = sub.icon && sub.icon.props && sub.icon.props.src;
                     return (
                       <div
@@ -1594,18 +1771,59 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                     );
                   })}
                 </div>
+                {isMobile && subcategories.length > 6 && (
+                  <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '48px', marginTop: '8px' }}>
+                    <button
+                      onClick={() => setShowAllSubcats(!showAllSubcats)}
+                      className="show-more-categories-btn"
+                      style={{
+                        background: 'none',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        color: 'var(--color-gold)',
+                        fontSize: '13.5px',
+                        fontWeight: '700',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        cursor: 'pointer',
+                        padding: '4px 12px'
+                      }}
+                    >
+                      <span>{showAllSubcats ? (lang === 'CZ' ? 'Zobrazit méně' : 'Show less') : (lang === 'CZ' ? 'Zobrazit více' : 'Show more')}</span>
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="14" 
+                        height="14" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2.5" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        style={{ 
+                          transition: 'transform 0.25s ease', 
+                          transform: showAllSubcats ? 'rotate(180deg)' : 'rotate(0deg)' 
+                        }}
+                      >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                )}
               </>
             )
           ) : (
             (() => {
               const currentSubsubcats = getSubSubcategories(activeSubcategory);
+              const subsubcatsList = currentSubsubcats.filter(sub => sub.id !== 'all');
               return currentSubsubcats.length > 0 && activeSubsubcategory === 'all' && (
                 <>
                   <div className="subcategories-section-title">
                     {lang === 'CZ' ? 'Upřesněte typ balení' : 'Refine Packaging Type'}
                   </div>
-                  <div className="subcategory-grid">
-                    {currentSubsubcats.filter(sub => sub.id !== 'all').map(sub => {
+                  <div className="subcategory-grid" style={isMobile && subsubcatsList.length > 6 ? { marginBottom: '12px' } : { marginBottom: '48px' }}>
+                    {((isMobile && !showAllSubsubcats) ? subsubcatsList.slice(0, 6) : subsubcatsList).map(sub => {
                       const isEmoji = typeof sub.icon === 'string';
                       return (
                         <div
@@ -1628,10 +1846,52 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                       );
                     })}
                   </div>
+                  {isMobile && subsubcatsList.length > 6 && (
+                    <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '48px', marginTop: '8px' }}>
+                      <button
+                        onClick={() => setShowAllSubsubcats(!showAllSubsubcats)}
+                        className="show-more-categories-btn"
+                        style={{
+                          background: 'none',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          color: 'var(--color-gold)',
+                          fontSize: '13.5px',
+                          fontWeight: '700',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: 'pointer',
+                          padding: '4px 12px'
+                        }}
+                      >
+                        <span>{showAllSubsubcats ? (lang === 'CZ' ? 'Zobrazit méně' : 'Show less') : (lang === 'CZ' ? 'Zobrazit více' : 'Show more')}</span>
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          width="14" 
+                          height="14" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2.5" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          style={{ 
+                            transition: 'transform 0.25s ease', 
+                            transform: showAllSubsubcats ? 'rotate(180deg)' : 'rotate(0deg)' 
+                          }}
+                        >
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                 </>
               );
             })()
           )}
+
+
 
           {/* Toolbar panel */}
           <div className="catalog-toolbar">

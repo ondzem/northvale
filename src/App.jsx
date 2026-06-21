@@ -191,6 +191,9 @@ function AppContent() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
+  // Applied Discount Code State
+  const [appliedDiscount, setAppliedDiscount] = useState(null);
+
   // Cart State (Initialized from localStorage)
   const [cart, setCart] = useState(() => {
     try {
@@ -849,6 +852,7 @@ function AppContent() {
     });
 
     setCart([]);
+    setAppliedDiscount(null);
 
     // Save to Supabase if logged in
     try {
@@ -1030,6 +1034,8 @@ function AppContent() {
             setActivePage={navigateToPage}
             filters={filters}
             setFilters={setFilters}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
           />
         )}
 
@@ -1041,6 +1047,8 @@ function AppContent() {
             setActivePage={navigateToPage}
             filters={filters}
             setFilters={setFilters}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
           />
         )}
 
@@ -1117,6 +1125,8 @@ function AppContent() {
             setActivePage={navigateToPage}
             alert={showToast}
             onOpenLogin={() => setIsLoginModalOpen(true)}
+            appliedDiscount={appliedDiscount}
+            setAppliedDiscount={setAppliedDiscount}
           />
         )}
 
@@ -1146,6 +1156,9 @@ function AppContent() {
             cart={cart} 
             setCart={setCart} 
             setActivePage={navigateToPage} 
+            appliedDiscount={appliedDiscount}
+            setAppliedDiscount={setAppliedDiscount}
+            alert={showToast}
           />
         )}
 

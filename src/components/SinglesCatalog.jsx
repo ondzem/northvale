@@ -495,6 +495,26 @@ const getSubSubcatDesc = (game, subcat, lang) => {
   return descs[c.desc] || c.desc;
 };
 
+function ChevronIcon() {
+  return (
+    <span className="chevron-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="10" 
+        height="10" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="3" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      >
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </span>
+  );
+}
+
 export default function SinglesCatalog({ products, addToCart, setSelectedProductId, setActivePage, filters, setFilters, searchQuery, setSearchQuery }) {
   const { lang, t } = useTranslation();
   const [selectedGame, setSelectedGame] = useState(filters.game || 'Pokémon');
@@ -613,6 +633,10 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
   const [activeSubcategory, setActiveSubcategory] = useState('all');
   const [activeSubsubcategory, setActiveSubsubcategory] = useState('all');
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [showAllSubcats, setShowAllSubcats] = useState(false);
+  const [showAllSubsubcats, setShowAllSubsubcats] = useState(false);
+
   useEffect(() => {
     let active = true;
     async function load() {
@@ -623,8 +647,18 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
       }
     }
     load();
-    return () => { active = false; };
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      active = false;
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
+
 
   useEffect(() => {
     if (categoriesLoaded && dbCategories.length > 0) {
@@ -701,7 +735,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
 
   // Available filters options
   const baseSingles = singles.filter(s => s.game === selectedGame);
-  const editions = Array.from(new Set(baseSingles.map(s => s.edition)));
+
   const conditions = ['NM', 'EX', 'GD', 'LP', 'PL', 'PO'];
   const langs = ['EN', 'JP', 'CN', 'KR'];
 
@@ -756,10 +790,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
     return 'Other';
   };
 
-  // Dynamic filter count calculations
-  const getEditionCount = (ed) => {
-    return baseSingles.filter(card => card.edition === ed).length;
-  };
+
 
   const getRarityCount = (rarityGroup) => {
     return baseSingles.filter(card => getCardRarityGroup(card) === rarityGroup).length;
@@ -803,12 +834,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
     ? getDisplaySubcategories(selectedGame, 'single', dbCategories, lang)
     : [];
 
-  // Toggle helpers
-  const handleEditionToggle = (edition) => {
-    setSelectedEditions(prev => 
-      prev.includes(edition) ? prev.filter(e => e !== edition) : [...prev, edition]
-    );
-  };
+
 
   const handleConditionToggle = (cond) => {
     setSelectedConditions(prev => 
@@ -946,7 +972,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
       <div className="sidebar-filter-section">
         <h4 className={`sidebar-filter-title collapsible ${expandedSections.rarity ? 'active' : ''}`} onClick={() => toggleSection('rarity')}>
           {lang === 'CZ' ? 'Rarita' : 'Rarity'}
-          <span className="chevron-icon">{expandedSections.rarity ? '▲' : '▼'}</span>
+          <ChevronIcon />
         </h4>
         {expandedSections.rarity && (
           <div className="sidebar-checkbox-list">
@@ -1026,7 +1052,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
       <div className="sidebar-filter-section">
         <h4 className={`sidebar-filter-title collapsible ${expandedSections.color ? 'active' : ''}`} onClick={() => toggleSection('color')}>
           {title}
-          <span className="chevron-icon">{expandedSections.color ? '▲' : '▼'}</span>
+          <ChevronIcon />
         </h4>
         {expandedSections.color && (
           <div className="sidebar-checkbox-list">
@@ -1069,7 +1095,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
       <div className="sidebar-filter-section">
         <h4 className={`sidebar-filter-title collapsible ${expandedSections.finish ? 'active' : ''}`} onClick={() => toggleSection('finish')}>
           {lang === 'CZ' ? 'Provedení' : 'Finish'}
-          <span className="chevron-icon">{expandedSections.finish ? '▲' : '▼'}</span>
+          <ChevronIcon />
         </h4>
         {expandedSections.finish && (
           <div className="sidebar-checkbox-list">
@@ -1256,7 +1282,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
           <div className="sidebar-filter-section">
             <h4 className={`sidebar-filter-title collapsible ${expandedSections.search ? 'active' : ''}`} onClick={() => toggleSection('search')}>
               {lang === 'CZ' ? 'Hledat název karty' : 'Search Card Name'}
-              <span className="chevron-icon">{expandedSections.search ? '▲' : '▼'}</span>
+              <ChevronIcon />
             </h4>
             {expandedSections.search && (
               <input 
@@ -1269,34 +1295,6 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
             )}
           </div>
 
-          {/* Filter: Set / Edition checkboxes */}
-          <div className="sidebar-filter-section">
-            <h4 className={`sidebar-filter-title collapsible ${expandedSections.editions ? 'active' : ''}`} onClick={() => toggleSection('editions')}>
-              {lang === 'CZ' ? 'Edice / Set' : 'Expansion / Set'}
-              <span className="chevron-icon">{expandedSections.editions ? '▲' : '▼'}</span>
-            </h4>
-            {expandedSections.editions && (
-              <div className="sidebar-checkbox-list">
-                {editions.map(ed => {
-                  const count = getEditionCount(ed);
-                  const isDisabled = count === 0;
-                  return (
-                    <label key={ed} className={`sidebar-checkbox-label ${isDisabled ? 'disabled' : ''}`}>
-                      <input 
-                        type="checkbox" 
-                        checked={selectedEditions.includes(ed)} 
-                        onChange={() => handleEditionToggle(ed)}
-                        disabled={isDisabled}
-                        className="sidebar-checkbox"
-                      />
-                      <span>{ed}</span>
-                      <span className="filter-badge">{count}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            )}
-          </div>
 
           {/* Filter: Rarity */}
           {renderRarityFilter()}
@@ -1308,7 +1306,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
           <div className="sidebar-filter-section">
             <h4 className={`sidebar-filter-title collapsible ${expandedSections.condition ? 'active' : ''}`} onClick={() => toggleSection('condition')}>
               {lang === 'CZ' ? 'Stav karty' : 'Card Condition'}
-              <span className="chevron-icon">{expandedSections.condition ? '▲' : '▼'}</span>
+              <ChevronIcon />
             </h4>
             {expandedSections.condition && (
               <>
@@ -1354,7 +1352,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
           <div className="sidebar-filter-section">
             <h4 className={`sidebar-filter-title collapsible ${expandedSections.lang ? 'active' : ''}`} onClick={() => toggleSection('lang')}>
               {lang === 'CZ' ? 'Jazyk' : 'Language'}
-              <span className="chevron-icon">{expandedSections.lang ? '▲' : '▼'}</span>
+              <ChevronIcon />
             </h4>
             {expandedSections.lang && (
               <div className="sidebar-checkbox-list">
@@ -1386,7 +1384,7 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
           <div className="sidebar-filter-section">
             <h4 className={`sidebar-filter-title collapsible ${expandedSections.price ? 'active' : ''}`} onClick={() => toggleSection('price')}>
               {lang === 'CZ' ? 'Maximální cena' : 'Max Price'}
-              <span className="chevron-icon">{expandedSections.price ? '▲' : '▼'}</span>
+              <ChevronIcon />
             </h4>
             {expandedSections.price && (
               <div className="sidebar-range-box">
@@ -1445,7 +1443,24 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
                   className="description-toggle-btn"
                   onClick={() => setIsDescExpanded(!isDescExpanded)}
                 >
-                  {isDescExpanded ? (lang === 'CZ' ? 'Méně informací ▲' : 'Less info ▲') : (lang === 'CZ' ? 'Více informací ▼' : 'More info ▼')}
+                  <span>{isDescExpanded ? (lang === 'CZ' ? 'Méně informací' : 'Less info') : (lang === 'CZ' ? 'Více informací' : 'More info')}</span>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="12" 
+                    height="12" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    style={{ 
+                      transition: 'transform 0.25s ease', 
+                      transform: isDescExpanded ? 'rotate(180deg)' : 'rotate(0deg)' 
+                    }}
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -1474,7 +1489,24 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
                       className="description-toggle-btn"
                       onClick={() => setIsDescExpanded(!isDescExpanded)}
                     >
-                      {isDescExpanded ? (lang === 'CZ' ? 'Méně informací ▲' : 'Less info ▲') : (lang === 'CZ' ? 'Více informací ▼' : 'More info ▼')}
+                      <span>{isDescExpanded ? (lang === 'CZ' ? 'Méně informací' : 'Less info') : (lang === 'CZ' ? 'Více informací' : 'More info')}</span>
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="12" 
+                        height="12" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2.5" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        style={{ 
+                          transition: 'transform 0.25s ease', 
+                          transform: isDescExpanded ? 'rotate(180deg)' : 'rotate(0deg)' 
+                        }}
+                      >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -1489,31 +1521,71 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
                 <div className="subcategories-section-title">
                   {selectedGame === 'Pokémon' ? (lang === 'CZ' ? 'Populární kategorie vzácností' : 'Popular Rarity Categories') : (lang === 'CZ' ? `Vyberte vzácnost (${selectedGame})` : `Select Rarity (${selectedGame})`)}
                 </div>
-                <div className="subcategory-grid">
-                  {subcategories.map(sub => {
-                    const hasImage = sub.icon && sub.icon.props && sub.icon.props.src;
-                    return (
-                      <div 
-                        key={sub.id} 
-                        className={`subcategory-box ${activeSubcategory === sub.id ? 'active' : ''}`}
-                        onClick={() => {
-                          setActiveSubcategory(sub.id);
-                          setActiveSubsubcategory('all');
-                          setFilters(prev => ({ 
-                            ...prev, 
-                            rarity: sub.id === 'all' ? undefined : sub.id,
-                            subsubcat: undefined 
-                          }));
-                        }}
-                      >
-                        <span className={`subcategory-icon ${hasImage ? 'clean-img-container' : ''}`}>
-                          {sub.icon}
-                        </span>
-                        <span className="subcategory-name">{translateSubsubcatName(sub, lang)}</span>
-                      </div>
-                    );
-                  })}
-                </div>
+                 <div className="subcategory-grid" style={isMobile && subcategories.length > 6 ? { marginBottom: '12px' } : { marginBottom: '48px' }}>
+                   {((isMobile && !showAllSubcats) ? subcategories.slice(0, 6) : subcategories).map(sub => {
+                     const hasImage = sub.icon && sub.icon.props && sub.icon.props.src;
+                     return (
+                       <div 
+                         key={sub.id} 
+                         className={`subcategory-box ${activeSubcategory === sub.id ? 'active' : ''}`}
+                         onClick={() => {
+                           setActiveSubcategory(sub.id);
+                           setActiveSubsubcategory('all');
+                           setFilters(prev => ({ 
+                             ...prev, 
+                             rarity: sub.id === 'all' ? undefined : sub.id,
+                             subsubcat: undefined 
+                           }));
+                         }}
+                       >
+                         <span className={`subcategory-icon ${hasImage ? 'clean-img-container' : ''}`}>
+                           {sub.icon}
+                         </span>
+                         <span className="subcategory-name">{translateSubsubcatName(sub, lang)}</span>
+                       </div>
+                     );
+                   })}
+                 </div>
+                 {isMobile && subcategories.length > 6 && (
+                   <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '48px', marginTop: '8px' }}>
+                     <button
+                       onClick={() => setShowAllSubcats(!showAllSubcats)}
+                       className="show-more-categories-btn"
+                       style={{
+                         background: 'none',
+                         backgroundColor: 'transparent',
+                         border: 'none',
+                         color: 'var(--color-gold)',
+                         fontSize: '13.5px',
+                         fontWeight: '700',
+                         display: 'inline-flex',
+                         alignItems: 'center',
+                         gap: '6px',
+                         cursor: 'pointer',
+                         padding: '4px 12px'
+                       }}
+                     >
+                       <span>{showAllSubcats ? (lang === 'CZ' ? 'Zobrazit méně' : 'Show less') : (lang === 'CZ' ? 'Zobrazit více' : 'Show more')}</span>
+                       <svg 
+                         xmlns="http://www.w3.org/2000/svg" 
+                         width="14" 
+                         height="14" 
+                         viewBox="0 0 24 24" 
+                         fill="none" 
+                         stroke="currentColor" 
+                         strokeWidth="2.5" 
+                         strokeLinecap="round" 
+                         strokeLinejoin="round" 
+                         style={{ 
+                           transition: 'transform 0.25s ease', 
+                           transform: showAllSubcats ? 'rotate(180deg)' : 'rotate(0deg)' 
+                         }}
+                       >
+                         <polyline points="6 9 12 15 18 9"></polyline>
+                       </svg>
+                     </button>
+                   </div>
+                 )}
               </>
             )
           ) : (
@@ -1531,8 +1603,8 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
                   <div className="subcategories-section-title">
                     {lang === 'CZ' ? 'Upřesněte vzácnost' : 'Refine Rarity'}
                   </div>
-                  <div className="subcategory-grid">
-                    {displaySubsubcats.map(sub => {
+                  <div className="subcategory-grid" style={isMobile && displaySubsubcats.length > 6 ? { marginBottom: '12px' } : { marginBottom: '48px' }}>
+                    {((isMobile && !showAllSubsubcats) ? displaySubsubcats.slice(0, 6) : displaySubsubcats).map(sub => {
                       const isEmoji = typeof sub.icon === 'string';
                       const hasImage = sub.icon && sub.icon.props && sub.icon.props.src;
                       return (
@@ -1557,10 +1629,51 @@ export default function SinglesCatalog({ products, addToCart, setSelectedProduct
                       );
                     })}
                   </div>
+                  {isMobile && displaySubsubcats.length > 6 && (
+                    <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '48px', marginTop: '8px' }}>
+                      <button
+                        onClick={() => setShowAllSubsubcats(!showAllSubsubcats)}
+                        className="show-more-categories-btn"
+                        style={{
+                          background: 'none',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          color: 'var(--color-gold)',
+                          fontSize: '13.5px',
+                          fontWeight: '700',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: 'pointer',
+                          padding: '4px 12px'
+                        }}
+                      >
+                        <span>{showAllSubsubcats ? (lang === 'CZ' ? 'Zobrazit méně' : 'Show less') : (lang === 'CZ' ? 'Zobrazit více' : 'Show more')}</span>
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          width="14" 
+                          height="14" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2.5" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          style={{ 
+                            transition: 'transform 0.25s ease', 
+                            transform: showAllSubsubcats ? 'rotate(180deg)' : 'rotate(0deg)' 
+                          }}
+                        >
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                 </>
               );
             })()
           )}
+
 
           {/* Toolbar panel */}
           <div className="catalog-toolbar">

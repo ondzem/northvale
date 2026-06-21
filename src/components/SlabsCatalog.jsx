@@ -55,7 +55,27 @@ const subSubcategoriesConfig = {
 };
 
 
-export default function SlabsCatalog({ products, addToCart, setSelectedProductId, setActivePage, filters, setFilters }) {
+function ChevronIcon() {
+  return (
+    <span className="chevron-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="10" 
+        height="10" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="3" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      >
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </span>
+  );
+}
+
+export default function SlabsCatalog({ products, addToCart, setSelectedProductId, setActivePage, filters, setFilters, searchQuery, setSearchQuery }) {
   const { lang, t } = useTranslation();
   const [selectedCompanies, setSelectedCompanies] = useState(filters.company ? [filters.company] : []);
   const [onlyGrade10, setOnlyGrade10] = useState(false);
@@ -69,6 +89,7 @@ export default function SlabsCatalog({ products, addToCart, setSelectedProductId
 
   // Collapsible sections state
   const [expandedSections, setExpandedSections] = useState({
+    search: true,
     grading: true,
     grade: false,
     lang: false,
@@ -153,6 +174,13 @@ export default function SlabsCatalog({ products, addToCart, setSelectedProductId
 
   // Filter logic
   const filteredSlabs = slabs.filter(product => {
+    // Search query filter
+    if (searchQuery && 
+        !product.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
+        !(product.edition && product.edition.toLowerCase().includes(searchQuery.toLowerCase()))) {
+      return false;
+    }
+
     // Certifying Company Filter (sidebar checkboxes or top active subcategory)
     if (selectedCompanies.length > 0 && !selectedCompanies.includes(product.company)) return false;
 
@@ -272,7 +300,7 @@ export default function SlabsCatalog({ products, addToCart, setSelectedProductId
           <div className="sidebar-filter-section">
             <h4 className={`sidebar-filter-title collapsible ${expandedSections.grading ? 'active' : ''}`} onClick={() => toggleSection('grading')}>
               {lang === 'CZ' ? 'Gradingová firma' : 'Grading Company'}
-              <span className="chevron-icon">{expandedSections.grading ? '▲' : '▼'}</span>
+              <ChevronIcon />
             </h4>
             {expandedSections.grading && (
               <div className="sidebar-checkbox-list">
@@ -307,11 +335,28 @@ export default function SlabsCatalog({ products, addToCart, setSelectedProductId
             )}
           </div>
 
+          {/* Filter: Search within category */}
+          <div className="sidebar-filter-section">
+            <h4 className={`sidebar-filter-title collapsible ${expandedSections.search ? 'active' : ''}`} onClick={() => toggleSection('search')}>
+              {lang === 'CZ' ? 'Hledat název karty' : 'Search Card Name'}
+              <ChevronIcon />
+            </h4>
+            {expandedSections.search && (
+              <input 
+                type="text" 
+                placeholder={lang === 'CZ' ? 'Zadejte název...' : 'Search by name...'} 
+                value={searchQuery || ''} 
+                onChange={(e) => setSearchQuery(e.target.value)} 
+                className="sidebar-search-input"
+              />
+            )}
+          </div>
+
           {/* Filter: {lang === 'CZ' ? 'Výsledná známka' : 'Grade'} */}
           <div className="sidebar-filter-section">
             <h4 className={`sidebar-filter-title collapsible ${expandedSections.grade ? 'active' : ''}`} onClick={() => toggleSection('grade')}>
               {lang === 'CZ' ? 'Výsledná známka' : 'Grade'}
-              <span className="chevron-icon">{expandedSections.grade ? '▲' : '▼'}</span>
+              <ChevronIcon />
             </h4>
             {expandedSections.grade && (
               <div className="sidebar-checkbox-list">
@@ -344,7 +389,7 @@ export default function SlabsCatalog({ products, addToCart, setSelectedProductId
           <div className="sidebar-filter-section">
             <h4 className={`sidebar-filter-title collapsible ${expandedSections.lang ? 'active' : ''}`} onClick={() => toggleSection('lang')}>
               {lang === 'CZ' ? 'Jazyk karty' : 'Card Language'}
-              <span className="chevron-icon">{expandedSections.lang ? '▲' : '▼'}</span>
+              <ChevronIcon />
             </h4>
             {expandedSections.lang && (
               <div className="sidebar-checkbox-list">
@@ -377,7 +422,7 @@ export default function SlabsCatalog({ products, addToCart, setSelectedProductId
           <div className="sidebar-filter-section">
             <h4 className={`sidebar-filter-title collapsible ${expandedSections.price ? 'active' : ''}`} onClick={() => toggleSection('price')}>
               {lang === 'CZ' ? 'Maximální cena' : 'Max Price'}
-              <span className="chevron-icon">{expandedSections.price ? '▲' : '▼'}</span>
+              <ChevronIcon />
             </h4>
             {expandedSections.price && (
               <div className="sidebar-range-box">
@@ -408,11 +453,13 @@ export default function SlabsCatalog({ products, addToCart, setSelectedProductId
               setActiveSubcategory('all');
               setActiveSubsubcategory('all');
               setExpandedSections({
+                search: true,
                 grading: true,
                 grade: false,
                 lang: false,
                 price: true
               });
+              setSearchQuery('');
               setFilters({});
               setMobileFiltersOpen(false);
             }}
@@ -442,7 +489,24 @@ export default function SlabsCatalog({ products, addToCart, setSelectedProductId
                   className="description-toggle-btn"
                   onClick={() => setIsDescExpanded(!isDescExpanded)}
                 >
-                  {isDescExpanded ? (lang === 'CZ' ? 'Méně informací ▲' : 'Less info ▲') : (lang === 'CZ' ? 'Více informací ▼' : 'More info ▼')}
+                  <span>{isDescExpanded ? (lang === 'CZ' ? 'Méně informací' : 'Less info') : (lang === 'CZ' ? 'Více informací' : 'More info')}</span>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="12" 
+                    height="12" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    style={{ 
+                      transition: 'transform 0.25s ease', 
+                      transform: isDescExpanded ? 'rotate(180deg)' : 'rotate(0deg)' 
+                    }}
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -455,12 +519,29 @@ export default function SlabsCatalog({ products, addToCart, setSelectedProductId
                 <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`}>
                   {subSubcategoriesConfig[activeSubcategory]?.desc[lang] || (lang === 'CZ' ? 'Detailní popis slabs se připravuje.' : 'Detailed description of slabs is being prepared.')}
                 </p>
-                <button
-                  className="description-toggle-btn"
-                  onClick={() => setIsDescExpanded(!isDescExpanded)}
-                >
-                  {isDescExpanded ? (lang === 'CZ' ? 'Méně informací ▲' : 'Less info ▲') : (lang === 'CZ' ? 'Více informací ▼' : 'More info ▼')}
-                </button>
+                  <button
+                    className="description-toggle-btn"
+                    onClick={() => setIsDescExpanded(!isDescExpanded)}
+                  >
+                    <span>{isDescExpanded ? (lang === 'CZ' ? 'Méně informací' : 'Less info') : (lang === 'CZ' ? 'Více informací' : 'More info')}</span>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="12" 
+                      height="12" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2.5" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      style={{ 
+                        transition: 'transform 0.25s ease', 
+                        transform: isDescExpanded ? 'rotate(180deg)' : 'rotate(0deg)' 
+                      }}
+                    >
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
               </div>
             </div>
           )}

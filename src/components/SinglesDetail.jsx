@@ -127,6 +127,17 @@ const parseFormattedText = (text, isMini = false) => {
 export default function SinglesDetail({ productId, products, addToCart, setSelectedProductId, setActivePage, setFilters, alert }) {
   const { lang, t } = useTranslation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxZoomStyle, setLightboxZoomStyle] = useState({ display: 'none' });
   
@@ -456,7 +467,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
 
       {/* Breadcrumbs Navigation */}
       <div className="container">
-        <nav className="breadcrumbs-nav">
+        <nav className="breadcrumbs-nav" style={isMobile ? { marginBottom: '28px' } : undefined}>
         <span className="breadcrumb-item" onClick={() => { setActivePage('home'); }}>
           {t('common.home')}
         </span>
@@ -479,8 +490,21 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
 
       <div className="container">
         <div style={styles.layout}>
+        {/* Mobile-only Header */}
+        {isMobile && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', marginBottom: '24px' }}>
+            <h2 style={{ ...styles.cardTitle, margin: 0, padding: 0, fontSize: '24px' }}>{product.name}</h2>
+            <div className="rating-stars-container" style={{ marginTop: 0 }}>
+              <span className="rating-star-gold">{'★'.repeat(5)}</span>
+              <span className="rating-count-link" onClick={() => scrollToSection('hodnoceni')}>
+                ({reviews.length} {lang === 'CZ' ? 'hodnocení' : 'reviews'})
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Left Column: Clean Image Gallery */}
-        <div className="product-detail-left-col" style={styles.leftCol}>
+        <div className="product-detail-left-col" style={{ ...styles.leftCol, marginBottom: isMobile ? '12px' : '0px' }}>
           <div className="detail-gallery-wrapper">
             {/* Left Nav Arrow */}
             {images.length > 1 && (
@@ -534,23 +558,27 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
 
         {/* Right Column: Title, Ratings, Pricing, Buy Action */}
         <div className="product-detail-right-col" style={{ ...styles.rightCol, background: 'transparent', border: 'none', boxShadow: 'none', padding: 0 }}>
-          <h2 style={styles.cardTitle}>{product.name}</h2>
+          {!isMobile && <h2 style={styles.cardTitle}>{product.name}</h2>}
           
           {/* Rating stars and count link */}
-          <div className="rating-stars-container">
-            <span className="rating-star-gold">{'★'.repeat(5)}</span>
-            <span className="rating-count-link" onClick={() => scrollToSection('hodnoceni')}>
-              ({reviews.length} {lang === 'CZ' ? 'hodnocení' : 'reviews'})
-            </span>
-          </div>
+          {!isMobile && (
+            <div className="rating-stars-container">
+              <span className="rating-star-gold">{'★'.repeat(5)}</span>
+              <span className="rating-count-link" onClick={() => scrollToSection('hodnoceni')}>
+                ({reviews.length} {lang === 'CZ' ? 'hodnocení' : 'reviews'})
+              </span>
+            </div>
+          )}
 
           {/* Short description with more info link */}
-          <div className="product-short-desc">
-            {parseFormattedText(product.shortDesc || fallbackShortDesc)}
-            <span className="more-info-link" onClick={() => scrollToSection('popis')} style={{ display: 'inline-block', marginLeft: '6px' }}>
-              {lang === 'CZ' ? ' Víc informací' : ' More info'}
-            </span>
-          </div>
+          {!isMobile && (
+            <div className="product-short-desc">
+              {parseFormattedText(product.shortDesc || fallbackShortDesc)}
+              <span className="more-info-link" onClick={() => scrollToSection('popis')} style={{ display: 'inline-block', marginLeft: '6px' }}>
+                {lang === 'CZ' ? ' Víc informací' : ' More info'}
+              </span>
+            </div>
+          )}
 
           {/* Variant Selectors */}
           {product.variants && product.variants.length > 1 && (

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
 
-export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, alert, onOpenLogin }) {
+export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, alert, onOpenLogin, appliedDiscount, setAppliedDiscount }) {
   const { lang, t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -24,7 +24,9 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const [dic, setDic] = useState('');
   const [notes, setNotes] = useState('');
 
-
+  // Discount code states
+  const [promoInput, setPromoInput] = useState(appliedDiscount ? appliedDiscount.code : '');
+  const [promoLoading, setPromoLoading] = useState(false);
 
   // ComGate Payment Gateway Simulator States
   const [isGatewayOpen, setIsGatewayOpen] = useState(false);
@@ -35,6 +37,12 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
 
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
+  // Calculate discount
+  const discountAmount = appliedDiscount 
+    ? Math.round(cartSubtotal * (appliedDiscount.discount_percent / 100)) 
+    : 0;
+  const subtotalAfterDiscount = Math.max(0, cartSubtotal - discountAmount);
+
   // Shipping cost
   let shippingCost = 79;
   if (shipping === 'zasilkovna') shippingCost = 79;
@@ -44,8 +52,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   else if (shipping === 'posta-cenne') shippingCost = 110;
   else if (shipping === 'pardubice') shippingCost = 0;
 
-  // Free shipping above 2000 CZK for Zásilkovna, GLS, DPD
-  if (cartSubtotal > 2000 && (shipping === 'zasilkovna' || shipping === 'gls' || shipping === 'dpd')) {
+  // Free shipping above 2000 CZK for Zásilkovna, GLS, DPD (checked on total after discount)
+  if (subtotalAfterDiscount > 2000 && (shipping === 'zasilkovna' || shipping === 'gls' || shipping === 'dpd')) {
     shippingCost = 0;
   }
 
@@ -53,9 +61,58 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const paymentSurcharge = payment === 'cod' ? 25 : 0;
 
   // Store Credit capping calculations
-  const totalBeforeCredit = Math.max(0, cartSubtotal + shippingCost + paymentSurcharge);
+  const totalBeforeCredit = Math.max(0, subtotalAfterDiscount + shippingCost + paymentSurcharge);
   const actualAppliedCredit = Math.min(appliedCredit, totalBeforeCredit);
   const finalTotal = Math.max(0, totalBeforeCredit - actualAppliedCredit);
+
+  const handleApplyDiscount = async () => {
+    if (!promoInput.trim()) return;
+    setPromoLoading(true);
+    try {
+      const codeClean = promoInput.trim().toUpperCase();
+      const { data, error } = await supabase
+        .from('discount_codes')
+        .select('*')
+        .eq('code', codeClean)
+        .eq('active', true)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data) {
+        setAppliedDiscount(data);
+        if (alert) {
+          alert(
+            lang === 'CZ' 
+              ? `Slevový kód "${data.code}" (${data.discount_percent}%) byl úspěšně uplatněn.` 
+              : `Discount code "${data.code}" (${data.discount_percent}%) has been successfully applied.`,
+            'success'
+          );
+        }
+      } else {
+        if (alert) {
+          alert(
+            lang === 'CZ' 
+              ? 'Zadaný slevový kód je neplatný nebo neexistuje.' 
+              : 'The entered discount code is invalid or does not exist.',
+            'error'
+          );
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      if (alert) {
+        alert(
+          lang === 'CZ' 
+            ? 'Chyba při ověřování slevového kódu.' 
+            : 'Error validating discount code.',
+          'error'
+        );
+      }
+    } finally {
+      setPromoLoading(false);
+    }
+  };
 
   // Auto-fill form fields when logged in user details change
   useEffect(() => {
@@ -162,6 +219,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                 quantity: item.quantity
               })),
               subtotal: cartSubtotal,
+              discountCode: appliedDiscount ? appliedDiscount.code : null,
+              discountAmount: discountAmount,
               shippingCost,
               paymentSurcharge,
               creditApplied: creditUsed,
@@ -224,7 +283,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       }
     };
     handleCallback();
-  }, [cart, cartSubtotal, shippingCost, paymentSurcharge, finalTotal, actualAppliedCredit, shipping, lang]);
+  }, [cart, cartSubtotal, shippingCost, paymentSurcharge, finalTotal, actualAppliedCredit, shipping, lang, appliedDiscount, discountAmount]);
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
@@ -325,6 +384,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         quantity: item.quantity
       })),
       subtotal: cartSubtotal,
+      discountCode: appliedDiscount ? appliedDiscount.code : null,
+      discountAmount: discountAmount,
       shippingCost,
       paymentSurcharge,
       creditApplied: actualAppliedCredit,
@@ -1278,8 +1339,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                         {lang === 'CZ' ? 'Doručení do 24-48 h na Vámi vybrané místo.' : 'Delivery within 24-48 h to your selected location.'}
                       </span>
                     </span>
-                    <span className={`pof-price ${cartSubtotal > 2000 ? 'is-free' : ''}`}>
-                      {cartSubtotal > 2000 ? (lang === 'CZ' ? 'Zdarma' : 'Free') : (lang === 'CZ' ? '79 Kč' : '79 CZK')}
+                     <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
+                      {subtotalAfterDiscount > 2000 ? (lang === 'CZ' ? 'Zdarma' : 'Free') : (lang === 'CZ' ? '79 Kč' : '79 CZK')}
                     </span>
                   </button>
 
@@ -1297,8 +1358,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                         {lang === 'CZ' ? 'Spolehlivé doručení kurýrem přímo k Vám domů.' : 'Reliable delivery by courier directly to your home.'}
                       </span>
                     </span>
-                    <span className={`pof-price ${cartSubtotal > 2000 ? 'is-free' : ''}`}>
-                      {cartSubtotal > 2000 ? (lang === 'CZ' ? 'Zdarma' : 'Free') : (lang === 'CZ' ? '99 Kč' : '99 CZK')}
+                     <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
+                      {subtotalAfterDiscount > 2000 ? (lang === 'CZ' ? 'Zdarma' : 'Free') : (lang === 'CZ' ? '99 Kč' : '99 CZK')}
                     </span>
                   </button>
 
@@ -1316,8 +1377,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                         {lang === 'CZ' ? 'Komfortní doručení na adresu s možností změny termínu online.' : 'Comfortable home delivery with online schedule changes.'}
                       </span>
                     </span>
-                    <span className={`pof-price ${cartSubtotal > 2000 ? 'is-free' : ''}`}>
-                      {cartSubtotal > 2000 ? (lang === 'CZ' ? 'Zdarma' : 'Free') : (lang === 'CZ' ? '109 Kč' : '109 CZK')}
+                     <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
+                      {subtotalAfterDiscount > 2000 ? (lang === 'CZ' ? 'Zdarma' : 'Free') : (lang === 'CZ' ? '109 Kč' : '109 CZK')}
                     </span>
                   </button>
 
@@ -1537,7 +1598,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                               alert(lang === 'CZ' ? 'Nemáte dostatek kreditu.' : 'You do not have enough store credit.', 'error');
                               return;
                             }
-                            const maxPossibleCredit = Math.max(0, cartSubtotal + shippingCost + paymentSurcharge - isicDiscount);
+                            const maxPossibleCredit = Math.max(0, subtotalAfterDiscount + shippingCost + paymentSurcharge - isicDiscount);
                             const finalApplied = Math.min(val, maxPossibleCredit);
                             setAppliedCredit(finalApplied);
                             setCreditInput(finalApplied.toString());
@@ -1550,34 +1611,81 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   </div>
                 )}
 
-                {/* Totals Summary */}
-                <div className="pof-srows">
-                  <div className="pof-srow">
-                    <span><span className="__om-t">{lang === 'CZ' ? 'Mezisoučet' : 'Subtotal'}</span></span>
-                    <span className="pof-sdots"></span>
-                    <span>{cartSubtotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} <span className="__om-t">{lang === 'CZ' ? 'Kč' : 'CZK'}</span></span>
-                  </div>
-                  <div className="pof-srow">
-                    <span><span className="__om-t">{lang === 'CZ' ? 'Doprava' : 'Shipping'}</span></span>
-                    <span className="pof-sdots"></span>
-                    <span>{shippingCost === 0 ? (lang === 'CZ' ? 'Zdarma' : 'Free') : `${shippingCost} ${lang === 'CZ' ? 'Kč' : 'CZK'}`}</span>
-                  </div>
-                  {paymentSurcharge > 0 && (
-                    <div className="pof-srow">
-                      <span><span className="__om-t">{lang === 'CZ' ? 'Dobírkový příplatek' : 'COD Surcharge'}</span></span>
-                      <span className="pof-sdots"></span>
-                      <span>{paymentSurcharge} <span className="__om-t">{lang === 'CZ' ? 'Kč' : 'CZK'}</span></span>
-                    </div>
-                  )}
+                 {/* Discount Code Input */}
+                 <div className="pof-isic" style={{ padding: '20px 0', borderBottom: '1px solid rgba(240, 240, 240, 0.07)' }}>
+                   <div className="pof-isic-head">
+                     <span className="__om-t">{lang === 'CZ' ? 'Slevový kód' : 'Discount Code'}</span>
+                   </div>
+                   <div className="pof-isic-row">
+                     <input 
+                       type="text" 
+                       placeholder={lang === 'CZ' ? 'Zadejte kód' : 'Enter code'}
+                       value={promoInput} 
+                       onChange={(e) => setPromoInput(e.target.value)}
+                       disabled={!!appliedDiscount || promoLoading}
+                       style={{ background: 'transparent', border: 'none', outline: 'none', color: '#fff', fontSize: '14px', flexGrow: 1 }}
+                     />
+                     {appliedDiscount ? (
+                       <button 
+                         type="button"
+                         onClick={() => {
+                           setAppliedDiscount(null);
+                           setPromoInput('');
+                         }}
+                         style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', cursor: 'pointer' }}
+                       >
+                         <span className="__om-t">{lang === 'CZ' ? 'Odstranit' : 'Remove'}</span>
+                       </button>
+                     ) : (
+                       <button 
+                         type="button"
+                         onClick={handleApplyDiscount}
+                         disabled={promoLoading}
+                         style={{ background: 'transparent', border: 'none', color: 'rgb(253, 189, 22)', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', cursor: 'pointer' }}
+                       >
+                         <span className="__om-t">{promoLoading ? (lang === 'CZ' ? 'Ověřování...' : 'Verifying...') : (lang === 'CZ' ? 'Uplatnit' : 'Apply')}</span>
+                       </button>
+                     )}
+                   </div>
+                 </div>
 
-                  {actualAppliedCredit > 0 && (
-                    <div className="pof-srow" style={{ color: 'var(--nv-green)' }}>
-                      <span><span className="__om-t">{lang === 'CZ' ? 'Uplatněný kredit' : 'Store Credit applied'}</span></span>
-                      <span className="pof-sdots"></span>
-                      <span>-{actualAppliedCredit.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} <span className="__om-t">{lang === 'CZ' ? 'Kč' : 'CZK'}</span></span>
-                    </div>
-                  )}
-                </div>
+                 {/* Totals Summary */}
+                 <div className="pof-srows">
+                   <div className="pof-srow">
+                     <span><span className="__om-t">{lang === 'CZ' ? 'Mezisoučet' : 'Subtotal'}</span></span>
+                     <span className="pof-sdots"></span>
+                     <span>{cartSubtotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} <span className="__om-t">{lang === 'CZ' ? 'Kč' : 'CZK'}</span></span>
+                   </div>
+
+                   {appliedDiscount && (
+                     <div className="pof-srow" style={{ color: 'var(--color-gold)' }}>
+                       <span><span className="__om-t">{lang === 'CZ' ? `Sleva (${appliedDiscount.code})` : `Discount (${appliedDiscount.code})`}</span></span>
+                       <span className="pof-sdots"></span>
+                       <span>-{discountAmount.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} <span className="__om-t">{lang === 'CZ' ? 'Kč' : 'CZK'}</span></span>
+                     </div>
+                   )}
+
+                   <div className="pof-srow">
+                     <span><span className="__om-t">{lang === 'CZ' ? 'Doprava' : 'Shipping'}</span></span>
+                     <span className="pof-sdots"></span>
+                     <span>{shippingCost === 0 ? (lang === 'CZ' ? 'Zdarma' : 'Free') : `${shippingCost} ${lang === 'CZ' ? 'Kč' : 'CZK'}`}</span>
+                   </div>
+                   {paymentSurcharge > 0 && (
+                     <div className="pof-srow">
+                       <span><span className="__om-t">{lang === 'CZ' ? 'Dobírkový příplatek' : 'COD Surcharge'}</span></span>
+                       <span className="pof-sdots"></span>
+                       <span>{paymentSurcharge} <span className="__om-t">{lang === 'CZ' ? 'Kč' : 'CZK'}</span></span>
+                     </div>
+                   )}
+
+                   {actualAppliedCredit > 0 && (
+                     <div className="pof-srow" style={{ color: 'var(--nv-green)' }}>
+                       <span><span className="__om-t">{lang === 'CZ' ? 'Uplatněný kredit' : 'Store Credit applied'}</span></span>
+                       <span className="pof-sdots"></span>
+                       <span>-{actualAppliedCredit.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} <span className="__om-t">{lang === 'CZ' ? 'Kč' : 'CZK'}</span></span>
+                     </div>
+                   )}
+                 </div>
 
                 <div className="pof-total">
                   <span><span className="__om-t">{lang === 'CZ' ? 'Celkem' : 'Total due'}</span></span>

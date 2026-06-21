@@ -1,11 +1,66 @@
 import { useState } from 'react';
 import { useTranslation } from '../context/LanguageContext';
+import { supabase } from '../supabase';
 
-export default function Cart({ cart, setCart, setActivePage }) {
+export default function Cart({ cart, setCart, setActivePage, appliedDiscount, setAppliedDiscount, alert }) {
   const { lang, t } = useTranslation();
-  const [promoCode, setPromoCode] = useState('');
+  const [promoCode, setPromoCode] = useState(appliedDiscount ? appliedDiscount.code : '');
+  const [promoLoading, setPromoLoading] = useState(false);
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return;
+    setPromoLoading(true);
+    try {
+      const codeClean = promoCode.trim().toUpperCase();
+      const { data, error } = await supabase
+        .from('discount_codes')
+        .select('*')
+        .eq('code', codeClean)
+        .eq('active', true)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data) {
+        setAppliedDiscount(data);
+        if (alert) {
+          alert(
+            lang === 'CZ' 
+              ? `Slevový kód "${data.code}" (${data.discount_percent}%) byl úspěšně uplatněn.` 
+              : `Discount code "${data.code}" (${data.discount_percent}%) has been successfully applied.`,
+            'success'
+          );
+        }
+      } else {
+        if (alert) {
+          alert(
+            lang === 'CZ' 
+              ? 'Zadaný slevový kód je neplatný nebo neexistuje.' 
+              : 'The entered discount code is invalid or does not exist.',
+            'error'
+          );
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      if (alert) {
+        alert(
+          lang === 'CZ' 
+            ? 'Chyba při ověřování slevového kódu.' 
+            : 'Error validating discount code.',
+          'error'
+        );
+      }
+    } finally {
+      setPromoLoading(false);
+    }
+  };
 
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const discountAmount = appliedDiscount 
+    ? Math.round(subtotal * (appliedDiscount.discount_percent / 100)) 
+    : 0;
+  const finalTotal = Math.max(0, subtotal - discountAmount);
   
   const updateQuantity = (itemId, delta) => {
     setCart(prev => {
@@ -24,9 +79,9 @@ export default function Cart({ cart, setCart, setActivePage }) {
   };
 
   const freeShippingThreshold = 2000;
-  const isFreeShipping = subtotal >= freeShippingThreshold;
-  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
-  const shippingPercent = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
+  const isFreeShipping = finalTotal >= freeShippingThreshold;
+  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - finalTotal);
+  const shippingPercent = Math.min(100, Math.round((finalTotal / freeShippingThreshold) * 100));
 
   return (
     <div className="container fade-in">
@@ -234,6 +289,15 @@ export default function Cart({ cart, setCart, setActivePage }) {
                     <span className="ckf-sdots"></span>
                     <span>{subtotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}</span>
                   </div>
+
+                  {appliedDiscount && (
+                    <div className="ckf-srow" style={{ color: 'var(--color-gold)' }}>
+                      <span>{lang === 'CZ' ? `Sleva (${appliedDiscount.code})` : `Discount (${appliedDiscount.code})`}</span>
+                      <span className="ckf-sdots"></span>
+                      <span>-{discountAmount.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}</span>
+                    </div>
+                  )}
+
                   <div className="ckf-srow">
                     <span>{t('Cart.shipping')}</span>
                     <span className="ckf-sdots"></span>
@@ -245,7 +309,7 @@ export default function Cart({ cart, setCart, setActivePage }) {
                 <div className="ckf-total">
                   <span>{t('Cart.total')}</span>
                   <span className="ckf-total-val">
-                    {subtotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}
+                    {finalTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}
                   </span>
                 </div>
 
@@ -256,10 +320,28 @@ export default function Cart({ cart, setCart, setActivePage }) {
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
                     placeholder={t('Cart.promoPlaceholder')}
+                    disabled={!!appliedDiscount || promoLoading}
                   />
-                  <button type="button" onClick={() => alert(lang === 'CZ' ? `Zadali jste kód: ${promoCode}` : `Code entered: ${promoCode}`)}>
-                    {t('Cart.promoBtn')}
-                  </button>
+                  {appliedDiscount ? (
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        setAppliedDiscount(null);
+                        setPromoCode('');
+                      }}
+                      style={{ background: '#ef4444', color: '#fff' }}
+                    >
+                      {lang === 'CZ' ? 'Odebrat' : 'Remove'}
+                    </button>
+                  ) : (
+                    <button 
+                      type="button" 
+                      onClick={handleApplyPromo}
+                      disabled={promoLoading}
+                    >
+                      {promoLoading ? (lang === 'CZ' ? 'Ověřování...' : 'Verifying...') : t('Cart.promoBtn')}
+                    </button>
+                  )}
                 </div>
 
                 {/* Action Button */}

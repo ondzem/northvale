@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../../context/LanguageContext';
 import {
   fetchFaqData,
@@ -12,6 +12,8 @@ import {
 
 export default function FaqTab({ showToast }) {
   const { lang } = useTranslation();
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
   const [faqData, setFaqData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,6 +28,44 @@ export default function FaqTab({ showToast }) {
 
   // Delete confirmation modal state
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, type: '', target: null });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  const isInitialMount = useRef(true);
+
+  // Smooth scroll to form on mobile when edit/add is initiated
+  useEffect(() => {
+    if (isMobile && formState) {
+      setTimeout(() => {
+        const formElement = document.querySelector('.ctf-form-col');
+        if (formElement) {
+          formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 150);
+    }
+  }, [formState, isMobile]);
+
+  // Smooth scroll back to tree on mobile when form is closed/saved
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    if (isMobile && !formState) {
+      const treeElement = document.querySelector('.ctf-tree-col');
+      if (treeElement) {
+        treeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, [formState, isMobile]);
 
   useEffect(() => {
     loadData();
@@ -253,11 +293,11 @@ export default function FaqTab({ showToast }) {
   };
 
   return (
-    <div className="ctf-shell" style={{ display: 'flex', gap: '32px', minHeight: '500px', flexDirection: window.innerWidth < 768 ? 'column' : 'row' }}>
+    <div className="ctf-shell" style={{ display: 'flex', gap: '32px', minHeight: '500px', flexDirection: isMobile ? 'column' : 'row' }}>
       
       {/* LEFT COLUMN: FAQ list / tree */}
-      <section className="ctf-tree-col" style={{ flex: '1.2 1 0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+      <section className="ctf-tree-col" style={{ flex: isMobile ? 'none' : '1.2 1 0', width: isMobile ? '100%' : undefined, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '12px' : '8px', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'center', marginBottom: '16px' }}>
           <div>
             <h3 className="ctf-col-title" style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#fff' }}>
               {lang === 'CZ' ? 'Přehled témat a dotazů' : 'FAQ Topics & Questions'}
@@ -266,11 +306,11 @@ export default function FaqTab({ showToast }) {
               {lang === 'CZ' ? 'Zde můžete řadit témata i dotazy nahoru/dolů.' : 'Reorder topics and questions here.'}
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', width: isMobile ? '100%' : 'auto' }}>
             <button 
               type="button" 
               className="btn btn-secondary" 
-              style={{ fontSize: '11px', padding: '6px 12px' }}
+              style={{ flex: isMobile ? 1 : 'none', fontSize: '11px', padding: '6px 12px' }}
               onClick={handleInitAddCategory}
             >
               + {lang === 'CZ' ? 'Nové téma' : 'New Topic'}
@@ -278,7 +318,7 @@ export default function FaqTab({ showToast }) {
             <button 
               type="button" 
               className="btn btn-primary" 
-              style={{ fontSize: '11px', padding: '6px 12px' }}
+              style={{ flex: isMobile ? 1 : 'none', fontSize: '11px', padding: '6px 12px' }}
               disabled={faqData.length === 0}
               onClick={() => handleInitAddItem()}
             >
@@ -296,29 +336,82 @@ export default function FaqTab({ showToast }) {
             </p>
           </div>
         ) : (
-          <div className="ctf-tree" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div className="ctf-tree" style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: '12px',
+            maxHeight: isMobile ? 'none' : 'calc(100vh - 280px)',
+            overflowY: isMobile ? 'visible' : 'auto',
+            paddingRight: isMobile ? '0' : '8px',
+            WebkitOverflowScrolling: 'touch'
+          }}>
             {faqData.map((cat, idx) => {
               const isExpanded = expandedCats[cat.id] ?? true;
               return (
                 <div key={cat.id} style={{ borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                   
                   {/* Category Header */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(255,255,255,0.02)', borderBottom: isExpanded ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: 1 }} onClick={() => handleToggleExpand(cat.id)}>
-                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.2s ease' }}>▶</span>
-                      <strong style={{ color: '#fff', fontSize: '14px' }}>{lang === 'CZ' ? cat.name_cz : cat.name_en}</strong>
-                      <span style={{ fontSize: '11px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.04)', padding: '2px 6px', borderRadius: '10px' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    flexDirection: isMobile ? 'column' : 'row',
+                    alignItems: isMobile ? 'stretch' : 'center',
+                    justifyContent: 'space-between', 
+                    padding: isMobile ? '12px 10px' : '12px 16px', 
+                    background: 'rgba(255,255,255,0.02)', 
+                    borderBottom: isExpanded ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                    gap: isMobile ? '10px' : '0'
+                  }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '8px', 
+                      cursor: 'pointer', 
+                      flex: 1 
+                    }} onClick={() => handleToggleExpand(cat.id)}>
+                      <span style={{ 
+                        fontSize: '10px', 
+                        color: 'var(--text-muted)', 
+                        transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', 
+                        display: 'inline-block', 
+                        transition: 'transform 0.2s ease', 
+                        flexShrink: 0,
+                        marginTop: '1px' 
+                      }}>▶</span>
+                      <strong style={{ 
+                        color: '#fff', 
+                        fontSize: '14px', 
+                        lineHeight: '1.4', 
+                        wordBreak: 'break-word' 
+                      }}>{lang === 'CZ' ? cat.name_cz : cat.name_en}</strong>
+                      <span style={{ 
+                        fontSize: '10px', 
+                        color: 'var(--text-muted)', 
+                        background: 'rgba(255,255,255,0.04)', 
+                        padding: '2px 6px', 
+                        borderRadius: '10px', 
+                        flexShrink: 0,
+                        marginLeft: '4px',
+                        alignSelf: 'center'
+                      }}>
                         {cat.questions?.length || 0}
                       </span>
                     </div>
 
                     {/* Category actions */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: isMobile ? '12px' : '6px',
+                      justifyContent: isMobile ? 'flex-end' : 'flex-end',
+                      borderTop: isMobile ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                      paddingTop: isMobile ? '8px' : '0',
+                      marginTop: isMobile ? '2px' : '0'
+                    }}>
                       <button 
                         type="button" 
                         onClick={() => handleMoveCategory(idx, 'up')}
                         disabled={idx === 0}
-                        style={{ background: 'none', border: 'none', color: idx === 0 ? 'rgba(255,255,255,0.1)' : 'var(--text-muted)', padding: '4px', cursor: idx === 0 ? 'not-allowed' : 'pointer' }}
+                        style={{ background: 'none', border: 'none', color: idx === 0 ? 'rgba(255,255,255,0.1)' : 'var(--text-muted)', padding: isMobile ? '6px' : '4px', cursor: idx === 0 ? 'not-allowed' : 'pointer', fontSize: isMobile ? '14px' : '11px' }}
                         title={lang === 'CZ' ? 'Posunout nahoru' : 'Move up'}
                       >
                         ▲
@@ -327,7 +420,7 @@ export default function FaqTab({ showToast }) {
                         type="button" 
                         onClick={() => handleMoveCategory(idx, 'down')}
                         disabled={idx === faqData.length - 1}
-                        style={{ background: 'none', border: 'none', color: idx === faqData.length - 1 ? 'rgba(255,255,255,0.1)' : 'var(--text-muted)', padding: '4px', cursor: idx === faqData.length - 1 ? 'not-allowed' : 'pointer' }}
+                        style={{ background: 'none', border: 'none', color: idx === faqData.length - 1 ? 'rgba(255,255,255,0.1)' : 'var(--text-muted)', padding: isMobile ? '6px' : '4px', cursor: idx === faqData.length - 1 ? 'not-allowed' : 'pointer', fontSize: isMobile ? '14px' : '11px' }}
                         title={lang === 'CZ' ? 'Posunout dolů' : 'Move down'}
                       >
                         ▼
@@ -335,7 +428,7 @@ export default function FaqTab({ showToast }) {
                       <button 
                         type="button" 
                         onClick={() => handleInitEditCategory(cat)}
-                        style={{ background: 'none', border: 'none', color: 'var(--color-gold)', padding: '4px', cursor: 'pointer', fontSize: '12px' }}
+                        style={{ background: 'none', border: 'none', color: 'var(--color-gold)', padding: isMobile ? '6px' : '4px', cursor: 'pointer', fontSize: isMobile ? '14px' : '12px' }}
                         title={lang === 'CZ' ? 'Upravit téma' : 'Edit topic'}
                       >
                         ✏️
@@ -343,7 +436,7 @@ export default function FaqTab({ showToast }) {
                       <button 
                         type="button" 
                         onClick={() => handleDeleteCategoryClick(cat)}
-                        style={{ background: 'none', border: 'none', color: '#ef4444', padding: '4px', cursor: 'pointer', fontSize: '12px' }}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', padding: isMobile ? '6px' : '4px', cursor: 'pointer', fontSize: isMobile ? '14px' : '12px' }}
                         title={lang === 'CZ' ? 'Smazat téma' : 'Delete topic'}
                       >
                         🗑️
@@ -353,7 +446,7 @@ export default function FaqTab({ showToast }) {
 
                   {/* Nested Questions */}
                   {isExpanded && (
-                    <div style={{ padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: '6px', background: 'rgba(0,0,0,0.1)' }}>
+                    <div style={{ padding: isMobile ? '8px' : '8px 12px', display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(0,0,0,0.1)' }}>
                       {(cat.questions || []).length === 0 ? (
                         <p style={{ margin: '8px', color: 'var(--text-muted)', fontSize: '12px', fontStyle: 'italic' }}>
                           {lang === 'CZ' ? 'Žádné dotazy v tomto tématu.' : 'No questions in this topic.'}
@@ -367,24 +460,46 @@ export default function FaqTab({ showToast }) {
                             key={item.id} 
                             style={{ 
                               display: 'flex', 
-                              justifyContent: 'space-between', 
-                              alignItems: 'center', 
-                              padding: '8px 12px', 
+                              flexDirection: isMobile ? 'column' : 'row',
+                              alignItems: isMobile ? 'stretch' : 'center', 
+                              justifyContent: 'space-between',
+                              padding: isMobile ? '12px 10px' : '10px 14px', 
                               borderRadius: 'var(--radius-sm)', 
                               background: formState?.type === 'item' && formState?.data?.id === item.id ? 'rgba(253, 189, 22, 0.08)' : 'rgba(255,255,255,0.02)',
-                              border: formState?.type === 'item' && formState?.data?.id === item.id ? '1px solid rgba(253, 189, 22, 0.2)' : '1px solid transparent'
+                              border: formState?.type === 'item' && formState?.data?.id === item.id ? '1px solid rgba(253, 189, 22, 0.2)' : '1px solid rgba(255,255,255,0.04)',
+                              gap: isMobile ? '12px' : '16px'
                             }}
                           >
-                            <span style={{ fontSize: '13px', color: 'var(--text-main)', paddingRight: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>
-                              {lang === 'CZ' ? item.question_cz : item.question_en}
-                            </span>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              <div style={{ display: 'flex', gap: '6px' }}>
+                                <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-gold)' }}>CZ:</span>
+                                <span style={{ fontSize: '13px', color: 'var(--text-main)', lineHeight: '1.4', wordBreak: 'break-word' }}>
+                                  {item.question_cz}
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', gap: '6px' }}>
+                                <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)' }}>EN:</span>
+                                <span style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.4', wordBreak: 'break-word' }}>
+                                  {item.question_en}
+                                </span>
+                              </div>
+                            </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                            <div style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: isMobile ? '12px' : '6px', 
+                              flexShrink: 0,
+                              justifyContent: isMobile ? 'flex-end' : 'flex-end',
+                              borderTop: isMobile ? '1px solid rgba(255,255,255,0.03)' : 'none',
+                              paddingTop: isMobile ? '6px' : '0',
+                              marginTop: isMobile ? '2px' : '0'
+                            }}>
                               <button 
                                 type="button" 
                                 onClick={() => handleMoveItem(cat.id, qIdx, 'up')}
                                 disabled={qIdx === 0}
-                                style={{ background: 'none', border: 'none', color: qIdx === 0 ? 'rgba(255,255,255,0.05)' : 'var(--text-muted)', padding: '2px', cursor: qIdx === 0 ? 'not-allowed' : 'pointer', fontSize: '10px' }}
+                                style={{ background: 'none', border: 'none', color: qIdx === 0 ? 'rgba(255,255,255,0.05)' : 'var(--text-muted)', padding: isMobile ? '4px' : '2px', cursor: qIdx === 0 ? 'not-allowed' : 'pointer', fontSize: isMobile ? '12px' : '10px' }}
                                 title={lang === 'CZ' ? 'Posunout nahoru' : 'Move up'}
                               >
                                 ▲
@@ -393,7 +508,7 @@ export default function FaqTab({ showToast }) {
                                 type="button" 
                                 onClick={() => handleMoveItem(cat.id, qIdx, 'down')}
                                 disabled={qIdx === (cat.questions || []).length - 1}
-                                style={{ background: 'none', border: 'none', color: qIdx === (cat.questions || []).length - 1 ? 'rgba(255,255,255,0.05)' : 'var(--text-muted)', padding: '2px', cursor: qIdx === (cat.questions || []).length - 1 ? 'not-allowed' : 'pointer', fontSize: '10px' }}
+                                style={{ background: 'none', border: 'none', color: qIdx === (cat.questions || []).length - 1 ? 'rgba(255,255,255,0.05)' : 'var(--text-muted)', padding: isMobile ? '4px' : '2px', cursor: qIdx === (cat.questions || []).length - 1 ? 'not-allowed' : 'pointer', fontSize: isMobile ? '12px' : '10px' }}
                                 title={lang === 'CZ' ? 'Posunout dolů' : 'Move down'}
                               >
                                 ▼
@@ -401,7 +516,7 @@ export default function FaqTab({ showToast }) {
                               <button 
                                 type="button" 
                                 onClick={() => handleInitEditItem(item)}
-                                style={{ background: 'none', border: 'none', color: 'var(--color-gold)', padding: '2px', cursor: 'pointer', fontSize: '11px' }}
+                                style={{ background: 'none', border: 'none', color: 'var(--color-gold)', padding: isMobile ? '4px' : '2px', cursor: 'pointer', fontSize: isMobile ? '13px' : '11px' }}
                                 title={lang === 'CZ' ? 'Upravit dotaz' : 'Edit question'}
                               >
                                 ✏️
@@ -409,7 +524,7 @@ export default function FaqTab({ showToast }) {
                               <button 
                                 type="button" 
                                 onClick={() => handleDeleteItemClick(item)}
-                                style={{ background: 'none', border: 'none', color: '#ef4444', padding: '2px', cursor: 'pointer', fontSize: '11px' }}
+                                style={{ background: 'none', border: 'none', color: '#ef4444', padding: isMobile ? '4px' : '2px', cursor: 'pointer', fontSize: isMobile ? '13px' : '11px' }}
                                 title={lang === 'CZ' ? 'Smazat dotaz' : 'Delete question'}
                               >
                                 🗑️
@@ -428,7 +543,18 @@ export default function FaqTab({ showToast }) {
       </section>
 
       {/* RIGHT COLUMN: Form for add / edit */}
-      <section className="ctf-form-col" style={{ flex: '1 1 0', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid rgba(255,255,255,0.06)', padding: '24px', boxSizing: 'border-box' }}>
+      <section className="ctf-form-col" style={{ 
+        flex: isMobile ? 'none' : '1 1 0', 
+        width: isMobile ? '100%' : undefined, 
+        background: 'var(--bg-secondary)', 
+        borderRadius: 'var(--radius-lg)', 
+        border: '1px solid rgba(255,255,255,0.06)', 
+        padding: isMobile ? '16px' : '24px', 
+        boxSizing: 'border-box',
+        maxHeight: isMobile ? 'none' : 'calc(100vh - 280px)',
+        overflowY: isMobile ? 'visible' : 'auto',
+        WebkitOverflowScrolling: 'touch'
+      }}>
         {!formState ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '300px', textAlign: 'center', color: 'var(--text-muted)' }}>
             <span style={{ fontSize: '32px', marginBottom: '16px' }}>⚙️</span>
@@ -586,11 +712,11 @@ export default function FaqTab({ showToast }) {
             )}
 
             {/* BUTTONS */}
-            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: isMobile ? 'column-reverse' : 'row', gap: '10px', marginTop: '8px' }}>
               <button 
                 type="button" 
                 className="btn btn-secondary" 
-                style={{ flex: 1 }}
+                style={{ flex: 1, width: isMobile ? '100%' : 'auto' }}
                 onClick={() => setFormState(null)}
               >
                 {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
@@ -598,7 +724,7 @@ export default function FaqTab({ showToast }) {
               <button 
                 type="submit" 
                 className="btn btn-primary" 
-                style={{ flex: 1.5 }}
+                style={{ flex: 1.5, width: isMobile ? '100%' : 'auto' }}
               >
                 {lang === 'CZ' ? 'Uložit změny' : 'Save Changes'}
               </button>

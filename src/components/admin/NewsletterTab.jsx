@@ -5,6 +5,18 @@ import { fetchSubscribers, deleteSubscriber } from '../../services/newsletter';
 
 export default function NewsletterTab({ showToast }) {
   const { lang } = useTranslation();
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   const [subscribers, setSubscribers] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
   const [loadingSubs, setLoadingSubs] = useState(true);
@@ -556,7 +568,8 @@ export default function NewsletterTab({ showToast }) {
     setBlocks(prev => {
       const next = [...prev];
       if (cropTarget.index !== undefined && cropTarget.index < next.length) {
-        next[cropTarget.index].content = croppedUrl;
+        const targetField = cropTarget.field || 'content';
+        next[cropTarget.index][targetField] = croppedUrl;
       }
       return next;
     });
@@ -571,10 +584,10 @@ export default function NewsletterTab({ showToast }) {
   );
 
   return (
-    <div className="ctf-shell" style={{ display: 'flex', gap: '24px', minHeight: '600px', flexDirection: 'row', textAlign: 'left', width: '100%', boxSizing: 'border-box' }}>
+    <div className="ctf-shell" style={{ display: 'flex', gap: '24px', minHeight: '600px', flexDirection: isMobile ? 'column' : 'row', textAlign: 'left', width: '100%', boxSizing: 'border-box' }}>
       
       {/* LEFT COLUMN: Subscribers Overview & Campaign History (Tabbed layout to save space) */}
-      <section className="ctf-tree-col" style={{ flex: '0.8 1 0', minWidth: '260px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <section className="ctf-tree-col" style={{ flex: isMobile ? 'none' : '0.8 1 0', width: isMobile ? '100%' : undefined, minWidth: isMobile ? '100%' : '260px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         
         {/* Tabs controls */}
         <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.02)', padding: '4px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
@@ -635,12 +648,12 @@ export default function NewsletterTab({ showToast }) {
                 {lang === 'CZ' ? 'Žádní odběratelé.' : 'No subscribers.'}
               </p>
             ) : (
-              <div style={{ maxHeight: '350px', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 'var(--radius-sm)' }}>
+              <div style={{ maxHeight: '350px', overflowY: 'auto', overflowX: 'auto', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 'var(--radius-sm)' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.01)' }}>
                       <th style={{ padding: '6px', textAlign: 'left', color: 'var(--text-muted)' }}>E-mail</th>
-                      <th style={{ padding: '6px', textAlign: 'center', color: 'var(--text-muted)', width: '45px' }}>Jazyk</th>
+                      {!isMobile && <th style={{ padding: '6px', textAlign: 'center', color: 'var(--text-muted)', width: '45px' }}>Jazyk</th>}
                       <th style={{ padding: '6px', textAlign: 'left', color: 'var(--text-muted)', width: '60px' }}>Stav</th>
                       <th style={{ padding: '6px', textAlign: 'center', color: 'var(--text-muted)', width: '30px' }}></th>
                     </tr>
@@ -649,7 +662,7 @@ export default function NewsletterTab({ showToast }) {
                     {filteredSubscribers.map(sub => (
                       <tr key={sub.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                         <td style={{ padding: '6px', color: '#fff', wordBreak: 'break-all' }}>{sub.email}</td>
-                        <td style={{ padding: '6px', textAlign: 'center', color: 'var(--text-muted)' }}>{sub.lang || 'CZ'}</td>
+                        {!isMobile && <td style={{ padding: '6px', textAlign: 'center', color: 'var(--text-muted)' }}>{sub.lang || 'CZ'}</td>}
                         <td style={{ padding: '6px', color: sub.confirmed ? '#10b981' : '#f59e0b', fontWeight: 'bold' }}>
                           {sub.confirmed ? (lang === 'CZ' ? 'Aktiv' : 'Active') : (lang === 'CZ' ? 'Čeká' : 'DOI')}
                         </td>
@@ -703,7 +716,7 @@ export default function NewsletterTab({ showToast }) {
       </section>
 
       {/* MIDDLE COLUMN: Campaign Composer Form (Block Editor) */}
-      <section className="ctf-form-col" style={{ flex: '1.2 1 0', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid rgba(255,255,255,0.06)', padding: '20px', boxSizing: 'border-box', minWidth: '320px' }}>
+      <section className="ctf-form-col" style={{ flex: isMobile ? 'none' : '1.2 1 0', width: isMobile ? '100%' : undefined, background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid rgba(255,255,255,0.06)', padding: '20px', boxSizing: 'border-box', minWidth: isMobile ? '100%' : '320px' }}>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '15px', fontWeight: '700', color: 'var(--color-gold)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '10px' }}>
           {lang === 'CZ' ? 'Editor newsletteru' : 'Campaign composer'}
         </h3>
@@ -727,7 +740,7 @@ export default function NewsletterTab({ showToast }) {
           </div>
 
           {/* Subjects (CZ & EN) */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <label style={{ fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 {lang === 'CZ' ? 'Předmět CZ' : 'Subject CZ'} <span style={{ color: '#ef4444' }}>*</span>
@@ -810,7 +823,7 @@ export default function NewsletterTab({ showToast }) {
 
                 {/* Block Content Inputs */}
                 {block.type === 'text' && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
                     <div>
                       <label style={{ fontSize: '9px', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>Čeština (CZ)</label>
                       <textarea 
@@ -841,7 +854,7 @@ export default function NewsletterTab({ showToast }) {
                 {block.type === 'image' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {/* Ratio & Link Row */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.4fr 1.4fr', gap: '8px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1.4fr 1.4fr', gap: '8px' }}>
                       <div>
                         <label style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{lang === 'CZ' ? 'Poměr stran' : 'Aspect ratio'}</label>
                         <select 
@@ -880,7 +893,7 @@ export default function NewsletterTab({ showToast }) {
                     </div>
 
                     {/* Image File Box - CZ & EN */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '4px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginTop: '4px' }}>
                       {/* CZ image column */}
                       <div>
                         <span style={{ fontSize: '9px', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>{lang === 'CZ' ? 'Obrázek CZ' : 'Image CZ'}</span>
@@ -1023,7 +1036,7 @@ export default function NewsletterTab({ showToast }) {
                 )}
 
                 {block.type === 'button' && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <label style={{ fontSize: '9.5px', fontWeight: 'bold', color: 'var(--text-muted)' }}>České tlačítko (CZ)</label>
                       <input 
@@ -1073,11 +1086,11 @@ export default function NewsletterTab({ showToast }) {
           </div>
 
           {/* Add Block Buttons */}
-          <div style={{ display: 'flex', gap: '8px', marginTop: '4px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '8px', marginTop: '4px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px' }}>
             <button 
               type="button" 
               className="btn btn-secondary" 
-              style={{ flex: 1, padding: '8px 0', fontSize: '10px', fontWeight: 'bold' }}
+              style={{ flex: isMobile ? 'none' : 1, padding: '8px 0', fontSize: '10px', fontWeight: 'bold', width: '100%' }}
               onClick={() => addBlock('text')}
             >
               ➕ TEXT
@@ -1085,7 +1098,7 @@ export default function NewsletterTab({ showToast }) {
             <button 
               type="button" 
               className="btn btn-secondary" 
-              style={{ flex: 1, padding: '8px 0', fontSize: '10px', fontWeight: 'bold' }}
+              style={{ flex: isMobile ? 'none' : 1, padding: '8px 0', fontSize: '10px', fontWeight: 'bold', width: '100%' }}
               onClick={() => addBlock('image')}
             >
               ➕ OBRÁZEK
@@ -1093,7 +1106,7 @@ export default function NewsletterTab({ showToast }) {
             <button 
               type="button" 
               className="btn btn-secondary" 
-              style={{ flex: 1, padding: '8px 0', fontSize: '10px', fontWeight: 'bold' }}
+              style={{ flex: isMobile ? 'none' : 1, padding: '8px 0', fontSize: '10px', fontWeight: 'bold', width: '100%' }}
               onClick={() => addBlock('button')}
             >
               ➕ TLAČÍTKO
@@ -1116,7 +1129,7 @@ export default function NewsletterTab({ showToast }) {
       </section>
 
       {/* RIGHT COLUMN: Real-time Live Preview */}
-      <section className="ctf-preview-col" style={{ flex: '1.1 1 0', background: '#0b0b0c', borderRadius: 'var(--radius-lg)', border: '1px solid rgba(255,255,255,0.08)', padding: '16px', boxSizing: 'border-box', minWidth: '280px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <section className="ctf-preview-col" style={{ flex: isMobile ? 'none' : '1.1 1 0', width: isMobile ? '100%' : undefined, background: '#0b0b0c', borderRadius: 'var(--radius-lg)', border: '1px solid rgba(255,255,255,0.08)', padding: '16px', boxSizing: 'border-box', minWidth: isMobile ? '100%' : '280px', display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
           <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: 'var(--color-gold)' }}>
             👁️ {lang === 'CZ' ? 'Živý náhled e-mailu' : 'Live email preview'}
@@ -1466,12 +1479,12 @@ export default function NewsletterTab({ showToast }) {
               {lang === 'CZ' ? 'Tažením obrázek posuňte, posuvníkem níže přibližte.' : 'Drag to pan, use slider below to zoom.'}
             </p>
 
-            <div style={{ position: 'relative', width: '380px', height: '260px', background: '#000', borderRadius: '8px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ position: 'relative', width: '100%', maxWidth: '380px', aspectRatio: '380/260', background: '#000', borderRadius: '8px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
               <canvas
                 ref={canvasRef}
                 width={380}
                 height={260}
-                style={{ cursor: 'move', display: 'block' }}
+                style={{ cursor: 'move', display: 'block', width: '100%', height: '100%', objectFit: 'contain' }}
                 onMouseDown={handleCanvasMouseDown}
                 onMouseMove={handleCanvasMouseMove}
                 onMouseUp={handleCanvasMouseUp}

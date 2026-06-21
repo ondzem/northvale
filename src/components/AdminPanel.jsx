@@ -5,6 +5,7 @@ import CategoriesTab from './admin/CategoriesTab';
 import HomepageTab from './admin/HomepageTab';
 import FaqTab from './admin/FaqTab';
 import NewsletterTab from './admin/NewsletterTab';
+import DiscountCodesTab from './admin/DiscountCodesTab';
 
 export default function AdminPanel({ showToast, setActivePage }) {
   const { lang } = useTranslation();
@@ -30,6 +31,7 @@ export default function AdminPanel({ showToast, setActivePage }) {
     { id: 'homepage', name_cz: 'Správa úvodní stránky', name_en: 'Homepage CMS' },
     { id: 'faq', name_cz: 'Správa FAQ', name_en: 'FAQ CMS' },
     { id: 'newsletter', name_cz: 'Newsletter', name_en: 'Newsletter' },
+    { id: 'discount_codes', name_cz: 'Slevové kódy', name_en: 'Discount Codes' },
   ];
 
   return (
@@ -105,6 +107,11 @@ export default function AdminPanel({ showToast, setActivePage }) {
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
+              ) : tab.id === 'discount_codes' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                  <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                </svg>
               ) : null}
               <span>{lang === 'CZ' ? tab.name_cz : tab.name_en}</span>
             </button>
@@ -142,6 +149,12 @@ export default function AdminPanel({ showToast, setActivePage }) {
 
           {activeTab === 'newsletter' && (
             <NewsletterTab 
+              showToast={handleShowToastPlaceholder} 
+            />
+          )}
+
+          {activeTab === 'discount_codes' && (
+            <DiscountCodesTab 
               showToast={handleShowToastPlaceholder} 
             />
           )}
