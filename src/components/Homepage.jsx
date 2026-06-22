@@ -538,7 +538,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             {currentImageUrl && (
               <img 
                 src={currentImageUrl}
-                alt=""
+                alt={lang === 'CZ' ? 'Akční nabídka a novinky - Northvale TCG' : 'Special offer and news - Northvale TCG'}
                 loading="eager"
                 fetchpriority="high"
                 onLoad={() => {
@@ -623,67 +623,80 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           {(!isMobile || useMobileImage) ? (
             // --- VERTICAL LAYOUT (DESKTOP & MOBILE) ---
             <>
-              {/* Top: Title */}
-              <h3 style={{ 
-                fontSize: '17px', 
-                fontWeight: '700', 
-                color: 'var(--text-main)', 
-                margin: '4px 0 0 0',
-                textAlign: 'left',
-                lineHeight: '1.4',
-                cursor: catalogProduct ? 'pointer' : 'default',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                height: '48px',
-                fontFamily: 'var(--font-heading)',
-                position: 'relative',
-                zIndex: 10
-              }} onClick={() => handleCardClick(dealProduct)}>
-                {activeDeal.name}
-              </h3>
-
-              {/* Center: Image Container */}
-              <div style={{
-                height: !isMobile ? '185px' : '135px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
-                zIndex: 1,
-                cursor: catalogProduct ? 'pointer' : 'default',
-                marginTop: '16px',
-                marginBottom: '8px'
-              }} onClick={() => handleCardClick(dealProduct)}>
-                <img 
-                  src={activeDeal.image_url || '/logo s popisem.webp'} 
-                  alt={activeDeal.name} 
-                  style={{ 
-                    maxHeight: '100%', 
-                    maxWidth: '100%', 
-                    objectFit: 'contain',
-                    transform: 'scale(1.22) translateY(12px)',
-                    transition: 'transform 0.3s ease'
-                  }} 
-                />
-                {/* Floating stock badge */}
-                <span style={{
-                  position: 'absolute',
-                  top: '4px',
-                  left: '4px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  color: 'var(--text-main)',
-                  fontWeight: '700',
-                  fontSize: '9px',
-                  padding: '3px 8px',
-                  borderRadius: '4px',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
+              {/* Product link wrapping title and image */}
+              <a 
+                href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? (dealProduct.type === 'single' || dealProduct.type === 'slab' ? `/singles-detail/${dealProduct.id}` : `/sealed-detail/${dealProduct.id}`) : '#'} 
+                style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', flex: '1 1 auto', width: '100%' }} 
+                onClick={(e) => { 
+                  if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && dealProduct.id && dealProduct.id !== 'deal-of-the-day') { 
+                    e.preventDefault(); 
+                    handleCardClick(dealProduct); 
+                  } 
+                }}
+              >
+                {/* Top: Title */}
+                <h3 style={{ 
+                  fontSize: '17px', 
+                  fontWeight: '700', 
+                  color: 'var(--text-main)', 
+                  margin: '4px 0 0 0',
+                  textAlign: 'left',
+                  lineHeight: '1.4',
+                  cursor: catalogProduct ? 'pointer' : 'default',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  height: '48px',
+                  fontFamily: 'var(--font-heading)',
+                  position: 'relative',
+                  zIndex: 10
                 }}>
-                  {lang === 'CZ' ? `Zbývá ${dealProductStock} kusů` : `${dealProductStock} pcs left`}
-                </span>
-              </div>
+                  {activeDeal.name}
+                </h3>
+
+                {/* Center: Image Container */}
+                <div style={{
+                  height: !isMobile ? '185px' : '135px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative',
+                  zIndex: 1,
+                  cursor: catalogProduct ? 'pointer' : 'default',
+                  marginTop: '16px',
+                  marginBottom: '8px',
+                  width: '100%'
+                }}>
+                  <img 
+                    src={activeDeal.image_url || '/logo s popisem.webp'} 
+                    alt={activeDeal.name} 
+                    style={{ 
+                      maxHeight: '100%', 
+                      maxWidth: '100%', 
+                      objectFit: 'contain',
+                      transform: 'scale(1.22) translateY(12px)',
+                      transition: 'transform 0.3s ease'
+                    }} 
+                  />
+                  {/* Floating stock badge */}
+                  <span style={{
+                    position: 'absolute',
+                    top: '4px',
+                    left: '4px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    color: 'var(--text-main)',
+                    fontWeight: '700',
+                    fontSize: '9px',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                  }}>
+                    {lang === 'CZ' ? `Zbývá ${dealProductStock} kusů` : `${dealProductStock} pcs left`}
+                  </span>
+                </div>
+              </a>
 
               {/* Below Title: Price & Button Row */}
               <div style={{
@@ -898,23 +911,34 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 boxSizing: 'border-box'
               }}>
                 {/* Title (Enlarged) */}
-                <h3 style={{ 
-                  fontSize: '18px', 
-                  fontWeight: '800', 
-                  color: 'var(--text-main)', 
-                  margin: '0 0 8px 0',
-                  textAlign: 'left',
-                  lineHeight: '1.3',
-                  cursor: catalogProduct ? 'pointer' : 'default',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  fontFamily: 'var(--font-heading)'
-                }} onClick={() => handleCardClick(dealProduct)}>
-                  {activeDeal.name}
-                </h3>
+                <a 
+                  href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? (dealProduct.type === 'single' || dealProduct.type === 'slab' ? `/singles-detail/${dealProduct.id}` : `/sealed-detail/${dealProduct.id}`) : '#'} 
+                  style={{ textDecoration: 'none', color: 'inherit' }} 
+                  onClick={(e) => { 
+                    if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && dealProduct.id && dealProduct.id !== 'deal-of-the-day') { 
+                      e.preventDefault(); 
+                      handleCardClick(dealProduct); 
+                    } 
+                  }}
+                >
+                  <h3 style={{ 
+                    fontSize: '18px', 
+                    fontWeight: '800', 
+                    color: 'var(--text-main)', 
+                    margin: '0 0 8px 0',
+                    textAlign: 'left',
+                    lineHeight: '1.3',
+                    cursor: catalogProduct ? 'pointer' : 'default',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    fontFamily: 'var(--font-heading)'
+                  }}>
+                    {activeDeal.name}
+                  </h3>
+                </a>
 
                 {/* Split row: Left (enlarged image shifted left) & Right (stacked details) */}
                 <div style={{
@@ -926,26 +950,37 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   minHeight: '180px'
                 }}>
                   {/* Left part: Image Container (shifted all the way to left, enlarged) */}
-                  <div style={{
-                    flex: '1.2 1 0%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    position: 'relative',
-                    cursor: catalogProduct ? 'pointer' : 'default'
-                  }} onClick={() => handleCardClick(dealProduct)}>
-                    <img 
-                      src={activeDeal.image_url || '/logo s popisem.webp'} 
-                      alt={activeDeal.name} 
-                      style={{ 
-                        maxHeight: '100%', 
-                        maxWidth: '100%', 
-                        objectFit: 'contain',
-                        transform: 'scale(1.25) translate(-28px, 16px)',
-                        transformOrigin: 'left center'
-                      }} 
-                    />
-                  </div>
+                  <a 
+                    href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? (dealProduct.type === 'single' || dealProduct.type === 'slab' ? `/singles-detail/${dealProduct.id}` : `/sealed-detail/${dealProduct.id}`) : '#'} 
+                    style={{ flex: '1.2 1 0%', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', position: 'relative', textDecoration: 'none' }} 
+                    onClick={(e) => { 
+                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && dealProduct.id && dealProduct.id !== 'deal-of-the-day') { 
+                        e.preventDefault(); 
+                        handleCardClick(dealProduct); 
+                      } 
+                    }}
+                  >
+                    <div style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
+                      cursor: catalogProduct ? 'pointer' : 'default'
+                    }}>
+                      <img 
+                        src={activeDeal.image_url || '/logo s popisem.webp'} 
+                        alt={activeDeal.name} 
+                        style={{ 
+                          maxHeight: '100%', 
+                          maxWidth: '100%', 
+                          objectFit: 'contain',
+                          transform: 'scale(1.25) translate(-28px, 16px)',
+                          transformOrigin: 'left center'
+                        }} 
+                      />
+                    </div>
+                  </a>
 
                   {/* Right part: Prices, Stock badge, and Buy Button vertically stacked */}
                   <div style={{
@@ -1093,7 +1128,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               >
                 <img 
                   src={item.icon} 
-                  alt="" 
+                  alt={item.title} 
                   style={styles.uspIcon} 
                 />
                 <div style={styles.uspText}>
@@ -1256,28 +1291,28 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         <section id="popular-categories" className="category-section container">
         <h2 style={styles.sectionHeading} className="section-title">{lang === 'CZ' ? 'Oblíbené kategorie' : 'Popular Categories'}</h2>
         <div className="category-tiles-grid">
-          <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Pokémon' }); setActivePage('sealed-catalog'); }}>
+          <a href="/sealed-catalog?game=P%C3%B3kemon" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Pokémon' }); setActivePage('sealed-catalog'); } }}>
             <img src="/Pokemon.webp" alt="Pokémon" className="category-tile-img" />
-          </div>
-          <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Lorcana' }); setActivePage('sealed-catalog'); }}>
+          </a>
+          <a href="/sealed-catalog?game=Lorcana" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Lorcana' }); setActivePage('sealed-catalog'); } }}>
             <img src="/lorcana logo.webp" alt="Disney Lorcana" className="category-tile-img" />
-          </div>
-          <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'One Piece' }); setActivePage('sealed-catalog'); }}>
+          </a>
+          <a href="/sealed-catalog?game=One+Piece" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'One Piece' }); setActivePage('sealed-catalog'); } }}>
             <img src="/One piece.webp" alt="One Piece" className="category-tile-img" />
-          </div>
-          <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Riftbound' }); setActivePage('sealed-catalog'); }}>
+          </a>
+          <a href="/sealed-catalog?game=Riftbound" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Riftbound' }); setActivePage('sealed-catalog'); } }}>
             <img src="/Riftbound.webp" alt="Riftbound" className="category-tile-img" />
-          </div>
-          <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); }}>
-            <img src="/Prislusentstvi.webp" alt="{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}" className="category-tile-img" />
-          </div>
-          <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({ game: 'Acrylics' }); setActivePage('sealed-catalog'); }}>
+          </a>
+          <a href="/sealed-catalog?game=Accessories" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); } }}>
+            <img src="/Prislusentstvi.webp" alt={lang === 'CZ' ? 'Příslušenství' : 'Accessories'} className="category-tile-img" />
+          </a>
+          <a href="/sealed-catalog?game=Acrylics" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Acrylics' }); setActivePage('sealed-catalog'); } }}>
             <img src="/Akryly.webp" alt="Akryly" className="category-tile-img" />
-          </div>
+          </a>
           {FEATURE_FLAGS.showSlabs && (
-            <div style={styles.categoryTile} className="glass-card" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
-              <img src="/Ohodnoceni karet.webp" alt="{lang === 'CZ' ? 'Ohodnocené karty' : 'Graded Cards'}" className="category-tile-img" />
-            </div>
+            <a href="/slabs-catalog" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({}); setActivePage('slabs-catalog'); } }}>
+              <img src="/Ohodnoceni karet.webp" alt={lang === 'CZ' ? 'Ohodnocené karty' : 'Graded Cards'} className="category-tile-img" />
+            </a>
           )}
         </div>
       </section>
@@ -1295,7 +1330,18 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           <button onClick={() => handleScroll(newArrivalsRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
           <div ref={newArrivalsRef} className="homepage-product-grid">
             {newArrivals.map(product => (
-              <div key={product.id} className={`vf-card type-${product.type}`} onClick={() => handleCardClick(product)}>
+              <a 
+                key={product.id} 
+                href={product.type === 'single' || product.type === 'slab' ? `/singles-detail/${product.id}` : `/sealed-detail/${product.id}`} 
+                className={`vf-card type-${product.type}`} 
+                style={{ textDecoration: 'none', color: 'inherit' }}
+                onClick={(e) => { 
+                  if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
+                    e.preventDefault(); 
+                    handleCardClick(product); 
+                  } 
+                }}
+              >
                 <div className="vf-art">
                   <div className="card-art">
                     <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
@@ -1315,7 +1361,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     <span className="vf-price">{((product.variants ? product.variants[0].price : product.price) || 1200).toLocaleString('cs-CZ')} Kč</span>
                   </div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
           <button onClick={() => handleScroll(newArrivalsRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
@@ -1347,7 +1393,18 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             <button onClick={() => handleScroll(preordersRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
             <div ref={preordersRef} className="homepage-product-grid">
             {preorders.map(product => (
-              <div key={product.id} className={`vf-card type-${product.type}`} onClick={() => handleCardClick(product)}>
+              <a 
+                key={product.id} 
+                href={product.type === 'single' || product.type === 'slab' ? `/singles-detail/${product.id}` : `/sealed-detail/${product.id}`} 
+                className={`vf-card type-${product.type}`} 
+                style={{ textDecoration: 'none', color: 'inherit' }}
+                onClick={(e) => { 
+                  if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
+                    e.preventDefault(); 
+                    handleCardClick(product); 
+                  } 
+                }}
+              >
                 <div className="vf-art">
                   <div className="card-art">
                     <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
@@ -1367,7 +1424,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
                   </div>
                 </div>
-              </div>
+              </a>
             ))}
             </div>
             <button onClick={() => handleScroll(preordersRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
@@ -1408,7 +1465,18 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               <button onClick={() => handleScroll(gradedCardsRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
               <div ref={gradedCardsRef} className="homepage-product-grid">
               {gradedCards.map(product => (
-                <div key={product.id} className={`vf-card type-${product.type}`} onClick={() => handleCardClick(product)}>
+                <a 
+                  key={product.id} 
+                  href={product.type === 'single' || product.type === 'slab' ? `/singles-detail/${product.id}` : `/sealed-detail/${product.id}`} 
+                  className={`vf-card type-${product.type}`} 
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                  onClick={(e) => { 
+                    if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
+                      e.preventDefault(); 
+                      handleCardClick(product); 
+                    } 
+                  }}
+                >
                   <div className="vf-art">
                     <div className="card-art">
                       <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
@@ -1425,7 +1493,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                       <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
                     </div>
                   </div>
-                </div>
+                </a>
               ))}
               </div>
               <button onClick={() => handleScroll(gradedCardsRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
@@ -1454,7 +1522,18 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           <button onClick={() => handleScroll(accessoriesRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
           <div ref={accessoriesRef} className="homepage-product-grid">
             {accessories.map(product => (
-              <div key={product.id} className={`vf-card type-${product.type}`} onClick={() => handleCardClick(product)}>
+              <a 
+                key={product.id} 
+                href={product.type === 'single' || product.type === 'slab' ? `/singles-detail/${product.id}` : `/sealed-detail/${product.id}`} 
+                className={`vf-card type-${product.type}`} 
+                style={{ textDecoration: 'none', color: 'inherit' }}
+                onClick={(e) => { 
+                  if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
+                    e.preventDefault(); 
+                    handleCardClick(product); 
+                  } 
+                }}
+              >
                 <div className="vf-art">
                   <div className="card-art">
                     <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
@@ -1474,7 +1553,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
                   </div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
           <button onClick={() => handleScroll(accessoriesRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>

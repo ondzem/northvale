@@ -1315,13 +1315,13 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
 
                 {/* Socials */}
                 <div style={styles.drawerSocials}>
-                  <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" style={styles.drawerSocialLink}>
+                  <a href="https://www.instagram.com/northvaletcg/" target="_blank" rel="noopener noreferrer" style={styles.drawerSocialLink}>
                     <img src="/instagram.png" alt="Instagram" style={styles.drawerSocialIcon} />
                   </a>
-                  <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" style={styles.drawerSocialLink}>
+                  <a href="https://www.youtube.com/@northvaletcg" target="_blank" rel="noopener noreferrer" style={styles.drawerSocialLink}>
                     <img src="/youtube.png" alt="YouTube" style={styles.drawerSocialIcon} />
                   </a>
-                  <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" style={styles.drawerSocialLink}>
+                  <a href="https://www.tiktok.com/@northvaletcg" target="_blank" rel="noopener noreferrer" style={styles.drawerSocialLink}>
                     <img src="/tik-tok.png" alt="TikTok" style={styles.drawerSocialIcon} />
                   </a>
                 </div>

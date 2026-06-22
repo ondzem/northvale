@@ -118,6 +118,13 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
         <header className="are-mast">
           <h1 className="are-title">{activeArticle.title}</h1>
           <p className="are-lead">{activeArticle.description}</p>
+          <div style={styles.mastMeta}>
+            <span>👤 {tLabel('Redakce Northvale TCG', 'Northvale TCG Editors')}</span>
+            <span style={{ margin: '0 8px', opacity: 0.3 }}>•</span>
+            <span>📅 {getArticleDate(activeArticle.id)}</span>
+            <span style={{ margin: '0 8px', opacity: 0.3 }}>•</span>
+            <span>⏱ {activeArticle.readTime} {tLabel('čtení', 'read')}</span>
+          </div>
         </header>
 
         {/* Premium full-width hero image with auto height */}
@@ -194,7 +201,13 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
                 linksToMap.forEach(link => {
                   let idx = rawText.toLowerCase().indexOf(link.pattern.toLowerCase());
                   while (idx !== -1) {
-                    matches.push({ start: idx, length: link.pattern.length, label: rawText.substring(idx, idx + link.pattern.length), action: link.action });
+                    matches.push({ 
+                      start: idx, 
+                      length: link.pattern.length, 
+                      label: rawText.substring(idx, idx + link.pattern.length), 
+                      action: link.action,
+                      href: link.href
+                    });
                     idx = rawText.toLowerCase().indexOf(link.pattern.toLowerCase(), idx + 1);
                   }
                 });
@@ -259,6 +272,24 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
                 </p>
               );
             })}
+
+            {/* Author Bio Section */}
+            <div style={styles.authorBio} className="glass-card">
+              <img 
+                src="/favicon.svg" 
+                alt="Northvale TCG" 
+                style={styles.authorAvatar} 
+              />
+              <div style={styles.authorInfo}>
+                <h4 style={styles.authorName}>{tLabel('Autor: Redakce Northvale TCG', 'Written by: Northvale TCG Editor')}</h4>
+                <p style={styles.authorDesc}>
+                  {tLabel(
+                    'Specializovaný tým sběratelů a hráčů karetních her Pokémon, Lorcana a One Piece. Pomáháme chránit vaši sbírku a bezpečně nakupovat originální produkty.',
+                    'A specialized team of collectors and players of Pokémon, Lorcana, and One Piece card games. We help protect your collection and safely purchase authentic products.'
+                  )}
+                </p>
+              </div>
+            </div>
           </article>
         </div>
       </div>
@@ -528,6 +559,51 @@ const styles = {
     cursor: 'pointer',
     transition: 'opacity 0.2s ease',
     textUnderlineOffset: '3px'
+  },
+  mastMeta: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    fontSize: '13px',
+    color: 'var(--text-muted)',
+    marginTop: '12px',
+    fontWeight: '500'
+  },
+  authorBio: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '20px',
+    padding: '24px',
+    marginTop: '48px',
+    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    borderRadius: 'var(--radius-lg)'
+  },
+  authorAvatar: {
+    width: '64px',
+    height: '64px',
+    borderRadius: '50%',
+    objectFit: 'cover',
+    border: '2px solid var(--color-gold)',
+    backgroundColor: 'var(--bg-secondary)',
+    padding: '6px'
+  },
+  authorInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px'
+  },
+  authorName: {
+    fontSize: '16px',
+    fontWeight: '700',
+    color: 'var(--text-main)',
+    margin: 0
+  },
+  authorDesc: {
+    fontSize: '14px',
+    color: 'var(--text-muted)',
+    margin: 0,
+    lineHeight: '1.5'
   }
 };
 

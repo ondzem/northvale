@@ -941,6 +941,7 @@ function AppContent() {
     if (ogImageUrl.startsWith('/')) {
       ogImageUrl = `https://northvaletcg.eu${ogImageUrl}`;
     }
+    ogImageUrl = ogImageUrl.replace(/ /g, '%20');
     setMeta('property', 'og:image', ogImageUrl);
 
     // Structured Data (JSON-LD) injection
