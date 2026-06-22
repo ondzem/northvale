@@ -176,7 +176,7 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
                       <div className="ckf-thumb">
                         <img 
                           src={item.product?.image || item.image || '/Akce - NORTHVALE.webp'} 
-                          alt={item.name} 
+                          alt={item.name || 'Northvale TCG produkt'} 
                         />
                       </div>
 

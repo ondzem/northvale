@@ -2,6 +2,26 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { blogArticles } from '../blogData';
 
+// Helper to get static publication date
+const getArticleDate = (id) => {
+  switch (id) {
+    case 'jak-rozpoznat-falesnou-pokemon-kartu':
+      return '18. 06. 2026';
+    case 'jak-zacit-s-pokemon-kartami':
+      return '17. 06. 2026';
+    case 'kde-koupit-pokemon-karty-v-cesku':
+      return '16. 06. 2026';
+    case 'kde-sehnat-pokemon-karty-v-cr':
+      return '15. 06. 2026';
+    case 'prislusenstvi-pro-karty':
+      return '14. 06. 2026';
+    case 'vybava-sberatele-pokemon-karet':
+      return '13. 06. 2026';
+    default:
+      return '18. 06. 2026';
+  }
+};
+
 export default function Blog({ selectedArticleId, setSelectedProductId, setActivePage }) {
   const { lang } = useTranslation();
 
@@ -130,7 +150,7 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
         {/* Premium full-width hero image with auto height */}
         <div className="are-hero">
           <div className="card-art-hero">
-            <img src={activeArticle.image} alt={activeArticle.title} className="card-art-hero-img" />
+            <img src={activeArticle.image} alt={activeArticle.title || 'Northvale TCG blog'} className="card-art-hero-img" />
           </div>
         </div>
 
@@ -296,27 +316,6 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
     );
   }
 
-
-  // Helper to get static publication date
-  const getArticleDate = (id) => {
-    switch (id) {
-      case 'jak-rozpoznat-falesnou-pokemon-kartu':
-        return '18. 06. 2026';
-      case 'jak-zacit-s-pokemon-kartami':
-        return '17. 06. 2026';
-      case 'kde-koupit-pokemon-karty-v-cesku':
-        return '16. 06. 2026';
-      case 'kde-sehnat-pokemon-karty-v-cr':
-        return '15. 06. 2026';
-      case 'prislusenstvi-pro-karty':
-        return '14. 06. 2026';
-      case 'vybava-sberatele-pokemon-karet':
-        return '13. 06. 2026';
-      default:
-        return '18. 06. 2026';
-    }
-  };
-
   // Articles Grid/Overview View
   return (
     <div className="container fade-in" style={styles.container}>
@@ -351,7 +350,7 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
             <div className="blog-card-image-wrapper">
               <img 
                 src={article.image} 
-                alt={article.title} 
+                alt={article.title || 'Northvale TCG blog'} 
                 className="blog-card-img"
               />
               

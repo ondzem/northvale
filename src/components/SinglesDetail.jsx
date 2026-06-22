@@ -1005,7 +1005,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
             >
               <img 
                 src={activeImage} 
-                alt={product.name} 
+                alt={product.name || 'Northvale TCG produkt'} 
               />
             </div>
 
@@ -1929,7 +1929,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               >
                 <img 
                   src={activeImage} 
-                  alt={product.name} 
+                  alt={product.name || 'Northvale TCG produkt'} 
                   className="lightbox-image lightbox-image-clean" 
                 />
                 <div className="lightbox-magnifier-lens" style={lightboxZoomStyle} />

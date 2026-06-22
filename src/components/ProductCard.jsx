@@ -30,7 +30,7 @@ const ProductImage = ({ src, alt, className = '' }) => {
     <img
       ref={imgRef}
       src={src}
-      alt={alt}
+      alt={alt || 'Northvale TCG produkt'}
       onLoad={handleLoad}
       className={`${className} ${fitClass} ${loaded ? 'loaded' : ''}`}
     />
@@ -168,7 +168,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           <div className="ca-grain"></div>
 
           {/* Actual Card Image */}
-          <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
+          <ProductImage src={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" />
 
           {/* Slab Label Overlay if it is a graded slab */}
           {product.type === 'slab' && (

@@ -792,11 +792,11 @@ function AppContent() {
         break;
       case 'singles-detail':
       case 'sealed-detail': {
-        const currentProduct = dbProducts.find(p => p.id === selectedProductId);
-        if (currentProduct) {
-          pageTitle = currentProduct.name;
-          const plainDesc = extractFirstTextBlock(currentProduct.desc || currentProduct.description);
-          const rawShort = currentProduct.shortDesc || plainDesc || 'Kupte originální TCG produkty na Northvale TCG.';
+        const productForMeta = dbProducts.find(p => p.id === selectedProductId);
+        if (productForMeta) {
+          pageTitle = productForMeta.name;
+          const plainDesc = extractFirstTextBlock(productForMeta.desc || productForMeta.description);
+          const rawShort = productForMeta.shortDesc || plainDesc || 'Kupte originální TCG produkty na Northvale TCG.';
           metaDescription = stripAndTruncate(rawShort);
         }
         break;

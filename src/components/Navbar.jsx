@@ -91,7 +91,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
           >
             <img 
               src={p.image || '/logo.png'} 
-              alt={p.name} 
+              alt={p.name || 'Northvale TCG'} 
               style={styles.suggestionThumb} 
               onError={(e) => { e.target.src = '/logo.png'; }}
             />

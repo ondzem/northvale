@@ -23,7 +23,7 @@ const ProductImage = ({ src, alt, className = '' }) => {
   return (
     <img
       src={src}
-      alt={alt}
+      alt={alt || 'Northvale TCG produkt'}
       onLoad={handleLoad}
       className={`${className} ${fitClass} ${loaded ? 'loaded' : ''}`}
       loading="lazy"
@@ -671,7 +671,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 }}>
                   <img 
                     src={activeDeal.image_url || '/logo s popisem.webp'} 
-                    alt={activeDeal.name} 
+                    alt={activeDeal.name || 'Akční nabídka - Northvale TCG'} 
                     style={{ 
                       maxHeight: '100%', 
                       maxWidth: '100%', 
@@ -970,7 +970,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     }}>
                       <img 
                         src={activeDeal.image_url || '/logo s popisem.webp'} 
-                        alt={activeDeal.name} 
+                        alt={activeDeal.name || 'Akční nabídka - Northvale TCG'} 
                         style={{ 
                           maxHeight: '100%', 
                           maxWidth: '100%', 
@@ -1128,7 +1128,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               >
                 <img 
                   src={item.icon} 
-                  alt={item.title} 
+                  alt={item.title || 'Northvale TCG'} 
                   style={styles.uspIcon} 
                 />
                 <div style={styles.uspText}>
@@ -1291,7 +1291,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         <section id="popular-categories" className="category-section container">
         <h2 style={styles.sectionHeading} className="section-title">{lang === 'CZ' ? 'Oblíbené kategorie' : 'Popular Categories'}</h2>
         <div className="category-tiles-grid">
-          <a href="/sealed-catalog?game=P%C3%B3kemon" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Pokémon' }); setActivePage('sealed-catalog'); } }}>
+          <a href="/sealed-catalog?game=Pok%C3%A9mon" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Pokémon' }); setActivePage('sealed-catalog'); } }}>
             <img src="/Pokemon.webp" alt="Pokémon" className="category-tile-img" />
           </a>
           <a href="/sealed-catalog?game=Lorcana" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Lorcana' }); setActivePage('sealed-catalog'); } }}>
@@ -1344,7 +1344,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               >
                 <div className="vf-art">
                   <div className="card-art">
-                    <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
+                    <ProductImage src={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" />
                     <div className="ca-holo"></div>
                     <div className="ca-shine"></div>
                     <div className="ca-grain"></div>
@@ -1407,7 +1407,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               >
                 <div className="vf-art">
                   <div className="card-art">
-                    <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
+                    <ProductImage src={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" />
                     <div className="ca-holo"></div>
                     <div className="ca-shine"></div>
                     <div className="ca-grain"></div>
@@ -1479,7 +1479,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 >
                   <div className="vf-art">
                     <div className="card-art">
-                      <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
+                      <ProductImage src={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" />
                       <div className="ca-holo"></div>
                       <div className="ca-shine"></div>
                       <div className="ca-grain"></div>
@@ -1536,7 +1536,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               >
                 <div className="vf-art">
                   <div className="card-art">
-                    <ProductImage src={product.image} alt={product.name} className="ca-card-img" />
+                    <ProductImage src={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" />
                     <div className="ca-holo"></div>
                     <div className="ca-shine"></div>
                     <div className="ca-grain"></div>
