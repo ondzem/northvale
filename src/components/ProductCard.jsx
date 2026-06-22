@@ -105,7 +105,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
 
   const handleCardClick = () => {
     setSelectedProductId(product.id);
-    if (product.type === 'single') {
+    if (product.type === 'single' || product.type === 'slab') {
       setActivePage('singles-detail');
     } else {
       setActivePage('sealed-detail');

@@ -4,6 +4,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { fetchSlidesFromDB, DEFAULT_SLIDES } from '../services/slides';
 import { fetchDailyDealFromDB } from '../services/dailyDeal';
 import { fetchHomepageSectionsFromDB } from '../services/homepageSections';
+import { fetchProductByIdFromDB } from '../services/products';
 
 const ProductImage = ({ src, alt, className = '' }) => {
   const [aspectRatio, setAspectRatio] = useState(1.0);
@@ -240,6 +241,25 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   
   // Deal Button micro-animation state
   const [dealAdded, setDealAdded] = useState(false);
+  const [isBtnHoveredVertical, setIsBtnHoveredVertical] = useState(false);
+  const [isBtnHoveredHorizontal, setIsBtnHoveredHorizontal] = useState(false);
+  const [dealProductState, setDealProductState] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    async function loadProduct() {
+      if (activeDeal && activeDeal.product_id) {
+        const prod = await fetchProductByIdFromDB(activeDeal.product_id);
+        if (active) {
+          setDealProductState(prod);
+        }
+      }
+    }
+    loadProduct();
+    return () => {
+      active = false;
+    };
+  }, [activeDeal.product_id]);
 
   useEffect(() => {
     if (!activeDeal.ends_at) return;
@@ -373,14 +393,26 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     }
   };
 
-  const dealProductStock = Number(activeDeal.stock || 0);
+  const getDealStock = () => {
+    if (activeDeal.stock && Number(activeDeal.stock) > 0) {
+      return Number(activeDeal.stock);
+    }
+    if (dealProductState) {
+      if (dealProductState.variants && dealProductState.variants.length > 0) {
+        return dealProductState.variants.reduce((sum, v) => sum + Number(v.stock || 0), 0);
+      }
+      return Number(dealProductState.stock || 0);
+    }
+    return Number(activeDeal.stock || 0);
+  };
+  const dealProductStock = getDealStock();
   const dealProductPrice = Number(activeDeal.price || 0);
   const dealProductOriginalPrice = activeDeal.original_price ? Number(activeDeal.original_price) : null;
   const discountPercent = dealProductOriginalPrice 
     ? Math.round(((dealProductOriginalPrice - dealProductPrice) / dealProductOriginalPrice) * 100)
     : 0;
 
-  const catalogProduct = products.find(p => p.id === activeDeal.product_id);
+  const catalogProduct = dealProductState;
   const dealProduct = catalogProduct || {
     id: activeDeal.product_id || 'deal-of-the-day',
     name: activeDeal.name,
@@ -401,7 +433,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     }
   };
 
-  const handleBuyDealClick = () => {
+  const handleBuyDealClick = (e) => {
+    if (e) e.stopPropagation();
     const productToBuy = catalogProduct || dealProduct;
     const cartProduct = {
       ...productToBuy,
@@ -683,8 +716,12 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
                 <button 
                   className="btn btn-primary" 
+                  onMouseEnter={() => setIsBtnHoveredVertical(true)}
+                  onMouseLeave={() => setIsBtnHoveredVertical(false)}
                   style={{
-                    backgroundColor: dealAdded ? 'var(--color-gold-hover)' : 'var(--color-gold)',
+                    backgroundColor: dealAdded 
+                      ? 'var(--color-gold-hover)' 
+                      : (isBtnHoveredVertical ? 'var(--color-gold-hover)' : 'var(--color-gold)'),
                     color: '#000',
                     fontWeight: '700',
                     padding: '10px 14px',
@@ -699,9 +736,11 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     opacity: 1,
                     flex: '0 0 auto',
                     minWidth: '110px',
-                    transform: dealAdded ? 'scale(0.95)' : 'scale(1)',
+                    transform: dealAdded ? 'scale(0.95)' : (isBtnHoveredVertical ? 'scale(1.05)' : 'scale(1)'),
                     transition: 'all 0.15s ease',
-                    boxShadow: '0 4px 12px rgba(253, 189, 22, 0.15)'
+                    boxShadow: isBtnHoveredVertical 
+                      ? '0 6px 16px rgba(253, 189, 22, 0.3)' 
+                      : '0 4px 12px rgba(253, 189, 22, 0.15)'
                   }}
                   disabled={dealProductStock === 0}
                   onClick={handleBuyDealClick}
@@ -952,8 +991,12 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     {/* Buy Button */}
                     <button 
                       className="btn btn-primary" 
+                      onMouseEnter={() => setIsBtnHoveredHorizontal(true)}
+                      onMouseLeave={() => setIsBtnHoveredHorizontal(false)}
                       style={{
-                        backgroundColor: dealAdded ? 'var(--color-gold-hover)' : 'var(--color-gold)',
+                        backgroundColor: dealAdded 
+                          ? 'var(--color-gold-hover)' 
+                          : (isBtnHoveredHorizontal ? 'var(--color-gold-hover)' : 'var(--color-gold)'),
                         color: '#000',
                         fontWeight: '700',
                         padding: '10px 14px',
@@ -967,9 +1010,11 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                         cursor: (dealProductStock > 0) ? 'pointer' : 'not-allowed',
                         opacity: 1,
                         width: '120px',
-                        transform: dealAdded ? 'scale(0.95)' : 'scale(1)',
+                        transform: dealAdded ? 'scale(0.95)' : (isBtnHoveredHorizontal ? 'scale(1.05)' : 'scale(1)'),
                         transition: 'all 0.15s ease',
-                        boxShadow: '0 4px 12px rgba(253, 189, 22, 0.15)'
+                        boxShadow: isBtnHoveredHorizontal 
+                          ? '0 6px 16px rgba(253, 189, 22, 0.3)' 
+                          : '0 4px 12px rgba(253, 189, 22, 0.15)'
                       }}
                       disabled={dealProductStock === 0}
                       onClick={handleBuyDealClick}

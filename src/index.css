@@ -527,13 +527,8 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 
 /* Speciální interaktivní banner pro Akce Dne */
 .deal-widget-banner {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   background: var(--bg-secondary) !important;
-}
-.deal-widget-banner:hover {
-  transform: scale(1.025) !important;
-  border-color: rgba(253, 189, 22, 0.45) !important;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(253, 189, 22, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Responzivní slideshow pro USP argumenty */

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { fetchDailyDealFromDB } from '../services/dailyDeal';
+import { fetchProductByIdFromDB } from '../services/products';
 
 export default function DealOfTheDay({ products, addToCart, setSelectedProductId, setActivePage }) {
   const { lang } = useTranslation();
@@ -18,6 +19,34 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
 
   const [dealAdded, setDealAdded] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [isBtnHovered, setIsBtnHovered] = useState(false);
+  const [dealProduct, setDealProduct] = useState(null);
+
+  const activeDeal = deal || {
+    name: 'Booster Box SV06 Twilight Masquerade',
+    image_url: '/9.png',
+    stock: 14,
+    price: 2690,
+    original_price: 3590,
+    ends_at: new Date(Date.now() + 14.5 * 3600 * 1000).toISOString(),
+    product_id: 'deal-of-the-day'
+  };
+
+  useEffect(() => {
+    let active = true;
+    async function loadProduct() {
+      if (activeDeal && activeDeal.product_id) {
+        const prod = await fetchProductByIdFromDB(activeDeal.product_id);
+        if (active) {
+          setDealProduct(prod);
+        }
+      }
+    }
+    loadProduct();
+    return () => {
+      active = false;
+    };
+  }, [activeDeal.product_id]);
 
   // Load daily deal from Supabase on mount
   useEffect(() => {
@@ -39,20 +68,22 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
     };
   }, []);
 
-  const activeDeal = deal || {
-    name: 'Booster Box SV06 Twilight Masquerade',
-    image_url: '/9.png',
-    stock: 14,
-    price: 2690,
-    original_price: 3590,
-    ends_at: new Date(Date.now() + 14.5 * 3600 * 1000).toISOString(),
-    product_id: 'deal-of-the-day'
-  };
-
   // Find linked product in catalog
-  const catalogProduct = products.find(p => p.id === activeDeal.product_id);
+  const catalogProduct = dealProduct;
   const dealProductPrice = Number(activeDeal.price || 0);
-  const dealProductStock = Number(activeDeal.stock || 0);
+  const getDealStock = () => {
+    if (activeDeal.stock && Number(activeDeal.stock) > 0) {
+      return Number(activeDeal.stock);
+    }
+    if (dealProduct) {
+      if (dealProduct.variants && dealProduct.variants.length > 0) {
+        return dealProduct.variants.reduce((sum, v) => sum + Number(v.stock || 0), 0);
+      }
+      return Number(dealProduct.stock || 0);
+    }
+    return Number(activeDeal.stock || 0);
+  };
+  const dealProductStock = getDealStock();
   const dealProductOriginalPrice = activeDeal.original_price ? Number(activeDeal.original_price) : null;
 
   // Countdown timer logic based on absolute ends_at timestamp
@@ -146,47 +177,51 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
         display: 'flex',
         overflow: 'hidden',
         position: 'relative',
-        cursor: catalogProduct ? 'pointer' : 'default',
         width: '100%',
         boxSizing: 'border-box',
         marginBottom: '20px'
       }}
-      onClick={handleCardClick}
     >
       {/* Top: Title */}
-      <h3 style={{ 
-        fontSize: '17px', 
-        fontWeight: '700', 
-        color: 'var(--text-main)', 
-        margin: '4px 0 0 0',
-        textAlign: 'left',
-        lineHeight: '1.4',
-        cursor: catalogProduct ? 'pointer' : 'default',
-        display: '-webkit-box',
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: 'vertical',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        height: '48px',
-        fontFamily: 'var(--font-heading)',
-        position: 'relative',
-        zIndex: 10
-      }}>
+      <h3 
+        style={{ 
+          fontSize: '17px', 
+          fontWeight: '700', 
+          color: 'var(--text-main)', 
+          margin: '4px 0 0 0',
+          textAlign: 'left',
+          lineHeight: '1.4',
+          cursor: catalogProduct ? 'pointer' : 'default',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          height: '48px',
+          fontFamily: 'var(--font-heading)',
+          position: 'relative',
+          zIndex: 10
+        }}
+        onClick={handleCardClick}
+      >
         {activeDeal.name}
       </h3>
 
       {/* Center: Image Container */}
-      <div style={{
-        height: '145px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        zIndex: 1,
-        cursor: catalogProduct ? 'pointer' : 'default',
-        marginTop: '22px',
-        marginBottom: '8px'
-      }}>
+      <div 
+        style={{
+          height: '145px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          zIndex: 1,
+          cursor: catalogProduct ? 'pointer' : 'default',
+          marginTop: '22px',
+          marginBottom: '8px'
+        }}
+        onClick={handleCardClick}
+      >
         <img 
           src={activeDeal.image_url || '/logo s popisem.webp'} 
           alt={activeDeal.name} 
@@ -248,8 +283,12 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
 
         <button 
           className="btn btn-primary" 
+          onMouseEnter={() => setIsBtnHovered(true)}
+          onMouseLeave={() => setIsBtnHovered(false)}
           style={{
-            backgroundColor: dealAdded ? 'var(--color-gold-hover)' : 'var(--color-gold)',
+            backgroundColor: dealAdded 
+              ? 'var(--color-gold-hover)' 
+              : (isBtnHovered ? 'var(--color-gold-hover)' : 'var(--color-gold)'),
             color: '#000',
             fontWeight: '700',
             padding: '10px 14px',
@@ -264,9 +303,11 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
             opacity: 1,
             flex: '0 0 auto',
             minWidth: '110px',
-            transform: dealAdded ? 'scale(0.95)' : 'scale(1)',
+            transform: dealAdded ? 'scale(0.95)' : (isBtnHovered ? 'scale(1.05)' : 'scale(1)'),
             transition: 'all 0.15s ease',
-            boxShadow: '0 4px 12px rgba(253, 189, 22, 0.15)'
+            boxShadow: isBtnHovered 
+              ? '0 6px 16px rgba(253, 189, 22, 0.3)' 
+              : '0 4px 12px rgba(253, 189, 22, 0.15)'
           }}
           disabled={dealProductStock === 0}
           onClick={handleBuyDealClick}

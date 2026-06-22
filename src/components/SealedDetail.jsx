@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 import { supabase } from '../supabase';
+import { fetchProductByIdFromDB } from '../services/products';
 
 const getGameImage = (product) => {
   if (product.category === 'Acrylics') return '/acrylic-etb-box.png';
@@ -372,7 +373,113 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
 
 
 
-  const product = products.find(p => p.id === productId);
+  const [localProduct, setLocalProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const product = localProduct;
+
+  useEffect(() => {
+    let active = true;
+    async function loadProduct() {
+      const found = products.find(p => p.id === productId);
+      if (found) {
+        setLocalProduct(found);
+        setLoading(false);
+      } else {
+        setLoading(true);
+        try {
+          const fetched = await fetchProductByIdFromDB(productId);
+          if (active) {
+            setLocalProduct(fetched);
+            setLoading(false);
+          }
+        } catch (e) {
+          console.error("Failed to fetch product by ID:", e);
+          if (active) {
+            setLocalProduct(null);
+            setLoading(false);
+          }
+        }
+      }
+    }
+    loadProduct();
+    return () => {
+      active = false;
+    };
+  }, [productId, products]);
+
+  const similarSealed = useMemo(() => {
+    if (!products || !product) return [];
+    return products
+      .filter(p => p.type === 'sealed' && p.id !== product.id)
+      .map(p => {
+        let score = 0;
+        if (p.game === product.game) score += 25;
+        if (p.category === product.category) score += 20; // ETB with ETB, Booster Box with Booster Box
+        if (p.subcat === product.subcat) score += 15;
+        if (p.edition === product.edition) score += 15;
+        
+        // Price proximity (same price range)
+        if (p.price && product.price) {
+          const diff = Math.abs(p.price - product.price) / product.price;
+          if (diff < 0.2) score += 10;
+          else if (diff < 0.5) score += 5;
+        }
+        return { product: p, score };
+      })
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.product)
+      .slice(0, 6);
+  }, [products, product]);
+
+  const relatedSealed = useMemo(() => {
+    if (!products || !product) return [];
+    return products
+      .filter(p => p.id !== product.id)
+      .map(p => {
+        let score = 0;
+        
+        // 1. Acrylic cases are related to sealed products
+        if (p.category === 'Acrylics') {
+          score += 20;
+          // Check if case is specific for this type of box (e.g. ETB case for ETB product)
+          const pNameLower = p.name.toLowerCase();
+          const prodNameLower = product.name.toLowerCase();
+          const isEtbCase = pNameLower.includes('etb') || pNameLower.includes('elite trainer');
+          const isEtbProduct = prodNameLower.includes('etb') || prodNameLower.includes('elite trainer');
+          const isBoosterBoxCase = pNameLower.includes('booster box') || pNameLower.includes('display');
+          const isBoosterBoxProduct = prodNameLower.includes('booster box') || prodNameLower.includes('display') || prodNameLower.includes('boosterbox');
+          
+          if ((isEtbCase && isEtbProduct) || (isBoosterBoxCase && isBoosterBoxProduct)) {
+            score += 20;
+          }
+        }
+        
+        // 2. Same game accessories (cross-sell sleeves/deck boxes)
+        if (p.type === 'accessory' && p.game === product.game) {
+          score += 20;
+        }
+        
+        // 3. Same game sealed but different category (e.g. booster box for an ETB)
+        if (p.type === 'sealed' && p.game === product.game && p.category !== product.category) {
+          score += 10;
+        }
+        
+        return { product: p, score };
+      })
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.product)
+      .slice(0, 6);
+  }, [products, product]);
+
+  if (loading) {
+    return (
+      <div style={{ ...styles.errorContainer, minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="glass-panel">
+        <h3 style={{ color: 'var(--color-gold)' }}>{lang === 'CZ' ? 'Načítání...' : 'Loading...'}</h3>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -437,14 +544,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
     setLightboxZoomStyle({ display: 'none' });
   };
 
-  // Filter related and similar products
-  const relatedSealed = products
-    .filter(p => p.type === 'sealed' && p.game === product.game && p.id !== product.id)
-    .slice(0, 8);
-
-  const similarSealed = products
-    .filter(p => p.type === 'sealed' && p.id !== product.id && !relatedSealed.some(r => r.id === p.id))
-    .slice(0, 8);
+  // Filter related and similar products are defined at the top to satisfy React Rules of Hooks
 
   // Helper functions
   const getProductCode = (prod) => {

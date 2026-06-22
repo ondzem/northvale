@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 import { supabase } from '../supabase';
+import { fetchProductByIdFromDB } from '../services/products';
 
 const getGameImage = (product) => {
   if (product.category === 'Acrylics') return '/acrylic-etb-box.png';
@@ -372,7 +373,135 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
 
 
 
-  const product = products.find(p => p.id === productId);
+  const [localProduct, setLocalProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const product = localProduct;
+
+  const [selectedCondition, setSelectedCondition] = useState('NM');
+  const [selectedLang, setSelectedLang] = useState('EN');
+  const [selectedFoil, setSelectedFoil] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    async function loadProduct() {
+      const found = products.find(p => p.id === productId);
+      if (found) {
+        setLocalProduct(found);
+        setLoading(false);
+      } else {
+        setLoading(true);
+        try {
+          const fetched = await fetchProductByIdFromDB(productId);
+          if (active) {
+            setLocalProduct(fetched);
+            setLoading(false);
+          }
+        } catch (e) {
+          console.error("Failed to fetch product by ID:", e);
+          if (active) {
+            setLocalProduct(null);
+            setLoading(false);
+          }
+        }
+      }
+    }
+    loadProduct();
+    return () => {
+      active = false;
+    };
+  }, [productId, products]);
+
+  // Sync state if product changes
+  useEffect(() => {
+    if (product && product.variants && product.variants.length > 0) {
+      setSelectedCondition(product.variants[0].condition);
+      setSelectedLang(product.variants[0].lang);
+      setSelectedFoil(product.variants[0].foil);
+    } else {
+      setSelectedCondition('NM');
+      setSelectedLang('EN');
+      setSelectedFoil(false);
+    }
+    setQty(1);
+  }, [productId, products, product]);
+
+  const similarSingles = useMemo(() => {
+    if (!products || !product) return [];
+    return products
+      .filter(p => (p.type === 'single' || p.type === 'slab') && p.id !== product.id)
+      .map(p => {
+        let score = 0;
+        if (p.game === product.game) score += 25;
+        if (p.category === product.category) score += 15;
+        if (p.subcat === product.subcat) score += 10;
+        if (p.edition === product.edition) score += 15;
+        if (p.setCode && product.setCode && p.setCode === product.setCode) score += 10;
+        if (p.rarity === product.rarity) score += 10;
+        
+        // Price proximity (same price range)
+        if (p.price && product.price) {
+          const diff = Math.abs(p.price - product.price) / product.price;
+          if (diff < 0.2) score += 10;
+          else if (diff < 0.5) score += 5;
+        }
+        return { product: p, score };
+      })
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.product)
+      .slice(0, 6);
+  }, [products, product]);
+
+  const relatedSingles = useMemo(() => {
+    if (!products || !product) return [];
+    return products
+      .filter(p => p.id !== product.id)
+      .map(p => {
+        let score = 0;
+        
+        // 1. If other product is an accessory (sleeves, binders, deck boxes)
+        if (p.type === 'accessory') {
+          score += 30;
+          if (p.game === product.game) score += 20;
+        }
+        
+        // 2. Slabs related items: PSA frames/cases/stands
+        if (product.type === 'slab' && p.category === 'Acrylics') {
+          score += 25;
+        }
+        
+        // 3. Sealed products of the same game (cross-selling boosters)
+        if (p.type === 'sealed' && p.game === product.game) {
+          score += 15;
+        }
+        
+        // 4. Same game general bonus
+        if (p.game === product.game && p.type !== 'single' && p.type !== 'slab') {
+          score += 10;
+        }
+        
+        // Price filter: favor accessories that are not extremely expensive relative to the card
+        if (p.price && product.price && p.type === 'accessory') {
+          if (p.price <= product.price * 1.5) {
+            score += 5;
+          }
+        }
+        
+        return { product: p, score };
+      })
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.product)
+      .slice(0, 6);
+  }, [products, product]);
+
+  if (loading) {
+    return (
+      <div style={{ ...styles.errorContainer, minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="glass-panel">
+        <h3 style={{ color: 'var(--color-gold)' }}>{lang === 'CZ' ? 'Načítání...' : 'Loading...'}</h3>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -384,29 +513,6 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
       </div>
     );
   }
-
-  // React state for dynamic selection of variant parameters
-  const initialVariant = product.variants && product.variants.length > 0
-    ? product.variants[0]
-    : { id: product.id, price: product.price || 0, stock: product.stock || 0, condition: 'NM', lang: 'EN', foil: false };
-
-  const [selectedCondition, setSelectedCondition] = useState(initialVariant.condition);
-  const [selectedLang, setSelectedLang] = useState(initialVariant.lang);
-  const [selectedFoil, setSelectedFoil] = useState(initialVariant.foil);
-
-  // Sync state if product changes
-  useEffect(() => {
-    if (product.variants && product.variants.length > 0) {
-      setSelectedCondition(product.variants[0].condition);
-      setSelectedLang(product.variants[0].lang);
-      setSelectedFoil(product.variants[0].foil);
-    } else {
-      setSelectedCondition('NM');
-      setSelectedLang('EN');
-      setSelectedFoil(false);
-    }
-    setQty(1);
-  }, [productId, products]);
 
   // Find exact matching variant
   let activeVariant = product.variants && product.variants.length > 0
@@ -499,14 +605,7 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
     setLightboxZoomStyle({ display: 'none' });
   };
 
-  // Filter related and similar products
-  const relatedSingles = products
-    .filter(p => p.type === 'single' && p.game === product.game && p.id !== product.id)
-    .slice(0, 8);
-
-  const similarSingles = products
-    .filter(p => (p.type === 'single' || (FEATURE_FLAGS.showSlabs && p.type === 'slab')) && p.id !== product.id && !relatedSingles.some(r => r.id === p.id))
-    .slice(0, 8);
+  // Filter related and similar products are defined at the top to satisfy React Rules of Hooks
 
   // Helper function to get card codes
 
