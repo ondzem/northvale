@@ -50,7 +50,7 @@ const getCardThemeClass = (product) => {
   return themes[code % themes.length];
 };
 
-const getCardCode = (product) => {
+export const getCardCode = (product) => {
   const name = product?.name || '';
   const id = product?.id || '';
   const match = name.match(/(\d+\/\d+)/);

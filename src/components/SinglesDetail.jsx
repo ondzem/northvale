@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
-import ProductCard from './ProductCard';
+import ProductCard, { getCardCode } from './ProductCard';
 import { supabase } from '../supabase';
 import { fetchProductByIdFromDB } from '../services/products';
 

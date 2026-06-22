@@ -941,6 +941,9 @@ function AppContent() {
     if (ogImageUrl.startsWith('/')) {
       ogImageUrl = `https://northvaletcg.eu${ogImageUrl}`;
     }
+    if (ogImageUrl.startsWith('http') && !ogImageUrl.includes('northvaletcg.eu')) {
+      console.warn(`[SEO Warning] Externally hosted image found: ${ogImageUrl}. For optimal performance and control, download and host this image on northvaletcg.eu.`);
+    }
     ogImageUrl = ogImageUrl.replace(/ /g, '%20');
     setMeta('property', 'og:image', ogImageUrl);
 
