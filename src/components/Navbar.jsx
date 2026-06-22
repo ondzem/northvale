@@ -343,13 +343,13 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 <span style={styles.topBarDivider}>|</span>
 
                 <div style={styles.socials}>
-                  <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
+                  <a href="https://www.instagram.com/northvaletcg/" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
                     <img src="/instagram.png" alt="Instagram" style={styles.socialIcon} />
                   </a>
-                  <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
+                  <a href="https://www.youtube.com/@northvaletcg" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
                     <img src="/youtube.png" alt="YouTube" style={styles.socialIcon} />
                   </a>
-                  <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
+                  <a href="https://www.tiktok.com/@northvaletcg" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
                     <img src="/tik-tok.png" alt="TikTok" style={styles.socialIcon} />
                   </a>
                 </div>
@@ -361,9 +361,19 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
           <div style={styles.middleBar}>
             <div className="container" style={styles.middleBarContent}>
               {/* Logo */}
-              <div style={styles.logoContainer} onClick={() => { setFilters({}); setActivePage('home'); }}>
+              <a 
+                href="/" 
+                style={{ ...styles.logoContainer, display: 'block' }} 
+                onClick={(e) => {
+                  if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                    e.preventDefault();
+                    setFilters({});
+                    setActivePage('home');
+                  }
+                }}
+              >
                 <img src="/logo s popisem.webp" alt="NORTHVALE TCG" style={styles.logoImg} />
-              </div>
+              </a>
 
               <form 
                 ref={searchContainerRef}
@@ -436,9 +446,18 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   onMouseEnter={() => setActiveDropdown('pokemon')}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button style={{ ...styles.categoryItem, paddingLeft: 0 }} onClick={() => handleCategoryClick('sealed', { game: 'Pokémon' })}>
+                  <a 
+                    href="/sealed-catalog?game=Pokémon"
+                    style={{ ...styles.categoryItem, paddingLeft: 0 }} 
+                    onClick={(e) => {
+                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                        e.preventDefault();
+                        handleCategoryClick('sealed', { game: 'Pokémon' });
+                      }
+                    }}
+                  >
                     Pokémon <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
-                  </button>
+                  </a>
                   {activeDropdown === 'pokemon' && (
                     <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                       <div className="nav-dropdown-row">
@@ -498,9 +517,18 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   onMouseEnter={() => setActiveDropdown('lorcana')}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button style={styles.categoryItem} onClick={() => handleCategoryClick('sealed', { game: 'Lorcana' })}>
+                  <a 
+                    href="/sealed-catalog?game=Lorcana"
+                    style={styles.categoryItem} 
+                    onClick={(e) => {
+                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                        e.preventDefault();
+                        handleCategoryClick('sealed', { game: 'Lorcana' });
+                      }
+                    }}
+                  >
                     Disney Lorcana <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
-                  </button>
+                  </a>
                   {activeDropdown === 'lorcana' && (
                     <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                       <div className="nav-dropdown-row">
@@ -548,9 +576,18 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   onMouseEnter={() => setActiveDropdown('onepiece')}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button style={styles.categoryItem} onClick={() => handleCategoryClick('sealed', { game: 'One Piece' })}>
+                  <a 
+                    href="/sealed-catalog?game=One+Piece"
+                    style={styles.categoryItem} 
+                    onClick={(e) => {
+                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                        e.preventDefault();
+                        handleCategoryClick('sealed', { game: 'One Piece' });
+                      }
+                    }}
+                  >
                     One Piece <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
-                  </button>
+                  </a>
                   {activeDropdown === 'onepiece' && (
                     <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                       <div className="nav-dropdown-row">
@@ -592,9 +629,18 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   onMouseEnter={() => setActiveDropdown('riftbound')}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button style={styles.categoryItem} onClick={() => handleCategoryClick('sealed', { game: 'Riftbound' })}>
+                  <a 
+                    href="/sealed-catalog?game=Riftbound"
+                    style={styles.categoryItem} 
+                    onClick={(e) => {
+                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                        e.preventDefault();
+                        handleCategoryClick('sealed', { game: 'Riftbound' });
+                      }
+                    }}
+                  >
                     Riftbound <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
-                  </button>
+                  </a>
                   {activeDropdown === 'riftbound' && (
                     <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                       <div className="nav-dropdown-row">
@@ -642,9 +688,18 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   onMouseEnter={() => setActiveDropdown('accessories')}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button style={styles.categoryItem} onClick={() => handleCategoryClick('sealed', { game: 'Accessories' })}>
+                  <a 
+                    href="/sealed-catalog?game=Accessories"
+                    style={styles.categoryItem} 
+                    onClick={(e) => {
+                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                        e.preventDefault();
+                        handleCategoryClick('sealed', { game: 'Accessories' });
+                      }
+                    }}
+                  >
                     {translateSubcat('Příslušenství')} <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
-                  </button>
+                  </a>
                   {activeDropdown === 'accessories' && (
                     <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                       <div className="nav-dropdown-row">
@@ -706,9 +761,18 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   onMouseEnter={() => setActiveDropdown('acrylics')}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <button style={styles.categoryItem} onClick={() => handleCategoryClick('sealed', { game: 'Acrylics' })}>
+                  <a 
+                    href="/sealed-catalog?game=Acrylics"
+                    style={styles.categoryItem} 
+                    onClick={(e) => {
+                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                        e.preventDefault();
+                        handleCategoryClick('sealed', { game: 'Acrylics' });
+                      }
+                    }}
+                  >
                     {translateSubcat('Akryly')} <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
-                  </button>
+                  </a>
                   {activeDropdown === 'acrylics' && (
                     <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                       <div className="nav-dropdown-row">
@@ -759,9 +823,18 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     onMouseEnter={() => setActiveDropdown('slabs')}
                     onMouseLeave={() => setActiveDropdown(null)}
                   >
-                    <button style={styles.categoryItem} onClick={() => handleCategoryClick('slabs')}>
+                    <a 
+                      href="/slabs-catalog"
+                      style={styles.categoryItem} 
+                      onClick={(e) => {
+                        if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                          e.preventDefault();
+                          handleCategoryClick('slabs');
+                        }
+                      }}
+                    >
                       {translateSubcat('Ohodnocené karty')} <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
-                    </button>
+                    </a>
                     {activeDropdown === 'slabs' && (
                       <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                         <div className="nav-dropdown-row">
@@ -805,9 +878,18 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     onMouseEnter={() => setActiveDropdown('grading')}
                     onMouseLeave={() => setActiveDropdown(null)}
                   >
-                    <button style={styles.categoryItem} onClick={() => setActivePage('grading')}>
+                    <a 
+                      href="/grading"
+                      style={styles.categoryItem} 
+                      onClick={(e) => {
+                        if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                          e.preventDefault();
+                          setActivePage('grading');
+                        }
+                      }}
+                    >
                       Grading <img src="/angle-small-down (1).png" style={styles.chevron} alt="" />
-                    </button>
+                    </a>
                     {activeDropdown === 'grading' && (
                       <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                         <div className="nav-dropdown-row">
@@ -886,9 +968,19 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
               </div>
 
               {/* Center: Logo */}
-              <div style={styles.mobileCenterArea} onClick={() => { setFilters({}); setActivePage('home'); }}>
+              <a 
+                href="/" 
+                style={{ ...styles.mobileCenterArea, display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
+                onClick={(e) => {
+                  if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                    e.preventDefault();
+                    setFilters({});
+                    setActivePage('home');
+                  }
+                }}
+              >
                 <img src="/Northvale Logo.webp" alt="NORTHVALE TCG" style={styles.mobileLogoImg} />
-              </div>
+              </a>
 
               {/* Right: Profile & Cart */}
               <div style={styles.mobileRightArea}>

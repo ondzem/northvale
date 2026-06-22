@@ -134,10 +134,20 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
     }
   };
 
+  const cardUrl = product.type === 'single' || product.type === 'slab' 
+    ? `/singles-detail/${product.id}` 
+    : `/sealed-detail/${product.id}`;
+
   return (
-    <div 
+    <a 
+      href={cardUrl}
       className={`vf-card type-${product.type} ${(stock === 0 && !product.preorder) ? 'out-of-stock' : ''}`}
-      onClick={handleCardClick}
+      onClick={(e) => {
+        if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -279,6 +289,6 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           </button>
         </div>
       </div>
-    </div>
+    </a>
   );
 }

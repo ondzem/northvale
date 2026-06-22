@@ -174,20 +174,20 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
                 const parts = [];
                 
                 const linksToMap = [
-                  { pattern: 'nabídku toploaderů', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
-                  { pattern: 'pokémon obaly', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
-                  { pattern: 'obaly na karty', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
-                  { pattern: 'akrylové stojánky', action: () => handleInternalNav('sealed-catalog', { game: 'Acrylics' }) },
-                  { pattern: 'obaly Ultra PRO', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
-                  { pattern: 'stojánky a display systémy', action: () => handleInternalNav('sealed-catalog', { game: 'Acrylics' }) },
-                  { pattern: 'jak poznat fake Pokémon kartu', action: () => handleArticleClick('jak-rozpoznat-fale-nou-pok-mon-kartu') },
-                  { pattern: 'jak poznat falešnou Pokémon kartu', action: () => handleArticleClick('jak-rozpoznat-fale-nou-pok-mon-kartu') },
-                  { pattern: 'jak poznat falešné karty Pokémon', action: () => handleArticleClick('jak-rozpoznat-fale-nou-pok-mon-kartu') },
-                  { pattern: 'jak začít s Pokémon kartami', action: () => handleArticleClick('jak-zacit-s-pokemon-kartami') },
-                  { pattern: 'kde koupit Pokémon karty v Česku', action: () => handleArticleClick('kde-koupit-pokemon-karty-v-cesku') },
-                  { pattern: 'kde sehnat Pokémon karty v ČR', action: () => handleArticleClick('kde-sehnat-pokemon-karty-v-cr') },
-                  { pattern: 'příslušenství pro karty', action: () => handleArticleClick('prislusenstvi-pro-karty') },
-                  { pattern: 'výbavu sběratele Pokémon karet', action: () => handleArticleClick('vybava-sberatele-pokemon-karet') }
+                  { pattern: 'nabídku toploaderů', href: '/sealed-catalog?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
+                  { pattern: 'pokémon obaly', href: '/sealed-catalog?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
+                  { pattern: 'obaly na karty', href: '/sealed-catalog?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
+                  { pattern: 'akrylové stojánky', href: '/sealed-catalog?game=Acrylics', action: () => handleInternalNav('sealed-catalog', { game: 'Acrylics' }) },
+                  { pattern: 'obaly Ultra PRO', href: '/sealed-catalog?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
+                  { pattern: 'stojánky a display systémy', href: '/sealed-catalog?game=Acrylics', action: () => handleInternalNav('sealed-catalog', { game: 'Acrylics' }) },
+                  { pattern: 'jak poznat fake Pokémon kartu', href: '/blog/jak-rozpoznat-falesnou-pokemon-kartu', action: () => handleArticleClick('jak-rozpoznat-falesnou-pokemon-kartu') },
+                  { pattern: 'jak poznat falešnou Pokémon kartu', href: '/blog/jak-rozpoznat-falesnou-pokemon-kartu', action: () => handleArticleClick('jak-rozpoznat-falesnou-pokemon-kartu') },
+                  { pattern: 'jak poznat falešné karty Pokémon', href: '/blog/jak-rozpoznat-falesnou-pokemon-kartu', action: () => handleArticleClick('jak-rozpoznat-falesnou-pokemon-kartu') },
+                  { pattern: 'jak začít s Pokémon kartami', href: '/blog/jak-zacit-s-pokemon-kartami', action: () => handleArticleClick('jak-zacit-s-pokemon-kartami') },
+                  { pattern: 'kde koupit Pokémon karty v Česku', href: '/blog/kde-koupit-pokemon-karty-v-cesku', action: () => handleArticleClick('kde-koupit-pokemon-karty-v-cesku') },
+                  { pattern: 'kde sehnat Pokémon karty v ČR', href: '/blog/kde-sehnat-pokemon-karty-v-cr', action: () => handleArticleClick('kde-sehnat-pokemon-karty-v-cr') },
+                  { pattern: 'příslušenství pro karty', href: '/blog/prislusenstvi-pro-karty', action: () => handleArticleClick('prislusenstvi-pro-karty') },
+                  { pattern: 'výbavu sběratele Pokémon karet', href: '/blog/vybava-sberatele-pokemon-karet', action: () => handleArticleClick('vybava-sberatele-pokemon-karet') }
                 ];
 
                 let matches = [];
@@ -220,13 +220,19 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
                     parts.push(rawText.substring(currentPos, m.start));
                   }
                   parts.push(
-                    <span 
+                    <a 
                       key={index} 
+                      href={m.href}
                       className="are-link"
-                      onClick={m.action}
+                      onClick={(e) => {
+                        if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                          e.preventDefault();
+                          m.action();
+                        }
+                      }}
                     >
                       {m.label}
-                    </span>
+                    </a>
                   );
                   currentPos = m.start + m.length;
                 });
@@ -263,7 +269,7 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
   // Helper to get static publication date
   const getArticleDate = (id) => {
     switch (id) {
-      case 'jak-rozpoznat-fale-nou-pok-mon-kartu':
+      case 'jak-rozpoznat-falesnou-pokemon-kartu':
         return '18. 06. 2026';
       case 'jak-zacit-s-pokemon-kartami':
         return '17. 06. 2026';
@@ -299,10 +305,16 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
       {/* Articles Grid */}
       <div style={styles.grid}>
         {filteredArticles.map(article => (
-          <div 
+          <a 
             key={article.id}
+            href={`/blog/${article.id}`}
             className="blog-card"
-            onClick={() => handleArticleClick(article.id)}
+            onClick={(e) => {
+              if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                e.preventDefault();
+                handleArticleClick(article.id);
+              }
+            }}
           >
             {/* Image Wrapper - Full width/height, no inner glass border */}
             <div className="blog-card-image-wrapper">
@@ -336,7 +348,7 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
                 <span style={{ fontSize: '14px' }}>→</span>
               </span>
             </div>
-          </div>
+          </a>
         ))}
       </div>
     </div>

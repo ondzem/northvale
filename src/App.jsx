@@ -721,6 +721,38 @@ function AppContent() {
     });
   }, [activePage, gdprVopTab]);
 
+  // Helpers for stripping HTML tags and JSON-LD structured data formatting
+  const stripAndTruncate = (text, max = 155) => {
+    if (!text) return '';
+    const plain = String(text)
+      .replace(/<[^>]+>/g, '') // Strip HTML tags
+      .replace(/data:image\/[^"']+/g, '') // Strip base64 inline images
+      .replace(/[{}"]/g, '') // Strip JSON brackets/quotes if any JSON structure leaked
+      .replace(/\s+/g, ' ') // Collapse whitespaces
+      .trim();
+    return plain.length > max ? plain.slice(0, max - 1).trimEnd() + '…' : plain;
+  };
+
+  const extractFirstTextBlock = (desc) => {
+    if (!desc) return '';
+    if (desc.trim().startsWith('[') || desc.trim().startsWith('{')) {
+      try {
+        const blocks = JSON.parse(desc);
+        if (Array.isArray(blocks)) {
+          const firstText = blocks.find(b => b.type === 'paragraph' || b.type === 'text' || b.text);
+          if (firstText) {
+            return firstText.text || '';
+          }
+        } else if (blocks.text) {
+          return blocks.text;
+        }
+      } catch (err) {
+        // Fallback to string handling
+      }
+    }
+    return desc;
+  };
+
   // Dynamic Page Title & SEO Meta Description
   useEffect(() => {
     let pageTitle = '';
@@ -728,16 +760,32 @@ function AppContent() {
 
     switch (activePage) {
       case 'home':
-        pageTitle = t('common.home');
+        pageTitle = lang === 'CZ'
+          ? 'Northvale TCG – Pokémon, Lorcana a One Piece karty | E-shop'
+          : 'Northvale TCG – Pokémon, Lorcana & One Piece Cards Shop';
         break;
-      case 'singles-catalog':
-        pageTitle = t('Catalogs.singlesTitle');
-        metaDescription = 'Kusové karty Pokémon na jednom místě. Prozkoumejte naši širokou nabídku a doplňte svou sbírku.';
+      case 'singles-catalog': {
+        const gamePart = filters.game && filters.game !== 'all' && filters.game !== 'all-games' ? filters.game : '';
+        const typePart = filters.type || '';
+        pageTitle = gamePart || typePart 
+          ? `${[typePart, gamePart].filter(Boolean).join(' ')} - Kusovky` 
+          : t('Catalogs.singlesTitle');
+        metaDescription = gamePart || typePart
+          ? `Kusové karty ${[typePart, gamePart].filter(Boolean).join(' ')} na kusovky. Doplňte svou sbírku Pokémon, Lorcana a One Piece karet.`
+          : 'Kusové karty Pokémon, Lorcana a One Piece na jednom místě. Prozkoumejte naši širokou nabídku a doplňte svou sbírku.';
         break;
-      case 'sealed-catalog':
-        pageTitle = t('Catalogs.sealedTitle');
-        metaDescription = 'Zapečetěné balíčky (boostery), boxy, ETB a příslušenství pro karetní hry Pokémon, Lorcana a One Piece.';
+      }
+      case 'sealed-catalog': {
+        const gamePart = filters.game && filters.game !== 'all' && filters.game !== 'all-games' ? filters.game : '';
+        const typePart = filters.type || '';
+        pageTitle = gamePart || typePart 
+          ? `${[typePart, gamePart].filter(Boolean).join(' ')}` 
+          : t('Catalogs.sealedTitle');
+        metaDescription = gamePart || typePart
+          ? `${[typePart, gamePart].filter(Boolean).join(' ')} skladem na Northvale TCG. Zapečetěné produkty Pokémon, Lorcana a One Piece.`
+          : 'Zapečetěné balíčky (boostery), boxy, ETB a příslušenství pro karetní hry Pokémon, Lorcana a One Piece.';
         break;
+      }
       case 'slabs-catalog':
         pageTitle = t('Catalogs.slabsTitle');
         metaDescription = 'Ohodnocené karty (graded slabs) s certifikovanou pravostí a kvalitou od předních gradingových společností.';
@@ -747,7 +795,9 @@ function AppContent() {
         const currentProduct = dbProducts.find(p => p.id === selectedProductId);
         if (currentProduct) {
           pageTitle = currentProduct.name;
-          metaDescription = `${currentProduct.name} - ${currentProduct.description || 'Kupte originální TCG produkty na Northvale TCG.'}`;
+          const plainDesc = extractFirstTextBlock(currentProduct.desc || currentProduct.description);
+          const rawShort = currentProduct.shortDesc || plainDesc || 'Kupte originální TCG produkty na Northvale TCG.';
+          metaDescription = stripAndTruncate(rawShort);
         }
         break;
       }
@@ -824,10 +874,13 @@ function AppContent() {
       default:
         pageTitle = 'Northvaletcg.eu';
     }
-    
+
     document.title = pageTitle ? `${pageTitle} - Northvaletcg.eu` : 'Northvaletcg.eu';
 
-    // Update Meta Description dynamically for SEO
+    // Synchronize HTML language code dynamically
+    document.documentElement.lang = lang === 'CZ' ? 'cs' : 'en';
+
+    // Dynamic Meta Description
     let metaDescTag = document.querySelector('meta[name="description"]');
     if (!metaDescTag) {
       metaDescTag = document.createElement('meta');
@@ -835,7 +888,160 @@ function AppContent() {
       document.head.appendChild(metaDescTag);
     }
     metaDescTag.content = metaDescription;
-  }, [activePage, selectedProductId, gdprVopTab, lang]);
+
+    // Canonical link injection
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.rel = 'canonical';
+      document.head.appendChild(canonicalLink);
+    }
+    const cleanSearch = new URLSearchParams();
+    const activeParams = new URLSearchParams(window.location.search);
+    ['game', 'type', 'company', 'gameFilter'].forEach(param => {
+      if (activeParams.has(param)) {
+        cleanSearch.set(param, activeParams.get(param));
+      }
+    });
+    const searchString = cleanSearch.toString();
+    const canonicalUrl = `https://northvaletcg.eu${window.location.pathname}${searchString ? '?' + searchString : ''}`;
+    canonicalLink.href = canonicalUrl;
+
+    // Open Graph / Twitter meta helpers
+    const setMeta = (attr, key, value) => {
+      if (!value) return;
+      let tag = document.querySelector(`meta[${attr}="${key}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute(attr, key);
+        document.head.appendChild(tag);
+      }
+      tag.content = value;
+    };
+
+    setMeta('property', 'og:title', pageTitle ? `${pageTitle} - Northvaletcg.eu` : 'Northvaletcg.eu');
+    setMeta('property', 'og:description', metaDescription);
+    setMeta('property', 'og:type', (activePage === 'sealed-detail' || activePage === 'singles-detail') ? 'product' : 'website');
+    setMeta('property', 'og:url', canonicalUrl);
+    setMeta('name', 'twitter:card', 'summary_large_image');
+
+    // Retrieve active visual images
+    let ogImageUrl = '/Northvale Logo.webp';
+    const currentProduct = (activePage === 'sealed-detail' || activePage === 'singles-detail')
+      ? dbProducts.find(p => p.id === selectedProductId)
+      : null;
+    if (currentProduct && currentProduct.image) {
+      ogImageUrl = currentProduct.image;
+    } else if (activePage === 'blog' && selectedProductId) {
+      const currentArticle = blogArticles.find(a => a.id === selectedProductId);
+      if (currentArticle && currentArticle.image) {
+        ogImageUrl = currentArticle.image;
+      }
+    }
+    if (ogImageUrl.startsWith('/')) {
+      ogImageUrl = `https://northvaletcg.eu${ogImageUrl}`;
+    }
+    setMeta('property', 'og:image', ogImageUrl);
+
+    // Structured Data (JSON-LD) injection
+    let jsonLdScript = document.getElementById('structured-data-seo');
+    if (jsonLdScript) {
+      jsonLdScript.remove();
+    }
+
+    let jsonLdData = null;
+
+    if (activePage === 'home') {
+      jsonLdData = {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://northvaletcg.eu/#organization",
+            "name": "Northvale TCG",
+            "url": "https://northvaletcg.eu",
+            "logo": "https://northvaletcg.eu/Northvale%20Logo.webp",
+            "sameAs": [
+              "https://www.instagram.com/northvaletcg/",
+              "https://www.youtube.com/@northvaletcg",
+              "https://www.tiktok.com/@northvaletcg"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://northvaletcg.eu/#website",
+            "url": "https://northvaletcg.eu",
+            "name": "Northvale TCG",
+            "publisher": { "@id": "https://northvaletcg.eu/#organization" }
+          }
+        ]
+      };
+    } else if ((activePage === 'sealed-detail' || activePage === 'singles-detail') && currentProduct) {
+      const price = currentProduct.price ?? 0;
+      const stock = currentProduct.stock ?? 0;
+      const offersStock = stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock";
+      jsonLdData = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": currentProduct.name,
+        "image": ogImageUrl,
+        "description": metaDescription,
+        "offers": {
+          "@type": "Offer",
+          "url": canonicalUrl,
+          "priceCurrency": "CZK",
+          "price": price,
+          "availability": offersStock
+        }
+      };
+    } else if (activePage === 'blog') {
+      if (selectedProductId) {
+        const currentArticle = blogArticles.find(a => a.id === selectedProductId);
+        if (currentArticle) {
+          jsonLdData = {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": currentArticle.title,
+            "description": currentArticle.description,
+            "image": ogImageUrl,
+            "datePublished": "2026-06-18T12:00:00Z",
+            "author": {
+              "@type": "Organization",
+              "name": "Northvale TCG"
+            }
+          };
+        }
+      }
+    } else if (activePage === 'sealed-catalog' || activePage === 'singles-catalog') {
+      jsonLdData = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": lang === 'CZ' ? "Domů" : "Home",
+            "item": "https://northvaletcg.eu/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": pageTitle,
+            "item": canonicalUrl
+          }
+        ]
+      };
+    }
+
+    if (jsonLdData) {
+      jsonLdScript = document.createElement('script');
+      jsonLdScript.type = 'application/ld+json';
+      jsonLdScript.id = 'structured-data-seo';
+      jsonLdScript.text = JSON.stringify(jsonLdData);
+      document.head.appendChild(jsonLdScript);
+    }
+
+  }, [activePage, selectedProductId, gdprVopTab, lang, filters, dbProducts]);
 
   // Custom Toast helper
   function showToast(message, type = 'success', title = '') {

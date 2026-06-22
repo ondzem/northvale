@@ -2,7 +2,7 @@
 
 export const blogArticles = [
   {
-    "id": "jak-rozpoznat-fale-nou-pok-mon-kartu",
+    "id": "jak-rozpoznat-falesnou-pokemon-kartu",
     "title": "Jak rozpoznat falešnou Pokémon kartu: 9 rychlých testů",
     "category": "Bezpečnost",
     "readTime": "8 min",
