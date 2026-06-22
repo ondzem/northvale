@@ -52,7 +52,7 @@ export async function fetchProductsFromDB(options = {}) {
     } else {
       const { data, error } = await supabase
         .from('products')
-        .select('*');
+        .select('id, name, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, image, back_image, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, additional_images, illustrator, set_code, stage, element, custom_params');
 
       if (error) {
         throw error;

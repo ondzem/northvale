@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from '../../context/LanguageContext';
-import { fetchProductsFromDB, saveProductToDB, deleteProductFromDB } from '../../services/products';
+import { fetchProductsFromDB, saveProductToDB, deleteProductFromDB, fetchProductByIdFromDB } from '../../services/products';
 import { fetchCategoriesFromDB } from '../../services/categories';
 import ProductCard from '../ProductCard';
 import { FEATURE_FLAGS } from '../../config';
@@ -504,7 +504,18 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (p) => {
+  const handleOpenEditModal = async (prod) => {
+    let p = prod;
+    if (!prod.desc && prod.id) {
+      try {
+        const fetched = await fetchProductByIdFromDB(prod.id);
+        if (fetched) {
+          p = fetched;
+        }
+      } catch (e) {
+        console.error("Failed to fetch full product details for edit modal", e);
+      }
+    }
     setEditingProduct(p);
     setFormId(p.id || '');
     
