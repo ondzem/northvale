@@ -1037,6 +1037,13 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     </div>
                   </div>
 
+                  {/* Blog mobile link */}
+                  <div style={styles.mobileNavSection}>
+                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { setActivePage('blog'); setDrawerOpen(false); }}>
+                      <span>Blog</span>
+                    </div>
+                  </div>
+
                   {/* 7. Slabs */}
                   {FEATURE_FLAGS.showSlabs && (
                     <div style={styles.mobileNavSection}>
@@ -1116,6 +1123,13 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                         onClick={() => { setActivePage('support'); setDrawerOpen(false); }}
                       >
                         {translateSubcat('Kontakt')}
+                      </li>
+                      <li 
+                        style={styles.drawerLinkItem} 
+                        className="drawer-link-item"
+                        onClick={() => { setActivePage('blog'); setDrawerOpen(false); }}
+                      >
+                        {translateSubcat('Blog')}
                       </li>
                       {FEATURE_FLAGS.showBuylist && (
                         <li 

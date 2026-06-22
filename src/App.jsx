@@ -25,6 +25,8 @@ import ResetPasswordModal from './components/ResetPasswordModal';
 import CookieConsent from './components/CookieConsent';
 import ErrorPage from './components/ErrorPage';
 import { supabase } from './supabase';
+import Blog from './components/Blog';
+import { blogArticles } from './blogData';
 
 import { mockProducts } from './mockData';
 import { fetchProductsFromDB } from './services/products';
@@ -79,6 +81,11 @@ const parseUrlToState = () => {
     page = 'faq';
   } else if (path === '/about') {
     page = 'about';
+  } else if (path.startsWith('/blog/')) {
+    page = 'blog';
+    productId = path.replace('/blog/', '');
+  } else if (path === '/blog') {
+    page = 'blog';
   } else if (path === '/checkout') {
     page = 'checkout';
   } else if (path === '/profile') {
@@ -139,6 +146,12 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
     path = '/faq';
   } else if (page === 'about') {
     path = '/about';
+  } else if (page === 'blog') {
+    if (productId) {
+      path = `/blog/${productId}`;
+    } else {
+      path = '/blog';
+    }
   } else if (page === 'checkout') {
     path = '/checkout';
   } else if (page === 'profile') {
@@ -708,50 +721,78 @@ function AppContent() {
     });
   }, [activePage, gdprVopTab]);
 
-  // Dynamic Page Title
+  // Dynamic Page Title & SEO Meta Description
   useEffect(() => {
     let pageTitle = '';
+    let metaDescription = 'Northvale TCG - Váš průvodce světem karetních her Pokémon, Disney Lorcana a One Piece. Originální produkty, příslušenství a sběratelský blog.';
+
     switch (activePage) {
       case 'home':
         pageTitle = t('common.home');
         break;
       case 'singles-catalog':
         pageTitle = t('Catalogs.singlesTitle');
+        metaDescription = 'Kusové karty Pokémon na jednom místě. Prozkoumejte naši širokou nabídku a doplňte svou sbírku.';
         break;
       case 'sealed-catalog':
         pageTitle = t('Catalogs.sealedTitle');
+        metaDescription = 'Zapečetěné balíčky (boostery), boxy, ETB a příslušenství pro karetní hry Pokémon, Lorcana a One Piece.';
         break;
       case 'slabs-catalog':
         pageTitle = t('Catalogs.slabsTitle');
+        metaDescription = 'Ohodnocené karty (graded slabs) s certifikovanou pravostí a kvalitou od předních gradingových společností.';
         break;
       case 'singles-detail':
       case 'sealed-detail': {
         const currentProduct = dbProducts.find(p => p.id === selectedProductId);
         if (currentProduct) {
           pageTitle = currentProduct.name;
+          metaDescription = `${currentProduct.name} - ${currentProduct.description || 'Kupte originální TCG produkty na Northvale TCG.'}`;
+        }
+        break;
+      }
+      case 'blog': {
+        if (selectedProductId) {
+          const currentArticle = blogArticles.find(a => a.id === selectedProductId);
+          if (currentArticle) {
+            pageTitle = currentArticle.title;
+            metaDescription = currentArticle.description;
+          } else {
+            pageTitle = 'Článek nenalezen';
+          }
+        } else {
+          pageTitle = 'Blog';
+          metaDescription = 'Průvodce světem karetních her, tipy na ochranu sbírky, rady pro začátečníky a návody pro rozpoznání padělaných karet.';
         }
         break;
       }
       case 'buylist':
         pageTitle = t('BuylistPortal.title');
+        metaDescription = 'Výkup Pokémon, Lorcana a One Piece karet. Prodejte nám své přebytečné kusové karty za skvělé ceny.';
         break;
       case 'grading':
         pageTitle = t('GradingPortal.title');
+        metaDescription = 'Profesionální grading servis pro vaše TCG karty. Certifikace stavu, bezpečné pouzdro a zvýšení hodnoty.';
         break;
       case 'grading-guide':
         pageTitle = t('GradingGuide.title');
+        metaDescription = 'Průvodce gradingem karet. Jak připravit karty pro grading, jaké zvolit služby a na co si dát pozor.';
         break;
       case 'community':
         pageTitle = t('Community.title');
+        metaDescription = 'Turnaje a komunitní akce Northvale TCG. Připojte se k lokálním hráčům a poměřte své síly.';
         break;
       case 'support':
         pageTitle = t('ContactPage.title');
+        metaDescription = 'Kontaktujte Northvale TCG. Rádi vám poradíme s výběrem produktů, stavbou balíčku nebo objednávkou.';
         break;
       case 'faq':
         pageTitle = t('FaqPage.title');
+        metaDescription = 'Často kladené dotazy (FAQ) ohledně dopravy, plateb, věrnostního programu a pravosti karet.';
         break;
       case 'about':
         pageTitle = t('AboutPage.title');
+        metaDescription = 'O nás - Northvale TCG. Příběh e-shopu založeného z vášně pro sbírání karetních her Pokémon, Lorcana a One Piece.';
         break;
       case 'admin':
         pageTitle = 'Administrace';
@@ -759,12 +800,16 @@ function AppContent() {
       case 'gdpr-vop':
         if (gdprVopTab === 'doprava') {
           pageTitle = t('GdprVop.dopravaTitle');
+          metaDescription = 'Informace o možnostech dopravy a platby. Doručení po celé ČR a na Slovensko přes Zásilkovnu a PPL.';
         } else if (gdprVopTab === 'vop') {
           pageTitle = t('GdprVop.vopTitle');
+          metaDescription = 'Všeobecné obchodní podmínky (VOP) e-shopu Northvale TCG.';
         } else if (gdprVopTab === 'odstoupeni') {
           pageTitle = t('GdprVop.withdrawalTitle');
+          metaDescription = 'Formulář a podmínky pro odstoupení od kupní smlouvy do 14 dnů.';
         } else {
           pageTitle = t('GdprVop.gdprTitle');
+          metaDescription = 'Zásady ochrany osobních údajů (GDPR) a zpracování cookies.';
         }
         break;
       case 'cart':
@@ -781,6 +826,15 @@ function AppContent() {
     }
     
     document.title = pageTitle ? `${pageTitle} - Northvaletcg.eu` : 'Northvaletcg.eu';
+
+    // Update Meta Description dynamically for SEO
+    let metaDescTag = document.querySelector('meta[name="description"]');
+    if (!metaDescTag) {
+      metaDescTag = document.createElement('meta');
+      metaDescTag.name = 'description';
+      document.head.appendChild(metaDescTag);
+    }
+    metaDescTag.content = metaDescription;
   }, [activePage, selectedProductId, gdprVopTab, lang]);
 
   // Custom Toast helper
@@ -1139,6 +1193,14 @@ function AppContent() {
 
         {activePage === 'about' && (
           <AboutPage setActivePage={navigateToPage} />
+        )}
+
+        {activePage === 'blog' && (
+          <Blog 
+            selectedArticleId={selectedProductId}
+            setSelectedProductId={setSelectedProductId}
+            setActivePage={navigateToPage}
+          />
         )}
 
         {activePage === 'checkout' && (
