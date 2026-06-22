@@ -38,166 +38,223 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
   // Helper to translate labels
   const tLabel = (cz, en) => (lang === 'CZ' ? cz : en);
 
+  // Scroll Spy / Active Anchor state
+  const [activeAnchor, setActiveAnchor] = useState('');
+
+  useEffect(() => {
+    if (!activeArticle) return;
+    
+    const handleScroll = () => {
+      const headings = document.querySelectorAll('.are-body h2');
+      let currentActive = '';
+      
+      // If we are at the top of the page, highlight the first item
+      if (window.scrollY < 200) {
+        const firstHeading = headings[0];
+        if (firstHeading) {
+          setActiveAnchor(firstHeading.id);
+          return;
+        }
+      }
+      
+      headings.forEach(heading => {
+        const rect = heading.getBoundingClientRect();
+        // If the heading is in the upper part of the viewport
+        if (rect.top <= 140) {
+          currentActive = heading.id;
+        }
+      });
+      
+      if (currentActive) {
+        setActiveAnchor(currentActive);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    // Initial call to set active heading
+    handleScroll();
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [selectedArticleId, activeArticle]);
+
   if (activeArticle) {
+    // Extract H2 sections for the Table of Contents sidebar
+    const h2Sections = activeArticle.content.filter(sec => sec.type === 'h2');
+
+    const handleTocClick = (e, slug) => {
+      e.preventDefault();
+      const element = document.getElementById(slug);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+        setActiveAnchor(slug);
+      }
+    };
+
+    // Helper to generate dynamic matching anchor IDs
+    const slugify = (text) => {
+      return text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-');
+    };
+
     // Detailed Article View
     return (
-      <div className="container fade-in" style={styles.container}>
+      <div className="container fade-in" style={{ ...styles.container, paddingTop: '40px' }}>
         <div style={{ marginBottom: '24px' }}>
           <button 
             type="button"
-            className="btn btn-outline"
-            style={styles.backBtn}
+            className="are-back"
             onClick={handleBackToList}
           >
             ← {tLabel('Zpět na přehled článků', 'Back to articles')}
           </button>
         </div>
 
-        <article className="glass-panel" style={styles.articleCard}>
-          {/* Article Header Image */}
-          <div style={styles.detailImageWrapper}>
-            <img 
-              src={activeArticle.image} 
-              alt={activeArticle.title} 
-              style={styles.detailImage}
-            />
-            <div style={styles.imageOverlay} />
+        {/* Article Header (Masthead) */}
+        <header className="are-mast">
+          <h1 className="are-title">{activeArticle.title}</h1>
+          <p className="are-lead">{activeArticle.description}</p>
+        </header>
+
+        {/* Premium full-width hero image with auto height */}
+        <div className="are-hero">
+          <div className="card-art-hero">
+            <img src={activeArticle.image} alt={activeArticle.title} className="card-art-hero-img" />
           </div>
+        </div>
 
-          <div style={styles.detailContent}>
-            {/* Meta info */}
-            <div style={styles.metaRow}>
-              <span style={styles.categoryBadge}>
-                {tLabel(
-                  activeArticle.category,
-                  categories.find(c => c.id === activeArticle.category)?.en || activeArticle.category
-                )}
-              </span>
-              <span style={styles.readTime}>⏱ {activeArticle.readTime}</span>
-            </div>
-
-            {/* Title */}
-            <h1 style={styles.articleTitle}>{activeArticle.title}</h1>
-
-            {/* Description */}
-            <p style={styles.articleLead}>{activeArticle.description}</p>
-
-            <div className="article-divider" style={styles.divider}></div>
-
-            {/* Main Text Content */}
-            <div style={styles.bodyText}>
-              {activeArticle.content.map((sec, idx) => {
-                if (sec.type === 'h2') {
-                  return <h2 key={idx} style={styles.h2}>{sec.text}</h2>;
-                }
-                if (sec.type === 'h3') {
-                  return <h3 key={idx} style={styles.h3}>{sec.text}</h3>;
-                }
-                
-                // Format links dynamically in paragraph text for SEO optimization
-                let text = sec.text;
-                
-                // Replace internal keywords with actual working links
-                // 1. "Jak se hrají karty Pokémon" or "článku Jak se hrají karty"
-                // 2. "jak poznat falešné karty Pokémon" or "jak poznat fake Pokémon kartu"
-                // 3. "ochranu Pokémon karet"
-                // 4. "nabídku toploaderů"
-                // 5. "akrylové stojánky a display systémy"
-                // Let's keep the html parsing simple or render standard react links.
-                // We'll split the text by some terms and output elements
-                
-                const formatParagraphText = (rawText) => {
-                  const parts = [];
-                  let lastIdx = 0;
-                  
-                  const linksToMap = [
-                    { pattern: 'nabídku toploaderů', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
-                    { pattern: 'pokémon obaly', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
-                    { pattern: 'obaly na karty', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
-                    { pattern: 'akrylové stojánky', action: () => handleInternalNav('sealed-catalog', { game: 'Acrylics' }) },
-                    { pattern: 'obaly Ultra PRO', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
-                    { pattern: 'stojánky a display systémy', action: () => handleInternalNav('sealed-catalog', { game: 'Acrylics' }) },
-                    { pattern: 'jak poznat fake Pokémon kartu', action: () => handleArticleClick('jak-rozpoznat-fale-nou-pok-mon-kartu') },
-                    { pattern: 'jak poznat falešnou Pokémon kartu', action: () => handleArticleClick('jak-rozpoznat-fale-nou-pok-mon-kartu') },
-                    { pattern: 'jak poznat falešné karty Pokémon', action: () => handleArticleClick('jak-rozpoznat-fale-nou-pok-mon-kartu') },
-                    { pattern: 'jak začít s Pokémon kartami', action: () => handleArticleClick('jak-zacit-s-pokemon-kartami') },
-                    { pattern: 'kde koupit Pokémon karty v Česku', action: () => handleArticleClick('kde-koupit-pokemon-karty-v-cesku') },
-                    { pattern: 'kde sehnat Pokémon karty v ČR', action: () => handleArticleClick('kde-sehnat-pokemon-karty-v-cr') },
-                    { pattern: 'příslušenství pro karty', action: () => handleArticleClick('prislusenstvi-pro-karty') },
-                    { pattern: 'výbavu sběratele Pokémon karet', action: () => handleArticleClick('vybava-sberatele-pokemon-karet') }
-                  ];
-
-                  // Let's do a simple replacement check
-                  let matches = [];
-                  linksToMap.forEach(link => {
-                    let idx = rawText.toLowerCase().indexOf(link.pattern.toLowerCase());
-                    while (idx !== -1) {
-                      matches.push({ start: idx, length: link.pattern.length, label: rawText.substring(idx, idx + link.pattern.length), action: link.action });
-                      idx = rawText.toLowerCase().indexOf(link.pattern.toLowerCase(), idx + 1);
-                    }
-                  });
-
-                  // Sort matches by start index
-                  matches.sort((a, b) => a.start - b.start);
-
-                  // Filter out overlapping matches
-                  let filteredMatches = [];
-                  let lastEnd = 0;
-                  for (let m of matches) {
-                    if (m.start >= lastEnd) {
-                      filteredMatches.push(m);
-                      lastEnd = m.start + m.length;
-                    }
-                  }
-
-                  if (filteredMatches.length === 0) {
-                    return rawText;
-                  }
-
-                  let currentPos = 0;
-                  filteredMatches.forEach((m, index) => {
-                    if (m.start > currentPos) {
-                      parts.push(rawText.substring(currentPos, m.start));
-                    }
-                    parts.push(
-                      <span 
-                        key={index} 
-                        style={styles.inlineLink}
-                        onClick={m.action}
-                      >
-                        {m.label}
-                      </span>
-                    );
-                    currentPos = m.start + m.length;
-                  });
-
-                  if (currentPos < rawText.length) {
-                    parts.push(rawText.substring(currentPos));
-                  }
-
-                  return parts;
-                };
-
-                const handleInternalNav = (page, filters = {}) => {
-                  // Direct navigation helper
-                  if (filters.game) {
-                    // Update filters
-                    window.location.hash = ''; // Clear hash
-                    setActivePage(page);
-                  } else {
-                    setActivePage(page);
-                  }
-                };
-                
+        {/* Main Editorial Grid Layout */}
+        <div className="are-grid">
+          {/* Table of Contents Sticky Sidebar */}
+          <aside className="are-toc">
+            <div className="are-toc-label">— {tLabel('V tomto článku', 'In this article')}</div>
+            <nav className="are-toc-nav">
+              {h2Sections.map((sec, idx) => {
+                const num = String(idx + 1).padStart(2, '0');
+                const slug = slugify(sec.text);
+                const isActive = slug === activeAnchor;
                 return (
-                  <p key={idx} style={styles.p}>
-                    {formatParagraphText(text)}
-                  </p>
+                  <a 
+                    key={idx} 
+                    href={`#${slug}`} 
+                    className={`are-toc-item ${isActive ? 'active' : ''}`}
+                    onClick={(e) => handleTocClick(e, slug)}
+                  >
+                    <span className="are-toc-num">{num}</span>
+                    <span>{sec.text}</span>
+                  </a>
                 );
               })}
-            </div>
-          </div>
-        </article>
+            </nav>
+          </aside>
+
+          {/* Main Article Body Column */}
+          <article className="are-body">
+            {activeArticle.content.map((sec, idx) => {
+              if (sec.type === 'h2') {
+                const slug = slugify(sec.text);
+                return (
+                  <h2 key={idx} id={slug} className="are-h2">
+                    {sec.text}
+                  </h2>
+                );
+              }
+              if (sec.type === 'h3') {
+                return <h3 key={idx} className="are-h3">{sec.text}</h3>;
+              }
+              
+              // Format links dynamically in paragraph text for SEO optimization
+              let text = sec.text;
+              
+              const formatParagraphText = (rawText) => {
+                const parts = [];
+                
+                const linksToMap = [
+                  { pattern: 'nabídku toploaderů', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
+                  { pattern: 'pokémon obaly', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
+                  { pattern: 'obaly na karty', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
+                  { pattern: 'akrylové stojánky', action: () => handleInternalNav('sealed-catalog', { game: 'Acrylics' }) },
+                  { pattern: 'obaly Ultra PRO', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
+                  { pattern: 'stojánky a display systémy', action: () => handleInternalNav('sealed-catalog', { game: 'Acrylics' }) },
+                  { pattern: 'jak poznat fake Pokémon kartu', action: () => handleArticleClick('jak-rozpoznat-fale-nou-pok-mon-kartu') },
+                  { pattern: 'jak poznat falešnou Pokémon kartu', action: () => handleArticleClick('jak-rozpoznat-fale-nou-pok-mon-kartu') },
+                  { pattern: 'jak poznat falešné karty Pokémon', action: () => handleArticleClick('jak-rozpoznat-fale-nou-pok-mon-kartu') },
+                  { pattern: 'jak začít s Pokémon kartami', action: () => handleArticleClick('jak-zacit-s-pokemon-kartami') },
+                  { pattern: 'kde koupit Pokémon karty v Česku', action: () => handleArticleClick('kde-koupit-pokemon-karty-v-cesku') },
+                  { pattern: 'kde sehnat Pokémon karty v ČR', action: () => handleArticleClick('kde-sehnat-pokemon-karty-v-cr') },
+                  { pattern: 'příslušenství pro karty', action: () => handleArticleClick('prislusenstvi-pro-karty') },
+                  { pattern: 'výbavu sběratele Pokémon karet', action: () => handleArticleClick('vybava-sberatele-pokemon-karet') }
+                ];
+
+                let matches = [];
+                linksToMap.forEach(link => {
+                  let idx = rawText.toLowerCase().indexOf(link.pattern.toLowerCase());
+                  while (idx !== -1) {
+                    matches.push({ start: idx, length: link.pattern.length, label: rawText.substring(idx, idx + link.pattern.length), action: link.action });
+                    idx = rawText.toLowerCase().indexOf(link.pattern.toLowerCase(), idx + 1);
+                  }
+                });
+
+                matches.sort((a, b) => a.start - b.start);
+
+                let filteredMatches = [];
+                let lastEnd = 0;
+                for (let m of matches) {
+                  if (m.start >= lastEnd) {
+                    filteredMatches.push(m);
+                    lastEnd = m.start + m.length;
+                  }
+                }
+
+                if (filteredMatches.length === 0) {
+                  return rawText;
+                }
+
+                let currentPos = 0;
+                filteredMatches.forEach((m, index) => {
+                  if (m.start > currentPos) {
+                    parts.push(rawText.substring(currentPos, m.start));
+                  }
+                  parts.push(
+                    <span 
+                      key={index} 
+                      className="are-link"
+                      onClick={m.action}
+                    >
+                      {m.label}
+                    </span>
+                  );
+                  currentPos = m.start + m.length;
+                });
+
+                if (currentPos < rawText.length) {
+                  parts.push(rawText.substring(currentPos));
+                }
+
+                return parts;
+              };
+
+              const handleInternalNav = (page, filters = {}) => {
+                if (filters.game) {
+                  window.location.hash = '';
+                  setActivePage(page);
+                } else {
+                  setActivePage(page);
+                }
+              };
+              
+              return (
+                <p key={idx} className="are-p">
+                  {formatParagraphText(text)}
+                </p>
+              );
+            })}
+          </article>
+        </div>
       </div>
     );
   }
