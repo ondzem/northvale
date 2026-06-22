@@ -4,7 +4,6 @@ import { blogArticles } from '../blogData';
 
 export default function Blog({ selectedArticleId, setSelectedProductId, setActivePage }) {
   const { lang } = useTranslation();
-  const [activeCategory, setActiveCategory] = useState('all');
 
   // Categories list derived from CZ categories
   const categories = [
@@ -23,9 +22,7 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
 
   const activeArticle = blogArticles.find(a => a.id === selectedArticleId);
 
-  const filteredArticles = activeCategory === 'all'
-    ? blogArticles
-    : blogArticles.filter(a => a.category === activeCategory);
+  const filteredArticles = blogArticles;
 
   const handleArticleClick = (slug) => {
     // Set active page to blog and pass slug as product/article ID
@@ -206,24 +203,6 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
   }
 
 
-  // Helper to map category colors to gradients
-  const getCategoryGradient = (category) => {
-    switch (category) {
-      case 'Bezpečnost':
-        return 'linear-gradient(135deg, #FF007A 0%, #FF8A00 100%)';
-      case 'Pro začátečníky':
-        return 'linear-gradient(135deg, #7F00FF 0%, #FF007F 100%)';
-      case 'Nákupní průvodce':
-        return 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)';
-      case 'Příslušenství':
-        return 'linear-gradient(135deg, #F3904F 0%, #3B4371 100%)';
-      case 'Pro sběratele':
-        return 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
-      default:
-        return 'linear-gradient(135deg, #2c3e50 0%, #000000 100%)';
-    }
-  };
-
   // Helper to get static publication date
   const getArticleDate = (id) => {
     switch (id) {
@@ -247,12 +226,10 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
   // Articles Grid/Overview View
   return (
     <div className="container fade-in" style={styles.container}>
-      {/* Eyebrow & Title */}
+      {/* Title Header */}
       <div style={styles.header}>
-        <span style={styles.eyebrow}>{tLabel('Články a sběratelský blog', 'Articles & Collector Blog')}</span>
         <h1 style={styles.title}>
-          {tLabel('Náš ', 'Our ')}
-          <span style={{ color: 'var(--color-gold)' }}>{tLabel('blog', 'blog')}</span>
+          {tLabel('Náš blog', 'Our Blog')}
         </h1>
         <p style={styles.subtitle}>
           {tLabel(
@@ -260,20 +237,6 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
             'Guides to the card game world, tips on preserving your collection, advice for beginners, and guides to spot fake cards.'
           )}
         </p>
-      </div>
-
-      {/* Category Pills Filter */}
-      <div style={styles.pillContainer}>
-        {categories.map(cat => (
-          <button
-            key={cat.id}
-            type="button"
-            className={`blog-pill ${activeCategory === cat.id ? 'active' : ''}`}
-            onClick={() => setActiveCategory(cat.id)}
-          >
-            {tLabel(cat.cz, cat.en)}
-          </button>
-        ))}
       </div>
 
       {/* Articles Grid */}
@@ -284,19 +247,13 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
             className="blog-card"
             onClick={() => handleArticleClick(article.id)}
           >
-            {/* Image Wrapper with Category Gradient */}
-            <div 
-              className="blog-card-image-wrapper"
-              style={{ background: getCategoryGradient(article.category) }}
-            >
-              {/* Inner Floating Glass Frame */}
-              <div className="blog-card-glass-frame">
-                <img 
-                  src={article.image} 
-                  alt={article.title} 
-                  className="blog-card-img"
-                />
-              </div>
+            {/* Image Wrapper - Full width/height, no inner glass border */}
+            <div className="blog-card-image-wrapper">
+              <img 
+                src={article.image} 
+                alt={article.title} 
+                className="blog-card-img"
+              />
               
               {/* Absolute Top-Left Category Badge */}
               <span style={styles.cardCategoryBadge}>
@@ -331,24 +288,15 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
 
 const styles = {
   container: {
-    paddingTop: '48px',
-    paddingBottom: '80px',
+    paddingTop: '100px',
+    paddingBottom: '180px',
     maxWidth: '1200px',
     margin: '0 auto',
     boxSizing: 'border-box'
   },
   header: {
     textAlign: 'center',
-    marginBottom: '48px'
-  },
-  eyebrow: {
-    fontSize: '11px',
-    fontWeight: '500',
-    color: '#8A8A92',
-    letterSpacing: '0.15em',
-    textTransform: 'uppercase',
-    display: 'block',
-    marginBottom: '10px'
+    marginBottom: '64px'
   },
   title: {
     fontSize: '48px',
@@ -366,13 +314,6 @@ const styles = {
     margin: '0 auto',
     lineHeight: '1.6'
   },
-  pillContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '12px',
-    justifyContent: 'center',
-    marginBottom: '56px'
-  },
   grid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
@@ -380,9 +321,9 @@ const styles = {
   },
   cardCategoryBadge: {
     position: 'absolute',
-    top: '24px',
-    left: '24px',
-    backgroundColor: 'rgba(18, 18, 20, 0.8)',
+    top: '20px',
+    left: '20px',
+    backgroundColor: 'rgba(18, 18, 20, 0.85)',
     color: 'var(--color-gold)',
     border: '1px solid rgba(253, 189, 22, 0.2)',
     fontSize: '10px',
@@ -520,3 +461,4 @@ const styles = {
     textUnderlineOffset: '3px'
   }
 };
+

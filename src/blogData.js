@@ -7,7 +7,7 @@ export const blogArticles = [
     "category": "Bezpečnost",
     "readTime": "8 min",
     "description": "Dostaneš kartu do ruky a přemýšlíš, jak poznat, zda platíš za originál, nebo jen kus barevného papíru? Nauč se 9 rychlých domácích testů, které odhalí každý padělek.",
-    "image": "/blog/blog_fake_card_check.png",
+    "image": "/blog/jak-rozpoznat-falesnou-sberatelskou-kartu-9-rychlych-testu-1782126189013.webp",
     "content": [
       {
         "type": "p",
@@ -229,7 +229,7 @@ export const blogArticles = [
     "category": "Pro začátečníky",
     "readTime": "7 min",
     "description": "Nevíte, jaký produkt koupit jako první a za kolik? Tento průvodce vás krok za krokem provede základy produktů, pravidly hry i stavbou prvního balíčku.",
-    "image": "/blog/blog_pokemon_beginner.png",
+    "image": "/blog/jak-zacit-s-kolekcnimi-kartami-pruvodce-pro-zacatecniky-1782120851891.webp",
     "content": [
       {
         "type": "p",
@@ -415,7 +415,7 @@ export const blogArticles = [
     "category": "Nákupní průvodce",
     "readTime": "8 min",
     "description": "Hledáte spolehlivá místa pro nákup karet v ČR bez rizika padělků? Porovnání specializovaných e-shopů, supermarketů, bazarů a Cardmarketu pro rok 2026.",
-    "image": "/blog/blog_buy_pokemon_cards.png",
+    "image": "/blog/kde-koupit-pokemon-karty-v-cesku-pruvodce-pro-rok-2026-1782122229028.webp",
     "content": [
       {
         "type": "p",
@@ -565,7 +565,7 @@ export const blogArticles = [
     "category": "Bezpečnost",
     "readTime": "7 min",
     "description": "Ověřené e-shopy, kamenné obchody i komunitní tržiště. Zjistěte, kde bezpečně sehnat Pokémon karty a jak poznat padělanou kartu ještě před zaplacením.",
-    "image": "/blog/blog_genuine_vs_fake.png",
+    "image": "/blog/kde-sehnat-pokemon-karty-v-cr-a-nenatrefit-na-padelek-1782121932572.webp",
     "content": [
       {
         "type": "p",
@@ -755,7 +755,7 @@ export const blogArticles = [
     "category": "Příslušenství",
     "readTime": "9 min",
     "description": "Ochranné pomůcky jsou základem pro zachování hodnoty vaší sbírky. Kompletní průvodce od penny sleeves přes toploadery až po magnetické one-touch holdery a display systémy.",
-    "image": "/blog/blog_card_accessories.png",
+    "image": "/blog/prislusenstvi-pro-karty-od-sleevu-po-akrylovy-stojanek-1782125988994.webp",
     "content": [
       {
         "type": "h2",
@@ -961,7 +961,7 @@ export const blogArticles = [
     "category": "Pro sběratele",
     "readTime": "10 min",
     "description": "Co potřebuje každý sběratel pro dlouhodobou ochranu a organizaci karet? Jak a kdy se vyplatí investovat do profesionálního gradingu karet PSA či Beckett.",
-    "image": "/blog/blog_sberatel_grading.png",
+    "image": "/blog/vybava-sberatele-pokemon-karet-od-obalu-az-po-grading-1782123289333.webp",
     "content": [
       {
         "type": "p",
