@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import { fetchSlidesFromDB, DEFAULT_SLIDES } from '../services/slides';
@@ -226,13 +226,15 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     };
   }, []);
 
+  const fallbackEndsAt = useMemo(() => new Date(Date.now() + 14.5 * 3600 * 1000).toISOString(), []);
+
   const activeDeal = deal || {
     name: 'Booster Box SV06 Twilight Masquerade',
     image_url: '/9.png',
     stock: 14,
     price: 2690,
     original_price: 3590,
-    ends_at: new Date(Date.now() + 14.5 * 3600 * 1000).toISOString(),
+    ends_at: fallbackEndsAt,
     product_id: 'deal-of-the-day'
   };
 

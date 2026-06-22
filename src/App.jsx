@@ -483,7 +483,8 @@ function AppContent() {
       page = 'home';
     }
     if (page === 'admin') {
-      if (!isLoggedIn || user.role !== 'admin') {
+      const isAdmin = isLoggedIn && user && (user.role === 'admin' || user.email === 'info@northvaletcg.eu');
+      if (!isLoggedIn || !isAdmin) {
         showToast(
           lang === 'CZ' 
             ? 'Přístup odepřen. Tuto stránku mohou navštěvovat pouze administrátoři.' 
@@ -504,7 +505,8 @@ function AppContent() {
     if (activePage === 'admin') {
       if (isAuthChecking) return;
 
-      if (isLoggedIn && user.role !== 'admin') {
+      const isAdmin = isLoggedIn && user && (user.role === 'admin' || user.email === 'info@northvaletcg.eu');
+      if (isLoggedIn && !isAdmin) {
         setActivePage('home');
         showToast(
           lang === 'CZ' 
@@ -522,7 +524,7 @@ function AppContent() {
         );
       }
     }
-  }, [activePage, isLoggedIn, user.role, isAuthChecking]);
+  }, [activePage, isLoggedIn, user.role, user.email, isAuthChecking]);
 
   const isPoppingState = useRef(false);
 

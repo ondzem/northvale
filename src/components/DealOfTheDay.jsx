@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { fetchDailyDealFromDB } from '../services/dailyDeal';
 import { fetchProductByIdFromDB } from '../services/products';
@@ -22,13 +22,15 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
   const [isBtnHovered, setIsBtnHovered] = useState(false);
   const [dealProduct, setDealProduct] = useState(null);
 
+  const fallbackEndsAt = useMemo(() => new Date(Date.now() + 14.5 * 3600 * 1000).toISOString(), []);
+
   const activeDeal = deal || {
     name: 'Booster Box SV06 Twilight Masquerade',
     image_url: '/9.png',
     stock: 14,
     price: 2690,
     original_price: 3590,
-    ends_at: new Date(Date.now() + 14.5 * 3600 * 1000).toISOString(),
+    ends_at: fallbackEndsAt,
     product_id: 'deal-of-the-day'
   };
 

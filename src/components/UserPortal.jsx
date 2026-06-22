@@ -662,7 +662,7 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
           <strong>{user.name || user.email.split('@')[0]}</strong>
         </span>
         <div style={{ display: 'flex', gap: '12px' }}>
-          {user.role === 'admin' && (
+          {user && (user.role === 'admin' || user.email === 'info@northvaletcg.eu') && (
             <button 
               className="prf-topbar-logout" 
               style={{ borderColor: 'var(--color-gold)', color: 'var(--color-gold)', backgroundColor: 'rgba(253, 189, 22, 0.05)' }} 
@@ -718,7 +718,7 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
             </button>
           )}
           <div className="prf-nav-divider"></div>
-          {user.role === 'admin' && (
+           {user && (user.role === 'admin' || user.email === 'info@northvaletcg.eu') && (
             <>
               <button 
                 className="prf-nav-item"
