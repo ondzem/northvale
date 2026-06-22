@@ -9063,5 +9063,139 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   }
 }
 
+/* --- SEO Blog Floating Minimal Styles --- */
+.blog-card {
+  display: flex;
+  flex-direction: column;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  height: 100%;
+  padding: 0;
+  transition: all 0.3s ease;
+}
 
+.blog-card-image-wrapper {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
+.blog-card:hover .blog-card-image-wrapper {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 20px rgba(253, 189, 22, 0.05);
+}
+
+.blog-card-glass-frame {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(20, 20, 24, 0.45);
+  backdrop-filter: blur(8px) saturate(130%);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.blog-card:hover .blog-card-glass-frame {
+  border-color: rgba(253, 189, 22, 0.4);
+}
+
+.blog-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+  transition: transform 0.5s ease, opacity 0.3s ease;
+}
+
+.blog-card:hover .blog-card-img {
+  transform: scale(1.06);
+  opacity: 1;
+}
+
+.blog-card-title {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.4;
+  margin: 12px 0;
+  transition: color 0.3s ease;
+}
+
+.blog-card:hover .blog-card-title {
+  color: var(--color-gold);
+}
+
+.blog-card-desc {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.3s ease;
+}
+
+.blog-card:hover .blog-card-desc {
+  color: #cdd;
+}
+
+.blog-card-readmore {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  transition: color 0.3s ease, gap 0.3s ease;
+}
+
+.blog-card:hover .blog-card-readmore {
+  color: var(--color-gold);
+  gap: 12px;
+}
+
+/* Category Filter Pills */
+.blog-pill {
+  padding: 10px 24px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #8A8A92;
+  background: transparent;
+  transition: all 0.25s ease;
+}
+
+.blog-pill:hover {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.blog-pill.active {
+  background: var(--color-gold) !important;
+  color: #000 !important;
+  border-color: var(--color-gold) !important;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(253, 189, 22, 0.25);
+}

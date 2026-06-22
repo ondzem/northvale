@@ -205,20 +205,59 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
     );
   }
 
+
+  // Helper to map category colors to gradients
+  const getCategoryGradient = (category) => {
+    switch (category) {
+      case 'Bezpečnost':
+        return 'linear-gradient(135deg, #FF007A 0%, #FF8A00 100%)';
+      case 'Pro začátečníky':
+        return 'linear-gradient(135deg, #7F00FF 0%, #FF007F 100%)';
+      case 'Nákupní průvodce':
+        return 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)';
+      case 'Příslušenství':
+        return 'linear-gradient(135deg, #F3904F 0%, #3B4371 100%)';
+      case 'Pro sběratele':
+        return 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+      default:
+        return 'linear-gradient(135deg, #2c3e50 0%, #000000 100%)';
+    }
+  };
+
+  // Helper to get static publication date
+  const getArticleDate = (id) => {
+    switch (id) {
+      case 'jak-rozpoznat-fale-nou-pok-mon-kartu':
+        return '18. 06. 2026';
+      case 'jak-zacit-s-pokemon-kartami':
+        return '17. 06. 2026';
+      case 'kde-koupit-pokemon-karty-v-cesku':
+        return '16. 06. 2026';
+      case 'kde-sehnat-pokemon-karty-v-cr':
+        return '15. 06. 2026';
+      case 'prislusenstvi-pro-karty':
+        return '14. 06. 2026';
+      case 'vybava-sberatele-pokemon-karet':
+        return '13. 06. 2026';
+      default:
+        return '18. 06. 2026';
+    }
+  };
+
   // Articles Grid/Overview View
   return (
     <div className="container fade-in" style={styles.container}>
       {/* Eyebrow & Title */}
       <div style={styles.header}>
-        <span className="nv-eyebrow">{tLabel('Články a sběratelský blog', 'Articles & Collector Blog')}</span>
+        <span style={styles.eyebrow}>{tLabel('Články a sběratelský blog', 'Articles & Collector Blog')}</span>
         <h1 style={styles.title}>
           {tLabel('Náš ', 'Our ')}
-          <span style={{ color: 'var(--color-gold)' }}>{tLabel('Blog', 'Blog')}</span>
+          <span style={{ color: 'var(--color-gold)' }}>{tLabel('blog', 'blog')}</span>
         </h1>
         <p style={styles.subtitle}>
           {tLabel(
             'Průvodce světem karetních her, tipy na ochranu sbírky, rady pro začátečníky a návody pro rozpoznání padělaných karet.',
-            'Guides to the card game world, tips on preserving your collection, beginner advice, and how to identify counterfeit cards.'
+            'Guides to the card game world, tips on preserving your collection, advice for beginners, and guides to spot fake cards.'
           )}
         </p>
       </div>
@@ -229,12 +268,7 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
           <button
             key={cat.id}
             type="button"
-            style={{
-              ...styles.pill,
-              backgroundColor: activeCategory === cat.id ? 'var(--color-gold)' : 'rgba(255, 255, 255, 0.03)',
-              color: activeCategory === cat.id ? '#000' : 'var(--text-main)',
-              borderColor: activeCategory === cat.id ? 'var(--color-gold)' : 'rgba(255, 255, 255, 0.08)'
-            }}
+            className={`blog-pill ${activeCategory === cat.id ? 'active' : ''}`}
             onClick={() => setActiveCategory(cat.id)}
           >
             {tLabel(cat.cz, cat.en)}
@@ -247,18 +281,24 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
         {filteredArticles.map(article => (
           <div 
             key={article.id}
-            className="glass-panel blog-card"
-            style={styles.card}
+            className="blog-card"
             onClick={() => handleArticleClick(article.id)}
           >
-            {/* Image Wrapper */}
-            <div style={styles.imageWrapper}>
-              <img 
-                src={article.image} 
-                alt={article.title} 
-                style={styles.cardImage}
-                className="blog-card-image"
-              />
+            {/* Image Wrapper with Category Gradient */}
+            <div 
+              className="blog-card-image-wrapper"
+              style={{ background: getCategoryGradient(article.category) }}
+            >
+              {/* Inner Floating Glass Frame */}
+              <div className="blog-card-glass-frame">
+                <img 
+                  src={article.image} 
+                  alt={article.title} 
+                  className="blog-card-img"
+                />
+              </div>
+              
+              {/* Absolute Top-Left Category Badge */}
               <span style={styles.cardCategoryBadge}>
                 {tLabel(
                   article.category,
@@ -267,16 +307,19 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
               </span>
             </div>
 
-            {/* Info */}
+            {/* Card Body Info */}
             <div style={styles.cardBody}>
               <div style={styles.cardMeta}>
                 <span>⏱ {article.readTime}</span>
+                <span style={{ margin: '0 8px', opacity: 0.3 }}>•</span>
+                <span>{getArticleDate(article.id)}</span>
               </div>
-              <h3 style={styles.cardTitle}>{article.title}</h3>
-              <p style={styles.cardDesc}>{article.description}</p>
+              <h3 className="blog-card-title">{article.title}</h3>
+              <p className="blog-card-desc">{article.description}</p>
               
-              <span className="blog-read-more" style={styles.readMoreLink}>
-                {tLabel('Číst článek →', 'Read Article →')}
+              <span className="blog-card-readmore">
+                {tLabel('ČÍST ČLÁNEK', 'READ ARTICLE')}
+                <span style={{ fontSize: '14px' }}>→</span>
               </span>
             </div>
           </div>
@@ -296,19 +339,29 @@ const styles = {
   },
   header: {
     textAlign: 'center',
-    marginBottom: '40px'
+    marginBottom: '48px'
+  },
+  eyebrow: {
+    fontSize: '11px',
+    fontWeight: '500',
+    color: '#8A8A92',
+    letterSpacing: '0.15em',
+    textTransform: 'uppercase',
+    display: 'block',
+    marginBottom: '10px'
   },
   title: {
-    fontSize: '36px',
+    fontSize: '48px',
     fontWeight: '800',
     marginTop: '12px',
     marginBottom: '16px',
     fontFamily: 'var(--font-heading)',
-    letterSpacing: '-0.5px'
+    letterSpacing: '-0.5px',
+    color: '#FFF'
   },
   subtitle: {
-    fontSize: '16px',
-    color: 'var(--text-muted)',
+    fontSize: '15px',
+    color: '#8A8A92',
     maxWidth: '650px',
     margin: '0 auto',
     lineHeight: '1.6'
@@ -316,62 +369,32 @@ const styles = {
   pillContainer: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: '10px',
+    gap: '12px',
     justifyContent: 'center',
-    marginBottom: '48px'
-  },
-  pill: {
-    padding: '8px 16px',
-    borderRadius: '100px',
-    border: '1px solid',
-    fontSize: '13px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    outline: 'none'
+    marginBottom: '56px'
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
-    gap: '24px'
-  },
-  card: {
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-    borderRadius: 'var(--radius-lg)',
-    cursor: 'pointer',
-    height: '100%',
-    padding: '0',
-    transition: 'transform 0.3s ease, border-color 0.3s ease'
-  },
-  imageWrapper: {
-    width: '100%',
-    height: '210px',
-    position: 'relative',
-    overflow: 'hidden'
-  },
-  cardImage: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    transition: 'transform 0.5s ease'
+    gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+    gap: '48px 40px'
   },
   cardCategoryBadge: {
     position: 'absolute',
-    top: '12px',
-    left: '12px',
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    top: '24px',
+    left: '24px',
+    backgroundColor: 'rgba(18, 18, 20, 0.8)',
     color: 'var(--color-gold)',
-    border: '1px solid rgba(253, 189, 22, 0.3)',
-    fontSize: '11px',
+    border: '1px solid rgba(253, 189, 22, 0.2)',
+    fontSize: '10px',
     fontWeight: '700',
-    padding: '4px 10px',
+    padding: '6px 14px',
     borderRadius: '100px',
-    backdropFilter: 'blur(4px)'
+    backdropFilter: 'blur(5px)',
+    letterSpacing: '0.05em',
+    zIndex: 10
   },
   cardBody: {
-    padding: '20px',
+    paddingTop: '20px',
     display: 'flex',
     flexDirection: 'column',
     flex: '1 1 auto'
@@ -380,33 +403,9 @@ const styles = {
     fontSize: '11px',
     color: 'var(--text-muted)',
     marginBottom: '10px',
-    fontWeight: '600'
-  },
-  cardTitle: {
-    fontSize: '18px',
-    fontWeight: '700',
-    color: 'var(--text-main)',
-    marginBottom: '10px',
-    lineHeight: '1.4',
-    fontFamily: 'var(--font-heading)'
-  },
-  cardDesc: {
-    fontSize: '13.5px',
-    color: 'var(--text-muted)',
-    lineHeight: '1.6',
-    marginBottom: '20px',
-    display: '-webkit-box',
-    WebkitLineClamp: 3,
-    WebkitBoxOrient: 'vertical',
-    overflow: 'hidden'
-  },
-  readMoreLink: {
-    marginTop: 'auto',
-    fontSize: '13px',
-    fontWeight: '700',
-    color: 'var(--color-gold)',
-    display: 'inline-block',
-    transition: 'color 0.2s ease'
+    fontWeight: '600',
+    display: 'flex',
+    alignItems: 'center'
   },
   backBtn: {
     color: 'var(--text-main)',
