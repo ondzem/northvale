@@ -120,11 +120,15 @@ const RichTextEditor = ({ value, onChange, placeholder, className, style }) => {
   const { lang } = useTranslation();
   const editorRef = useRef(null);
   const lastValueRef = useRef(value);
+  const hasInitializedRef = useRef(false);
 
   useEffect(() => {
-    if (editorRef.current && value !== lastValueRef.current) {
-      editorRef.current.innerHTML = value || '';
-      lastValueRef.current = value;
+    if (editorRef.current) {
+      if (!hasInitializedRef.current || value !== lastValueRef.current) {
+        editorRef.current.innerHTML = value || '';
+        lastValueRef.current = value;
+        hasInitializedRef.current = true;
+      }
     }
   }, [value]);
 
@@ -299,6 +303,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterGame, setFilterGame] = useState('all');
+  const [sortBy, setSortBy] = useState('newest'); // 'newest', 'oldest', 'name_asc', 'name_desc'
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -550,10 +555,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       : [{ id: 'v-' + Math.random().toString(36).substr(2, 5), condition: 'NM', lang: 'EN', foil: false, price: p.price || 0, stock: p.stock || 0 }];
     setFormVariants(loadedVariants);
 
-    // Load new split-form and preview states
-    setFormShortDesc(p.shortDesc || '');
-    setFormAdditionalImages(p.additionalImages || []);
-    
     // Decodes JSON blocks from p.desc
     let parsedBlocks = [];
     try {
@@ -568,6 +569,22 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       parsedBlocks = [{ id: 'b-' + Math.random().toString(36).substr(2, 5), type: 'text', value: p.desc || p.description || '' }];
     }
     setFormDescBlocks(parsedBlocks);
+
+    // Compute fallback description if needed
+    const firstTextBlock = parsedBlocks.find(b => b.type === 'text')?.value || '';
+    const fallbackShortDesc = firstTextBlock ? (firstTextBlock.split('.').slice(0, 2).filter(Boolean).join('. ') + '.') : '';
+
+    const isHtmlEmpty = (html) => {
+      if (!html) return true;
+      const clean = html.replace(/<[^>]+>/g, '').trim();
+      return clean === '' || clean === '&nbsp;';
+    };
+
+    const savedShortDesc = p.shortDesc || p.short_description || '';
+
+    // Load new split-form and preview states
+    setFormShortDesc(!isHtmlEmpty(savedShortDesc) ? savedShortDesc : fallbackShortDesc);
+    setFormAdditionalImages(p.additionalImages || []);
     
     setCropTarget({ type: 'front' });
     setFormSetCode(p.setCode || '');
@@ -1210,6 +1227,29 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     return matchesSearch && matchesType && matchesGame;
   });
 
+  // Sort products list
+  filteredProducts.sort((a, b) => {
+    if (sortBy === 'newest') {
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      if (dateB !== dateA) return dateB - dateA;
+      return a.id.localeCompare(b.id);
+    }
+    if (sortBy === 'oldest') {
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      if (dateA !== dateB) return dateA - dateB;
+      return a.id.localeCompare(b.id);
+    }
+    if (sortBy === 'name_asc') {
+      return a.name.localeCompare(b.name, lang === 'CZ' ? 'cs' : 'en');
+    }
+    if (sortBy === 'name_desc') {
+      return b.name.localeCompare(a.name, lang === 'CZ' ? 'cs' : 'en');
+    }
+    return 0;
+  });
+
   const previewName = (formName || (lang === 'CZ' ? 'Název karty' : 'Card Name')) + (formCardCode ? ` (${formCardCode})` : '');
 
   const previewAvailableConditions = [...new Set((formVariants || []).map(v => v.condition))].filter(Boolean);
@@ -1314,19 +1354,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
           />
         </div>
 
-        <div className="adf-tselect">
-          <select 
-            value={filterType}
-            onChange={e => setFilterType(e.target.value)}
-          >
-            <option value="all">{lang === 'CZ' ? 'Všechny typy' : 'All Types'}</option>
-            <option value="single">{lang === 'CZ' ? 'Kusové karty' : 'Singles'}</option>
-            <option value="sealed">{lang === 'CZ' ? 'Zapečetěné' : 'Sealed'}</option>
-            <option value="slab">{lang === 'CZ' ? 'Graded slabs' : 'Graded Slabs'}</option>
-            <option value="accessory">{lang === 'CZ' ? 'Příslušenství / Akryly' : 'Accessories'}</option>
-          </select>
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 9l6 6 6-6"></path></svg>
-        </div>
+
 
         <div className="adf-tselect">
           <select 
@@ -1340,6 +1368,19 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
             <option value="Riftbound">Riftbound</option>
             <option value="Accessories">{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}</option>
             <option value="Acrylics">{lang === 'CZ' ? 'Akryly' : 'Acrylics'}</option>
+          </select>
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+        </div>
+
+        <div className="adf-tselect">
+          <select 
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+          >
+            <option value="newest">{lang === 'CZ' ? 'Nejnovější' : 'Newest'}</option>
+            <option value="oldest">{lang === 'CZ' ? 'Nejstarší' : 'Oldest'}</option>
+            <option value="name_asc">{lang === 'CZ' ? 'Název (A-Z)' : 'Name (A-Z)'}</option>
+            <option value="name_desc">{lang === 'CZ' ? 'Název (Z-A)' : 'Name (Z-A)'}</option>
           </select>
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 9l6 6 6-6"></path></svg>
         </div>

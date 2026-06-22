@@ -321,22 +321,17 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/singles-detail/test-subjekt</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://northvaletcg.eu/sealed-detail/lorcana-first-chapter-booster-box</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/charizard-ex-super-premium-coll</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/acrylic-booster-box-pokemon</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/acrylic-booster-box-pokemon</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/charizard-ex-super-premium-coll</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

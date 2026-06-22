@@ -17,6 +17,12 @@ const getGameImage = (product) => {
   return '/logo s popisem.webp';
 };
 
+const isHtmlEmpty = (html) => {
+  if (!html) return true;
+  const clean = html.replace(/<[^>]+>/g, '').trim();
+  return clean === '' || clean === '&nbsp;';
+};
+
 // Rich text formatter function for custom headers, lists, check lists, bold text
 const parseFormattedText = (text, isMini = false) => {
   if (!text) return null;
@@ -1003,14 +1009,12 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
           )}
 
           {/* Short description with more info link */}
-          {!isMobile && (
-            <div className="product-short-desc">
-              {parseFormattedText(product.shortDesc || fallbackShortDesc)}
-              <span className="more-info-link" onClick={() => scrollToSection('popis')} style={{ display: 'inline-block', marginLeft: '6px' }}>
-                {lang === 'CZ' ? 'Víc informací' : 'More info'}
-              </span>
-            </div>
-          )}
+          <div className="product-short-desc" style={{ marginTop: isMobile ? '16px' : '8px' }}>
+            {parseFormattedText(!isHtmlEmpty(product.shortDesc) ? product.shortDesc : fallbackShortDesc)}
+            <span className="more-info-link" onClick={() => scrollToSection('popis')} style={{ display: 'inline-block', marginLeft: '6px' }}>
+              {lang === 'CZ' ? 'Víc informací' : 'More info'}
+            </span>
+          </div>
 
           <hr className="product-detail-divider" />
 
