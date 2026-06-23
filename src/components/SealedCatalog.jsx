@@ -231,27 +231,87 @@ export function getDisplaySubcategories(game, type, categories, lang) {
 const gameInfo = {
   'Pokémon': {
     title: 'Pokémon',
-    desc: 'Objevte širokou nabídku Pokémon produktů. Od Booster Boxů a Elite Trainer Boxů až po speciální kolekce a dárková balení. Všechny produkty pocházejí z oficiální distribuce s garancí pravosti.'
+    desc: `Chcete zažít nostalgii, rozbalit legendárního Charizarda nebo bezpečně investovat? Objevte svět sealed Pokémon produktů, kde se snoubí sběratelská vášeň s dlouhodobým finančním zhodnocením.
+
+Co nabízíme: Široký výběr zapečetěných Booster Boxů, Elite Trainer Boxů, speciálních kolekcí a prémiových kufrů z nejnovějších i historických edic.
+Proč investovat: Zapečetěné (sealed) Pokémon produkty jsou dlouhodobě jednou z nejstabilnějších alternativních investic. Po ukončení tisku edice jejich hodnota stabilně roste.
+Proč nakoupit u nás: Garantujeme 100% originální původ z oficiální distribuce. Každý box balíme s maximální péčí do ochranné fólie a pevných krabic, aby k vám dorazil v bezchybném sběratelském stavu.`,
+    enTitle: 'Pokémon',
+    enDesc: `Looking to relive nostalgia, pull a legendary Charizard, or make a secure investment? Enter the world of sealed Pokémon products, where collecting passion meets long-term financial growth.
+
+What we offer: A wide selection of sealed Booster Boxes, Elite Trainer Boxes, special collections, and premium cases from recent and historic expansions.
+Why invest: Sealed Pokémon products are historically one of the most stable alternative investments. Once a set goes out of print, its value steadily appreciates.
+Why choose us: We guarantee 100% authentic products sourced directly from official distribution. Every item is packed with ultimate care to ensure it arrives in pristine collector condition.`
   },
   'Lorcana': {
     title: 'Disney Lorcana',
-    desc: 'Boxy, Trove boxy a boostery Disney Lorcana. Otevřete bránu do magického světa s originálními produkty a rozšiřte svou sbírku o vzácné Enchanted karty.'
+    desc: `Vstupte do kouzelného světa Disney Lorcana a objevte sílu legendárních příběhů. Tato moderní sběratelská hra přináší úchvatné ilustrace vašich oblíbených hrdinů a obrovský sběratelský potenciál.
+
+Co nabízíme: Originální zapečetěné Booster Boxy, oblíbené dárkové Illumineer's Trove boxy, startovní balíčky a samostatné boostery.
+Proč investovat: Spojení giganta Disney a špičkové herní mechaniky dává Lorcaně obrovskou sběratelskou sílu. Omezené první tisky a vzácné "Enchanted" karty dělají ze sealed boxů skvělou investici s vysokým růstovým potenciálem.
+Proč nakoupit u nás: Jako specializovaný obchod zajišťujeme produkty přímo z distribuce. Garantujeme rychlé odeslání a bezpečné doručení, aby vaše Trove boxy a Booster boxy neutrpěly žádné poškození rohů.`,
+    enTitle: 'Disney Lorcana',
+    enDesc: `Step into the magical realm of Disney Lorcana and experience the power of legendary stories. This modern trading card game combines stunning Disney illustrations with immense collector appeal.
+
+What we offer: Original sealed Booster Boxes, highly sought-after Illumineer's Trove boxes, starter decks, and booster packs.
+Why invest: The combination of the Disney powerhouse and excellent game design creates massive collectibility. Limited print runs and rare "Enchanted" cards make sealed boxes a great investment opportunity.
+Why choose us: We source all products directly from official distributors. We guarantee fast shipping and secure packaging so that your Trove and Booster boxes arrive without any corner damage.`
   },
   'One Piece': {
     title: 'One Piece',
-    desc: 'Kompletní nabídka booster boxů a boosterů pro One Piece Card Game. Pořiďte si originální balení s garancí kvality a neotevřeného stavu.'
+    desc: `Vyplujte na moře dobrodružství s celosvětovým fenoménem One Piece Card Game! Nejrychleji rostoucí TCG současnosti láká na dramatické souboje, milované postavy z anime a extrémně vzácné sběratelské kousky.
+
+Co nabízíme: Zapečetěné anglické Booster Boxy, exkluzivní dárkové sety, startovní balíčky a samostatné boostery připravené k rozbalení.
+Proč investovat: One Piece trpí celosvětovým nedostatkem sealed produktů kvůli enormní poptávce a limitovaným tiskům. Šance na otevření "Manga Rare" nebo Alternate Art karet vyhání cenu neotevřených boxů strmě nahoru ihned po vydání edice.
+Proč nakoupit u nás: Všechny boxy držíme v neotevřeném, neváženém a neupravovaném stavu (unsearched/unopened). Zásilky balíme tak, aby odolaly jakémukoliv zacházení při přepravě.`,
+    enTitle: 'One Piece',
+    enDesc: `Set sail for adventure with the global phenomenon that is the One Piece Card Game! Currently the fastest-growing TCG worldwide, it captivates players with dynamic matches and highly coveted collector items.
+
+What we offer: Sealed English Booster Boxes, exclusive gift sets, starter decks, and booster packs ready for opening.
+Why invest: One Piece suffers from chronic worldwide stock shortages due to extreme demand and tight print allocations. The chance to pull "Manga Rares" or Alternate Art Leaders drives up sealed box prices rapidly.
+We guarantee: All our booster boxes are kept in completely sealed, unweighted, and unsearched condition. We pack every order securely to survive transit without a scratch.`
   },
   'Riftbound': {
     title: 'Riftbound',
-    desc: 'Booster boxy, boostery a startovní Trial decky hry Riftbound. Vše, co potřebujete pro okamžitý vstup do této strategické fantasy hry.'
+    desc: `Objevte Riftbound – strategickou karetní hru z českých luhů a hájů, která si získává srdce hráčů po celém světě. Vybudujte si elementární balíček a ovládněte bojiště v napínavých soubojích.
+
+Co nabízíme: Kompletní sealed portfolio včetně Booster Boxů, samostatných boosterů, startovních Trial Decků a nádherných oficiálních neoprenových podložek.
+Proč investovat: Riftbound je výjimečný projekt s oddanou komunitou a omezeným nákladem. Vlastnictví sealed edic z raných fází hry představuje unikátní sběratelskou hodnotu pro každého fanouška taktických her.
+Proč nakoupit u nás: Jsme hrdým partnerem a přímým distributorem Riftbound. Nákupem u nás získáte garanci nejlepších cen, kompletního sortimentu a přímé podpory této skvělé hry.`,
+    enTitle: 'Riftbound',
+    enDesc: `Discover Riftbound – a tactical trading card game with deep strategic gameplay and elemental magic, building a dedicated fanbase worldwide.
+
+What we offer: The complete sealed range including Booster Boxes, individual booster packs, pre-built Trial Decks, and official high-quality neoprene playmats.
+Why invest: Riftbound is a unique project printed in limited numbers. Owning sealed editions from its early releases represents a unique collector value for tactical card game enthusiasts.
+Why choose us: We are a proud partner and direct distributor of Riftbound, guaranteeing authentic stock, best prices, and immediate availability.`
   },
   'Accessories': {
     title: 'Herní Příslušenství',
-    desc: 'Alba na karty, obaly, toploadery a další nezbytné doplňky pro ochranu a organizaci vaší sbírky. Udržujte své karty v bezpečí a perfektním stavu.'
+    desc: `Stav vaší karty určuje až 90 % její finanční hodnoty. Chraňte své investice a prezentujte svou sbírku jako profesionálové s naší nabídkou prémiového herního příslušenství.
+
+Co nabízíme: Široký výběr ochranných obalů (sleeves), pevných toploaderů, alb na karty, ale i unikátních alb navržených speciálně pro toploadery a graded slabs.
+Proč investovat: Špatné skladování může karty nevratně poškodit (odřené hrany, poškrábaný povrch, ohnutí). Použitím kvalitních alb a obalů zachováte sběratelskou hodnotu karet po desítky let.
+Proč nakoupit u nás: Nabízíme výhradně osvědčené značky (Dragon Shield, Ultra Pro) a specializované pořadače na cenné investiční karty, vše s okamžitým doručením z našeho skladu.`,
+    enTitle: 'Gaming Accessories',
+    enDesc: `A card's condition determines up to 90% of its market value. Protect your investments and showcase your collection like a professional with our premium gaming accessories.
+
+What we offer: A wide range of protective card sleeves, rigid toploaders, card binders, as well as unique albums designed specifically for storing toploaders and graded slabs.
+Why invest: Suboptimal storage can permanently ruin a card's grade (edge wear, surface scratches, bending). Using high-end accessories preserves your collection's financial value for decades.
+Why choose us: We stock only trusted industry brands (Dragon Shield, Ultra Pro) and specialized binders for high-value cards, with all items in stock and ready to ship.`
   },
   'Acrylics': {
     title: 'Prémiové Akrylové Boxy',
-    desc: `Vysoce kvalitní akrylové obaly s UV ochranou pro vaše cenné booster boxy a Elite Trainer Boxy${FEATURE_FLAGS.showSlabs ? ' a graded karty' : ''}. Dokonalá ochrana a prezentace.`
+    desc: `Investiční sealed boxy si zaslouží nekompromisní ochranu. Proměňte své Booster Boxy a Elite Trainer Boxy v luxusní výstavní kousky a uchovejte jejich hodnotu na věky.
+
+Co nabízíme: Vysoce kvalitní akrylové ochranné boxy vyrobené na míru pro Pokémon Booster Boxy, Elite Trainer Boxy a Lorcana Trove boxy.
+Proč investovat: Dlouhodobé působení prachu, vlhkosti a škodlivého UV záření může znehodnotit originální fólii a barvy na boxu. Naše 4mm akrylové obaly s 99% UV ochranou a magnetickým zavíráním zamezí jakémukoliv poškození a zachovají box v dokonalém stavu.
+Proč nakoupit u nás: Naše akryly mají dokonale čiré hrany, extra silné magnety a jsou speciálně dimenzované, aby boxy seděly pevně a bezpečně bez volného pohybu.`,
+    enTitle: 'Premium Acrylic Cases',
+    enDesc: `High-value sealed boxes deserve ultimate protection. Turn your Booster Boxes and Elite Trainer Boxes into luxury display items while safeguarding their value for the future.
+
+What we offer: Premium, heavy-duty acrylic display cases custom-sized for Pokémon Booster Boxes, ETBs, and Disney Lorcana Trove boxes.
+Why invest: Long-term exposure to dust, moisture, and UV light can permanently degrade a box's original shrink wrap and fade its colors. Our 4mm thick cases with 99% UV protection and secure magnetic lids shield your investments from environmental hazards.
+Why choose us: Our display cases feature crystal-clear polished edges, strong magnetic closures, and snug dimensions to keep your sealed products secure without shifting inside.`
   }
 };
 
@@ -1662,7 +1722,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
             <div className="category-intro-box">
               <h2 className="category-title">{(lang === 'CZ' ? gameInfo[selectedGame]?.title : gameInfo[selectedGame]?.enTitle) || (lang === 'CZ' ? 'Sealed Katalog' : 'Sealed Products')}</h2>
               <div className="category-description-wrapper">
-                <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`}>
+                <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`} style={{ whiteSpace: 'pre-line' }}>
                   {(lang === 'CZ' ? gameInfo[selectedGame]?.desc : gameInfo[selectedGame]?.enDesc) || (lang === 'CZ' ? 'Vstupte do světa originálních zapečetěných Pokémon, Disney Lorcana, One Piece, Riftbound produktů, herního příslušenství a prémiových akrylových boxů. Nabízíme široký výběr booster boxů, dárkových Elite Trainer Boxů, Trove boxů, booster bundlů i samostatných balíčků.' : 'Enter the world of original sealed Pokémon, Disney Lorcana, One Piece, Riftbound products, gaming accessories, and premium acrylic cases. We stock booster boxes, gift Elite Trainer Boxes, Trove boxes, bundles, and single booster packs.')}
                 </p>
                 <button
@@ -1703,7 +1763,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                   </h2>
                   {desc && (
                     <div className="category-description-wrapper">
-                      <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`}>
+                      <p className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`} style={{ whiteSpace: 'pre-line' }}>
                         {desc}
                       </p>
                       <button
