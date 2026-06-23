@@ -1146,7 +1146,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.vf-card:hover {
+.vf-card:hover:not(:has(.card-buy-container button:hover)) {
   transform: translateY(-6px);
 }
 
@@ -1173,7 +1173,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.vf-card:hover .card-art {
+.vf-card:hover:not(:has(.card-buy-container button:hover)) .card-art {
   box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), 0 16px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.5);
 }
 
@@ -1240,7 +1240,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   z-index: 2;
 }
 
-.vf-card:hover .ca-holo {
+.vf-card:hover:not(:has(.card-buy-container button:hover)) .ca-holo {
   opacity: 1;
   transform: rotate(15deg);
 }
@@ -1307,7 +1307,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.vf-card:hover .ca-image {
+.vf-card:hover:not(:has(.card-buy-container button:hover)) .ca-image {
   transform: scale(1.05);
 }
 
