@@ -40,6 +40,9 @@ export default function NewsletterTab({ showToast }) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, targetEmail: null });
 
+  // Campaign Import loading state
+  const [loadingImport, setLoadingImport] = useState(false);
+
   // Cropping states
   const [isCropping, setIsCropping] = useState(false);
   const [cropTarget, setCropTarget] = useState(null); // { index }
@@ -156,6 +159,232 @@ export default function NewsletterTab({ showToast }) {
       showToast(lang === 'CZ' ? `Chyba při odesílání: ${err.message}` : `Send error: ${err.message}`, 'error');
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const parseHtmlToBlocks = (html) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const blocks = [];
+    const blockDivs = doc.querySelectorAll('.block-text, .block-image, .block-button');
+    
+    blockDivs.forEach((div, index) => {
+      const id = (Date.now() + index).toString();
+      if (div.classList.contains('block-text')) {
+        let content = div.innerHTML.trim();
+        content = content.replace(/<br\s*\/?>/gi, '\n');
+        blocks.push({
+          id,
+          type: 'text',
+          content: content,
+          contentEN: ''
+        });
+      } else if (div.classList.contains('block-image')) {
+        const anchor = div.querySelector('a');
+        const img = div.querySelector('img');
+        const linkUrl = anchor ? anchor.getAttribute('href') : '';
+        const src = img ? img.getAttribute('src') : '';
+        blocks.push({
+          id,
+          type: 'image',
+          ratio: 'original',
+          content: src,
+          contentEN: '',
+          linkUrl: linkUrl,
+          linkUrlEN: ''
+        });
+      } else if (div.classList.contains('block-button')) {
+        const anchor = div.querySelector('a');
+        const url = anchor ? anchor.getAttribute('href') : '';
+        const text = anchor ? anchor.textContent.trim() : '';
+        blocks.push({
+          id,
+          type: 'button',
+          text: text,
+          textEN: '',
+          url: url,
+          urlEN: ''
+        });
+      }
+    });
+    return blocks;
+  };
+
+  const handleLoadCampaign = async (selectedCampaign) => {
+    const name = selectedCampaign.name || '';
+    let baseName = name;
+    let isCZ = true;
+    
+    if (name.endsWith(' [CZ]')) {
+      baseName = name.slice(0, -5);
+      isCZ = true;
+    } else if (name.endsWith(' [EN]')) {
+      baseName = name.slice(0, -5);
+      isCZ = false;
+    }
+    
+    // Strip resent suffix
+    baseName = baseName.replace(/\s*\(Resent\s+\d{1,2}\.\d{1,2}\.\d{4}\)/gi, '');
+    
+    const czCampaign = isCZ ? selectedCampaign : campaigns.find(c => c.name.startsWith(baseName + ' [CZ]'));
+    const enCampaign = !isCZ ? selectedCampaign : campaigns.find(c => c.name.startsWith(baseName + ' [EN]'));
+    
+    setLoadingImport(true);
+    showToast(
+      lang === 'CZ' 
+        ? 'Načítání historie kampaně do editoru...' 
+        : 'Loading campaign history into editor...', 
+      'info'
+    );
+    
+    try {
+      let czData = null;
+      let enData = null;
+      
+      if (czCampaign) {
+        const res = await supabase.functions.invoke(`send-newsletter?id=${czCampaign.id}`, { method: 'GET' });
+        if (res.error) throw res.error;
+        czData = res.data;
+      }
+      
+      if (enCampaign && (!czCampaign || enCampaign.id !== czCampaign.id)) {
+        const res = await supabase.functions.invoke(`send-newsletter?id=${enCampaign.id}`, { method: 'GET' });
+        if (res.error) throw res.error;
+        enData = res.data;
+      }
+      
+      // Update form values
+      setCampaignName(baseName);
+      
+      const parsedCZSubject = czData?.subject || selectedCampaign.subject || '';
+      const parsedENSubject = enData?.subject || (enCampaign ? enCampaign.subject : '') || parsedCZSubject;
+      
+      setSubject(parsedCZSubject);
+      setSubjectEN(parsedENSubject);
+      
+      const czBlocks = czData ? parseHtmlToBlocks(czData.htmlContent) : [];
+      const enBlocks = enData ? parseHtmlToBlocks(enData.htmlContent) : [];
+      
+      const mergedBlocks = [];
+      const maxLength = Math.max(czBlocks.length, enBlocks.length);
+      
+      for (let i = 0; i < maxLength; i++) {
+        const czBlock = czBlocks[i];
+        const enBlock = enBlocks[i];
+        
+        if (czBlock && enBlock && czBlock.type === enBlock.type) {
+          if (czBlock.type === 'text') {
+            mergedBlocks.push({
+              id: czBlock.id,
+              type: 'text',
+              content: czBlock.content,
+              contentEN: enBlock.content
+            });
+          } else if (czBlock.type === 'image') {
+            mergedBlocks.push({
+              id: czBlock.id,
+              type: 'image',
+              ratio: 'original',
+              content: czBlock.content,
+              contentEN: enBlock.content,
+              linkUrl: czBlock.linkUrl || '',
+              linkUrlEN: enBlock.linkUrl || ''
+            });
+          } else if (czBlock.type === 'button') {
+            mergedBlocks.push({
+              id: czBlock.id,
+              type: 'button',
+              text: czBlock.text,
+              textEN: enBlock.text,
+              url: czBlock.url || '',
+              urlEN: enBlock.url || ''
+            });
+          }
+        } else if (czBlock) {
+          if (czBlock.type === 'text') {
+            mergedBlocks.push({
+              id: czBlock.id,
+              type: 'text',
+              content: czBlock.content,
+              contentEN: czBlock.content
+            });
+          } else if (czBlock.type === 'image') {
+            mergedBlocks.push({
+              id: czBlock.id,
+              type: 'image',
+              ratio: 'original',
+              content: czBlock.content,
+              contentEN: czBlock.content,
+              linkUrl: czBlock.linkUrl || '',
+              linkUrlEN: czBlock.linkUrl || ''
+            });
+          } else if (czBlock.type === 'button') {
+            mergedBlocks.push({
+              id: czBlock.id,
+              type: 'button',
+              text: czBlock.text,
+              textEN: czBlock.text,
+              url: czBlock.url || '',
+              urlEN: czBlock.url || ''
+            });
+          }
+        } else if (enBlock) {
+          if (enBlock.type === 'text') {
+            mergedBlocks.push({
+              id: enBlock.id,
+              type: 'text',
+              content: enBlock.content,
+              contentEN: enBlock.content
+            });
+          } else if (enBlock.type === 'image') {
+            mergedBlocks.push({
+              id: enBlock.id,
+              type: 'image',
+              ratio: 'original',
+              content: enBlock.content,
+              contentEN: enBlock.content,
+              linkUrl: enBlock.linkUrl || '',
+              linkUrlEN: enBlock.linkUrl || ''
+            });
+          } else if (enBlock.type === 'button') {
+            mergedBlocks.push({
+              id: enBlock.id,
+              type: 'button',
+              text: enBlock.text,
+              textEN: enBlock.text,
+              url: enBlock.url || '',
+              urlEN: enBlock.url || ''
+            });
+          }
+        }
+      }
+      
+      if (mergedBlocks.length > 0) {
+        setBlocks(mergedBlocks);
+        showToast(
+          lang === 'CZ' 
+            ? 'Kampaň byla načtena do editoru!' 
+            : 'Campaign loaded into editor!', 
+          'success'
+        );
+      } else {
+        showToast(
+          lang === 'CZ' 
+            ? 'Nepodařilo se nalézt žádné bloky k načtení.' 
+            : 'No blocks found to load.', 
+          'warning'
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      showToast(
+        lang === 'CZ' 
+          ? 'Chyba při načítání kampaně z historie.' 
+          : 'Error loading campaign from history.', 
+        'error'
+      );
+    } finally {
+      setLoadingImport(false);
     }
   };
 
@@ -701,9 +930,24 @@ export default function NewsletterTab({ showToast }) {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '420px', overflowY: 'auto' }}>
                 {campaigns.map(camp => (
-                  <div key={camp.id} style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.03)', fontSize: '11px' }}>
-                    <strong style={{ display: 'block', fontSize: '12px', color: '#fff', marginBottom: '2px' }}>{camp.name}</strong>
-                    <span style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '4px' }}>{camp.subject}</span>
+                  <div key={camp.id} style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.03)', fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <strong style={{ display: 'block', fontSize: '12px', color: '#fff', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{camp.name}</strong>
+                        <span style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{camp.subject}</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                        <button 
+                          type="button" 
+                          onClick={() => handleLoadCampaign(camp)}
+                          className="btn btn-secondary" 
+                          style={{ fontSize: '10px', padding: '4px 8px', background: 'rgba(253,189,22,0.1)', color: 'var(--color-gold)', border: '1px solid rgba(253,189,22,0.2)' }}
+                          disabled={loadingImport}
+                        >
+                          📥 {lang === 'CZ' ? 'Načíst do editoru' : 'Load to editor'}
+                        </button>
+                      </div>
+                    </div>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>
                       {camp.sentDate ? new Date(camp.sentDate).toLocaleDateString() : 'Odesláno'}
                     </span>
@@ -1436,6 +1680,39 @@ export default function NewsletterTab({ showToast }) {
                 {lang === 'CZ' ? 'Odeslat hromadně' : 'Send Campaign'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Loading Import Overlay */}
+      {loadingImport && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          backdropFilter: 'blur(3px)'
+        }}>
+          <div style={{
+            background: 'var(--bg-secondary, #141416)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '300px',
+            width: '90%',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+            textAlign: 'center'
+          }}>
+            <span style={{ fontSize: '32px', display: 'block', marginBottom: '12px' }}>⏳</span>
+            <h4 style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff', margin: '0' }}>
+              {lang === 'CZ' ? 'Načítání kampaně do editoru...' : 'Loading campaign into editor...'}
+            </h4>
           </div>
         </div>
       )}

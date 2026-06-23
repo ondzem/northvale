@@ -650,8 +650,8 @@ export default function HomepageTab({ showToast, onEditProduct }) {
         loadedImage.current = img;
 
         // frame resolution helper
-        const frameW = cropTarget === 'desktop' ? 280 : (cropTarget === 'mobile' ? 256 : 220);
-        const frameH = cropTarget === 'desktop' ? 122 : (cropTarget === 'mobile' ? 320 : 220);
+        const frameW = cropTarget === 'desktop' ? 280 : (cropTarget === 'mobile' ? 256 : (cropTarget === 'deal' ? 200 : 220));
+        const frameH = cropTarget === 'desktop' ? 122 : (cropTarget === 'mobile' ? 320 : (cropTarget === 'deal' ? 280 : 220));
 
         // Calculate min scale to cover the frame
         const minScaleX = frameW / img.width;
@@ -689,8 +689,8 @@ export default function HomepageTab({ showToast, onEditProduct }) {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const frameW = cropTarget === 'desktop' ? 280 : (cropTarget === 'mobile' ? 256 : 220);
-    const frameH = cropTarget === 'desktop' ? 122 : (cropTarget === 'mobile' ? 320 : 220);
+    const frameW = cropTarget === 'desktop' ? 280 : (cropTarget === 'mobile' ? 256 : (cropTarget === 'deal' ? 200 : 220));
+    const frameH = cropTarget === 'desktop' ? 122 : (cropTarget === 'mobile' ? 320 : (cropTarget === 'deal' ? 280 : 220));
     const frameX = (canvas.width - frameW) / 2;
     const frameY = (canvas.height - frameH) / 2;
 
@@ -798,8 +798,8 @@ export default function HomepageTab({ showToast, onEditProduct }) {
     if (!loadedImage.current || !canvasRef.current) return;
 
     const img = loadedImage.current;
-    const frameW = cropTarget === 'desktop' ? 280 : (cropTarget === 'mobile' ? 256 : 220);
-    const frameH = cropTarget === 'desktop' ? 122 : (cropTarget === 'mobile' ? 320 : 220);
+    const frameW = cropTarget === 'desktop' ? 280 : (cropTarget === 'mobile' ? 256 : (cropTarget === 'deal' ? 200 : 220));
+    const frameH = cropTarget === 'desktop' ? 122 : (cropTarget === 'mobile' ? 320 : (cropTarget === 'deal' ? 280 : 220));
 
     const scale = cropRefScale.current;
     const drawW = img.width * scale;
@@ -818,7 +818,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
       return;
     }
 
-    const baseW = cropTarget === 'desktop' ? 1920 : (cropTarget === 'mobile' ? 800 : 500);
+    const baseW = cropTarget === 'desktop' ? 1920 : (cropTarget === 'mobile' ? 800 : (cropTarget === 'deal' ? 1000 : 500));
     const scaleFactor = baseW / frameW;
 
     const cropCanvas = document.createElement('canvas');
@@ -1485,7 +1485,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
 
               {/* Ořez obrázku */}
               <div className="ctf-field" style={{ marginTop: '20px' }}>
-                <label className="ctf-label">{lang === 'CZ' ? 'Obrázek akce (poměr 1:1)' : 'Deal Image (1:1 aspect ratio)'}<span style={{ color: '#ef4444' }}> *</span></label>
+                <label className="ctf-label">{lang === 'CZ' ? 'Obrázek akce (poměr 5:7)' : 'Deal Image (5:7 aspect ratio)'}<span style={{ color: '#ef4444' }}> *</span></label>
                 
                 {dealImageUrl ? (
                   <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', padding: '12px' }}>
@@ -1522,7 +1522,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                       {lang === 'CZ' ? 'Přetáhněte obrázek sem nebo klikněte k výběru' : 'Drag image here or click to select'}
                     </span>
                     <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
-                      {lang === 'CZ' ? 'Podporuje JPG, PNG, WEBP (ořez 1:1)' : 'Supports JPG, PNG, WEBP (1:1 crop)'}
+                      {lang === 'CZ' ? 'Podporuje JPG, PNG, WEBP (ořez 5:7, 1000 × 1400 px)' : 'Supports JPG, PNG, WEBP (5:7 crop, 1000 × 1400 px)'}
                     </span>
                   </div>
                 )}
@@ -1593,7 +1593,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
               <div 
                 className="glass-panel deal-widget-banner"
                 style={{ 
-                  height: '420px', 
+                  height: '480px', 
                   padding: '16px 16px 0 16px',
                   flexDirection: 'column',
                   alignItems: 'stretch',
@@ -1631,7 +1631,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
 
                 {/* Image */}
                 <div style={{
-                  height: '185px',
+                  height: '230px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -1647,16 +1647,21 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                       maxHeight: '100%', 
                       maxWidth: '100%', 
                       objectFit: 'contain',
-                      transform: 'scale(1.22) translateY(12px)'
+                      transform: 'scale(1) translateY(4px)',
+                      transition: 'transform 0.3s ease'
                     }} 
                   />
                   <span style={{
                     position: 'absolute',
                     top: '4px',
                     left: '4px',
-                    color: 'var(--color-green)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    color: 'var(--text-main)',
                     fontWeight: '700',
-                    fontSize: '11px'
+                    fontSize: '9px',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)'
                   }}>
                     {lang === 'CZ' ? `Zbývá ${dealStock} kusů` : `${dealStock} pcs left`}
                   </span>
@@ -1914,7 +1919,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                 ? (lang === 'CZ' ? 'Poměr stran je uzamčen na šířku (2.28:1 - pro desktop)' : 'Aspect ratio locked to landscape (2.28:1 - for desktop)')
                 : (cropTarget === 'mobile'
                   ? (lang === 'CZ' ? 'Poměr stran je uzamčen na výšku (4:5 - pro mobil)' : 'Aspect ratio locked to portrait (4:5 - for mobile)')
-                  : (lang === 'CZ' ? 'Poměr stran je uzamčen na čtverec (1:1 - pro produkt)' : 'Aspect ratio locked to square (1:1 - for product)'))
+                  : (lang === 'CZ' ? 'Poměr stran je uzamčen na výšku (5:7 - pro akci dne)' : 'Aspect ratio locked to portrait (5:7 - for deal of the day)'))
               }
             </div>
             

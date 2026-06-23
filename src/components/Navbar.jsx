@@ -345,11 +345,11 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 <span style={styles.topBarDivider}>|</span>
 
                 <div style={styles.socials}>
-                  <a href="https://www.instagram.com/northvaletcg/" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
+                  <a href="https://www.instagram.com/northvaletcg/?utm_source=ig_web_button_share_sheet" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
                     <img src="/instagram.png" alt="Instagram" style={styles.socialIcon} width="14" height="14" />
                   </a>
-                  <a href="https://www.youtube.com/@northvaletcg" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
-                    <img src="/youtube.png" alt="YouTube" style={styles.socialIcon} width="14" height="14" />
+                  <a href="https://www.facebook.com/share/18yajuq6N1/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
+                    <img src="/facebook.png" alt="Facebook" style={styles.socialIcon} width="14" height="14" />
                   </a>
                   <a href="https://www.tiktok.com/@northvaletcg" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
                     <img src="/tik-tok.png" alt="TikTok" style={styles.socialIcon} width="14" height="14" />
@@ -1319,11 +1319,11 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
 
                 {/* Socials */}
                 <div style={styles.drawerSocials}>
-                  <a href="https://www.instagram.com/northvaletcg/" target="_blank" rel="noopener noreferrer" style={styles.drawerSocialLink}>
+                  <a href="https://www.instagram.com/northvaletcg/?utm_source=ig_web_button_share_sheet" target="_blank" rel="noopener noreferrer" style={styles.drawerSocialLink}>
                     <img src="/instagram.png" alt="Instagram" style={styles.drawerSocialIcon} width="18" height="18" />
                   </a>
-                  <a href="https://www.youtube.com/@northvaletcg" target="_blank" rel="noopener noreferrer" style={styles.drawerSocialLink}>
-                    <img src="/youtube.png" alt="YouTube" style={styles.drawerSocialIcon} width="18" height="18" />
+                  <a href="https://www.facebook.com/share/18yajuq6N1/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" style={styles.drawerSocialLink}>
+                    <img src="/facebook.png" alt="Facebook" style={styles.drawerSocialIcon} width="18" height="18" />
                   </a>
                   <a href="https://www.tiktok.com/@northvaletcg" target="_blank" rel="noopener noreferrer" style={styles.drawerSocialLink}>
                     <img src="/tik-tok.png" alt="TikTok" style={styles.drawerSocialIcon} width="18" height="18" />
@@ -1445,7 +1445,7 @@ const styles = {
   socials: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
+    gap: '16px',
   },
   socialLink: {
     display: 'flex',

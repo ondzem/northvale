@@ -658,7 +658,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
                 {/* Center: Image Container */}
                 <div style={{
-                  height: !isMobile ? '185px' : '135px',
+                  height: !isMobile ? '230px' : '175px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -672,13 +672,13 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   <img 
                     src={activeDeal.image_url || '/logo s popisem.webp'} 
                     alt={activeDeal.name || 'Akční nabídka - Northvale TCG'} 
-                    width="185"
-                    height="185"
+                    width={!isMobile ? "164" : "125"}
+                    height={!isMobile ? "230" : "175"}
                     style={{ 
                       maxHeight: '100%', 
                       maxWidth: '100%', 
                       objectFit: 'contain',
-                      transform: 'scale(1.22) translateY(12px)',
+                      transform: 'scale(1) translateY(4px)',
                       transition: 'transform 0.3s ease'
                     }} 
                   />

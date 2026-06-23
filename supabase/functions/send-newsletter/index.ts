@@ -176,8 +176,32 @@ serve(async (req) => {
     // Initialize Supabase Client with service key (bypasses RLS to write to storage)
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 1. GET Request: Fetch history of sent campaigns
+    // 1. GET Request: Fetch history of sent campaigns OR details of a single campaign
     if (req.method === "GET") {
+      const url = new URL(req.url);
+      const campaignId = url.searchParams.get("id");
+
+      if (campaignId) {
+        const response = await fetch(`https://api.brevo.com/v3/emailCampaigns/${campaignId}`, {
+          method: "GET",
+          headers: {
+            "api-key": brevoApiKey,
+            "accept": "application/json"
+          }
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Brevo API GET Campaign details error: ${errorText}`);
+        }
+
+        const data = await response.json();
+        return new Response(JSON.stringify(data), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const response = await fetch("https://api.brevo.com/v3/emailCampaigns?type=classic&limit=10", {
         method: "GET",
         headers: {
@@ -198,9 +222,81 @@ serve(async (req) => {
       });
     }
 
-    // 2. POST Request: Create and send a new custom campaign
+    // 2. POST Request: Create and send a new custom campaign OR clone and send an existing one
     if (req.method === "POST") {
-      const { campaignName, subject, subjectEN, blocks } = await req.json();
+      const body = await req.json();
+      const { cloneCampaignId } = body;
+
+      if (cloneCampaignId) {
+        // Step A: Fetch original campaign from Brevo
+        const originalResponse = await fetch(`https://api.brevo.com/v3/emailCampaigns/${cloneCampaignId}`, {
+          method: "GET",
+          headers: {
+            "api-key": brevoApiKey,
+            "accept": "application/json"
+          }
+        });
+
+        if (!originalResponse.ok) {
+          const errorText = await originalResponse.text();
+          throw new Error(`Brevo API GET original campaign error: ${errorText}`);
+        }
+
+        const originalData = await originalResponse.json();
+
+        // Step B: Create a new campaign with same content
+        const newCampaignName = `${originalData.name} (Resent ${new Date().toLocaleDateString()})`;
+        const createResponse = await fetch("https://api.brevo.com/v3/emailCampaigns", {
+          method: "POST",
+          headers: {
+            "api-key": brevoApiKey,
+            "content-type": "application/json",
+            "accept": "application/json"
+          },
+          body: JSON.stringify({
+            sender: {
+              name: originalData.sender?.name || senderName,
+              email: originalData.sender?.email || senderEmail
+            },
+            name: newCampaignName,
+            subject: originalData.subject,
+            htmlContent: originalData.htmlContent,
+            recipients: {
+              listIds: originalData.recipients?.listIds || [brevoListIdCZ]
+            }
+          })
+        });
+
+        if (!createResponse.ok) {
+          const errorText = await createResponse.text();
+          throw new Error(`Failed to create cloned campaign. Brevo responded: ${errorText}`);
+        }
+
+        const newCampaignData = await createResponse.json();
+        const newCampaignId = newCampaignData.id;
+
+        if (newCampaignId) {
+          const sendResponse = await fetch(`https://api.brevo.com/v3/emailCampaigns/${newCampaignId}/sendNow`, {
+            method: "POST",
+            headers: {
+              "api-key": brevoApiKey,
+              "content-type": "application/json",
+              "accept": "application/json"
+            }
+          });
+          if (!sendResponse.ok) {
+            const errorText = await sendResponse.text();
+            throw new Error(`Cloned campaign created (${newCampaignId}) but sendNow failed: ${errorText}`);
+          }
+        }
+
+        return new Response(JSON.stringify({ success: true, campaignIds: [newCampaignId] }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { campaignName, subject, subjectEN, blocks } = body;
 
       if (!campaignName || !subject || !blocks || !Array.isArray(blocks)) {
         return new Response(JSON.stringify({ error: "Missing required fields (campaignName, subject, blocks)" }), {

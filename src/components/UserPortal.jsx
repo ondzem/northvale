@@ -40,6 +40,7 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
 
   // 2FA Setup states
   const [isSettingUp2FA, setIsSettingUp2FA] = useState(false);
@@ -371,6 +372,35 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
       setNewPassword('');
       setConfirmPassword('');
       showToast(lang === 'CZ' ? 'Heslo bylo úspěšně změněno.' : 'Password was successfully updated.', 'success');
+    }
+  };
+
+  // Trigger password reset email from profile security tab
+  const handleForgotPassword = async () => {
+    setIsResetting(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+        redirectTo: window.location.origin
+      });
+
+      if (error) throw error;
+
+      showToast(
+        lang === 'CZ'
+          ? 'Odkaz pro obnovení hesla byl odeslán na Váš e-mail.'
+          : 'Password reset link has been sent to your email.',
+        'success'
+      );
+    } catch (err) {
+      console.error('Password reset from portal error:', err);
+      showToast(
+        lang === 'CZ'
+          ? `Chyba při odesílání: ${err.message}`
+          : `Error sending reset link: ${err.message}`,
+        'error'
+      );
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -1210,9 +1240,23 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                       required 
                     />
                   </div>
-                  <button type="submit" className="prf-btn-primary" style={{ marginTop: '16px' }}>
-                    {lang === 'CZ' ? 'Uložit nové heslo' : 'Save New Password'}
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '20px', flexWrap: 'wrap' }}>
+                    <button type="submit" className="prf-btn-primary" style={{ margin: 0 }}>
+                      {lang === 'CZ' ? 'Uložit nové heslo' : 'Save New Password'}
+                    </button>
+                    
+                    <button 
+                      type="button" 
+                      className="forgot-password-link"
+                      style={{ margin: 0, padding: 0 }}
+                      disabled={isResetting}
+                      onClick={handleForgotPassword}
+                    >
+                      {isResetting 
+                        ? (lang === 'CZ' ? 'Odesílání...' : 'Sending...') 
+                        : t('LoginModal.forgotPasswordLink')}
+                    </button>
+                  </div>
                 </form>
               </section>
 

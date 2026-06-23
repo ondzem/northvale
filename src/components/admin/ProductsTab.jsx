@@ -3227,7 +3227,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       <span style={{ opacity: 0.2 }}>|</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <img src="/instagram.png" alt="Instagram" style={{ width: '14px', height: '14px', filter: 'brightness(0.8)' }} />
-                        <img src="/youtube.png" alt="YouTube" style={{ width: '14px', height: '14px', filter: 'brightness(0.8)' }} />
+                        <img src="/facebook.png" alt="Facebook" style={{ width: '14px', height: '14px', filter: 'brightness(0.8)' }} />
                         <img src="/tik-tok.png" alt="TikTok" style={{ width: '14px', height: '14px', filter: 'brightness(0.8)' }} />
                       </div>
                     </div>
@@ -4211,7 +4211,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       <div className="footer-socials" style={{ display: 'flex', gap: '12px' }}>
                         <img src="/instagram.png" alt="Instagram" style={{ width: '20px', height: '20px' }} />
                         <img src="/tik-tok.png" alt="TikTok" style={{ width: '20px', height: '20px' }} />
-                        <img src="/youtube.png" alt="YouTube" style={{ width: '20px', height: '20px' }} />
+                        <img src="/facebook.png" alt="Facebook" style={{ width: '20px', height: '20px' }} />
                       </div>
                     </div>
 

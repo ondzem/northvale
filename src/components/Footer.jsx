@@ -97,14 +97,14 @@ export default function Footer({ setActivePage, activePage }) {
             }
           </p>
           <div className="footer-socials">
-            <a href="https://www.instagram.com/northvaletcg/" target="_blank" rel="noopener noreferrer" className="footer-social-link">
+            <a href="https://www.instagram.com/northvaletcg/?utm_source=ig_web_button_share_sheet" target="_blank" rel="noopener noreferrer" className="footer-social-link">
               <img src="/instagram.png" alt="Instagram" className="footer-social-icon" width="16" height="16" />
             </a>
             <a href="https://www.tiktok.com/@northvaletcg" target="_blank" rel="noopener noreferrer" className="footer-social-link">
               <img src="/tik-tok.png" alt="TikTok" className="footer-social-icon" width="16" height="16" />
             </a>
-            <a href="https://www.youtube.com/@northvaletcg" target="_blank" rel="noopener noreferrer" className="footer-social-link">
-              <img src="/youtube.png" alt="YouTube" className="footer-social-icon" width="16" height="16" />
+            <a href="https://www.facebook.com/share/18yajuq6N1/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="footer-social-link">
+              <img src="/facebook.png" alt="Facebook" className="footer-social-icon" width="16" height="16" />
             </a>
           </div>
         </div>
