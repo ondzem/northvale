@@ -756,13 +756,13 @@ function AppContent() {
   // Dynamic Page Title & SEO Meta Description
   useEffect(() => {
     let pageTitle = '';
-    let metaDescription = 'Northvale TCG - Váš průvodce světem karetních her Pokémon, Disney Lorcana a One Piece. Originální produkty, příslušenství a sběratelský blog.';
+    let metaDescription = lang === 'CZ'
+      ? 'Vstupte do prémiového e-shopu pro sběratele. Zaručujeme 100% originální sealed produkty, kusovky a bezpečné balení.'
+      : 'Welcome to the premium shop for collectors. We guarantee 100% authentic sealed products, singles & safe packing.';
 
     switch (activePage) {
       case 'home':
-        pageTitle = lang === 'CZ'
-          ? 'Northvale TCG – Pokémon, Lorcana a One Piece karty | E-shop'
-          : 'Northvale TCG – Pokémon, Lorcana & One Piece Cards Shop';
+        pageTitle = 'Northvale TCG';
         break;
       case 'singles-catalog': {
         const gamePart = filters.game && filters.game !== 'all' && filters.game !== 'all-games' ? filters.game : '';
@@ -875,7 +875,11 @@ function AppContent() {
         pageTitle = 'Northvaletcg.eu';
     }
 
-    document.title = pageTitle ? `${pageTitle} - Northvaletcg.eu` : 'Northvaletcg.eu';
+    if (activePage === 'home') {
+      document.title = 'Northvale TCG';
+    } else {
+      document.title = pageTitle ? `${pageTitle} - Northvaletcg.eu` : 'Northvaletcg.eu';
+    }
 
     // Synchronize HTML language code dynamically
     document.documentElement.lang = lang === 'CZ' ? 'cs' : 'en';
