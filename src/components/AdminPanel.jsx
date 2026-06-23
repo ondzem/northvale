@@ -6,10 +6,11 @@ import HomepageTab from './admin/HomepageTab';
 import FaqTab from './admin/FaqTab';
 import NewsletterTab from './admin/NewsletterTab';
 import DiscountCodesTab from './admin/DiscountCodesTab';
+import OrdersTab from './admin/OrdersTab';
 
 export default function AdminPanel({ showToast, setActivePage }) {
   const { lang } = useTranslation();
-  const [activeTab, setActiveTab] = useState('products'); // default to products CMS
+  const [activeTab, setActiveTab] = useState('orders'); // default to Orders tab for immediate focus
   const [editProductId, setEditProductId] = useState(null);
 
   const handleEditProductFromOtherTab = (productId) => {
@@ -26,6 +27,7 @@ export default function AdminPanel({ showToast, setActivePage }) {
   };
 
   const tabsConfig = [
+    { id: 'orders', name_cz: 'Objednávky', name_en: 'Orders' },
     { id: 'products', name_cz: 'Správa produktů', name_en: 'Products CMS' },
     { id: 'categories', name_cz: 'Správa kategorií', name_en: 'Categories CMS' },
     { id: 'homepage', name_cz: 'Správa úvodní stránky', name_en: 'Homepage CMS' },
@@ -83,7 +85,13 @@ export default function AdminPanel({ showToast, setActivePage }) {
               className={`adf-nav-item ${activeTab === tab.id ? 'is-active' : ''}`}
               onClick={() => setActiveTab(tab.id)}
             >
-              {tab.id === 'products' ? (
+              {tab.id === 'orders' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+                  <circle cx="9" cy="21" r="1"></circle>
+                  <circle cx="20" cy="21" r="1"></circle>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+              ) : tab.id === 'products' ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
                   <path d="M3 7l9-4 9 4v10l-9 4-9-4z"></path>
                   <path d="M3 7l9 4 9-4M12 11v10"></path>
@@ -120,6 +128,12 @@ export default function AdminPanel({ showToast, setActivePage }) {
 
         {/* Content Pane */}
         <main className="adf-main">
+          {activeTab === 'orders' && (
+            <OrdersTab 
+              showToast={handleShowToastPlaceholder} 
+            />
+          )}
+
           {activeTab === 'products' && (
             <ProductsTab 
               showToast={handleShowToastPlaceholder} 

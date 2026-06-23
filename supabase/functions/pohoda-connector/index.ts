@@ -134,6 +134,28 @@ serve(async (req) => {
         </ord:orderItem>`;
       });
 
+      // Add shipping fee line item if applicable
+      if (order.shipping_cost && parseFloat(order.shipping_cost) > 0) {
+        itemsXml += `
+        <ord:orderItem>
+          <ord:text>${escapeXml(order.shipping_method || 'Doprava')}</ord:text>
+          <ord:quantity>1</ord:quantity>
+          <ord:delivered>1</ord:delivered>
+          <ord:unitPrice>${order.shipping_cost}</ord:unitPrice>
+        </ord:orderItem>`;
+      }
+
+      // Add payment surcharge line item if applicable (e.g. COD fee)
+      if (order.payment_surcharge && parseFloat(order.payment_surcharge) > 0) {
+        itemsXml += `
+        <ord:orderItem>
+          <ord:text>Dobírkový příplatek</ord:text>
+          <ord:quantity>1</ord:quantity>
+          <ord:delivered>1</ord:delivered>
+          <ord:unitPrice>${order.payment_surcharge}</ord:unitPrice>
+        </ord:orderItem>`;
+      }
+
       const orderXml = `<?xml version="1.0" encoding="Windows-1250"?>
 <dat:dataPack id="OBJ-${order.id}" version="2.0" note="Objednavka z eshopu"
               xmlns:dat="http://www.stormware.cz/schema/version_2/data.xsd"
@@ -158,6 +180,11 @@ serve(async (req) => {
             <typ:phone>${escapeXml(order.customer_phone)}</typ:phone>
           </typ:address>
         </ord:partnerIdentity>
+        ${order.carrier ? `
+        <ord:carrier>
+          <ids>${escapeXml(order.carrier)}</ids>
+        </ord:carrier>
+        ` : ''}
         <ord:paymentType>
           <ids>${escapeXml(order.payment_method || 'platba kartou')}</ids>
         </ord:paymentType>

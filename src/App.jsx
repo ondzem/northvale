@@ -1172,7 +1172,17 @@ function AppContent() {
             customer_zip: order.shippingZip,
             customer_email: order.customerEmail,
             customer_phone: order.customerPhone,
-            payment_method: order.paymentMethod
+            payment_method: order.paymentMethod,
+            shipping_method: order.shippingMethod,
+            shipping_cost: order.shippingCost,
+            payment_surcharge: order.paymentSurcharge,
+            carrier: order.shippingMethod ? (
+              order.shippingMethod.includes('GLS') ? 'GLS' :
+              order.shippingMethod.includes('DPD') ? 'DPD' :
+              (order.shippingMethod.includes('Zásilkovna') || order.shippingMethod.includes('Packeta')) ? 'Zásilkovna' :
+              order.shippingMethod.includes('Pošta') ? 'Česká pošta' :
+              'Osobní odběr'
+            ) : 'GLS'
           },
           items: order.items.map(item => ({
             name: item.name,
