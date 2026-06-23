@@ -782,26 +782,26 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       <div className="nav-dropdown-row">
                         <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Pokémon' })}>
                           <div className="nav-dropdown-icon">
-                            <img src="/acrylic-etb-box.png" alt="" className="nav-dropdown-img" width="60" height="60" />
+                            <img src="/acrylic-etb-box.webp" alt="" className="nav-dropdown-img" width="60" height="60" />
                           </div>
                           <span className="nav-dropdown-text">{translateSubcat('Pokemon')}</span>
                         </div>
                         <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Lorcana' })}>
                           <div className="nav-dropdown-icon">
-                            <img src="/acrylic-etb-box.png" alt="" className="nav-dropdown-img" width="60" height="60" />
+                            <img src="/acrylic-etb-box.webp" alt="" className="nav-dropdown-img" width="60" height="60" />
                           </div>
                           <span className="nav-dropdown-text">{translateSubcat('Lorcana')}</span>
                         </div>
                         <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Riftbound' })}>
                           <div className="nav-dropdown-icon">
-                            <img src="/acrylic-etb-box.png" alt="" className="nav-dropdown-img" width="60" height="60" />
+                            <img src="/acrylic-etb-box.webp" alt="" className="nav-dropdown-img" width="60" height="60" />
                           </div>
                           <span className="nav-dropdown-text">{translateSubcat('Riftbound')}</span>
                         </div>
                         {FEATURE_FLAGS.showSlabs && (
                           <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'PSA' })}>
                             <div className="nav-dropdown-icon">
-                              <img src="/acrylic-etb-box.png" alt="" className="nav-dropdown-img" width="60" height="60" />
+                              <img src="/acrylic-etb-box.webp" alt="" className="nav-dropdown-img" width="60" height="60" />
                             </div>
                             <span className="nav-dropdown-text">{translateSubcat('Psa karty')}</span>
                           </div>

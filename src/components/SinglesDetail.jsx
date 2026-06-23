@@ -6,7 +6,7 @@ import { supabase } from '../supabase';
 import { fetchProductByIdFromDB } from '../services/products';
 
 const getGameImage = (product) => {
-  if (product.category === 'Acrylics') return '/acrylic-etb-box.png';
+  if (product.category === 'Acrylics') return '/acrylic-etb-box.webp';
   const game = product.game || '';
   const g = game.toLowerCase();
   if (g.includes('pokémon') || g.includes('pokemon')) return '/Pokemon.webp';

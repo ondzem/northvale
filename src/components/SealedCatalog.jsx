@@ -12,7 +12,7 @@ function getGameFallbackLogo(game) {
     case 'One Piece': return '/One piece.webp';
     case 'Riftbound': return '/Riftbound.webp';
     case 'Accessories': return '/Prislusentstvi.webp';
-    case 'Acrylics': return '/acrylic-etb-box.png';
+    case 'Acrylics': return '/acrylic-etb-box.webp';
     default: return '/Northvale Logo.webp';
   }
 }

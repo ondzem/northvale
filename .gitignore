@@ -29,3 +29,15 @@ scratch/
 # Developer skills & environment
 Skills/
 *.bak
+
+# Local image backups
+public/.original_backups/
+
+# Local temporary/scratch folders and assets
+Blog Northvale/
+D _ Editorial _ Obsah.html
+Guardrails-develop/
+loading stránek/
+loading str*
+northvaletcg-fixy-pro-antigravity.md
+scratch_debug_blog_error.js

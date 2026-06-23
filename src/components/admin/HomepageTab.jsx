@@ -1185,6 +1185,38 @@ export default function HomepageTab({ showToast, onEditProduct }) {
               style={{ display: 'none' }} 
               onChange={(e) => handleFileChange(e, 'desktop')}
             />
+
+            <div style={{ marginTop: '10px' }}>
+              <label style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '4px' }}>
+                {lang === 'CZ' ? 'Nebo zadejte přímou URL adresu obrázku (např. /banners/slide1.webp):' : 'Or enter direct image URL (e.g. /banners/slide1.webp):'}
+              </label>
+              <input
+                type="text"
+                className="ctf-input"
+                style={{ fontSize: '12px', padding: '8px 12px' }}
+                value={formDesktopUrl}
+                onChange={e => setFormDesktopUrl(e.target.value)}
+                placeholder={lang === 'CZ' ? 'Zadejte URL nebo cestu k obrázku...' : 'Enter URL or image path...'}
+              />
+            </div>
+
+            {formDesktopUrl && formDesktopUrl.startsWith('data:image') && formDesktopUrl.length > 150000 && (
+              <div style={{
+                marginTop: '8px',
+                padding: '10px 12px',
+                background: 'rgba(239, 68, 68, 0.08)',
+                border: '1px solid rgba(239, 68, 68, 0.15)',
+                borderRadius: '6px',
+                color: '#f87171',
+                fontSize: '11px',
+                lineHeight: '1.4'
+              }}>
+                <strong>{lang === 'CZ' ? 'Upozornění na výkon:' : 'Performance Warning:'}</strong>{' '}
+                {lang === 'CZ'
+                  ? 'Tento obrázek je uložen jako velký textový řetězec (Base64). Pro lepší rychlost načítání stránek doporučujeme nahrát soubor do Supabase Storage a vložit jeho veřejný odkaz výše.'
+                  : 'This image is stored as a large Base64 string. To prevent page load delays, we recommend uploading the image to Supabase Storage and pasting its public link above.'}
+              </div>
+            )}
           </div>
 
           {/* Mobile Banner Upload & Crop */}
@@ -1232,6 +1264,38 @@ export default function HomepageTab({ showToast, onEditProduct }) {
               style={{ display: 'none' }} 
               onChange={(e) => handleFileChange(e, 'mobile')}
             />
+
+            <div style={{ marginTop: '10px' }}>
+              <label style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '4px' }}>
+                {lang === 'CZ' ? 'Nebo zadejte přímou URL adresu obrázku (např. /banners/slide1-mobile.webp):' : 'Or enter direct image URL (e.g. /banners/slide1-mobile.webp):'}
+              </label>
+              <input
+                type="text"
+                className="ctf-input"
+                style={{ fontSize: '12px', padding: '8px 12px' }}
+                value={formMobileUrl}
+                onChange={e => setFormMobileUrl(e.target.value)}
+                placeholder={lang === 'CZ' ? 'Zadejte URL nebo cestu k obrázku...' : 'Enter URL or image path...'}
+              />
+            </div>
+
+            {formMobileUrl && formMobileUrl.startsWith('data:image') && formMobileUrl.length > 150000 && (
+              <div style={{
+                marginTop: '8px',
+                padding: '10px 12px',
+                background: 'rgba(239, 68, 68, 0.08)',
+                border: '1px solid rgba(239, 68, 68, 0.15)',
+                borderRadius: '6px',
+                color: '#f87171',
+                fontSize: '11px',
+                lineHeight: '1.4'
+              }}>
+                <strong>{lang === 'CZ' ? 'Upozornění na výkon:' : 'Performance Warning:'}</strong>{' '}
+                {lang === 'CZ'
+                  ? 'Tento obrázek je uložen jako velký textový řetězec (Base64). Pro lepší rychlost načítání stránek doporučujeme nahrát soubor do Supabase Storage a vložit jeho veřejný odkaz výše.'
+                  : 'This image is stored as a large Base64 string. To prevent page load delays, we recommend uploading the image to Supabase Storage and pasting its public link above.'}
+              </div>
+            )}
           </div>
 
           {/* Cíl přesměrování */}
