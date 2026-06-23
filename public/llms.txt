@@ -1,0 +1,25 @@
+# Northvale TCG
+
+Northvale TCG je specializovaný e-shop a komunita pro sběratele a hráče karetních her (TCG) jako jsou Pokémon, Disney Lorcana, One Piece a Riftbound. Nabízíme sealed produkty, kusové karty (singles), ohodnocené karty (slaby) a služby profesionálního gradingování karet.
+
+## Hlavní sekce webu
+
+- [Úvodní stránka](https://northvaletcg.eu/) - Hlavní stránka e-shopu s aktuální nabídkou a akcemi.
+- [Sealed produkty](https://northvaletcg.eu/sealed-catalog) - Nabídka neotevřených produktů (booster boxy, ETB, balíčky).
+- [Kusové karty](https://northvaletcg.eu/singles-catalog) - Prodej samostatných kusových karet pro hráče i sběratele.
+- [Slaby (Graded karty)](https://northvaletcg.eu/slabs-catalog) - Profesionálně ohodnocené karty od společností PSA, Becket a dalších.
+- [Výkup karet (Buylist)](https://northvaletcg.eu/buylist) - Informace o výkupu vašich karet.
+- [Grading karet](https://northvaletcg.eu/grading) - Služby spojené s odesíláním karet k profesionálnímu ohodnocení.
+- [Návod ke gradingu](https://northvaletcg.eu/grading-guide) - Jak správně připravit a posoudit karty před gradingem.
+- [Komunita](https://northvaletcg.eu/community) - Turnaje, komunitní akce a informace pro hráče.
+- [Časté dotazy (FAQ)](https://northvaletcg.eu/faq) - Otázky a odpovědi ohledně dopravy, plateb a služeb.
+- [O nás](https://northvaletcg.eu/about) - Příběh a mise týmu Northvale TCG.
+- [Blog](https://northvaletcg.eu/blog) - Články, návody, tipy a novinky ze světa sběratelských karet.
+
+## Populární články na blogu
+
+- [Jak rozpoznat falešnou Pokémon kartu](https://northvaletcg.eu/blog/jak-rozpoznat-falesnou-pokemon-kartu) - Kompletní průvodce pro ověření pravosti karet.
+- [Jak začít s Pokémon kartami](https://northvaletcg.eu/blog/jak-zacit-s-pokemon-kartami) - Průvodce pro začínající sběratele a hráče.
+- [Kde koupit Pokémon karty v Česku](https://northvaletcg.eu/blog/kde-koupit-pokemon-karty-v-cesku) - Tipy na bezpečný nákup originálních karet.
+- [Příslušenství pro karty](https://northvaletcg.eu/blog/prislusenstvi-pro-karty) - Ochranné obaly, alba, toploadery a další doplňky.
+- [Výbava sběratele Pokémon karet](https://northvaletcg.eu/blog/vybava-sberatele-pokemon-karet) - Co vše potřebuje správný sběratel.
