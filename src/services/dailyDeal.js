@@ -12,13 +12,12 @@ export const DEFAULT_DEAL = {
   product_id: 'deal-of-the-day'
 };
 
-let cachedDeal = null;
+let cachedDeals = [];
 
 /**
- * Fetch the active Deal of the Day from Supabase.
- * Falls back to default mock deal if table query fails or returns empty.
+ * Fetch all daily deal slots from Supabase.
  */
-export async function fetchDailyDealFromDB() {
+export async function fetchDailyDealsFromDB() {
   try {
     if (!supabase.from) {
       throw new Error('Supabase client is not initialized');
@@ -26,58 +25,80 @@ export async function fetchDailyDealFromDB() {
 
     const { data, error } = await supabase
       .from('daily_deal')
-      .select('*')
-      .eq('id', 'active-deal')
-      .maybeSingle();
+      .select('*');
 
     if (error) {
       throw error;
     }
 
-    if (!data) {
-      // If table is empty, insert and return default deal
-      await saveDailyDealToDB(DEFAULT_DEAL);
-      return DEFAULT_DEAL;
+    if (!data || data.length === 0) {
+      // If table is empty, insert default active-deal
+      await saveDailyDealToDB(DEFAULT_DEAL, 'active-deal');
+      return [DEFAULT_DEAL];
     }
 
-    cachedDeal = data;
+    cachedDeals = data;
     return data;
   } catch (err) {
-    console.warn('Database daily_deal fetch failed, using fallback/cache:', err.message || err);
-    
-    // Check localStorage cache first
+    console.warn('Database daily_deal slots fetch failed, using cache/fallback:', err.message || err);
     try {
-      const cached = localStorage.getItem('northvale-cached-deal');
+      const cached = localStorage.getItem('northvale-cached-deals');
       if (cached) {
         return JSON.parse(cached);
       }
     } catch (e) {
-      console.warn('Failed to read cached daily_deal:', e);
+      console.warn('Failed to read cached daily_deals:', e);
     }
-    
-    return DEFAULT_DEAL;
+    return [DEFAULT_DEAL];
   }
 }
 
 /**
- * Save or update the Deal of the Day in Supabase.
+ * Get the currently active daily deal from a list of deals based on ends_at values.
+ * Returns the first deal that ends in the future.
  */
-export async function saveDailyDealToDB(deal) {
+export function getActiveDailyDeal(allDeals) {
+  if (!allDeals || allDeals.length === 0) return null;
+  
+  // Sort deals by ends_at ascending
+  const sortedDeals = [...allDeals].sort((a, b) => new Date(a.ends_at) - new Date(b.ends_at));
+  
+  // Find first deal that expires in the future
+  const now = Date.now();
+  const active = sortedDeals.find(d => new Date(d.ends_at).getTime() > now);
+  
+  return active || null;
+}
+
+/**
+ * Fetch the active daily deal (or fallback to DEFAULT_DEAL if none are in the future).
+ * This function is used by the storefront so it doesn't need to know about slots.
+ */
+export async function fetchDailyDealFromDB() {
+  const deals = await fetchDailyDealsFromDB();
+  const active = getActiveDailyDeal(deals);
+  return active || DEFAULT_DEAL;
+}
+
+/**
+ * Save or update a specific daily deal slot.
+ */
+export async function saveDailyDealToDB(deal, slotId = 'active-deal') {
   try {
     if (!supabase.from) {
       throw new Error('Supabase client is not initialized');
     }
 
-    // Map fields
     const payload = {
-      id: 'active-deal',
+      id: slotId,
       name: deal.name,
       image_url: deal.image_url || null,
       stock: deal.stock !== undefined ? Number(deal.stock) : 0,
       price: deal.price !== undefined ? Number(deal.price) : 0,
       original_price: deal.original_price !== undefined ? Number(deal.original_price) : null,
       ends_at: deal.ends_at,
-      product_id: deal.product_id || null
+      product_id: deal.product_id || null,
+      expiry_notified: deal.expiry_notified ?? false
     };
 
     const { data, error } = await supabase
@@ -90,27 +111,46 @@ export async function saveDailyDealToDB(deal) {
       throw error;
     }
 
-    cachedDeal = data;
+    // Refresh cachedDeals
+    await fetchDailyDealsFromDB();
+    
     // Update local cache
     try {
-      localStorage.setItem('northvale-cached-deal', JSON.stringify(data));
+      localStorage.setItem('northvale-cached-deals', JSON.stringify(cachedDeals));
+      // Also cache active deal for backwards compatibility
+      const active = getActiveDailyDeal(cachedDeals);
+      if (active) {
+        localStorage.setItem('northvale-cached-deal', JSON.stringify(active));
+      }
     } catch (e) {
-      console.warn('Failed to cache daily_deal locally:', e);
+      console.warn('Failed to cache daily_deals locally:', e);
     }
 
     return { data, error: null };
   } catch (err) {
     console.error('Failed to save daily_deal to Supabase:', err);
 
-    // Fallback: save to localStorage cache to let it work client-side
+    // Fallback: update local list
     const fallbackDeal = {
       ...deal,
-      id: 'active-deal'
+      id: slotId
     };
+    
+    const existingIndex = cachedDeals.findIndex(d => d.id === slotId);
+    if (existingIndex >= 0) {
+      cachedDeals[existingIndex] = fallbackDeal;
+    } else {
+      cachedDeals.push(fallbackDeal);
+    }
+
     try {
-      localStorage.setItem('northvale-cached-deal', JSON.stringify(fallbackDeal));
+      localStorage.setItem('northvale-cached-deals', JSON.stringify(cachedDeals));
+      const active = getActiveDailyDeal(cachedDeals);
+      if (active) {
+        localStorage.setItem('northvale-cached-deal', JSON.stringify(active));
+      }
     } catch (e) {
-      console.warn('Failed to cache daily_deal locally during fallback:', e);
+      console.warn('Failed to cache daily_deals locally during fallback:', e);
     }
 
     return {

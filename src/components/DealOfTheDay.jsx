@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { fetchDailyDealFromDB } from '../services/dailyDeal';
 import { fetchProductByIdFromDB } from '../services/products';
@@ -50,25 +50,26 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
     };
   }, [activeDeal.product_id]);
 
+  const loadDailyDeal = useCallback(async (active = true) => {
+    const dbDeal = await fetchDailyDealFromDB();
+    if (active && dbDeal) {
+      setDeal(dbDeal);
+      try {
+        localStorage.setItem('northvale-cached-deal', JSON.stringify(dbDeal));
+      } catch (e) {
+        console.warn('Failed to cache daily deal:', e);
+      }
+    }
+  }, []);
+
   // Load daily deal from Supabase on mount
   useEffect(() => {
     let active = true;
-    async function loadDailyDeal() {
-      const dbDeal = await fetchDailyDealFromDB();
-      if (active && dbDeal) {
-        setDeal(dbDeal);
-        try {
-          localStorage.setItem('northvale-cached-deal', JSON.stringify(dbDeal));
-        } catch (e) {
-          console.warn('Failed to cache daily deal:', e);
-        }
-      }
-    }
-    loadDailyDeal();
+    loadDailyDeal(active);
     return () => {
       active = false;
     };
-  }, []);
+  }, [loadDailyDeal]);
 
   // Find linked product in catalog
   const catalogProduct = dealProduct;
@@ -98,6 +99,7 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
 
       if (diff <= 0) {
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        loadDailyDeal();
         return;
       }
 
@@ -113,7 +115,7 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [activeDeal.ends_at]);
+  }, [activeDeal.ends_at, loadDailyDeal]);
 
   const handleCardClick = () => {
     if (!catalogProduct) return;

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from '../../context/LanguageContext';
 import { fetchSlidesFromDB, saveSlideToDB, deleteSlideFromDB } from '../../services/slides';
-import { fetchDailyDealFromDB, saveDailyDealToDB } from '../../services/dailyDeal';
+import { fetchDailyDealFromDB, saveDailyDealToDB, fetchDailyDealsFromDB } from '../../services/dailyDeal';
 import { fetchProductsFromDB } from '../../services/products';
 import { fetchHomepageSectionsFromDB, saveHomepageSectionToDB } from '../../services/homepageSections';
 
@@ -33,6 +33,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
   const [dealLoading, setDealLoading] = useState(true);
   const [dealSaving, setDealSaving] = useState(false);
   const [dealProductsList, setDealProductsList] = useState([]);
+  const [selectedSlotId, setSelectedSlotId] = useState('active-deal');
   
   const [dealName, setDealName] = useState('');
   const [dealProductId, setDealProductId] = useState('');
@@ -492,25 +493,63 @@ export default function HomepageTab({ showToast, onEditProduct }) {
       // Load sections with products preloaded so defaults can be computed
       await loadSections(allProducts || []);
 
-      const dbDeal = await fetchDailyDealFromDB();
-      if (dbDeal) {
-        setDealName(dbDeal.name || '');
-        setDealProductId(dbDeal.product_id || '');
-        setDealStock(String(dbDeal.stock || 0));
-        setDealPrice(String(dbDeal.price || 0));
-        setDealOriginalPrice(dbDeal.original_price ? String(dbDeal.original_price) : '');
-        setDealImageUrl(dbDeal.image_url || '');
+      await handleSlotChange(selectedSlotId);
+    } catch (err) {
+      console.error('Failed to load daily deal in admin:', err);
+      setDealLoading(false);
+    }
+  };
 
-        const endsAt = new Date(dbDeal.ends_at).getTime();
-        const diff = Math.max(0, endsAt - Date.now());
-        const totalSecs = Math.floor(diff / 1000);
+  const handleSlotChange = async (slotId) => {
+    setSelectedSlotId(slotId);
+    setDealLoading(true);
+    try {
+      const dealsList = await fetchDailyDealsFromDB();
+      const slotDeal = dealsList.find(d => d.id === slotId);
+
+      if (slotDeal) {
+        setDealName(slotDeal.name || '');
+        setDealProductId(slotDeal.product_id || '');
+        setDealStock(String(slotDeal.stock || 0));
+        setDealPrice(String(slotDeal.price || 0));
+        setDealOriginalPrice(slotDeal.original_price ? String(slotDeal.original_price) : '');
+        setDealImageUrl(slotDeal.image_url || '');
+
+        let durationMs = 0;
+        if (slotId === 'active-deal') {
+          const endsAt = new Date(slotDeal.ends_at).getTime();
+          durationMs = Math.max(0, endsAt - Date.now());
+        } else if (slotId === 'deal-2') {
+          const deal1 = dealsList.find(d => d.id === 'active-deal');
+          const parentEndsAt = deal1 ? new Date(deal1.ends_at).getTime() : Date.now();
+          durationMs = Math.max(0, new Date(slotDeal.ends_at).getTime() - parentEndsAt);
+        } else { // deal-3
+          const deal2 = dealsList.find(d => d.id === 'deal-2');
+          const deal1 = dealsList.find(d => d.id === 'active-deal');
+          const parentEndsAt = deal2 ? new Date(deal2.ends_at).getTime() : (deal1 ? new Date(deal1.ends_at).getTime() : Date.now());
+          durationMs = Math.max(0, new Date(slotDeal.ends_at).getTime() - parentEndsAt);
+        }
+
+        const totalSecs = Math.floor(durationMs / 1000);
         setDealDays(String(Math.floor(totalSecs / (3600 * 24))));
         setDealHours(String(Math.floor((totalSecs % (3600 * 24)) / 3600)));
         setDealMinutes(String(Math.floor((totalSecs % 3600) / 60)));
         setDealSeconds(String(totalSecs % 60));
+      } else {
+        // Clear forms if slot is new/empty
+        setDealName('');
+        setDealProductId('');
+        setDealStock('0');
+        setDealPrice('0');
+        setDealOriginalPrice('');
+        setDealImageUrl('');
+        setDealDays('0');
+        setDealHours('24');
+        setDealMinutes('0');
+        setDealSeconds('0');
       }
     } catch (err) {
-      console.error('Failed to load daily deal in admin:', err);
+      console.error('Failed to switch daily deal slot:', err);
     }
     setDealLoading(false);
   };
@@ -541,30 +580,88 @@ export default function HomepageTab({ showToast, onEditProduct }) {
     const hoursOffset = Number(dealHours || 0) * 3600 * 1000;
     const minsOffset = Number(dealMinutes || 0) * 60 * 1000;
     const secsOffset = Number(dealSeconds || 0) * 1000;
+    const durationMs = daysOffset + hoursOffset + minsOffset + secsOffset;
 
-    const endsAtIso = new Date(Date.now() + daysOffset + hoursOffset + minsOffset + secsOffset).toISOString();
+    try {
+      const dealsList = await fetchDailyDealsFromDB();
+      const deal1 = dealsList.find(d => d.id === 'active-deal');
+      const deal2 = dealsList.find(d => d.id === 'deal-2');
+      const deal3 = dealsList.find(d => d.id === 'deal-3');
 
-    const payload = {
-      name: dealName,
-      product_id: dealProductId || null,
-      stock: Number(dealStock || 0),
-      price: Number(dealPrice || 0),
-      original_price: dealOriginalPrice ? Number(dealOriginalPrice) : null,
-      image_url: dealImageUrl || null,
-      ends_at: endsAtIso
-    };
+      let endsAtIso = '';
+      if (selectedSlotId === 'active-deal') {
+        endsAtIso = new Date(Date.now() + durationMs).toISOString();
+      } else if (selectedSlotId === 'deal-2') {
+        const parentEndsAt = deal1 ? new Date(deal1.ends_at).getTime() : Date.now();
+        endsAtIso = new Date(parentEndsAt + durationMs).toISOString();
+      } else { // deal-3
+        const parentEndsAt = deal2 ? new Date(deal2.ends_at).getTime() : (deal1 ? new Date(deal1.ends_at).getTime() : Date.now());
+        endsAtIso = new Date(parentEndsAt + durationMs).toISOString();
+      }
 
-    const { data, error, isMockFallback } = await saveDailyDealToDB(payload);
+      const payload = {
+        name: dealName,
+        product_id: dealProductId || null,
+        stock: Number(dealStock || 0),
+        price: Number(dealPrice || 0),
+        original_price: dealOriginalPrice ? Number(dealOriginalPrice) : null,
+        image_url: dealImageUrl || null,
+        ends_at: endsAtIso,
+        expiry_notified: false
+      };
 
-    if (error) {
-      showToast(lang === 'CZ' ? 'Chyba při ukládání akce dne!' : 'Error saving Deal of the Day!', 'error');
-    } else {
+      const { error, isMockFallback } = await saveDailyDealToDB(payload, selectedSlotId);
+
+      if (error) {
+        throw error;
+      }
+
+      const newT_saved = new Date(endsAtIso).getTime();
+
+      // Cascade shifts
+      if (selectedSlotId === 'active-deal') {
+        if (deal2 && deal1) {
+          const oldT1 = new Date(deal1.ends_at).getTime();
+          const oldT2 = new Date(deal2.ends_at).getTime();
+          const durationSlot2 = Math.max(0, oldT2 - oldT1);
+          const newT2 = newT_saved + durationSlot2;
+          const newT2Iso = new Date(newT2).toISOString();
+          
+          await saveDailyDealToDB({ ...deal2, ends_at: newT2Iso }, 'deal-2');
+
+          if (deal3) {
+            const oldT3 = new Date(deal3.ends_at).getTime();
+            const durationSlot3 = Math.max(0, oldT3 - oldT2);
+            const newT3 = newT2 + durationSlot3;
+            const newT3Iso = new Date(newT3).toISOString();
+
+            await saveDailyDealToDB({ ...deal3, ends_at: newT3Iso }, 'deal-3');
+          }
+        }
+      } else if (selectedSlotId === 'deal-2') {
+        if (deal3 && deal2) {
+          const oldT2 = new Date(deal2.ends_at).getTime();
+          const oldT3 = new Date(deal3.ends_at).getTime();
+          const durationSlot3 = Math.max(0, oldT3 - oldT2);
+          const newT3 = newT_saved + durationSlot3;
+          const newT3Iso = new Date(newT3).toISOString();
+
+          await saveDailyDealToDB({ ...deal3, ends_at: newT3Iso }, 'deal-3');
+        }
+      }
+
       showToast(
         isMockFallback
           ? (lang === 'CZ' ? 'Akce dne uložena pouze lokálně (Chyba DB)!' : 'Daily deal saved locally only (DB error)!')
           : (lang === 'CZ' ? 'Akce dne úspěšně uložena!' : 'Deal of the Day successfully saved!'),
         isMockFallback ? 'warning' : 'success'
       );
+
+      // Reload form states
+      await loadDailyDeal();
+    } catch (err) {
+      console.error('Failed to save daily deal:', err);
+      showToast(lang === 'CZ' ? 'Chyba při ukládání akce dne!' : 'Error saving Deal of the Day!', 'error');
     }
     setDealSaving(false);
   };
@@ -1387,6 +1484,30 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                 : 'Here you can configure the title, pricing, stock count, picture and timer for the active Daily Deal. Changes apply storefront-wide.'}
             </p>
 
+            {/* Slot selector dropdown */}
+            <div className="ctf-field" style={{ marginBottom: '24px', maxWidth: '320px' }}>
+              <label className="ctf-label" style={{ fontWeight: '700' }}>
+                {lang === 'CZ' ? 'Vyberte slot Akce dne:' : 'Select Daily Deal Slot:'}
+              </label>
+              <div className="ctf-select">
+                <select 
+                  value={selectedSlotId}
+                  onChange={(e) => handleSlotChange(e.target.value)}
+                >
+                  <option value="active-deal">
+                    {lang === 'CZ' ? '1. Aktivní akce dne (Hlavní)' : '1. Active Deal of the Day (Primary)'}
+                  </option>
+                  <option value="deal-2">
+                    {lang === 'CZ' ? '2. Následující akce dne' : '2. Next Scheduled Deal'}
+                  </option>
+                  <option value="deal-3">
+                    {lang === 'CZ' ? '3. Následující akce dne 2' : '3. Second Next Scheduled Deal'}
+                  </option>
+                </select>
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+            </div>
+
         {dealLoading ? (
           <p className="ctf-col-sub">{lang === 'CZ' ? 'Načítání konfigurace akce...' : 'Loading deal configuration...'}</p>
         ) : (
@@ -1558,8 +1679,12 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                 </div>
                 <p className="ctf-hint">
                   {lang === 'CZ'
-                    ? 'Zadejte čas zbývající do konce akce. Odpočet se po uložení začne odpočítávat v reálném čase.'
-                    : 'Enter the remaining duration for the deal. The live timer will compute the deadline relative to saving moment.'}
+                    ? selectedSlotId === 'active-deal'
+                      ? 'Zadejte čas zbývající do konce akce. Odpočet se po uložení začne odpočítávat v reálném čase.'
+                      : 'Zadejte dobu trvání této akce. Spustí se automaticky ihned po skončení předchozí akce.'
+                    : selectedSlotId === 'active-deal'
+                      ? 'Enter the remaining duration for the deal. The live timer will compute the deadline relative to saving moment.'
+                      : 'Enter the duration for this deal. It will start automatically after the previous scheduled deal ends.'}
                 </p>
               </div>
 
