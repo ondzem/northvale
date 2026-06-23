@@ -43,9 +43,15 @@ async function getProducts(supabaseUrl, supabaseAnonKey) {
 
   try {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data, error } = await supabase
+    const fetchPromise = supabase
       .from('products')
       .select('id, type');
+    
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Database query timed out')), 3000)
+    );
+
+    const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
     if (error) {
       throw error;

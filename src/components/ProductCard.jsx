@@ -31,6 +31,8 @@ const ProductImage = ({ src, alt, className = '' }) => {
       ref={imgRef}
       src={src}
       alt={alt || 'Northvale TCG produkt'}
+      width="240"
+      height="336"
       onLoad={handleLoad}
       className={`${className} ${fitClass} ${loaded ? 'loaded' : ''}`}
     />

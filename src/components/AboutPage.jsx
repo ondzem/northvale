@@ -53,6 +53,8 @@ export default function AboutPage({ setActivePage }) {
             src="/o nas northvale.webp" 
             alt={lang === 'CZ' ? 'Tým Northvale' : 'Northvale Team'} 
             className="abf-image-banner" 
+            width="1200"
+            height="480"
           />
         </div>
 

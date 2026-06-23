@@ -672,6 +672,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   <img 
                     src={activeDeal.image_url || '/logo s popisem.webp'} 
                     alt={activeDeal.name || 'Akční nabídka - Northvale TCG'} 
+                    width="185"
+                    height="185"
                     style={{ 
                       maxHeight: '100%', 
                       maxWidth: '100%', 
@@ -763,6 +765,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   <img 
                     src="/shopping-cart.png" 
                     alt="" 
+                    width="14"
+                    height="14"
                     style={{ 
                       width: '14px', 
                       height: '14px', 
@@ -971,6 +975,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                       <img 
                         src={activeDeal.image_url || '/logo s popisem.webp'} 
                         alt={activeDeal.name || 'Akční nabídka - Northvale TCG'} 
+                        width="185"
+                        height="185"
                         style={{ 
                           maxHeight: '100%', 
                           maxWidth: '100%', 
@@ -1059,6 +1065,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                       <img 
                         src="/shopping-cart.png" 
                         alt="" 
+                        width="14"
+                        height="14"
                         style={{ 
                           width: '14px', 
                           height: '14px', 
@@ -1129,6 +1137,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 <img 
                   src={item.icon} 
                   alt={item.title || 'Northvale TCG'} 
+                  width="36"
+                  height="36"
                   style={styles.uspIcon} 
                 />
                 <div style={styles.uspText}>
@@ -1150,28 +1160,28 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       ) : (
         <section style={styles.uspBar} className="container">
           <div style={{ ...styles.uspBox, borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            <img src="/truck-moving.png" alt={lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'} style={styles.uspIcon} />
+            <img src="/truck-moving.png" alt={lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'} width="36" height="36" style={styles.uspIcon} />
             <div style={styles.uspText}>
               <h4 style={styles.uspTitle}>{lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'}</h4>
               <p style={styles.uspDesc}>{lang === 'CZ' ? 'při objednávce nad 1 000 Kč' : 'on orders over 1,000 Kč'}</p>
             </div>
           </div>
           <div style={{ ...styles.uspBox, borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            <img src="/tachometer-fast.png" alt={lang === 'CZ' ? 'Rychlost doručení' : 'Fast Delivery'} style={styles.uspIcon} />
+            <img src="/tachometer-fast.png" alt={lang === 'CZ' ? 'Rychlost doručení' : 'Fast Delivery'} width="36" height="36" style={styles.uspIcon} />
             <div style={styles.uspText}>
               <h4 style={styles.uspTitle}>{lang === 'CZ' ? 'Rychlost doručení' : 'Fast Shipping'}</h4>
               <p style={styles.uspDesc}>{lang === 'CZ' ? 'Odesíláme do 24 hodin' : 'Dispatched within 24 hours'}</p>
             </div>
           </div>
           <div style={{ ...styles.uspBox, borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            <img src="/badget-check-alt.png" alt={lang === 'CZ' ? '100% Originální' : '100% Authentic'} style={styles.uspIcon} />
+            <img src="/badget-check-alt.png" alt={lang === 'CZ' ? '100% Originální' : '100% Authentic'} width="36" height="36" style={styles.uspIcon} />
             <div style={styles.uspText}>
               <h4 style={styles.uspTitle}>{lang === 'CZ' ? '100% Originální' : '100% Authentic'}</h4>
               <p style={styles.uspDesc}>{lang === 'CZ' ? 'Pouze od ověřených distributorů' : 'Only from verified distributors'}</p>
             </div>
           </div>
           <div style={styles.uspBox}>
-            <img src="/credit-card.png" alt={lang === 'CZ' ? 'Bezpečná platba' : 'Secure Payment'} style={styles.uspIcon} />
+            <img src="/credit-card.png" alt={lang === 'CZ' ? 'Bezpečná platba' : 'Secure Payment'} width="36" height="36" style={styles.uspIcon} />
             <div style={styles.uspText}>
               <h4 style={styles.uspTitle}>{lang === 'CZ' ? 'Bezpečná platba' : 'Secure Payment'}</h4>
               <p style={styles.uspDesc}>{lang === 'CZ' ? 'Karta, bankovní převod, dobírka' : 'Cards, bank transfer, COD'}</p>
@@ -1275,6 +1285,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               <img 
                 src="/o nas northvale.webp" 
                 alt="O nás - Northvale" 
+                width="1254"
+                height="1254"
                 style={{
                   width: '100%',
                   height: '100%',
@@ -1292,26 +1304,26 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         <h2 style={styles.sectionHeading} className="section-title">{lang === 'CZ' ? 'Oblíbené kategorie' : 'Popular Categories'}</h2>
         <div className="category-tiles-grid">
           <a href="/sealed-catalog?game=Pok%C3%A9mon" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Pokémon' }); setActivePage('sealed-catalog'); } }}>
-            <img src="/Pokemon.webp" alt="Pokémon" className="category-tile-img" />
+            <img src="/Pokemon.webp" alt="Pokémon" className="category-tile-img" width="3376" height="1248" />
           </a>
           <a href="/sealed-catalog?game=Lorcana" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Lorcana' }); setActivePage('sealed-catalog'); } }}>
-            <img src="/lorcana logo.webp" alt="Disney Lorcana" className="category-tile-img" />
+            <img src="/lorcana logo.webp" alt="Disney Lorcana" className="category-tile-img" width="3376" height="1248" />
           </a>
           <a href="/sealed-catalog?game=One+Piece" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'One Piece' }); setActivePage('sealed-catalog'); } }}>
-            <img src="/One piece.webp" alt="One Piece" className="category-tile-img" />
+            <img src="/One piece.webp" alt="One Piece" className="category-tile-img" width="3376" height="1248" />
           </a>
           <a href="/sealed-catalog?game=Riftbound" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Riftbound' }); setActivePage('sealed-catalog'); } }}>
-            <img src="/Riftbound.webp" alt="Riftbound" className="category-tile-img" />
+            <img src="/Riftbound.webp" alt="Riftbound" className="category-tile-img" width="1233" height="456" />
           </a>
           <a href="/sealed-catalog?game=Accessories" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); } }}>
-            <img src="/Prislusentstvi.webp" alt={lang === 'CZ' ? 'Příslušenství' : 'Accessories'} className="category-tile-img" />
+            <img src="/Prislusentstvi.webp" alt={lang === 'CZ' ? 'Příslušenství' : 'Accessories'} className="category-tile-img" width="3376" height="1248" />
           </a>
           <a href="/sealed-catalog?game=Acrylics" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Acrylics' }); setActivePage('sealed-catalog'); } }}>
-            <img src="/Akryly.webp" alt="Akryly" className="category-tile-img" />
+            <img src="/Akryly.webp" alt="Akryly" className="category-tile-img" width="2800" height="1035" />
           </a>
           {FEATURE_FLAGS.showSlabs && (
             <a href="/slabs-catalog" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({}); setActivePage('slabs-catalog'); } }}>
-              <img src="/Ohodnoceni karet.webp" alt={lang === 'CZ' ? 'Ohodnocené karty' : 'Graded Cards'} className="category-tile-img" />
+              <img src="/Ohodnoceni karet.webp" alt={lang === 'CZ' ? 'Ohodnocené karty' : 'Graded Cards'} className="category-tile-img" width="3376" height="1248" />
             </a>
           )}
         </div>
@@ -1443,7 +1455,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 <button className="btn btn-primary" onClick={() => { setFilters({}); setActivePage('grading'); }}>{lang === 'CZ' ? 'Chci ohodnotit kartu' : 'Submit Cards for Grading'}</button>
               </div>
               <div className="grading-banner-img-wrapper">
-                <img src="/grading sekce.webp" alt="Grading karet" className="grading-banner-image" />
+                <img src="/grading sekce.webp" alt="Grading karet" className="grading-banner-image" width="1672" height="941" />
               </div>
             </div>
           </section>

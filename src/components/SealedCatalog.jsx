@@ -164,7 +164,7 @@ export function getDisplaySubcategories(game, type, categories, lang) {
     return [{
       id: 'all',
       name: game ? `${game} TCG` : 'Všechny',
-      icon: <img src={getGameFallbackLogo(game)} alt="" className="subcategory-img" />
+      icon: <img src={getGameFallbackLogo(game)} alt="" className="subcategory-img" width="44" height="44" />
     }];
   }
   
@@ -179,32 +179,32 @@ export function getDisplaySubcategories(game, type, categories, lang) {
   if (children.length === 0 && type === 'single') {
     if (game === 'Pokémon') {
       return [
-        { id: 'all', name: 'Pokémon TCG', icon: <img src="/Pokemon.webp" alt="" className="subcategory-img" /> },
-        { id: 'Alternate Art', name: 'Alternate Art', icon: <img src="https://images.pokemontcg.io/swsh11/186.png" alt="" className="subcategory-img" /> },
-        { id: 'Special Illustration Rare', name: 'Special Illustration', icon: <img src="https://images.pokemontcg.io/sv3/223.png" alt="" className="subcategory-img" /> },
-        { id: 'Secret Rare', name: 'Secret Rare', icon: <img src="https://images.pokemontcg.io/swsh7/218.png" alt="" className="subcategory-img" /> },
-        { id: 'Rainbow Rare', name: 'Rainbow Rare', icon: <img src="https://images.pokemontcg.io/swsh4/188.png" alt="" className="subcategory-img" /> },
+        { id: 'all', name: 'Pokémon TCG', icon: <img src="/Pokemon.webp" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Alternate Art', name: 'Alternate Art', icon: <img src="https://images.pokemontcg.io/swsh11/186.png" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Special Illustration Rare', name: 'Special Illustration', icon: <img src="https://images.pokemontcg.io/sv3/223.png" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Secret Rare', name: 'Secret Rare', icon: <img src="https://images.pokemontcg.io/swsh7/218.png" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Rainbow Rare', name: 'Rainbow Rare', icon: <img src="https://images.pokemontcg.io/swsh4/188.png" alt="" className="subcategory-img" width="44" height="44" /> },
       ];
     } else if (game === 'Lorcana') {
       return [
-        { id: 'all', name: 'Lorcana TCG', icon: <img src="/lorcana logo.webp" alt="" className="subcategory-img" /> },
-        { id: 'Common', name: 'Common', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-        { id: 'Uncommon', name: 'Uncommon', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-        { id: 'Rare', name: 'Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-        { id: 'Super Rare', name: 'Super Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-        { id: 'Legendary', name: 'Legendary', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-        { id: 'Enchanted', name: 'Enchanted', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+        { id: 'all', name: 'Lorcana TCG', icon: <img src="/lorcana logo.webp" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Common', name: 'Common', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Uncommon', name: 'Uncommon', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Rare', name: 'Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Super Rare', name: 'Super Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Legendary', name: 'Legendary', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Enchanted', name: 'Enchanted', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/508930_in_1000x1000.jpg" alt="" className="subcategory-img" width="44" height="44" /> },
       ];
     } else if (game === 'One Piece') {
       return [
-        { id: 'all', name: 'One Piece TCG', icon: <img src="/One piece.webp" alt="" className="subcategory-img" /> },
-        { id: 'Common', name: 'Common', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-        { id: 'Uncommon', name: 'Uncommon', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-        { id: 'Rare', name: 'Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-        { id: 'Super Rare', name: 'Super Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-        { id: 'Secret Rare', name: 'Secret Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-        { id: 'Leader', name: 'Leader', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
-        { id: 'Alternate Art', name: 'Alternate Art', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" /> },
+        { id: 'all', name: 'One Piece TCG', icon: <img src="/One piece.webp" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Common', name: 'Common', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Uncommon', name: 'Uncommon', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Rare', name: 'Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Super Rare', name: 'Super Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Secret Rare', name: 'Secret Rare', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Leader', name: 'Leader', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" width="44" height="44" /> },
+        { id: 'Alternate Art', name: 'Alternate Art', icon: <img src="https://tcgplayer-cdn.tcgplayer.com/product/527633_in_1000x1000.jpg" alt="" className="subcategory-img" width="44" height="44" /> },
       ];
     }
   }
@@ -213,7 +213,7 @@ export function getDisplaySubcategories(game, type, categories, lang) {
     {
       id: 'all',
       name: lang === 'CZ' ? root.name_cz : root.name_en,
-      icon: <img src={root.image_url || getGameFallbackLogo(game)} alt="" className="subcategory-img" />
+      icon: <img src={root.image_url || getGameFallbackLogo(game)} alt="" className="subcategory-img" width="44" height="44" />
     }
   ];
   
@@ -221,7 +221,7 @@ export function getDisplaySubcategories(game, type, categories, lang) {
     formatted.push({
       id: child.id,
       name: lang === 'CZ' ? child.name_cz : child.name_en,
-      icon: <img src={child.image_url || getGameFallbackLogo(game)} alt="" className="subcategory-img" />
+      icon: <img src={child.image_url || getGameFallbackLogo(game)} alt="" className="subcategory-img" width="44" height="44" />
     });
   });
   
@@ -721,7 +721,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       formatted.push({
         id: child.id,
         name: lang === 'CZ' ? child.name_cz : child.name_en,
-        icon: child.image_url ? <img src={child.image_url} alt="" className="subcategory-img" style={{ width: '18px', height: '18px', borderRadius: '4px', objectFit: 'cover' }} /> : '📁'
+        icon: child.image_url ? <img src={child.image_url} alt="" className="subcategory-img" width="18" height="18" style={{ width: '18px', height: '18px', borderRadius: '4px', objectFit: 'cover' }} /> : '📁'
       });
     });
     return formatted;

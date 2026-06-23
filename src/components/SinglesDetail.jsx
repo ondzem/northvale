@@ -1012,6 +1012,8 @@ export default function SinglesDetail({ productId, products, addToCart, setSelec
               <img 
                 src={activeImage} 
                 alt={product.name || 'Northvale TCG produkt'} 
+                width="400"
+                height="420"
               />
             </div>
 

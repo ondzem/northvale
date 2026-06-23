@@ -217,11 +217,11 @@ export default function SlabsCatalog({ products, addToCart, setSelectedProductId
   });
 
   const subcategories = [
-    { id: 'all', name: lang === 'CZ' ? 'Všechny Slabs' : 'All Slabs', icon: <img src="/Ohodnoceni karet.webp" alt="" className="subcategory-img" /> },
-    { id: 'PSA', name: 'PSA Slabs', icon: <img src="https://images.pokemontcg.io/sv3/223.png" alt="" className="subcategory-img" /> },
-    { id: 'Beckett', name: 'Beckett Slabs', icon: <img src="https://images.pokemontcg.io/swsh4/188.png" alt="" className="subcategory-img" /> },
-    { id: 'TAG', name: 'TAG Slabs', icon: <img src="https://images.pokemontcg.io/swsh7/215.png" alt="" className="subcategory-img" /> },
-    { id: 'CGC', name: 'CGC Slabs', icon: <img src="https://images.pokemontcg.io/swsh11/186.png" alt="" className="subcategory-img" /> }
+    { id: 'all', name: lang === 'CZ' ? 'Všechny Slabs' : 'All Slabs', icon: <img src="/Ohodnoceni karet.webp" alt="" className="subcategory-img" width="44" height="44" /> },
+    { id: 'PSA', name: 'PSA Slabs', icon: <img src="https://images.pokemontcg.io/sv3/223.png" alt="" className="subcategory-img" width="44" height="44" /> },
+    { id: 'Beckett', name: 'Beckett Slabs', icon: <img src="https://images.pokemontcg.io/swsh4/188.png" alt="" className="subcategory-img" width="44" height="44" /> },
+    { id: 'TAG', name: 'TAG Slabs', icon: <img src="https://images.pokemontcg.io/swsh7/215.png" alt="" className="subcategory-img" width="44" height="44" /> },
+    { id: 'CGC', name: 'CGC Slabs', icon: <img src="https://images.pokemontcg.io/swsh11/186.png" alt="" className="subcategory-img" width="44" height="44" /> }
   ];
 
   const getSubSubcatName = (cat, subcat) => {

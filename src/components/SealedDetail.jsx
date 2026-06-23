@@ -962,6 +962,8 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
               <img 
                 src={activeImage} 
                 alt={product.name || 'Northvale TCG produkt'} 
+                width="400"
+                height="420"
               />
             </div>
 

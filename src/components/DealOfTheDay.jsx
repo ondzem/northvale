@@ -227,6 +227,8 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
         <img 
           src={activeDeal.image_url || '/logo s popisem.webp'} 
           alt={activeDeal.name || 'Akční nabídka - Northvale TCG'} 
+          width="145"
+          height="145"
           style={{ 
             maxHeight: '100%', 
             maxWidth: '100%', 
@@ -317,6 +319,8 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
           <img 
             src="/shopping-cart.png" 
             alt="" 
+            width="14"
+            height="14"
             style={{ 
               width: '14px', 
               height: '14px', 

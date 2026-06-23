@@ -86,6 +86,8 @@ export default function Footer({ setActivePage, activePage }) {
             src="/logo s popisem.webp" 
             alt="NORTHVALE TCG" 
             className="footer-logo" 
+            width="168"
+            height="84"
             onClick={() => setActivePage('home')} 
           />
           <p className="footer-desc">
@@ -96,13 +98,13 @@ export default function Footer({ setActivePage, activePage }) {
           </p>
           <div className="footer-socials">
             <a href="https://www.instagram.com/northvaletcg/" target="_blank" rel="noopener noreferrer" className="footer-social-link">
-              <img src="/instagram.png" alt="Instagram" className="footer-social-icon" />
+              <img src="/instagram.png" alt="Instagram" className="footer-social-icon" width="16" height="16" />
             </a>
             <a href="https://www.tiktok.com/@northvaletcg" target="_blank" rel="noopener noreferrer" className="footer-social-link">
-              <img src="/tik-tok.png" alt="TikTok" className="footer-social-icon" />
+              <img src="/tik-tok.png" alt="TikTok" className="footer-social-icon" width="16" height="16" />
             </a>
             <a href="https://www.youtube.com/@northvaletcg" target="_blank" rel="noopener noreferrer" className="footer-social-link">
-              <img src="/youtube.png" alt="YouTube" className="footer-social-icon" />
+              <img src="/youtube.png" alt="YouTube" className="footer-social-icon" width="16" height="16" />
             </a>
           </div>
         </div>
@@ -197,14 +199,14 @@ export default function Footer({ setActivePage, activePage }) {
           justifyContent: 'center',
           alignItems: 'center'
         }}>
-          <img src="/comgate-logos.png" alt={lang === 'CZ' ? 'Platební metody' : 'Payment Methods'} style={{ maxHeight: '35px', opacity: 0.8 }} />
+          <img src="/comgate-logos.png" alt={lang === 'CZ' ? 'Platební metody' : 'Payment Methods'} width="272" height="35" style={{ maxHeight: '35px', opacity: 0.8 }} />
         </div>
       </div>
 
       <div className="footer-bottom">
         <div className="container footer-bottom-content">
           <span>&copy; {new Date().getFullYear()} NORTHVALE s.r.o.</span>
-          <img src="/comgate-logos.png" alt={lang === 'CZ' ? 'Platební metody' : 'Payment Methods'} className="footer-payment-desktop" style={{ maxHeight: '28px', opacity: 0.8 }} />
+          <img src="/comgate-logos.png" alt={lang === 'CZ' ? 'Platební metody' : 'Payment Methods'} className="footer-payment-desktop" width="218" height="28" style={{ maxHeight: '28px', opacity: 0.8 }} />
           <span>{lang === 'CZ' ? 'Vytvořil' : 'Created by'} <a href="https://ozeman.cz" target="_blank" rel="noopener noreferrer" className="credits-link">ozeman.cz</a></span>
         </div>
       </div>

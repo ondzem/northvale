@@ -177,6 +177,8 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
                         <img 
                           src={item.product?.image || item.image || '/Akce - NORTHVALE.webp'} 
                           alt={item.name || 'Northvale TCG produkt'} 
+                          width="72"
+                          height="100"
                         />
                       </div>
 

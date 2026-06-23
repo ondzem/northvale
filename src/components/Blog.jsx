@@ -150,7 +150,7 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
         {/* Premium full-width hero image with auto height */}
         <div className="are-hero">
           <div className="card-art-hero">
-            <img src={activeArticle.image} alt={activeArticle.title || 'Northvale TCG blog'} className="card-art-hero-img" />
+            <img src={activeArticle.image} alt={activeArticle.title || 'Northvale TCG blog'} className="card-art-hero-img" width="1200" height="675" />
           </div>
         </div>
 
@@ -299,6 +299,8 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
                 src="/favicon.svg" 
                 alt="Northvale TCG" 
                 style={styles.authorAvatar} 
+                width="64"
+                height="64"
               />
               <div style={styles.authorInfo}>
                 <h4 style={styles.authorName}>{tLabel('Autor: Redakce Northvale TCG', 'Written by: Northvale TCG Editor')}</h4>
@@ -352,6 +354,8 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
                 src={article.image} 
                 alt={article.title || 'Northvale TCG blog'} 
                 className="blog-card-img"
+                width="350"
+                height="196"
               />
               
               {/* Absolute Top-Left Category Badge */}
