@@ -115,6 +115,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
   };
 
   const handleBuyClick = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     const variant = hasVariants ? currentVariant : product;
     addToCart(variant, product);
@@ -125,6 +126,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
   };
 
   const handleFavoriteClick = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     const nextVal = !isFavorite;
     setIsFavorite(nextVal);

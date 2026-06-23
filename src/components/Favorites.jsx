@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 
@@ -23,6 +23,11 @@ export default function Favorites({ products, addToCart, setSelectedProductId, s
   });
 
   const favListRef = useRef(null);
+
+  useEffect(() => {
+    window.addEventListener('local-favorites-changed', handleUnfavoriteCheck);
+    return () => window.removeEventListener('local-favorites-changed', handleUnfavoriteCheck);
+  }, []);
 
   const favoriteProducts = products.filter(p => favoriteIds.includes(p.id));
 
