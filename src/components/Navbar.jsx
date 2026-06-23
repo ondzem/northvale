@@ -338,21 +338,21 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
 
                 <span style={styles.topBarDivider}>|</span>
 
-                <span style={styles.contactLink} onClick={() => setActivePage('support')}>
+                <span className="topbar-contact-link" style={styles.contactLink} onClick={() => setActivePage('support')}>
                   Kontakt
                 </span>
 
                 <span style={styles.topBarDivider}>|</span>
 
                 <div style={styles.socials}>
-                  <a href="https://www.instagram.com/northvaletcg/?utm_source=ig_web_button_share_sheet" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
-                    <img src="/instagram.png" alt="Instagram" style={styles.socialIcon} width="14" height="14" />
+                  <a href="https://www.instagram.com/northvaletcg/?utm_source=ig_web_button_share_sheet" target="_blank" rel="noopener noreferrer" className="topbar-social-link" style={styles.socialLink}>
+                    <img src="/instagram.png" alt="Instagram" className="topbar-social-icon" style={styles.socialIcon} width="14" height="14" />
                   </a>
-                  <a href="https://www.facebook.com/share/18yajuq6N1/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
-                    <img src="/facebook.png" alt="Facebook" style={styles.socialIcon} width="14" height="14" />
+                  <a href="https://www.facebook.com/share/18yajuq6N1/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="topbar-social-link" style={styles.socialLink}>
+                    <img src="/facebook.png" alt="Facebook" className="topbar-social-icon" style={styles.socialIcon} width="14" height="14" />
                   </a>
-                  <a href="https://www.tiktok.com/@northvaletcg" target="_blank" rel="noopener noreferrer" style={styles.socialLink}>
-                    <img src="/tik-tok.png" alt="TikTok" style={styles.socialIcon} width="14" height="14" />
+                  <a href="https://www.tiktok.com/@northvaletcg" target="_blank" rel="noopener noreferrer" className="topbar-social-link" style={styles.socialLink}>
+                    <img src="/tik-tok.png" alt="TikTok" className="topbar-social-icon" style={styles.socialIcon} width="14" height="14" />
                   </a>
                 </div>
               </div>
@@ -1309,24 +1309,24 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
               <div style={styles.mobileDrawerFooter}>
                 {/* Actions Row (Oblíbené, Kontakt) */}
                 <div style={styles.drawerActionsRow}>
-                  <button style={styles.drawerActionLink} onClick={() => { setActivePage('favorites'); setDrawerOpen(false); }}>
+                  <button className="drawer-action-link" style={styles.drawerActionLink} onClick={() => { setActivePage('favorites'); setDrawerOpen(false); }}>
                     <img src="/heart.png" alt="" style={styles.drawerActionIcon} width="16" height="16" /> {t('Navbar.favorites')}
                   </button>
-                  <button style={styles.drawerActionLink} onClick={() => { setActivePage('support'); setDrawerOpen(false); }}>
+                  <button className="drawer-action-link" style={styles.drawerActionLink} onClick={() => { setActivePage('support'); setDrawerOpen(false); }}>
                     Kontakt
                   </button>
                 </div>
 
                 {/* Socials */}
                 <div style={styles.drawerSocials}>
-                  <a href="https://www.instagram.com/northvaletcg/?utm_source=ig_web_button_share_sheet" target="_blank" rel="noopener noreferrer" style={styles.drawerSocialLink}>
-                    <img src="/instagram.png" alt="Instagram" style={styles.drawerSocialIcon} width="18" height="18" />
+                  <a href="https://www.instagram.com/northvaletcg/?utm_source=ig_web_button_share_sheet" target="_blank" rel="noopener noreferrer" className="drawer-social-link" style={styles.drawerSocialLink}>
+                    <img src="/instagram.png" alt="Instagram" className="drawer-social-icon" style={styles.drawerSocialIcon} width="18" height="18" />
                   </a>
-                  <a href="https://www.facebook.com/share/18yajuq6N1/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" style={styles.drawerSocialLink}>
-                    <img src="/facebook.png" alt="Facebook" style={styles.drawerSocialIcon} width="18" height="18" />
+                  <a href="https://www.facebook.com/share/18yajuq6N1/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="drawer-social-link" style={styles.drawerSocialLink}>
+                    <img src="/facebook.png" alt="Facebook" className="drawer-social-icon" style={styles.drawerSocialIcon} width="18" height="18" />
                   </a>
-                  <a href="https://www.tiktok.com/@northvaletcg" target="_blank" rel="noopener noreferrer" style={styles.drawerSocialLink}>
-                    <img src="/tik-tok.png" alt="TikTok" style={styles.drawerSocialIcon} width="18" height="18" />
+                  <a href="https://www.tiktok.com/@northvaletcg" target="_blank" rel="noopener noreferrer" className="drawer-social-link" style={styles.drawerSocialLink}>
+                    <img src="/tik-tok.png" alt="TikTok" className="drawer-social-icon" style={styles.drawerSocialIcon} width="18" height="18" />
                   </a>
                 </div>
 

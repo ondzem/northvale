@@ -86,7 +86,15 @@ export default function Favorites({ products, addToCart, setSelectedProductId, s
             <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>{t('Favorites.emptyDesc')}</p>
             <button 
               className="btn btn-primary" 
-              onClick={() => setActivePage('singles-catalog')}
+              onClick={() => {
+                setActivePage('home');
+                setTimeout(() => {
+                  const element = document.getElementById('popular-categories');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }, 100);
+              }}
               style={{ marginTop: '10px' }}
             >
               {t('Favorites.browseBtn')}

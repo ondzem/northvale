@@ -9466,3 +9466,57 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   margin-bottom: 10px;
 }
 
+/* Navbar Topbar & Drawer Hover Effects */
+.topbar-contact-link {
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+.topbar-contact-link:hover {
+  color: #ffffff !important;
+}
+
+.topbar-social-link {
+  display: flex;
+  align-items: center;
+}
+.topbar-social-icon {
+  width: 14px;
+  height: 14px;
+  filter: invert(0.9);
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+.topbar-social-link:hover .topbar-social-icon {
+  opacity: 1 !important;
+  filter: invert(1) !important;
+}
+
+/* Mobile Drawer Links Hover */
+.drawer-action-link {
+  transition: color 0.2s ease;
+}
+.drawer-action-link:hover {
+  color: #ffffff !important;
+}
+.drawer-action-link:hover img {
+  filter: invert(1) !important;
+}
+
+.drawer-social-link {
+  display: flex;
+  align-items: center;
+}
+.drawer-social-icon {
+  width: 18px;
+  height: 18px;
+  filter: invert(0.9);
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+.drawer-social-link:hover .drawer-social-icon {
+  opacity: 1 !important;
+  filter: invert(1) !important;
+}
+
+
