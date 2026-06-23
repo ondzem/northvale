@@ -12,14 +12,45 @@ export default function OrdersTab({ showToast }) {
   const [selectedOrderIds, setSelectedOrderIds] = useState([]);
   const [detailOrder, setDetailOrder] = useState(null);
   const [loadingDetailsProgress, setLoadingDetailsProgress] = useState({ current: 0, total: 0 });
-  const [isExporting, setIsExporting] = useState(false);
+
+  // GLS API configuration states (stored in localStorage)
+  const [glsUsername, setGlsUsername] = useState('info@northvaletcg.eu');
+  const [glsClientNumber, setGlsClientNumber] = useState('53016731');
+  const [glsPassword, setGlsPassword] = useState('');
+  const [glsTestMode, setGlsTestMode] = useState(false);
+  const [glsPrinterType, setGlsPrinterType] = useState('Thermo');
+  const [showGlsSettings, setShowGlsSettings] = useState(false);
+  const [generatingLabelId, setGeneratingLabelId] = useState(null);
 
   // Background loading reference to avoid duplicates
   const loadingQueueRef = useRef([]);
 
   useEffect(() => {
+    // Load GLS API credentials from local storage on mount
+    const savedUsername = localStorage.getItem('gls_api_username') || 'info@northvaletcg.eu';
+    const savedClientNumber = localStorage.getItem('gls_api_client_number') || '53016731';
+    const savedPassword = localStorage.getItem('gls_api_password') || '';
+    const savedTestMode = localStorage.getItem('gls_api_test_mode') === 'true';
+    const savedPrinterType = localStorage.getItem('gls_api_printer_type') || 'Thermo';
+
+    setGlsUsername(savedUsername);
+    setGlsClientNumber(savedClientNumber);
+    setGlsPassword(savedPassword);
+    setGlsTestMode(savedTestMode);
+    setGlsPrinterType(savedPrinterType);
+
     fetchOrdersList();
   }, []);
+
+  const saveGlsSettings = () => {
+    localStorage.setItem('gls_api_username', glsUsername);
+    localStorage.setItem('gls_api_client_number', glsClientNumber);
+    localStorage.setItem('gls_api_password', glsPassword);
+    localStorage.setItem('gls_api_test_mode', glsTestMode.toString());
+    localStorage.setItem('gls_api_printer_type', glsPrinterType);
+    setShowGlsSettings(false);
+    showToast(lang === 'CZ' ? 'Nastavení GLS API bylo uloženo.' : 'GLS API Settings saved.', 'success');
+  };
 
   const fetchOrdersList = async () => {
     setLoading(true);
@@ -57,7 +88,7 @@ export default function OrdersTab({ showToast }) {
   const loadDetailsBatch = async (filenames) => {
     loadingQueueRef.current = filenames;
     
-    // We fetch in small parallel batches of 5 to not hit rate limits and keep browser snappy
+    // Fetch in small parallel batches of 5 to not hit rate limits
     const batchSize = 5;
     let completed = 0;
 
@@ -192,6 +223,65 @@ export default function OrdersTab({ showToast }) {
     };
   };
 
+  // Direct GLS API Labeling Call
+  const generateGlsLabelApi = async (order) => {
+    if (!glsPassword) {
+      showToast(lang === 'CZ' ? 'Zadejte prosím nejprve vaše heslo pro GLS v nastavení API.' : 'Please enter your GLS password in the API settings first.', 'warning');
+      setShowGlsSettings(true);
+      return;
+    }
+
+    setGeneratingLabelId(order.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('pohoda-connector/generate-gls-label', {
+        body: {
+          username: glsUsername,
+          password: glsPassword,
+          clientNumber: glsClientNumber,
+          testMode: glsTestMode,
+          typeOfPrinter: glsPrinterType,
+          order: {
+            id: order.id,
+            customer_name: order.customerName,
+            customer_street: order.street,
+            customer_city: order.city,
+            customer_zip: order.zip,
+            customer_phone: order.phone,
+            customer_email: order.email,
+            total_price: order.totalPrice,
+            payment_method: order.paymentMethod
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      if (data && data.success) {
+        // Convert Base64 response to binary PDF Blob and download
+        const pdfBytes = Uint8Array.from(atob(data.pdfBase64), c => c.charCodeAt(0));
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `gls_stitok_${order.id}_${data.parcelNumber}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showToast(lang === 'CZ' 
+          ? `Štítek vygenerován! Balík č.: ${data.parcelNumber}` 
+          : `Label generated! Parcel No.: ${data.parcelNumber}`, 'success');
+      } else {
+        throw new Error(data?.error || 'Neznámá chyba při komunikaci s GLS API.');
+      }
+    } catch (err) {
+      console.error('GLS Label generation failed:', err);
+      showToast(lang === 'CZ' ? `Chyba API: ${err.message}` : `API Error: ${err.message}`, 'error');
+    } finally {
+      setGeneratingLabelId(null);
+    }
+  };
+
   const handleSelectOrder = (id) => {
     setSelectedOrderIds(prev => 
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
@@ -223,40 +313,31 @@ export default function OrdersTab({ showToast }) {
     document.body.removeChild(link);
   };
 
-  // Export to GLS CSV Format for upload to www.mygls.cz ("IMPORT NOVÉHO BALÍKU")
+  // Export to GLS CSV Format for backup upload to www.mygls.cz ("IMPORT NOVÉHO BALÍKU")
   const exportGlsCsv = () => {
     if (selectedOrderIds.length === 0) return;
 
-    // GLS Standard CSV Header
-    // Semicolon separator is preferred in CZ/SK Excel
     let csv = 'Jméno příjemce;Ulice a č.p.;Město;PSČ;Kód země;Telefon;Email;Variabilní symbol (ID);Částka dobírky (Kč);Poznámka\r\n';
 
     selectedOrderIds.forEach(id => {
-      // Find matching order in loaded details
       const orderFile = files.find(f => f.name.replace('order_', '').replace('.xml', '') === id || (loadedOrders[f.name] && loadedOrders[f.name].id === id));
       if (!orderFile) return;
       const order = loadedOrders[orderFile.name];
       if (!order) return;
 
-      // Extract delivery details
       const name = order.customerName || '';
       const street = order.street || '';
       const city = order.city || '';
-      // Clean ZIP (remove whitespace)
       const zip = (order.zip || '').replace(/\s+/g, '');
-      const country = 'CZ'; // Default destination country code
+      const country = 'CZ';
       const phone = order.phone || '';
       const email = order.email || '';
       const refId = order.id || '';
-
-      // If payment is Cash on Delivery, export total order price, otherwise 0/empty
       const isCod = (order.paymentMethod || '').toLowerCase().includes('dobírk') || 
                     (order.paymentMethod || '').toLowerCase().includes('cod');
       const codAmount = isCod ? order.totalPrice : '';
-
       const note = `Objednávka #${refId}`;
 
-      // Escape semicolons and newlines in values
       const escapeCsv = (str) => {
         if (!str) return '';
         return str.toString().replace(/;/g, ' ').replace(/\n/g, ' ').replace(/\r/g, '').trim();
@@ -318,17 +399,14 @@ export default function OrdersTab({ showToast }) {
       const order = loadedOrders[orderFile.name];
       if (!order || !order.rawXml) return;
 
-      // Extract the content inside the first <dat:dataPackItem> element
       const parser = new DOMParser();
       const doc = parser.parseFromString(order.rawXml, 'application/xml');
       const dataPackItem = doc.getElementsByTagName('dat:dataPackItem')[0] || 
                            doc.getElementsByTagName('dataPackItem')[0];
 
       if (dataPackItem) {
-        // XMLSerializer to serialize the dataPackItem node
         const serializer = new XMLSerializer();
         let itemXml = serializer.serializeToString(dataPackItem);
-        // Replace existing PackItem IDs to match the combined import structure
         combinedItemsXml += '\n  ' + itemXml;
       }
     });
@@ -340,7 +418,6 @@ export default function OrdersTab({ showToast }) {
               xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd">${combinedItemsXml}
 </dat:dataPack>`;
 
-    // Download file
     const blob = new Blob([combinedXml], { type: 'application/xml;charset=windows-1250;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -352,13 +429,11 @@ export default function OrdersTab({ showToast }) {
     showToast(lang === 'CZ' ? 'Hromadný Pohoda XML soubor stažen.' : 'Combined Pohoda XML file downloaded.', 'success');
   };
 
-  // Get orders after search & carrier filtering
   const getFilteredOrders = () => {
     return files.filter(f => {
       const details = loadedOrders[f.name];
       const orderId = f.name.replace('order_', '').replace('.xml', '');
       
-      // Filter by search query (Order ID or Customer Name)
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchesId = orderId.toLowerCase().includes(query);
@@ -367,7 +442,6 @@ export default function OrdersTab({ showToast }) {
         if (!matchesId && !matchesName && !matchesEmail) return false;
       }
 
-      // Filter by carrier
       if (carrierFilter !== 'all') {
         const detailsCarrier = (details?.carrier || 'GLS').toLowerCase();
         if (carrierFilter === 'gls' && !detailsCarrier.includes('gls')) return false;
@@ -403,7 +477,7 @@ export default function OrdersTab({ showToast }) {
           display: flex;
           gap: 12px;
           flex-grow: 1;
-          max-width: 500px;
+          max-width: 550px;
         }
         .orders-search-group input {
           flex-grow: 1;
@@ -535,6 +609,9 @@ export default function OrdersTab({ showToast }) {
           cursor: pointer;
           transition: all 0.2s;
           font-weight: 600;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
         }
         .orders-action-btn:hover {
           border-color: var(--nv-gold, #fdbd16);
@@ -549,6 +626,46 @@ export default function OrdersTab({ showToast }) {
         .orders-action-btn-primary:hover {
           background: #e5ab14;
           color: #000;
+        }
+        /* Settings panel */
+        .orders-settings-card {
+          background: rgba(24, 24, 28, 0.95);
+          border: 1px solid rgba(253, 189, 22, 0.2);
+          border-radius: 8px;
+          padding: 24px;
+          margin-bottom: 24px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+          animation: fadeIn 0.2s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .orders-settings-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 16px;
+          margin-bottom: 20px;
+        }
+        .orders-settings-field {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .orders-settings-field span {
+          font-size: 12px;
+          color: #8a8a92;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+        .orders-settings-field input, .orders-settings-field select {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+          padding: 8px 12px;
+          color: #fff;
+          font-size: 13.5px;
+          outline: none;
         }
         .orders-floating-bar {
           position: fixed;
@@ -704,6 +821,51 @@ export default function OrdersTab({ showToast }) {
         }
       `}</style>
 
+      {/* API Settings Panel */}
+      {showGlsSettings && (
+        <div className="orders-settings-card">
+          <h3 style={{ margin: '0 0 16px 0', fontSize: '15px', color: 'var(--nv-gold, #fdbd16)', fontWeight: '800' }}>
+            {lang === 'CZ' ? 'Nastavení připojení GLS API' : 'GLS API Connection Settings'}
+          </h3>
+          <div className="orders-settings-grid">
+            <label className="orders-settings-field">
+              <span>{lang === 'CZ' ? 'Uživatelské jméno (Email)' : 'Username (Email)'}</span>
+              <input type="email" value={glsUsername} onChange={e => setGlsUsername(e.target.value)} />
+            </label>
+            <label className="orders-settings-field">
+              <span>{lang === 'CZ' ? 'Zákaznické číslo (Client ID)' : 'Customer ID'}</span>
+              <input type="text" value={glsClientNumber} onChange={e => setGlsClientNumber(e.target.value)} />
+            </label>
+            <label className="orders-settings-field">
+              <span>{lang === 'CZ' ? 'Heslo do MyGLS' : 'MyGLS Password'}</span>
+              <input type="password" placeholder="••••••••" value={glsPassword} onChange={e => setGlsPassword(e.target.value)} />
+            </label>
+            <label className="orders-settings-field">
+              <span>{lang === 'CZ' ? 'Typ tiskárny' : 'Printer Type'}</span>
+              <select value={glsPrinterType} onChange={e => setGlsPrinterType(e.target.value)}>
+                <option value="Thermo">Thermo (Standard)</option>
+                <option value="A4_2x2">A4 - 2x2 štítky</option>
+                <option value="A4_4x1">A4 - 4x1 štítky</option>
+                <option value="Connect">Connect</option>
+                <option value="ShipItThermoPdf">ShipIt Thermo PDF</option>
+              </select>
+            </label>
+            <label className="orders-settings-field" style={{ justifyContent: 'center', flexDirection: 'row', gap: '8px', alignItems: 'center' }}>
+              <input type="checkbox" id="test-mode" checked={glsTestMode} onChange={e => setGlsTestMode(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: 'var(--nv-gold, #fdbd16)' }} />
+              <span style={{ textTransform: 'none', cursor: 'pointer', fontSize: '13px' }} onClick={() => setGlsTestMode(!glsTestMode)}>Testovací režim</span>
+            </label>
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="orders-action-btn orders-action-btn-primary" onClick={saveGlsSettings}>
+              {lang === 'CZ' ? 'Uložit nastavení' : 'Save settings'}
+            </button>
+            <button className="orders-action-btn" onClick={() => setShowGlsSettings(false)}>
+              {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="orders-toolbar">
         <div className="orders-search-group">
           <input 
@@ -722,12 +884,16 @@ export default function OrdersTab({ showToast }) {
           </select>
         </div>
 
-        <button className="orders-action-btn" onClick={fetchOrdersList} disabled={loading}>
-          {loading ? (lang === 'CZ' ? 'Aktualizuji...' : 'Refreshing...') : (lang === 'CZ' ? 'Načíst znovu' : 'Refresh list')}
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className="orders-action-btn" onClick={() => setShowGlsSettings(!showGlsSettings)}>
+            ⚙️ {lang === 'CZ' ? 'GLS API Nastavení' : 'GLS API Settings'}
+          </button>
+          <button className="orders-action-btn" onClick={fetchOrdersList} disabled={loading}>
+            {loading ? (lang === 'CZ' ? 'Aktualizuji...' : 'Refreshing...') : (lang === 'CZ' ? 'Načíst znovu' : 'Refresh list')}
+          </button>
+        </div>
       </div>
 
-      {/* Progress bar showing XML background downloading progress */}
       {loadingDetailsProgress.current < loadingDetailsProgress.total && (
         <div className="orders-progress-bar">
           <div>
@@ -795,6 +961,8 @@ export default function OrdersTab({ showToast }) {
                   return '';
                 };
 
+                const isGls = details && details.carrier.toUpperCase().includes('GLS');
+
                 return (
                   <tr key={file.name}>
                     <td className="orders-checkbox-col">
@@ -844,7 +1012,21 @@ export default function OrdersTab({ showToast }) {
                       )}
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                        {isGls && (
+                          <button 
+                            className="orders-action-btn orders-action-btn-primary"
+                            disabled={generatingLabelId === details.id}
+                            onClick={() => generateGlsLabelApi(details)}
+                            title="Vygenerovat štítek přímo přes GLS API"
+                          >
+                            {generatingLabelId === details.id ? (
+                              <div className="spinner-loader co-spinner" style={{ width: '12px', height: '12px', borderWidth: '1.5px' }}></div>
+                            ) : (
+                              '🏷️ GLS API'
+                            )}
+                          </button>
+                        )}
                         <button 
                           className="orders-action-btn"
                           disabled={!details}
