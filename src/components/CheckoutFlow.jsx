@@ -1078,7 +1078,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           <div style={{ padding: '60px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }} className="glass-panel">
             <span style={{ fontSize: '48px' }}>🛒</span>
             <h3>{t('Cart.empty')}</h3>
-            <button className="btn btn-primary" onClick={() => setActivePage('singles-catalog')}>
+            <button className="btn btn-primary" onClick={() => setActivePage('sealed-catalog')}>
               {t('common.backToCatalog')}
             </button>
           </div>

@@ -62,8 +62,8 @@ export async function fetchProductsFromDB(options = {}) {
       rawData = cachedRawProducts;
     }
 
-    // Filter rawData in memory
-    let filtered = rawData.map(mapDbProduct);
+    // Filter rawData in memory (ignore singles and slabs)
+    let filtered = rawData.map(mapDbProduct).filter(p => p.type !== 'single' && p.type !== 'slab');
 
     if (types && types.length > 0) {
       filtered = filtered.filter(p => types.includes(p.type));
@@ -101,8 +101,8 @@ export async function fetchProductsFromDB(options = {}) {
   } catch (err) {
     console.warn('Database products query failed, using local mock fallback:', err.message || err);
 
-    // Filter local mockProducts identically
-    let filtered = [...mockProducts];
+    // Filter local mockProducts identically (ignore singles and slabs)
+    let filtered = mockProducts.filter(p => p.type !== 'single' && p.type !== 'slab');
 
     if (types && types.length > 0) {
       filtered = filtered.filter(p => types.includes(p.type));
@@ -155,10 +155,17 @@ export async function fetchProductByIdFromDB(id) {
       throw error;
     }
 
-    return mapDbProduct(data);
+    const product = mapDbProduct(data);
+    if (product && (product.type === 'single' || product.type === 'slab')) {
+      return null;
+    }
+    return product;
   } catch (err) {
     console.warn(`Database fetch for single product ${id} failed, using mock fallback:`, err.message || err);
     const mock = mockProducts.find(p => p.id === id);
+    if (mock && (mock.type === 'single' || mock.type === 'slab')) {
+      return null;
+    }
     return mock || null;
   }
 }

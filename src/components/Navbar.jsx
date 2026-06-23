@@ -112,7 +112,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
           onClick={(e) => {
             e.stopPropagation();
             setSearchQuery(searchInput);
-            setActivePage('singles-catalog');
+            setActivePage('sealed-catalog');
             setShowSuggestions(false);
           }}
         >
@@ -241,17 +241,13 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setSearchQuery(searchInput);
-    setActivePage('singles-catalog');
+    setActivePage('sealed-catalog');
   };
 
   const handleCategoryClick = (category, subFilters = {}) => {
     setFilters(subFilters);
-    if (category === 'singles') {
-      setActivePage('singles-catalog');
-    } else if (category === 'sealed') {
+    if (category === 'sealed') {
       setActivePage('sealed-catalog');
-    } else if (category === 'slabs') {
-      setActivePage('slabs-catalog');
     } else if (category === 'grading') {
       setActivePage('grading');
     }

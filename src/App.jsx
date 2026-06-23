@@ -2,11 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Homepage from './components/Homepage';
-import SinglesCatalog from './components/SinglesCatalog';
 import SealedCatalog from './components/SealedCatalog';
-import SlabsCatalog from './components/SlabsCatalog';
 import SealedDetail from './components/SealedDetail';
-import SinglesDetail from './components/SinglesDetail';
 import BuylistPortal from './components/BuylistPortal';
 import GradingPortal from './components/GradingPortal';
 import GradingGuide from './components/GradingGuide';
@@ -53,20 +50,13 @@ const parseUrlToState = () => {
       productId = parsedId;
     }
   } else if (path.startsWith('/singles-detail/')) {
-    const parsedId = path.replace('/singles-detail/', '');
-    const product = mockProducts.find(p => p.id === parsedId);
-    if (product && product.type === 'slab' && !FEATURE_FLAGS.showSlabs) {
-      page = 'home';
-    } else {
-      page = 'singles-detail';
-      productId = parsedId;
-    }
+    page = 'home';
   } else if (path === '/singles-catalog') {
-    page = 'singles-catalog';
+    page = 'home';
   } else if (path === '/sealed-catalog') {
     page = 'sealed-catalog';
   } else if (path === '/slabs-catalog') {
-    page = FEATURE_FLAGS.showSlabs ? 'slabs-catalog' : 'home';
+    page = 'home';
   } else if (path === '/buylist') {
     page = FEATURE_FLAGS.showBuylist ? 'buylist' : 'home';
   } else if (path === '/grading') {
@@ -124,14 +114,8 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
   
   if (page === 'sealed-detail' && productId) {
     path = `/sealed-detail/${productId}`;
-  } else if (page === 'singles-detail' && productId) {
-    path = `/singles-detail/${productId}`;
-  } else if (page === 'singles-catalog') {
-    path = '/singles-catalog';
   } else if (page === 'sealed-catalog') {
     path = '/sealed-catalog';
-  } else if (page === 'slabs-catalog') {
-    path = FEATURE_FLAGS.showSlabs ? '/slabs-catalog' : '/';
   } else if (page === 'buylist') {
     path = FEATURE_FLAGS.showBuylist ? '/buylist' : '/';
   } else if (page === 'grading') {
@@ -275,16 +259,8 @@ function AppContent() {
       setIsLoadingProducts(true);
       let queryOptions = {};
 
-      if (activePage === 'singles-catalog') {
-        queryOptions.types = ['single', 'slab'];
-        queryOptions.game = filters.game || 'Pokémon';
-      } else if (activePage === 'sealed-catalog') {
+      if (activePage === 'sealed-catalog') {
         queryOptions.types = ['sealed', 'accessory'];
-        if (filters.game && filters.game !== 'all') {
-          queryOptions.game = filters.game;
-        }
-      } else if (activePage === 'slabs-catalog') {
-        queryOptions.type = 'slab';
         if (filters.game && filters.game !== 'all') {
           queryOptions.game = filters.game;
         }
@@ -1020,7 +996,7 @@ function AppContent() {
           };
         }
       }
-    } else if (activePage === 'sealed-catalog' || activePage === 'singles-catalog') {
+    } else if (activePage === 'sealed-catalog') {
       jsonLdData = {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
@@ -1309,20 +1285,7 @@ function AppContent() {
             setFilters={setFilters}
           />
         )}
-        
-        {activePage === 'singles-catalog' && (
-          <SinglesCatalog 
-            products={dbProducts}
-            addToCart={addToCart}
-            setSelectedProductId={setSelectedProductId}
-            setActivePage={navigateToPage}
-            filters={filters}
-            setFilters={setFilters}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            alert={showToast}
-          />
-        )}
+
 
         {activePage === 'sealed-catalog' && (
           <SealedCatalog 
@@ -1337,18 +1300,6 @@ function AppContent() {
           />
         )}
 
-        {activePage === 'slabs-catalog' && FEATURE_FLAGS.showSlabs && (
-          <SlabsCatalog 
-            products={dbProducts}
-            addToCart={addToCart}
-            setSelectedProductId={setSelectedProductId}
-            setActivePage={navigateToPage}
-            filters={filters}
-            setFilters={setFilters}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-        )}
 
         {activePage === 'sealed-detail' && (
           <SealedDetail 
@@ -1364,19 +1315,6 @@ function AppContent() {
           />
         )}
 
-        {activePage === 'singles-detail' && (
-          <SinglesDetail 
-            productId={selectedProductId}
-            products={dbProducts}
-            addToCart={addToCart}
-            setSelectedProductId={setSelectedProductId}
-            setActivePage={navigateToPage}
-            setFilters={setFilters}
-            alert={showToast}
-            user={user}
-            onOpenLogin={() => setIsLoginModalOpen(true)}
-          />
-        )}
 
         {activePage === 'buylist' && FEATURE_FLAGS.showBuylist && (
           <BuylistPortal 

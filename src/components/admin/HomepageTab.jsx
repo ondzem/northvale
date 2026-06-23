@@ -79,8 +79,6 @@ export default function HomepageTab({ showToast, onEditProduct }) {
   const REDIRECT_OPTIONS = [
     { value: 'home', labelCz: 'Úvodní stránka', labelEn: 'Homepage' },
     { value: 'sealed-catalog', labelCz: 'Zapečetěné produkty (Sealed)', labelEn: 'Sealed Products' },
-    { value: 'singles-catalog', labelCz: 'Kusové karty (Singles)', labelEn: 'Singles Catalog' },
-    { value: 'slabs-catalog', labelCz: 'Ohodnocené karty (Slabs)', labelEn: 'Graded Slabs' },
     { value: 'grading', labelCz: 'Zprostředkování gradingu', labelEn: 'Grading Service' },
     { value: 'buylist', labelCz: 'Výkup karet (Buylist)', labelEn: 'Card Buylist' },
     { value: 'about', labelCz: 'O nás (Příběh)', labelEn: 'About Us' },

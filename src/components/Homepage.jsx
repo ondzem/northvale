@@ -428,11 +428,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   const handleCardClick = (product) => {
     if (!catalogProduct || product.id === 'deal-of-the-day') return;
     setSelectedProductId(product.id);
-    if (product.type === 'single' || product.type === 'slab') {
-      setActivePage('singles-detail');
-    } else {
-      setActivePage('sealed-detail');
-    }
+    setActivePage('sealed-detail');
   };
 
   const handleBuyDealClick = (e) => {
@@ -510,8 +506,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     const pageMap = {
                       'home': 'home',
                       'sealed-catalog': 'sealed-catalog',
-                      'singles-catalog': 'singles-catalog',
-                      'slabs-catalog': 'slabs-catalog',
+                      'singles-catalog': 'sealed-catalog',
+                      'slabs-catalog': 'home',
                       'grading': 'grading',
                       'buylist': 'buylist',
                       'about': 'about',
@@ -625,7 +621,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             <>
               {/* Product link wrapping title and image */}
               <a 
-                href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? (dealProduct.type === 'single' || dealProduct.type === 'slab' ? `/singles-detail/${dealProduct.id}` : `/sealed-detail/${dealProduct.id}`) : '#'} 
+                href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? `/sealed-detail/${dealProduct.id}` : '#'} 
                 style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', flex: '1 1 auto', width: '100%' }} 
                 onClick={(e) => { 
                   if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && dealProduct.id && dealProduct.id !== 'deal-of-the-day') { 
@@ -916,7 +912,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               }}>
                 {/* Title (Enlarged) */}
                 <a 
-                  href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? (dealProduct.type === 'single' || dealProduct.type === 'slab' ? `/singles-detail/${dealProduct.id}` : `/sealed-detail/${dealProduct.id}`) : '#'} 
+                  href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? `/sealed-detail/${dealProduct.id}` : '#'} 
                   style={{ textDecoration: 'none', color: 'inherit' }} 
                   onClick={(e) => { 
                     if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && dealProduct.id && dealProduct.id !== 'deal-of-the-day') { 
@@ -955,7 +951,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 }}>
                   {/* Left part: Image Container (shifted all the way to left, enlarged) */}
                   <a 
-                    href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? (dealProduct.type === 'single' || dealProduct.type === 'slab' ? `/singles-detail/${dealProduct.id}` : `/sealed-detail/${dealProduct.id}`) : '#'} 
+                    href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? `/sealed-detail/${dealProduct.id}` : '#'} 
                     style={{ flex: '1.2 1 0%', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', position: 'relative', textDecoration: 'none' }} 
                     onClick={(e) => { 
                       if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && dealProduct.id && dealProduct.id !== 'deal-of-the-day') { 
@@ -1344,7 +1340,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             {newArrivals.map(product => (
               <a 
                 key={product.id} 
-                href={product.type === 'single' || product.type === 'slab' ? `/singles-detail/${product.id}` : `/sealed-detail/${product.id}`} 
+                href={`/sealed-detail/${product.id}`} 
                 className={`vf-card type-${product.type}`} 
                 style={{ textDecoration: 'none', color: 'inherit' }}
                 onClick={(e) => { 
@@ -1407,7 +1403,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             {preorders.map(product => (
               <a 
                 key={product.id} 
-                href={product.type === 'single' || product.type === 'slab' ? `/singles-detail/${product.id}` : `/sealed-detail/${product.id}`} 
+                href={`/sealed-detail/${product.id}`} 
                 className={`vf-card type-${product.type}`} 
                 style={{ textDecoration: 'none', color: 'inherit' }}
                 onClick={(e) => { 
@@ -1479,7 +1475,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               {gradedCards.map(product => (
                 <a 
                   key={product.id} 
-                  href={product.type === 'single' || product.type === 'slab' ? `/singles-detail/${product.id}` : `/sealed-detail/${product.id}`} 
+                  href={`/sealed-detail/${product.id}`} 
                   className={`vf-card type-${product.type}`} 
                   style={{ textDecoration: 'none', color: 'inherit' }}
                   onClick={(e) => { 
@@ -1536,7 +1532,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             {accessories.map(product => (
               <a 
                 key={product.id} 
-                href={product.type === 'single' || product.type === 'slab' ? `/singles-detail/${product.id}` : `/sealed-detail/${product.id}`} 
+                href={`/sealed-detail/${product.id}`} 
                 className={`vf-card type-${product.type}`} 
                 style={{ textDecoration: 'none', color: 'inherit' }}
                 onClick={(e) => { 

@@ -82,8 +82,6 @@ async function run() {
   const staticUrls = [
     { loc: `${baseUrl}/`, priority: '1.0', changefreq: 'daily' },
     { loc: `${baseUrl}/sealed-catalog`, priority: '0.8', changefreq: 'daily' },
-    { loc: `${baseUrl}/singles-catalog`, priority: '0.8', changefreq: 'daily' },
-    { loc: `${baseUrl}/slabs-catalog`, priority: '0.7', changefreq: 'weekly' },
     { loc: `${baseUrl}/buylist`, priority: '0.7', changefreq: 'weekly' },
     { loc: `${baseUrl}/grading`, priority: '0.7', changefreq: 'weekly' },
     { loc: `${baseUrl}/grading-guide`, priority: '0.6', changefreq: 'monthly' },
@@ -108,16 +106,16 @@ async function run() {
     };
   });
 
-  // 3. Product Detail URLs
-  const productUrls = products.map(product => {
-    const isSingle = product.type === 'single' || product.type === 'slab';
-    const path = isSingle ? `/singles-detail/${product.id}` : `/sealed-detail/${product.id}`;
-    return {
-      loc: `${baseUrl}${path}`,
-      priority: '0.6',
-      changefreq: 'weekly'
-    };
-  });
+  // 3. Product Detail URLs (excluding singles and slabs)
+  const productUrls = products
+    .filter(product => product.type !== 'single' && product.type !== 'slab')
+    .map(product => {
+      return {
+        loc: `${baseUrl}/sealed-detail/${product.id}`,
+        priority: '0.6',
+        changefreq: 'weekly'
+      };
+    });
 
   const allUrls = [...staticUrls, ...blogUrls, ...productUrls];
 

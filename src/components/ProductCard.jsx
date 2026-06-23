@@ -107,11 +107,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
 
   const handleCardClick = () => {
     setSelectedProductId(product.id);
-    if (product.type === 'single' || product.type === 'slab') {
-      setActivePage('singles-detail');
-    } else {
-      setActivePage('sealed-detail');
-    }
+    setActivePage('sealed-detail');
   };
 
   const handleBuyClick = (e) => {
@@ -138,9 +134,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
     }
   };
 
-  const cardUrl = product.type === 'single' || product.type === 'slab' 
-    ? `/singles-detail/${product.id}` 
-    : `/sealed-detail/${product.id}`;
+  const cardUrl = `/sealed-detail/${product.id}`;
 
   return (
     <a 
