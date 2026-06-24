@@ -9522,7 +9522,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 
 /* Contact Page Interactive Map Styling */
 .ktf-map-section {
-  margin-top: 60px;
+  margin-top: 90px;
   margin-bottom: 60px;
   width: 100%;
   display: flex;
@@ -9549,8 +9549,8 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 
 @media (max-width: 768px) {
   .ktf-map-section {
-    margin-top: 40px;
-    margin-bottom: 40px;
+    margin-top: 80px;
+    margin-bottom: 80px;
     gap: 16px;
   }
   .ktf-map-container {

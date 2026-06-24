@@ -44,7 +44,8 @@ async function uploadBase64Image(supabase: any, base64Content: string): Promise<
     .from('newsletter-banners')
     .getPublicUrl(fileName);
 
-  return publicUrl;
+  // Serve storage files via custom domain to avoid VPN / email proxy blocks on supabase.co
+  return publicUrl.replace('https://bfxzhggjpiyqfolqpxzz.supabase.co', 'https://northvaletcg.eu');
 }
 
 function compileHtml(subject: string, blocksHtml: string, isEnglish: boolean): string {
