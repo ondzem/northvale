@@ -4352,7 +4352,8 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 .tab-popis-specs-table td:first-child {
   color: var(--text-muted);
   font-weight: 600;
-  width: 120px;
+  width: 170px;
+  padding-right: 16px;
 }
 
 .tab-popis-specs-table td:last-child {
