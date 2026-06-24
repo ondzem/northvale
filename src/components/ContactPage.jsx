@@ -248,6 +248,30 @@ export default function ContactPage({ setActivePage }) {
           </div>
         </div>
 
+        {/* Interactive Map Section */}
+        <div className="ktf-map-section">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div className="nv-eyebrow">
+              {lang === 'CZ' ? 'Kde nás najdete' : 'Where to find us'}
+            </div>
+            <h3 style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-main)', margin: 0, fontFamily: 'var(--font-heading)' }}>
+              {lang === 'CZ' ? 'Sídlo a výdejní místo' : 'Office & Pickup Point'}
+            </h3>
+          </div>
+          <div className="ktf-map-container">
+            <iframe 
+              src="https://maps.google.com/maps?q=Brat%C5%99%C3%AD%20%C4%8Capk%C5%AF%201095,%20534%2001%20Holice&t=&z=15&ie=UTF8&iwloc=&output=embed"
+              width="100%" 
+              height="100%" 
+              className="ktf-map-iframe"
+              allowFullScreen="" 
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title={lang === 'CZ' ? 'Mapa sídla NORTHVALE' : 'NORTHVALE Location Map'}
+            ></iframe>
+          </div>
+        </div>
+
         {/* FAQ Section */}
         <div className="ktf-faq">
           <div className="ktf-faq-head">

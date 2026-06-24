@@ -9520,4 +9520,49 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   filter: invert(1) !important;
 }
 
+/* Contact Page Interactive Map Styling */
+.ktf-map-section {
+  margin-top: 60px;
+  margin-bottom: 60px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ktf-map-container {
+  width: 100%;
+  height: 420px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  background: var(--bg-secondary, #0c0d12);
+  position: relative;
+}
+
+.ktf-map-iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  filter: grayscale(0.7) invert(0.9) contrast(1.2) brightness(0.95);
+  transition: filter 0.3s ease;
+}
+
+.ktf-map-iframe:hover {
+  filter: grayscale(0.2) invert(0.9) contrast(1.15) brightness(0.95);
+}
+
+@media (max-width: 768px) {
+  .ktf-map-section {
+    margin-top: 40px;
+    margin-bottom: 40px;
+    gap: 16px;
+  }
+  .ktf-map-container {
+    height: 280px;
+    border-radius: 12px;
+  }
+}
+
 
