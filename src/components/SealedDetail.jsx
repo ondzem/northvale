@@ -386,24 +386,27 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
   useEffect(() => {
     let active = true;
     async function loadProduct() {
+      // 1. Show cached product details immediately if available to prevent blank screens
       const found = products.find(p => p.id === productId);
       if (found) {
         setLocalProduct(found);
         setLoading(false);
       } else {
         setLoading(true);
-        try {
-          const fetched = await fetchProductByIdFromDB(productId);
-          if (active) {
-            setLocalProduct(fetched);
-            setLoading(false);
-          }
-        } catch (e) {
-          console.error("Failed to fetch product by ID:", e);
-          if (active) {
-            setLocalProduct(null);
-            setLoading(false);
-          }
+      }
+
+      // 2. Always fetch full product details (including description, custom params, latest stock) from DB in the background
+      try {
+        const fetched = await fetchProductByIdFromDB(productId);
+        if (active && fetched) {
+          setLocalProduct(fetched);
+          setLoading(false);
+        }
+      } catch (e) {
+        console.error("Failed to fetch product by ID:", e);
+        if (active && !found) {
+          setLocalProduct(null);
+          setLoading(false);
         }
       }
     }

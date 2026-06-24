@@ -156,16 +156,10 @@ export async function fetchProductByIdFromDB(id) {
     }
 
     const product = mapDbProduct(data);
-    if (product && (product.type === 'single' || product.type === 'slab')) {
-      return null;
-    }
     return product;
   } catch (err) {
     console.warn(`Database fetch for single product ${id} failed, using mock fallback:`, err.message || err);
     const mock = mockProducts.find(p => p.id === id);
-    if (mock && (mock.type === 'single' || mock.type === 'slab')) {
-      return null;
-    }
     return mock || null;
   }
 }
