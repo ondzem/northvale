@@ -747,7 +747,7 @@ function AppContent() {
           ? `${[typePart, gamePart].filter(Boolean).join(' ')} - Kusovky` 
           : t('Catalogs.singlesTitle');
         metaDescription = gamePart || typePart
-          ? `Kusové karty ${[typePart, gamePart].filter(Boolean).join(' ')} na kusovky. Doplňte svou sbírku Pokémon, Lorcana a One Piece karet.`
+          ? `Kusové karty ${[typePart, gamePart].filter(Boolean).join(' ')}. Doplňte svou sbírku Pokémon, Lorcana a One Piece karet.`
           : 'Kusové karty Pokémon, Lorcana a One Piece na jednom místě. Prozkoumejte naši širokou nabídku a doplňte svou sbírku.';
         break;
       }
@@ -758,13 +758,13 @@ function AppContent() {
           ? `${[typePart, gamePart].filter(Boolean).join(' ')}` 
           : t('Catalogs.sealedTitle');
         metaDescription = gamePart || typePart
-          ? `${[typePart, gamePart].filter(Boolean).join(' ')} skladem na Northvale TCG. Zapečetěné produkty Pokémon, Lorcana a One Piece.`
-          : 'Zapečetěné balíčky (boostery), boxy, ETB a příslušenství pro karetní hry Pokémon, Lorcana a One Piece.';
+          ? `${[typePart, gamePart].filter(Boolean).join(' ')} skladem na Northvale TCG. Originální produkty Pokémon, Lorcana a One Piece.`
+          : 'Originální balíčky (boostery), boxy, ETB a příslušenství pro karetní hry Pokémon, Lorcana a One Piece.';
         break;
       }
       case 'slabs-catalog':
         pageTitle = t('Catalogs.slabsTitle');
-        metaDescription = 'Ohodnocené karty (graded slabs) s certifikovanou pravostí a kvalitou od předních gradingových společností.';
+        metaDescription = 'Ohodnocené karty s certifikovanou pravostí a kvalitou od předních gradingových společností.';
         break;
       case 'singles-detail':
       case 'sealed-detail': {

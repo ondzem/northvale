@@ -84,8 +84,8 @@ serve(async (req) => {
             <li style="margin-bottom: 8px;">
               <strong>${isCzech ? "Bezpečně zabalte vrácené produkty." : "Pack the returned products securely."}</strong><br>
               ${isCzech 
-                ? "Doporučujeme pro kusové karty použít soft sleeve a toploader (sendvičové balení) a pro zapečetěné produkty pevnou krabici s výplní, aby nedošlo k poškození." 
-                : "For singles, we recommend using a soft sleeve and toploader; for sealed products, a sturdy cardboard box with filler to prevent physical damage during transit."}
+                ? "Doporučujeme pro kusové karty použít soft sleeve a toploader (sendvičové balení) a pro balené produkty pevnou krabici s výplní, aby nedošlo k poškození." 
+                : "For singles, we recommend using a soft sleeve and toploader; for boxed products, a sturdy cardboard box with filler to prevent physical damage during transit."}
             </li>
             <li style="margin-bottom: 8px;">
               <strong>${isCzech ? "Odešlete zboží k nám." : "Ship the goods back to us."}</strong><br>
@@ -100,8 +100,8 @@ serve(async (req) => {
             <li>
               <strong>${isCzech ? "Kontrola a vrácení prostředků." : "Inspection and Payout."}</strong><br>
               ${isCzech 
-                ? "Jakmile balíček převezmeme, zkontrolujeme stav karet a neporušenost fólií u sealed produktů. Do 14 dnů od převzetí Vám vrátíme peníze zvolenou metodou." 
-                : "Once received, we will inspect the condition of the cards and seals. We will return your money via the selected method within 14 days of receipt."}
+                ? "Jakmile balíček převezmeme, zkontrolujeme stav karet a neporušenost fólií u balených produktů. Do 14 dnů od převzetí Vám vrátíme peníze zvolenou metodou." 
+                : "Once received, we will inspect the condition of the cards and original packaging. We will return your money via the selected method within 14 days of receipt."}
             </li>
           </ol>
         </div>

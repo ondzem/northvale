@@ -575,9 +575,9 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
     const nameLower = prod.name.toLowerCase();
     if (nameLower.includes('booster box') || nameLower.includes('display')) return 'Booster Box 📦';
     if (nameLower.includes('elite trainer box') || nameLower.includes('etb')) return 'Elite Trainer Box 🎁';
-    if (nameLower.includes('case')) return 'Sealed Case 💼';
+    if (nameLower.includes('case')) return 'Case 💼';
     if (nameLower.includes('deck')) return 'Starter Deck ⚔️';
-    return 'Sealed Balení';
+    return 'Originální balení';
   };
 
   const getPriceHistory = () => {
@@ -1011,12 +1011,14 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
           )}
 
           {/* Short description with more info link */}
-          <div className="product-short-desc" style={{ marginTop: isMobile ? '16px' : '8px' }}>
-            {parseFormattedText(!isHtmlEmpty(product.shortDesc) ? product.shortDesc : fallbackShortDesc)}
-            <span className="more-info-link" onClick={() => scrollToSection('popis')} style={{ display: 'inline-block', marginLeft: '6px' }}>
-              {lang === 'CZ' ? 'Víc informací' : 'More info'}
-            </span>
-          </div>
+          {!isMobile && (
+            <div className="product-short-desc" style={{ marginTop: '8px' }}>
+              {parseFormattedText(!isHtmlEmpty(product.shortDesc) ? product.shortDesc : fallbackShortDesc)}
+              <span className="more-info-link" onClick={() => scrollToSection('popis')} style={{ display: 'inline-block', marginLeft: '6px' }}>
+                {lang === 'CZ' ? 'Víc informací' : 'More info'}
+              </span>
+            </div>
+          )}
 
           <hr className="product-detail-divider" />
 
@@ -1200,8 +1202,8 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                 </span>
                 <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', lineHeight: '1.4' }}>
                   {lang === 'CZ' 
-                    ? 'Pro zachování maximální sběratelské hodnoty doporučujeme produkt uchovávat v neporušené originální ochranné fólii (sealed) a chránit před přímým slunečním zářením. Rozbalením nebo poškozením fólie dochází k okamžitému znehodnocení sběratelské hodnoty až o 50 %.'
-                    : 'To maintain maximum collectible value, we recommend keeping the product in its original undamaged shrink wrap (sealed) and protected from direct sunlight. Opening or damaging the wrap results in an immediate reduction of collectible value by up to 50%.'}
+                    ? 'Pro zachování maximální sběratelské hodnoty doporučujeme produkt uchovávat v neporušené originální ochranné fólii a chránit před přímým slunečním zářením. Rozbalením nebo poškozením fólie dochází k okamžitému znehodnocení sběratelské hodnoty až o 50 %.'
+                    : 'To maintain maximum collectible value, we recommend keeping the product in its original undamaged shrink wrap and protected from direct sunlight. Opening or damaging the wrap results in an immediate reduction of collectible value by up to 50%.'}
                 </span>
               </div>
             </div>
@@ -1393,7 +1395,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                         )}
                         {product.foilCondition && (
                           <tr>
-                            <td>{lang === 'CZ' ? 'Stav sealed fólie' : 'Shrink Wrap Condition'}</td>
+                            <td>{lang === 'CZ' ? 'Stav originální fólie' : 'Original Foil Condition'}</td>
                             <td>{product.foilCondition}</td>
                           </tr>
                         )}

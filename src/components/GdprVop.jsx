@@ -321,7 +321,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   <li><strong>Cardboard Sandwich:</strong> The toploader is placed between two thick pieces of corrugated cardboard extending beyond its dimensions, secured with low-tack painter's tape (leaves no glue residue).</li>
                   <li><strong>Bubble Envelope:</strong> The entire cardboard sandwich is placed in a high-quality bubble mailer. The card is thus 100% protected against shocks.</li>
                 </ol>
-                <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-main)', margin: '16px 0 8px 0' }}>How we pack sealed products</h4>
+                <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-main)', margin: '16px 0 8px 0' }}>How we pack boxed products</h4>
                 <ul style={{ paddingLeft: '20px', fontSize: '13px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   <li>Displays, Booster Boxes, and Elite Trainer Boxes (ETBs) are packed exclusively in sturdy, new 5-layer cardboard boxes.</li>
                   <li>Products are wrapped in a thick layer of bubble wrap, and empty space in the box is filled with paper padding or air cushions.</li>
@@ -391,7 +391,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   <li><strong>Kartonový sendvič:</strong> Toploader vložíme mezi dva silné pláty vlnité lepenky přesahující rozměry toploaderu a zafixujeme papírovou malířskou páskou (nezanechává stopy lepidla).</li>
                   <li><strong>Bublinková obálka:</strong> Celý sendvič vložíme do kvalitní bublinkové obálky. Karta je tak 100% chráněna proti nárazům.</li>
                 </ol>
-                <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-main)', margin: '16px 0 8px 0' }}>Jak balíme zapečetěné produkty (Sealed Product)</h4>
+                <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-main)', margin: '16px 0 8px 0' }}>Jak balíme balené produkty</h4>
                 <ul style={{ paddingLeft: '20px', fontSize: '13px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   <li>Displeje, Booster Boxy a Elite Trainer Boxy (ETB) balíme výhradně do pevných, nových pětivrstvých kartonových krabic.</li>
                   <li>Produkty obalujeme silnou vrstvou bublinkové fólie a zbylý prostor v krabici vyplňujeme papírovou střiží nebo vzduchovými polštářky.</li>
@@ -545,7 +545,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   5.1. Packaging standards:
                   <br />• <strong>Raw cards:</strong> Sleeve, toploader with Pull-Tab, cardboard sandwich, bubble envelope.
-                  <br />• <strong>Sealed products:</strong> Sturdy boxes, thick bubble wrap, and fillers to prevent wrap tear or corner dents.
+                  <br />• <strong>Boxed products:</strong> Sturdy boxes, thick bubble wrap, and fillers to prevent wrap tear or corner dents.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   5.2. Delivery methods: Packeta, DPD, GLS, Czech Post, or personal pick-up in Pardubice or Holice.
@@ -571,7 +571,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   6.5. Payouts will be refunded within 14 days of receiving the withdrawal notice, but not before the returned goods are received or proof of dispatch is provided.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  6.6. <strong>Important notice for collectors:</strong> Opening or damaging the original protective shrink wrap of sealed products (Booster Boxes, ETBs, Boosters) dramatically reduces their collectible and investment value. The Seller will claim compensation for the reduction in value (pursuant to Section 1833 of the Czech Civil Code), which may amount to 30% to 50% of the purchase price and will be deducted from the refund. For Singles, cards must not show any signs of wear, scratches, or binder ring dents.
+                  6.6. <strong>Important notice for collectors:</strong> Opening or damaging the original protective shrink wrap of boxed products (Booster Boxes, ETBs, Boosters) dramatically reduces their collectible and investment value. The Seller will claim compensation for the reduction in value (pursuant to Section 1833 of the Czech Civil Code), which may amount to 30% to 50% of the purchase price and will be deducted from the refund. For Singles, cards must not show any signs of wear, scratches, or binder ring dents.
                 </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>7. RIGHTS FROM DEFECTIVE PERFORMANCE (Complaints)</h3>
@@ -754,7 +754,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   5.1. Standardy balení:
                   <br />• <strong>Kusové karty:</strong> Sleeve, toploader s Pull-Tab, kartonový sendvič, bublinková obálka.
-                  <br />• <strong>Zapečetěné produkty:</strong> Pevné krabice, bublinková fólie, plnící materiál k zamezení poškození fólie a rohů.
+                  <br />• <strong>Balené produkty:</strong> Pevné krabice, bublinková fólie, plnící materiál k zamezení poškození fólie a rohů.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   5.2. Způsoby doručení: Zásilkovna, DPD, GLS, Česká pošta a osobní odběr v Pardubicích či Holicích.
@@ -780,7 +780,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   6.5. Peněžní prostředky vrátí prodávající do 14 dnů od doručení odstoupení, nikoli však dříve, než obdrží vrácené zboží nebo důkaz o odeslání.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  6.6. <strong>Důležité upozornění:</strong> U sealed produktů (Booster Boxy, ETB apod.) poškození nebo otevření smršťovací fólie (shrink wrap) dramaticky snižuje sběratelskou hodnotu. Prodávající uplatní nárok na snížení hodnoty zboží (§ 1833 občanského zákoníku), které může činit až 30–50 % z ceny zboží.
+                  6.6. <strong>Důležité upozornění:</strong> U balených produktů (Booster Boxy, ETB apod.) poškození nebo otevření smršťovací fólie (shrink wrap) dramaticky snižuje sběratelskou hodnotu. Prodávající uplatní nárok na snížení hodnoty zboží (§ 1833 občanského zákoníku), které může činit až 30–50 % z ceny zboží.
                 </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>7. PRÁVA Z VADNÉHO PLNĚNÍ (Reklamace)</h3>
@@ -1292,12 +1292,12 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                     </h4>
                     <p style={{ margin: '0 0 10px 0' }}>
                       {lang === 'EN' 
-                        ? 'Please note that for sealed products (e.g., Booster Boxes, Elite Trainer Boxes, special gift sets, or individual Boosters), opening or breaking the manufacturer\'s original protective shrink wrap causes irreversible damage to its collectible and investment value.'
-                        : 'Berte prosím na vědomí, že u zapečetěných produktů (např. Booster Boxy, Elite Trainer Boxy, speciální dárkové sety, nebo jednotlivé Boostery) dochází porušením originální ochranné fólie (tzv. shrink wrap s logy výrobce) k nevratnému poškození sběratelské a investiční hodnoty.'}
+                        ? 'Please note that for products in original packaging (e.g., Booster Boxes, Elite Trainer Boxes, special gift sets, or individual Boosters), opening or breaking the manufacturer\'s original protective shrink wrap causes irreversible damage to its collectible and investment value.'
+                        : 'Berte prosím na vědomí, že u originálně balených produktů (např. Booster Boxy, Elite Trainer Boxy, speciální dárkové sety, nebo jednotlivé Boostery) dochází porušením originální ochranné fólie (tzv. shrink wrap s logy výrobce) k nevratnému poškození sběratelské a investiční hodnoty.'}
                     </p>
                     <p style={{ margin: 0 }}>
                       {lang === 'EN'
-                        ? 'The product immediately becomes opened and weighable (losing its sealed guarantee). If you return goods with a broken wrap seal, we will claim compensation for the reduction in value in accordance with Section 1833 of the Civil Code. This compensation may amount to 30% to 50% of the purchase price and will be deducted from the refund. For Singles (raw cards), the card\'s physical condition must remain entirely undamaged (e.g., free of surface scratches, bent corners, or pressure marks from ring binders).'
+                        ? 'The product immediately becomes opened and weighable (losing its original guarantee). If you return goods with a broken wrap seal, we will claim compensation for the reduction in value in accordance with Section 1833 of the Civil Code. This compensation may amount to 30% to 50% of the purchase price and will be deducted from the refund. For Singles (raw cards), the card\'s physical condition must remain entirely undamaged (e.g., free of surface scratches, bent corners, or pressure marks from ring binders).'
                         : 'Zboží se tímto okamžikem stává rozbaleným a zvážitelným (ztrácí záruku neotevřenosti). Pokud vrátíte zboží s porušenou fólií, budeme nuceni uplatnit nárok na náhradu snížení hodnoty zboží v souladu s § 1833 občanského zákoníku. Tato náhrada může činit 30 až 50 % z kupní ceny zboží a bude odečtena od vrácené částky. U kusových karet (Singles) nesmí dojít k poškození stavu karty (např. poškrábání, ohnutí rohů či otlačení od kroužkových alb).'}
                     </p>
                   </div>
@@ -1351,14 +1351,14 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 <li>
                   <strong>{lang === 'EN' ? 'Return Shipping:' : 'Odeslání zboží prodejci:'}</strong>{' '}
                   {lang === 'EN'
-                    ? 'Pack the products securely (for singles, we recommend using a penny sleeve and toploader; for sealed products, a sturdy box and bubble wrap) and ship them to our address: NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice.'
-                    : 'Zboží bezpečně zabalte (pro kusové karty doporučujeme použít penny sleeve a toploader, pro zapečetěné krabice pevnou kartonovou krabici a bublinkovou fólii, aby nedošlo k poškození během dopravy) a odešlete na naši adresu: NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice.'}
+                    ? 'Pack the products securely (for singles, we recommend using a penny sleeve and toploader; for boxed products, a sturdy box and bubble wrap) and ship them to our address: NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice.'
+                    : 'Zboží bezpečně zabalte (pro kusové karty doporučujeme použít penny sleeve a toploader, pro originální balení pevnou kartonovou krabici a bublinkovou fólii, aby nedošlo k poškození během dopravy) a odešlete na naši adresu: NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice.'}
                 </li>
                 <li>
                   <strong>{lang === 'EN' ? 'Inspection & Payout:' : 'Kontrola a vrácení peněz:'}</strong>{' '}
                   {lang === 'EN'
                     ? 'Once received, we will inspect the cards or shrink wrap seal. We will process your refund via bank transfer or back to your card within 14 days of receiving the package (or receiving proof of shipment).'
-                    : 'Jakmile zásilku převezmeme, zkontrolujeme stav karet či neporušenost fólií u sealed produktů. Nejpozději do 14 dnů od převzetí vráceného zboží (nebo od okamžiku, kdy nám prokážete, že bylo zboží odesláno) vám vrátíme peníze na bankovní účet nebo zpět na platební kartu.'}
+                    : 'Jakmile zásilku převezmeme, zkontrolujeme stav karet či neporušenost fólií u balených produktů. Nejpozději do 14 dnů od převzetí vráceného zboží (nebo od okamžiku, kdy nám prokážete, že bylo zboží odesláno) vám vrátíme peníze na bankovní účet nebo zpět na platební kartu.'}
                 </li>
               </ol>
             </div>

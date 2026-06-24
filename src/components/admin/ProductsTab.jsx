@@ -610,7 +610,15 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const getHierarchicalCategoryOptions = () => {
     const list = [];
     const gameCats = categories.filter(c => c.game === formGame);
-    const roots = gameCats.filter(c => !c.parent_id);
+    
+    // Filter out root categories (parent_id: null)
+    const nonRootGameCats = gameCats.filter(c => c.parent_id !== null);
+    
+    // Find Level 1 categories (direct children of the root category)
+    const roots = nonRootGameCats.filter(c => {
+      const parent = categories.find(p => p.id === c.parent_id);
+      return parent ? parent.parent_id === null : true;
+    });
     
     const traverse = (cat, depth = 0) => {
       list.push({
@@ -618,7 +626,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
         name: lang === 'CZ' ? cat.name_cz : cat.name_en,
         depth: depth
       });
-      const children = gameCats.filter(c => c.parent_id === cat.id);
+      const children = nonRootGameCats.filter(c => c.parent_id === cat.id);
       children.forEach(child => traverse(child, depth + 1));
     };
     
@@ -633,7 +641,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     const visited = new Set();
     while (current && !visited.has(current.id)) {
       visited.add(current.id);
-      path.unshift(lang === 'CZ' ? current.name_cz : current.name_en);
+      if (current.parent_id !== null) {
+        path.unshift(lang === 'CZ' ? current.name_cz : current.name_en);
+      }
       current = categories.find(c => String(c.id) === String(current.parent_id));
     }
     return path.join(' ➔ ');

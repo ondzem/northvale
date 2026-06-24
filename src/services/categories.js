@@ -41,7 +41,7 @@ export const mockCategories = [
   { id: 'pokemon-japanese-special-set', name_cz: 'Japonský Speciální Set', name_en: 'Japanese Special Set', type: 'sealed', game: 'Pokémon', parent_id: 'pokemon-special' },
 
   // --- POKEMON SUB-SUBCATEGORIES (Level 3 under Other) ---
-  { id: 'pokemon-sealed-case', name_cz: 'Sealed Case', name_en: 'Sealed Case', type: 'sealed', game: 'Pokémon', parent_id: 'pokemon-other' },
+  { id: 'pokemon-sealed-case', name_cz: 'Sady boxů (Case)', name_en: 'Cases', type: 'sealed', game: 'Pokémon', parent_id: 'pokemon-other' },
   { id: 'pokemon-japanese-other', name_cz: 'Japonské ostatní', name_en: 'Japanese Other', type: 'sealed', game: 'Pokémon', parent_id: 'pokemon-other' },
 
   // --- LORCANA SUB-CATEGORIES (Level 2) ---

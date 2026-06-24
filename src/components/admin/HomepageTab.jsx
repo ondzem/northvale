@@ -78,7 +78,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
   // List of standard storefront redirect destinations
   const REDIRECT_OPTIONS = [
     { value: 'home', labelCz: 'Úvodní stránka', labelEn: 'Homepage' },
-    { value: 'sealed-catalog', labelCz: 'Zapečetěné produkty (Sealed)', labelEn: 'Sealed Products' },
+    { value: 'sealed-catalog', labelCz: 'Katalog produktů a příslušenství', labelEn: 'Products & Accessories Catalog' },
     { value: 'grading', labelCz: 'Zprostředkování gradingu', labelEn: 'Grading Service' },
     { value: 'buylist', labelCz: 'Výkup karet (Buylist)', labelEn: 'Card Buylist' },
     { value: 'about', labelCz: 'O nás (Příběh)', labelEn: 'About Us' },

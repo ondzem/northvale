@@ -117,8 +117,8 @@ export const translations = {
     FaqPage: {
       title: "Často kladené dotazy (FAQ)",
       subtitle: "Vše, co potřebujete vědět o nákupu, balení, výkupu a gradingu.",
-      q1: "Jakým způsobem balíte sealed produkty, aby se nepoškodily rohy?",
-      a1: "To je naše hlavní priorita. Booster boxy a ETB balíme výhradně do pevných, nových pětivrstvých kartonových krabic. Produkt obalíme silnou vrstvou bublinkové fólie a volný prostor vyplníme papírovou střiží. Fólie (shrink wrap) a rohy dorazí neporušené.",
+      q1: "Jakým způsobem balíte produkty, aby se nepoškodily rohy?",
+      a1: "To je naše hlavní priorita. Booster boxy a ETB balíme výhradně do pevných, nových pětivrstvých kartonových krabic. Produkt obalíme silnou vrstvou bublinkové fólie a volný prostor vyplníme papírovou střiží. Fólie a rohy dorazí neporušené.",
       q2: "Jak dlouho trvá odeslání objednávky?",
       a2: "Objednávky přijaté do 12:00 v pracovní dny odesíláme týž den. Ostatní do 24 hodin. Doručení dopravci (Zásilkovna, GLS, DPD) trvá obvykle 1-2 pracovní dny.",
       q3: "Mohu u vás prodat své přebytečné karty?",
@@ -248,9 +248,9 @@ export const translations = {
       }
     },
     Catalogs: {
-      singlesTitle: "Kusové karty Pokémon (Singles)",
-      sealedTitle: "Zapečetěné TCG produkty",
-      slabsTitle: "Graded Karty (Slabs)",
+      singlesTitle: "Katalog TCG karet",
+      sealedTitle: "TCG produkty a příslušenství",
+      slabsTitle: "Ohodnocené karty",
       searchLabel: "Vyhledávání",
       searchPlaceholder: "Hledat podle názvu...",
       filters: "Filtry",
@@ -569,8 +569,8 @@ export const translations = {
     FaqPage: {
       title: "Frequently Asked Questions (FAQ)",
       subtitle: "Everything you need to know about purchasing, packaging, card buybacks, and grading.",
-      q1: "How do you pack sealed products to protect the corners?",
-      a1: "This is our primary standard. Booster boxes and ETBs are shipped in thick, double-walled cardboard boxes. We wrap products in multiple layers of bubble wrap and pad empty space with paper fillers. We guarantee your box wraps and corners arrive in pristine condition.",
+      q1: "How do you pack products to protect the corners?",
+      a1: "This is our primary standard. Booster boxes and ETBs are shipped in thick, double-walled cardboard boxes. We wrap products in multiple layers of bubble wrap and pad empty space with paper fillers. We guarantee your box packagings and corners arrive in pristine condition.",
       q2: "How long does shipping take?",
       a2: "Orders placed before 12:00 PM on business days are dispatched same-day. Courier delivery (Packeta, GLS, DPD) typically takes 1-2 business days.",
       q3: "Can I sell my cards to you?",
@@ -700,9 +700,9 @@ export const translations = {
       }
     },
     Catalogs: {
-      singlesTitle: "Pokémon Singles",
-      sealedTitle: "Sealed TCG Products",
-      slabsTitle: "Graded Cards (Slabs)",
+      singlesTitle: "TCG Cards",
+      sealedTitle: "TCG Products & Accessories",
+      slabsTitle: "Graded Cards",
       searchLabel: "Search",
       searchPlaceholder: "Search by name...",
       filters: "Filters",

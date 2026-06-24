@@ -436,6 +436,37 @@ export default function CategoriesTab({ showToast }) {
   };
 
 
+  const getGameRootCategoryId = (gameName) => {
+    const found = categories.find(c => c.game === gameName && c.parent_id === null);
+    if (found) return found.id;
+    const mapping = {
+      'Pokémon': 'game-pokemon',
+      'Lorcana': 'game-lorcana',
+      'One Piece': 'game-onepiece',
+      'Riftbound': 'game-riftbound',
+      'Accessories': 'game-accessories',
+      'Acrylics': 'game-acrylics'
+    };
+    return mapping[gameName] || null;
+  };
+
+  const isParentRoot = (parentId) => {
+    if (!parentId) return true;
+    const parent = categories.find(c => c.id === parentId);
+    return parent ? parent.parent_id === null : false;
+  };
+
+  const resolveCategoryType = (game, parentId) => {
+    if (parentId && !isParentRoot(parentId)) {
+      const parent = categories.find(c => c.id === parentId);
+      if (parent) return parent.type;
+    }
+    if (game === 'Accessories' || game === 'Acrylics') {
+      return 'accessory';
+    }
+    return 'sealed';
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     if (!formId.trim()) {
@@ -450,17 +481,12 @@ export default function CategoriesTab({ showToast }) {
       setFormId(slug);
     }
 
-    const parentCat = categories.find(c => c.id === formParentId);
-    let resolvedType = formType;
-    if (!isEditing) {
-      if (parentCat) {
-        resolvedType = parentCat.type;
-      } else if (formGame === 'Accessories' || formGame === 'Acrylics') {
-        resolvedType = 'accessory';
-      } else {
-        resolvedType = 'single';
-      }
+    let resolvedParentId = formParentId;
+    if (!resolvedParentId || isParentRoot(resolvedParentId)) {
+      resolvedParentId = getGameRootCategoryId(formGame);
     }
+
+    const resolvedType = resolveCategoryType(formGame, resolvedParentId);
 
     const catData = {
       id: formId.trim() || (formNameEn || formNameCz).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
@@ -468,7 +494,7 @@ export default function CategoriesTab({ showToast }) {
       name_en: formNameEn,
       type: resolvedType,
       game: formGame,
-      parent_id: formParentId || null,
+      parent_id: resolvedParentId || null,
       image_url: formImageUrl,
       description_cz: formDescCz,
       description_en: formDescEn
@@ -526,7 +552,9 @@ export default function CategoriesTab({ showToast }) {
     const visited = new Set();
     while (current && !visited.has(current.id)) {
       visited.add(current.id);
-      path.unshift(lang === 'CZ' ? current.name_cz : current.name_en);
+      if (current.parent_id !== null) {
+        path.unshift(lang === 'CZ' ? current.name_cz : current.name_en);
+      }
       current = categories.find(c => c.id === current.parent_id);
     }
     return path.join(' ➔ ');
@@ -557,8 +585,14 @@ export default function CategoriesTab({ showToast }) {
     // We only want options for the currently selected game, excluding self/descendants
     const gameCats = categories.filter(c => c.game === formGame && !isSelfOrDescendant(c.id));
     
-    // Find roots for this game
-    const roots = gameCats.filter(c => !c.parent_id);
+    // Filter out root categories (parent_id: null)
+    const nonRootGameCats = gameCats.filter(c => c.parent_id !== null);
+    
+    // Find Level 1 categories (direct children of the root category)
+    const roots = nonRootGameCats.filter(c => {
+      const parent = categories.find(p => p.id === c.parent_id);
+      return parent ? parent.parent_id === null : true;
+    });
     
     const traverse = (cat, depth = 0) => {
       list.push({
@@ -567,7 +601,7 @@ export default function CategoriesTab({ showToast }) {
         depth: depth
       });
       
-      const children = gameCats.filter(c => c.parent_id === cat.id);
+      const children = nonRootGameCats.filter(c => c.parent_id === cat.id);
       children.forEach(child => traverse(child, depth + 1));
     };
     
@@ -678,10 +712,22 @@ export default function CategoriesTab({ showToast }) {
         ) : (
           <div className="ctf-tree">
             {gamesList.map(game => {
-              const roots = categories.filter(c => c.game === game && !c.parent_id);
+              const gameRoot = categories.find(c => c.game === game && c.parent_id === null);
+              const roots = gameRoot ? categories.filter(c => c.parent_id === gameRoot.id) : [];
+              const getGameDisplayName = (g) => {
+                const mapping = {
+                  'Pokémon': 'Pokémon',
+                  'Lorcana': 'Disney Lorcana',
+                  'One Piece': 'One Piece',
+                  'Riftbound': 'Riftbound',
+                  'Accessories': lang === 'CZ' ? 'Herní příslušenství' : 'Gaming Accessories',
+                  'Acrylics': lang === 'CZ' ? 'Prémiové akrylové boxy' : 'Premium Acrylic Cases'
+                };
+                return mapping[g] || g;
+              };
               return (
                 <div key={game} className="ctf-group">
-                  <div className="ctf-group-label">{game}</div>
+                  <div className="ctf-group-label">{getGameDisplayName(game)}</div>
                   {roots.length === 0 ? (
                     <div className="ctf-col-sub" style={{ paddingLeft: '12px', fontStyle: 'italic', fontSize: '12px', marginBottom: '12px' }}>
                       {lang === 'CZ' ? 'Žádné podkategorie' : 'No subcategories'}
@@ -732,7 +778,7 @@ export default function CategoriesTab({ showToast }) {
               <span style={{ color: 'rgba(255,255,255,0.45)' }}>Domů</span>
               <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '10px' }}>➔</span>
               <span style={{ color: '#fff', fontWeight: '500' }}>{formGame}</span>
-              {formParentId && (
+              {formParentId && !isParentRoot(formParentId) && (
                 <>
                   <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '10px' }}>➔</span>
                   <span style={{ color: 'rgba(255,255,255,0.8)' }}>
@@ -812,18 +858,18 @@ export default function CategoriesTab({ showToast }) {
                   className="ctf-parent-trigger"
                 >
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    {formParentId ? (
+                    {!formParentId || isParentRoot(formParentId) ? (
+                      <>
+                        <span style={{ color: 'rgba(255, 255, 255, 0.4)' }}>🌐</span>
+                        <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                          {lang === 'CZ' ? '— Hlavní kategorie —' : '— Top-level category —'}
+                        </span>
+                      </>
+                    ) : (
                       <>
                         <span style={{ color: 'var(--color-gold)' }}>📁</span>
                         <span style={{ fontSize: '13px' }}>{getParentPath(formParentId)}</span>
                         <span style={{ color: 'rgba(255, 255, 255, 0.35)', fontSize: '11px' }}>({formParentId})</span>
-                      </>
-                    ) : (
-                      <>
-                        <span style={{ color: 'rgba(255, 255, 255, 0.4)' }}>🌐</span>
-                        <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-                          {lang === 'CZ' ? '— Bez nadřazené kategorie (Hlavní) —' : '— No Parent Category (Top-level) —'}
-                        </span>
                       </>
                     )}
                   </span>
@@ -862,8 +908,8 @@ export default function CategoriesTab({ showToast }) {
                         alignItems: 'center',
                         gap: '8px',
                         fontSize: '13px',
-                        color: !formParentId ? 'var(--color-gold)' : '#fff',
-                        background: !formParentId ? 'rgba(253, 189, 22, 0.08)' : 'transparent',
+                        color: !formParentId || isParentRoot(formParentId) ? 'var(--color-gold)' : '#fff',
+                        background: !formParentId || isParentRoot(formParentId) ? 'rgba(253, 189, 22, 0.08)' : 'transparent',
                         transition: 'background 0.15s, color 0.15s',
                         marginBottom: '6px',
                         borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
@@ -871,8 +917,8 @@ export default function CategoriesTab({ showToast }) {
                       className="ctf-parent-opt-none"
                     >
                       <span>🌐</span>
-                      <span style={{ fontWeight: !formParentId ? '600' : '400' }}>
-                        {lang === 'CZ' ? '— Bez nadřazené kategorie (Hlavní) —' : '— No Parent Category (Top-level) —'}
+                      <span style={{ fontWeight: !formParentId || isParentRoot(formParentId) ? '600' : '400' }}>
+                        {lang === 'CZ' ? '— Hlavní kategorie —' : '— Top-level category —'}
                       </span>
                     </div>
 
