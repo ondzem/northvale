@@ -52,18 +52,18 @@ export default function InvoiceTemplate({ order, onClose, lang = 'CZ' }) {
           {/* Supplier (Dodavatel) */}
           <div className="invoice-party invoice-supplier">
             <h2>{lang === 'CZ' ? 'Dodavatel:' : 'Supplier:'}</h2>
-            <p className="party-name"><strong>Northvale TCG s.r.o.</strong></p>
-            <p>Smilova 321</p>
-            <p>530 02 Pardubice</p>
+            <p className="party-name"><strong>NORTHVALE s.r.o.</strong></p>
+            <p>Bratří Čapků 1095</p>
+            <p>534 01 Holice</p>
             <p>{lang === 'CZ' ? 'Česká republika' : 'Czech Republic'}</p>
             <div className="party-tax-ids" style={{ marginTop: '10px' }}>
-              <p>IČO: <strong>12345678</strong></p>
-              <p>DIČ: <strong>CZ12345678</strong></p>
+              <p>IČO: <strong>29618142</strong></p>
+              <p>DIČ: <strong>CZ29618142</strong></p>
             </div>
             <p className="invoice-legal-note" style={{ fontSize: '10px', color: '#666', marginTop: '8px' }}>
               {lang === 'CZ' 
-                ? 'Společnost zapsaná v obchodním rejstříku vedeném Krajským soudem v Hradci Králové, oddíl C, vložka 12345.'
-                : 'Company registered in the Commercial Register maintained by the Regional Court in Hradec Králové, Section C, File 12345.'}
+                ? 'Společnost zapsaná v obchodním rejstříku vedeném Krajským soudem v Hradci Králové, oddíl C, vložka 29618.'
+                : 'Company registered in the Commercial Register maintained by the Regional Court in Hradec Králové, Section C, File 29618.'}
             </p>
           </div>
 
@@ -189,6 +189,12 @@ export default function InvoiceTemplate({ order, onClose, lang = 'CZ' }) {
             </p>
           </div>
         </div>
+
+        {order.notes && (
+          <div style={{ marginTop: '20px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '4px', borderLeft: '3px solid var(--nv-gold, #fdbd16)', fontSize: '13px', textAlign: 'left' }}>
+            <strong>{lang === 'CZ' ? 'Poznámka k objednávce:' : 'Order Note:'}</strong> {order.notes}
+          </div>
+        )}
 
         <footer className="invoice-document-footer">
           <p>{lang === 'CZ' ? 'Děkujeme za Váš nákup na Northvale TCG!' : 'Thank you for shopping at Northvale TCG!'}</p>

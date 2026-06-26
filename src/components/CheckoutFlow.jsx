@@ -10,7 +10,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
   const [zip, setZip] = useState('');
-  const [shipping, setShipping] = useState('zasilkovna');
+  const [shipping, setShipping] = useState('pardubice');
   const [payment, setPayment] = useState('card');
   
   // Store Credit applied state
@@ -251,7 +251,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   : shipMethod === 'dpd'
                     ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
                     : shipMethod === 'pardubice' 
-                      ? (lang === 'CZ' ? 'Osobní odběr Pardubice' : 'Local Pickup Pardubice') 
+                      ? (lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)') 
                       : shipMethod === 'posta-cenne'
                         ? (lang === 'CZ' ? 'Česká pošta - Cenné psaní' : 'Czech Post - Insured Letter')
                         : (lang === 'CZ' ? 'Česká pošta - Doporučené psaní' : 'Czech Post - Registered Mail'),
@@ -423,7 +423,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           : shipping === 'dpd'
             ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
             : shipping === 'pardubice' 
-              ? (lang === 'CZ' ? 'Osobní odběr Pardubice' : 'Local Pickup Pardubice') 
+              ? (lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)') 
               : shipping === 'posta-cenne'
                 ? (lang === 'CZ' ? 'Česká pošta - Cenné psaní' : 'Czech Post - Insured Letter')
                 : (lang === 'CZ' ? 'Česká pošta - Doporučené psaní' : 'Czech Post - Registered Mail'),
@@ -1351,165 +1351,19 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                 <div className="pof-radios">
                   <button 
                     type="button"
-                    className={`pof-radio ${shipping === 'zasilkovna' ? 'is-active' : ''}`} 
-                    onClick={() => setShipping('zasilkovna')}
-                  >
-                    <span className="pof-radio-dot" aria-hidden="true"></span>
-                    <span className="pof-radio-body">
-                      <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'Zásilkovna - Výdejní místo / Z-BOX' : 'Packeta - Pickup Point / Z-BOX'}
-                      </span>
-                      <span className="pof-radio-desc">
-                        {lang === 'CZ' ? 'Doručení do 24-48 h na Vámi vybrané místo.' : 'Delivery within 24-48 h to your selected location.'}
-                      </span>
-                    </span>
-                     <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
-                      {subtotalAfterDiscount > 2000 ? (lang === 'CZ' ? 'Zdarma' : 'Free') : (lang === 'CZ' ? '79 Kč' : '79 CZK')}
-                    </span>
-                  </button>
-
-                  <button 
-                    type="button"
-                    className={`pof-radio ${shipping === 'gls' ? 'is-active' : ''}`} 
-                    onClick={() => setShipping('gls')}
-                  >
-                    <span className="pof-radio-dot" aria-hidden="true"></span>
-                    <span className="pof-radio-body">
-                      <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery'}
-                      </span>
-                      <span className="pof-radio-desc">
-                        {lang === 'CZ' ? 'Spolehlivé doručení kurýrem přímo k Vám domů.' : 'Reliable delivery by courier directly to your home.'}
-                      </span>
-                    </span>
-                     <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
-                      {subtotalAfterDiscount > 2000 ? (lang === 'CZ' ? 'Zdarma' : 'Free') : (lang === 'CZ' ? '99 Kč' : '99 CZK')}
-                    </span>
-                  </button>
-
-                  <button 
-                    type="button"
-                    className={`pof-radio ${shipping === 'dpd' ? 'is-active' : ''}`} 
-                    onClick={() => setShipping('dpd')}
-                  >
-                    <span className="pof-radio-dot" aria-hidden="true"></span>
-                    <span className="pof-radio-body">
-                      <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery'}
-                      </span>
-                      <span className="pof-radio-desc">
-                        {lang === 'CZ' ? 'Komfortní doručení na adresu s možností změny termínu online.' : 'Comfortable home delivery with online schedule changes.'}
-                      </span>
-                    </span>
-                     <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
-                      {subtotalAfterDiscount > 2000 ? (lang === 'CZ' ? 'Zdarma' : 'Free') : (lang === 'CZ' ? '109 Kč' : '109 CZK')}
-                    </span>
-                  </button>
-
-                  <button 
-                    type="button"
-                    className={`pof-radio ${shipping === 'pardubice' ? 'is-active' : ''}`} 
+                    className="pof-radio is-active" 
                     onClick={() => setShipping('pardubice')}
                   >
                     <span className="pof-radio-dot" aria-hidden="true"></span>
                     <span className="pof-radio-body">
                       <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'Osobní odběr Pardubice (Coffee & Cards)' : 'Local Pickup Pardubice (Coffee & Cards)'}
+                        {lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)'}
                       </span>
                       <span className="pof-radio-desc">
-                        {lang === 'CZ' ? 'Vyzvednutí zdarma v kavárně v centru. Slevový kód na kávu.' : 'Pickup for free in the café in the city center. Free coffee voucher included.'}
+                        {lang === 'CZ' ? 'Vyzvednutí na naší provozovně. Zdarma.' : 'Pickup at our premises. Free.'}
                       </span>
                     </span>
                     <span className="pof-price is-free">{lang === 'CZ' ? 'Zdarma' : 'Free'}</span>
-                  </button>
-
-                  <button 
-                    type="button"
-                    className={`pof-radio ${shipping === 'posta-doporucene' ? 'is-active' : ''}`} 
-                    onClick={() => setShipping('posta-doporucene')}
-                  >
-                    <span className="pof-radio-dot" aria-hidden="true"></span>
-                    <span className="pof-radio-body">
-                      <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'Česká pošta - Doporučené psaní' : 'Czech Post - Registered Mail'}
-                      </span>
-                      <span className="pof-radio-desc">
-                        {lang === 'CZ' ? 'Pojištěno do 880 Kč. Pouze pro menší zásilky.' : 'Insured up to 880 CZK. Available for light card shipments only.'}
-                      </span>
-                    </span>
-                    <span className="pof-price is-free">{lang === 'CZ' ? 'Zdarma' : 'Free'}</span>
-                  </button>
-
-                  <button 
-                    type="button"
-                    className={`pof-radio ${shipping === 'posta-cenne' ? 'is-active' : ''}`} 
-                    onClick={() => setShipping('posta-cenne')}
-                  >
-                    <span className="pof-radio-dot" aria-hidden="true"></span>
-                    <span className="pof-radio-body">
-                      <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'Česká pošta - Cenné psaní' : 'Czech Post - Insured Letter'}
-                      </span>
-                      <span className="pof-radio-desc">
-                        {lang === 'CZ' 
-                          ? 'Bezpečnostní obálka, plné pojištění (doporučeno pro drahé kusovky).' 
-                          : 'Special secure bubble envelope with full valuation insurance (highly recommended for high-end singles).'}
-                      </span>
-                    </span>
-                    <span className="pof-price">{lang === 'CZ' ? '110 Kč' : '110 CZK'}</span>
-                  </button>
-                </div>
-              </section>
-
-              {/* Step 5: Způsob platby */}
-              <section className="pof-step">
-                <div className="pof-step-head">
-                  <span className="pof-step-num"><span className="__om-t">05</span></span>
-                  <h3><span className="__om-t">{lang === 'CZ' ? 'Způsob platby' : 'Payment Method'}</span></h3>
-                </div>
-                <div className="pof-radios">
-                  <button 
-                    type="button"
-                    className={`pof-radio ${payment === 'card' ? 'is-active' : ''}`} 
-                    onClick={() => setPayment('card')}
-                  >
-                    <span className="pof-radio-dot" aria-hidden="true"></span>
-                    <span className="pof-radio-body">
-                      <span className="pof-radio-name">{lang === 'CZ' ? 'Platební karta online' : 'Online Credit/Debit Card'}</span>
-                      <span className="pof-radio-desc">{lang === 'CZ' ? 'Okamžitá platba přes bránu.' : 'Instant secure payment via gateway.'}</span>
-                    </span>
-                  </button>
-
-                  <button 
-                    type="button"
-                    className={`pof-radio ${payment === 'transfer' ? 'is-active' : ''}`} 
-                    onClick={() => setPayment('transfer')}
-                  >
-                    <span className="pof-radio-dot" aria-hidden="true"></span>
-                    <span className="pof-radio-body">
-                      <span className="pof-radio-name">{lang === 'CZ' ? 'Bankovní převod' : 'Bank Transfer'}</span>
-                      <span className="pof-radio-desc">
-                        {lang === 'CZ' 
-                          ? 'Platební údaje obdržíte v e-mailu. Expedujeme po připsání platby.' 
-                          : 'Payment coordinates will be sent by email. We ship immediately after transfer clears.'}
-                      </span>
-                    </span>
-                  </button>
-
-                  <button 
-                    type="button"
-                    className={`pof-radio ${payment === 'cod' ? 'is-active' : ''}`} 
-                    onClick={() => setPayment('cod')}
-                  >
-                    <span className="pof-radio-dot" aria-hidden="true"></span>
-                    <span className="pof-radio-body">
-                      <span className="pof-radio-name">{lang === 'CZ' ? 'Dobírka (Platba při převzetí)' : 'Cash on Delivery'}</span>
-                      <span className="pof-radio-desc">
-                        {lang === 'CZ' 
-                          ? 'Platíte v hotovosti nebo kartou kurýrovi při doručení. Příplatek 25 Kč.' 
-                          : 'Pay in cash or by credit card directly to the courier. +25 CZK surcharge.'}
-                      </span>
-                    </span>
                   </button>
                 </div>
               </section>
@@ -1551,14 +1405,15 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   {cart.map((item, idx) => (
                     <div key={idx} className="pof-line-item">
                       <div className="pof-li-thumb">
-                        <div className="card-art">
-                          <div className="ca-base"></div>
-                          <div className="ca-holo"></div>
-                          <div className="ca-shine"></div>
-                          <div className="ca-grain"></div>
-                          <div className="ca-frame"></div>
-                          <div className="ca-inner-frame"></div>
-                        </div>
+                        <img 
+                          src={item.product?.image || item.image || '/Akce - NORTHVALE.webp'} 
+                          alt={item.name || (item.product && item.product.name) || 'Northvale TCG produkt'} 
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
                       </div>
                       <div className="pof-li-name">
                         <div>
@@ -1730,7 +1585,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               <div className="ckf-help" style={{ marginTop: '24px' }}>
                 <span>{t('Cart.help') || (lang === 'CZ' ? 'Nevíte si rady?' : 'Need help?')}</span>
                 <a href="tel:+420739666779">+420 739 666 779</a>
-                <span style={{ opacity: 0.4 }}>/</span>
+                <span style={{ opacity: 0.4 }}>{"/"}</span>
                 <a href="mailto:info@northvaletcg.eu">info@northvaletcg.eu</a>
               </div>
             </aside>

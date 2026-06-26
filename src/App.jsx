@@ -1201,6 +1201,7 @@ function AppContent() {
             shipping_method: order.shippingMethod,
             shipping_cost: order.shippingCost,
             payment_surcharge: order.paymentSurcharge,
+            notes: order.notes || '',
             carrier: order.shippingMethod ? (
               order.shippingMethod.includes('GLS') ? 'GLS' :
               order.shippingMethod.includes('DPD') ? 'DPD' :
@@ -1243,6 +1244,7 @@ function AppContent() {
             companyName: order.companyName,
             ico: order.ico,
             dic: order.dic,
+            notes: order.notes || '',
             items: order.items.map(item => ({
               name: item.name || item.productName,
               quantity: item.quantity,
@@ -1276,7 +1278,8 @@ function AppContent() {
             isCompany: order.isCompany,
             companyName: order.companyName,
             ico: order.ico,
-            dic: order.dic
+            dic: order.dic,
+            notes: order.notes || ''
           },
           items: order.items.map(item => ({
             name: item.name || item.productName,

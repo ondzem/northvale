@@ -79,15 +79,16 @@ serve(async (req) => {
     const isPersonalPickup = order.shippingMethod && (
       order.shippingMethod.includes('Osobní') || 
       order.shippingMethod.includes('Local Pickup') || 
-      order.shippingMethod.includes('Pardubice')
+      order.shippingMethod.includes('Pardubice') ||
+      order.shippingMethod.includes('Holice')
     );
 
     const deliveryInstructions = isPersonalPickup 
       ? `
         <div style="background-color: #fcfbfa; padding: 15px 20px; border-left: 4px solid #fdbd16; border-radius: 4px; margin-bottom: 20px;">
-          <h3 style="margin: 0 0 5px 0; font-size: 15px; color: #111;">📍 Osobní odběr Pardubice</h3>
+          <h3 style="margin: 0 0 5px 0; font-size: 15px; color: #111;">📍 Osobní odběr Holice</h3>
           <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.5;">
-            Zboží pro Vás začínáme připravovat. Jakmile bude objednávka připravena k vyzvednutí na naší kontaktní adrese <strong>Smilova 321, 530 02 Pardubice</strong>, zašleme Vám e-mail a SMS.
+            Zboží pro Vás začínáme připravovat. Jakmile bude objednávka připravena k vyzvednutí na naší kontaktní adrese <strong>Bratří Čapků 1095, 534 01 Holice</strong>, zašleme Vám e-mail a SMS.
           </p>
         </div>
       `
@@ -171,11 +172,11 @@ serve(async (req) => {
           </tr>
           <tr>
             <td style="padding: 4px 0; vertical-align: top; font-size: 13px; line-height: 1.5; color: #333;">
-              <strong>Northvale TCG s.r.o.</strong><br/>
-              Smilova 321<br/>
-              530 02 Pardubice<br/>
-              IČO: 12345678<br/>
-              DIČ: CZ12345678
+              <strong>NORTHVALE s.r.o.</strong><br/>
+              Bratří Čapků 1095<br/>
+              534 01 Holice<br/>
+              IČO: 29618142<br/>
+              DIČ: CZ29618142
             </td>
             <td style="padding: 4px 0; vertical-align: top; font-size: 13px; line-height: 1.5; color: #333; text-align: right;">
               <strong>${order.customerName}</strong><br/>

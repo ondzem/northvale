@@ -32,11 +32,11 @@ serve(async (req) => {
 ============================================================
 
 DODAVATEL:
-Northvale TCG s.r.o.
-Smilova 321, 530 02 Pardubice
+NORTHVALE s.r.o.
+Bratří Čapků 1095, 534 01 Holice
 Česká republika
-IČO: 12345678
-DIČ: CZ12345678
+IČO: 29618142
+DIČ: CZ29618142
 
 ODBĚRATEL:
 ${order.companyName ? `${order.companyName}\nJméno: ` : ""}${order.customerName}
@@ -46,6 +46,7 @@ IČO: ${order.ico || "—"}
 DIČ: ${order.dic || "—"}
 E-mail: ${order.customerEmail || "—"}
 Tel: ${order.customerPhone || "—"}
+Poznámka: ${order.notes || "—"}
 
 ------------------------------------------------------------
 Variabilní symbol: ${order.id}

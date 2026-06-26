@@ -50,8 +50,8 @@ export default function OrderConfirmation({ order, setActivePage }) {
             <>
               <h3>📍 {lang === 'CZ' ? 'Pokyny k osobnímu odběru' : 'Personal Pickup Instructions'}</h3>
               <p className="pickup-address">
-                <strong>Northvale TCG s.r.o.</strong><br />
-                Smilova 321, 530 02 Pardubice
+                <strong>NORTHVALE s.r.o.</strong><br />
+                Bratří Čapků 1095, 534 01 Holice
               </p>
               <p className="pickup-note">
                 {lang === 'CZ'
