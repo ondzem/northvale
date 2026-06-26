@@ -298,7 +298,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('list'); // 'list' or 'excel'
   const [editedProducts, setEditedProducts] = useState({});
   const [outOfStockBehavior, setOutOfStockBehavior] = useState(localStorage.getItem('outOfStockBehavior') || 'watchdog');
   const [pokemonSets, setPokemonSets] = useState([]);
@@ -1644,50 +1643,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
           />
         </div>
 
-        <div style={{ display: 'flex', gap: '4px', backgroundColor: 'rgba(255,255,255,0.04)', padding: '4px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', marginRight: 'auto' }}>
-          <button
-            type="button"
-            onClick={() => setViewMode('list')}
-            style={{
-              padding: '6px 12px',
-              borderRadius: '6px',
-              border: 'none',
-              backgroundColor: viewMode === 'list' ? 'var(--color-gold, #fdbd16)' : 'transparent',
-              color: viewMode === 'list' ? '#1a1407' : '#8a8a92',
-              fontSize: '12px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.16s ease'
-            }}
-          >
-            🎴 {lang === 'CZ' ? 'Standardní' : 'Standard'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('excel')}
-            style={{
-              padding: '6px 12px',
-              borderRadius: '6px',
-              border: 'none',
-              backgroundColor: viewMode === 'excel' ? 'var(--color-gold, #fdbd16)' : 'transparent',
-              color: viewMode === 'excel' ? '#1a1407' : '#8a8a92',
-              fontSize: '12px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.16s ease'
-            }}
-          >
-            📊 {lang === 'CZ' ? 'Excel tabulka' : 'Excel Grid'}
-          </button>
-        </div>
+        <div style={{ marginRight: 'auto' }} />
 
-        {viewMode === 'excel' && Object.keys(editedProducts).length > 0 && (
+        {Object.keys(editedProducts).length > 0 && (
           <button
             type="button"
             onClick={handleSaveAllExcel}
@@ -1750,104 +1708,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
           <span>+ {lang === 'CZ' ? 'Přidat produkt' : 'Add Product'}</span>
         </button>
       </div>
-
-
-
-      {/* Products CSS-Grid Table matching A _ Floating _ Minimal */}
-      {viewMode === 'list' ? (
-        <div className="adf-table">
-          {loading ? (
-            <p style={styles.infoText}>{lang === 'CZ' ? 'Načítání produktů...' : 'Loading products...'}</p>
-          ) : filteredProducts.length === 0 ? (
-            <p style={styles.infoText}>{lang === 'CZ' ? 'Žádné produkty neodpovídají filtrům.' : 'No products match filters.'}</p>
-          ) : (
-            <>
-              <div className="adf-thead">
-                <span>{lang === 'CZ' ? 'Náhled' : 'Preview'}</span>
-                <span>{lang === 'CZ' ? 'Kód / ID' : 'Code / ID'}</span>
-                <span>{lang === 'CZ' ? 'Název produktu' : 'Product Name'}</span>
-                <span>{lang === 'CZ' ? 'Hra' : 'Game'}</span>
-                <span>{lang === 'CZ' ? 'Typ' : 'Type'}</span>
-                <span className="adf-th-right">{lang === 'CZ' ? 'Cena / Sklad' : 'Price / Stock'}</span>
-                <span className="adf-th-right">{lang === 'CZ' ? 'Akce' : 'Actions'}</span>
-              </div>
-              
-              {filteredProducts.map(p => {
-                let priceStockText = '';
-                let stockText = '';
-                let isLowStock = false;
-                if (p.type === 'single') {
-                  const totalStock = p.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
-                  const minPrice = p.variants?.length > 0 ? Math.min(...p.variants.map(v => v.price)) : 0;
-                  priceStockText = `${minPrice}`;
-                  stockText = `${totalStock} ks skladem`;
-                  if (totalStock <= 5) isLowStock = true;
-                } else {
-                  priceStockText = `${p.price || 0}`;
-                  stockText = `${p.stock || 0} ks skladem`;
-                  if ((p.stock || 0) <= 5) isLowStock = true;
-                }
-
-                return (
-                  <div key={p.id} className="adf-row">
-                    <div className="adf-thumb">
-                      <div className="card-art">
-                        {p.image ? (
-                          <img 
-                            src={p.image} 
-                            alt="" 
-                            style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '4px' }}
-                            onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }}
-                          />
-                        ) : (
-                          <>
-                            <div className="ca-base"></div>
-                            <div className="ca-holo"></div>
-                            <div className="ca-shine"></div>
-                            <div className="ca-grain"></div>
-                            <div className="ca-frame"></div>
-                            <div className="ca-inner-frame"></div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <code className="adf-code">{p.id}</code>
-                    <div className="adf-name">{p.name}</div>
-                    <div className="adf-game">{p.game}</div>
-                    <div>
-                      <span className="adf-type">{p.type}</span>
-                    </div>
-                    <div className="adf-price">
-                      <span className="adf-price-val">{priceStockText} Kč</span>
-                      <span className={`adf-stock ${isLowStock ? 'is-low' : ''}`}>{stockText}</span>
-                    </div>
-                    <div className="adf-actions">
-                      <button 
-                        type="button" 
-                        className="adf-edit"
-                        onClick={() => handleOpenEditModal(p)}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9M16.5 3.5a2 2 0 0 1 3 3L8 18l-4 1 1-4z"></path></svg>
-                        <span>{lang === 'CZ' ? ' Upravit' : ' Edit'}</span>
-                      </button>
-                      <button 
-                        type="button" 
-                        className="adf-del"
-                        aria-label={lang === 'CZ' ? 'Smazat' : 'Delete'}
-                        onClick={() => handleDeleteProduct(p.id)}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"></path></svg>
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </>
-          )}
-        </div>
-      ) : (
-        /* Excel Grid View */
-        <div className="nv-excel-container">
+      {/* Excel Grid View */}
+      <div className="nv-excel-container">
           {loading ? (
             <p style={{ ...styles.infoText, padding: '24px' }}>{lang === 'CZ' ? 'Načítání produktů...' : 'Loading products...'}</p>
           ) : filteredProducts.length === 0 ? (
@@ -2026,7 +1888,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
             </table>
           )}
         </div>
-      )}
 
       {/* Add / Edit Modal */}
       {isModalOpen && createPortal(
