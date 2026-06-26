@@ -7411,7 +7411,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   color: rgba(255, 255, 255, 0.85);
 }
 .tab-popis-text-html ul li::before {
-  content: "✦";
+  content: "•";
   position: absolute;
   left: 0;
   top: 0;
