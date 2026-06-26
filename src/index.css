@@ -7286,6 +7286,26 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   opacity: 0.5;
 }
 
+.pmf-input:-webkit-autofill,
+.pmf-input:-webkit-autofill:hover, 
+.pmf-input:-webkit-autofill:focus, 
+.pmf-input:-webkit-autofill:active,
+.pmf-input:autofill {
+  -webkit-box-shadow: 0 0 0 1000px #18181c inset !important;
+  -webkit-text-fill-color: rgb(240, 240, 240) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.pmf-select:-webkit-autofill,
+.pmf-select:-webkit-autofill:hover, 
+.pmf-select:-webkit-autofill:focus, 
+.pmf-select:-webkit-autofill:active,
+.pmf-select:autofill {
+  -webkit-box-shadow: 0 0 0 1000px #18181c inset !important;
+  -webkit-text-fill-color: rgb(240, 240, 240) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 .pmf-select-wrapper {
   position: relative;
   width: 100%;

@@ -382,6 +382,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const categoryDropdownRef = useRef(null);
 
+  // AbortController for cancelable TCG fetch
+  const abortControllerRef = useRef(null);
+
   // Image Crop State (Using Refs for 60fps performance to bypass React renders during drag/zoom)
   const [cropImageSrc, setCropImageSrc] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
@@ -462,6 +465,40 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       document.documentElement.style.overflow = '';
     };
   }, [isModalOpen, isCsvModalOpen]);
+
+  // Effect to automatically generate SKU for new products in real-time
+  useEffect(() => {
+    if (!editingProduct && isModalOpen) {
+      if (formType === 'single') {
+        const cleanSet = (formSetCode || '').trim().toUpperCase();
+        const cleanNum = (formCardCode || '').trim().split('/')[0].trim();
+        if (cleanSet && cleanNum) {
+          let prefix = 'SGL';
+          if (formGame === 'Pokémon') prefix = 'POK';
+          else if (formGame === 'Lorcana') prefix = 'LOR';
+          else if (formGame === 'One Piece') prefix = 'OP';
+          else if (formGame === 'Riftbound') prefix = 'RIF';
+          setFormId(`${prefix}-${cleanSet}-${cleanNum}`);
+          return;
+        }
+      }
+      
+      const cleanName = (formName || '').trim();
+      const cleanCardCode = (formCardCode || '').trim();
+      const combined = cleanCardCode ? `${cleanName} (${cleanCardCode})` : cleanName;
+      if (combined) {
+        const generated = combined
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+        setFormId(generated);
+      } else {
+        setFormId('');
+      }
+    }
+  }, [editingProduct, isModalOpen, formType, formGame, formName, formSetCode, formCardCode]);
 
   const loadData = async () => {
     setLoading(true);
@@ -761,6 +798,15 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     loadData();
   };
 
+  const handleCancelTcgFetch = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsApiLoading(false);
+    showToast(lang === 'CZ' ? 'Vyhledávání zrušeno.' : 'Search cancelled.', 'info');
+  };
+
   const handleFetchTcgCard = async () => {
     const setInput = document.getElementById('api-set-code');
     const numberInput = document.getElementById('api-card-number');
@@ -771,6 +817,12 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       showToast(lang === 'CZ' ? 'Zadejte kód sady a číslo karty.' : 'Please enter set code and card number.', 'warning');
       return;
     }
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     setIsApiLoading(true);
 
@@ -796,18 +848,18 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     try {
       if (formGame === 'Pokémon' || formGame.toLowerCase().includes('pok')) {
         let url = `https://api.pokemontcg.io/v2/cards?q=set.id:${resolvedSetId} number:${normalizedNumberVal}`;
-        let res = await fetch(url);
+        let res = await fetch(url, { signal: controller.signal });
         let data = await res.json();
         
         if (!data.data || data.data.length === 0) {
           url = `https://api.pokemontcg.io/v2/cards?q=set.ptcgoCode:${setVal.toUpperCase()} number:${normalizedNumberVal}`;
-          res = await fetch(url);
+          res = await fetch(url, { signal: controller.signal });
           data = await res.json();
         }
 
         if (!data.data || data.data.length === 0) {
           url = `https://api.pokemontcg.io/v2/cards?q=number:${normalizedNumberVal}`;
-          res = await fetch(url);
+          res = await fetch(url, { signal: controller.signal });
           data = await res.json();
         }
 
@@ -854,10 +906,15 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
           : 'Auto-fill is not available for this game/accessory – please enter the details manually.', 'warning');
       }
     } catch (err) {
+      if (err.name === 'AbortError') {
+        console.log('TCG Fetch aborted');
+        return;
+      }
       console.error(err);
       showToast(lang === 'CZ' ? 'Chyba při dotazování externího API.' : 'Error querying external API.', 'error');
     } finally {
       setIsApiLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -2051,15 +2108,15 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         style={{ height: '38px' }}
                       />
                     </div>
-                    <div style={{ flex: '1 1 200px', display: 'flex', alignItems: 'flex-end' }}>
+                    <div style={{ flex: '1 1 200px', display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
                       <button
                         type="button"
                         onClick={handleFetchTcgCard}
                         disabled={isApiLoading}
                         style={{
-                          width: '100%',
+                          flex: 1,
                           height: '38px',
-                          background: isApiLoading ? 'rgba(253, 189, 22, 0.4)' : 'var(--nv-gold, #fdbd16)',
+                          background: isApiLoading ? 'rgba(253, 189, 22, 0.2)' : 'var(--nv-gold, #fdbd16)',
                           color: isApiLoading ? '#8a8a92' : '#0b0c10',
                           border: 'none',
                           borderRadius: '8px',
@@ -2075,7 +2132,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         {isApiLoading ? (
                           <>
                             <div className="spinner-loader co-spinner" style={{ width: '14px', height: '14px', borderWidth: '1.5px', margin: 0 }}></div>
-                            <span>{lang === 'CZ' ? 'Načítám...' : 'Loading...'}</span>
+                            <span>{lang === 'CZ' ? 'Vyhledávám...' : 'Searching...'}</span>
                           </>
                         ) : (
                           <>
@@ -2084,6 +2141,28 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           </>
                         )}
                       </button>
+                      {isApiLoading && (
+                        <button
+                          type="button"
+                          onClick={handleCancelTcgFetch}
+                          style={{
+                            height: '38px',
+                            padding: '0 16px',
+                            background: 'rgba(239, 68, 68, 0.15)',
+                            color: 'rgb(248, 113, 113)',
+                            border: '1px solid rgba(239, 68, 68, 0.25)',
+                            borderRadius: '8px',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.16s ease'
+                          }}
+                        >
+                          {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -2147,13 +2226,20 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         <label className="pmf-label">{lang === 'CZ' ? 'Kód / SKU' : 'SKU / Code'}</label>
                         <input 
                           type="text" 
-                          disabled={!!editingProduct} 
+                          disabled={true} 
                           className="pmf-input" 
                           value={formId} 
-                          onChange={e => setFormId(e.target.value)}
-                          placeholder={lang === 'CZ' ? 'Zadejte nebo auto...' : 'Enter or auto...'}
-                          style={editingProduct ? { opacity: 0.6, cursor: 'not-allowed', border: '1px dashed rgba(255, 255, 255, 0.15)' } : {}} 
+                          placeholder={lang === 'CZ' ? 'Generuje se automaticky' : 'Generated automatically'}
+                          style={{ 
+                            opacity: 0.65, 
+                            cursor: 'not-allowed', 
+                            border: '1px dashed rgba(255, 255, 255, 0.15)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.02)'
+                          }} 
                         />
+                        <span style={{ fontSize: '10px', color: '#8a8a92', marginTop: '4px', display: 'block' }}>
+                          {lang === 'CZ' ? 'Generuje se automaticky.' : 'Generated automatically.'}
+                        </span>
                       </div>
                     </div>
                   </div>
