@@ -1498,7 +1498,6 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   <span className="__om-t">{lang === 'CZ' ? 'Vaše objednávka' : 'Your Order Summary'}</span>
                 </h3>
 
-                {/* Preorder order warning hidden for now
                 {cart.some(item => item.product?.preorder || item.preorder) && (
                   <div style={{
                     background: 'rgba(253, 189, 22, 0.02)',
@@ -1521,7 +1520,6 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                     </div>
                   </div>
                 )}
-                */}
                 
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   {cart.map((item, idx) => (
@@ -1539,13 +1537,11 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                       <div className="pof-li-name">
                         <div>
                           {item.name || (item.product && item.product.name)}
-                          {/* Preorder label hidden for now
                           {(item.product?.preorder || item.preorder) && (
                             <span style={{ fontSize: '8px', fontWeight: '800', backgroundColor: 'rgba(253, 189, 22, 0.12)', color: 'var(--nv-gold, #fdbd16)', padding: '1px 4px', borderRadius: '2px', marginLeft: '6px', display: 'inline-block', verticalAlign: 'middle', textTransform: 'uppercase', border: '1px solid rgba(253, 189, 22, 0.2)' }}>
                               {lang === 'CZ' ? 'Předobjednávka' : 'Pre-order'}
                             </span>
                           )}
-                          */}
                         </div>
                         {item.condition && (
                           <div className="pof-li-variant">

@@ -1864,8 +1864,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                   <th style={{ width: '110px' }}>{lang === 'CZ' ? 'Typ' : 'Type'}</th>
                   <th style={{ width: '120px' }}>{lang === 'CZ' ? 'Cena (Kč)' : 'Price (CZK)'}</th>
                   <th style={{ width: '100px' }}>{lang === 'CZ' ? 'Sklad (ks)' : 'Stock'}</th>
-                  {/* <th style={{ width: '50px', textAlign: 'center' }}>Pre</th>
-                  <th style={{ width: '50px', textAlign: 'center' }}>Inv</th> */}
+                  <th style={{ width: '50px', textAlign: 'center' }}>Pre</th>
+                  <th style={{ width: '50px', textAlign: 'center' }}>Inv</th>
                   <th style={{ width: '120px', textAlign: 'center' }}>{lang === 'CZ' ? 'Akce' : 'Actions'}</th>
                 </tr>
               </thead>
@@ -1974,7 +1974,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           />
                         )}
                       </td>
-                      {/* <td style={{ textAlign: 'center' }}>
+                      <td style={{ textAlign: 'center' }}>
                         <input
                           type="checkbox"
                           className="nv-excel-checkbox"
@@ -1989,7 +1989,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           checked={!!currentP.investment}
                           onChange={e => handleExcelRowChange(p.id, 'investment', e.target.checked)}
                         />
-                      </td> */}
+                      </td>
                       <td style={{ textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
                           <button
@@ -2610,7 +2610,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                     </div>
                   )}
 
-                  {/* Preorder & Investment checkboxes hidden for now
+                  {/* Preorder & Investment checkboxes */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '10px 0', marginTop: '10px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                     <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
                       <label className="pmf-check-label">
@@ -2639,7 +2639,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       </div>
                     )}
                   </div>
-                  */}
 
                 </div>
 

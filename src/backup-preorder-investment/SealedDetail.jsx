@@ -1039,11 +1039,16 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
 
               {/* Stock status */}
               <div className="product-stock-delivery-wrapper">
-                <div className={`product-stock-status ${(stock > 0 ? 'in-stock' : 'out-of-stock')}`}>
-                  <span style={{ fontSize: '20px', lineHeight: 1, color: (stock > 0 ? 'var(--color-green)' : 'var(--color-red)') }}>●</span>
-                  {stock > 0 ? (lang === 'CZ' ? `Skladem (${stock} ks)` : `In Stock (${stock} pcs)`) : (lang === 'CZ' ? 'Na objednávku' : 'Special Order')}
+                <div className={`product-stock-status ${product.preorder ? 'in-stock' : (stock > 0 ? 'in-stock' : 'out-of-stock')}`}>
+                  <span style={{ fontSize: '20px', lineHeight: 1, color: product.preorder ? 'var(--color-gold)' : (stock > 0 ? 'var(--color-green)' : 'var(--color-red)') }}>●</span>
+                  {product.preorder ? (
+                    <span style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>
+                      {lang === 'CZ' ? 'Předobjednávka' : 'Pre-order'}
+                    </span>
+                  ) : (
+                    stock > 0 ? (lang === 'CZ' ? `Skladem (${stock} ks)` : `In Stock (${stock} pcs)`) : (lang === 'CZ' ? 'Na objednávku' : 'Special Order')
+                  )}
                 </div>
-                {/* Preorder expected release hidden for now
                 {product.preorder && product.releaseDate && (
                   <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                     <span>📅</span>
@@ -1071,7 +1076,6 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                     </button>
                   </div>
                 )}
-                */}
                 <span className="product-delivery-link" onClick={() => setActivePage('community')}>
                   {lang === 'CZ' ? 'Možnosti doručení' : 'Delivery options'}
                 </span>
@@ -1089,10 +1093,15 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
 
                 <button 
                   className="product-add-to-cart-btn"
-                  disabled={stock === 0}
+                  disabled={stock === 0 && !product.preorder}
                   onClick={() => addToCart(product, product, qty)}
+                  style={{
+                    backgroundColor: product.preorder ? 'var(--nv-gold, #fdbd16)' : undefined,
+                    color: product.preorder ? '#000' : undefined,
+                    fontWeight: product.preorder ? '700' : undefined
+                  }}
                 >
-                  {t('common.addToCart')}
+                  {product.preorder ? (lang === 'CZ' ? 'Předobjednat' : 'Pre-order') : t('common.addToCart')}
                 </button>
               </div>
 
@@ -1178,7 +1187,6 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
             </div>
           </div>
 
-          {/* Investment recommendations hidden for now
           {product.investment && (
             <div style={{
               background: 'rgba(253, 189, 22, 0.03)',
@@ -1203,7 +1211,6 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
               </div>
             </div>
           )}
-          */}
 
         </div>
       </div>

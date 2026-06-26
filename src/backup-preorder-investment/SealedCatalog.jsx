@@ -1132,7 +1132,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     if (product.price > priceRange) return false;
 
     // Stock availability
-    if (onlyInStock && product.stock <= 0) return false;
+    if (onlyInStock && product.stock <= 0 && !product.preorder) return false;
     if (onlyPreorder && !product.preorder) return false;
 
     // Subcategories matching helper (tabs at the top)
@@ -1204,8 +1204,8 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
   // Sidebar Layout rendering functions
   const renderStockFilter = () => {
     const list = [
-      { id: 'inStock', name: lang === 'CZ' ? 'Pouze skladem' : 'Only in Stock' }
-      // { id: 'preorder', name: lang === 'CZ' ? 'Možnost předobjednávky' : 'Pre-order available' }
+      { id: 'inStock', name: lang === 'CZ' ? 'Pouze skladem' : 'Only in Stock' },
+      { id: 'preorder', name: lang === 'CZ' ? 'Možnost předobjednávky' : 'Pre-order available' }
     ];
     return (
       <div className="sidebar-filter-section">

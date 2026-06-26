@@ -139,7 +139,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
   return (
     <a 
       href={cardUrl}
-      className={`vf-card type-${product.type} ${(stock === 0) ? 'out-of-stock' : ''}`}
+      className={`vf-card type-${product.type} ${(stock === 0 && !product.preorder) ? 'out-of-stock' : ''}`}
       onClick={(e) => {
         if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
           e.preventDefault();
@@ -176,7 +176,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
             </div>
           )}
 
-          {/* Preorder & Investment Tags hidden for now
+          {/* Preorder & Investment Tags */}
           {product.preorder && (
             <span className="card-tag preorder-tag">
               {t('ProductCard.preorder')}
@@ -188,7 +188,6 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
               {t('ProductCard.investment')}
             </span>
           )}
-          */}
         </div>
       </div>
 
@@ -208,6 +207,11 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
               <>
                 <span className="vf-dot"></span>
                 {t('ProductCard.inStock')} ({stock} {t('ProductCard.pcs')})
+              </>
+            ) : product.preorder ? (
+              <>
+                <span className="vf-dot" style={{ backgroundColor: 'var(--color-gold)', boxShadow: '0 0 8px rgba(253, 189, 22, 0.6)' }}></span>
+                {t('ProductCard.onOrder')}
               </>
             ) : (
               <>
@@ -250,13 +254,13 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
 
           <button 
             className="btn btn-primary do-kosiku-btn"
-            disabled={stock === 0}
+            disabled={stock === 0 && !product.preorder}
             onClick={handleBuyClick}
             style={{
               flexGrow: 1,
               backgroundColor: isAdded ? 'var(--color-green)' : 'var(--color-gold)',
-              cursor: (stock > 0) ? 'pointer' : 'not-allowed',
-              opacity: (stock > 0) ? 1 : 0.4
+              cursor: (stock > 0 || product.preorder) ? 'pointer' : 'not-allowed',
+              opacity: (stock > 0 || product.preorder) ? 1 : 0.4
             }}
           >
             <svg 
@@ -279,7 +283,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
                 </>
               )}
             </svg>
-            {isAdded ? t('ProductCard.added') : t('ProductCard.addToCart')}
+            {isAdded ? t('ProductCard.added') : (product.preorder ? (lang === 'CZ' ? 'Předobjednat' : 'Pre-order') : t('ProductCard.addToCart'))}
           </button>
         </div>
       </div>

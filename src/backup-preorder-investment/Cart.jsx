@@ -189,13 +189,11 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
                         </div>
                         <h3 className="ckf-item-name">
                           {item.productName || item.name.split(' (')[0]}
-                          {/* Preorder item label hidden for now
                           {(item.product?.preorder || item.preorder) && (
                             <span style={{ fontSize: '9px', fontWeight: '800', backgroundColor: 'rgba(253, 189, 22, 0.12)', color: 'var(--nv-gold, #fdbd16)', padding: '2px 6px', borderRadius: '3px', marginLeft: '8px', display: 'inline-block', verticalAlign: 'middle', textTransform: 'uppercase', border: '1px solid rgba(253, 189, 22, 0.2)' }}>
                               {lang === 'CZ' ? 'Předobjednávka' : 'Pre-order'}
                             </span>
                           )}
-                          */}
                         </h3>
                         
                         {/* Variant tags */}
@@ -242,7 +240,6 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
 
               {/* Right Column: Order Summary */}
               <aside className="ckf-summary">
-                {/* Preorder order warning hidden for now
                 {cart.some(item => item.product?.preorder || item.preorder) && (
                   <div style={{
                     background: 'rgba(253, 189, 22, 0.02)',
@@ -265,7 +262,6 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
                     </div>
                   </div>
                 )}
-                */}
 
                 {/* Free Shipping Alert banner */}
                 <div className="nv-eyebrow" style={{ marginBottom: '8px' }}>{t('Cart.summary') || 'Shrnutí'}</div>
