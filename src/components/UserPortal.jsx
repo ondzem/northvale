@@ -137,8 +137,8 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
     } else {
       showToast(
         lang === 'CZ' 
-          ? 'Kontaktní údaje uloženy v prohlížeči (pro trvalé uložení spusťte SQL skript v Supabase).' 
-          : 'Contact info saved in memory (run the SQL script in Supabase to save permanently).', 
+          ? 'Kontaktní údaje se nepodařilo uložit do databáze (uloženo dočasně v paměti).' 
+          : 'Failed to save contact info to the database (saved in memory).', 
         'warning'
       );
     }
@@ -194,8 +194,8 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
     } else {
       showToast(
         lang === 'CZ' 
-          ? 'Fakturační údaje uloženy v prohlížeči (pro trvalé uložení spusťte SQL skript v Supabase).' 
-          : 'Billing details saved in memory (run the SQL script in Supabase to save permanently).', 
+          ? 'Fakturační údaje se nepodařilo uložit do databáze (uloženo dočasně v paměti).' 
+          : 'Failed to save billing details to the database (saved in memory).', 
         'warning'
       );
     }
@@ -264,8 +264,8 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
     } else {
       showToast(
         lang === 'CZ' 
-          ? 'Adresa byla uložena v prohlížeči (pro trvalé uložení spusťte SQL skript v Supabase).' 
-          : 'Address was saved in memory (run the SQL script in Supabase to save permanently).', 
+          ? 'Adresu se nepodařilo uložit do databáze (uloženo dočasně v paměti).' 
+          : 'Failed to save address to the database (saved in memory).', 
         'warning'
       );
     }
