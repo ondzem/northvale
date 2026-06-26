@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
+
 
 export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, alert, onOpenLogin, appliedDiscount, setAppliedDiscount }) {
   const { lang, t } = useTranslation();
@@ -142,6 +143,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   }, [user]);
 
   const [isVerifying, setIsVerifying] = useState(false);
+  const callbackProcessedRef = useRef(false);
 
   // Zpracování callbacku z GP webpay po návratu zákazníka
   useEffect(() => {
@@ -150,6 +152,9 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       const status = params.get('status');
       
       if (status === 'callback') {
+        if (callbackProcessedRef.current) return;
+        callbackProcessedRef.current = true;
+
         const orderNumber = params.get('ORDERNUMBER');
         const prCode = params.get('PRCODE');
         const srCode = params.get('SRCODE');
@@ -287,6 +292,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           }
         } catch (err) {
           console.error('Verifikace platby selhala:', err);
+          callbackProcessedRef.current = false;
           alert(lang === 'CZ' 
             ? 'Nepodařilo se ověřit platbu přes GP webpay.' 
             : 'Could not verify payment via GP webpay.',

@@ -521,6 +521,9 @@ function AppContent() {
 
   // Sync state to URL in history
   useEffect(() => {
+    if (window.location.search.includes('status=callback')) {
+      return;
+    }
     const newUrl = generateUrlFromState(activePage, selectedProductId, gdprVopTab, filters, searchQuery);
     const currentUrl = window.location.pathname + window.location.search;
     
