@@ -1131,8 +1131,13 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     // Price range
     if (product.price > priceRange) return false;
 
-    // Stock availability
-    if (onlyInStock && product.stock <= 0 && !product.preorder) return false;
+    // Hiding out of stock products automatically
+    if (product.type === 'single') {
+      const hasStock = product.variants && product.variants.some(v => (v.stock || 0) > 0);
+      if (!hasStock) return false;
+    } else {
+      if ((product.stock || 0) <= 0) return false;
+    }
     if (onlyPreorder && !product.preorder) return false;
 
     // Subcategories matching helper (tabs at the top)

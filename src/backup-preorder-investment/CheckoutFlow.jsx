@@ -185,7 +185,14 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
             // Platba byla úspěšně ověřena!
             // Načíst zbylé parametry z rozpracované objednávky v localStorage
             const pendingStr = localStorage.getItem('pending-order-data');
+            let orderItems = cart;
+            let orderSubtotal = cartSubtotal;
+            let orderDiscountCode = appliedDiscount ? appliedDiscount.code : null;
+            let orderDiscountAmount = discountAmount;
+            let orderShippingCost = shippingCost;
+            let orderPaymentSurcharge = paymentSurcharge;
             let creditUsed = actualAppliedCredit;
+            let orderFinalTotal = finalTotal;
             let shipMethod = shipping;
             let customerDetails = {
               name: name,
@@ -203,7 +210,14 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
 
             if (pendingStr) {
               const pending = JSON.parse(pendingStr);
-              creditUsed = pending.creditApplied;
+              orderItems = pending.cart || [];
+              orderSubtotal = pending.cartSubtotal || 0;
+              orderDiscountCode = pending.discountCode || null;
+              orderDiscountAmount = pending.discountAmount || 0;
+              orderShippingCost = pending.shippingCost || 0;
+              orderPaymentSurcharge = pending.paymentSurcharge || 0;
+              creditUsed = pending.creditApplied || 0;
+              orderFinalTotal = pending.finalTotal || 0;
               shipMethod = pending.shippingMethod;
               if (pending.customerDetails) {
                 customerDetails = pending.customerDetails;
@@ -213,20 +227,23 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
 
             const order = {
               id: orderNumber,
-              items: cart.map(item => ({
+              items: orderItems.map(item => ({
+                id: item.id,
+                product_id: item.id,
                 name: item.name || item.productName,
                 price: item.price,
-                quantity: item.quantity
+                quantity: item.quantity,
+                product: item
               })),
-              subtotal: cartSubtotal,
-              discountCode: appliedDiscount ? appliedDiscount.code : null,
-              discountAmount: discountAmount,
-              shippingCost,
-              paymentSurcharge,
+              subtotal: orderSubtotal,
+              discountCode: orderDiscountCode,
+              discountAmount: orderDiscountAmount,
+              shippingCost: orderShippingCost,
+              paymentSurcharge: orderPaymentSurcharge,
               creditApplied: creditUsed,
               isicApplied: false,
               isicDiscount: 0,
-              finalTotal,
+              finalTotal: orderFinalTotal,
               shippingMethod: shipMethod === 'zasilkovna' 
                 ? (lang === 'CZ' ? 'Zásilkovna - Výdejní místo / Z-BOX' : 'Packeta - Pickup Point / Z-BOX') 
                 : shipMethod === 'gls'
@@ -260,7 +277,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               : `Payment for order ${orderNumber} has been successfully verified! Order created.`,
               'success'
             );
-            setActivePage('profile');
+            setActivePage('order-confirmation');
           } else {
             alert(lang === 'CZ'
               ? `Platba pro objednávku ${orderNumber} byla zamítnuta (Kód: ${prCode}/${srCode}). Zkuste to prosím znovu.`
@@ -316,7 +333,14 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         // Uložit rozpracovanou objednávku do localStorage pro návrat
         localStorage.setItem('pending-order-data', JSON.stringify({
           orderId,
+          cart,
+          cartSubtotal,
+          discountCode: appliedDiscount ? appliedDiscount.code : null,
+          discountAmount,
+          shippingCost,
+          paymentSurcharge,
           creditApplied: actualAppliedCredit,
+          finalTotal,
           shippingMethod: shipping,
           paymentMethod: 'card',
           customerDetails: {

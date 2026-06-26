@@ -13,6 +13,7 @@ import FaqPage from './components/FaqPage';
 import CheckoutFlow from './components/CheckoutFlow';
 import UserPortal from './components/UserPortal';
 import AdminPanel from './components/AdminPanel';
+import OrderConfirmation from './components/OrderConfirmation';
 import GdprVop from './components/GdprVop';
 import AboutPage from './components/AboutPage';
 import Cart from './components/Cart';
@@ -183,6 +184,7 @@ function AppContent() {
   const [selectedProductId, setSelectedProductId] = useState(initialUrlState.productId);
   const [searchQuery, setSearchQuery] = useState(initialUrlState.searchQuery);
   const [filters, setFilters] = useState(initialUrlState.filters);
+  const [lastCompletedOrder, setLastCompletedOrder] = useState(null);
 
   // User and Session State (Declared at top to avoid hoisting reference issues)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -1103,6 +1105,7 @@ function AppContent() {
 
   // Submit Order Action
   const submitOrder = async (order, creditApplied = 0) => {
+    setLastCompletedOrder(order);
     let updatedOrders = [];
     let newCredit = 0;
     setUser(prev => {
@@ -1489,6 +1492,13 @@ function AppContent() {
             onOpenLogin={() => setIsLoginModalOpen(true)}
             appliedDiscount={appliedDiscount}
             setAppliedDiscount={setAppliedDiscount}
+          />
+        )}
+
+        {activePage === 'order-confirmation' && (
+          <OrderConfirmation 
+            order={lastCompletedOrder}
+            setActivePage={navigateToPage}
           />
         )}
 

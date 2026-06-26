@@ -672,6 +672,30 @@ export default function OrdersTab({ showToast }) {
     showToast(lang === 'CZ' ? 'XML soubor pro Pohodu byl stažen.' : 'XML file for Pohoda downloaded.', 'success');
   };
 
+  const downloadAllInvoicesTxt = () => {
+    if (selectedOrderIds.length === 0) {
+      showToast(lang === 'CZ' ? 'Vyberte nejprve objednávky pro stažení.' : 'Select orders to download first.', 'warning');
+      return;
+    }
+    
+    selectedOrderIds.forEach(orderId => {
+      const link = document.createElement('a');
+      link.href = `https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${orderId}.txt`;
+      link.download = `invoice_${orderId}.txt`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+    
+    showToast(
+      lang === 'CZ' 
+        ? 'Stahování vybraných textových faktur bylo zahájeno.' 
+        : 'Downloading selected text invoices started.', 
+      'success'
+    );
+  };
+
   const getFilteredOrders = () => {
     return files.filter(f => {
       const details = loadedOrders[f.name];
@@ -1287,6 +1311,14 @@ export default function OrdersTab({ showToast }) {
                         >
                           {lang === 'CZ' ? 'Detail' : 'Detail'}
                         </button>
+                        <button 
+                          className="orders-action-btn orders-action-btn-primary"
+                          disabled={!details}
+                          onClick={() => setShowInvoiceOrder(details)}
+                          title={lang === 'CZ' ? 'Vytisknout / Uložit PDF fakturu' : 'Print / Save PDF Invoice'}
+                        >
+                          📄 {lang === 'CZ' ? 'Faktura' : 'Invoice'}
+                        </button>
                         <a 
                           href={details ? URL.createObjectURL(new Blob([details.rawXml], { type: 'application/xml' })) : '#'} 
                           download={`order_${details?.id || orderId}.xml`}
@@ -1297,8 +1329,25 @@ export default function OrdersTab({ showToast }) {
                               showToast(lang === 'CZ' ? 'XML soubor se načítá.' : 'XML file is loading.', 'warning');
                             }
                           }}
+                          title={lang === 'CZ' ? 'Stáhnout XML pro Pohodu' : 'Download XML for Pohoda'}
                         >
                           XML
+                        </a>
+                        <a 
+                          href={details ? `https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${details.id}.txt` : '#'} 
+                          download={`invoice_${details?.id || orderId}.txt`}
+                          className="orders-action-btn"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => {
+                            if (!details) {
+                              e.preventDefault();
+                              showToast(lang === 'CZ' ? 'Faktura se načítá.' : 'Invoice is loading.', 'warning');
+                            }
+                          }}
+                          title={lang === 'CZ' ? 'Stáhnout textovou fakturu' : 'Download text invoice'}
+                        >
+                          TXT
                         </a>
                       </div>
                     </td>
@@ -1330,6 +1379,9 @@ export default function OrdersTab({ showToast }) {
             </button>
             <button className="orders-action-btn orders-action-btn-primary" onClick={exportPohodaXml}>
               {lang === 'CZ' ? 'Export pro Pohodu (XML)' : 'Export for Pohoda (XML)'}
+            </button>
+            <button className="orders-action-btn orders-action-btn-primary" onClick={downloadAllInvoicesTxt}>
+              {lang === 'CZ' ? 'Stáhnout faktury (TXT)' : 'Download Invoices (TXT)'}
             </button>
           </div>
         </div>
