@@ -511,6 +511,12 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   3.9. Due to the volatile nature of TCG markets, the Seller reserves the right not to accept an order in the event of an obvious pricing error or if stock is sold out.
                 </p>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                  3.10. <strong>Order Cancellation by the Buyer:</strong> The Buyer has the right to cancel their order without any penalties at any time before the order is dispatched or handed over to the carrier. Order cancellation requests can be made by phone at +420 739 666 779 or via email at info@northvaletcg.eu.
+                </p>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                  3.11. <strong>Order Cancellation by the Seller:</strong> The Seller reserves the right to cancel an order (or part thereof) in the event of an obvious pricing error (due to system issues or data import failures), if the goods are no longer manufactured or supplied, or if the stock is permanently sold out. The Buyer will be notified immediately, and any payments already received will be returned within 14 days.
+                </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>4. PRICE OF GOODS AND PAYMENT TERMS</h3>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
@@ -562,13 +568,16 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   6.1. A consumer Buyer has the right to withdraw from the Purchase Agreement without stating a reason within fourteen (14) days of receiving the goods.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  6.2 - 6.3. The withdrawal notice can be sent to the registered address of NORTHVALE s.r.o. or by email to info@northvaletcg.eu.
+                  6.2. The withdrawal notice can be sent to the registered office address of NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice, or via email to info@northvaletcg.eu.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  6.4. The goods must be returned within 14 days of withdrawal. The Buyer bears the return shipping costs.
+                  6.3. For swift processing, the Buyer is highly recommended to use our **online interactive form** available directly on our website under the <span style={{ color: 'var(--color-gold)', fontWeight: '700', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setActiveTab('odstoupeni')}>Order Withdrawal</span> tab. Using this form ensures immediate registration of the request and speeds up the refund process.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  6.5. Payouts will be refunded within 14 days of receiving the withdrawal notice, but not before the returned goods are received or proof of dispatch is provided.
+                  6.4. The Buyer must return the goods to the Seller within 14 days of withdrawal. The Buyer bears the direct costs of returning the goods (e.g. postage/shipping fees).
+                </p>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                  6.5. <strong>Refund Conditions:</strong> The Seller will refund all payments received from the Buyer (including shipping costs corresponding to the cheapest delivery method offered) within 14 days of receiving the withdrawal notice. The refund will be processed using the same payment method as the original transaction (including refunding to the payment card if paid via the GP Webpay gateway) or by bank transfer to the account specified by the Buyer. The Seller is not obliged to refund the money before the returned goods are received or before the Buyer provides proof of dispatch.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   6.6. <strong>Important notice for collectors:</strong> Opening or damaging the original protective shrink wrap of boxed products (Booster Boxes, ETBs, Boosters) dramatically reduces their collectible and investment value. The Seller will claim compensation for the reduction in value (pursuant to Section 1833 of the Czech Civil Code), which may amount to 30% to 50% of the purchase price and will be deducted from the refund. For Singles, cards must not show any signs of wear, scratches, or binder ring dents.
@@ -599,7 +608,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   8.1. Complaints are handled via email at info@northvaletcg.eu.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  8.2. The Czech Trade Inspection, with registered office at Štěpánská 567/15, 120 00 Prague 2, ID: 000 20 869, website: <a href="https://adr.coi.cz/cs" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', textDecoration: 'underline' }}>https://adr.coi.cz/cs</a>, is authorized for out-of-court resolution of consumer disputes arising from the Purchase Agreement. The online dispute resolution platform located at <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', textDecoration: 'underline' }}>http://ec.europa.eu/consumers/odr</a> can be used to resolve disputes between the seller and the buyer from a purchase agreement concluded by electronic means.
+                  8.2. The Czech Trade Inspection Authority (Česká obchodní inspekce), with its registered office at Štěpánská 567/15, 120 00 Prague 2, ID: 000 20 869, main website: <a href="https://www.coi.cz" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', textDecoration: 'underline' }}>www.coi.cz</a>, online dispute resolution (ADR) form website: <a href="https://adr.coi.cz/cs" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', textDecoration: 'underline' }}>https://adr.coi.cz/cs</a>, is authorized for the out-of-court resolution of consumer disputes arising from the Purchase Agreement. The online dispute resolution platform located at <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', textDecoration: 'underline' }}>https://ec.europa.eu/consumers/odr</a> can be used to resolve disputes between the Seller and the Buyer.
                 </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>9. FINAL PROVISIONS</h3>
@@ -613,33 +622,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   9.3. Agreements are archived in electronic form.
                 </p>
 
-                <h4 style={{ fontSize: '14px', fontWeight: '800', color: 'var(--text-main)', margin: '24px 0 12px 0' }}>
-                  Appendix No. 1: Standard Withdrawal Form
-                </h4>
-                <div style={{
-                  border: '1px dashed rgba(255, 255, 255, 0.1)',
-                  padding: '20px',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  color: 'var(--text-muted)',
-                  lineHeight: '1.8',
-                  backgroundColor: 'rgba(255, 255, 255, 0.005)'
-                }}>
-                  <strong>Notice of Withdrawal from the Purchase Agreement</strong><br /><br />
-                  <strong>Recipient:</strong><br />
-                  NORTHVALE s.r.o.<br />
-                  Bratří Čapků 1095, 534 01 Holice<br />
-                  Email: info@northvaletcg.eu<br /><br />
-                  I/We (*) hereby withdraw from the contract for the purchase of these goods (*):<br /><br />
-                  • Order Date / Delivery Date:<br />
-                  • Order / Invoice Number:<br />
-                  • Buyer's Full Name:<br />
-                  • Buyer's Address:<br />
-                  • Buyer's Signature (paper submissions only):<br />
-                  • Date:<br /><br />
-                  <span style={{ fontSize: '11px' }}>(*) Strike out what does not apply.</span>
-                </div>
-                <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '20px' }}>In Holicích, on June 9, 2026</p>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '20px' }}>In Holice, on June 26, 2026</p>
               </div>
             ) : (
               <div>
@@ -720,6 +703,12 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   3.9. Vzhledem k povaze TCG si prodávající vyhrazuje právo neakceptovat objednávku v případě zjevné chyby v ceně či vyprodání skladových zásob.
                 </p>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                  3.10. <strong>Storno objednávky kupujícím:</strong> Kupující má právo zrušit (stornovat) svou objednávku bez jakýchkoliv sankcí až do okamžiku, kdy je objednávka expedována nebo předána dopravci. Zrušení objednávky lze provést telefonicky na čísle +420 739 666 779 nebo e-mailem na adrese info@northvaletcg.eu.
+                </p>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                  3.11. <strong>Storno objednávky prodávajícím:</strong> Prodávající je oprávněn zrušit objednávku (či její část) v případě zjevné chyby v ceně zboží (např. chybný import či systémová chyba), pokud se zboží již nevyrábí či nedodává, nebo pokud je skladová zásoba dlouhodobě vyprodaná. O stornu bude kupující bezodkladně informován a uhrazené finanční prostředky mu budou vráceny nejpozději do 14 dnů.
+                </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>4. CENA ZBOŽÍ A PLATEBNÍ PODMÍNKY</h3>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
@@ -771,13 +760,16 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   6.1. Kupující spotřebitel má právo odstoupit od kupní smlouvy bez udání důvodu do čtrnácti (14) dnů od převzetí zboží.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  6.2 - 6.3. Odstoupení lze provést jakýmkoli prohlášením zaslaným na adresu NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice, nebo na e-mail info@northvaletcg.eu.
+                  6.2. Odstoupení od kupní smlouvy může kupující zaslat na adresu sídla společnosti NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice, nebo na e-mailovou adresu info@northvaletcg.eu.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  6.4. Zboží mustí být vráceno nejpozději do 14 dnů od odstoupení. Kupující nese náklady na vrácení zboží.
+                  6.3. Pro odstoupení doporučujeme využít **on-line interaktivní formulář** dostupný přímo na našem webu v záložce <span style={{ color: 'var(--color-gold)', fontWeight: '700', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setActiveTab('odstoupeni')}>Odstoupení od smlouvy</span>. Použitím tohoto formuláře dojde k okamžitému zaevidování vaší žádosti a zrychlení procesu vrácení peněz.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  6.5. Peněžní prostředky vrátí prodávající do 14 dnů od doručení odstoupení, nikoli však dříve, než obdrží vrácené zboží nebo důkaz o odeslání.
+                  6.4. Kupující je povinen zaslat nebo předat zboží zpět prodávajícímu do 14 dnů od odstoupení od smlouvy. Kupující nese přímé náklady spojené s vrácením zboží (např. poštovné a balné).
+                </p>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                  6.5. <strong>Podmínky vrácení peněz:</strong> Prodávající vrátí kupujícímu bezodkladně, nejpozději však do 14 dnů od doručení odstoupení, všechny přijaté peněžní prostředky (včetně nákladů na doručení odpovídajících nejlevnějšímu nabízenému způsobu). Prostředky budou vráceny stejným způsobem, jakým byly přijaty (včetně zpětné transakce na platební kartu, pokud byla platba provedena platební kartou přes bránu GP Webpay), případně převodem na bankovní účet určený kupujícím. Prodávající není povinen vrátit prostředky dříve, než obdrží vrácené zboží nebo než kupující prokáže, že zboží odeslal.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   6.6. <strong>Důležité upozornění:</strong> U balených produktů (Booster Boxy, ETB apod.) poškození nebo otevření smršťovací fólie (shrink wrap) dramaticky snižuje sběratelskou hodnotu. Prodávající uplatní nárok na snížení hodnoty zboží (§ 1833 občanského zákoníku), které může činit až 30–50 % z ceny zboží.
@@ -808,7 +800,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   8.1. Stížnosti vyřizujeme přes e-mail info@northvaletcg.eu.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  8.2. K mimosoudnímu řešení spotřebitelských sporů z kupní smlouvy je věcně příslušná Česká obchodní inspekce, se sídlem Štěpánská 567/15, 120 00 Praha 2, IČ: 000 20 869, internetová adresa: <a href="https://adr.coi.cz/cs" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', textDecoration: 'underline' }}>https://adr.coi.cz/cs</a>. Platformu pro řešení sporů on-line nacházející se na internetové adrese <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', textDecoration: 'underline' }}>http://ec.europa.eu/consumers/odr</a> je možné využít při řešení sporů mezi prodávajícím a kupujícím z kupní smlouvy uzavřené elektronickými prostředky.
+                  8.2. K mimosoudnímu řešení spotřebitelských sporů z kupní smlouvy je věcně příslušná Česká obchodní inspekce, se sídlem Štěpánská 567/15, 120 00 Praha 2, IČ: 000 20 869, internetové stránky: <a href="https://www.coi.cz" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', textDecoration: 'underline' }}>www.coi.cz</a>, formulář pro podání návrhu na zahájení mimosoudního řešení spotřebitelského sporu (ADR) je k dispozici na adrese: <a href="https://adr.coi.cz/cs" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', textDecoration: 'underline' }}>https://adr.coi.cz/cs</a>. Platformu pro řešení sporů on-line nacházející se na internetové adrese <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', textDecoration: 'underline' }}>https://ec.europa.eu/consumers/odr</a> je možné rovněž využít při řešení sporů mezi prodávajícím a kupujícím.
                 </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>9. ZÁVĚREČNÁ USTANOVENÍ</h3>
@@ -822,33 +814,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   9.3. Kupní smlouvy jsou archivovány v elektronické podobě.
                 </p>
 
-                <h4 style={{ fontSize: '14px', fontWeight: '800', color: 'var(--text-main)', margin: '24px 0 12px 0' }}>
-                  Příloha č. 1: Vzorový formulář pro odstoupení od smlouvy
-                </h4>
-                <div style={{
-                  border: '1px dashed rgba(255, 255, 255, 0.1)',
-                  padding: '20px',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  color: 'var(--text-muted)',
-                  lineHeight: '1.8',
-                  backgroundColor: 'rgba(255, 255, 255, 0.005)'
-                }}>
-                  <strong>Oznámení o odstoupení od kupní smlouvy</strong><br /><br />
-                  <strong>Adresát:</strong><br />
-                  NORTHVALE s.r.o.<br />
-                  Bratří Čapků 1095, 534 01 Holice<br />
-                  E-mail: info@northvaletcg.eu<br /><br />
-                  Tímto oznamuji/oznamujeme (*), že odstupuji/odstupujeme (*) od smlouvy o nákupu tohoto zboží (*):<br /><br />
-                  • Datum objednání zboží / datum obdržení zboží:<br />
-                  • Číslo objednávky / číslo daňového dokladu:<br />
-                  • Jméno a příjmení kupujícího/spotřebitele:<br />
-                  • Adresa kupujícího/spotřebitele:<br />
-                  • Podpis kupujícího/spotřebitele (pouze pokud je zasíláno v listinné podobě):<br />
-                  • Datum:<br /><br />
-                  <span style={{ fontSize: '11px' }}>(*) Nehodící se škrtněte nebo doplňte.</span>
-                </div>
-                <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '20px' }}>V Holicích, dne 9. června 2026</p>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '20px' }}>V Holicích, dne 26. června 2026</p>
               </div>
             )
           )}
@@ -911,7 +877,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   <br />• <strong>Carriers:</strong> Zásilkovna s.r.o. (Packeta), DPD CZ s.r.o., GLS Czech Republic s.r.o., Czech Post, s.p.
                   <br />• <strong>Payment Gateway:</strong> Global Payments s.r.o.
                   <br />• <strong>Analytics:</strong> Google Ireland Limited (Google Analytics), Microsoft Corporation (Microsoft Clarity).
-                  <br />• <strong>IT & Accounting Services:</strong> Hosting providers, Pohoda ERP software.
+                  <br />• <strong>IT & Accounting Services:</strong> Hosting providers, accounting software.
                   <br />• <strong>Grading Services (USA):</strong> Card submissions to PSA/BGS/TAG are made anonymously under our business accounts, without sharing your personal data.
                 </p>
 
@@ -938,7 +904,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   By submitting an order or registering, you confirm you have read and accepted this Privacy Policy. We reserve the right to modify this policy unilaterally.
                 </p>
-                <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '20px' }}>In Holicích, on June 9, 2026</p>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '20px' }}>In Holice, on June 26, 2026</p>
               </div>
             ) : (
               <div>
@@ -997,7 +963,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   <br />• <strong>Dopravci:</strong> Zásilkovna s.r.o., DPD CZ s.r.o., GLS Czech Republic s.r.o., Česká pošta, s.p.
                   <br />• <strong>Platební brána:</strong> Global Payments s.r.o.
                   <br />• <strong>Analytické nástroje:</strong> Google Ireland Limited (Google Analytics), Microsoft Corporation (Microsoft Clarity).
-                  <br />• <strong>IT a účetní služby:</strong> Webhosting a externí účetní software (Pohoda).
+                  <br />• <strong>IT a účetní služby:</strong> Webhosting a externí účetní software.
                   <br />• <strong>Gradingové autority (USA):</strong> Odeslání karet do USA u asistovaného gradingu probíhá anonymně pod naším partnerským účtem (bez vašich osobních dat).
                 </p>
 
@@ -1025,7 +991,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   Odesláním objednávky nebo registrací potvrzujete seznámení se s těmito zásadami ochrany osobních údajů a jejich přijetí. Tyto zásady jsme oprávněni jednostranně měnit.
                 </p>
-                <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '20px' }}>V Holicích, dne 9. června 2026</p>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '20px' }}>V Holicích, dne 26. června 2026</p>
               </div>
             )
           )}

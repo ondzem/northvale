@@ -8,7 +8,7 @@ import { decode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS, DELETE",
 };
 
 async function uploadBase64Image(supabase: any, base64Content: string): Promise<string> {
@@ -217,7 +217,81 @@ serve(async (req) => {
       }
 
       const data = await response.json();
+
+      // Fetch locally deleted campaigns
+      let deletedCampaignIds: number[] = [];
+      try {
+        const { data: dbDeleted, error: dbError } = await supabase
+          .from("deleted_campaigns")
+          .select("campaign_id");
+        if (dbError) {
+          console.error("Failed to query deleted campaigns:", dbError);
+        } else if (dbDeleted) {
+          deletedCampaignIds = dbDeleted.map((row: any) => row.campaign_id);
+        }
+      } catch (err) {
+        console.error("Database query exception:", err);
+      }
+
+      // Filter out test campaigns and locally deleted campaigns from the list
+      const testCampaignIds = [2, 3, 4, 5, 6, 7, 8];
+      if (data && Array.isArray(data.campaigns)) {
+        data.campaigns = data.campaigns.filter((c: any) => {
+          return !testCampaignIds.includes(c.id) && !deletedCampaignIds.includes(c.id);
+        });
+      }
+
       return new Response(JSON.stringify(data), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // 1.5. DELETE Request: Delete a campaign (hide locally and try to delete in Brevo)
+    if (req.method === "DELETE") {
+      const url = new URL(req.url);
+      const campaignIdStr = url.searchParams.get("id");
+
+      if (!campaignIdStr) {
+        return new Response(JSON.stringify({ error: "Missing campaign id parameter" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const campaignId = parseInt(campaignIdStr, 10);
+
+      // Insert into locally deleted campaigns database table to hide it
+      try {
+        const { error: dbError } = await supabase
+          .from("deleted_campaigns")
+          .upsert({ campaign_id: campaignId });
+        if (dbError) {
+          console.error("Failed to mark campaign as deleted in DB:", dbError);
+        }
+      } catch (err) {
+        console.error("Database upsert exception:", err);
+      }
+
+      // Try to delete from Brevo (works for drafts, fails for sent campaigns)
+      try {
+        const response = await fetch(`https://api.brevo.com/v3/emailCampaigns/${campaignId}`, {
+          method: "DELETE",
+          headers: {
+            "api-key": brevoApiKey,
+            "accept": "application/json"
+          }
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.log(`Brevo API DELETE Campaign note (expected if already sent): ${errorText}`);
+        }
+      } catch (err) {
+        console.error("Failed to delete from Brevo API:", err);
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

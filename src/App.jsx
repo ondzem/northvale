@@ -1118,6 +1118,52 @@ function AppContent() {
     setCart([]);
     setAppliedDiscount(null);
 
+    // Subtract stock from Supabase Database
+    try {
+      for (const item of order.items) {
+        const prod = item.product;
+        if (!prod || !prod.id) continue;
+
+        if (prod.type === 'single') {
+          const { data: dbProd } = await supabase
+            .from('products')
+            .select('variants')
+            .eq('id', prod.id)
+            .single();
+
+          if (dbProd && dbProd.variants) {
+            const updatedVariants = dbProd.variants.map(v => {
+              if (v.id === item.id) {
+                return { ...v, stock: Math.max(0, (v.stock || 0) - item.quantity) };
+              }
+              return v;
+            });
+
+            await supabase
+              .from('products')
+              .update({ variants: updatedVariants })
+              .eq('id', prod.id);
+          }
+        } else {
+          const { data: dbProd } = await supabase
+            .from('products')
+            .select('stock')
+            .eq('id', prod.id)
+            .single();
+
+          if (dbProd) {
+            const newStock = Math.max(0, (dbProd.stock || 0) - item.quantity);
+            await supabase
+              .from('products')
+              .update({ stock: newStock })
+              .eq('id', prod.id);
+          }
+        }
+      }
+    } catch (stockErr) {
+      console.error('Failed to update product stock on Supabase:', stockErr);
+    }
+
     // Save to Supabase if logged in
     try {
       const sessionRes = await supabase.auth.getSession();
@@ -1135,9 +1181,9 @@ function AppContent() {
       console.error('Failed to sync order history to Supabase:', err);
     }
 
-    // Call Edge Function to export order to Pohoda
+    // Call Edge Function to save order JSON in storage
     try {
-      await supabase.functions.invoke('pohoda-connector/export-order', {
+      await supabase.functions.invoke('save-order-json', {
         body: {
           order: {
             id: order.id,
@@ -1169,7 +1215,75 @@ function AppContent() {
         }
       });
     } catch (exportErr) {
-      console.error('Pohoda order export invocation failed:', exportErr);
+      console.error('Order save invocation failed:', exportErr);
+    }
+
+    // Call Edge Function to generate invoice PDF/document
+    try {
+      await supabase.functions.invoke('generate-invoice-pdf', {
+        body: {
+          order: {
+            id: order.id,
+            date: order.date || new Date().toLocaleDateString('cs-CZ'),
+            customerName: order.customerName,
+            customerEmail: order.customerEmail,
+            customerPhone: order.customerPhone,
+            shippingStreet: order.shippingStreet,
+            shippingCity: order.shippingCity,
+            shippingZip: order.shippingZip,
+            paymentMethod: order.paymentMethod,
+            shippingMethod: order.shippingMethod,
+            shippingCost: order.shippingCost,
+            paymentSurcharge: order.paymentSurcharge,
+            finalTotal: order.finalTotal,
+            isCompany: order.isCompany,
+            companyName: order.companyName,
+            ico: order.ico,
+            dic: order.dic,
+            items: order.items.map(item => ({
+              name: item.name || item.productName,
+              quantity: item.quantity,
+              price: item.price
+            }))
+          }
+        }
+      });
+    } catch (pdfErr) {
+      console.error('Invoice generation failed:', pdfErr);
+    }
+
+    // Call Edge Function to send email confirmation with full invoice
+    try {
+      await supabase.functions.invoke('send-order-email', {
+        body: {
+          order: {
+            id: order.id,
+            date: order.date || new Date().toLocaleDateString('cs-CZ'),
+            customerName: order.customerName,
+            customerEmail: order.customerEmail,
+            customerPhone: order.customerPhone,
+            shippingStreet: order.shippingStreet,
+            shippingCity: order.shippingCity,
+            shippingZip: order.shippingZip,
+            paymentMethod: order.paymentMethod,
+            shippingMethod: order.shippingMethod,
+            shippingCost: order.shippingCost,
+            paymentSurcharge: order.paymentSurcharge,
+            finalTotal: order.finalTotal,
+            isCompany: order.isCompany,
+            companyName: order.companyName,
+            ico: order.ico,
+            dic: order.dic
+          },
+          items: order.items.map(item => ({
+            name: item.name || item.productName,
+            quantity: item.quantity,
+            price: item.price
+          }))
+        }
+      });
+    } catch (emailErr) {
+      console.error('Order email sending failed:', emailErr);
     }
   };
 

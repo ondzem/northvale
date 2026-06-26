@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { FEATURE_FLAGS } from '../config';
 import { supabase } from '../supabase';
+import InvoiceTemplate from './admin/InvoiceTemplate';
 
 export default function UserPortal({ user, setUser, setActivePage, onLogout, showToast }) {
   const { lang, t } = useTranslation();
   const [activeTab, setActiveTab] = useState('settings');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [showInvoiceOrder, setShowInvoiceOrder] = useState(null);
 
   // Contact Info states
   const [isEditingContact, setIsEditingContact] = useState(false);
@@ -679,6 +681,16 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
     });
   };
 
+  if (showInvoiceOrder) {
+    return (
+      <InvoiceTemplate 
+        order={showInvoiceOrder} 
+        onClose={() => setShowInvoiceOrder(null)} 
+        lang={lang} 
+      />
+    );
+  }
+
   return (
     <div className="nv-profile-container fade-in">
       <h1 className="sr-only">
@@ -1154,8 +1166,8 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                   <span style={{ color: 'var(--color-gold)' }}>ℹ️</span>
                   <p style={{ margin: 0, fontSize: '13px', color: '#8a8a92', lineHeight: '1.5' }}>
                     {lang === 'CZ' 
-                      ? 'Faktury jsou automaticky synchronizovány a vystavovány prostřednictvím našeho firemního ekonomického softwaru ERP Pohoda.'
-                      : 'Invoices are automatically issued and synced through our corporate accounting software ERP Pohoda.'}
+                      ? 'Zde naleznete přehled a tiskové verze faktur ke všem Vašim objednávkám.'
+                      : 'Here you can find an overview and printable versions of invoices for all your orders.'}
                   </p>
                 </div>
 
@@ -1181,9 +1193,36 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                           <div style={{ textAlign: 'right' }}>
                             <button 
                               className="prf-edit"
-                              onClick={() => alert(lang === 'CZ' ? `Stahování PDF faktury ${invoiceNum} ze systému Pohoda...` : `Downloading PDF invoice ${invoiceNum} from ERP Pohoda...`)}
+                              onClick={() => {
+                                const formattedOrder = {
+                                  id: order.id,
+                                  date: order.date,
+                                  customerName: user.name || user.email.split('@')[0],
+                                  email: user.email,
+                                  phone: user.phone || '',
+                                  street: order.shippingStreet || user.street || '',
+                                  city: order.shippingCity || user.city || '',
+                                  zip: order.shippingZip || user.zip || '',
+                                  paymentMethod: order.paymentMethod,
+                                  shippingMethod: order.shippingMethod,
+                                  shippingCost: parseFloat(order.shippingCost || '0'),
+                                  paymentSurcharge: parseFloat(order.paymentSurcharge || '0'),
+                                  items: (order.items || []).map(item => ({
+                                    name: item.name || item.productName,
+                                    quantity: parseFloat(item.quantity || '1'),
+                                    price: parseFloat(item.price || '0'),
+                                    total: parseFloat(item.quantity || '1') * parseFloat(item.price || '0')
+                                  })),
+                                  totalPrice: parseFloat(order.finalTotal || order.total || '0'),
+                                  isCompany: order.isCompany || false,
+                                  companyName: order.companyName || '',
+                                  ico: order.ico || '',
+                                  dic: order.dic || ''
+                                };
+                                setShowInvoiceOrder(formattedOrder);
+                              }}
                             >
-                              📥 {lang === 'CZ' ? 'Stáhnout' : 'Download'}
+                              📥 {lang === 'CZ' ? 'Zobrazit' : 'View'}
                             </button>
                           </div>
                         </div>

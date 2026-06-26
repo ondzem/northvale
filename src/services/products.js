@@ -38,7 +38,7 @@ const PRODUCTS_CACHE_TTL = 30000; // 30 seconds cache TTL
  * Falls back to client-side filtering on mockProducts if database is not configured/accessible.
  */
 export async function fetchProductsFromDB(options = {}) {
-  const { type, types, game, searchQuery, edition } = options;
+  const { type, types, game, searchQuery, edition, includeAll } = options;
 
   try {
     if (!supabase.from) {
@@ -62,8 +62,21 @@ export async function fetchProductsFromDB(options = {}) {
       rawData = cachedRawProducts;
     }
 
-    // Filter rawData in memory (ignore singles and slabs)
-    let filtered = rawData.map(mapDbProduct).filter(p => p.type !== 'single' && p.type !== 'slab');
+    // Filter rawData in memory (ignore singles and slabs unless includeAll is true)
+    let filtered = rawData.map(mapDbProduct);
+    if (!includeAll) {
+      filtered = filtered.filter(p => p.type !== 'single' && p.type !== 'slab');
+      
+      // Always hide out-of-stock items from public view
+      filtered = filtered.filter(p => {
+        if (p.type === 'single') {
+          const totalStock = p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
+          return totalStock > 0;
+        } else {
+          return (p.stock || 0) > 0;
+        }
+      });
+    }
 
     if (types && types.length > 0) {
       filtered = filtered.filter(p => types.includes(p.type));
@@ -101,8 +114,21 @@ export async function fetchProductsFromDB(options = {}) {
   } catch (err) {
     console.warn('Database products query failed, using local mock fallback:', err.message || err);
 
-    // Filter local mockProducts identically (ignore singles and slabs)
-    let filtered = mockProducts.filter(p => p.type !== 'single' && p.type !== 'slab');
+    // Filter local mockProducts identically (ignore singles and slabs unless includeAll is true)
+    let filtered = mockProducts;
+    if (!includeAll) {
+      filtered = filtered.filter(p => p.type !== 'single' && p.type !== 'slab');
+      
+      // Always hide out-of-stock items from public view
+      filtered = filtered.filter(p => {
+        if (p.type === 'single') {
+          const totalStock = p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
+          return totalStock > 0;
+        } else {
+          return (p.stock || 0) > 0;
+        }
+      });
+    }
 
     if (types && types.length > 0) {
       filtered = filtered.filter(p => types.includes(p.type));

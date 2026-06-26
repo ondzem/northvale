@@ -298,6 +298,10 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState('list'); // 'list' or 'excel'
+  const [editedProducts, setEditedProducts] = useState({});
+  const [outOfStockBehavior, setOutOfStockBehavior] = useState(localStorage.getItem('outOfStockBehavior') || 'watchdog');
+  const [pokemonSets, setPokemonSets] = useState([]);
   
   // Filters for table list
   const [searchQuery, setSearchQuery] = useState('');
@@ -307,6 +311,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isApiLoading, setIsApiLoading] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   
   // CSV Import State
@@ -395,6 +400,19 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
   useEffect(() => {
     loadData();
+    // Fetch Pokemon sets once on mount for set code mapping (e.g. PAL -> sv2)
+    const fetchSets = async () => {
+      try {
+        const res = await fetch("https://api.pokemontcg.io/v2/sets");
+        const data = await res.json();
+        if (data && data.data) {
+          setPokemonSets(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch Pokemon TCG sets:", err);
+      }
+    };
+    fetchSets();
   }, []);
 
   useEffect(() => {
@@ -448,7 +466,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const loadData = async () => {
     setLoading(true);
     const [pData, cData] = await Promise.all([
-      fetchProductsFromDB(),
+      fetchProductsFromDB({ includeAll: true }),
       fetchCategoriesFromDB()
     ]);
     setProducts(pData || []);
@@ -647,6 +665,200 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       current = categories.find(c => String(c.id) === String(current.parent_id));
     }
     return path.join(' ➔ ');
+  };
+
+  const getCategoryOptionsForGame = (game) => {
+    const list = [];
+    const gameCats = categories.filter(c => c.game === game);
+    const nonRootGameCats = gameCats.filter(c => c.parent_id !== null);
+    const roots = nonRootGameCats.filter(c => {
+      const parent = categories.find(p => p.id === c.parent_id);
+      return parent ? parent.parent_id === null : true;
+    });
+    const traverse = (cat, depth = 0) => {
+      list.push({
+        id: cat.id,
+        name: lang === 'CZ' ? cat.name_cz : cat.name_en,
+        depth: depth
+      });
+      const children = nonRootGameCats.filter(c => c.parent_id === cat.id);
+      children.forEach(child => traverse(child, depth + 1));
+    };
+    roots.forEach(root => traverse(root, 0));
+    return list;
+  };
+
+  const handleExcelRowChange = (productId, field, value) => {
+    setEditedProducts(prev => {
+      const currentEdit = prev[productId] || { ...products.find(p => p.id === productId) };
+      return {
+        ...prev,
+        [productId]: {
+          ...currentEdit,
+          [field]: value
+        }
+      };
+    });
+  };
+
+  const handleSaveExcelRow = async (productId) => {
+    const editData = editedProducts[productId];
+    if (!editData) return;
+
+    const productPayload = {
+      ...editData,
+      price: editData.type === 'single' ? null : (editData.price ? Number(editData.price) : 0),
+      stock: editData.type === 'single' ? null : (editData.stock ? Number(editData.stock) : 0),
+    };
+
+    const { error, isMockFallback } = await saveProductToDB(productPayload);
+    if (error) {
+      showToast(lang === 'CZ' ? `Chyba při ukládání: ${error.message || error}` : `Error saving: ${error.message || error}`, 'error');
+    } else {
+      if (isMockFallback) {
+        showToast(lang === 'CZ' ? `Uloženo lokálně (Chyba DB)` : `Saved locally (DB Error)`, 'warning');
+      } else {
+        showToast(lang === 'CZ' ? 'Změny v řádku uloženy!' : 'Row changes saved!', 'success');
+      }
+      setEditedProducts(prev => {
+        const copy = { ...prev };
+        delete copy[productId];
+        return copy;
+      });
+      loadData();
+    }
+  };
+
+  const handleSaveAllExcel = async () => {
+    const ids = Object.keys(editedProducts);
+    if (ids.length === 0) return;
+    
+    let successCount = 0;
+    let failCount = 0;
+    
+    for (const id of ids) {
+      const editData = editedProducts[id];
+      const productPayload = {
+        ...editData,
+        price: editData.type === 'single' ? null : (editData.price ? Number(editData.price) : 0),
+        stock: editData.type === 'single' ? null : (editData.stock ? Number(editData.stock) : 0),
+      };
+      
+      const { error } = await saveProductToDB(productPayload);
+      if (error) {
+        failCount++;
+      } else {
+        successCount++;
+      }
+    }
+    
+    if (failCount === 0) {
+      showToast(lang === 'CZ' ? `Uloženo všech ${successCount} produktů.` : `All ${successCount} products saved.`, 'success');
+      setEditedProducts({});
+    } else {
+      showToast(lang === 'CZ' ? `Uloženo: ${successCount}, Chyba: ${failCount}` : `Saved: ${successCount}, Failed: ${failCount}`, 'warning');
+    }
+    loadData();
+  };
+
+  const handleFetchTcgCard = async () => {
+    const setInput = document.getElementById('api-set-code');
+    const numberInput = document.getElementById('api-card-number');
+    const setVal = setInput ? setInput.value.trim().toLowerCase() : '';
+    const numberVal = numberInput ? numberInput.value.trim() : '';
+
+    if (!setVal || !numberVal) {
+      showToast(lang === 'CZ' ? 'Zadejte kód sady a číslo karty.' : 'Please enter set code and card number.', 'warning');
+      return;
+    }
+
+    setIsApiLoading(true);
+
+    // Normalize number: strip slashes (e.g. 062/193 -> 062) and leading zeroes (062 -> 62)
+    let normalizedNumberVal = numberVal.split('/')[0].trim();
+    if (/^\d+$/.test(normalizedNumberVal)) {
+      normalizedNumberVal = parseInt(normalizedNumberVal, 10).toString();
+    }
+
+    // Map input set code to correct set.id (e.g., PAL -> sv2)
+    let resolvedSetId = setVal;
+    if (formGame === 'Pokémon' || formGame.toLowerCase().includes('pok')) {
+      const matchedSet = pokemonSets.find(s => 
+        s.id.toLowerCase() === setVal || 
+        s.ptcgoCode?.toLowerCase() === setVal ||
+        s.name.toLowerCase() === setVal
+      );
+      if (matchedSet) {
+        resolvedSetId = matchedSet.id.toLowerCase();
+      }
+    }
+
+    try {
+      if (formGame === 'Pokémon' || formGame.toLowerCase().includes('pok')) {
+        let url = `https://api.pokemontcg.io/v2/cards?q=set.id:${resolvedSetId} number:${normalizedNumberVal}`;
+        let res = await fetch(url);
+        let data = await res.json();
+        
+        if (!data.data || data.data.length === 0) {
+          url = `https://api.pokemontcg.io/v2/cards?q=set.ptcgoCode:${setVal.toUpperCase()} number:${normalizedNumberVal}`;
+          res = await fetch(url);
+          data = await res.json();
+        }
+
+        if (!data.data || data.data.length === 0) {
+          url = `https://api.pokemontcg.io/v2/cards?q=number:${normalizedNumberVal}`;
+          res = await fetch(url);
+          data = await res.json();
+        }
+
+        let card = null;
+        if (data.data && data.data.length > 0) {
+          card = data.data.find(c => 
+            c.set.id.toLowerCase() === resolvedSetId || 
+            c.set.id.toLowerCase() === setVal || 
+            c.set.ptcgoCode?.toLowerCase() === setVal ||
+            c.set.name.toLowerCase().includes(setVal)
+          ) || data.data[0];
+        }
+
+        if (!card) {
+          showToast(lang === 'CZ' ? 'Karta nebyla nalezena.' : 'Card not found.', 'error');
+          return;
+        }
+
+        setFormName(card.name);
+        setFormCardCode(card.number + '/' + (card.set.printedTotal || card.set.total || ''));
+        setFormEdition(card.set.name);
+        setFormSetCode(card.set.ptcgoCode || card.set.id.toUpperCase());
+        setFormRarity(card.rarity || 'Common');
+        setFormImage(card.images.large || card.images.small);
+        setFormBackImage('https://images.pokemontcg.io/unbroken_bonds/back.png');
+        setFormIllustrator(card.artist || '');
+        setFormStage(card.subtypes?.[0] || '');
+        setFormElement(card.types?.[0] || '');
+        
+        const generatedSku = `POK-${(card.set.ptcgoCode || card.set.id).toUpperCase()}-${card.number}`;
+        setFormId(generatedSku);
+
+        const textDesc = `Typ: ${card.supertype} - ${card.subtypes?.join(', ') || ''}\nHra: Pokémon TCG\nEdice: ${card.set.name}\nIlustrátor: ${card.artist || 'Neznámý'}`;
+        setFormShortDesc(textDesc);
+        
+        setFormVariants([
+          { id: 'v-' + Math.random().toString(36).substr(2, 5), condition: 'NM', lang: 'EN', foil: false, price: 100, stock: 1 }
+        ]);
+
+        showToast(lang === 'CZ' ? `Karta ${card.name} úspěšně načtena!` : `Card ${card.name} loaded successfully!`, 'success');
+      } else {
+        showToast(lang === 'CZ' 
+          ? 'Pro tuto hru/příslušenství není automatické doplňování k dispozici – vyplňte prosím údaje ručně.' 
+          : 'Auto-fill is not available for this game/accessory – please enter the details manually.', 'warning');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast(lang === 'CZ' ? 'Chyba při dotazování externího API.' : 'Error querying external API.', 'error');
+    } finally {
+      setIsApiLoading(false);
+    }
   };
 
   const handleDeleteProduct = (id) => {
@@ -1375,7 +1587,73 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
           />
         </div>
 
+        <div style={{ display: 'flex', gap: '4px', backgroundColor: 'rgba(255,255,255,0.04)', padding: '4px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', marginRight: 'auto' }}>
+          <button
+            type="button"
+            onClick={() => setViewMode('list')}
+            style={{
+              padding: '6px 12px',
+              borderRadius: '6px',
+              border: 'none',
+              backgroundColor: viewMode === 'list' ? 'var(--color-gold, #fdbd16)' : 'transparent',
+              color: viewMode === 'list' ? '#1a1407' : '#8a8a92',
+              fontSize: '12px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.16s ease'
+            }}
+          >
+            🎴 {lang === 'CZ' ? 'Standardní' : 'Standard'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('excel')}
+            style={{
+              padding: '6px 12px',
+              borderRadius: '6px',
+              border: 'none',
+              backgroundColor: viewMode === 'excel' ? 'var(--color-gold, #fdbd16)' : 'transparent',
+              color: viewMode === 'excel' ? '#1a1407' : '#8a8a92',
+              fontSize: '12px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.16s ease'
+            }}
+          >
+            📊 {lang === 'CZ' ? 'Excel tabulka' : 'Excel Grid'}
+          </button>
+        </div>
 
+        {viewMode === 'excel' && Object.keys(editedProducts).length > 0 && (
+          <button
+            type="button"
+            onClick={handleSaveAllExcel}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              backgroundColor: '#10b981',
+              color: '#fff',
+              fontSize: '12px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.16s ease',
+              marginRight: '8px',
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)'
+            }}
+          >
+            💾 {lang === 'CZ' ? `Uložit vše (${Object.keys(editedProducts).length})` : `Save All (${Object.keys(editedProducts).length})`}
+          </button>
+        )}
 
         <div className="adf-tselect">
           <select 
@@ -1406,7 +1684,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 9l6 6 6-6"></path></svg>
         </div>
 
-        <button type="button" className="adf-tcsv" onClick={() => setIsCsvModalOpen(true)}>
+        <button type="button" className="adf-tcsv" onClick={() => showToast(lang === 'CZ' ? 'Tato funkce hromadného importu CSV zatím není nastavená.' : 'Bulk CSV Import function is not configured yet.', 'warning')}>
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2h9l5 5v15H6z"></path><path d="M14 2v6h6M9 13h6M9 17h6"></path></svg>
           <span> {lang === 'CZ' ? 'Hromadný CSV import' : 'Bulk CSV Import'}</span>
         </button>
@@ -1416,97 +1694,282 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
         </button>
       </div>
 
-      {/* Products CSS-Grid Table matching A _ Floating _ Minimal */}
-      <div className="adf-table">
-        {loading ? (
-          <p style={styles.infoText}>{lang === 'CZ' ? 'Načítání produktů...' : 'Loading products...'}</p>
-        ) : filteredProducts.length === 0 ? (
-          <p style={styles.infoText}>{lang === 'CZ' ? 'Žádné produkty neodpovídají filtrům.' : 'No products match filters.'}</p>
-        ) : (
-          <>
-            <div className="adf-thead">
-              <span>{lang === 'CZ' ? 'Náhled' : 'Preview'}</span>
-              <span>{lang === 'CZ' ? 'Kód / ID' : 'Code / ID'}</span>
-              <span>{lang === 'CZ' ? 'Název produktu' : 'Product Name'}</span>
-              <span>{lang === 'CZ' ? 'Hra' : 'Game'}</span>
-              <span>{lang === 'CZ' ? 'Typ' : 'Type'}</span>
-              <span className="adf-th-right">{lang === 'CZ' ? 'Cena / Sklad' : 'Price / Stock'}</span>
-              <span className="adf-th-right">{lang === 'CZ' ? 'Akce' : 'Actions'}</span>
-            </div>
-            
-            {filteredProducts.map(p => {
-              let priceStockText = '';
-              let stockText = '';
-              let isLowStock = false;
-              if (p.type === 'single') {
-                const totalStock = p.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
-                const minPrice = p.variants?.length > 0 ? Math.min(...p.variants.map(v => v.price)) : 0;
-                priceStockText = `${minPrice}`;
-                stockText = `${totalStock} ks skladem`;
-                if (totalStock <= 5) isLowStock = true;
-              } else {
-                priceStockText = `${p.price || 0}`;
-                stockText = `${p.stock || 0} ks skladem`;
-                if ((p.stock || 0) <= 5) isLowStock = true;
-              }
 
-              return (
-                <div key={p.id} className="adf-row">
-                  <div className="adf-thumb">
-                    <div className="card-art">
-                      {p.image ? (
-                        <img 
-                          src={p.image} 
-                          alt="" 
-                          style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '4px' }}
-                          onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }}
-                        />
-                      ) : (
-                        <>
-                          <div className="ca-base"></div>
-                          <div className="ca-holo"></div>
-                          <div className="ca-shine"></div>
-                          <div className="ca-grain"></div>
-                          <div className="ca-frame"></div>
-                          <div className="ca-inner-frame"></div>
-                        </>
-                      )}
+
+      {/* Products CSS-Grid Table matching A _ Floating _ Minimal */}
+      {viewMode === 'list' ? (
+        <div className="adf-table">
+          {loading ? (
+            <p style={styles.infoText}>{lang === 'CZ' ? 'Načítání produktů...' : 'Loading products...'}</p>
+          ) : filteredProducts.length === 0 ? (
+            <p style={styles.infoText}>{lang === 'CZ' ? 'Žádné produkty neodpovídají filtrům.' : 'No products match filters.'}</p>
+          ) : (
+            <>
+              <div className="adf-thead">
+                <span>{lang === 'CZ' ? 'Náhled' : 'Preview'}</span>
+                <span>{lang === 'CZ' ? 'Kód / ID' : 'Code / ID'}</span>
+                <span>{lang === 'CZ' ? 'Název produktu' : 'Product Name'}</span>
+                <span>{lang === 'CZ' ? 'Hra' : 'Game'}</span>
+                <span>{lang === 'CZ' ? 'Typ' : 'Type'}</span>
+                <span className="adf-th-right">{lang === 'CZ' ? 'Cena / Sklad' : 'Price / Stock'}</span>
+                <span className="adf-th-right">{lang === 'CZ' ? 'Akce' : 'Actions'}</span>
+              </div>
+              
+              {filteredProducts.map(p => {
+                let priceStockText = '';
+                let stockText = '';
+                let isLowStock = false;
+                if (p.type === 'single') {
+                  const totalStock = p.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
+                  const minPrice = p.variants?.length > 0 ? Math.min(...p.variants.map(v => v.price)) : 0;
+                  priceStockText = `${minPrice}`;
+                  stockText = `${totalStock} ks skladem`;
+                  if (totalStock <= 5) isLowStock = true;
+                } else {
+                  priceStockText = `${p.price || 0}`;
+                  stockText = `${p.stock || 0} ks skladem`;
+                  if ((p.stock || 0) <= 5) isLowStock = true;
+                }
+
+                return (
+                  <div key={p.id} className="adf-row">
+                    <div className="adf-thumb">
+                      <div className="card-art">
+                        {p.image ? (
+                          <img 
+                            src={p.image} 
+                            alt="" 
+                            style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '4px' }}
+                            onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }}
+                          />
+                        ) : (
+                          <>
+                            <div className="ca-base"></div>
+                            <div className="ca-holo"></div>
+                            <div className="ca-shine"></div>
+                            <div className="ca-grain"></div>
+                            <div className="ca-frame"></div>
+                            <div className="ca-inner-frame"></div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <code className="adf-code">{p.id}</code>
+                    <div className="adf-name">{p.name}</div>
+                    <div className="adf-game">{p.game}</div>
+                    <div>
+                      <span className="adf-type">{p.type}</span>
+                    </div>
+                    <div className="adf-price">
+                      <span className="adf-price-val">{priceStockText} Kč</span>
+                      <span className={`adf-stock ${isLowStock ? 'is-low' : ''}`}>{stockText}</span>
+                    </div>
+                    <div className="adf-actions">
+                      <button 
+                        type="button" 
+                        className="adf-edit"
+                        onClick={() => handleOpenEditModal(p)}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9M16.5 3.5a2 2 0 0 1 3 3L8 18l-4 1 1-4z"></path></svg>
+                        <span>{lang === 'CZ' ? ' Upravit' : ' Edit'}</span>
+                      </button>
+                      <button 
+                        type="button" 
+                        className="adf-del"
+                        aria-label={lang === 'CZ' ? 'Smazat' : 'Delete'}
+                        onClick={() => handleDeleteProduct(p.id)}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"></path></svg>
+                      </button>
                     </div>
                   </div>
-                  <code className="adf-code">{p.id}</code>
-                  <div className="adf-name">{p.name}</div>
-                  <div className="adf-game">{p.game}</div>
-                  <div>
-                    <span className="adf-type">{p.type}</span>
-                  </div>
-                  <div className="adf-price">
-                    <span className="adf-price-val">{priceStockText} Kč</span>
-                    <span className={`adf-stock ${isLowStock ? 'is-low' : ''}`}>{stockText}</span>
-                  </div>
-                  <div className="adf-actions">
-                    <button 
-                      type="button" 
-                      className="adf-edit"
-                      onClick={() => handleOpenEditModal(p)}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9M16.5 3.5a2 2 0 0 1 3 3L8 18l-4 1 1-4z"></path></svg>
-                      <span>{lang === 'CZ' ? ' Upravit' : ' Edit'}</span>
-                    </button>
-                    <button 
-                      type="button" 
-                      className="adf-del"
-                      aria-label={lang === 'CZ' ? 'Smazat' : 'Delete'}
-                      onClick={() => handleDeleteProduct(p.id)}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"></path></svg>
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </>
-        )}
-      </div>
+                );
+              })}
+            </>
+          )}
+        </div>
+      ) : (
+        /* Excel Grid View */
+        <div className="nv-excel-container">
+          {loading ? (
+            <p style={{ ...styles.infoText, padding: '24px' }}>{lang === 'CZ' ? 'Načítání produktů...' : 'Loading products...'}</p>
+          ) : filteredProducts.length === 0 ? (
+            <p style={{ ...styles.infoText, padding: '24px' }}>{lang === 'CZ' ? 'Žádné produkty neodpovídají filtrům.' : 'No products match filters.'}</p>
+          ) : (
+            <table className="nv-excel-table">
+              <thead>
+                <tr>
+                  <th style={{ width: '60px' }}>{lang === 'CZ' ? 'Náhled' : 'Preview'}</th>
+                  <th style={{ width: '160px' }}>{lang === 'CZ' ? 'SKU / ID' : 'SKU / ID'}</th>
+                  <th>{lang === 'CZ' ? 'Název produktu' : 'Product Name'}</th>
+                  <th style={{ width: '130px' }}>{lang === 'CZ' ? 'Hra' : 'Game'}</th>
+                  <th style={{ width: '180px' }}>{lang === 'CZ' ? 'Kategorie' : 'Category'}</th>
+                  <th style={{ width: '110px' }}>{lang === 'CZ' ? 'Typ' : 'Type'}</th>
+                  <th style={{ width: '120px' }}>{lang === 'CZ' ? 'Cena (Kč)' : 'Price (CZK)'}</th>
+                  <th style={{ width: '100px' }}>{lang === 'CZ' ? 'Sklad (ks)' : 'Stock'}</th>
+                  <th style={{ width: '50px', textAlign: 'center' }}>Pre</th>
+                  <th style={{ width: '50px', textAlign: 'center' }}>Inv</th>
+                  <th style={{ width: '120px', textAlign: 'center' }}>{lang === 'CZ' ? 'Akce' : 'Actions'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProducts.map(p => {
+                  const isModified = !!editedProducts[p.id];
+                  const currentP = editedProducts[p.id] || p;
+
+                  return (
+                    <tr key={p.id}>
+                      <td style={{ textAlign: 'center' }}>
+                        <div style={{ width: '36px', height: '36px', overflow: 'hidden', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: '#121216', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                          {p.image ? (
+                            <img src={p.image} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }} />
+                          ) : (
+                            <span style={{ fontSize: '10px', color: '#8a8a92' }}>N/A</span>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <code style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', color: 'var(--nv-gold, #fdbd16)', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '150px' }} title={p.id}>
+                          {p.id}
+                        </code>
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          className="nv-excel-input"
+                          value={currentP.name || ''}
+                          onChange={e => handleExcelRowChange(p.id, 'name', e.target.value)}
+                        />
+                      </td>
+                      <td>
+                        <select
+                          className="nv-excel-select"
+                          value={currentP.game || ''}
+                          onChange={e => {
+                            handleExcelRowChange(p.id, 'game', e.target.value);
+                            handleExcelRowChange(p.id, 'category_id', null);
+                          }}
+                        >
+                          <option value="Pokémon">Pokémon</option>
+                          <option value="Lorcana">Lorcana</option>
+                          <option value="One Piece">One Piece</option>
+                          <option value="Riftbound">Riftbound</option>
+                          <option value="Accessories">{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}</option>
+                          <option value="Acrylics">{lang === 'CZ' ? 'Akryly' : 'Acrylics'}</option>
+                        </select>
+                      </td>
+                      <td>
+                        <select
+                          className="nv-excel-select"
+                          value={currentP.category_id || ''}
+                          onChange={e => handleExcelRowChange(p.id, 'category_id', e.target.value || null)}
+                        >
+                          <option value="">— Bez kategorie —</option>
+                          {getCategoryOptionsForGame(currentP.game).map(opt => (
+                            <option key={opt.id} value={opt.id}>
+                              {'\u00A0'.repeat(opt.depth * 2)}{opt.name}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td>
+                        <select
+                          className="nv-excel-select"
+                          value={currentP.type || ''}
+                          onChange={e => handleExcelRowChange(p.id, 'type', e.target.value)}
+                        >
+                          <option value="single">Single</option>
+                          <option value="sealed">Sealed</option>
+                          <option value="slab">Slab</option>
+                          <option value="acrylic">Acrylic</option>
+                          <option value="accessory">Accessory</option>
+                        </select>
+                      </td>
+                      <td>
+                        {currentP.type === 'single' ? (
+                          <span className="nv-excel-badge-single" onClick={() => handleOpenEditModal(p)}>
+                            {lang === 'CZ' ? 'Varianty' : 'Variants'}
+                          </span>
+                        ) : (
+                          <input
+                            type="number"
+                            className="nv-excel-input"
+                            value={currentP.price === null || currentP.price === undefined ? '' : currentP.price}
+                            onChange={e => handleExcelRowChange(p.id, 'price', e.target.value)}
+                            placeholder="Cena"
+                            style={{ textAlign: 'right' }}
+                          />
+                        )}
+                      </td>
+                      <td>
+                        {currentP.type === 'single' ? (
+                          <span style={{ fontSize: '11px', color: '#8a8a92' }}>
+                            {(p.variants || []).reduce((sum, v) => sum + v.stock, 0)} ks
+                          </span>
+                        ) : (
+                          <input
+                            type="number"
+                            className="nv-excel-input"
+                            value={currentP.stock === null || currentP.stock === undefined ? '' : currentP.stock}
+                            onChange={e => handleExcelRowChange(p.id, 'stock', e.target.value)}
+                            placeholder="Sklad"
+                            style={{ textAlign: 'right' }}
+                          />
+                        )}
+                      </td>
+                      <td style={{ textAlign: 'center' }}>
+                        <input
+                          type="checkbox"
+                          className="nv-excel-checkbox"
+                          checked={!!currentP.preorder}
+                          onChange={e => handleExcelRowChange(p.id, 'preorder', e.target.checked)}
+                        />
+                      </td>
+                      <td style={{ textAlign: 'center' }}>
+                        <input
+                          type="checkbox"
+                          className="nv-excel-checkbox"
+                          checked={!!currentP.investment}
+                          onChange={e => handleExcelRowChange(p.id, 'investment', e.target.checked)}
+                        />
+                      </td>
+                      <td style={{ textAlign: 'center' }}>
+                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                          <button
+                            type="button"
+                            className={`nv-excel-action-btn ${isModified ? 'save-pending' : ''}`}
+                            onClick={() => handleSaveExcelRow(p.id)}
+                            disabled={!isModified}
+                            title={lang === 'CZ' ? 'Uložit změny v řádku' : 'Save row changes'}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                          </button>
+                          <button
+                            type="button"
+                            className="nv-excel-action-btn"
+                            onClick={() => handleOpenEditModal(p)}
+                            title={lang === 'CZ' ? 'Otevřít detailní formulář' : 'Open detailed form'}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                          </button>
+                          <button
+                            type="button"
+                            className="nv-excel-action-btn delete"
+                            onClick={() => handleDeleteProduct(p.id)}
+                            title={lang === 'CZ' ? 'Smazat' : 'Delete'}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
 
       {/* Add / Edit Modal */}
       {isModalOpen && createPortal(
@@ -1523,6 +1986,109 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
             <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: '100%' }}>
               
+              {!editingProduct && formType === 'single' && (
+                <div className="pmf-section-card" style={{
+                  background: 'linear-gradient(135deg, rgba(253, 189, 22, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)',
+                  border: '1px solid rgba(253, 189, 22, 0.15)',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  marginBottom: '10px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  boxSizing: 'border-box',
+                  width: '100%'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '18px' }}>🔍</span>
+                    <strong style={{ color: 'var(--nv-gold, #fdbd16)', textTransform: 'uppercase', fontSize: '13px', letterSpacing: '0.5px' }}>
+                      {lang === 'CZ' ? 'TCG Rychlé doplňování' : 'TCG Auto-Fill Lookup'}
+                    </strong>
+                  </div>
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', width: '100%' }}>
+                    <div style={{ flex: '1 1 180px' }}>
+                      <label style={{ fontSize: '11px', color: '#8a8a92', display: 'block', marginBottom: '6px' }}>
+                        {lang === 'CZ' ? 'Hra' : 'Game'}
+                      </label>
+                      <div className="pmf-select-wrapper">
+                        <select 
+                          className="pmf-select" 
+                          value={formGame} 
+                          onChange={e => setFormGame(e.target.value)}
+                          style={{ height: '38px', padding: '0 10px' }}
+                        >
+                          <option value="Pokémon">Pokémon</option>
+                          <option value="Lorcana">Lorcana</option>
+                          <option value="One Piece">One Piece</option>
+                          <option value="Riftbound">Riftbound</option>
+                          <option value="Accessories">{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}</option>
+                          <option value="Acrylics">{lang === 'CZ' ? 'Akryly' : 'Acrylics'}</option>
+                        </select>
+                        <svg className="pmf-select-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                      </div>
+                    </div>
+                    <div style={{ flex: '1 1 180px' }}>
+                      <label style={{ fontSize: '11px', color: '#8a8a92', display: 'block', marginBottom: '6px' }}>
+                        {lang === 'CZ' ? 'Zkratka Edice (Set Code)' : 'Set Code'}
+                      </label>
+                      <input 
+                        type="text" 
+                        id="api-set-code" 
+                        className="pmf-input" 
+                        placeholder={formGame === 'Pokémon' ? 'např. sv3, obf' : 'např. aac, woo'} 
+                        style={{ height: '38px' }}
+                      />
+                    </div>
+                    <div style={{ flex: '1 1 150px' }}>
+                      <label style={{ fontSize: '11px', color: '#8a8a92', display: 'block', marginBottom: '6px' }}>
+                        {lang === 'CZ' ? 'Číslo karty' : 'Card Number'}
+                      </label>
+                      <input 
+                        type="text" 
+                        id="api-card-number" 
+                        className="pmf-input" 
+                        placeholder="např. 186" 
+                        style={{ height: '38px' }}
+                      />
+                    </div>
+                    <div style={{ flex: '1 1 200px', display: 'flex', alignItems: 'flex-end' }}>
+                      <button
+                        type="button"
+                        onClick={handleFetchTcgCard}
+                        disabled={isApiLoading}
+                        style={{
+                          width: '100%',
+                          height: '38px',
+                          background: isApiLoading ? 'rgba(253, 189, 22, 0.4)' : 'var(--nv-gold, #fdbd16)',
+                          color: isApiLoading ? '#8a8a92' : '#0b0c10',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontWeight: '700',
+                          cursor: isApiLoading ? 'not-allowed' : 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          transition: 'background-color 0.16s ease'
+                        }}
+                      >
+                        {isApiLoading ? (
+                          <>
+                            <div className="spinner-loader co-spinner" style={{ width: '14px', height: '14px', borderWidth: '1.5px', margin: 0 }}></div>
+                            <span>{lang === 'CZ' ? 'Načítám...' : 'Loading...'}</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>⚡</span>
+                            <span>{lang === 'CZ' ? 'Vyhledat a doplnit' : 'Search & Autofill'}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* ROW 1: PART 1 */}
               <div style={{ display: 'flex', gap: '40px', alignItems: 'flex-start' }} className="pmf-modal-split-layout">
                 {/* Left Column: Part 1 Form */}
@@ -1570,26 +2136,26 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                   </div>
 
                   <div className="pmf-form-row" style={styles.row}>
-                    <div className="pmf-form-col" style={{ ...styles.col, flex: editingProduct ? '2 1 0' : '1 1 0' }}>
+                    <div className="pmf-form-col" style={{ ...styles.col, flex: '2 1 0' }}>
                       <div className="pmf-field">
                         <label className="pmf-label">{lang === 'CZ' ? 'Název produktu' : 'Product Name'}<span className="pmf-req-dot"> *</span></label>
                         <input type="text" required className="pmf-input" value={formName} onChange={e => setFormName(e.target.value)} placeholder="např. Charizard ex" />
                       </div>
                     </div>
-                    {editingProduct && (
-                      <div className="pmf-form-col" style={{ ...styles.col, flex: '1 1 0' }}>
-                        <div className="pmf-field">
-                          <label className="pmf-label">{lang === 'CZ' ? 'Kód / SKU (z Pohody)' : 'SKU / Code (from Pohoda)'}</label>
-                          <input 
-                            type="text" 
-                            disabled 
-                            className="pmf-input" 
-                            value={formId} 
-                            style={{ opacity: 0.6, cursor: 'not-allowed', border: '1px dashed rgba(255, 255, 255, 0.15)' }} 
-                          />
-                        </div>
+                    <div className="pmf-form-col" style={{ ...styles.col, flex: '1 1 0' }}>
+                      <div className="pmf-field">
+                        <label className="pmf-label">{lang === 'CZ' ? 'Kód / SKU' : 'SKU / Code'}</label>
+                        <input 
+                          type="text" 
+                          disabled={!!editingProduct} 
+                          className="pmf-input" 
+                          value={formId} 
+                          onChange={e => setFormId(e.target.value)}
+                          placeholder={lang === 'CZ' ? 'Zadejte nebo auto...' : 'Enter or auto...'}
+                          style={editingProduct ? { opacity: 0.6, cursor: 'not-allowed', border: '1px dashed rgba(255, 255, 255, 0.15)' } : {}} 
+                        />
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   <div className="pmf-form-row" style={styles.row}>
@@ -1822,7 +2388,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         <div className="pmf-field">
                           <label className="pmf-label">
                             {lang === 'CZ' ? 'Cena (Kč)' : 'Price (CZK)'}
-                            {editingProduct && <span style={{ color: 'var(--color-gold, #fdbd16)', fontSize: '11px', marginLeft: '8px', fontWeight: 'normal' }}>({lang === 'CZ' ? 'Řízeno Pohodou' : 'Synced from Pohoda'})</span>}
                             <span className="pmf-req-dot"> *</span>
                           </label>
                           <input 
@@ -1832,8 +2397,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             value={formPrice} 
                             onChange={e => setFormPrice(e.target.value)} 
                             placeholder="např. 150" 
-                            disabled={!!editingProduct}
-                            style={editingProduct ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
                           />
                         </div>
                       </div>
@@ -1841,7 +2404,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         <div className="pmf-field">
                           <label className="pmf-label">
                             {lang === 'CZ' ? 'Skladem (ks)' : 'Stock (pcs)'}
-                            {editingProduct && <span style={{ color: 'var(--color-gold, #fdbd16)', fontSize: '11px', marginLeft: '8px', fontWeight: 'normal' }}>({lang === 'CZ' ? 'Řízeno Pohodou' : 'Synced from Pohoda'})</span>}
                             <span className="pmf-req-dot"> *</span>
                           </label>
                           <input 
@@ -1851,8 +2413,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             value={formStock} 
                             onChange={e => setFormStock(e.target.value)} 
                             placeholder="např. 5" 
-                            disabled={!!editingProduct}
-                            style={editingProduct ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
                           />
                         </div>
                       </div>
@@ -1932,32 +2492,28 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             <div style={{ flex: 1 }}>
                               <div className="pmf-vcell-label">
                                 {lang === 'CZ' ? 'Cena' : 'Price'}
-                                {editingProduct && <span style={{ color: 'var(--color-gold, #fdbd16)', fontSize: '10px', marginLeft: '6px' }}>(Pohoda)</span>}
                               </div>
                               <input 
                                 type="number" 
                                 className="pmf-input" 
                                 value={v.price} 
                                 onChange={e => handleVariantChange(v.id, 'price', e.target.value ? Number(e.target.value) : '')} 
-                                style={{ padding: '8px 12px', fontSize: '13px', ...(editingProduct ? { opacity: 0.6, cursor: 'not-allowed' } : {}) }} 
+                                style={{ padding: '8px 12px', fontSize: '13px' }} 
                                 placeholder="100" 
-                                disabled={!!editingProduct}
                               />
                             </div>
                             {/* Stock */}
                             <div style={{ flex: 1 }}>
                               <div className="pmf-vcell-label">
                                 {lang === 'CZ' ? 'Skladem (ks)' : 'Stock (pcs)'}
-                                {editingProduct && <span style={{ color: 'var(--color-gold, #fdbd16)', fontSize: '10px', marginLeft: '6px' }}>(Pohoda)</span>}
                               </div>
                               <input 
                                 type="number" 
                                 className="pmf-input" 
                                 value={v.stock} 
                                 onChange={e => handleVariantChange(v.id, 'stock', e.target.value ? Number(e.target.value) : '')} 
-                                style={{ padding: '8px 12px', fontSize: '13px', ...(editingProduct ? { opacity: 0.6, cursor: 'not-allowed' } : {}) }} 
+                                style={{ padding: '8px 12px', fontSize: '13px' }} 
                                 placeholder="1" 
-                                disabled={!!editingProduct}
                               />
                             </div>
                           </div>

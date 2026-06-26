@@ -39,6 +39,8 @@ export default function NewsletterTab({ showToast }) {
   // Modals state
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, targetEmail: null });
+  const [deletingCampId, setDeletingCampId] = useState(null);
+  const [deleteCampConfirm, setDeleteCampConfirm] = useState({ isOpen: false, targetId: null, campaignName: '' });
 
   // Campaign Import loading state
   const [loadingImport, setLoadingImport] = useState(false);
@@ -105,6 +107,27 @@ export default function NewsletterTab({ showToast }) {
       showToast(lang === 'CZ' ? 'Chyba při odebírání odběratele.' : 'Error removing subscriber.', 'error');
     } finally {
       setDeleteConfirm({ isOpen: false, targetEmail: null });
+    }
+  };
+
+  const handleDeleteCampaign = async () => {
+    const campaignId = deleteCampConfirm.targetId;
+    if (!campaignId) return;
+
+    setDeleteCampConfirm({ isOpen: false, targetId: null, campaignName: '' });
+    setDeletingCampId(campaignId);
+    try {
+      const { data, error } = await supabase.functions.invoke(`send-newsletter?id=${campaignId}`, {
+        method: 'DELETE'
+      });
+      if (error) throw error;
+      showToast(lang === 'CZ' ? 'Kampaň byla smazána.' : 'Campaign was deleted.', 'success');
+      loadCampaigns();
+    } catch (err) {
+      console.error(err);
+      showToast(lang === 'CZ' ? 'Chyba při mazání kampaně.' : 'Error deleting campaign.', 'error');
+    } finally {
+      setDeletingCampId(null);
     }
   };
 
@@ -930,27 +953,34 @@ export default function NewsletterTab({ showToast }) {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '420px', overflowY: 'auto' }}>
                 {campaigns.map(camp => (
-                  <div key={camp.id} style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.03)', fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <strong style={{ display: 'block', fontSize: '12px', color: '#fff', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{camp.name}</strong>
-                        <span style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{camp.subject}</span>
-                      </div>
-                      <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                        <button 
-                          type="button" 
-                          onClick={() => handleLoadCampaign(camp)}
-                          className="btn btn-secondary" 
-                          style={{ fontSize: '10px', padding: '4px 8px', background: 'rgba(253,189,22,0.1)', color: 'var(--color-gold)', border: '1px solid rgba(253,189,22,0.2)' }}
-                          disabled={loadingImport}
-                        >
-                          📥 {lang === 'CZ' ? 'Načíst do editoru' : 'Load to editor'}
-                        </button>
-                      </div>
+                  <div key={camp.id} style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.05)', fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ minWidth: 0 }}>
+                      <strong style={{ display: 'block', fontSize: '12px', color: '#fff', marginBottom: '2px', wordBreak: 'break-word' }}>{camp.name}</strong>
+                      <span style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '6px', wordBreak: 'break-word', fontSize: '11px', opacity: 0.85 }}>{camp.subject}</span>
+                      <span style={{ color: 'var(--color-gold)', fontWeight: 'bold', fontSize: '10px' }}>
+                        {camp.sentDate ? new Date(camp.sentDate).toLocaleDateString() : 'Odesláno'}
+                      </span>
                     </div>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>
-                      {camp.sentDate ? new Date(camp.sentDate).toLocaleDateString() : 'Odesláno'}
-                    </span>
+                    <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '8px', marginTop: '2px' }}>
+                      <button 
+                        type="button" 
+                        onClick={() => handleLoadCampaign(camp)}
+                        className="btn btn-secondary" 
+                        style={{ flex: 1, fontSize: '10px', padding: '6px 10px', background: 'rgba(253,189,22,0.08)', color: 'var(--color-gold)', border: '1px solid rgba(253,189,22,0.15)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px' }}
+                        disabled={loadingImport || deletingCampId === camp.id}
+                      >
+                        📥 {lang === 'CZ' ? 'Načíst do editoru' : 'Load to editor'}
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={() => setDeleteCampConfirm({ isOpen: true, targetId: camp.id, campaignName: camp.name })}
+                        className="btn btn-secondary" 
+                        style={{ flex: 1, fontSize: '10px', padding: '6px 10px', background: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.15)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px' }}
+                        disabled={loadingImport || deletingCampId === camp.id}
+                      >
+                        🗑️ {deletingCampId === camp.id ? (lang === 'CZ' ? 'Mazání...' : 'Deleting...') : (lang === 'CZ' ? 'Smazat' : 'Delete')}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1622,6 +1652,60 @@ export default function NewsletterTab({ showToast }) {
                 onClick={handleDeleteSubscriber}
               >
                 {lang === 'CZ' ? 'Odebrat' : 'Remove'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Campaign Delete Confirmation Modal */}
+      {deleteCampConfirm.isOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.85)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'var(--bg-secondary, #141416)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '380px',
+            width: '90%',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
+          }}>
+            <h4 style={{ fontSize: '16px', fontWeight: 'bold', color: '#fff', margin: '0 0 10px 0' }}>
+              {lang === 'CZ' ? 'Smazat kampaň?' : 'Delete Campaign?'}
+            </h4>
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', margin: '0 0 20px 0', lineHeight: '1.5' }}>
+              {lang === 'CZ' 
+                ? `Opravdu chcete smazat kampaň "${deleteCampConfirm.campaignName}" z historie?`
+                : `Are you sure you want to delete campaign "${deleteCampConfirm.campaignName}" from history?`}
+            </p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ padding: '6px 12px', fontSize: '12px' }}
+                onClick={() => setDeleteCampConfirm({ isOpen: false, targetId: null, campaignName: '' })}
+              >
+                {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                style={{ background: '#ef4444', color: '#fff', padding: '6px 12px', fontSize: '12px' }}
+                onClick={handleDeleteCampaign}
+              >
+                {lang === 'CZ' ? 'Smazat' : 'Delete'}
               </button>
             </div>
           </div>

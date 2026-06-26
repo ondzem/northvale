@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../../context/LanguageContext';
 import { supabase } from '../../supabase';
+import InvoiceTemplate from './InvoiceTemplate';
 
 export default function OrdersTab({ showToast }) {
   const { lang } = useTranslation();
@@ -11,6 +12,7 @@ export default function OrdersTab({ showToast }) {
   const [loadedOrders, setLoadedOrders] = useState({});
   const [selectedOrderIds, setSelectedOrderIds] = useState([]);
   const [detailOrder, setDetailOrder] = useState(null);
+  const [showInvoiceOrder, setShowInvoiceOrder] = useState(null);
   const [loadingDetailsProgress, setLoadingDetailsProgress] = useState({ current: 0, total: 0 });
 
   // GLS API configuration states (stored in localStorage)
@@ -64,8 +66,8 @@ export default function OrdersTab({ showToast }) {
 
       if (error) throw error;
 
-      // Filter files matching order_*.xml format
-      const orderFiles = (data || []).filter(f => f.name.startsWith('order_') && f.name.endsWith('.xml'));
+      // Filter files matching order_*.xml or order_*.json format
+      const orderFiles = (data || []).filter(f => f.name.startsWith('order_') && (f.name.endsWith('.xml') || f.name.endsWith('.json')));
       setFiles(orderFiles);
       
       // Start background loading for missing details
@@ -103,8 +105,67 @@ export default function OrdersTab({ showToast }) {
             
             if (error) throw error;
             
-            const xmlText = await data.text();
-            const parsed = parseOrderXml(xmlText, filename);
+            let parsed;
+            const textContent = await data.text();
+            
+            if (filename.endsWith('.json')) {
+              const jsonObj = JSON.parse(textContent);
+              const o = jsonObj.order;
+              parsed = {
+                id: o.id,
+                date: o.date || new Date(jsonObj.created_at || Date.now()).toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
+                customerName: o.customer_name || '',
+                email: o.customer_email || '',
+                phone: o.customer_phone || '',
+                street: o.customer_street || '',
+                city: o.customer_city || '',
+                zip: o.customer_zip || '',
+                paymentMethod: o.payment_method || '',
+                carrier: o.carrier || 'GLS',
+                shippingMethod: o.shipping_method || '',
+                shippingCost: parseFloat(o.shipping_cost || '0'),
+                paymentSurcharge: parseFloat(o.payment_surcharge || '0'),
+                items: (jsonObj.items || []).map(item => ({
+                  name: item.name,
+                  code: item.product_id || '',
+                  quantity: parseFloat(item.quantity || '1'),
+                  price: parseFloat(item.price || '0'),
+                  total: parseFloat(item.quantity || '1') * parseFloat(item.price || '0'),
+                  isService: false
+                })),
+                totalPrice: parseFloat(o.final_total || jsonObj.subtotal || '0'),
+                isCompany: o.is_company || false,
+                companyName: o.company_name || '',
+                ico: o.ico || '',
+                dic: o.dic || '',
+                notes: o.notes || '',
+                rawJson: jsonObj
+              };
+
+              // Append shipping and payment surcharge as service items if present
+              if (parsed.shippingCost > 0) {
+                parsed.items.push({
+                  name: parsed.shippingMethod || 'Doprava',
+                  code: '',
+                  quantity: 1,
+                  price: parsed.shippingCost,
+                  total: parsed.shippingCost,
+                  isService: true
+                });
+              }
+              if (parsed.paymentSurcharge > 0) {
+                parsed.items.push({
+                  name: 'Dobírkový příplatek',
+                  code: '',
+                  quantity: 1,
+                  price: parsed.paymentSurcharge,
+                  total: parsed.paymentSurcharge,
+                  isService: true
+                });
+              }
+            } else {
+              parsed = parseOrderXml(textContent, filename);
+            }
             
             setLoadedOrders(prev => ({
               ...prev,
@@ -233,7 +294,7 @@ export default function OrdersTab({ showToast }) {
 
     setGeneratingLabelId(order.id);
     try {
-      const { data, error } = await supabase.functions.invoke('pohoda-connector/generate-gls-label', {
+      const { data, error } = await supabase.functions.invoke('gls-labels', {
         body: {
           username: glsUsername,
           password: glsPassword,
@@ -386,47 +447,229 @@ export default function OrdersTab({ showToast }) {
     showToast(lang === 'CZ' ? `Exportováno ${selectedOrderIds.length} zásilek pro DPD.` : `Exported ${selectedOrderIds.length} parcels for DPD.`, 'success');
   };
 
-  // Download all selected orders combined in a single Pohoda datapack XML
-  const downloadCombinedPohodaXml = () => {
-    if (selectedOrderIds.length === 0) return;
+  // Download all selected orders as a CSV sheet for the accountant
+  const exportAccountantCsv = () => {
+    if (selectedOrderIds.length === 0) {
+      showToast(lang === 'CZ' ? 'Vyberte nejprve objednávky pro export.' : 'Select orders to export first.', 'warning');
+      return;
+    }
+
+    let csv = '\uFEFF'; // UTF-8 BOM
+    csv += 'Číslo dokladu;Variabilní symbol;Datum vystavení;Datum plnění (DUZP);Firma/Odběratel;Ulice;Město;PSČ;Stát;IČO;DIČ;Základ 21%;Výše DPH 21%;Osvobozeno 0%;Celkem s DPH;Typ platby;Způsob dopravy\r\n';
+
+    selectedOrderIds.forEach(id => {
+      // Find matching filename in files list
+      const orderFile = files.find(f => f.name.replace('order_', '').replace('.json', '').replace('.xml', '') === id || (loadedOrders[f.name] && loadedOrders[f.name].id === id));
+      if (!orderFile) return;
+      const order = loadedOrders[orderFile.name];
+      if (!order) return;
+
+      const vatRate = 0.21;
+      const total = order.totalPrice || 0;
+      const base = total / (1 + vatRate);
+      const vat = total - base;
+
+      const escape = (val) => {
+        if (!val) return '';
+        const str = String(val).replace(/"/g, '""');
+        return `"${str}"`;
+      };
+
+      const dateStr = order.date || '';
+      const name = order.customerName || '';
+      const street = order.street || '';
+      const city = order.city || '';
+      const zip = order.zip || '';
+      const country = 'CZ';
+      const ico = order.ico || '';
+      const dic = order.dic || '';
+      const payMethod = order.paymentMethod || '';
+      const shipMethod = order.shippingMethod || order.carrier || '';
+
+      csv += `${id};${id};${dateStr};${dateStr};${escape(name)};${escape(street)};${escape(city)};${escape(zip)};${country};${ico};${dic};${base.toFixed(2).replace('.', ',')};${vat.toFixed(2).replace('.', ',')};0;${total.toFixed(2).replace('.', ',')};${escape(payMethod)};${escape(shipMethod)}\r\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `export_ucetnictvi_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(lang === 'CZ' ? 'Přehled pro účetní byl stažen (CSV).' : 'Accountant summary downloaded (CSV).', 'success');
+  };
+
+  // Export selected orders in STORMWARE Pohoda XML format (invoice.xsd)
+  const exportPohodaXml = () => {
+    if (selectedOrderIds.length === 0) {
+      showToast(lang === 'CZ' ? 'Vyberte nejprve objednávky pro export.' : 'Select orders to export first.', 'warning');
+      return;
+    }
 
     const packId = 'PACK-' + Math.floor(100000 + Math.random() * 900000);
     let combinedItemsXml = '';
 
+    const escapeXml = (unsafe) => {
+      if (!unsafe) return '';
+      return String(unsafe).replace(/[<>&'"]/g, (c) => {
+        switch (c) {
+          case '<': return '&lt;';
+          case '>': return '&gt;';
+          case '&': return '&amp;';
+          case '\'': return '&apos;';
+          case '"': return '&quot;';
+          default: return c;
+        }
+      });
+    };
+
     selectedOrderIds.forEach(id => {
-      const orderFile = files.find(f => f.name.replace('order_', '').replace('.xml', '') === id || (loadedOrders[f.name] && loadedOrders[f.name].id === id));
+      const orderFile = files.find(f => f.name.replace('order_', '').replace('.json', '').replace('.xml', '') === id || (loadedOrders[f.name] && loadedOrders[f.name].id === id));
       if (!orderFile) return;
       const order = loadedOrders[orderFile.name];
-      if (!order || !order.rawXml) return;
+      if (!order) return;
 
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(order.rawXml, 'application/xml');
-      const dataPackItem = doc.getElementsByTagName('dat:dataPackItem')[0] || 
-                           doc.getElementsByTagName('dataPackItem')[0];
+      const dateStr = order.date ? new Date(order.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+      const name = order.customerName || '';
+      const street = order.street || '';
+      const city = order.city || '';
+      const zip = order.zip || '';
+      const email = order.email || '';
+      const phone = order.phone || '';
+      const payMethod = order.paymentMethod || 'platba kartou';
+      const shippingCost = order.shippingCost || 0;
+      const paymentSurcharge = order.paymentSurcharge || 0;
 
-      if (dataPackItem) {
-        const serializer = new XMLSerializer();
-        let itemXml = serializer.serializeToString(dataPackItem);
-        combinedItemsXml += '\n  ' + itemXml;
+      let itemsXml = '';
+      const itemsOnly = order.items ? order.items.filter(i => !i.isService) : [];
+
+      itemsOnly.forEach(item => {
+        itemsXml += `
+        <inv:invoiceItem>
+          <inv:text>${escapeXml(item.name)}</inv:text>
+          <inv:quantity>${item.quantity}</inv:quantity>
+          <inv:rateVAT>high</inv:rateVAT>
+          <inv:homeCurrency>
+            <typ:unitPrice>${item.price}</typ:unitPrice>
+          </inv:homeCurrency>
+          ${item.code ? `
+          <inv:stockItem>
+            <typ:stockItem>
+              <typ:ids>${escapeXml(item.code)}</typ:ids>
+            </typ:stockItem>
+          </inv:stockItem>
+          ` : ''}
+        </inv:invoiceItem>`;
+      });
+
+      if (shippingCost > 0) {
+        itemsXml += `
+        <inv:invoiceItem>
+          <inv:text>${escapeXml(order.shippingMethod || 'Doprava')}</inv:text>
+          <inv:quantity>1</inv:quantity>
+          <inv:rateVAT>high</inv:rateVAT>
+          <inv:homeCurrency>
+            <typ:unitPrice>${shippingCost}</typ:unitPrice>
+          </inv:homeCurrency>
+        </inv:invoiceItem>`;
       }
+
+      if (paymentSurcharge > 0) {
+        itemsXml += `
+        <inv:invoiceItem>
+          <inv:text>Dobírkový příplatek</inv:text>
+          <inv:quantity>1</inv:quantity>
+          <inv:rateVAT>high</inv:rateVAT>
+          <inv:homeCurrency>
+            <typ:unitPrice>${paymentSurcharge}</typ:unitPrice>
+          </inv:homeCurrency>
+        </inv:invoiceItem>`;
+      }
+
+      combinedItemsXml += `
+  <dat:dataPackItem id="FA-${id}" version="2.0">
+    <inv:invoice version="2.0">
+      <inv:invoiceHeader>
+        <inv:invoiceType>issuedInvoice</inv:invoiceType>
+        <inv:number>
+          <typ:numberRequested>${id}</typ:numberRequested>
+        </inv:number>
+        <inv:symVar>${id}</inv:symVar>
+        <inv:date>${dateStr}</inv:date>
+        <inv:dateTax>${dateStr}</inv:dateTax>
+        <inv:dateDue>${dateStr}</inv:dateDue>
+        <inv:text>Faktura za objednavku c. ${id}</inv:text>
+        <inv:partnerIdentity>
+          <typ:address>
+            <typ:name>${escapeXml(name)}</typ:name>
+            <typ:city>${escapeXml(city)}</typ:city>
+            <typ:street>${escapeXml(street)}</typ:street>
+            <typ:zip>${escapeXml(zip)}</typ:zip>
+            <typ:email>${escapeXml(email)}</typ:email>
+            <typ:phone>${escapeXml(phone)}</typ:phone>
+            ${order.ico ? `<typ:ico>${order.ico}</typ:ico>` : ''}
+            ${order.dic ? `<typ:dic>${order.dic}</typ:dic>` : ''}
+          </typ:address>
+        </inv:partnerIdentity>
+        <inv:paymentType>
+          <typ:ids>${escapeXml(payMethod)}</typ:ids>
+        </inv:paymentType>
+      </inv:invoiceHeader>
+      <inv:invoiceDetail>${itemsXml}
+      </inv:invoiceDetail>
+    </inv:invoice>
+  </dat:dataPackItem>`;
     });
 
     const combinedXml = `<?xml version="1.0" encoding="Windows-1250"?>
-<dat:dataPack id="${packId}" version="2.0" note="Hromadny import eshop"
+<dat:dataPack id="${packId}" version="2.0" note="Hromadny import faktur z eshopu"
               xmlns:dat="http://www.stormware.cz/schema/version_2/data.xsd"
-              xmlns:ord="http://www.stormware.cz/schema/version_2/order.xsd"
+              xmlns:inv="http://www.stormware.cz/schema/version_2/invoice.xsd"
               xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd">${combinedItemsXml}
 </dat:dataPack>`;
 
-    const blob = new Blob([combinedXml], { type: 'application/xml;charset=windows-1250;' });
+    // Windows-1250 (CP1250) mapping table for central European characters
+    const cp1250Map = {
+      8364: 128, 8218: 130, 8222: 132, 8230: 133, 8224: 134, 8225: 135, 8240: 137, 352: 138, 
+      8249: 139, 346: 140, 356: 141, 381: 142, 377: 143, 8216: 145, 8217: 146, 8220: 147, 
+      8221: 148, 8226: 149, 8211: 150, 8212: 151, 8482: 153, 353: 154, 8250: 155, 347: 156, 
+      357: 157, 382: 158, 378: 159, 160: 160, 711: 161, 728: 162, 321: 163, 164: 164, 
+      260: 165, 166: 166, 167: 167, 168: 168, 169: 169, 350: 170, 171: 171, 172: 172, 
+      173: 173, 174: 174, 379: 175, 176: 176, 177: 177, 731: 178, 322: 179, 180: 180, 
+      181: 181, 182: 182, 183: 183, 184: 184, 261: 185, 351: 186, 187: 187, 317: 188, 
+      733: 189, 318: 190, 380: 191, 340: 192, 193: 193, 194: 194, 258: 195, 196: 196, 
+      313: 197, 262: 198, 199: 199, 268: 200, 201: 201, 280: 202, 203: 203, 282: 204, 
+      205: 205, 206: 206, 270: 207, 272: 208, 323: 209, 327: 210, 211: 211, 212: 212, 
+      336: 213, 214: 214, 215: 215, 344: 216, 366: 217, 218: 218, 368: 219, 220: 220, 
+      221: 221, 354: 222, 223: 223, 341: 224, 225: 225, 226: 226, 259: 227, 228: 228, 
+      314: 229, 263: 230, 231: 231, 269: 232, 233: 233, 281: 234, 235: 235, 283: 236, 
+      237: 237, 238: 238, 271: 239, 273: 240, 324: 241, 328: 242, 243: 243, 244: 244, 
+      337: 245, 246: 246, 247: 247, 345: 248, 367: 249, 250: 250, 369: 251, 252: 252, 
+      253: 253, 355: 254, 729: 255
+    };
+
+    const bytes = new Uint8Array(combinedXml.length);
+    for (let i = 0; i < combinedXml.length; i++) {
+      const code = combinedXml.charCodeAt(i);
+      if (code <= 127) {
+        bytes[i] = code;
+      } else if (cp1250Map[code] !== undefined) {
+        bytes[i] = cp1250Map[code];
+      } else {
+        bytes[i] = 63; // '?' for unmappable
+      }
+    }
+
+    const blob = new Blob([bytes], { type: 'application/xml;charset=windows-1250;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `pohoda_import_${packId}.xml`);
+    link.setAttribute('download', `pohoda_export_${new Date().toISOString().split('T')[0]}.xml`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast(lang === 'CZ' ? 'Hromadný Pohoda XML soubor stažen.' : 'Combined Pohoda XML file downloaded.', 'success');
+    showToast(lang === 'CZ' ? 'XML soubor pro Pohodu byl stažen.' : 'XML file for Pohoda downloaded.', 'success');
   };
 
   const getFilteredOrders = () => {
@@ -457,6 +700,16 @@ export default function OrdersTab({ showToast }) {
 
   const filteredFiles = getFilteredOrders();
   const allSelected = filteredFiles.length > 0 && selectedOrderIds.length === filteredFiles.length;
+
+  if (showInvoiceOrder) {
+    return (
+      <InvoiceTemplate 
+        order={showInvoiceOrder} 
+        onClose={() => setShowInvoiceOrder(null)} 
+        lang={lang} 
+      />
+    );
+  }
 
   return (
     <div className="orders-tab-container">
@@ -1072,8 +1325,11 @@ export default function OrdersTab({ showToast }) {
             <button className="orders-action-btn orders-action-btn-primary" onClick={exportDpdCsv}>
               Export pro DPD (CSV)
             </button>
-            <button className="orders-action-btn" onClick={downloadCombinedPohodaXml}>
-              Sloučit XML pro Pohodu
+            <button className="orders-action-btn" onClick={exportAccountantCsv}>
+              {lang === 'CZ' ? 'Export pro účetní (CSV)' : 'Export for Accountant (CSV)'}
+            </button>
+            <button className="orders-action-btn orders-action-btn-primary" onClick={exportPohodaXml}>
+              {lang === 'CZ' ? 'Export pro Pohodu (XML)' : 'Export for Pohoda (XML)'}
             </button>
           </div>
         </div>
@@ -1176,8 +1432,14 @@ export default function OrdersTab({ showToast }) {
               </div>
             </div>
 
-            <div style={{ marginTop: '32px', display: 'flex', justifyContent: 'flex-end' }}>
-              <button className="orders-action-btn orders-action-btn-primary" onClick={() => setDetailOrder(null)}>
+            <div style={{ marginTop: '32px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button className="orders-action-btn orders-action-btn-primary" onClick={() => {
+                setShowInvoiceOrder(detailOrder);
+                setDetailOrder(null);
+              }}>
+                {lang === 'CZ' ? 'Zobrazit fakturu' : 'Show Invoice'}
+              </button>
+              <button className="orders-action-btn" onClick={() => setDetailOrder(null)}>
                 {lang === 'CZ' ? 'Zavřít' : 'Close'}
               </button>
             </div>
