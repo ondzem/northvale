@@ -2092,6 +2092,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         type="text" 
                         id="api-set-code" 
                         className="pmf-input" 
+                        autoComplete="new-password"
                         placeholder={formGame === 'Pokémon' ? 'např. sv3, obf' : 'např. aac, woo'} 
                         style={{ height: '38px' }}
                       />
@@ -2104,6 +2105,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         type="text" 
                         id="api-card-number" 
                         className="pmf-input" 
+                        autoComplete="new-password"
                         placeholder="např. 186" 
                         style={{ height: '38px' }}
                       />
@@ -2218,7 +2220,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                     <div className="pmf-form-col" style={{ ...styles.col, flex: '2 1 0' }}>
                       <div className="pmf-field">
                         <label className="pmf-label">{lang === 'CZ' ? 'Název produktu' : 'Product Name'}<span className="pmf-req-dot"> *</span></label>
-                        <input type="text" required className="pmf-input" value={formName} onChange={e => setFormName(e.target.value)} placeholder="např. Charizard ex" />
+                        <input type="text" required className="pmf-input" autoComplete="new-password" value={formName} onChange={e => setFormName(e.target.value)} placeholder="např. Charizard ex" />
                       </div>
                     </div>
                     <div className="pmf-form-col" style={{ ...styles.col, flex: '1 1 0' }}>
@@ -3008,13 +3010,13 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           <div className="pmf-form-col" style={styles.col}>
                             <div className="pmf-field">
                               <label className="pmf-label">{lang === 'CZ' ? 'Edice / Sada' : 'Set / Expansion'}</label>
-                              <input type="text" className="pmf-input" value={formEdition} onChange={e => setFormEdition(e.target.value)} placeholder="např. Obsidian Flames" />
+                              <input type="text" className="pmf-input" autoComplete="new-password" value={formEdition} onChange={e => setFormEdition(e.target.value)} placeholder="např. Obsidian Flames" />
                             </div>
                           </div>
                           <div className="pmf-form-col" style={styles.col}>
                             <div className="pmf-field">
                               <label className="pmf-label">{lang === 'CZ' ? 'Zkratka edice (Set Code)' : 'Set Code'}</label>
-                              <input type="text" className="pmf-input" value={formSetCode} onChange={e => setFormSetCode(e.target.value)} placeholder="např. OBF" />
+                              <input type="text" className="pmf-input" autoComplete="new-password" value={formSetCode} onChange={e => setFormSetCode(e.target.value)} placeholder="např. OBF" />
                             </div>
                           </div>
                         </div>
@@ -3024,13 +3026,13 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           <div className="pmf-form-col" style={styles.col}>
                             <div className="pmf-field">
                               <label className="pmf-label">{lang === 'CZ' ? 'Sběratelské číslo' : 'Collector Code'}</label>
-                              <input type="text" className="pmf-input" value={formCardCode} onChange={e => setFormCardCode(e.target.value)} placeholder="např. 186/196" />
+                              <input type="text" className="pmf-input" autoComplete="new-password" value={formCardCode} onChange={e => setFormCardCode(e.target.value)} placeholder="např. 186/196" />
                             </div>
                           </div>
                           <div className="pmf-form-col" style={styles.col}>
                             <div className="pmf-field">
                               <label className="pmf-label">{lang === 'CZ' ? 'Rarita' : 'Rarity'}</label>
-                              <input type="text" className="pmf-input" value={formRarity} onChange={e => setFormRarity(e.target.value)} placeholder="např. Ultra Rare" />
+                              <input type="text" className="pmf-input" autoComplete="new-password" value={formRarity} onChange={e => setFormRarity(e.target.value)} placeholder="např. Ultra Rare" />
                             </div>
                           </div>
                         </div>
