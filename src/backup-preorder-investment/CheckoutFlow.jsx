@@ -337,7 +337,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         // Přesměrovat na bránu pomocí POST formuláře
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = 'https://test.3dsecure.gpwebpay.com/pgw/order.do';
+        form.action = 'https://3dsecure.gpwebpay.com/pgw/order.do';
 
         Object.keys(data).forEach(key => {
           const input = document.createElement('input');
