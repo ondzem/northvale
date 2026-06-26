@@ -234,11 +234,11 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               id: orderNumber,
               items: orderItems.map(item => ({
                 id: item.id,
-                product_id: item.id,
+                product_id: item.product?.id || item.id,
                 name: item.name || item.productName,
                 price: item.price,
                 quantity: item.quantity,
-                product: item
+                product: item.product || item
               })),
               subtotal: orderSubtotal,
               discountCode: orderDiscountCode,
@@ -409,9 +409,12 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     const order = {
       id: orderId,
       items: cart.map(item => ({
+        id: item.id,
+        product_id: item.product?.id || item.id,
         name: item.name || item.productName,
         price: item.price,
-        quantity: item.quantity
+        quantity: item.quantity,
+        product: item.product || item
       })),
       subtotal: cartSubtotal,
       discountCode: appliedDiscount ? appliedDiscount.code : null,
