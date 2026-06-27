@@ -118,7 +118,9 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   // Auto-fill form fields when logged in user details change
   useEffect(() => {
     if (user && user.id) {
-      if (user.name) setName(user.name);
+      if (user.billingName) setName(user.billingName);
+      else if (user.name) setName(user.name);
+      
       if (user.email) setEmail(user.email);
       if (user.phone) setPhone(user.phone);
       

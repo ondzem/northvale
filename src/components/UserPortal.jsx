@@ -116,7 +116,8 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
       try {
         const { error } = await supabase
           .from('profiles')
-          .upsert({ id: user.id, full_name: contactName, phone: contactPhone });
+          .update({ full_name: contactName, phone: contactPhone })
+          .eq('id', user.id);
 
         if (!error) {
           isSuccess = true;
@@ -163,7 +164,8 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
       try {
         const { error } = await supabase
           .from('profiles')
-          .upsert({ id: user.id, ...billingData });
+          .update(billingData)
+          .eq('id', user.id);
 
         if (!error) {
           isSuccess = true;
@@ -242,7 +244,8 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
       try {
         const { error } = await supabase
           .from('profiles')
-          .upsert({ id: user.id, shipping_addresses: updatedAddresses });
+          .update({ shipping_addresses: updatedAddresses })
+          .eq('id', user.id);
 
         if (!error) {
           isSuccess = true;
@@ -300,7 +303,8 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
           try {
             const { error } = await supabase
               .from('profiles')
-              .upsert({ id: user.id, shipping_addresses: updatedAddresses });
+              .update({ shipping_addresses: updatedAddresses })
+              .eq('id', user.id);
 
             if (!error) {
               isSuccess = true;
