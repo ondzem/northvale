@@ -224,6 +224,11 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
               </span>
             )}
             <span className="vf-price" style={{ fontSize: '15px' }}>{price.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}</span>
+            {originalPrice && product.lowestPrice30d && (
+              <span style={{ fontSize: '9px', color: 'var(--text-muted, #8a8a92)', marginTop: '2px', whiteSpace: 'nowrap' }}>
+                {lang === 'CZ' ? 'Nejnižší 30d:' : 'Lowest 30d:'} {product.lowestPrice30d.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}
+              </span>
+            )}
           </div>
         </div>
 

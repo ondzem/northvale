@@ -9,13 +9,13 @@ import { FEATURE_FLAGS } from '../../config';
 // Rich text formatter function for custom headers, lists, check lists, bold text, and raw HTML
 const parseFormattedText = (text, isMini = false) => {
   if (!text) return null;
-  
+
   // If it looks like HTML, render it directly
   if (/<[a-z][\s\S]*>/i.test(text)) {
     return (
-      <div 
-        className={isMini ? "mock-page-container-html" : "tab-popis-text-html"} 
-        dangerouslySetInnerHTML={{ __html: text }} 
+      <div
+        className={isMini ? "mock-page-container-html" : "tab-popis-text-html"}
+        dangerouslySetInnerHTML={{ __html: text }}
       />
     );
   }
@@ -23,7 +23,7 @@ const parseFormattedText = (text, isMini = false) => {
   const lines = text.split('\n');
   const elements = [];
   let currentList = [];
-  
+
   const parseInlineFormatting = (str) => {
     if (!str) return '';
     const parts = str.split(/\*\*([^*]+)\*\*/g);
@@ -57,7 +57,7 @@ const parseFormattedText = (text, isMini = false) => {
 
   lines.forEach((line, index) => {
     const trimmed = line.trim();
-    
+
     // Check if it's a heading
     if (trimmed.startsWith('### ')) {
       flushList(index);
@@ -251,24 +251,24 @@ const RichTextEditor = ({ value, onChange, placeholder, className, style }) => {
 function parseCSV(text) {
   const lines = text.split(/\r?\n/);
   if (lines.length < 2) return [];
-  
+
   // Detect separator
   const header = lines[0];
   const separator = header.includes(';') ? ';' : ',';
-  
+
   const headers = header.split(separator).map(h => h.trim().replace(/^["']|["']$/g, ''));
-  
+
   const results = [];
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
-    
+
     // Split by separator taking quotes into account
     let matches = [];
     let insideQuote = false;
     let entries = [];
     let current = '';
-    
+
     for (let charIndex = 0; charIndex < line.length; charIndex++) {
       const char = line[charIndex];
       if (char === '"' || char === "'") {
@@ -281,7 +281,7 @@ function parseCSV(text) {
       }
     }
     entries.push(current.trim().replace(/^["']|["']$/g, ''));
-    
+
     if (entries.length > 0) {
       const obj = {};
       headers.forEach((h, idx) => {
@@ -301,7 +301,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [editedProducts, setEditedProducts] = useState({});
   const [outOfStockBehavior, setOutOfStockBehavior] = useState(localStorage.getItem('outOfStockBehavior') || 'watchdog');
   const [pokemonSets, setPokemonSets] = useState([]);
-  
+
   // Filters for table list
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -312,7 +312,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isApiLoading, setIsApiLoading] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  
+
   // CSV Import State
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
   const [csvContent, setCsvContent] = useState('');
@@ -332,25 +332,27 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [formPrice, setFormPrice] = useState('');
   const [formStock, setFormStock] = useState('');
   const [formLang, setFormLang] = useState('EN');
-  
+
   // Specialized fields based on type
   const [formPreorder, setFormPreorder] = useState(false);
   const [formReleaseDate, setFormReleaseDate] = useState('');
   const [formInvestment, setFormInvestment] = useState(false);
   const [formNoVat, setFormNoVat] = useState(false);
+  const [formOriginalPrice, setFormOriginalPrice] = useState('');
+  const [formLowestPrice30d, setFormLowestPrice30d] = useState('');
   const [formCategoryId, setFormCategoryId] = useState('');
-  
+
   // Sealed fields
   const [formPackagingType, setFormPackagingType] = useState('Booster Box');
   const [formBoosterCount, setFormBoosterCount] = useState('');
   const [formYear, setFormYear] = useState('');
   const [formFoilCondition, setFormFoilCondition] = useState('100% stav');
-  
+
   // Slab fields
   const [formCompany, setFormCompany] = useState('PSA');
   const [formGrade, setFormGrade] = useState('10');
   const [formCertNumber, setFormCertNumber] = useState('');
-  
+
   // Acrylic fields
   const [formAcrylicThickness, setFormAcrylicThickness] = useState('4');
   const [formUvProtection, setFormUvProtection] = useState(true);
@@ -377,7 +379,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [previewLang, setPreviewLang] = useState('EN');
   const [previewFoil, setPreviewFoil] = useState(false);
   const [previewActiveImage, setPreviewActiveImage] = useState('');
-  
+
   // Custom Category Dropdown State
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const categoryDropdownRef = useRef(null);
@@ -482,7 +484,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
           return;
         }
       }
-      
+
       const cleanName = (formName || '').trim();
       const cleanCardCode = (formCardCode || '').trim();
       const combined = cleanCardCode ? `${cleanName} (${cleanCardCode})` : cleanName;
@@ -530,6 +532,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormReleaseDate('');
     setFormInvestment(false);
     setFormNoVat(false);
+    setFormOriginalPrice('');
+    setFormLowestPrice30d('');
     setFormCategoryId('');
     setFormPackagingType('Booster Box');
     setFormBoosterCount('');
@@ -545,7 +549,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormVariants([
       { id: 'v-' + Math.random().toString(36).substr(2, 5), condition: 'NM', lang: 'EN', foil: true, price: 100, stock: 1 }
     ]);
-    
+
     // Reset split-form states
     setFormShortDesc('');
     setFormAdditionalImages([]);
@@ -574,7 +578,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     }
     setEditingProduct(p);
     setFormId(p.id || '');
-    
+
     let cleanName = p.name || '';
     let parsedCode = '';
     const nameMatch = cleanName.match(/\(([^)]+)\)$/);
@@ -598,19 +602,21 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormReleaseDate(p.releaseDate || p.foil_condition || '');
     setFormInvestment(!!p.investment);
     setFormNoVat(!!p.no_vat);
+    setFormOriginalPrice(p.originalPrice !== null && p.originalPrice !== undefined ? p.originalPrice.toString() : '');
+    setFormLowestPrice30d(p.lowestPrice30d !== null && p.lowestPrice30d !== undefined ? p.lowestPrice30d.toString() : '');
     setFormCategoryId(p.category_id || '');
-    
+
     // Sealed fields
     setFormPackagingType(p.packagingType || p.packaging_type || 'Booster Box');
     setFormBoosterCount(p.boosterCount !== null && p.boosterCount !== undefined ? p.boosterCount.toString() : '');
     setFormYear(p.year !== null && p.year !== undefined ? p.year.toString() : '');
     setFormFoilCondition(p.foilCondition || p.foil_condition || '100% stav');
-    
+
     // Slab fields
     setFormCompany(p.company || 'PSA');
     setFormGrade(p.grade !== null && p.grade !== undefined ? p.grade.toString() : '10');
     setFormCertNumber(p.certNumber || p.cert_number || '');
-    
+
     // Acrylic fields
     setFormAcrylicThickness(p.acrylicThickness !== null && p.acrylicThickness !== undefined ? p.acrylicThickness.toString() : '4');
     setFormUvProtection(!!(p.uvProtection || p.uv_protection));
@@ -653,7 +659,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     // Load new split-form and preview states
     setFormShortDesc(!isHtmlEmpty(savedShortDesc) ? savedShortDesc : fallbackShortDesc);
     setFormAdditionalImages(p.additionalImages || []);
-    
+
     setCropTarget({ type: 'front' });
     setFormSetCode(p.setCode || '');
     setFormStage(p.stage || '');
@@ -667,16 +673,16 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const getHierarchicalCategoryOptions = () => {
     const list = [];
     const gameCats = categories.filter(c => c.game === formGame);
-    
+
     // Filter out root categories (parent_id: null)
     const nonRootGameCats = gameCats.filter(c => c.parent_id !== null);
-    
+
     // Find Level 1 categories (direct children of the root category)
     const roots = nonRootGameCats.filter(c => {
       const parent = categories.find(p => p.id === c.parent_id);
       return parent ? parent.parent_id === null : true;
     });
-    
+
     const traverse = (cat, depth = 0) => {
       list.push({
         id: cat.id,
@@ -686,7 +692,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       const children = nonRootGameCats.filter(c => c.parent_id === cat.id);
       children.forEach(child => traverse(child, depth + 1));
     };
-    
+
     roots.forEach(root => traverse(root, 0));
     return list;
   };
@@ -771,10 +777,10 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const handleSaveAllExcel = async () => {
     const ids = Object.keys(editedProducts);
     if (ids.length === 0) return;
-    
+
     let successCount = 0;
     let failCount = 0;
-    
+
     for (const id of ids) {
       const editData = editedProducts[id];
       const productPayload = {
@@ -782,7 +788,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
         price: editData.type === 'single' ? null : (editData.price ? Number(editData.price) : 0),
         stock: editData.type === 'single' ? null : (editData.stock ? Number(editData.stock) : 0),
       };
-      
+
       const { error } = await saveProductToDB(productPayload);
       if (error) {
         failCount++;
@@ -790,7 +796,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
         successCount++;
       }
     }
-    
+
     if (failCount === 0) {
       showToast(lang === 'CZ' ? `Uloženo všech ${successCount} produktů.` : `All ${successCount} products saved.`, 'success');
       setEditedProducts({});
@@ -837,8 +843,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     // Map input set code to correct set.id (e.g., PAL -> sv2)
     let resolvedSetId = setVal;
     if (formGame === 'Pokémon' || formGame.toLowerCase().includes('pok')) {
-      const matchedSet = pokemonSets.find(s => 
-        s.id.toLowerCase() === setVal || 
+      const matchedSet = pokemonSets.find(s =>
+        s.id.toLowerCase() === setVal ||
         s.ptcgoCode?.toLowerCase() === setVal ||
         s.name.toLowerCase() === setVal
       );
@@ -852,7 +858,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
         let url = `https://api.pokemontcg.io/v2/cards?q=set.id:${resolvedSetId} number:${normalizedNumberVal}`;
         let res = await fetch(url, { signal: controller.signal });
         let data = await res.json();
-        
+
         if (!data.data || data.data.length === 0) {
           url = `https://api.pokemontcg.io/v2/cards?q=set.ptcgoCode:${setVal.toUpperCase()} number:${normalizedNumberVal}`;
           res = await fetch(url, { signal: controller.signal });
@@ -867,9 +873,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
         let card = null;
         if (data.data && data.data.length > 0) {
-          card = data.data.find(c => 
-            c.set.id.toLowerCase() === resolvedSetId || 
-            c.set.id.toLowerCase() === setVal || 
+          card = data.data.find(c =>
+            c.set.id.toLowerCase() === resolvedSetId ||
+            c.set.id.toLowerCase() === setVal ||
             c.set.ptcgoCode?.toLowerCase() === setVal ||
             c.set.name.toLowerCase().includes(setVal)
           ) || data.data[0];
@@ -890,21 +896,21 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
         setFormIllustrator(card.artist || '');
         setFormStage(card.subtypes?.[0] || '');
         setFormElement(card.types?.[0] || '');
-        
+
         const generatedSku = `POK-${(card.set.ptcgoCode || card.set.id).toUpperCase()}-${card.number}`;
         setFormId(generatedSku);
 
         const textDesc = `Typ: ${card.supertype} - ${card.subtypes?.join(', ') || ''}\nHra: Pokémon TCG\nEdice: ${card.set.name}\nIlustrátor: ${card.artist || 'Neznámý'}`;
         setFormShortDesc(textDesc);
-        
+
         setFormVariants([
           { id: 'v-' + Math.random().toString(36).substr(2, 5), condition: 'NM', lang: 'EN', foil: false, price: 100, stock: 1 }
         ]);
 
         showToast(lang === 'CZ' ? `Karta ${card.name} úspěšně načtena!` : `Card ${card.name} loaded successfully!`, 'success');
       } else {
-        showToast(lang === 'CZ' 
-          ? 'Pro tuto hru/příslušenství není automatické doplňování k dispozici – vyplňte prosím údaje ručně.' 
+        showToast(lang === 'CZ'
+          ? 'Pro tuto hru/příslušenství není automatické doplňování k dispozici – vyplňte prosím údaje ručně.'
           : 'Auto-fill is not available for this game/accessory – please enter the details manually.', 'warning');
       }
     } catch (err) {
@@ -995,6 +1001,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       releaseDate: formPreorder ? formReleaseDate : null,
       investment: formInvestment,
       no_vat: formNoVat,
+      originalPrice: formOriginalPrice ? Number(formOriginalPrice) : null,
+      lowestPrice30d: formLowestPrice30d ? Number(formLowestPrice30d) : null,
       category_id: formCategoryId || null,
       shortDesc: formShortDesc || null,
       additionalImages: formAdditionalImages || [],
@@ -1126,7 +1134,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       setCropImageSrc(event.target.result);
       setCropImageFormat(file.type || 'image/jpeg');
       setIsCropping(true);
-      
+
       // Default crop orientation based on target type
       if (target && (target.type === 'block' || target.type === 'additional')) {
         setCropOrientation('landscape');
@@ -1158,7 +1166,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
         const minScaleX = frameW / img.width;
         const minScaleY = frameH / img.height;
         const computedMinScale = Math.max(minScaleX, minScaleY);
-        
+
         // Allow zooming out down to 1% (0.01) so they can fit wide/tall images fully
         const sliderMinScale = 0.01;
         minScaleRef.current = sliderMinScale;
@@ -1432,7 +1440,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
   const handleSaveCsvToDb = async () => {
     if (parsedRows.length === 0) return;
-    
+
     let successCount = 0;
     let failCount = 0;
 
@@ -1465,7 +1473,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
           if (row.variants) {
             try {
               productPayload.variants = JSON.parse(row.variants);
-            } catch(e) {
+            } catch (e) {
               productPayload.variants = [];
             }
           } else {
@@ -1498,8 +1506,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     }
 
     showToast(
-      lang === 'CZ' 
-        ? `Hromadný import dokončen. Úspěšně: ${successCount}, Chyby: ${failCount}` 
+      lang === 'CZ'
+        ? `Hromadný import dokončen. Úspěšně: ${successCount}, Chyby: ${failCount}`
         : `Bulk import completed. Success: ${successCount}, Fails: ${failCount}`,
       failCount > 0 ? 'warning' : 'success'
     );
@@ -1512,9 +1520,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
   // Filter products list
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (p.edition && p.edition.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.edition && p.edition.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesType = filterType === 'all' || p.type === filterType;
     const matchesGame = filterGame === 'all' || p.game === filterGame;
     return matchesSearch && matchesType && matchesGame;
@@ -1562,20 +1570,20 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   };
   const previewAccBrand = formName.includes('Dragon Shield') ? 'Dragon Shield' : formName.includes('Ultra Pro') ? 'Ultra Pro' : formName.includes('Ultimate Guard') ? 'Ultimate Guard' : (lang === 'CZ' ? 'Ostatní' : 'Other');
   const previewAccSize = formName.includes('Japanese') ? 'Japanese Size' : 'Standard Size (Pokémon/Lorcana)';
-  const previewAccCount = formName.includes('100') 
-    ? (lang === 'CZ' ? '100 ks' : '100 pcs') 
-    : formName.includes('25') 
-      ? (lang === 'CZ' ? '25 ks' : '25 pcs') 
-      : formName.includes('216') 
-        ? (lang === 'CZ' ? '216 slotů' : '216 slots') 
-        : formName.includes('30') 
-          ? (lang === 'CZ' ? '30 slotů' : '30 slots') 
+  const previewAccCount = formName.includes('100')
+    ? (lang === 'CZ' ? '100 ks' : '100 pcs')
+    : formName.includes('25')
+      ? (lang === 'CZ' ? '25 ks' : '25 pcs')
+      : formName.includes('216')
+        ? (lang === 'CZ' ? '216 slotů' : '216 slots')
+        : formName.includes('30')
+          ? (lang === 'CZ' ? '30 slotů' : '30 slots')
           : (lang === 'CZ' ? '1 ks' : '1 pc');
-  const previewAccMaterial = formName.includes('Matte') 
-    ? (lang === 'CZ' ? 'Matný plast (Matte)' : 'Matte plastic') 
+  const previewAccMaterial = formName.includes('Matte')
+    ? (lang === 'CZ' ? 'Matný plast (Matte)' : 'Matte plastic')
     : (lang === 'CZ' ? 'Prvotřídní acid-free PP' : 'Premium acid-free PP');
-  const previewAccColor = formName.includes('Clear') 
-    ? (lang === 'CZ' ? 'Průhledná (Clear)' : 'Clear') 
+  const previewAccColor = formName.includes('Clear')
+    ? (lang === 'CZ' ? 'Průhledná (Clear)' : 'Clear')
     : (lang === 'CZ' ? 'Černá (Black)' : 'Black');
 
   let activePreviewVariant = (formVariants || []).find(v => v.condition === previewCondition && v.lang === previewLang && v.foil === previewFoil)
@@ -1585,7 +1593,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const previewPrice = formType === 'single'
     ? (activePreviewVariant?.price || 0)
     : (formPrice ? Number(formPrice) : 0);
-    
+
   const previewStock = formType === 'single'
     ? (activePreviewVariant?.stock || 0)
     : (formStock ? Number(formStock) : 0);
@@ -1604,31 +1612,31 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     investment: formInvestment,
     category_id: formCategoryId,
     lang: formLang,
-    
+
     // Single-specific
     variants: formVariants,
-    
+
     // Non-single specific
     price: formPrice ? Number(formPrice) : 0,
     stock: formStock ? Number(formStock) : 0,
-    
+
     // Sealed-specific
     packagingType: formPackagingType,
     boosterCount: formBoosterCount ? Number(formBoosterCount) : null,
     year: formYear ? Number(formYear) : null,
     foilCondition: formFoilCondition,
-    
+
     // Slab-specific
     company: formCompany,
     grade: formGrade ? Number(formGrade) : null,
     certNumber: formCertNumber,
-    
+
     // Accessory-specific
     acrylicThickness: formAcrylicThickness ? Number(formAcrylicThickness) : null,
     uvProtection: formUvProtection,
     closingType: formClosingType,
     innerDimensions: formInnerDimensions,
-    
+
     // Custom specifications/parameters
     customParams: formCustomParams
   };
@@ -1639,8 +1647,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       <div className="adf-toolbar">
         <div className="adf-tsearch">
           <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.2-4.2"></path></svg>
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder={lang === 'CZ' ? 'Hledat název, ID nebo set...' : 'Search name, ID or set...'}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
@@ -1675,7 +1683,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
         )}
 
         <div className="adf-tselect">
-          <select 
+          <select
             value={filterGame}
             onChange={e => setFilterGame(e.target.value)}
           >
@@ -1691,7 +1699,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
         </div>
 
         <div className="adf-tselect">
-          <select 
+          <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}
           >
@@ -1714,133 +1722,133 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       </div>
       {/* Excel Grid View */}
       <div className="nv-excel-container">
-          {loading ? (
-            <p style={{ ...styles.infoText, padding: '24px' }}>{lang === 'CZ' ? 'Načítání produktů...' : 'Loading products...'}</p>
-          ) : filteredProducts.length === 0 ? (
-            <p style={{ ...styles.infoText, padding: '24px' }}>{lang === 'CZ' ? 'Žádné produkty neodpovídají filtrům.' : 'No products match filters.'}</p>
-          ) : (
-            <table className="nv-excel-table">
-              <thead>
-                <tr>
-                  <th style={{ width: '60px' }}>{lang === 'CZ' ? 'Náhled' : 'Preview'}</th>
-                  <th style={{ width: '160px' }}>{lang === 'CZ' ? 'SKU / ID' : 'SKU / ID'}</th>
-                  <th>{lang === 'CZ' ? 'Název produktu' : 'Product Name'}</th>
-                  <th style={{ width: '130px' }}>{lang === 'CZ' ? 'Hra' : 'Game'}</th>
-                  <th style={{ width: '180px' }}>{lang === 'CZ' ? 'Kategorie' : 'Category'}</th>
-                  <th style={{ width: '110px' }}>{lang === 'CZ' ? 'Typ' : 'Type'}</th>
-                  <th style={{ width: '120px' }}>{lang === 'CZ' ? 'Cena (Kč)' : 'Price (CZK)'}</th>
-                  <th style={{ width: '100px' }}>{lang === 'CZ' ? 'Sklad (ks)' : 'Stock'}</th>
-                  {/* <th style={{ width: '50px', textAlign: 'center' }}>Pre</th>
+        {loading ? (
+          <p style={{ ...styles.infoText, padding: '24px' }}>{lang === 'CZ' ? 'Načítání produktů...' : 'Loading products...'}</p>
+        ) : filteredProducts.length === 0 ? (
+          <p style={{ ...styles.infoText, padding: '24px' }}>{lang === 'CZ' ? 'Žádné produkty neodpovídají filtrům.' : 'No products match filters.'}</p>
+        ) : (
+          <table className="nv-excel-table">
+            <thead>
+              <tr>
+                <th style={{ width: '60px' }}>{lang === 'CZ' ? 'Náhled' : 'Preview'}</th>
+                <th style={{ width: '160px' }}>{lang === 'CZ' ? 'SKU / ID' : 'SKU / ID'}</th>
+                <th>{lang === 'CZ' ? 'Název produktu' : 'Product Name'}</th>
+                <th style={{ width: '130px' }}>{lang === 'CZ' ? 'Hra' : 'Game'}</th>
+                <th style={{ width: '180px' }}>{lang === 'CZ' ? 'Kategorie' : 'Category'}</th>
+                <th style={{ width: '110px' }}>{lang === 'CZ' ? 'Typ' : 'Type'}</th>
+                <th style={{ width: '120px' }}>{lang === 'CZ' ? 'Cena (Kč)' : 'Price (CZK)'}</th>
+                <th style={{ width: '100px' }}>{lang === 'CZ' ? 'Sklad (ks)' : 'Stock'}</th>
+                {/* <th style={{ width: '50px', textAlign: 'center' }}>Pre</th>
                   <th style={{ width: '50px', textAlign: 'center' }}>Inv</th> */}
-                  <th style={{ width: '120px', textAlign: 'center' }}>{lang === 'CZ' ? 'Akce' : 'Actions'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredProducts.map(p => {
-                  const isModified = !!editedProducts[p.id];
-                  const currentP = editedProducts[p.id] || p;
+                <th style={{ width: '120px', textAlign: 'center' }}>{lang === 'CZ' ? 'Akce' : 'Actions'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProducts.map(p => {
+                const isModified = !!editedProducts[p.id];
+                const currentP = editedProducts[p.id] || p;
 
-                  return (
-                    <tr key={p.id}>
-                      <td style={{ textAlign: 'center' }}>
-                        <div style={{ width: '36px', height: '36px', overflow: 'hidden', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: '#121216', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-                          {p.image ? (
-                            <img src={p.image} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }} />
-                          ) : (
-                            <span style={{ fontSize: '10px', color: '#8a8a92' }}>N/A</span>
-                          )}
-                        </div>
-                      </td>
-                      <td>
-                        <code style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', color: 'var(--nv-gold, #fdbd16)', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '150px' }} title={p.id}>
-                          {p.id}
-                        </code>
-                      </td>
-                      <td>
+                return (
+                  <tr key={p.id}>
+                    <td style={{ textAlign: 'center' }}>
+                      <div style={{ width: '36px', height: '36px', overflow: 'hidden', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: '#121216', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                        {p.image ? (
+                          <img src={p.image} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }} />
+                        ) : (
+                          <span style={{ fontSize: '10px', color: '#8a8a92' }}>N/A</span>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <code style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', color: 'var(--nv-gold, #fdbd16)', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '150px' }} title={p.id}>
+                        {p.id}
+                      </code>
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        className="nv-excel-input"
+                        value={currentP.name || ''}
+                        onChange={e => handleExcelRowChange(p.id, 'name', e.target.value)}
+                      />
+                    </td>
+                    <td>
+                      <select
+                        className="nv-excel-select"
+                        value={currentP.game || ''}
+                        onChange={e => {
+                          handleExcelRowChange(p.id, 'game', e.target.value);
+                          handleExcelRowChange(p.id, 'category_id', null);
+                        }}
+                      >
+                        <option value="Pokémon">Pokémon</option>
+                        <option value="Lorcana">Lorcana</option>
+                        <option value="One Piece">One Piece</option>
+                        <option value="Riftbound">Riftbound</option>
+                        <option value="Accessories">{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}</option>
+                        <option value="Acrylics">{lang === 'CZ' ? 'Akryly' : 'Acrylics'}</option>
+                      </select>
+                    </td>
+                    <td>
+                      <select
+                        className="nv-excel-select"
+                        value={currentP.category_id || ''}
+                        onChange={e => handleExcelRowChange(p.id, 'category_id', e.target.value || null)}
+                      >
+                        <option value="">— Bez kategorie —</option>
+                        {getCategoryOptionsForGame(currentP.game).map(opt => (
+                          <option key={opt.id} value={opt.id}>
+                            {'\u00A0'.repeat(opt.depth * 2)}{opt.name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <select
+                        className="nv-excel-select"
+                        value={currentP.type || ''}
+                        onChange={e => handleExcelRowChange(p.id, 'type', e.target.value)}
+                      >
+                        <option value="single">Single</option>
+                        <option value="sealed">Sealed</option>
+                        <option value="slab">Slab</option>
+                        <option value="acrylic">Acrylic</option>
+                        <option value="accessory">Accessory</option>
+                      </select>
+                    </td>
+                    <td>
+                      {currentP.type === 'single' ? (
+                        <span className="nv-excel-badge-single" onClick={() => handleOpenEditModal(p)}>
+                          {lang === 'CZ' ? 'Varianty' : 'Variants'}
+                        </span>
+                      ) : (
                         <input
-                          type="text"
+                          type="number"
                           className="nv-excel-input"
-                          value={currentP.name || ''}
-                          onChange={e => handleExcelRowChange(p.id, 'name', e.target.value)}
+                          value={currentP.price === null || currentP.price === undefined ? '' : currentP.price}
+                          onChange={e => handleExcelRowChange(p.id, 'price', e.target.value)}
+                          placeholder="Cena"
+                          style={{ textAlign: 'right' }}
                         />
-                      </td>
-                      <td>
-                        <select
-                          className="nv-excel-select"
-                          value={currentP.game || ''}
-                          onChange={e => {
-                            handleExcelRowChange(p.id, 'game', e.target.value);
-                            handleExcelRowChange(p.id, 'category_id', null);
-                          }}
-                        >
-                          <option value="Pokémon">Pokémon</option>
-                          <option value="Lorcana">Lorcana</option>
-                          <option value="One Piece">One Piece</option>
-                          <option value="Riftbound">Riftbound</option>
-                          <option value="Accessories">{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}</option>
-                          <option value="Acrylics">{lang === 'CZ' ? 'Akryly' : 'Acrylics'}</option>
-                        </select>
-                      </td>
-                      <td>
-                        <select
-                          className="nv-excel-select"
-                          value={currentP.category_id || ''}
-                          onChange={e => handleExcelRowChange(p.id, 'category_id', e.target.value || null)}
-                        >
-                          <option value="">— Bez kategorie —</option>
-                          {getCategoryOptionsForGame(currentP.game).map(opt => (
-                            <option key={opt.id} value={opt.id}>
-                              {'\u00A0'.repeat(opt.depth * 2)}{opt.name}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td>
-                        <select
-                          className="nv-excel-select"
-                          value={currentP.type || ''}
-                          onChange={e => handleExcelRowChange(p.id, 'type', e.target.value)}
-                        >
-                          <option value="single">Single</option>
-                          <option value="sealed">Sealed</option>
-                          <option value="slab">Slab</option>
-                          <option value="acrylic">Acrylic</option>
-                          <option value="accessory">Accessory</option>
-                        </select>
-                      </td>
-                      <td>
-                        {currentP.type === 'single' ? (
-                          <span className="nv-excel-badge-single" onClick={() => handleOpenEditModal(p)}>
-                            {lang === 'CZ' ? 'Varianty' : 'Variants'}
-                          </span>
-                        ) : (
-                          <input
-                            type="number"
-                            className="nv-excel-input"
-                            value={currentP.price === null || currentP.price === undefined ? '' : currentP.price}
-                            onChange={e => handleExcelRowChange(p.id, 'price', e.target.value)}
-                            placeholder="Cena"
-                            style={{ textAlign: 'right' }}
-                          />
-                        )}
-                      </td>
-                      <td>
-                        {currentP.type === 'single' ? (
-                          <span style={{ fontSize: '11px', color: '#8a8a92' }}>
-                            {(p.variants || []).reduce((sum, v) => sum + v.stock, 0)} ks
-                          </span>
-                        ) : (
-                          <input
-                            type="number"
-                            className="nv-excel-input"
-                            value={currentP.stock === null || currentP.stock === undefined ? '' : currentP.stock}
-                            onChange={e => handleExcelRowChange(p.id, 'stock', e.target.value)}
-                            placeholder="Sklad"
-                            style={{ textAlign: 'right' }}
-                          />
-                        )}
-                      </td>
-                      {/* <td style={{ textAlign: 'center' }}>
+                      )}
+                    </td>
+                    <td>
+                      {currentP.type === 'single' ? (
+                        <span style={{ fontSize: '11px', color: '#8a8a92' }}>
+                          {(p.variants || []).reduce((sum, v) => sum + v.stock, 0)} ks
+                        </span>
+                      ) : (
+                        <input
+                          type="number"
+                          className="nv-excel-input"
+                          value={currentP.stock === null || currentP.stock === undefined ? '' : currentP.stock}
+                          onChange={e => handleExcelRowChange(p.id, 'stock', e.target.value)}
+                          placeholder="Sklad"
+                          style={{ textAlign: 'right' }}
+                        />
+                      )}
+                    </td>
+                    {/* <td style={{ textAlign: 'center' }}>
                         <input
                           type="checkbox"
                           className="nv-excel-checkbox"
@@ -1856,42 +1864,42 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           onChange={e => handleExcelRowChange(p.id, 'investment', e.target.checked)}
                         />
                       </td> */}
-                      <td style={{ textAlign: 'center' }}>
-                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-                          <button
-                            type="button"
-                            className={`nv-excel-action-btn ${isModified ? 'save-pending' : ''}`}
-                            onClick={() => handleSaveExcelRow(p.id)}
-                            disabled={!isModified}
-                            title={lang === 'CZ' ? 'Uložit změny v řádku' : 'Save row changes'}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                          </button>
-                          <button
-                            type="button"
-                            className="nv-excel-action-btn"
-                            onClick={() => handleOpenEditModal(p)}
-                            title={lang === 'CZ' ? 'Otevřít detailní formulář' : 'Open detailed form'}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                          </button>
-                          <button
-                            type="button"
-                            className="nv-excel-action-btn delete"
-                            onClick={() => handleDeleteProduct(p.id)}
-                            title={lang === 'CZ' ? 'Smazat' : 'Delete'}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
+                    <td style={{ textAlign: 'center' }}>
+                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                        <button
+                          type="button"
+                          className={`nv-excel-action-btn ${isModified ? 'save-pending' : ''}`}
+                          onClick={() => handleSaveExcelRow(p.id)}
+                          disabled={!isModified}
+                          title={lang === 'CZ' ? 'Uložit změny v řádku' : 'Save row changes'}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                        </button>
+                        <button
+                          type="button"
+                          className="nv-excel-action-btn"
+                          onClick={() => handleOpenEditModal(p)}
+                          title={lang === 'CZ' ? 'Otevřít detailní formulář' : 'Open detailed form'}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button
+                          type="button"
+                          className="nv-excel-action-btn delete"
+                          onClick={() => handleDeleteProduct(p.id)}
+                          title={lang === 'CZ' ? 'Smazat' : 'Delete'}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
 
       {/* Add / Edit Modal */}
       {isModalOpen && createPortal(
@@ -1899,7 +1907,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
           <div className="pmf-modal fade-in" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '1280px', width: '96%' }}>
             <div className="pmf-head">
               <h2 className="pmf-title">
-                {editingProduct 
+                {editingProduct
                   ? (lang === 'CZ' ? `Upravit: ${editingProduct.name}` : `Edit: ${editingProduct.name}`)
                   : (lang === 'CZ' ? 'Vytvořit nový produkt' : 'Create New Product')}
               </h2>
@@ -1907,7 +1915,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
             </div>
 
             <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: '100%' }}>
-              
+
               {!editingProduct && formType === 'single' && (
                 <div className="pmf-section-card" style={{
                   background: 'linear-gradient(135deg, rgba(253, 189, 22, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)',
@@ -1933,9 +1941,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         {lang === 'CZ' ? 'Hra' : 'Game'}
                       </label>
                       <div className="pmf-select-wrapper">
-                        <select 
-                          className="pmf-select" 
-                          value={formGame} 
+                        <select
+                          className="pmf-select"
+                          value={formGame}
                           onChange={e => setFormGame(e.target.value)}
                           style={{ height: '38px', padding: '0 10px' }}
                         >
@@ -1953,12 +1961,12 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       <label style={{ fontSize: '11px', color: '#8a8a92', display: 'block', marginBottom: '6px' }}>
                         {lang === 'CZ' ? 'Zkratka Edice (Set Code)' : 'Set Code'}
                       </label>
-                      <input 
-                        type="text" 
-                        id="api-set-code" 
-                        className="pmf-input" 
+                      <input
+                        type="text"
+                        id="api-set-code"
+                        className="pmf-input"
                         autoComplete="new-password"
-                        placeholder={formGame === 'Pokémon' ? 'např. sv3, obf' : 'např. aac, woo'} 
+                        placeholder={formGame === 'Pokémon' ? 'např. sv3, obf' : 'např. aac, woo'}
                         style={{ height: '38px' }}
                       />
                     </div>
@@ -1966,12 +1974,12 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       <label style={{ fontSize: '11px', color: '#8a8a92', display: 'block', marginBottom: '6px' }}>
                         {lang === 'CZ' ? 'Číslo karty' : 'Card Number'}
                       </label>
-                      <input 
-                        type="text" 
-                        id="api-card-number" 
-                        className="pmf-input" 
+                      <input
+                        type="text"
+                        id="api-card-number"
+                        className="pmf-input"
                         autoComplete="new-password"
-                        placeholder="např. 186" 
+                        placeholder="např. 186"
                         style={{ height: '38px' }}
                       />
                     </div>
@@ -2039,7 +2047,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
               <div style={{ display: 'flex', gap: '40px', alignItems: 'flex-start' }} className="pmf-modal-split-layout">
                 {/* Left Column: Part 1 Form */}
                 <div style={{ flex: '1 1 720px', minWidth: '0' }}>
-                  
+
                   {/* ČÁST 1: NÁHLEDOVÁ KARTA */}
                   <div className="pmf-section-card" style={{
                     background: 'rgba(255, 255, 255, 0.02)',
@@ -2051,445 +2059,475 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                     flexDirection: 'column',
                     gap: '20px'
                   }}>
-                  <div className="pmf-section-header" style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-                    paddingBottom: '12px',
-                    marginBottom: '4px'
-                  }}>
-                    <span className="pmf-section-badge" style={{
-                      background: 'var(--nv-gold, #fdbd16)',
-                      color: '#0b0c10',
-                      fontWeight: '800',
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
+                    <div className="pmf-section-header" style={{
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '13px'
-                    }}>1</span>
-                    <h3 className="pmf-section-title" style={{
-                      fontSize: '15px',
-                      fontWeight: '800',
-                      color: '#fff',
-                      margin: 0,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px'
-                    }}>{lang === 'CZ' ? '1. ČÁST: NÁHLEDOVÁ KARTA' : 'PART 1: CATALOG CARD PREVIEW'}</h3>
-                  </div>
-
-                  <div className="pmf-form-row" style={styles.row}>
-                    <div className="pmf-form-col" style={{ ...styles.col, flex: '2 1 0' }}>
-                      <div className="pmf-field">
-                        <label className="pmf-label">{lang === 'CZ' ? 'Název produktu' : 'Product Name'}<span className="pmf-req-dot"> *</span></label>
-                        <input type="text" required className="pmf-input" autoComplete="new-password" value={formName} onChange={e => setFormName(e.target.value)} placeholder="např. Charizard ex" />
-                      </div>
+                      gap: '12px',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                      paddingBottom: '12px',
+                      marginBottom: '4px'
+                    }}>
+                      <span className="pmf-section-badge" style={{
+                        background: 'var(--nv-gold, #fdbd16)',
+                        color: '#0b0c10',
+                        fontWeight: '800',
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '13px'
+                      }}>1</span>
+                      <h3 className="pmf-section-title" style={{
+                        fontSize: '15px',
+                        fontWeight: '800',
+                        color: '#fff',
+                        margin: 0,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}>{lang === 'CZ' ? '1. ČÁST: NÁHLEDOVÁ KARTA' : 'PART 1: CATALOG CARD PREVIEW'}</h3>
                     </div>
-                    <div className="pmf-form-col" style={{ ...styles.col, flex: '1 1 0' }}>
-                      <div className="pmf-field">
-                        <label className="pmf-label">{lang === 'CZ' ? 'Kód / SKU' : 'SKU / Code'}</label>
-                        <input 
-                          type="text" 
-                          disabled={true} 
-                          className="pmf-input" 
-                          value={formId} 
-                          placeholder={lang === 'CZ' ? 'Generuje se automaticky' : 'Generated automatically'}
-                          style={{ 
-                            opacity: 0.65, 
-                            cursor: 'not-allowed', 
-                            border: '1px dashed rgba(255, 255, 255, 0.15)',
-                            backgroundColor: 'rgba(255, 255, 255, 0.02)'
-                          }} 
-                        />
-                        <span style={{ fontSize: '10px', color: '#8a8a92', marginTop: '4px', display: 'block' }}>
-                          {lang === 'CZ' ? 'Generuje se automaticky.' : 'Generated automatically.'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="pmf-form-row" style={styles.row}>
-                    <div className="pmf-form-col" style={styles.col}>
-                      <div className="pmf-field">
-                        <label className="pmf-label">{lang === 'CZ' ? 'Hra' : 'Game'}</label>
-                        <div className="pmf-select-wrapper">
-                          <select className="pmf-select" value={formGame} onChange={e => {
-                            const nextGame = e.target.value;
-                            setFormGame(nextGame);
-                            setFormCategoryId(''); // reset category selection
-                          }}>
-                            <option value="Pokémon">Pokémon</option>
-                            <option value="Lorcana">Lorcana</option>
-                            <option value="One Piece">One Piece</option>
-                            <option value="Riftbound">Riftbound</option>
-                            <option value="Accessories">Accessories</option>
-                            <option value="Acrylics">Acrylics</option>
-                          </select>
-                          <svg className="pmf-select-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                    <div className="pmf-form-row" style={styles.row}>
+                      <div className="pmf-form-col" style={{ ...styles.col, flex: '2 1 0' }}>
+                        <div className="pmf-field">
+                          <label className="pmf-label">{lang === 'CZ' ? 'Název produktu' : 'Product Name'}<span className="pmf-req-dot"> *</span></label>
+                          <input type="text" required className="pmf-input" autoComplete="new-password" value={formName} onChange={e => setFormName(e.target.value)} placeholder="např. Charizard ex" />
+                        </div>
+                      </div>
+                      <div className="pmf-form-col" style={{ ...styles.col, flex: '1 1 0' }}>
+                        <div className="pmf-field">
+                          <label className="pmf-label">{lang === 'CZ' ? 'Kód / SKU' : 'SKU / Code'}</label>
+                          <input
+                            type="text"
+                            disabled={true}
+                            className="pmf-input"
+                            value={formId}
+                            placeholder={lang === 'CZ' ? 'Generuje se automaticky' : 'Generated automatically'}
+                            style={{
+                              opacity: 0.65,
+                              cursor: 'not-allowed',
+                              border: '1px dashed rgba(255, 255, 255, 0.15)',
+                              backgroundColor: 'rgba(255, 255, 255, 0.02)'
+                            }}
+                          />
+                          <span style={{ fontSize: '10px', color: '#8a8a92', marginTop: '4px', display: 'block' }}>
+                            {lang === 'CZ' ? 'Generuje se automaticky.' : 'Generated automatically.'}
+                          </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="pmf-form-col" style={{ ...styles.col, flex: 1.8 }}>
-                      <div className="pmf-field" style={{ position: 'relative' }}>
-                        <label className="pmf-label">{lang === 'CZ' ? 'Zařadit pod kategorii' : 'Assign to Category'}</label>
-                        <div ref={categoryDropdownRef} className="pmf-select-wrapper">
-                          <style>{`
+                    <div className="pmf-form-row" style={styles.row}>
+                      <div className="pmf-form-col" style={styles.col}>
+                        <div className="pmf-field">
+                          <label className="pmf-label">{lang === 'CZ' ? 'Hra' : 'Game'}</label>
+                          <div className="pmf-select-wrapper">
+                            <select className="pmf-select" value={formGame} onChange={e => {
+                              const nextGame = e.target.value;
+                              setFormGame(nextGame);
+                              setFormCategoryId(''); // reset category selection
+                            }}>
+                              <option value="Pokémon">Pokémon</option>
+                              <option value="Lorcana">Lorcana</option>
+                              <option value="One Piece">One Piece</option>
+                              <option value="Riftbound">Riftbound</option>
+                              <option value="Accessories">Accessories</option>
+                              <option value="Acrylics">Acrylics</option>
+                            </select>
+                            <svg className="pmf-select-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pmf-form-col" style={{ ...styles.col, flex: 1.8 }}>
+                        <div className="pmf-field" style={{ position: 'relative' }}>
+                          <label className="pmf-label">{lang === 'CZ' ? 'Zařadit pod kategorii' : 'Assign to Category'}</label>
+                          <div ref={categoryDropdownRef} className="pmf-select-wrapper">
+                            <style>{`
                             .pmf-select.is-open {
                               border-bottom: 1px solid var(--nv-gold, #fdbd16) !important;
                             }
                           `}</style>
-                          <button
-                            type="button"
-                            onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
-                            className={`pmf-select ctf-parent-trigger ${isCategoryDropdownOpen ? 'is-open' : ''}`}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              textAlign: 'left',
-                              paddingRight: '28px',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              boxSizing: 'border-box'
-                            }}
-                          >
-                            <span style={{ 
-                              whiteSpace: 'nowrap', 
-                              overflow: 'hidden', 
-                              textOverflow: 'ellipsis',
-                              fontSize: '15px',
-                              color: 'rgb(240, 240, 240)'
-                            }}>
-                              {formCategoryId ? (
-                                getCategoryPath(formCategoryId)
-                              ) : (
-                                lang === 'CZ' ? '— Bez kategorie (Hlavní) —' : '— No Category (Top-level) —'
-                              )}
-                            </span>
-                          </button>
-                          <svg 
-                            className="pmf-select-chevron" 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            width="14" 
-                            height="14" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round"
-                            style={{
-                              transform: isCategoryDropdownOpen ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%) rotate(0deg)',
-                              transition: 'transform 0.2s ease, stroke 0.2s ease'
-                            }}
-                          >
-                            <path d="M6 9l6 6 6-6" />
-                          </svg>
-                          
-                          {isCategoryDropdownOpen && (
-                            <div
+                            <button
+                              type="button"
+                              onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                              className={`pmf-select ctf-parent-trigger ${isCategoryDropdownOpen ? 'is-open' : ''}`}
                               style={{
-                                position: 'absolute',
-                                top: 'calc(100% + 6px)',
-                                left: 0,
-                                width: '100%',
-                                minWidth: '360px',
-                                maxHeight: '320px',
-                                overflowY: 'auto',
-                                background: '#1E1E24',
-                                border: '1px solid rgba(255, 255, 255, 0.12)',
-                                borderRadius: '8px',
-                                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6)',
-                                zIndex: 9999,
-                                padding: '8px',
-                                boxSizing: 'border-box',
+                                display: 'flex',
+                                alignItems: 'center',
+                                textAlign: 'left',
+                                paddingRight: '28px',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                boxSizing: 'border-box'
                               }}
-                              className="ctf-parent-dropdown"
                             >
-                              {/* Option for None */}
+                              <span style={{
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                fontSize: '15px',
+                                color: 'rgb(240, 240, 240)'
+                              }}>
+                                {formCategoryId ? (
+                                  getCategoryPath(formCategoryId)
+                                ) : (
+                                  lang === 'CZ' ? '— Bez kategorie (Hlavní) —' : '— No Category (Top-level) —'
+                                )}
+                              </span>
+                            </button>
+                            <svg
+                              className="pmf-select-chevron"
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              style={{
+                                transform: isCategoryDropdownOpen ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%) rotate(0deg)',
+                                transition: 'transform 0.2s ease, stroke 0.2s ease'
+                              }}
+                            >
+                              <path d="M6 9l6 6 6-6" />
+                            </svg>
+
+                            {isCategoryDropdownOpen && (
                               <div
-                                onClick={() => { 
-                                  setFormCategoryId(''); 
-                                  setIsCategoryDropdownOpen(false); 
-                                }}
                                 style={{
-                                  padding: '8px 12px',
-                                  borderRadius: '6px',
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '8px',
-                                  fontSize: '13px',
-                                  color: !formCategoryId ? 'var(--color-gold)' : '#fff',
-                                  background: !formCategoryId ? 'rgba(253, 189, 22, 0.08)' : 'transparent',
-                                  transition: 'background 0.15s, color 0.15s',
-                                  marginBottom: '6px',
-                                  borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                                  boxSizing: 'border-box'
+                                  position: 'absolute',
+                                  top: 'calc(100% + 6px)',
+                                  left: 0,
+                                  width: '100%',
+                                  minWidth: '360px',
+                                  maxHeight: '320px',
+                                  overflowY: 'auto',
+                                  background: '#1E1E24',
+                                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                                  borderRadius: '8px',
+                                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6)',
+                                  zIndex: 9999,
+                                  padding: '8px',
+                                  boxSizing: 'border-box',
                                 }}
-                                className="ctf-parent-opt-none"
+                                className="ctf-parent-dropdown"
                               >
-                                <span>🌐</span>
-                                <span style={{ fontWeight: !formCategoryId ? '600' : '400' }}>
-                                  {lang === 'CZ' ? '— Bez kategorie (Hlavní) —' : '— No Category (Top-level) —'}
-                                </span>
-                              </div>
-
-                              {/* Hierarchical Options */}
-                              {getHierarchicalCategoryOptions().length === 0 ? (
-                                <div style={{ padding: '8px 12px', color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontStyle: 'italic', textAlign: 'center' }}>
-                                  {lang === 'CZ' ? 'Žádné kategorie k dispozici' : 'No categories available'}
+                                {/* Option for None */}
+                                <div
+                                  onClick={() => {
+                                    setFormCategoryId('');
+                                    setIsCategoryDropdownOpen(false);
+                                  }}
+                                  style={{
+                                    padding: '8px 12px',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    fontSize: '13px',
+                                    color: !formCategoryId ? 'var(--color-gold)' : '#fff',
+                                    background: !formCategoryId ? 'rgba(253, 189, 22, 0.08)' : 'transparent',
+                                    transition: 'background 0.15s, color 0.15s',
+                                    marginBottom: '6px',
+                                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                                    boxSizing: 'border-box'
+                                  }}
+                                  className="ctf-parent-opt-none"
+                                >
+                                  <span>🌐</span>
+                                  <span style={{ fontWeight: !formCategoryId ? '600' : '400' }}>
+                                    {lang === 'CZ' ? '— Bez kategorie (Hlavní) —' : '— No Category (Top-level) —'}
+                                  </span>
                                 </div>
-                              ) : (
-                                getHierarchicalCategoryOptions().map((opt, idx) => {
-                                  const isOptSelected = formCategoryId === opt.id;
-                                  const isLevel0 = opt.depth === 0;
-                                  const isLevel1 = opt.depth === 1;
-                                  
-                                  const showSeparator = isLevel1 && idx > 1;
 
-                                  return (
-                                    <div key={opt.id}>
-                                      {showSeparator && (
-                                        <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.05)', margin: '10px 8px 8px 8px' }}></div>
-                                      )}
-                                      <div
-                                        onClick={() => {
-                                          setFormCategoryId(opt.id);
-                                          const cat = categories.find(c => String(c.id) === String(opt.id));
-                                          if (cat && cat.type) {
-                                            setFormType(cat.type);
-                                          }
-                                          setIsCategoryDropdownOpen(false);
-                                        }}
-                                        style={{
-                                          padding: isLevel0 ? '10px 12px' : '8px 12px',
-                                          paddingLeft: `${12 + opt.depth * 24}px`,
-                                          borderRadius: '6px',
-                                          cursor: 'pointer',
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          gap: '8px',
-                                          fontSize: isLevel0 ? '13.5px' : '13px',
-                                          transition: 'background 0.15s, color 0.15s',
-                                          marginTop: isLevel0 ? '8px' : '2px',
-                                          marginBottom: isLevel0 ? '4px' : '0px',
-                                          background: isOptSelected 
-                                            ? 'rgba(253, 189, 22, 0.08)' 
-                                            : isLevel0 
-                                              ? 'rgba(255, 255, 255, 0.025)' 
-                                              : 'transparent',
-                                          border: isOptSelected 
-                                            ? '1px solid rgba(253, 189, 22, 0.2)' 
-                                            : isLevel0 
-                                              ? '1px solid rgba(255, 255, 255, 0.06)' 
-                                              : '1px solid transparent',
-                                          boxSizing: 'border-box'
-                                        }}
-                                        className="ctf-parent-option-row"
-                                      >
-                                        <span 
-                                          style={{ 
-                                            opacity: 0.8, 
-                                            fontSize: '11px',
-                                            color: isOptSelected 
-                                              ? 'var(--color-gold)' 
-                                              : isLevel1 
-                                                ? '#FDBD16' 
-                                                : 'inherit'
+                                {/* Hierarchical Options */}
+                                {getHierarchicalCategoryOptions().length === 0 ? (
+                                  <div style={{ padding: '8px 12px', color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontStyle: 'italic', textAlign: 'center' }}>
+                                    {lang === 'CZ' ? 'Žádné kategorie k dispozici' : 'No categories available'}
+                                  </div>
+                                ) : (
+                                  getHierarchicalCategoryOptions().map((opt, idx) => {
+                                    const isOptSelected = formCategoryId === opt.id;
+                                    const isLevel0 = opt.depth === 0;
+                                    const isLevel1 = opt.depth === 1;
+
+                                    const showSeparator = isLevel1 && idx > 1;
+
+                                    return (
+                                      <div key={opt.id}>
+                                        {showSeparator && (
+                                          <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.05)', margin: '10px 8px 8px 8px' }}></div>
+                                        )}
+                                        <div
+                                          onClick={() => {
+                                            setFormCategoryId(opt.id);
+                                            const cat = categories.find(c => String(c.id) === String(opt.id));
+                                            if (cat && cat.type) {
+                                              setFormType(cat.type);
+                                            }
+                                            setIsCategoryDropdownOpen(false);
                                           }}
-                                        >
-                                          {opt.depth > 0 ? '↳' : '📁'}
-                                        </span>
-                                        <span 
-                                          style={{ 
-                                            fontWeight: isOptSelected || isLevel0 ? '700' : isLevel1 ? '600' : '400',
-                                            color: isOptSelected 
-                                              ? 'var(--color-gold)' 
-                                              : isLevel0 
-                                                ? '#ffffff' 
-                                                : isLevel1 
-                                                  ? '#FDBD16' 
-                                                  : 'rgba(255, 255, 255, 0.65)'
+                                          style={{
+                                            padding: isLevel0 ? '10px 12px' : '8px 12px',
+                                            paddingLeft: `${12 + opt.depth * 24}px`,
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            fontSize: isLevel0 ? '13.5px' : '13px',
+                                            transition: 'background 0.15s, color 0.15s',
+                                            marginTop: isLevel0 ? '8px' : '2px',
+                                            marginBottom: isLevel0 ? '4px' : '0px',
+                                            background: isOptSelected
+                                              ? 'rgba(253, 189, 22, 0.08)'
+                                              : isLevel0
+                                                ? 'rgba(255, 255, 255, 0.025)'
+                                                : 'transparent',
+                                            border: isOptSelected
+                                              ? '1px solid rgba(253, 189, 22, 0.2)'
+                                              : isLevel0
+                                                ? '1px solid rgba(255, 255, 255, 0.06)'
+                                                : '1px solid transparent',
+                                            boxSizing: 'border-box'
                                           }}
+                                          className="ctf-parent-option-row"
                                         >
-                                          {opt.name}
-                                        </span>
-                                        <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px', marginLeft: 'auto' }}>
-                                          {opt.id}
-                                        </span>
+                                          <span
+                                            style={{
+                                              opacity: 0.8,
+                                              fontSize: '11px',
+                                              color: isOptSelected
+                                                ? 'var(--color-gold)'
+                                                : isLevel1
+                                                  ? '#FDBD16'
+                                                  : 'inherit'
+                                            }}
+                                          >
+                                            {opt.depth > 0 ? '↳' : '📁'}
+                                          </span>
+                                          <span
+                                            style={{
+                                              fontWeight: isOptSelected || isLevel0 ? '700' : isLevel1 ? '600' : '400',
+                                              color: isOptSelected
+                                                ? 'var(--color-gold)'
+                                                : isLevel0
+                                                  ? '#ffffff'
+                                                  : isLevel1
+                                                    ? '#FDBD16'
+                                                    : 'rgba(255, 255, 255, 0.65)'
+                                            }}
+                                          >
+                                            {opt.name}
+                                          </span>
+                                          <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px', marginLeft: 'auto' }}>
+                                            {opt.id}
+                                          </span>
+                                        </div>
                                       </div>
-                                    </div>
-                                  );
-                                })
-                              )}
-                            </div>
-                          )}
+                                    );
+                                  })
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Standard Flat price/stock inputs (non-singles) */}
-                  {formType !== 'single' && (
-                    <div className="pmf-form-row" style={styles.row}>
-                      <div className="pmf-form-col" style={styles.col}>
-                        <div className="pmf-field">
-                          <label className="pmf-label">
-                            {lang === 'CZ' ? 'Cena (Kč)' : 'Price (CZK)'}
-                            <span className="pmf-req-dot"> *</span>
-                          </label>
-                          <input 
-                            type="number" 
-                            required 
-                            className="pmf-input" 
-                            value={formPrice} 
-                            onChange={e => setFormPrice(e.target.value)} 
-                            placeholder="např. 150" 
-                          />
+                    {/* Standard Flat price/stock inputs (non-singles) */}
+                    {formType !== 'single' && (
+                      <div className="pmf-form-row" style={styles.row}>
+                        <div className="pmf-form-col" style={styles.col}>
+                          <div className="pmf-field">
+                            <label className="pmf-label">
+                              {lang === 'CZ' ? 'Cena (Kč)' : 'Price (CZK)'}
+                              <span className="pmf-req-dot"> *</span>
+                            </label>
+                            <input
+                              type="number"
+                              required
+                              className="pmf-input"
+                              value={formPrice}
+                              onChange={e => setFormPrice(e.target.value)}
+                              placeholder="např. 150"
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div className="pmf-form-col" style={styles.col}>
-                        <div className="pmf-field">
-                          <label className="pmf-label">
-                            {lang === 'CZ' ? 'Skladem (ks)' : 'Stock (pcs)'}
-                            <span className="pmf-req-dot"> *</span>
-                          </label>
-                          <input 
-                            type="number" 
-                            required 
-                            className="pmf-input" 
-                            value={formStock} 
-                            onChange={e => setFormStock(e.target.value)} 
-                            placeholder="např. 5" 
-                          />
+                        <div className="pmf-form-col" style={styles.col}>
+                          <div className="pmf-field">
+                            <label className="pmf-label">
+                              {lang === 'CZ' ? 'Skladem (ks)' : 'Stock (pcs)'}
+                              <span className="pmf-req-dot"> *</span>
+                            </label>
+                            <input
+                              type="number"
+                              required
+                              className="pmf-input"
+                              value={formStock}
+                              onChange={e => setFormStock(e.target.value)}
+                              placeholder="např. 5"
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Main image dropzone in Part 1 */}
-                  <div className="pmf-field">
-                    <label className="pmf-label">{lang === 'CZ' ? 'Obrázek náhledu (Přední strana)' : 'Preview Image (Front Side)'}<span className="pmf-req-dot"> *</span></label>
-                    {formImage ? (
-                      <div style={{ display: 'flex', gap: '16px', alignItems: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', padding: '12px', borderRadius: '8px' }}>
-                        <img src={formImage} alt="Preview front" style={{ height: '70px', width: '50px', objectFit: 'contain', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }} onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }} />
-                        <div style={{ flex: 1, display: 'flex', gap: '8px' }}>
-                          <button type="button" className="pmf-variants-add" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => {
-                            const input = document.createElement('input');
-                            input.type = 'file';
-                            input.accept = 'image/*';
-                            input.onchange = (e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                const target = { type: 'front' };
-                                setCropTarget(target);
-                                loadImageFile(file, target);
-                              }
-                            };
-                            input.click();
-                          }}>{lang === 'CZ' ? 'Změnit fotku' : 'Change Photo'}</button>
-                          <button type="button" className="pmf-variants-add" style={{ padding: '6px 12px', fontSize: '11px', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.3)', color: '#ef4444' }} onClick={() => setFormImage('')}>{lang === 'CZ' ? 'Odstranit' : 'Remove'}</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div 
-                        className="pmf-drop"
-                        onDragOver={handleDragOver}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          const file = e.dataTransfer.files[0];
-                          if (file) {
-                            const target = { type: 'front' };
-                            setCropTarget(target);
-                            loadImageFile(file, target);
-                          }
-                        }}
-                        onClick={() => document.getElementById('pmf-main-file-input').click()}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '8px', color: 'var(--text-muted, #8a8a92)' }}>
-                          <rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="8.5" cy="9.5" r="1.5" /><path d="M21 16l-5-5L5 20" />
-                        </svg>
-                        <p className="dropText" style={{ fontSize: '11px', margin: 0, color: 'var(--text-muted, #8a8a92)' }}>
-                          {lang === 'CZ' ? 'Přetáhněte obrázek karty sem nebo klikněte k výběru' : 'Drag & Drop card image here or click to select'}
-                        </p>
-                        <input type="file" id="pmf-main-file-input" accept="image/*" style={{ display: 'none' }} onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            const target = { type: 'front' };
-                            setCropTarget(target);
-                            loadImageFile(file, target);
-                          }
-                        }} />
                       </div>
                     )}
-                  </div>
 
-                  {/* Variants Row if it's a single card */}
-                  {formType === 'single' && (
-                    <div style={{ marginTop: '10px' }}>
-                      <div className="pmf-variants-head">
-                        <div>
-                          <h4 className="pmf-variants-title">{lang === 'CZ' ? 'Cena a sklad karty' : 'Card Price & Stock'}</h4>
-                          <span className="pmf-variants-sub">{lang === 'CZ' ? 'Nastavení ceny a množství kusů' : 'Set price and quantity'}</span>
+                    {/* Main image dropzone in Part 1 */}
+                    <div className="pmf-field">
+                      <label className="pmf-label">{lang === 'CZ' ? 'Obrázek náhledu (Přední strana)' : 'Preview Image (Front Side)'}<span className="pmf-req-dot"> *</span></label>
+                      {formImage ? (
+                        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', padding: '12px', borderRadius: '8px' }}>
+                          <img src={formImage} alt="Preview front" style={{ height: '70px', width: '50px', objectFit: 'contain', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }} onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }} />
+                          <div style={{ flex: 1, display: 'flex', gap: '8px' }}>
+                            <button type="button" className="pmf-variants-add" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => {
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/*';
+                              input.onchange = (e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                  const target = { type: 'front' };
+                                  setCropTarget(target);
+                                  loadImageFile(file, target);
+                                }
+                              };
+                              input.click();
+                            }}>{lang === 'CZ' ? 'Změnit fotku' : 'Change Photo'}</button>
+                            <button type="button" className="pmf-variants-add" style={{ padding: '6px 12px', fontSize: '11px', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.3)', color: '#ef4444' }} onClick={() => setFormImage('')}>{lang === 'CZ' ? 'Odstranit' : 'Remove'}</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          className="pmf-drop"
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            const file = e.dataTransfer.files[0];
+                            if (file) {
+                              const target = { type: 'front' };
+                              setCropTarget(target);
+                              loadImageFile(file, target);
+                            }
+                          }}
+                          onClick={() => document.getElementById('pmf-main-file-input').click()}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '8px', color: 'var(--text-muted, #8a8a92)' }}>
+                            <rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="8.5" cy="9.5" r="1.5" /><path d="M21 16l-5-5L5 20" />
+                          </svg>
+                          <p className="dropText" style={{ fontSize: '11px', margin: 0, color: 'var(--text-muted, #8a8a92)' }}>
+                            {lang === 'CZ' ? 'Přetáhněte obrázek karty sem nebo klikněte k výběru' : 'Drag & Drop card image here or click to select'}
+                          </p>
+                          <input type="file" id="pmf-main-file-input" accept="image/*" style={{ display: 'none' }} onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              const target = { type: 'front' };
+                              setCropTarget(target);
+                              loadImageFile(file, target);
+                            }
+                          }} />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Variants Row if it's a single card */}
+                    {formType === 'single' && (
+                      <div style={{ marginTop: '10px' }}>
+                        <div className="pmf-variants-head">
+                          <div>
+                            <h4 className="pmf-variants-title">{lang === 'CZ' ? 'Cena a sklad karty' : 'Card Price & Stock'}</h4>
+                            <span className="pmf-variants-sub">{lang === 'CZ' ? 'Nastavení ceny a množství kusů' : 'Set price and quantity'}</span>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '12px' }}>
+                          {formVariants.map((v) => (
+                            <div key={v.id} className="pmf-vrow" style={{ padding: '8px 0', display: 'flex', gap: '16px' }}>
+                              {/* Price */}
+                              <div style={{ flex: 1 }}>
+                                <div className="pmf-vcell-label">
+                                  {lang === 'CZ' ? 'Cena' : 'Price'}
+                                </div>
+                                <input
+                                  type="number"
+                                  className="pmf-input"
+                                  value={v.price}
+                                  onChange={e => handleVariantChange(v.id, 'price', e.target.value ? Number(e.target.value) : '')}
+                                  style={{ padding: '8px 12px', fontSize: '13px' }}
+                                  placeholder="100"
+                                />
+                              </div>
+                              {/* Stock */}
+                              <div style={{ flex: 1 }}>
+                                <div className="pmf-vcell-label">
+                                  {lang === 'CZ' ? 'Skladem (ks)' : 'Stock (pcs)'}
+                                </div>
+                                <input
+                                  type="number"
+                                  className="pmf-input"
+                                  value={v.stock}
+                                  onChange={e => handleVariantChange(v.id, 'stock', e.target.value ? Number(e.target.value) : '')}
+                                  style={{ padding: '8px 12px', fontSize: '13px' }}
+                                  placeholder="1"
+                                />
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '12px' }}>
-                        {formVariants.map((v) => (
-                          <div key={v.id} className="pmf-vrow" style={{ padding: '8px 0', display: 'flex', gap: '16px' }}>
-                            {/* Price */}
-                            <div style={{ flex: 1 }}>
-                              <div className="pmf-vcell-label">
-                                {lang === 'CZ' ? 'Cena' : 'Price'}
-                              </div>
-                              <input 
-                                type="number" 
-                                className="pmf-input" 
-                                value={v.price} 
-                                onChange={e => handleVariantChange(v.id, 'price', e.target.value ? Number(e.target.value) : '')} 
-                                style={{ padding: '8px 12px', fontSize: '13px' }} 
-                                placeholder="100" 
-                              />
-                            </div>
-                            {/* Stock */}
-                            <div style={{ flex: 1 }}>
-                              <div className="pmf-vcell-label">
-                                {lang === 'CZ' ? 'Skladem (ks)' : 'Stock (pcs)'}
-                              </div>
-                              <input 
-                                type="number" 
-                                className="pmf-input" 
-                                value={v.stock} 
-                                onChange={e => handleVariantChange(v.id, 'stock', e.target.value ? Number(e.target.value) : '')} 
-                                style={{ padding: '8px 12px', fontSize: '13px' }} 
-                                placeholder="1" 
-                              />
-                            </div>
-                          </div>
-                        ))}
+                    )}
+
+                    {/* Bez DPH Checkbox */}
+                    <div className="pmf-field" style={{ marginTop: '16px', marginBottom: '8px' }}>
+                      <label className="pmf-check-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'rgba(255,255,255,0.8)' }}>
+                        <input 
+                          type="checkbox" 
+                          className="pmf-check-box" 
+                          checked={formNoVat} 
+                          onChange={e => setFormNoVat(e.target.checked)} 
+                          style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                        />
+                        {lang === 'CZ' ? 'Bez DPH (zvláštní režim podle § 90)' : 'No VAT (margin scheme under § 90)'}
+                      </label>
+                    </div>
+
+                    {/* Discount / Omnibus Prices */}
+                    <div style={{ display: 'flex', gap: '16px', marginTop: '8px', marginBottom: '16px' }}>
+                      <div style={{ flex: 1 }} className="pmf-field">
+                        <label className="pmf-label" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>
+                          {lang === 'CZ' ? 'Původní přeškrtnutá cena (Kč)' : 'Original Price (CZK)'}
+                        </label>
+                        <input 
+                          type="number" 
+                          className="pmf-input" 
+                          value={formOriginalPrice} 
+                          onChange={e => setFormOriginalPrice(e.target.value)} 
+                          placeholder="např. 199" 
+                          style={{ padding: '8px 12px', fontSize: '13px' }}
+                        />
+                      </div>
+                      <div style={{ flex: 1 }} className="pmf-field">
+                        <label className="pmf-label" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>
+                          {lang === 'CZ' ? 'Nejnižší cena za 30 dní (Kč)' : 'Lowest price in 30 days (CZK)'}
+                        </label>
+                        <input 
+                          type="number" 
+                          className="pmf-input" 
+                          value={formLowestPrice30d} 
+                          onChange={e => setFormLowestPrice30d(e.target.value)} 
+                          placeholder="např. 149" 
+                          style={{ padding: '8px 12px', fontSize: '13px' }}
+                        />
                       </div>
                     </div>
-                  )}
 
-                  {/* Bez DPH Checkbox */}
-                  <div className="pmf-field" style={{ marginTop: '16px', marginBottom: '16px' }}>
-                    <label className="pmf-check-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'rgba(255,255,255,0.8)' }}>
-                      <input 
-                        type="checkbox" 
-                        className="pmf-check-box" 
-                        checked={formNoVat} 
-                        onChange={e => setFormNoVat(e.target.checked)} 
-                        style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                      />
-                      {lang === 'CZ' ? 'Bez DPH (zvláštní režim podle § 90)' : 'No VAT (margin scheme under § 90)'}
-                    </label>
-                  </div>
-
-                  {/* Preorder & Investment checkboxes hidden for now
+                    {/* Preorder & Investment checkboxes hidden for now
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '10px 0', marginTop: '10px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                     <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
                       <label className="pmf-check-label">
@@ -2520,7 +2558,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                   </div>
                   */}
 
-                </div>
+                  </div>
 
                 </div> {/* Closes Left Column for Part 1 Form */}
 
@@ -2531,9 +2569,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       <span style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', color: 'var(--nv-gold, #fdbd16)', letterSpacing: '1px', fontFamily: 'var(--font-heading)' }}>
                         {lang === 'CZ' ? 'Živý náhled karty' : 'Live Card Preview'}
                       </span>
-                      <button 
-                        type="button" 
-                        className="pmf-variants-add" 
+                      <button
+                        type="button"
+                        className="pmf-variants-add"
                         style={{ padding: '3px 8px', fontSize: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}
                         onClick={() => { setPreviewActiveTab('popis'); setIsFullPreviewOpen(true); }}
                       >
@@ -2546,11 +2584,11 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '24px 16px', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', boxSizing: 'border-box' }}>
                     <div style={{ width: '100%', maxWidth: '240px', pointerEvents: 'none', userSelect: 'none' }}>
-                      <ProductCard 
-                        product={livePreviewProduct} 
-                        addToCart={() => {}} 
-                        setSelectedProductId={() => {}} 
-                        setActivePage={() => {}} 
+                      <ProductCard
+                        product={livePreviewProduct}
+                        addToCart={() => { }}
+                        setSelectedProductId={() => { }}
+                        setActivePage={() => { }}
                       />
                     </div>
                   </div>
@@ -2576,402 +2614,365 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                     flexDirection: 'column',
                     gap: '24px'
                   }}>
-                  <div className="pmf-section-header" style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-                    paddingBottom: '12px',
-                    marginBottom: '4px'
-                  }}>
-                    <span className="pmf-section-badge" style={{
-                      background: 'var(--nv-gold, #fdbd16)',
-                      color: '#0b0c10',
-                      fontWeight: '800',
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
+                    <div className="pmf-section-header" style={{
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '13px'
-                    }}>2</span>
-                    <h3 className="pmf-section-title" style={{
-                      fontSize: '15px',
-                      fontWeight: '800',
-                      color: '#fff',
-                      margin: 0,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px'
-                    }}>{lang === 'CZ' ? '2. ČÁST: DETAIL PRODUKTOVÉ STRÁNKY' : 'PART 2: STOREFRONT DETAILS PAGE'}</h3>
-                  </div>
-
-                  {/* PODSEKCE 2.1: FOTOGALERIE A KRÁTKÝ POPIS */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    {/* Multi-Image Gallery Slots */}
-                    <div className="pmf-field">
-                      <label className="pmf-label">
-                        {lang === 'CZ' ? 'Fotogalerie produktu (Oříznutelné fotky)' : 'Product Gallery (Croppable Photos)'}
-                      </label>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '16px', marginTop: '8px' }}>
-                        {/* Front Photo Card (Mirrored) */}
-                        <div className="image-slot-card" style={styles.imageSlotCard}>
-                          <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--nv-gold, #fdbd16)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? 'Přední strana' : 'Front side'}</span>
-                          {formImage ? (
-                            <div style={styles.slotPreviewWrap}>
-                              <img src={formImage} alt="Front preview" style={styles.slotPreviewImg} />
-                              <div style={styles.slotActions}>
-                                <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
-                                  const input = document.createElement('input');
-                                  input.type = 'file';
-                                  input.accept = 'image/*';
-                                  input.onchange = (e) => {
-                                    const file = e.target.files[0];
-                                    if (file) {
-                                      const target = { type: 'front' };
-                                      setCropTarget(target);
-                                      loadImageFile(file, target);
-                                    }
-                                  };
-                                  input.click();
-                                }}>🔄</button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="slot-empty" style={styles.slotEmpty} onClick={() => {
-                              const input = document.createElement('input');
-                              input.type = 'file';
-                              input.accept = 'image/*';
-                              input.onchange = (e) => {
-                                const file = e.target.files[0];
-                                if (file) {
-                                  const target = { type: 'front' };
-                                  setCropTarget(target);
-                                  loadImageFile(file, target);
-                                }
-                              };
-                              input.click();
-                            }}>
-                              <span>➕ {lang === 'CZ' ? 'Přední' : 'Front'}</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Back Photo Card */}
-                        <div className="image-slot-card" style={styles.imageSlotCard}>
-                          <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? 'Zadní strana' : 'Back side'}</span>
-                          {formBackImage ? (
-                            <div style={styles.slotPreviewWrap}>
-                              <img src={formBackImage} alt="Back preview" style={styles.slotPreviewImg} />
-                              <div style={styles.slotActions}>
-                                <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
-                                  const input = document.createElement('input');
-                                  input.type = 'file';
-                                  input.accept = 'image/*';
-                                  input.onchange = (e) => {
-                                    const file = e.target.files[0];
-                                    if (file) {
-                                      const target = { type: 'back' };
-                                      setCropTarget(target);
-                                      loadImageFile(file, target);
-                                    }
-                                  };
-                                  input.click();
-                                }}>🔄</button>
-                                <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '11px' }} onClick={() => setFormBackImage('')}>🗑️</button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="slot-empty" style={styles.slotEmpty} onClick={() => {
-                              const input = document.createElement('input');
-                              input.type = 'file';
-                              input.accept = 'image/*';
-                              input.onchange = (e) => {
-                                const file = e.target.files[0];
-                                if (file) {
-                                  const target = { type: 'back' };
-                                  setCropTarget(target);
-                                  loadImageFile(file, target);
-                                }
-                              };
-                              input.click();
-                            }}>
-                              <span>➕ {lang === 'CZ' ? 'Zadní' : 'Back'}</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Additional Photo Cards */}
-                        {formAdditionalImages.map((imgUrl, index) => (
-                          <div key={index} className="image-slot-card" style={styles.imageSlotCard}>
-                            <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? `Další #${index + 1}` : `Extra #${index + 1}`}</span>
-                            <div style={styles.slotPreviewWrap}>
-                              <img src={imgUrl} alt="Extra preview" style={styles.slotPreviewImg} />
-                              <div style={styles.slotActions}>
-                                <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
-                                  const input = document.createElement('input');
-                                  input.type = 'file';
-                                  input.accept = 'image/*';
-                                  input.onchange = (e) => {
-                                    const file = e.target.files[0];
-                                    if (file) {
-                                      const target = { type: 'additional', index };
-                                      setCropTarget(target);
-                                      loadImageFile(file, target);
-                                    }
-                                  };
-                                  input.click();
-                                }}>🔄</button>
-                                <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
-                                  setFormAdditionalImages(formAdditionalImages.filter((_, i) => i !== index));
-                                }}>🗑️</button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-
-                        {/* Add Extra Photo Card */}
-                        <div className="image-slot-card" style={styles.imageSlotCard}>
-                          <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? 'Další fotka' : 'Additional'}</span>
-                           <div className="slot-empty" style={styles.slotEmpty} onClick={() => {
-                            const input = document.createElement('input');
-                            input.type = 'file';
-                            input.accept = 'image/*';
-                            input.onchange = (e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                const target = { type: 'additional' };
-                                setCropTarget(target);
-                                loadImageFile(file, target);
-                              }
-                            };
-                            input.click();
-                          }}>
-                            <span>➕ {lang === 'CZ' ? 'Přidat' : 'Add'}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Custom short description textarea */}
-                    <div className="pmf-field">
-                      <label className="pmf-label">
-                        {lang === 'CZ' ? 'Vlastní krátký popisek (u tlačítek)' : 'Custom Short Description (Near Actions)'}
-                      </label>
-                      <RichTextEditor
-                        value={formShortDesc}
-                        onChange={setFormShortDesc}
-                        placeholder={lang === 'CZ' ? 'Vyplňte vlastní krátký popis, který se zobrazuje vedle fotky karty. Pokud necháte prázdné, vygeneruje se z hlavního popisu.' : 'Enter short descriptive teaser. Fallback is generated from the main description if empty.'}
-                        className="pmf-textarea pmf-textarea-with-toolbar"
-                      />
-                      <span style={styles.helperText}>
-                        {lang === 'CZ' ? '💡 Krátký odstavec u nákupních tlačítek pod nadpisem karty.' : '💡 Displayed near price and cart button.'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* DELICÍ ČÁRA */}
-                  <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '12px 0' }}></div>
-
-                  {/* PODSEKCE 2.2: OBSAH A SPECIFIKACE (Dvě sekce) */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    
-                    {/* Sekce A: Podrobný popis */}
-                    <div style={{
-                      background: 'rgba(255, 255, 255, 0.01)',
-                      border: '1px solid rgba(255, 255, 255, 0.04)',
-                      borderRadius: '12px',
-                      padding: '20px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '14px'
+                      gap: '12px',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                      paddingBottom: '12px',
+                      marginBottom: '4px'
                     }}>
-                      <h4 style={{ margin: 0, fontSize: '13px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--nv-gold, #fdbd16)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '10px' }}>
-                        {lang === 'CZ' ? 'A. Podrobný popis produktu' : 'A. Detailed Product Description'}
-                      </h4>
-                      {/* Description Blocks Builder */}
-                      <div className="pmf-field" style={{ margin: 0 }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '16px' }}>
-                          
-                          {formDescBlocks.map((block, idx) => (
-                            <div key={block.id} style={{ display: 'flex', gap: '12px', alignItems: 'stretch', padding: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-                              
-                              {/* Reordering indicators */}
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', justifyContent: 'center', alignItems: 'center', minWidth: '36px', borderRight: '1px solid rgba(255,255,255,0.06)', paddingRight: '8px' }}>
-                                <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 'bold' }}># {idx + 1}</span>
-                                <span style={{ fontSize: '13px' }}>{block.type === 'text' ? '📝' : '🖼️'}</span>
-                              </div>
+                      <span className="pmf-section-badge" style={{
+                        background: 'var(--nv-gold, #fdbd16)',
+                        color: '#0b0c10',
+                        fontWeight: '800',
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '13px'
+                      }}>2</span>
+                      <h3 className="pmf-section-title" style={{
+                        fontSize: '15px',
+                        fontWeight: '800',
+                        color: '#fff',
+                        margin: 0,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}>{lang === 'CZ' ? '2. ČÁST: DETAIL PRODUKTOVÉ STRÁNKY' : 'PART 2: STOREFRONT DETAILS PAGE'}</h3>
+                    </div>
 
-                              {/* Block input fields */}
-                              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px', justifyContent: 'center' }}>
-                                {block.type === 'text' ? (
-                                  <>
-                                    <RichTextEditor
-                                      value={block.value}
-                                      onChange={(val) => handleDescBlockChange(block.id, val)}
-                                      placeholder={lang === 'CZ' ? 'Zde napište text...' : 'Write text block content here...'}
-                                      className="pmf-textarea pmf-textarea-with-toolbar"
-                                      style={{ padding: '8px 10px', fontSize: '14px' }}
-                                    />
-                                  </>
-                                ) : (
-                                  <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                                    {block.value ? (
-                                      <img src={block.value} alt="" style={{ height: '70px', width: '50px', objectFit: 'contain', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }} />
-                                    ) : (
-                                      <div style={{ height: '70px', width: '50px', borderRadius: '4px', border: '1px dashed rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '18px' }}>📷</div>
-                                    )}
-                                    <div style={{ flex: 1 }}>
-                                      <button type="button" className="pmf-variants-add" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => {
-                                        const input = document.createElement('input');
-                                        input.type = 'file';
-                                        input.accept = 'image/*';
-                                        input.onchange = (e) => {
-                                          const file = e.target.files[0];
-                                          if (file) {
-                                            const target = { type: 'block', id: block.id };
-                                            setCropTarget(target);
-                                            loadImageFile(file, target);
-                                          }
-                                        };
-                                        input.click();
-                                      }}>
-                                        {block.value ? (lang === 'CZ' ? 'Změnit obrázek' : 'Change Image') : (lang === 'CZ' ? 'Nahrát a oříznout' : 'Upload & Crop')}
-                                      </button>
-                                      <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
-                                        {lang === 'CZ'
-                                          ? 'Doporučená velikost šablony: 1050×750 px (na šířku) nebo 750×1050 px (na výšku).'
-                                          : 'Recommended template size: 1050×750 px (landscape) or 750×1050 px (portrait).'}
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
+                    {/* PODSEKCE 2.1: FOTOGALERIE A KRÁTKÝ POPIS */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      {/* Multi-Image Gallery Slots */}
+                      <div className="pmf-field">
+                        <label className="pmf-label">
+                          {lang === 'CZ' ? 'Fotogalerie produktu (Oříznutelné fotky)' : 'Product Gallery (Croppable Photos)'}
+                        </label>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '16px', marginTop: '8px' }}>
+                          {/* Front Photo Card (Mirrored) */}
+                          <div className="image-slot-card" style={styles.imageSlotCard}>
+                            <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--nv-gold, #fdbd16)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? 'Přední strana' : 'Front side'}</span>
+                            {formImage ? (
+                              <div style={styles.slotPreviewWrap}>
+                                <img src={formImage} alt="Front preview" style={styles.slotPreviewImg} />
+                                <div style={styles.slotActions}>
+                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
+                                    const input = document.createElement('input');
+                                    input.type = 'file';
+                                    input.accept = 'image/*';
+                                    input.onchange = (e) => {
+                                      const file = e.target.files[0];
+                                      if (file) {
+                                        const target = { type: 'front' };
+                                        setCropTarget(target);
+                                        loadImageFile(file, target);
+                                      }
+                                    };
+                                    input.click();
+                                  }}>🔄</button>
+                                </div>
                               </div>
+                            ) : (
+                              <div className="slot-empty" style={styles.slotEmpty} onClick={() => {
+                                const input = document.createElement('input');
+                                input.type = 'file';
+                                input.accept = 'image/*';
+                                input.onchange = (e) => {
+                                  const file = e.target.files[0];
+                                  if (file) {
+                                    const target = { type: 'front' };
+                                    setCropTarget(target);
+                                    loadImageFile(file, target);
+                                  }
+                                };
+                                input.click();
+                              }}>
+                                <span>➕ {lang === 'CZ' ? 'Přední' : 'Front'}</span>
+                              </div>
+                            )}
+                          </div>
 
-                              {/* Block Actions */}
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', justifyContent: 'center', borderLeft: '1px solid rgba(255,255,255,0.06)', paddingLeft: '8px' }}>
-                                <button type="button" style={{ background: 'none', border: 'none', color: '#8a8a92', cursor: 'pointer', fontSize: '10px', opacity: idx === 0 ? 0.3 : 1 }} disabled={idx === 0} onClick={() => handleMoveDescBlock(idx, -1)}>▲</button>
-                                <button type="button" style={{ background: 'none', border: 'none', color: '#8a8a92', cursor: 'pointer', fontSize: '10px', opacity: idx === formDescBlocks.length - 1 ? 0.3 : 1 }} disabled={idx === formDescBlocks.length - 1} onClick={() => handleMoveDescBlock(idx, 1)}>▼</button>
-                                <button type="button" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '11px', marginTop: '4px' }} onClick={() => handleRemoveDescBlock(block.id)}>🗑️</button>
+                          {/* Back Photo Card */}
+                          <div className="image-slot-card" style={styles.imageSlotCard}>
+                            <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? 'Zadní strana' : 'Back side'}</span>
+                            {formBackImage ? (
+                              <div style={styles.slotPreviewWrap}>
+                                <img src={formBackImage} alt="Back preview" style={styles.slotPreviewImg} />
+                                <div style={styles.slotActions}>
+                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
+                                    const input = document.createElement('input');
+                                    input.type = 'file';
+                                    input.accept = 'image/*';
+                                    input.onchange = (e) => {
+                                      const file = e.target.files[0];
+                                      if (file) {
+                                        const target = { type: 'back' };
+                                        setCropTarget(target);
+                                        loadImageFile(file, target);
+                                      }
+                                    };
+                                    input.click();
+                                  }}>🔄</button>
+                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '11px' }} onClick={() => setFormBackImage('')}>🗑️</button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="slot-empty" style={styles.slotEmpty} onClick={() => {
+                                const input = document.createElement('input');
+                                input.type = 'file';
+                                input.accept = 'image/*';
+                                input.onchange = (e) => {
+                                  const file = e.target.files[0];
+                                  if (file) {
+                                    const target = { type: 'back' };
+                                    setCropTarget(target);
+                                    loadImageFile(file, target);
+                                  }
+                                };
+                                input.click();
+                              }}>
+                                <span>➕ {lang === 'CZ' ? 'Zadní' : 'Back'}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Additional Photo Cards */}
+                          {formAdditionalImages.map((imgUrl, index) => (
+                            <div key={index} className="image-slot-card" style={styles.imageSlotCard}>
+                              <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? `Další #${index + 1}` : `Extra #${index + 1}`}</span>
+                              <div style={styles.slotPreviewWrap}>
+                                <img src={imgUrl} alt="Extra preview" style={styles.slotPreviewImg} />
+                                <div style={styles.slotActions}>
+                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
+                                    const input = document.createElement('input');
+                                    input.type = 'file';
+                                    input.accept = 'image/*';
+                                    input.onchange = (e) => {
+                                      const file = e.target.files[0];
+                                      if (file) {
+                                        const target = { type: 'additional', index };
+                                        setCropTarget(target);
+                                        loadImageFile(file, target);
+                                      }
+                                    };
+                                    input.click();
+                                  }}>🔄</button>
+                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
+                                    setFormAdditionalImages(formAdditionalImages.filter((_, i) => i !== index));
+                                  }}>🗑️</button>
+                                </div>
                               </div>
                             </div>
                           ))}
 
-                          <div style={{ display: 'flex', gap: '12px', marginTop: '6px' }}>
-                            <button type="button" className="pmf-variants-add" style={{ flex: 1 }} onClick={() => handleAddDescBlock('text')}>
-                              ➕ {lang === 'CZ' ? 'Přidat Textový Blok' : 'Add Text Block'}
-                            </button>
-                            <button type="button" className="pmf-variants-add" style={{ flex: 1 }} onClick={() => handleAddDescBlock('image')}>
-                              🖼️ {lang === 'CZ' ? 'Přidat Obrázek' : 'Add Image Block'}
-                            </button>
+                          {/* Add Extra Photo Card */}
+                          <div className="image-slot-card" style={styles.imageSlotCard}>
+                            <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? 'Další fotka' : 'Additional'}</span>
+                            <div className="slot-empty" style={styles.slotEmpty} onClick={() => {
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/*';
+                              input.onchange = (e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                  const target = { type: 'additional' };
+                                  setCropTarget(target);
+                                  loadImageFile(file, target);
+                                }
+                              };
+                              input.click();
+                            }}>
+                              <span>➕ {lang === 'CZ' ? 'Přidat' : 'Add'}</span>
+                            </div>
                           </div>
-
                         </div>
+                      </div>
+
+                      {/* Custom short description textarea */}
+                      <div className="pmf-field">
+                        <label className="pmf-label">
+                          {lang === 'CZ' ? 'Vlastní krátký popisek (u tlačítek)' : 'Custom Short Description (Near Actions)'}
+                        </label>
+                        <RichTextEditor
+                          value={formShortDesc}
+                          onChange={setFormShortDesc}
+                          placeholder={lang === 'CZ' ? 'Vyplňte vlastní krátký popis, který se zobrazuje vedle fotky karty. Pokud necháte prázdné, vygeneruje se z hlavního popisu.' : 'Enter short descriptive teaser. Fallback is generated from the main description if empty.'}
+                          className="pmf-textarea pmf-textarea-with-toolbar"
+                        />
+                        <span style={styles.helperText}>
+                          {lang === 'CZ' ? '💡 Krátký odstavec u nákupních tlačítek pod nadpisem karty.' : '💡 Displayed near price and cart button.'}
+                        </span>
                       </div>
                     </div>
 
-                    {/* Sekce B: Parametry a specifikace */}
-                    <div style={{
-                      background: 'rgba(255, 255, 255, 0.01)',
-                      border: '1px solid rgba(255, 255, 255, 0.04)',
-                      borderRadius: '12px',
-                      padding: '20px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '14px'
-                    }}>
-                      <h4 style={{ margin: 0, fontSize: '13px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--nv-gold, #fdbd16)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '10px' }}>
-                        {lang === 'CZ' ? 'B. Parametry a specifikace produktu' : 'B. Product Specs & Specifications'}
-                      </h4>
-                      {/* Optional Specifications parameters Checklist */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        {/* Set / Edition */}
-                        <div className="pmf-form-row" style={styles.row}>
-                          <div className="pmf-form-col" style={styles.col}>
-                            <div className="pmf-field">
-                              <label className="pmf-label">{lang === 'CZ' ? 'Edice / Sada' : 'Set / Expansion'}</label>
-                              <input type="text" className="pmf-input" autoComplete="new-password" value={formEdition} onChange={e => setFormEdition(e.target.value)} placeholder="např. Obsidian Flames" />
-                            </div>
-                          </div>
-                          <div className="pmf-form-col" style={styles.col}>
-                            <div className="pmf-field">
-                              <label className="pmf-label">{lang === 'CZ' ? 'Zkratka edice (Set Code)' : 'Set Code'}</label>
-                              <input type="text" className="pmf-input" autoComplete="new-password" value={formSetCode} onChange={e => setFormSetCode(e.target.value)} placeholder="např. OBF" />
-                            </div>
-                          </div>
-                        </div>
+                    {/* DELICÍ ČÁRA */}
+                    <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '12px 0' }}></div>
 
-                        {/* Sběratelské číslo & Rarita */}
-                        <div className="pmf-form-row" style={styles.row}>
-                          <div className="pmf-form-col" style={styles.col}>
-                            <div className="pmf-field">
-                              <label className="pmf-label">{lang === 'CZ' ? 'Sběratelské číslo' : 'Collector Code'}</label>
-                              <input type="text" className="pmf-input" autoComplete="new-password" value={formCardCode} onChange={e => setFormCardCode(e.target.value)} placeholder="např. 186/196" />
-                            </div>
-                          </div>
-                          <div className="pmf-form-col" style={styles.col}>
-                            <div className="pmf-field">
-                              <label className="pmf-label">{lang === 'CZ' ? 'Rarita' : 'Rarity'}</label>
-                              <input type="text" className="pmf-input" autoComplete="new-password" value={formRarity} onChange={e => setFormRarity(e.target.value)} placeholder="např. Ultra Rare" />
-                            </div>
-                          </div>
-                        </div>
+                    {/* PODSEKCE 2.2: OBSAH A SPECIFIKACE (Dvě sekce) */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-                        {/* Jazyk & Element / Barva / Typ */}
-                        <div className="pmf-form-row" style={styles.row}>
-                          <div className="pmf-form-col" style={styles.col}>
-                            <div className="pmf-field">
-                              <label className="pmf-label">{lang === 'CZ' ? 'Jazyk (Hlavní)' : 'Language'}</label>
-                              <div className="pmf-select-wrapper">
-                                <select className="pmf-select" value={formLang} onChange={e => {
-                                  const newLang = e.target.value;
-                                  setFormLang(newLang);
-                                  if (formType === 'single' && formVariants.length > 0) {
-                                    setFormVariants(formVariants.map((v, i) => i === 0 ? { ...v, lang: newLang } : v));
-                                  }
-                                  setPreviewLang(newLang);
-                                }}>
-                                  <option value="EN">EN 🇬🇧</option>
-                                  <option value="JP">JP 🇯🇵</option>
-                                  <option value="CN">CN 🇨🇳</option>
-                                  <option value="CZ">CZ 🇨🇿</option>
-                                </select>
-                                <svg className="pmf-select-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                      {/* Sekce A: Podrobný popis */}
+                      <div style={{
+                        background: 'rgba(255, 255, 255, 0.01)',
+                        border: '1px solid rgba(255, 255, 255, 0.04)',
+                        borderRadius: '12px',
+                        padding: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '14px'
+                      }}>
+                        <h4 style={{ margin: 0, fontSize: '13px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--nv-gold, #fdbd16)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '10px' }}>
+                          {lang === 'CZ' ? 'A. Podrobný popis produktu' : 'A. Detailed Product Description'}
+                        </h4>
+                        {/* Description Blocks Builder */}
+                        <div className="pmf-field" style={{ margin: 0 }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '16px' }}>
+
+                            {formDescBlocks.map((block, idx) => (
+                              <div key={block.id} style={{ display: 'flex', gap: '12px', alignItems: 'stretch', padding: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+
+                                {/* Reordering indicators */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', justifyContent: 'center', alignItems: 'center', minWidth: '36px', borderRight: '1px solid rgba(255,255,255,0.06)', paddingRight: '8px' }}>
+                                  <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 'bold' }}># {idx + 1}</span>
+                                  <span style={{ fontSize: '13px' }}>{block.type === 'text' ? '📝' : '🖼️'}</span>
+                                </div>
+
+                                {/* Block input fields */}
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px', justifyContent: 'center' }}>
+                                  {block.type === 'text' ? (
+                                    <>
+                                      <RichTextEditor
+                                        value={block.value}
+                                        onChange={(val) => handleDescBlockChange(block.id, val)}
+                                        placeholder={lang === 'CZ' ? 'Zde napište text...' : 'Write text block content here...'}
+                                        className="pmf-textarea pmf-textarea-with-toolbar"
+                                        style={{ padding: '8px 10px', fontSize: '14px' }}
+                                      />
+                                    </>
+                                  ) : (
+                                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                                      {block.value ? (
+                                        <img src={block.value} alt="" style={{ height: '70px', width: '50px', objectFit: 'contain', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                                      ) : (
+                                        <div style={{ height: '70px', width: '50px', borderRadius: '4px', border: '1px dashed rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '18px' }}>📷</div>
+                                      )}
+                                      <div style={{ flex: 1 }}>
+                                        <button type="button" className="pmf-variants-add" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => {
+                                          const input = document.createElement('input');
+                                          input.type = 'file';
+                                          input.accept = 'image/*';
+                                          input.onchange = (e) => {
+                                            const file = e.target.files[0];
+                                            if (file) {
+                                              const target = { type: 'block', id: block.id };
+                                              setCropTarget(target);
+                                              loadImageFile(file, target);
+                                            }
+                                          };
+                                          input.click();
+                                        }}>
+                                          {block.value ? (lang === 'CZ' ? 'Změnit obrázek' : 'Change Image') : (lang === 'CZ' ? 'Nahrát a oříznout' : 'Upload & Crop')}
+                                        </button>
+                                        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
+                                          {lang === 'CZ'
+                                            ? 'Doporučená velikost šablony: 1050×750 px (na šířku) nebo 750×1050 px (na výšku).'
+                                            : 'Recommended template size: 1050×750 px (landscape) or 750×1050 px (portrait).'}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Block Actions */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', justifyContent: 'center', borderLeft: '1px solid rgba(255,255,255,0.06)', paddingLeft: '8px' }}>
+                                  <button type="button" style={{ background: 'none', border: 'none', color: '#8a8a92', cursor: 'pointer', fontSize: '10px', opacity: idx === 0 ? 0.3 : 1 }} disabled={idx === 0} onClick={() => handleMoveDescBlock(idx, -1)}>▲</button>
+                                  <button type="button" style={{ background: 'none', border: 'none', color: '#8a8a92', cursor: 'pointer', fontSize: '10px', opacity: idx === formDescBlocks.length - 1 ? 0.3 : 1 }} disabled={idx === formDescBlocks.length - 1} onClick={() => handleMoveDescBlock(idx, 1)}>▼</button>
+                                  <button type="button" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '11px', marginTop: '4px' }} onClick={() => handleRemoveDescBlock(block.id)}>🗑️</button>
+                                </div>
                               </div>
+                            ))}
+
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '6px' }}>
+                              <button type="button" className="pmf-variants-add" style={{ flex: 1 }} onClick={() => handleAddDescBlock('text')}>
+                                ➕ {lang === 'CZ' ? 'Přidat Textový Blok' : 'Add Text Block'}
+                              </button>
+                              <button type="button" className="pmf-variants-add" style={{ flex: 1 }} onClick={() => handleAddDescBlock('image')}>
+                                🖼️ {lang === 'CZ' ? 'Přidat Obrázek' : 'Add Image Block'}
+                              </button>
                             </div>
-                          </div>
-                          <div className="pmf-form-col" style={styles.col}>
-                            <div className="pmf-field">
-                              <label className="pmf-label">{lang === 'CZ' ? 'Element / Barva / Typ' : 'Element / Color / Type'}</label>
-                              <input type="text" className="pmf-input" value={formElement} onChange={e => setFormElement(e.target.value)} placeholder="např. Fire, Lightning, Amethyst..." />
-                            </div>
+
                           </div>
                         </div>
+                      </div>
 
-                        {/* Stav karty & Provedení (pouze pro single karty) */}
-                        {formType === 'single' && (
+                      {/* Sekce B: Parametry a specifikace */}
+                      <div style={{
+                        background: 'rgba(255, 255, 255, 0.01)',
+                        border: '1px solid rgba(255, 255, 255, 0.04)',
+                        borderRadius: '12px',
+                        padding: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '14px'
+                      }}>
+                        <h4 style={{ margin: 0, fontSize: '13px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--nv-gold, #fdbd16)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '10px' }}>
+                          {lang === 'CZ' ? 'B. Parametry a specifikace produktu' : 'B. Product Specs & Specifications'}
+                        </h4>
+                        {/* Optional Specifications parameters Checklist */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          {/* Set / Edition */}
                           <div className="pmf-form-row" style={styles.row}>
                             <div className="pmf-form-col" style={styles.col}>
                               <div className="pmf-field">
-                                <label className="pmf-label">{lang === 'CZ' ? 'Stav karty' : 'Card Condition'}</label>
+                                <label className="pmf-label">{lang === 'CZ' ? 'Edice / Sada' : 'Set / Expansion'}</label>
+                                <input type="text" className="pmf-input" autoComplete="new-password" value={formEdition} onChange={e => setFormEdition(e.target.value)} placeholder="např. Obsidian Flames" />
+                              </div>
+                            </div>
+                            <div className="pmf-form-col" style={styles.col}>
+                              <div className="pmf-field">
+                                <label className="pmf-label">{lang === 'CZ' ? 'Zkratka edice (Set Code)' : 'Set Code'}</label>
+                                <input type="text" className="pmf-input" autoComplete="new-password" value={formSetCode} onChange={e => setFormSetCode(e.target.value)} placeholder="např. OBF" />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Sběratelské číslo & Rarita */}
+                          <div className="pmf-form-row" style={styles.row}>
+                            <div className="pmf-form-col" style={styles.col}>
+                              <div className="pmf-field">
+                                <label className="pmf-label">{lang === 'CZ' ? 'Sběratelské číslo' : 'Collector Code'}</label>
+                                <input type="text" className="pmf-input" autoComplete="new-password" value={formCardCode} onChange={e => setFormCardCode(e.target.value)} placeholder="např. 186/196" />
+                              </div>
+                            </div>
+                            <div className="pmf-form-col" style={styles.col}>
+                              <div className="pmf-field">
+                                <label className="pmf-label">{lang === 'CZ' ? 'Rarita' : 'Rarity'}</label>
+                                <input type="text" className="pmf-input" autoComplete="new-password" value={formRarity} onChange={e => setFormRarity(e.target.value)} placeholder="např. Ultra Rare" />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Jazyk & Element / Barva / Typ */}
+                          <div className="pmf-form-row" style={styles.row}>
+                            <div className="pmf-form-col" style={styles.col}>
+                              <div className="pmf-field">
+                                <label className="pmf-label">{lang === 'CZ' ? 'Jazyk (Hlavní)' : 'Language'}</label>
                                 <div className="pmf-select-wrapper">
-                                  <select 
-                                    className="pmf-select" 
-                                    value={formVariants[0]?.condition || 'NM'} 
-                                    onChange={e => {
-                                      const newCond = e.target.value;
-                                      if (formVariants.length > 0) {
-                                        setFormVariants(formVariants.map((v, i) => i === 0 ? { ...v, condition: newCond } : v));
-                                      }
-                                      setPreviewCondition(newCond);
-                                    }}
-                                  >
-                                    <option value="NM">Near Mint (NM)</option>
-                                    <option value="EX">Excellent (EX)</option>
-                                    <option value="GD">Good (GD)</option>
-                                    <option value="LP">Light Played (LP)</option>
-                                    <option value="PL">Played (PL)</option>
-                                    <option value="PO">Poor (PO)</option>
+                                  <select className="pmf-select" value={formLang} onChange={e => {
+                                    const newLang = e.target.value;
+                                    setFormLang(newLang);
+                                    if (formType === 'single' && formVariants.length > 0) {
+                                      setFormVariants(formVariants.map((v, i) => i === 0 ? { ...v, lang: newLang } : v));
+                                    }
+                                    setPreviewLang(newLang);
+                                  }}>
+                                    <option value="EN">EN 🇬🇧</option>
+                                    <option value="JP">JP 🇯🇵</option>
+                                    <option value="CN">CN 🇨🇳</option>
+                                    <option value="CZ">CZ 🇨🇿</option>
                                   </select>
                                   <svg className="pmf-select-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
                                 </div>
@@ -2979,257 +2980,294 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             </div>
                             <div className="pmf-form-col" style={styles.col}>
                               <div className="pmf-field">
-                                <label className="pmf-label">{lang === 'CZ' ? 'Provedení' : 'Foiling / Finish'}</label>
-                                <div className="pmf-select-wrapper">
-                                  <select 
-                                    className="pmf-select" 
-                                    value={formVariants[0]?.foil === true ? "foil" : "non-foil"} 
-                                    onChange={e => {
-                                      const isFoil = e.target.value === 'foil';
-                                      if (formVariants.length > 0) {
-                                        setFormVariants(formVariants.map((v, i) => i === 0 ? { ...v, foil: isFoil } : v));
-                                      }
-                                      setPreviewFoil(isFoil);
-                                    }}
-                                  >
-                                    <option value="non-foil">{lang === 'CZ' ? 'Non-Foil (matná)' : 'Non-Foil (matte)'}</option>
-                                    <option value="foil">{lang === 'CZ' ? 'Foil (lesklá) ✨' : 'Foil (shiny) ✨'}</option>
-                                  </select>
-                                  <svg className="pmf-select-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-                                </div>
+                                <label className="pmf-label">{lang === 'CZ' ? 'Element / Barva / Typ' : 'Element / Color / Type'}</label>
+                                <input type="text" className="pmf-input" value={formElement} onChange={e => setFormElement(e.target.value)} placeholder="např. Fire, Lightning, Amethyst..." />
                               </div>
                             </div>
                           </div>
-                        )}
 
-                        {/* Vývojové stádium & Ilustrátor */}
-                        <div className="pmf-form-row" style={styles.row}>
-                          <div className="pmf-form-col" style={styles.col}>
-                            <div className="pmf-field">
-                              <label className="pmf-label">{lang === 'CZ' ? 'Vývojové stádium' : 'Stage'}</label>
-                              <input type="text" className="pmf-input" value={formStage} onChange={e => setFormStage(e.target.value)} placeholder="např. VMAX, ex, Stage 1, Basic..." />
-                            </div>
-                          </div>
-                          <div className="pmf-form-col" style={styles.col}>
-                            <div className="pmf-field">
-                              <label className="pmf-label">{lang === 'CZ' ? 'Ilustrátor' : 'Illustrator'}</label>
-                              <input type="text" className="pmf-input" value={formIllustrator} onChange={e => setFormIllustrator(e.target.value)} placeholder="např. Mitsuhiro Arita" />
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Rok vydání */}
-                        <div className="pmf-form-row" style={styles.row}>
-                          <div className="pmf-form-col" style={styles.col}>
-                            <div className="pmf-field">
-                              <label className="pmf-label">{lang === 'CZ' ? 'Rok vydání' : 'Release Year'}</label>
-                              <input type="number" className="pmf-input" value={formYear} onChange={e => setFormYear(e.target.value)} placeholder="např. 2024" />
-                            </div>
-                          </div>
-                          <div className="pmf-form-col" style={styles.col}>
-                            {/* Empty column for visual symmetry */}
-                          </div>
-                        </div>
-
-
-
-
-
-                        {/* TYPE-SPECIFIC DETAILS (Sealed / Slab / Acrylics / Accessories) */}
-                        {formType === 'sealed' && (
-                          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          {/* Stav karty & Provedení (pouze pro single karty) */}
+                          {formType === 'single' && (
                             <div className="pmf-form-row" style={styles.row}>
                               <div className="pmf-form-col" style={styles.col}>
                                 <div className="pmf-field">
-                                  <label className="pmf-label">{lang === 'CZ' ? 'Typ balení' : 'Packaging Type'}</label>
-                                  <input type="text" className="pmf-input" value={formPackagingType} onChange={e => setFormPackagingType(e.target.value)} placeholder="Booster Box, ETB, Booster..." />
+                                  <label className="pmf-label">{lang === 'CZ' ? 'Stav karty' : 'Card Condition'}</label>
+                                  <div className="pmf-select-wrapper">
+                                    <select
+                                      className="pmf-select"
+                                      value={formVariants[0]?.condition || 'NM'}
+                                      onChange={e => {
+                                        const newCond = e.target.value;
+                                        if (formVariants.length > 0) {
+                                          setFormVariants(formVariants.map((v, i) => i === 0 ? { ...v, condition: newCond } : v));
+                                        }
+                                        setPreviewCondition(newCond);
+                                      }}
+                                    >
+                                      <option value="NM">Near Mint (NM)</option>
+                                      <option value="EX">Excellent (EX)</option>
+                                      <option value="GD">Good (GD)</option>
+                                      <option value="LP">Light Played (LP)</option>
+                                      <option value="PL">Played (PL)</option>
+                                      <option value="PO">Poor (PO)</option>
+                                    </select>
+                                    <svg className="pmf-select-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                                  </div>
                                 </div>
                               </div>
                               <div className="pmf-form-col" style={styles.col}>
                                 <div className="pmf-field">
-                                  <label className="pmf-label">{lang === 'CZ' ? 'Počet boosterů' : 'Booster Count'}</label>
-                                  <input type="number" className="pmf-input" value={formBoosterCount} onChange={e => setFormBoosterCount(e.target.value)} placeholder="36" />
+                                  <label className="pmf-label">{lang === 'CZ' ? 'Provedení' : 'Foiling / Finish'}</label>
+                                  <div className="pmf-select-wrapper">
+                                    <select
+                                      className="pmf-select"
+                                      value={formVariants[0]?.foil === true ? "foil" : "non-foil"}
+                                      onChange={e => {
+                                        const isFoil = e.target.value === 'foil';
+                                        if (formVariants.length > 0) {
+                                          setFormVariants(formVariants.map((v, i) => i === 0 ? { ...v, foil: isFoil } : v));
+                                        }
+                                        setPreviewFoil(isFoil);
+                                      }}
+                                    >
+                                      <option value="non-foil">{lang === 'CZ' ? 'Non-Foil (matná)' : 'Non-Foil (matte)'}</option>
+                                      <option value="foil">{lang === 'CZ' ? 'Foil (lesklá) ✨' : 'Foil (shiny) ✨'}</option>
+                                    </select>
+                                    <svg className="pmf-select-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                            <div className="pmf-field">
-                              <label className="pmf-label">{lang === 'CZ' ? 'Stav sealed fólie' : 'Shrink Wrap Condition'}</label>
-                              <input type="text" className="pmf-input" value={formFoilCondition} onChange={e => setFormFoilCondition(e.target.value)} placeholder="100% stav" />
-                            </div>
-                          </div>
-                        )}
-
-                        {formType === 'slab' && (
-                          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            <div className="pmf-form-row" style={styles.row}>
-                              <div className="pmf-form-col" style={styles.col}>
-                                <div className="pmf-field">
-                                  <label className="pmf-label">{lang === 'CZ' ? 'Gradingová firma' : 'Grading Company'}</label>
-                                  <input type="text" className="pmf-input" value={formCompany} onChange={e => setFormCompany(e.target.value)} placeholder="PSA, Beckett, AP..." />
-                                </div>
-                              </div>
-                              <div className="pmf-form-col" style={styles.col}>
-                                <div className="pmf-field">
-                                  <label className="pmf-label">{lang === 'CZ' ? 'Známka (Grade)' : 'Grade'}</label>
-                                  <input type="number" className="pmf-input" value={formGrade} onChange={e => setFormGrade(e.target.value)} placeholder="10" />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="pmf-field">
-                              <label className="pmf-label">{lang === 'CZ' ? 'Certifikační číslo' : 'Certificate Number'}</label>
-                              <input type="text" className="pmf-input" value={formCertNumber} onChange={e => setFormCertNumber(e.target.value)} placeholder="např. 89234850" />
-                            </div>
-                          </div>
-                        )}
-
-                        {formType === 'accessory' && (
-                          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            <div className="pmf-form-row" style={styles.row}>
-                              <div className="pmf-form-col" style={styles.col}>
-                                <div className="pmf-field">
-                                  <label className="pmf-label">{lang === 'CZ' ? 'Tloušťka akrylu (mm)' : 'Acrylic Thickness (mm)'}</label>
-                                  <input type="number" className="pmf-input" value={formAcrylicThickness} onChange={e => setFormAcrylicThickness(e.target.value)} placeholder="4" />
-                                </div>
-                              </div>
-                              <div className="pmf-form-col" style={styles.col}>
-                                <div className="pmf-field" style={{ justifyContent: 'center' }}>
-                                  <label className="pmf-check-label">
-                                    <input type="checkbox" className="pmf-check-box" checked={formUvProtection} onChange={e => setFormUvProtection(e.target.checked)} />
-                                    {lang === 'CZ' ? 'Integrovaný UV filtr' : 'Integrated UV Protection'}
-                                  </label>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="pmf-form-row" style={styles.row}>
-                              <div className="pmf-form-col" style={styles.col}>
-                                <div className="pmf-field">
-                                  <label className="pmf-label">{lang === 'CZ' ? 'Typ zavírání' : 'Closing Type'}</label>
-                                  <input type="text" className="pmf-input" value={formClosingType} onChange={e => setFormClosingType(e.target.value)} placeholder="Magnetické víko..." />
-                                </div>
-                              </div>
-                              <div className="pmf-form-col" style={styles.col}>
-                                <div className="pmf-field">
-                                  <label className="pmf-label">{lang === 'CZ' ? 'Vnitřní rozměry' : 'Inner Dimensions'}</label>
-                                  <input type="text" className="pmf-input" value={formInnerDimensions} onChange={e => setFormInnerDimensions(e.target.value)} placeholder="142 x 125 x 78 mm" />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Custom parameters manager */}
-                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', marginTop: '16px' }}>
-                          <label className="pmf-label" style={{ display: 'block', marginBottom: '8px', color: 'var(--nv-gold, #fdbd16)', fontSize: '12px', fontWeight: 'bold' }}>
-                            {lang === 'CZ' ? 'Vlastní parametry a specifikace' : 'Custom Specifications'}
-                          </label>
-                          
-                          {/* List of custom params */}
-                          {formCustomParams.length > 0 && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-                              {formCustomParams.map((param, index) => (
-                                <div key={index} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.04)' }}>
-                                  <input 
-                                    type="text" 
-                                    className="pmf-input" 
-                                    style={{ flex: 1, padding: '6px 10px', fontSize: '12px' }} 
-                                    value={param.label} 
-                                    onChange={(e) => {
-                                      const newParams = formCustomParams.map((p, i) => 
-                                        i === index ? { ...p, label: e.target.value } : p
-                                      );
-                                      setFormCustomParams(newParams);
-                                    }} 
-                                    placeholder={lang === 'CZ' ? 'Název parametru' : 'Parameter Name'}
-                                  />
-                                  <input 
-                                    type="text" 
-                                    className="pmf-input" 
-                                    style={{ flex: 2, padding: '6px 10px', fontSize: '12px' }} 
-                                    value={param.value} 
-                                    onChange={(e) => {
-                                      const newParams = formCustomParams.map((p, i) => 
-                                        i === index ? { ...p, value: e.target.value } : p
-                                      );
-                                      setFormCustomParams(newParams);
-                                    }} 
-                                    placeholder={lang === 'CZ' ? 'Hodnota parametru' : 'Parameter Value'}
-                                  />
-                                  <button 
-                                    type="button" 
-                                    onClick={() => setFormCustomParams(formCustomParams.filter((_, i) => i !== index))}
-                                    style={{
-                                      background: 'rgba(239, 68, 68, 0.1)',
-                                      border: '1px solid rgba(239, 68, 68, 0.2)',
-                                      color: '#ef4444',
-                                      padding: '6px 10px',
-                                      borderRadius: '4px',
-                                      cursor: 'pointer',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center'
-                                    }}
-                                    title={lang === 'CZ' ? 'Odstranit' : 'Delete'}
-                                  >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                                  </button>
-                                </div>
-                              ))}
                             </div>
                           )}
 
-                          {/* Form to add a new parameter */}
-                          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                            <div style={{ flex: 1 }}>
-                              <input 
-                                id="new-param-label"
-                                type="text" 
-                                className="pmf-input" 
-                                style={{ padding: '8px 12px', fontSize: '13px' }} 
-                                placeholder={lang === 'CZ' ? 'Např. Jazyk karty' : 'E.g. Language'} 
-                              />
+                          {/* Vývojové stádium & Ilustrátor */}
+                          <div className="pmf-form-row" style={styles.row}>
+                            <div className="pmf-form-col" style={styles.col}>
+                              <div className="pmf-field">
+                                <label className="pmf-label">{lang === 'CZ' ? 'Vývojové stádium' : 'Stage'}</label>
+                                <input type="text" className="pmf-input" value={formStage} onChange={e => setFormStage(e.target.value)} placeholder="např. VMAX, ex, Stage 1, Basic..." />
+                              </div>
                             </div>
-                            <div style={{ flex: 2 }}>
-                              <input 
-                                id="new-param-value"
-                                type="text" 
-                                className="pmf-input" 
-                                style={{ padding: '8px 12px', fontSize: '13px' }} 
-                                placeholder={lang === 'CZ' ? 'Např. Čeština (CZ)' : 'E.g. Czech (CZ)'} 
-                              />
+                            <div className="pmf-form-col" style={styles.col}>
+                              <div className="pmf-field">
+                                <label className="pmf-label">{lang === 'CZ' ? 'Ilustrátor' : 'Illustrator'}</label>
+                                <input type="text" className="pmf-input" value={formIllustrator} onChange={e => setFormIllustrator(e.target.value)} placeholder="např. Mitsuhiro Arita" />
+                              </div>
                             </div>
-                            <button 
-                              type="button" 
-                              className="pmf-variants-add" 
-                              style={{ 
-                                padding: '8px 16px', 
-                                height: '38px', 
-                                whiteSpace: 'nowrap',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px'
-                              }}
-                              onClick={() => {
-                                const labelInput = document.getElementById('new-param-label');
-                                const valueInput = document.getElementById('new-param-value');
-                                if (labelInput && valueInput && labelInput.value.trim() && valueInput.value.trim()) {
-                                  setFormCustomParams([...formCustomParams, { label: labelInput.value.trim(), value: valueInput.value.trim() }]);
-                                  labelInput.value = '';
-                                  valueInput.value = '';
-                                } else {
-                                  alert(lang === 'CZ' ? 'Vyplňte prosím název i hodnotu parametru.' : 'Please fill both the parameter name and value.');
-                                }
-                              }}
-                            >
-                              <span>+</span> {lang === 'CZ' ? 'Přidat' : 'Add'}
-                            </button>
                           </div>
+
+                          {/* Rok vydání */}
+                          <div className="pmf-form-row" style={styles.row}>
+                            <div className="pmf-form-col" style={styles.col}>
+                              <div className="pmf-field">
+                                <label className="pmf-label">{lang === 'CZ' ? 'Rok vydání' : 'Release Year'}</label>
+                                <input type="number" className="pmf-input" value={formYear} onChange={e => setFormYear(e.target.value)} placeholder="např. 2024" />
+                              </div>
+                            </div>
+                            <div className="pmf-form-col" style={styles.col}>
+                              {/* Empty column for visual symmetry */}
+                            </div>
+                          </div>
+
+
+
+
+
+                          {/* TYPE-SPECIFIC DETAILS (Sealed / Slab / Acrylics / Accessories) */}
+                          {formType === 'sealed' && (
+                            <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                              <div className="pmf-form-row" style={styles.row}>
+                                <div className="pmf-form-col" style={styles.col}>
+                                  <div className="pmf-field">
+                                    <label className="pmf-label">{lang === 'CZ' ? 'Typ balení' : 'Packaging Type'}</label>
+                                    <input type="text" className="pmf-input" value={formPackagingType} onChange={e => setFormPackagingType(e.target.value)} placeholder="Booster Box, ETB, Booster..." />
+                                  </div>
+                                </div>
+                                <div className="pmf-form-col" style={styles.col}>
+                                  <div className="pmf-field">
+                                    <label className="pmf-label">{lang === 'CZ' ? 'Počet boosterů' : 'Booster Count'}</label>
+                                    <input type="number" className="pmf-input" value={formBoosterCount} onChange={e => setFormBoosterCount(e.target.value)} placeholder="36" />
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="pmf-field">
+                                <label className="pmf-label">{lang === 'CZ' ? 'Stav sealed fólie' : 'Shrink Wrap Condition'}</label>
+                                <input type="text" className="pmf-input" value={formFoilCondition} onChange={e => setFormFoilCondition(e.target.value)} placeholder="100% stav" />
+                              </div>
+                            </div>
+                          )}
+
+                          {formType === 'slab' && (
+                            <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                              <div className="pmf-form-row" style={styles.row}>
+                                <div className="pmf-form-col" style={styles.col}>
+                                  <div className="pmf-field">
+                                    <label className="pmf-label">{lang === 'CZ' ? 'Gradingová firma' : 'Grading Company'}</label>
+                                    <input type="text" className="pmf-input" value={formCompany} onChange={e => setFormCompany(e.target.value)} placeholder="PSA, Beckett, AP..." />
+                                  </div>
+                                </div>
+                                <div className="pmf-form-col" style={styles.col}>
+                                  <div className="pmf-field">
+                                    <label className="pmf-label">{lang === 'CZ' ? 'Známka (Grade)' : 'Grade'}</label>
+                                    <input type="number" className="pmf-input" value={formGrade} onChange={e => setFormGrade(e.target.value)} placeholder="10" />
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="pmf-field">
+                                <label className="pmf-label">{lang === 'CZ' ? 'Certifikační číslo' : 'Certificate Number'}</label>
+                                <input type="text" className="pmf-input" value={formCertNumber} onChange={e => setFormCertNumber(e.target.value)} placeholder="např. 89234850" />
+                              </div>
+                            </div>
+                          )}
+
+                          {formType === 'accessory' && (
+                            <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                              <div className="pmf-form-row" style={styles.row}>
+                                <div className="pmf-form-col" style={styles.col}>
+                                  <div className="pmf-field">
+                                    <label className="pmf-label">{lang === 'CZ' ? 'Tloušťka akrylu (mm)' : 'Acrylic Thickness (mm)'}</label>
+                                    <input type="number" className="pmf-input" value={formAcrylicThickness} onChange={e => setFormAcrylicThickness(e.target.value)} placeholder="4" />
+                                  </div>
+                                </div>
+                                <div className="pmf-form-col" style={styles.col}>
+                                  <div className="pmf-field" style={{ justifyContent: 'center' }}>
+                                    <label className="pmf-check-label">
+                                      <input type="checkbox" className="pmf-check-box" checked={formUvProtection} onChange={e => setFormUvProtection(e.target.checked)} />
+                                      {lang === 'CZ' ? 'Integrovaný UV filtr' : 'Integrated UV Protection'}
+                                    </label>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="pmf-form-row" style={styles.row}>
+                                <div className="pmf-form-col" style={styles.col}>
+                                  <div className="pmf-field">
+                                    <label className="pmf-label">{lang === 'CZ' ? 'Typ zavírání' : 'Closing Type'}</label>
+                                    <input type="text" className="pmf-input" value={formClosingType} onChange={e => setFormClosingType(e.target.value)} placeholder="Magnetické víko..." />
+                                  </div>
+                                </div>
+                                <div className="pmf-form-col" style={styles.col}>
+                                  <div className="pmf-field">
+                                    <label className="pmf-label">{lang === 'CZ' ? 'Vnitřní rozměry' : 'Inner Dimensions'}</label>
+                                    <input type="text" className="pmf-input" value={formInnerDimensions} onChange={e => setFormInnerDimensions(e.target.value)} placeholder="142 x 125 x 78 mm" />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Custom parameters manager */}
+                          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', marginTop: '16px' }}>
+                            <label className="pmf-label" style={{ display: 'block', marginBottom: '8px', color: 'var(--nv-gold, #fdbd16)', fontSize: '12px', fontWeight: 'bold' }}>
+                              {lang === 'CZ' ? 'Vlastní parametry a specifikace' : 'Custom Specifications'}
+                            </label>
+
+                            {/* List of custom params */}
+                            {formCustomParams.length > 0 && (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                                {formCustomParams.map((param, index) => (
+                                  <div key={index} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                                    <input
+                                      type="text"
+                                      className="pmf-input"
+                                      style={{ flex: 1, padding: '6px 10px', fontSize: '12px' }}
+                                      value={param.label}
+                                      onChange={(e) => {
+                                        const newParams = formCustomParams.map((p, i) =>
+                                          i === index ? { ...p, label: e.target.value } : p
+                                        );
+                                        setFormCustomParams(newParams);
+                                      }}
+                                      placeholder={lang === 'CZ' ? 'Název parametru' : 'Parameter Name'}
+                                    />
+                                    <input
+                                      type="text"
+                                      className="pmf-input"
+                                      style={{ flex: 2, padding: '6px 10px', fontSize: '12px' }}
+                                      value={param.value}
+                                      onChange={(e) => {
+                                        const newParams = formCustomParams.map((p, i) =>
+                                          i === index ? { ...p, value: e.target.value } : p
+                                        );
+                                        setFormCustomParams(newParams);
+                                      }}
+                                      placeholder={lang === 'CZ' ? 'Hodnota parametru' : 'Parameter Value'}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setFormCustomParams(formCustomParams.filter((_, i) => i !== index))}
+                                      style={{
+                                        background: 'rgba(239, 68, 68, 0.1)',
+                                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                                        color: '#ef4444',
+                                        padding: '6px 10px',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                      }}
+                                      title={lang === 'CZ' ? 'Odstranit' : 'Delete'}
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Form to add a new parameter */}
+                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                              <div style={{ flex: 1 }}>
+                                <input
+                                  id="new-param-label"
+                                  type="text"
+                                  className="pmf-input"
+                                  style={{ padding: '8px 12px', fontSize: '13px' }}
+                                  placeholder={lang === 'CZ' ? 'Např. Jazyk karty' : 'E.g. Language'}
+                                />
+                              </div>
+                              <div style={{ flex: 2 }}>
+                                <input
+                                  id="new-param-value"
+                                  type="text"
+                                  className="pmf-input"
+                                  style={{ padding: '8px 12px', fontSize: '13px' }}
+                                  placeholder={lang === 'CZ' ? 'Např. Čeština (CZ)' : 'E.g. Czech (CZ)'}
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                className="pmf-variants-add"
+                                style={{
+                                  padding: '8px 16px',
+                                  height: '38px',
+                                  whiteSpace: 'nowrap',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                                onClick={() => {
+                                  const labelInput = document.getElementById('new-param-label');
+                                  const valueInput = document.getElementById('new-param-value');
+                                  if (labelInput && valueInput && labelInput.value.trim() && valueInput.value.trim()) {
+                                    setFormCustomParams([...formCustomParams, { label: labelInput.value.trim(), value: valueInput.value.trim() }]);
+                                    labelInput.value = '';
+                                    valueInput.value = '';
+                                  } else {
+                                    alert(lang === 'CZ' ? 'Vyplňte prosím název i hodnotu parametru.' : 'Please fill both the parameter name and value.');
+                                  }
+                                }}
+                              >
+                                <span>+</span> {lang === 'CZ' ? 'Přidat' : 'Add'}
+                              </button>
+                            </div>
+                          </div>
+
                         </div>
-
                       </div>
-                    </div>
 
+                    </div>
                   </div>
-                </div>
 
                 </div> {/* Closes Left Column for Part 2 Form */}
 
@@ -3240,9 +3278,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       <span style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', color: 'var(--nv-gold, #fdbd16)', letterSpacing: '1px', fontFamily: 'var(--font-heading)' }}>
                         {lang === 'CZ' ? 'Živý náhled detailu' : 'Live Page Preview'}
                       </span>
-                      <button 
-                        type="button" 
-                        className="pmf-variants-add" 
+                      <button
+                        type="button"
+                        className="pmf-variants-add"
                         style={{ padding: '3px 8px', fontSize: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}
                         onClick={() => { setPreviewActiveTab('popis'); setIsFullPreviewOpen(true); }}
                       >
@@ -3253,10 +3291,10 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       {lang === 'CZ' ? 'Jak bude vypadat produktová stránka (scrollovatelná).' : 'How the storefront details page will look (scrollable).'}
                     </span>
                   </div>
-                  
+
                   {/* Miniature Storefront Page Preview */}
                   <div style={styles.mockPageContainer} className="glass-panel">
-                    
+
                     {/* Breadcrumbs Mockup */}
                     <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                       Domů / {formGame} / {formEdition || (lang === 'CZ' ? 'Bez sady' : 'No set')}
@@ -3265,19 +3303,19 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                     {/* Image Gallery area */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', width: '100%' }}>
                       <div style={{ width: '100%', height: '330px', backgroundColor: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                        <img 
-                          src={previewActiveImage || formImage || '/Northvale Logo.webp'} 
-                          alt="" 
-                          style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} 
+                        <img
+                          src={previewActiveImage || formImage || '/Northvale Logo.webp'}
+                          alt=""
+                          style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
                           onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }}
                         />
                       </div>
-                      
+
                       {/* Dot indicator lines */}
                       {(formBackImage || formAdditionalImages.length > 0) && (
                         <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', padding: '2px 0', width: '100%', justifyContent: 'center' }}>
                           {formImage && (
-                            <div 
+                            <div
                               onClick={() => setPreviewActiveImage(formImage)}
                               style={{ width: '28px', height: '36px', border: (previewActiveImage === formImage) ? '1.5px solid var(--nv-gold, #fdbd16)' : '1px solid rgba(255,255,255,0.15)', borderRadius: '4px', overflow: 'hidden', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: 'pointer' }}
                             >
@@ -3285,7 +3323,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             </div>
                           )}
                           {formBackImage && (
-                            <div 
+                            <div
                               onClick={() => setPreviewActiveImage(formBackImage)}
                               style={{ width: '28px', height: '36px', border: (previewActiveImage === formBackImage) ? '1.5px solid var(--nv-gold, #fdbd16)' : '1px solid rgba(255,255,255,0.15)', borderRadius: '4px', overflow: 'hidden', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: 'pointer' }}
                             >
@@ -3293,8 +3331,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             </div>
                           )}
                           {formAdditionalImages.map((imgUrl, i) => (
-                            <div 
-                              key={i} 
+                            <div
+                              key={i}
                               onClick={() => setPreviewActiveImage(imgUrl)}
                               style={{ width: '28px', height: '36px', border: (previewActiveImage === imgUrl) ? '1.5px solid var(--nv-gold, #fdbd16)' : '1px solid rgba(255,255,255,0.15)', borderRadius: '4px', overflow: 'hidden', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: 'pointer' }}
                             >
@@ -3314,7 +3352,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         <span>★★★★★</span>
                         <span style={{ color: 'rgba(255,255,255,0.4)' }}>(5 {lang === 'CZ' ? 'recenzí' : 'reviews'})</span>
                       </div>
-                      
+
                       <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', margin: '8px 0 0 0', lineHeight: '1.4' }}>
                         {parseFormattedText(formShortDesc || (formDescBlocks.find(b => b.type === 'text')?.value?.split('.').slice(0, 2).filter(Boolean).join('. ') + '.') || (lang === 'CZ' ? 'Prázdný krátký popis...' : 'Teaser description empty...'), true)}
                       </div>
@@ -3328,7 +3366,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         {previewAvailableConditions.length > 0 && (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: '1 1 50px' }}>
                             <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px' }}>{lang === 'CZ' ? 'Stav:' : 'Condition:'}</span>
-                            <select 
+                            <select
                               value={previewCondition}
                               onChange={(e) => setPreviewCondition(e.target.value)}
                               style={{ backgroundColor: '#000', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '2px 4px', borderRadius: '4px', fontSize: '10px', width: '100%' }}
@@ -3340,7 +3378,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         {previewAvailableLangs.length > 0 && (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: '1 1 50px' }}>
                             <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px' }}>{lang === 'CZ' ? 'Jazyk:' : 'Lang:'}</span>
-                            <select 
+                            <select
                               value={previewLang}
                               onChange={(e) => setPreviewLang(e.target.value)}
                               style={{ backgroundColor: '#000', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '2px 4px', borderRadius: '4px', fontSize: '10px', width: '100%' }}
@@ -3352,7 +3390,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         {previewAvailableFoils.length > 0 && (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: '1 1 60px' }}>
                             <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px' }}>{lang === 'CZ' ? 'Úprava:' : 'Finish:'}</span>
-                            <select 
+                            <select
                               value={previewFoil ? 'foil' : 'non-foil'}
                               onChange={(e) => setPreviewFoil(e.target.value === 'foil')}
                               style={{ backgroundColor: '#000', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '2px 4px', borderRadius: '4px', fontSize: '10px', width: '100%' }}
@@ -3392,7 +3430,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
                     {/* Stacked Desc and Specs details */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      
+
                       {/* Description blocks loop */}
                       <div>
                         <h4 style={{ fontSize: '11px', textTransform: 'uppercase', color: '#fff', margin: '0 0 8px 0', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '4px', letterSpacing: '0.5px', fontWeight: '800' }}>
@@ -3413,10 +3451,10 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             } else if (block.type === 'image') {
                               return (
                                 <div key={block.id} className="desc-block-image-container" style={{ margin: '12px 0', display: 'flex', justifyContent: 'flex-start' }}>
-                                  <img 
-                                    src={block.value || '/Northvale Logo.webp'} 
-                                    alt="" 
-                                    style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px' }} 
+                                  <img
+                                    src={block.value || '/Northvale Logo.webp'}
+                                    alt=""
+                                    style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px' }}
                                     onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }}
                                   />
                                 </div>
@@ -3637,7 +3675,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
             </form>
 
             {isFullPreviewOpen && (
-              <div 
+              <div
                 style={{
                   position: 'fixed',
                   top: 0,
@@ -3652,7 +3690,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                   alignItems: 'stretch',
                   boxSizing: 'border-box',
                   fontFamily: "'Inter Tight', sans-serif"
-                }} 
+                }}
                 className="fade-in"
                 onClick={(e) => e.stopPropagation()}
               >
@@ -3679,8 +3717,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       {lang === 'CZ' ? 'Aktivní zobrazení' : 'Live View'}
                     </span>
                   </div>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     style={{
                       background: 'rgba(255,255,255,0.04)',
                       border: '1px solid rgba(255,255,255,0.15)',
@@ -3727,7 +3765,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                     boxSizing: 'border-box'
                   }}>
                     <div style={{ textAlign: 'left' }}>
-                      {lang === 'CZ' ? 'Potřebujete poradit? Podívejte se na ' : 'Need help? Check out '} 
+                      {lang === 'CZ' ? 'Potřebujete poradit? Podívejte se na ' : 'Need help? Check out '}
                       <strong style={{ color: 'var(--nv-gold, #fdbd16)', cursor: 'pointer' }}>
                         {lang === 'CZ' ? 'nejčastější dotazy' : 'frequently asked questions'}
                       </strong>
@@ -3924,7 +3962,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                     padding: '0 16px',
                     boxSizing: 'border-box'
                   }}>
-                    
+
                     {/* BREADCRUMBS */}
                     <nav className="breadcrumbs-nav" style={{ marginBottom: '32px' }}>
                       <span className="breadcrumb-item" style={{ cursor: 'pointer' }}>{lang === 'CZ' ? 'Domů' : 'Home'}</span>
@@ -3942,14 +3980,14 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       alignItems: 'start',
                       marginBottom: '64px'
                     }}>
-                      
+
                       {/* LEFT COLUMN: Clean Gallery */}
                       <div className="product-detail-left-col" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                         <div className="detail-gallery-wrapper" style={{ position: 'relative' }}>
                           <div className="detail-clean-image-container">
-                            <img 
-                              src={previewActiveImage || formImage || '/Northvale Logo.webp'} 
-                              alt="Product Main Preview" 
+                            <img
+                              src={previewActiveImage || formImage || '/Northvale Logo.webp'}
+                              alt="Product Main Preview"
                               onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }}
                             />
                           </div>
@@ -3959,7 +3997,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         {(formBackImage || formAdditionalImages.length > 0) && (
                           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
                             {formImage && (
-                              <div 
+                              <div
                                 onClick={() => setPreviewActiveImage(formImage)}
                                 style={{ width: '60px', height: '80px', border: previewActiveImage === formImage ? '2px solid var(--nv-gold, #fdbd16)' : '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                               >
@@ -3967,7 +4005,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               </div>
                             )}
                             {formBackImage && (
-                              <div 
+                              <div
                                 onClick={() => setPreviewActiveImage(formBackImage)}
                                 style={{ width: '60px', height: '80px', border: previewActiveImage === formBackImage ? '2px solid var(--nv-gold, #fdbd16)' : '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                               >
@@ -3975,8 +4013,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               </div>
                             )}
                             {formAdditionalImages.map((imgUrl, i) => (
-                              <div 
-                                key={i} 
+                              <div
+                                key={i}
                                 onClick={() => setPreviewActiveImage(imgUrl)}
                                 style={{ width: '60px', height: '80px', border: previewActiveImage === imgUrl ? '2px solid var(--nv-gold, #fdbd16)' : '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                               >
@@ -3989,7 +4027,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
                       {/* RIGHT COLUMN: Buy block, title, stars */}
                       <div className="product-detail-right-col" style={{ display: 'flex', flexDirection: 'column', gap: '24px', textAlign: 'left' }}>
-                        
+
                         {/* Title, Brand, rating */}
                         <div>
                           <h2 style={{
@@ -4003,7 +4041,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           }}>
                             {previewName || (lang === 'CZ' ? 'Název produktu' : 'Product Name')}
                           </h2>
-                          
+
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--nv-gold, #fdbd16)' }}>
                             <span>★★★★★</span>
                             <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '500', cursor: 'pointer' }}>
@@ -4045,8 +4083,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               {previewAvailableConditions.length > 0 && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: '1 1 120px' }}>
                                   <label style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', fontWeight: '600', textTransform: 'uppercase' }}>{lang === 'CZ' ? 'Stav karty:' : 'Card Condition:'}</label>
-                                  <select 
-                                    value={previewCondition} 
+                                  <select
+                                    value={previewCondition}
                                     onChange={(e) => setPreviewCondition(e.target.value)}
                                     style={{ backgroundColor: '#000', border: '1px solid rgba(255,255,255,0.12)', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', color: '#fff', outline: 'none', cursor: 'pointer' }}
                                   >
@@ -4060,8 +4098,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               {previewAvailableLangs.length > 0 && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: '1 1 120px' }}>
                                   <label style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', fontWeight: '600', textTransform: 'uppercase' }}>{lang === 'CZ' ? 'Jazyk karty:' : 'Card Language:'}</label>
-                                  <select 
-                                    value={previewLang} 
+                                  <select
+                                    value={previewLang}
                                     onChange={(e) => setPreviewLang(e.target.value)}
                                     style={{ backgroundColor: '#000', border: '1px solid rgba(255,255,255,0.12)', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', color: '#fff', outline: 'none', cursor: 'pointer' }}
                                   >
@@ -4077,8 +4115,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               {previewAvailableFoils.length > 0 && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: '1 1 120px' }}>
                                   <label style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', fontWeight: '600', textTransform: 'uppercase' }}>{lang === 'CZ' ? 'Provedení:' : 'Finish:'}</label>
-                                  <select 
-                                    value={previewFoil ? 'foil' : 'non-foil'} 
+                                  <select
+                                    value={previewFoil ? 'foil' : 'non-foil'}
                                     onChange={(e) => setPreviewFoil(e.target.value === 'foil')}
                                     style={{ backgroundColor: '#000', border: '1px solid rgba(255,255,255,0.12)', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', color: '#fff', outline: 'none', cursor: 'pointer' }}
                                   >
@@ -4106,7 +4144,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           flexDirection: 'column',
                           gap: '24px'
                         }}>
-                          
+
                           {/* Price & Stock info */}
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
@@ -4114,8 +4152,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                 {`${(previewPrice).toLocaleString('cs-CZ')} Kč`}
                               </div>
                               <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
-                                {lang === 'CZ' 
-                                  ? `Bez DPH: ${Math.round(previewPrice / 1.21).toLocaleString('cs-CZ')} Kč` 
+                                {lang === 'CZ'
+                                  ? `Bez DPH: ${Math.round(previewPrice / 1.21).toLocaleString('cs-CZ')} Kč`
                                   : `Excl. VAT: ${Math.round(previewPrice / 1.21).toLocaleString('cs-CZ')} CZK`}
                               </div>
                             </div>
@@ -4134,8 +4172,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                 border: previewStock > 0 ? '1px solid rgba(16, 185, 129, 0.12)' : '1px solid rgba(239, 68, 68, 0.12)'
                               }}>
                                 <span style={{ fontSize: '8px' }}>●</span>
-                                {previewStock > 0 
-                                  ? (lang === 'CZ' ? `Skladem (${previewStock} ks)` : `In Stock (${previewStock} pcs)`) 
+                                {previewStock > 0
+                                  ? (lang === 'CZ' ? `Skladem (${previewStock} ks)` : `In Stock (${previewStock} pcs)`)
                                   : (lang === 'CZ' ? 'Na objednávku' : 'Out of Stock')}
                               </div>
                               <span style={{ fontSize: '11px', color: 'var(--nv-gold, #fdbd16)', textDecoration: 'underline', cursor: 'pointer' }}>
@@ -4268,8 +4306,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                     {/* HORIZONTAL TABS BAR */}
                     <div className="product-tabs-wrapper" style={{ margin: '48px 0 32px 0' }}>
                       <div className="product-tabs-nav">
-                        <button 
-                          className={`product-tab-btn ${previewActiveTab === 'popis' ? 'active' : ''}`} 
+                        <button
+                          className={`product-tab-btn ${previewActiveTab === 'popis' ? 'active' : ''}`}
                           onClick={() => setPreviewActiveTab('popis')}
                         >
                           <svg className="tab-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -4277,8 +4315,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           </svg>
                           <span>{lang === 'CZ' ? 'Popis a parametry' : 'Description & Specs'}</span>
                         </button>
-                        <button 
-                          className={`product-tab-btn ${previewActiveTab === 'hodnoceni' ? 'active' : ''}`} 
+                        <button
+                          className={`product-tab-btn ${previewActiveTab === 'hodnoceni' ? 'active' : ''}`}
                           onClick={() => setPreviewActiveTab('hodnoceni')}
                         >
                           <svg className="tab-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -4286,8 +4324,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           </svg>
                           <span>{lang === 'CZ' ? 'Hodnocení' : 'Reviews'}</span>
                         </button>
-                        <button 
-                          className={`product-tab-btn ${previewActiveTab === 'diskuse' ? 'active' : ''}`} 
+                        <button
+                          className={`product-tab-btn ${previewActiveTab === 'diskuse' ? 'active' : ''}`}
                           onClick={() => setPreviewActiveTab('diskuse')}
                         >
                           <svg className="tab-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -4295,8 +4333,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           </svg>
                           <span>{lang === 'CZ' ? 'Diskuze' : 'Discussion'}</span>
                         </button>
-                        <button 
-                          className={`product-tab-btn ${previewActiveTab === 'souvisejici' ? 'active' : ''}`} 
+                        <button
+                          className={`product-tab-btn ${previewActiveTab === 'souvisejici' ? 'active' : ''}`}
                           onClick={() => setPreviewActiveTab('souvisejici')}
                         >
                           <svg className="tab-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -4304,8 +4342,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           </svg>
                           <span>{lang === 'CZ' ? 'Související produkty' : 'Related Products'}</span>
                         </button>
-                        <button 
-                          className={`product-tab-btn ${previewActiveTab === 'podobne' ? 'active' : ''}`} 
+                        <button
+                          className={`product-tab-btn ${previewActiveTab === 'podobne' ? 'active' : ''}`}
                           onClick={() => setPreviewActiveTab('podobne')}
                         >
                           <svg className="tab-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -4320,7 +4358,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                     <div>
                       {previewActiveTab === 'popis' && (
                         <div className="tab-popis-layout" style={{ textAlign: 'left' }}>
-                          
+
                           {/* Left Column: Descriptions */}
                           <div className="tab-popis-left-col">
                             <div>
@@ -4342,10 +4380,10 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                   } else if (block.type === 'image') {
                                     return (
                                       <div key={block.id} className="desc-block-image-container" style={{ margin: '16px 0', display: 'flex', justifyContent: 'flex-start' }}>
-                                        <img 
-                                          src={block.value || '/Northvale Logo.webp'} 
-                                          alt="" 
-                                          style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }} 
+                                        <img
+                                          src={block.value || '/Northvale Logo.webp'}
+                                          alt=""
+                                          style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }}
                                           onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }}
                                         />
                                       </div>
@@ -4365,7 +4403,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               <h3 className="detail-section-title" style={{ marginTop: 0 }}>
                                 {lang === 'CZ' ? 'Parametry produktu' : 'Product Specs'}
                               </h3>
-                              
+
                               <table className="tab-popis-specs-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <tbody>
                                   {formGame && (
@@ -4562,7 +4600,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                 {lang === 'CZ' ? 'Založeno na 12 hodnoceních' : 'Based on 12 reviews'}
                               </div>
                             </div>
-                            
+
                             <div className="reviews-dashboard-bars">
                               <div className="reviews-bar-row">
                                 <span className="bar-label">5 ★</span>
@@ -4593,8 +4631,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
                             <div className="reviews-dashboard-action">
                               <p className="action-text">
-                                {lang === 'CZ' 
-                                  ? 'Podělte se o své zkušenosti s tímto produktem a pomozte ostatním sběratelům.' 
+                                {lang === 'CZ'
+                                  ? 'Podělte se o své zkušenosti s tímto produktem a pomozte ostatním sběratelům.'
                                   : 'Share your experience with this product and help other collectors.'}
                               </p>
                               <button type="button" className="btn btn-primary reviews-add-btn" style={{ pointerEvents: 'none', opacity: 0.8 }}>
@@ -4733,12 +4771,12 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                 {/* 6. STOREFRONT FOOTER */}
                 <footer className="main-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                   <div className="container footer-grid has-four-cols" style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '40px', padding: '48px 16px 32px 16px', boxSizing: 'border-box', textAlign: 'left' }}>
-                    
+
                     {/* Col 1 */}
                     <div className="footer-column footer-col-about" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                       <img src="/logo s popisem.webp" alt="NORTHVALE TCG" style={{ height: '36px', width: 'fit-content', objectFit: 'contain' }} />
                       <p className="footer-desc" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.5', margin: 0 }}>
-                        {lang === 'CZ' 
+                        {lang === 'CZ'
                           ? 'TCG e-shop od sběratelů pro sběratele. Nakupte originální karetní produkty se 100% garancí pravosti a špičkovým sběratelským balením.'
                           : 'TCG shop run by collectors for collectors. Purchase authentic card products with 100% guaranteed authenticity and premium collector packaging.'}
                       </p>
@@ -4887,7 +4925,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       </button>
                     </div>
                   )}
-                  <canvas 
+                  <canvas
                     ref={canvasRef}
                     width={300}
                     height={400}
@@ -4912,8 +4950,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       <span ref={zoomValRef} style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>100%</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => {
                           if (sliderRef.current) {
                             const minVal = Number(sliderRef.current.min);
@@ -4928,8 +4966,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                       </button>
-                      
-                      <input 
+
+                      <input
                         ref={sliderRef}
                         type="range"
                         min="0.01"
@@ -4944,7 +4982,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         }}
                       />
 
-                      <button 
+                      <button
                         type="button"
                         onClick={() => {
                           if (sliderRef.current) {
@@ -5004,12 +5042,12 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
             <div style={styles.csvBody}>
               <p style={styles.desc}>
-                {lang === 'CZ' 
-                  ? 'Vložte data ve formátu CSV (oddělovač čárka nebo středník). Hlavičky by měly obsahovat: id, name, game, type, edition, rarity, price, stock, variants.' 
+                {lang === 'CZ'
+                  ? 'Vložte data ve formátu CSV (oddělovač čárka nebo středník). Hlavičky by měly obsahovat: id, name, game, type, edition, rarity, price, stock, variants.'
                   : 'Paste your CSV content (comma or semicolon separated). Allowed headers: id, name, game, type, edition, rarity, price, stock, variants.'}
               </p>
 
-              <textarea 
+              <textarea
                 style={styles.csvTextarea}
                 rows="10"
                 placeholder={`id;name;game;type;edition;price;stock\ncharizard-ex;Charizard ex;Pokémon;single;Obsidian Flames;1850;3`}

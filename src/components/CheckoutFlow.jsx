@@ -1587,6 +1587,18 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   <span className="pof-total-val">{finalTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} <span className="__om-t">{lang === 'CZ' ? 'Kč' : 'CZK'}</span></span>
                 </div>
 
+                 <div style={{ fontSize: '11px', color: 'var(--text-muted, #8a8a92)', lineHeight: '1.4', margin: '0 0 16px 0', textAlign: 'center' }}>
+                   {lang === 'CZ' ? (
+                     <>
+                       Kliknutím na tlačítko souhlasíte s našimi <a href="/UniverzalniObchodniPodminky.pdf" target="_blank" style={{ color: 'var(--text-color, #ffffff)', textDecoration: 'underline' }}>obchodními podmínkami</a> a berete na vědomí zpracování osobních údajů.
+                     </>
+                   ) : (
+                     <>
+                       By clicking the button, you agree to our <a href="/UniverzalniObchodniPodminky.pdf" target="_blank" style={{ color: 'var(--text-color, #ffffff)', textDecoration: 'underline' }}>terms and conditions</a> and acknowledge the processing of personal data.
+                     </>
+                   )}
+                 </div>
+
                 <button type="submit" className="pof-submit">
                   <span className="__om-t">{lang === 'CZ' ? 'Objednat a zaplatit' : 'Place Order & Pay'} </span>
                   <span><span className="__om-t">→</span></span>

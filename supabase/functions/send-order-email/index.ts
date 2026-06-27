@@ -60,6 +60,25 @@ serve(async (req) => {
       console.error("Storage download or encode failed:", storageErr);
     }
 
+    // Download universal Terms & Conditions and encode to base64
+    let base64Terms = "";
+    try {
+      const { data: fileData, error: downloadError } = await supabase.storage
+        .from("invoices")
+        .download("UniverzalniObchodniPodminky.pdf");
+
+      if (downloadError) {
+        console.error("Error downloading Terms PDF:", downloadError);
+      } else if (fileData) {
+        const arrayBuffer = await fileData.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        base64Terms = base64Encode(uint8Array);
+        console.log(`Successfully loaded and base64-encoded Terms PDF. Length: ${base64Terms.length}`);
+      }
+    } catch (storageErr) {
+      console.error("Terms download failed:", storageErr);
+    }
+
     // Calculations for values
     const total = parseFloat(order.finalTotal || order.totalPrice || '0');
     const orderDate = order.date || new Date().toLocaleDateString('cs-CZ');
@@ -288,6 +307,14 @@ serve(async (req) => {
       }
     ] : [];
 
+    // Construct terms attachment for the order confirmation email
+    const confirmAttachments = base64Terms ? [
+      {
+        name: "obchodni_podminky.pdf",
+        content: base64Terms
+      }
+    ] : [];
+
     // Custom Subject format for Tax Invoice
     const invoiceEmailSubject = `Faktura - daňový doklad č. ${order.id} ze dne ${orderDate}`;
 
@@ -303,7 +330,8 @@ serve(async (req) => {
         sender: { name: senderName, email: senderEmail },
         to: [{ email: order.customerEmail, name: order.customerName }],
         subject: `Potvrzení objednávky #${order.id}`,
-        htmlContent: htmlConfirmContent
+        htmlContent: htmlConfirmContent,
+        attachment: confirmAttachments.length > 0 ? confirmAttachments : undefined
       })
     });
 

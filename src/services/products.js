@@ -25,7 +25,9 @@ function mapDbProduct(p) {
     stage: p.stage || null,
     element: p.element || null,
     releaseDate: p.preorder ? p.foil_condition : null,
-    customParams: p.custom_params || []
+    customParams: p.custom_params || [],
+    originalPrice: p.original_price || null,
+    lowestPrice30d: p.lowest_price_30d || null
   };
 }
 // In-memory cache for raw products list
@@ -52,7 +54,7 @@ export async function fetchProductsFromDB(options = {}) {
     } else {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, image, back_image, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, additional_images, illustrator, set_code, stage, element, custom_params, no_vat');
+        .select('id, name, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, image, back_image, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, additional_images, illustrator, set_code, stage, element, custom_params, no_vat, original_price, lowest_price_30d');
 
       if (error) {
         throw error;
@@ -228,13 +230,15 @@ export function mapProductToDb(p) {
     variants: p.variants || null,
     category_id: p.category_id || null,
     short_description: p.shortDesc || null,
-    additional_images: p.additionalImages || null,
+    additional_images: p.additional_images || null,
     illustrator: p.illustrator || null,
     set_code: p.setCode || null,
     stage: p.stage || null,
     element: p.element || null,
     custom_params: p.customParams || [],
-    no_vat: !!p.no_vat
+    no_vat: !!p.no_vat,
+    original_price: p.originalPrice !== undefined && p.originalPrice !== null ? Number(p.originalPrice) : null,
+    lowest_price_30d: p.lowestPrice30d !== undefined && p.lowestPrice30d !== null ? Number(p.lowestPrice30d) : null
   };
 }
 

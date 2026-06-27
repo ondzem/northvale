@@ -410,6 +410,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   const dealProductStock = getDealStock();
   const dealProductPrice = Number(activeDeal.price || 0);
   const dealProductOriginalPrice = activeDeal.original_price ? Number(activeDeal.original_price) : null;
+  const dealProductLowestPrice30d = activeDeal.lowest_price_30d || (dealProductState && (dealProductState.lowestPrice30d || dealProductState.lowest_price_30d)) || null;
   const discountPercent = dealProductOriginalPrice 
     ? Math.round(((dealProductOriginalPrice - dealProductPrice) / dealProductOriginalPrice) * 100)
     : 0;
@@ -725,6 +726,11 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   <span style={{ fontSize: !isMobile ? '19px' : '18px', fontWeight: '800', color: 'var(--color-gold)', marginTop: '2px', whiteSpace: 'nowrap' }}>
                     {dealProductPrice.toLocaleString()} Kč
                   </span>
+                  {dealProductOriginalPrice && dealProductLowestPrice30d && (
+                    <span style={{ fontSize: '9px', color: 'var(--text-muted, #8a8a92)', marginTop: '2px', whiteSpace: 'nowrap' }}>
+                      {lang === 'CZ' ? 'Nejnižší 30d:' : 'Lowest 30d:'} {Number(dealProductLowestPrice30d).toLocaleString()} Kč
+                    </span>
+                  )}
                 </div>
 
                 <button 
@@ -1025,6 +1031,11 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                       <span style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-gold)', marginTop: '1px' }}>
                         {dealProductPrice.toLocaleString()} Kč
                       </span>
+                      {dealProductOriginalPrice && dealProductLowestPrice30d && (
+                        <span style={{ fontSize: '9px', color: 'var(--text-muted, #8a8a92)', marginTop: '2px', whiteSpace: 'nowrap' }}>
+                          {lang === 'CZ' ? 'Nejnižší 30d:' : 'Lowest 30d:'} {Number(dealProductLowestPrice30d).toLocaleString()} Kč
+                        </span>
+                      )}
                     </div>
 
                     {/* Buy Button */}
