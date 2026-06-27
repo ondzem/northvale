@@ -237,24 +237,36 @@ export default function ContactPage({ setActivePage }) {
                   </div>
                 )}
 
-                <div style={{ fontSize: '11px', color: 'var(--text-muted, #8a8a92)', lineHeight: '1.4', margin: '12px 0 16px 0', textAlign: 'left' }}>
-                  {lang === 'CZ' ? (
-                    <>
-                      Odesláním zprávy berete na vědomí, že dochází ke <a href="/UniverzalniObchodniPodminky.pdf" target="_blank" style={{ color: 'var(--text-color, #ffffff)', textDecoration: 'underline' }}>zpracování vašich osobních údajů</a>.
-                    </>
-                  ) : (
-                    <>
-                      By sending this message, you acknowledge that your <a href="/UniverzalniObchodniPodminky.pdf" target="_blank" style={{ color: 'var(--text-color, #ffffff)', textDecoration: 'underline' }}>personal data will be processed</a>.
-                    </>
-                  )}
-                </div>
+                 <button type="submit" className="ktf-submit" disabled={isSubmitting}>
+                   {isSubmitting
+                     ? (lang === 'CZ' ? 'Odesílání...' : 'Sending...')
+                     : t('ContactPage.formBtn')
+                   } <span className="nv-link-arrow">→</span>
+                 </button>
 
-                <button type="submit" className="ktf-submit" disabled={isSubmitting}>
-                  {isSubmitting
-                    ? (lang === 'CZ' ? 'Odesílání...' : 'Sending...')
-                    : t('ContactPage.formBtn')
-                  } <span className="nv-link-arrow">→</span>
-                </button>
+                 <div style={{ fontSize: '11px', color: 'var(--text-muted, #8a8a92)', lineHeight: '1.5', marginTop: '14px', textAlign: 'left' }}>
+                   {lang === 'CZ' ? (
+                     <>
+                       Odesláním zprávy berete na vědomí{' '}
+                       <span 
+                         onClick={() => setActivePage('gdpr-vop', 'gdpr')} 
+                         style={{ color: 'var(--color-gold, #fdbd16)', cursor: 'pointer', textDecoration: 'underline', fontWeight: '500' }}
+                       >
+                         zpracování osobních údajů
+                       </span>.
+                     </>
+                   ) : (
+                     <>
+                       By sending this message, you acknowledge the{' '}
+                       <span 
+                         onClick={() => setActivePage('gdpr-vop', 'gdpr')} 
+                         style={{ color: 'var(--color-gold, #fdbd16)', cursor: 'pointer', textDecoration: 'underline', fontWeight: '500' }}
+                       >
+                         processing of your personal data
+                       </span>.
+                     </>
+                   )}
+                 </div>
               </form>
             )}
           </div>
