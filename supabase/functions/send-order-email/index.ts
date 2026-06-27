@@ -2,6 +2,8 @@
 // Deploy via Supabase CLI: supabase functions deploy send-order-email
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
+import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,6 +32,31 @@ serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Set up Supabase client
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Download generated PDF invoice from Storage and encode to base64
+    let base64Invoice = "";
+    try {
+      const fileName = `invoice_${order.id}.pdf`;
+      const { data: fileData, error: downloadError } = await supabase.storage
+        .from("invoices")
+        .download(fileName);
+
+      if (downloadError) {
+        console.error(`Error downloading invoice ${fileName}:`, downloadError);
+      } else if (fileData) {
+        const arrayBuffer = await fileData.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        base64Invoice = base64Encode(uint8Array);
+        console.log(`Successfully loaded and base64-encoded invoice. Length: ${base64Invoice.length}`);
+      }
+    } catch (storageErr) {
+      console.error("Storage download or encode failed:", storageErr);
     }
 
     // Calculations for Czech VAT (21% standard rate)
@@ -111,7 +138,7 @@ serve(async (req) => {
 
         <p style="font-size: 14px; color: #333; line-height: 1.5;">
           Dobrý den,<br/><br/>
-          děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. V samostatném e-mailu Vám zasíláme také daňový doklad (fakturu).
+          děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. V příloze tohoto e-mailu naleznete také oficiální daňový doklad (fakturu v PDF).
         </p>
 
         ${deliveryInstructions}
@@ -160,11 +187,11 @@ serve(async (req) => {
         <div style="background-color: #fcfbfa; padding: 15px 20px; border-left: 4px solid #fdbd16; border-radius: 4px; margin-bottom: 20px;">
           <h3 style="margin: 0 0 5px 0; font-size: 15px; color: #111;">Faktura byla vystavena a uhrazena</h3>
           <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.5;">
-            Vaše platba přes platební bránu proběhla úspěšně. Níže naleznete kompletní daňový doklad.
+            Vaše platba přes platební bránu proběhla úspěšně. V příloze tohoto e-mailu naleznete oficiální daňový doklad ve formátu PDF.
           </p>
         </div>
 
-        <!-- Invoice Details Header -->
+        <!-- Invoice Details Header Summary -->
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
           <tr>
             <td style="padding: 8px 0; font-size: 12px; color: #777; text-transform: uppercase;">Dodavatel</td>
@@ -197,53 +224,16 @@ serve(async (req) => {
           </tr>
         </table>
 
-        <!-- Items Table -->
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
-          <thead>
-            <tr style="background-color: #f5f5f7;">
-              <th style="padding: 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: #555; font-weight: bold;">Položka</th>
-              <th style="padding: 10px; text-align: center; font-size: 11px; text-transform: uppercase; color: #555; font-weight: bold; width: 60px;">Množství</th>
-              <th style="padding: 10px; text-align: right; font-size: 11px; text-transform: uppercase; color: #555; font-weight: bold; width: 90px;">Cena / ks</th>
-              <th style="padding: 10px; text-align: center; font-size: 11px; text-transform: uppercase; color: #555; font-weight: bold; width: 60px;">Sazba</th>
-              <th style="padding: 10px; text-align: right; font-size: 11px; text-transform: uppercase; color: #555; font-weight: bold; width: 110px;">Celkem</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsRows}
-          </tbody>
-        </table>
-
-        <!-- VAT Breakdown and Grand Total -->
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-          <tr>
-            <td style="vertical-align: top; width: 60%;">
-              <table style="width: 100%; font-size: 12px; color: #666; border-collapse: collapse;">
-                <tr style="border-bottom: 1px solid #eee;">
-                  <th style="text-align: left; padding: 4px 0;">Sazba</th>
-                  <th style="text-align: right; padding: 4px 0;">Základ</th>
-                  <th style="text-align: right; padding: 4px 0;">DPH</th>
-                </tr>
-                <tr>
-                  <td style="padding: 4px 0;">21%</td>
-                  <td style="text-align: right; padding: 4px 0;">${base.toFixed(2)} Kč</td>
-                  <td style="text-align: right; padding: 4px 0;">${vat.toFixed(2)} Kč</td>
-                </tr>
-              </table>
-            </td>
-            <td style="vertical-align: top; width: 40%; text-align: right; padding-left: 20px;">
-              <div style="background-color: #fafafa; border: 1px solid #eee; padding: 15px; border-radius: 6px; display: inline-block; width: 100%; box-sizing: border-box;">
-                <span style="font-size: 12px; color: #666;">Celkem k úhradě</span><br/>
-                <strong style="font-size: 20px; color: #2e7d32; display: block; margin-top: 5px;">${total.toLocaleString('cs-CZ')} Kč</strong>
-                <span style="font-size: 11px; color: #2e7d32; font-weight: bold; display: block; margin-top: 4px;">🟢 Uhrazeno</span>
-              </div>
-            </td>
-          </tr>
-        </table>
+        <div style="background-color: #fafafa; border: 1px solid #eee; padding: 15px; border-radius: 6px; text-align: center; margin-bottom: 20px;">
+          <span style="font-size: 12px; color: #666;">Celková uhrazená částka:</span><br/>
+          <strong style="font-size: 20px; color: #2e7d32; display: block; margin-top: 5px;">${total.toLocaleString('cs-CZ')} Kč</strong>
+          <span style="font-size: 11px; color: #2e7d32; font-weight: bold; display: block; margin-top: 4px;">🟢 Uhrazeno</span>
+        </div>
 
         <div style="text-align: center; margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px;">
-          <a href="https://northvaletcg.eu/profil" style="display: inline-block; background-color: #fdbd16; color: #111; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; font-size: 14px;">
-            Zobrazit mou fakturu online
-          </a>
+          <p style="font-size: 11px; color: #888;">
+            Kompletní rozpis položek a kalkulaci DPH naleznete v přiloženém PDF souboru.
+          </p>
         </div>
       </div>
     `;
@@ -294,6 +284,14 @@ serve(async (req) => {
       </div>
     `;
 
+    // Construct attachment object if base64Invoice is available
+    const attachments = base64Invoice ? [
+      {
+        name: `faktura_${order.id}.pdf`,
+        content: base64Invoice
+      }
+    ] : [];
+
     // 1. Send Order Confirmation Email
     await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
@@ -306,7 +304,8 @@ serve(async (req) => {
         sender: { name: senderName, email: senderEmail },
         to: [{ email: order.customerEmail, name: order.customerName }],
         subject: `[NORTHVALE] Potvrzení objednávky #${order.id}`,
-        htmlContent: htmlConfirmContent
+        htmlContent: htmlConfirmContent,
+        attachment: attachments.length > 0 ? attachments : undefined
       })
     });
 
@@ -322,7 +321,8 @@ serve(async (req) => {
         sender: { name: senderName, email: senderEmail },
         to: [{ email: order.customerEmail, name: order.customerName }],
         subject: `[NORTHVALE] Faktura k objednávce #${order.id}`,
-        htmlContent: htmlInvoiceContent
+        htmlContent: htmlInvoiceContent,
+        attachment: attachments.length > 0 ? attachments : undefined
       })
     });
 
@@ -338,7 +338,8 @@ serve(async (req) => {
         sender: { name: senderName, email: senderEmail },
         to: [{ email: recipientEmail, name: "NORTHVALE Admin" }],
         subject: `[NORTHVALE - ADMIN] Nová objednávka #${order.id}`,
-        htmlContent: htmlAdminAlertContent
+        htmlContent: htmlAdminAlertContent,
+        attachment: attachments.length > 0 ? attachments : undefined
       })
     });
 
@@ -347,7 +348,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Error in send-order-email:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
