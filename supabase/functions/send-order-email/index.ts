@@ -334,7 +334,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         sender: { name: senderName, email: senderEmail },
-        to: [{ email: recipientEmail, name: "NORTHVALE Admin" }],
+        to: [{ email: "objednavky@northvaletcg.eu", name: "NORTHVALE Admin" }],
         subject: `[NORTHVALE - ADMIN] Nová objednávka #${order.id}`,
         htmlContent: htmlAdminAlertContent,
         attachment: attachments.length > 0 ? attachments : undefined
