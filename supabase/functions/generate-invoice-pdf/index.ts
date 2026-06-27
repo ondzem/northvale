@@ -215,10 +215,42 @@ serve(async (req) => {
     currentY += 5;
     page.drawLine({ start: { x: 300, y: currentY }, end: { x: 550, y: currentY }, thickness: 1.5, color: cCharcoal });
 
+    const items = order.items || [];
+    let hasNoVatItems = false;
+    let regularSubtotal = 0;
+    let noVatSubtotal = 0;
+
+    items.forEach((item: any) => {
+      const price = parseFloat(item.price || "0");
+      const qty = parseInt(item.quantity || "1");
+      const val = price * qty;
+      if (item.no_vat === true) {
+        hasNoVatItems = true;
+        noVatSubtotal += val;
+      } else {
+        regularSubtotal += val;
+      }
+    });
+
+    const shippingCost = parseFloat(order.shippingCost || "0");
+    const paymentSurcharge = parseFloat(order.paymentSurcharge || "0");
+    regularSubtotal += shippingCost + paymentSurcharge;
+
     const total = parseFloat(order.finalTotal || "0");
+
+    let totalPaidRegular = total;
+    let totalPaidNoVat = 0;
+    const totalBeforeCredit = regularSubtotal + noVatSubtotal;
+
+    if (totalBeforeCredit > 0) {
+      const ratioRegular = regularSubtotal / totalBeforeCredit;
+      totalPaidRegular = total * ratioRegular;
+      totalPaidNoVat = total * (1 - ratioRegular);
+    }
+
     const vatRate = 0.21;
-    const base = total / (1 + vatRate);
-    const vat = total - base;
+    const base21 = totalPaidRegular / (1 + vatRate);
+    const vat21 = totalPaidRegular - base21;
 
     // Grand Total on Right
     drawTextRight(formatKcs(total), 550, currentY - 20, 14, boldFont, cCharcoal);
@@ -237,10 +269,23 @@ serve(async (req) => {
     page.drawLine({ start: { x: 45, y: vatY - 3 }, end: { x: 250, y: vatY - 3 }, thickness: 0.5, color: cBorder });
     vatY -= 12;
 
+    // Render 21% standard row
     drawText("21%", 45, vatY, 8, regularFont, cCharcoal);
-    drawTextRight(formatKcs(base), 120, vatY, 8, regularFont, cCharcoal);
-    drawTextRight(formatKcs(vat), 185, vatY, 8, regularFont, cCharcoal);
-    drawTextRight(formatKcs(total), 250, vatY, 8, boldFont, cCharcoal);
+    drawTextRight(formatKcs(base21), 120, vatY, 8, regularFont, cCharcoal);
+    drawTextRight(formatKcs(vat21), 185, vatY, 8, regularFont, cCharcoal);
+    drawTextRight(formatKcs(totalPaidRegular), 250, vatY, 8, boldFont, cCharcoal);
+
+    // Render § 90 margin scheme row if exists
+    if (hasNoVatItems) {
+      vatY -= 14;
+      drawText("§ 90", 45, vatY, 8, regularFont, cCharcoal);
+      drawTextRight(formatKcs(totalPaidNoVat), 120, vatY, 8, regularFont, cCharcoal);
+      drawTextRight(formatKcs(0), 185, vatY, 8, regularFont, cCharcoal);
+      drawTextRight(formatKcs(totalPaidNoVat), 250, vatY, 8, boldFont, cCharcoal);
+
+      vatY -= 16;
+      drawText("Uplatněn zvláštní režim podle § 90 zákona o DPH - použité zboží.", 45, vatY, 7, regularFont, cGrey);
+    }
 
     // Notes Box (if notes exist)
     let notesY = vatY - 25;

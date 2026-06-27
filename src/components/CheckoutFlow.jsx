@@ -240,6 +240,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                 name: item.name || item.productName,
                 price: item.price,
                 quantity: item.quantity,
+                no_vat: !!(item.no_vat || item.product?.no_vat),
                 product: item.product || item
               })),
               subtotal: orderSubtotal,

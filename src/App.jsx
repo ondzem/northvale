@@ -1251,7 +1251,8 @@ function AppContent() {
             items: order.items.map(item => ({
               name: item.name || item.productName,
               quantity: item.quantity,
-              price: item.price
+              price: item.price,
+              no_vat: !!(item.no_vat || item.product?.no_vat)
             }))
           }
         }
@@ -1287,7 +1288,8 @@ function AppContent() {
           items: order.items.map(item => ({
             name: item.name || item.productName,
             quantity: item.quantity,
-            price: item.price
+            price: item.price,
+            no_vat: !!(item.no_vat || item.product?.no_vat)
           }))
         }
       });

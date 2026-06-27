@@ -337,6 +337,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [formPreorder, setFormPreorder] = useState(false);
   const [formReleaseDate, setFormReleaseDate] = useState('');
   const [formInvestment, setFormInvestment] = useState(false);
+  const [formNoVat, setFormNoVat] = useState(false);
   const [formCategoryId, setFormCategoryId] = useState('');
   
   // Sealed fields
@@ -528,6 +529,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormPreorder(false);
     setFormReleaseDate('');
     setFormInvestment(false);
+    setFormNoVat(false);
     setFormCategoryId('');
     setFormPackagingType('Booster Box');
     setFormBoosterCount('');
@@ -595,6 +597,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormPreorder(!!p.preorder);
     setFormReleaseDate(p.releaseDate || p.foil_condition || '');
     setFormInvestment(!!p.investment);
+    setFormNoVat(!!p.no_vat);
     setFormCategoryId(p.category_id || '');
     
     // Sealed fields
@@ -991,6 +994,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       preorder: formPreorder,
       releaseDate: formPreorder ? formReleaseDate : null,
       investment: formInvestment,
+      no_vat: formNoVat,
       category_id: formCategoryId || null,
       shortDesc: formShortDesc || null,
       additionalImages: formAdditionalImages || [],
@@ -2470,6 +2474,20 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       </div>
                     </div>
                   )}
+
+                  {/* Bez DPH Checkbox */}
+                  <div className="pmf-field" style={{ marginTop: '16px', marginBottom: '16px' }}>
+                    <label className="pmf-check-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'rgba(255,255,255,0.8)' }}>
+                      <input 
+                        type="checkbox" 
+                        className="pmf-check-box" 
+                        checked={formNoVat} 
+                        onChange={e => setFormNoVat(e.target.checked)} 
+                        style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                      />
+                      {lang === 'CZ' ? 'Bez DPH (zvláštní režim podle § 90)' : 'No VAT (margin scheme under § 90)'}
+                    </label>
+                  </div>
 
                   {/* Preorder & Investment checkboxes hidden for now
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '10px 0', marginTop: '10px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
