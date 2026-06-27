@@ -9,6 +9,29 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+// Global cache for fonts to avoid downloading them on every function call (hot starts)
+let regularFontBytes: ArrayBuffer | null = null;
+let boldFontBytes: ArrayBuffer | null = null;
+
+async function loadFonts() {
+  if (!regularFontBytes) {
+    console.log("Fetching Roboto-Regular font...");
+    const res = await fetch("https://github.com/googlefonts/roboto-2/raw/main/src/hinted/Roboto-Regular.ttf");
+    if (!res.ok) throw new Error("Failed to fetch Roboto-Regular font");
+    regularFontBytes = await res.arrayBuffer();
+  }
+  if (!boldFontBytes) {
+    console.log("Fetching Roboto-Bold font...");
+    const res = await fetch("https://github.com/googlefonts/roboto-2/raw/main/src/hinted/Roboto-Bold.ttf");
+    if (!res.ok) throw new Error("Failed to fetch Roboto-Bold font");
+    boldFontBytes = await res.arrayBuffer();
+  }
+  return {
+    regular: regularFontBytes,
+    bold: boldFontBytes
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -31,14 +54,10 @@ serve(async (req) => {
     const pdfDoc = await PDFDocument.create();
     pdfDoc.registerFontkit(fontkit);
 
-    // 2. Load custom Roboto fonts for Czech characters support
-    const regularFontUrl = new URL("./Roboto-Regular.ttf", import.meta.url);
-    const boldFontUrl = new URL("./Roboto-Bold.ttf", import.meta.url);
-    const regularFontBytes = await Deno.readFile(regularFontUrl);
-    const boldFontBytes = await Deno.readFile(boldFontUrl);
-
-    const regularFont = await pdfDoc.embedFont(regularFontBytes);
-    const boldFont = await pdfDoc.embedFont(boldFontBytes);
+    // 2. Load custom Roboto fonts from cache or fetch them
+    const fonts = await loadFonts();
+    const regularFont = await pdfDoc.embedFont(fonts.regular);
+    const boldFont = await pdfDoc.embedFont(fonts.bold);
 
     // 3. Create a page (A4: 595.28 x 841.89)
     const page = pdfDoc.addPage([595.28, 841.89]);
