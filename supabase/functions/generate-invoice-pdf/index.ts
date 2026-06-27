@@ -59,7 +59,22 @@ serve(async (req) => {
     const regularFont = await pdfDoc.embedFont(fonts.regular);
     const boldFont = await pdfDoc.embedFont(fonts.bold);
 
-    // 3. Create a page (A4: 595.28 x 841.89)
+    // 3. Fetch and embed the logo image from public Storage
+    let logoImage: any = null;
+    try {
+      const logoUrl = "https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/logo.png";
+      const logoRes = await fetch(logoUrl);
+      if (logoRes.ok) {
+        const logoBytes = await logoRes.arrayBuffer();
+        logoImage = await pdfDoc.embedPng(logoBytes);
+      } else {
+        console.error("Failed to fetch logo.png from storage:", logoRes.status);
+      }
+    } catch (logoErr) {
+      console.error("Error embedding logo:", logoErr);
+    }
+
+    // 4. Create a page (A4: 595.28 x 841.89)
     const page = pdfDoc.addPage([595.28, 841.89]);
     const { width, height } = page.getSize();
 
@@ -68,6 +83,7 @@ serve(async (req) => {
     const cGrey = rgb(0.5, 0.5, 0.5);
     const cBorder = rgb(0.9, 0.9, 0.9);
     const cGreen = rgb(0.15, 0.45, 0.17);
+    const cBrandYellow = rgb(0.99, 0.74, 0.09);
 
     // Helper functions for drawing text
     const drawText = (text: string, x: number, y: number, size: number, font = regularFont, color = cCharcoal) => {
@@ -92,21 +108,36 @@ serve(async (req) => {
     drawText("Faktura - daňový doklad", 320, 778, 14, boldFont, cCharcoal);
     drawText(String(order.id), 320, 760, 14, boldFont, cGrey);
 
-    // Supplier & Customer Headers
-    drawText("DODAVATEL", 45, 735, 7, boldFont, cGrey);
-    drawText("ODBĚRATEL", 320, 735, 7, boldFont, cGrey);
+    // Draw logo if successfully loaded, otherwise fall back to clean text logo
+    if (logoImage) {
+      const scaleFactor = 150 / logoImage.width;
+      const logoDims = logoImage.scale(scaleFactor);
+      page.drawImage(logoImage, {
+        x: 45,
+        y: 735,
+        width: logoDims.width,
+        height: logoDims.height,
+      });
+    } else {
+      drawText("NORTHVALE TCG", 45, 762, 16, boldFont, cBrandYellow);
+      drawText("info@northvaletcg.eu", 45, 747, 9, regularFont, cGrey);
+    }
+
+    // Supplier & Customer Headers (Shifted down for larger header space)
+    drawText("DODAVATEL", 45, 705, 7, boldFont, cGrey);
+    drawText("ODBĚRATEL", 320, 705, 7, boldFont, cGrey);
 
     // Supplier Details
-    drawText("NORTHVALE s.r.o.", 45, 718, 10, boldFont, cCharcoal);
-    drawText("Bratří Čapků 1095", 45, 704, 9, regularFont, cCharcoal);
-    drawText("534 01 Holice", 45, 690, 9, regularFont, cCharcoal);
-    drawText("Česká republika", 45, 676, 9, regularFont, cCharcoal);
+    drawText("NORTHVALE s.r.o.", 45, 688, 10, boldFont, cCharcoal);
+    drawText("Bratří Čapků 1095", 45, 674, 9, regularFont, cCharcoal);
+    drawText("534 01 Holice", 45, 660, 9, regularFont, cCharcoal);
+    drawText("Česká republika", 45, 646, 9, regularFont, cCharcoal);
 
     // Customer Details
     const customerNameLine = order.companyName ? order.companyName : order.customerName;
-    drawText(customerNameLine, 320, 718, 10, boldFont, cCharcoal);
+    drawText(customerNameLine, 320, 688, 10, boldFont, cCharcoal);
 
-    let custY = 704;
+    let custY = 674;
     if (order.companyName && order.customerName) {
       drawText(`Jméno: ${order.customerName}`, 320, custY, 9, regularFont, cCharcoal);
       custY -= 14;
@@ -116,7 +147,7 @@ serve(async (req) => {
     drawText(`${order.shippingCity || ""}, ${order.shippingZip || ""}`, 320, custY, 9, regularFont, cCharcoal);
 
     // IDs Section
-    let idY = 645;
+    let idY = 600;
     drawText("IČO", 45, idY, 8, regularFont, cGrey);
     drawTextRight("29618142", 240, idY, 8, regularFont, cCharcoal);
     drawText("IČO", 320, idY, 8, regularFont, cGrey);
@@ -129,7 +160,7 @@ serve(async (req) => {
     drawTextRight(order.dic || "—", 550, idY, 8, regularFont, cCharcoal);
 
     // Bank & Dates Section
-    let dateY = 595;
+    let dateY = 550;
     drawText("Bankovní účet", 45, dateY, 8, regularFont, cGrey);
     drawTextRight("123456789/0100", 240, dateY, 8, regularFont, cCharcoal);
     drawText("Datum vystavení", 320, dateY, 8, regularFont, cGrey);
@@ -148,7 +179,7 @@ serve(async (req) => {
     drawTextRight(displayPm, 240, dateY, 8, regularFont, cCharcoal);
 
     // Table Divider Line
-    const tableDividerY = 540;
+    const tableDividerY = 470;
     page.drawLine({ start: { x: 45, y: tableDividerY }, end: { x: 550, y: tableDividerY }, thickness: 0.5, color: cGrey });
     drawTextRight("CENA", 550, tableDividerY + 5, 7, boldFont, cGrey);
 
@@ -222,6 +253,8 @@ serve(async (req) => {
 
     // Grand Total on Right
     drawTextRight(formatKcs(total), 550, currentY - 20, 14, boldFont, cCharcoal);
+    // Paid Status Text directly below Grand Total
+    drawTextRight("🟢 UHRAZENO", 550, currentY - 36, 10, boldFont, cGreen);
 
     // VAT Table on Left
     let vatY = currentY - 15;
@@ -239,9 +272,6 @@ serve(async (req) => {
     drawTextRight(formatKcs(base), 120, vatY, 8, regularFont, cCharcoal);
     drawTextRight(formatKcs(vat), 185, vatY, 8, regularFont, cCharcoal);
     drawTextRight(formatKcs(total), 250, vatY, 8, boldFont, cCharcoal);
-
-    // Paid Status Text
-    drawText("🟢 UHRAZENO", 320, currentY - 40, 10, boldFont, cGreen);
 
     // Notes Box (if notes exist)
     let notesY = vatY - 25;
