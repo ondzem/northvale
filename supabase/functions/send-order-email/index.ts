@@ -74,7 +74,7 @@ serve(async (req) => {
     );
 
     // Download URL from Supabase Storage public bucket
-    const downloadInvoiceUrl = `https://bfxzhggjpiyqfolpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${order.id}.pdf`;
+    const downloadInvoiceUrl = `https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${order.id}.pdf`;
 
     // 1. Customer Order Confirmation Email Content (Email-safe, responsive, transparent with dark text and checkmark)
     const htmlConfirmContent = `
@@ -302,9 +302,8 @@ serve(async (req) => {
       body: JSON.stringify({
         sender: { name: senderName, email: senderEmail },
         to: [{ email: order.customerEmail, name: order.customerName }],
-        subject: `[NORTHVALE] Potvrzení objednávky #${order.id}`,
-        htmlContent: htmlConfirmContent,
-        attachment: attachments.length > 0 ? attachments : undefined
+        subject: `Potvrzení objednávky #${order.id}`,
+        htmlContent: htmlConfirmContent
       })
     });
 
