@@ -31,12 +31,10 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [editingAddressIndex, setEditingAddressIndex] = useState(null);
   const [shipName, setShipName] = useState('');
-  const [shipCompany, setShipCompany] = useState('');
   const [shipStreet, setShipStreet] = useState('');
   const [shipCity, setShipCity] = useState('');
   const [shipZip, setShipZip] = useState('');
   const [shipCountry, setShipCountry] = useState('Česká republika');
-  const [shipPhone, setShipPhone] = useState('');
 
   // Security Password state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -206,30 +204,26 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
   // Address form cleanup
   const clearAddressForm = () => {
     setShipName('');
-    setShipCompany('');
     setShipStreet('');
     setShipCity('');
     setShipZip('');
     setShipCountry('Česká republika');
-    setShipPhone('');
   };
 
   // Add / Edit Shipping Address Action
   const handleSaveAddress = async (e) => {
     e.preventDefault();
-    if (!shipName || !shipStreet || !shipCity || !shipZip || !shipPhone) {
+    if (!shipName || !shipStreet || !shipCity || !shipZip) {
       showToast(lang === 'CZ' ? 'Prosím vyplňte všechna povinná pole.' : 'Please fill in all required fields.', 'error');
       return;
     }
 
     const newAddr = {
       name: shipName,
-      company: shipCompany,
       street: shipStreet,
       city: shipCity,
       zip: shipZip,
-      country: shipCountry,
-      phone: shipPhone
+      country: shipCountry
     };
 
     let updatedAddresses = [...(user.shippingAddresses || [])];
@@ -279,12 +273,10 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
     const addr = user.shippingAddresses[idx];
     setEditingAddressIndex(idx);
     setShipName(addr.name || '');
-    setShipCompany(addr.company || '');
     setShipStreet(addr.street || '');
     setShipCity(addr.city || '');
     setShipZip(addr.zip || '');
     setShipCountry(addr.country || 'Česká republika');
-    setShipPhone(addr.phone || '');
     setIsAddingAddress(true);
   };
 
@@ -981,10 +973,6 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                         <input type="text" value={shipName} onChange={e => setShipName(e.target.value)} className="prf-input" required />
                       </div>
                       <div className="prf-input-group">
-                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Firma (nepovinné)' : 'Company (optional)'}</label>
-                        <input type="text" value={shipCompany} onChange={e => setShipCompany(e.target.value)} className="prf-input" />
-                      </div>
-                      <div className="prf-input-group">
                         <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Ulice a č.p.' : 'Street'} *</label>
                         <input type="text" value={shipStreet} onChange={e => setShipStreet(e.target.value)} className="prf-input" required />
                       </div>
@@ -998,10 +986,6 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                       <div className="prf-input-group">
                         <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Země' : 'Country'}</label>
                         <input type="text" value={shipCountry} onChange={e => setShipCountry(e.target.value)} className="prf-input" />
-                      </div>
-                      <div className="prf-input-group">
-                        <label className="nv-eyebrow" style={{ fontSize: '10px' }}>{lang === 'CZ' ? 'Telefon' : 'Phone'} *</label>
-                        <input type="tel" value={shipPhone} onChange={e => setShipPhone(e.target.value)} className="prf-input" required />
                       </div>
                     </div>
                     <div className="prf-btn-group" style={{ marginTop: '20px' }}>
@@ -1023,12 +1007,10 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                           <div key={idx} className="prf-addr">
                             <div className="prf-addr-name">{addr.name}</div>
                             <div className="prf-addr-lines">
-                              {addr.company && <span>{addr.company}</span>}
                               <span>{addr.street}</span>
                               <span>{addr.city}, {addr.zip}</span>
                               <span>{addr.country}</span>
                             </div>
-                            <div className="prf-addr-phone">{addr.phone}</div>
                             <div className="prf-addr-actions">
                               <button onClick={() => triggerEditAddress(idx)}>{lang === 'CZ' ? 'Upravit' : 'Edit'}</button>
                               <span className="prf-addr-sep"></span>
