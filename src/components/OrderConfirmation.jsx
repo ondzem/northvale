@@ -6,11 +6,11 @@ export default function OrderConfirmation({ order, setActivePage }) {
 
   if (!order) {
     return (
-      <div className="order-confirm-wrapper" style={{ padding: '80px 24px', textAlign: 'center' }}>
-        <div className="order-confirm-card">
+      <div className="order-confirm-wrapper" style={{ padding: '80px 24px', textAlign: 'center', background: '#18181C', minHeight: '80vh', color: '#F0F0F0' }}>
+        <div className="order-confirm-card" style={{ maxWidth: '600px', margin: '0 auto' }}>
           <h2>{lang === 'CZ' ? 'Objednávka nenalezena' : 'Order Not Found'}</h2>
-          <p>{lang === 'CZ' ? 'Nebyly nalezeny žádné podrobnosti o objednávce.' : 'No order details were found.'}</p>
-          <button className="nv-btn nv-btn-primary" style={{ marginTop: '20px' }} onClick={() => setActivePage('home')}>
+          <p style={{ color: '#8A8A92', marginTop: '10px' }}>{lang === 'CZ' ? 'Nebyly nalezeny žádné podrobnosti o objednávce.' : 'No order details were found.'}</p>
+          <button className="ocf-btn-primary" style={{ marginTop: '20px' }} onClick={() => setActivePage('home')}>
             {lang === 'CZ' ? 'Zpět do obchodu' : 'Back to Shop'}
           </button>
         </div>
@@ -21,112 +21,131 @@ export default function OrderConfirmation({ order, setActivePage }) {
   const isPersonalPickup = order.shippingMethod && (
     order.shippingMethod.includes('Osobní') || 
     order.shippingMethod.includes('Local Pickup') ||
-    order.shippingMethod.includes('Pardubice')
+    order.shippingMethod.includes('Pardubice') ||
+    order.shippingMethod.includes('Holice')
   );
 
   return (
     <div className="order-confirm-wrapper">
       <div className="order-confirm-card">
-        {/* Animated Checkmark Icon */}
-        <div className="success-checkmark-container">
-          <div className="success-checkmark">
-            <div className="check-icon">
-              <span className="icon-line line-tip"></span>
-              <span className="icon-line line-long"></span>
-              <div className="icon-circle"></div>
-              <div className="icon-fix"></div>
-            </div>
-          </div>
+        {/* Checkmark Icon */}
+        <div className="ocf-check">
+          <svg viewBox="0 0 52 52" fill="none" aria-hidden="true" width="84" height="84">
+            <circle className="ocf-check-ring" cx="26" cy="26" r="23" stroke="#10B981" strokeWidth="2.2" fill="none" />
+            <path className="ocf-check-tick" d="M16 27l7 7 14-15" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          </svg>
         </div>
 
-        <h1 className="confirm-title">{lang === 'CZ' ? 'Děkujeme za objednávku!' : 'Thank you for your order!'}</h1>
-        <p className="confirm-order-id">
-          {lang === 'CZ' ? 'Číslo objednávky:' : 'Order ID:'} <strong>#{order.id}</strong>
+        {/* Title */}
+        <h1 className="ocf-title">
+          {lang === 'CZ' ? 'Děkujeme za objednávku!' : 'Thank you for your order!'}
+        </h1>
+
+        {/* Order Number */}
+        <p className="ocf-num">
+          {lang === 'CZ' ? 'Číslo objednávky: ' : 'Order ID: '}
+          <span className="ocf-gold-text">#{order.id}</span>
         </p>
 
-        {/* Dynamic Delivery/Pickup Information Box */}
-        <div className="instructions-box">
-          {isPersonalPickup ? (
-            <>
-              <h3>📍 {lang === 'CZ' ? 'Pokyny k osobnímu odběru' : 'Personal Pickup Instructions'}</h3>
-              <p className="pickup-address">
-                <strong>NORTHVALE s.r.o.</strong><br />
-                Bratří Čapků 1095, 534 01 Holice
-              </p>
-              <p className="pickup-note">
-                {lang === 'CZ'
-                  ? 'Zboží pro Vás začínáme připravovat. Jakmile bude objednávka připravena k vyzvednutí, zašleme Vám potvrzovací e-mail a SMS.'
-                  : 'We are preparing your items. As soon as your order is ready for collection, we will send you a confirmation email and SMS.'}
-              </p>
-            </>
-          ) : (
-            <>
-              <h3>📦 {lang === 'CZ' ? 'Doručení zásilky' : 'Shipping Information'}</h3>
-              <p>
-                {lang === 'CZ' ? 'Způsob doručení:' : 'Shipping Method:'} <strong>{order.shippingMethod}</strong>
-              </p>
-              <p className="pickup-note">
-                {lang === 'CZ'
-                  ? 'Vaše platba byla úspěšně přijata. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. Sledujte prosím svůj e-mail pro sledovací číslo zásilky.'
-                  : 'Your payment was successfully received. We will process your order and hand it over to the carrier as soon as possible. Please check your email for the shipment tracking number.'}
-              </p>
-            </>
-          )}
+        {/* Shipping details container */}
+        <div className="ocf-ship">
+          <div className="ocf-ship-head">
+            {isPersonalPickup ? (
+              <>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                <span>{lang === 'CZ' ? 'Osobní odběr — Holice' : 'Personal Pickup — Holice'}</span>
+              </>
+            ) : (
+              <>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                  <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg>
+                <span>{lang === 'CZ' ? 'Doručení zásilky' : 'Shipping Delivery'}</span>
+              </>
+            )}
+          </div>
+          
+          <p className="ocf-ship-method">
+            {lang === 'CZ' ? 'Způsob doručení: ' : 'Delivery Method: '}
+            <strong>{order.shippingMethod}</strong>
+          </p>
+
+          <p className="ocf-ship-note">
+            {isPersonalPickup ? (
+              lang === 'CZ' 
+                ? 'Zboží pro Vás začínáme připravovat. Jakmile bude objednávka připravena k vyzvednutí na naší kontaktní adrese Bratří Čapků 1095, 534 01 Holice, zašleme Vám e-mail a SMS.'
+                : 'We are preparing your items. As soon as your order is ready for pickup at our contact address Bratří Čapků 1095, 534 01 Holice, we will send you an email and SMS.'
+            ) : (
+              lang === 'CZ'
+                ? 'Vaše platba byla úspěšně přijata. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. Sledujte prosím svůj e-mail pro sledovací číslo zásilky.'
+                : 'Your payment was successfully received. We will process your order and hand it over to the carrier as soon as possible. Please check your email for the shipment tracking number.'
+            )}
+          </p>
         </div>
 
-        {/* Order Summary Box */}
-        <div className="confirm-order-summary">
-          <h4>{lang === 'CZ' ? 'Přehled objednávky' : 'Order Summary'}</h4>
-          <div className="summary-items-list">
-            {order.items && order.items.map((item, index) => (
-              <div className="summary-item-row" key={index}>
-                <span>{item.name} <span className="item-qty">({item.quantity}x)</span></span>
-                <span>{(item.price * item.quantity).toLocaleString()} Kč</span>
-              </div>
-            ))}
+        {/* Order Summary */}
+        <div className="ocf-summary">
+          <div className="ocf-summary-label">
+            {lang === 'CZ' ? 'Přehled objednávky' : 'Order Summary'}
           </div>
 
-          <hr className="summary-divider" />
+          {order.items && order.items.map((item, index) => (
+            <div className="ocf-irow" key={index}>
+              <span className="ocf-iname">
+                {item.name}
+                <span className="ocf-iqty"> ({item.quantity}×)</span>
+              </span>
+              <span className="ocf-iprice">{(item.price * item.quantity).toLocaleString('cs-CZ')} Kč</span>
+            </div>
+          ))}
 
           {order.shippingCost > 0 && (
-            <div className="summary-cost-row">
+            <div className="ocf-srow">
               <span>{lang === 'CZ' ? 'Dopravné:' : 'Shipping:'}</span>
-              <span>{order.shippingCost.toLocaleString()} Kč</span>
+              <span>{order.shippingCost.toLocaleString('cs-CZ')} Kč</span>
             </div>
           )}
 
           {order.paymentSurcharge > 0 && (
-            <div className="summary-cost-row">
-              <span>{lang === 'CZ' ? 'Příplatek:' : 'Surcharge:'}</span>
-              <span>{order.paymentSurcharge.toLocaleString()} Kč</span>
+            <div className="ocf-srow">
+              <span>{lang === 'CZ' ? 'Dobírkový příplatek:' : 'Cash on Delivery Surcharge:'}</span>
+              <span>{order.paymentSurcharge.toLocaleString('cs-CZ')} Kč</span>
             </div>
           )}
 
           {order.creditApplied > 0 && (
-            <div className="summary-cost-row credit-row">
+            <div className="ocf-srow" style={{ color: '#10B981' }}>
               <span>{lang === 'CZ' ? 'Uplatněný kredit:' : 'Credit Applied:'}</span>
-              <span>-{order.creditApplied.toLocaleString()} Kč</span>
+              <span>-{order.creditApplied.toLocaleString('cs-CZ')} Kč</span>
             </div>
           )}
 
-          <div className="summary-total-row">
+          <div className="ocf-total">
             <span>{lang === 'CZ' ? 'Celkem zaplaceno:' : 'Total Paid:'}</span>
-            <span className="total-amount">{order.finalTotal.toLocaleString()} Kč</span>
+            <span className="ocf-total-val">
+              {order.finalTotal.toLocaleString('cs-CZ')} <span style={{ fontSize: '18px', fontWeight: '700' }}>Kč</span>
+            </span>
           </div>
         </div>
 
-        <p className="email-disclaimer">
+        {/* Disclaimer */}
+        <p className="ocf-email">
           {lang === 'CZ' 
             ? 'Potvrzení objednávky a daňový doklad (faktura) Vám byly zaslány na e-mail.' 
             : 'Order confirmation and tax invoice have been sent to your email.'}
         </p>
 
-        {/* Action Buttons */}
-        <div className="confirm-actions">
-          <button className="nv-btn nv-btn-primary" onClick={() => setActivePage('home')}>
+        {/* Actions */}
+        <div className="ocf-actions">
+          <button type="button" className="ocf-btn-primary" onClick={() => setActivePage('home')}>
             {lang === 'CZ' ? 'Pokračovat v nákupu' : 'Continue Shopping'}
           </button>
-          <button className="nv-btn" onClick={() => setActivePage('profile')}>
+          <button type="button" className="ocf-btn-ghost" onClick={() => setActivePage('profile')}>
             {lang === 'CZ' ? 'Zobrazit mé objednávky' : 'View My Orders'}
           </button>
         </div>
@@ -137,281 +156,243 @@ export default function OrderConfirmation({ order, setActivePage }) {
           display: flex;
           justify-content: center;
           align-items: center;
-          padding: 60px 24px;
-          min-height: 70vh;
-          background: radial-gradient(circle at top, rgba(253, 189, 22, 0.05) 0%, transparent 60%);
+          padding: 64px 24px;
+          min-height: 80vh;
+          background-color: #18181C;
+          font-family: "Inter Tight", system-ui, sans-serif;
+          color: #F0F0F0;
         }
+
         .order-confirm-card {
           width: 100%;
-          max-width: 580px;
-          background: rgba(24, 24, 28, 0.7);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 12px;
-          padding: 40px;
+          max-width: 600px;
           text-align: center;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-        .confirm-title {
-          font-size: 26px;
-          font-weight: 800;
-          color: #fff;
-          margin: 24px 0 8px 0;
-          font-family: 'Outfit', sans-serif;
-        }
-        .confirm-order-id {
-          font-size: 15px;
-          color: #8a8a92;
-          margin-bottom: 32px;
-        }
-        .confirm-order-id strong {
-          color: var(--nv-gold, #fdbd16);
-          font-size: 16px;
-        }
-        .instructions-box {
-          background: rgba(253, 189, 22, 0.05);
-          border: 1px solid rgba(253, 189, 22, 0.15);
-          border-radius: 8px;
-          padding: 24px;
-          text-align: left;
-          margin-bottom: 32px;
-        }
-        .instructions-box h3 {
-          margin: 0 0 12px 0;
-          font-size: 16px;
-          color: var(--nv-gold, #fdbd16);
-          font-weight: 700;
-        }
-        .pickup-address {
-          font-size: 15px;
-          line-height: 1.5;
-          color: #fff;
-          margin: 0 0 12px 0;
-        }
-        .pickup-note {
-          font-size: 13.5px;
-          line-height: 1.6;
-          color: #b5b5be;
-          margin: 0;
-        }
-        .confirm-order-summary {
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid rgba(255, 255, 255, 0.04);
-          border-radius: 8px;
-          padding: 24px;
-          text-align: left;
-          margin-bottom: 24px;
-        }
-        .confirm-order-summary h4 {
-          margin: 0 0 16px 0;
-          font-size: 14px;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          color: #8a8a92;
-          font-weight: 700;
-        }
-        .summary-items-list {
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          align-items: center;
         }
-        .summary-item-row {
+
+        .ocf-check {
+          width: 84px;
+          height: 84px;
+          margin-bottom: 28px;
           display: flex;
-          justify-content: space-between;
-          font-size: 14px;
-          color: #fff;
+          justify-content: center;
+          align-items: center;
         }
-        .item-qty {
-          color: #8a8a92;
-          font-size: 13px;
+
+        .ocf-check-ring {
+          stroke-dasharray: 150;
+          stroke-dashoffset: 150;
+          animation: ring-draw 0.6s ease-out forwards;
+        }
+
+        .ocf-check-tick {
+          stroke-dasharray: 50;
+          stroke-dashoffset: 50;
+          animation: checkmark-draw 0.4s ease-out 0.4s forwards;
+        }
+
+        @keyframes ring-draw {
+          to {
+            stroke-dashoffset: 0;
+          }
+        }
+
+        @keyframes checkmark-draw {
+          to {
+            stroke-dashoffset: 0;
+          }
+        }
+
+        .ocf-title {
+          font-size: 38px;
+          font-weight: 800;
+          color: #F0F0F0;
+          margin: 0 0 14px 0;
+          line-height: 1.2;
+          font-family: "Outfit", "Inter Tight", sans-serif;
+        }
+
+        .ocf-num {
+          font-size: 16px;
+          color: #8A8A92;
+          margin: 0 0 44px 0;
+        }
+
+        .ocf-gold-text {
+          color: #FDBD16;
+          font-weight: 700;
           margin-left: 4px;
         }
-        .summary-divider {
-          border: 0;
-          border-top: 1px solid rgba(255, 255, 255, 0.06);
-          margin: 16px 0;
+
+        .ocf-ship {
+          width: 100%;
+          border-top: 1px solid rgba(240, 240, 240, 0.07);
+          border-bottom: 1px solid rgba(240, 240, 240, 0.07);
+          padding: 24px 0;
+          margin-bottom: 36px;
+          text-align: left;
         }
-        .summary-cost-row {
+
+        .ocf-ship-head {
           display: flex;
-          justify-content: space-between;
-          font-size: 13.5px;
-          color: #8a8a92;
-          margin-bottom: 8px;
+          align-items: center;
+          gap: 8px;
+          color: #FDBD16;
+          font-size: 13px;
+          font-weight: 700;
+          text-transform: uppercase;
+          margin-bottom: 18px;
+          letter-spacing: 0.05em;
         }
-        .credit-row {
-          color: #4caf50;
+
+        .ocf-ship-method {
+          font-size: 17px;
+          color: #F0F0F0;
+          margin: 0 0 14px 0;
         }
-        .summary-total-row {
+
+        .ocf-ship-note {
+          font-size: 14.5px;
+          line-height: 1.6;
+          color: #8A8A92;
+          margin: 0;
+        }
+
+        .ocf-summary {
+          width: 100%;
+          text-align: left;
+          margin-bottom: 32px;
+        }
+
+        .ocf-summary-label {
+          font-size: 12px;
+          font-weight: 600;
+          text-transform: uppercase;
+          color: #50505A;
+          margin-bottom: 18px;
+          letter-spacing: 0.05em;
+        }
+
+        .ocf-irow {
           display: flex;
           justify-content: space-between;
           align-items: baseline;
-          margin-top: 16px;
+          padding: 4px 0 18px 0;
+          font-size: 16px;
+          color: #F0F0F0;
+        }
+
+        .ocf-iname {
+          font-weight: 600;
+        }
+
+        .ocf-iqty {
+          color: #50505A;
+          font-size: 14px;
+          font-weight: 400;
+        }
+
+        .ocf-iprice {
+          font-weight: 600;
+          font-variant-numeric: tabular-nums;
+        }
+
+        .ocf-srow {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          padding: 16px 0;
+          border-top: 1px solid rgba(240, 240, 240, 0.07);
+          font-size: 15px;
+          color: #8A8A92;
+        }
+
+        .ocf-total {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          padding: 16px 0 0 0;
+          border-top: 1px solid rgba(240, 240, 240, 0.07);
+          font-size: 16px;
+          color: #F0F0F0;
           font-weight: 700;
         }
-        .summary-total-row span:first-child {
-          font-size: 15px;
-          color: #fff;
+
+        .ocf-total-val {
+          font-size: 26px;
+          font-weight: 800;
+          color: #FDBD16;
+          font-variant-numeric: tabular-nums;
         }
-        .total-amount {
-          font-size: 22px;
-          color: var(--nv-gold, #fdbd16);
+
+        .ocf-email {
+          font-size: 13.5px;
+          line-height: 1.6;
+          color: #8A8A92;
+          margin: 0 0 28px 0;
+          text-align: center;
         }
-        .email-disclaimer {
-          font-size: 13px;
-          color: #8a8a92;
-          margin-bottom: 32px;
-        }
-        .confirm-actions {
+
+        .ocf-actions {
           display: flex;
           gap: 16px;
           justify-content: center;
-        }
-        .nv-btn {
-          padding: 12px 24px;
-          border-radius: 6px;
-          font-size: 14.5px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          background: rgba(255, 255, 255, 0.05);
-          color: #fff;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .nv-btn:hover {
-          background: rgba(255, 255, 255, 0.1);
-        }
-        .nv-btn-primary {
-          background: var(--nv-gold, #fdbd16);
-          color: #111;
-          border: none;
-        }
-        .nv-btn-primary:hover {
-          background: #e0a50b;
+          width: 100%;
         }
 
-        /* Success Checkmark Animation */
-        .success-checkmark-container {
+        .ocf-btn-primary {
+          background-color: #FDBD16;
+          color: #1A1407;
+          border: none;
+          height: 49px;
+          border-radius: 11px;
+          font-size: 14px;
+          font-weight: 700;
+          padding: 0 30px;
+          cursor: pointer;
+          transition: background-color 0.16s ease;
           display: flex;
+          align-items: center;
           justify-content: center;
-          margin-bottom: 20px;
         }
-        .success-checkmark {
-          width: 80px;
-          height: 80px;
+
+        .ocf-btn-primary:hover {
+          background-color: #E2A80F;
         }
-        .success-checkmark .check-icon {
-          width: 80px;
-          height: 80px;
-          position: relative;
-          border-radius: 50%;
-          box-sizing: content-box;
-          border: 4px solid #4caf50;
+
+        .ocf-btn-ghost {
+          background-color: transparent;
+          color: #F0F0F0;
+          border: 1px solid rgba(240, 240, 240, 0.12);
+          height: 49px;
+          border-radius: 11px;
+          font-size: 14px;
+          font-weight: 600;
+          padding: 0 30px;
+          cursor: pointer;
+          transition: border-color 0.16s ease, background-color 0.16s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
-        .success-checkmark .check-icon::before {
-          top: 3px;
-          left: -2px;
-          width: 30px;
-          transform-origin: 100% 50%;
-          border-radius: 100px 0 0 100px;
+
+        .ocf-btn-ghost:hover {
+          border-color: rgba(240, 240, 240, 0.3);
+          background-color: rgba(255, 255, 255, 0.02);
         }
-        .success-checkmark .check-icon::after {
-          top: 0;
-          left: 30px;
-          width: 60px;
-          transform-origin: 0 50%;
-          border-radius: 0 100px 100px 0;
-          position: absolute;
-        }
-        .success-checkmark .check-icon .icon-circle {
-          top: -4px;
-          left: -4px;
-          z-index: 10;
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
-          position: absolute;
-          box-sizing: content-box;
-          border: 4px solid rgba(76, 175, 80, 0.5);
-        }
-        .success-checkmark .check-icon .icon-fix {
-          top: 8px;
-          width: 5px;
-          left: 26px;
-          z-index: 1;
-          height: 85px;
-          position: absolute;
-          transform: rotate(-45deg);
-        }
-        .success-checkmark .check-icon .icon-line {
-          height: 5px;
-          background-color: #4caf50;
-          display: block;
-          border-radius: 2px;
-          position: absolute;
-          z-index: 10;
-        }
-        .success-checkmark .check-icon .icon-line.line-tip {
-          top: 46px;
-          left: 14px;
-          width: 25px;
-          transform: rotate(45deg);
-          animation: icon-line-tip 0.75s;
-        }
-        .success-checkmark .check-icon .icon-line.line-long {
-          top: 38px;
-          right: 8px;
-          width: 47px;
-          transform: rotate(-45deg);
-          animation: icon-line-long 0.75s;
-        }
-        @keyframes icon-line-tip {
-          0% {
-            width: 0;
-            left: 1px;
-            top: 19px;
+
+        @media (max-width: 480px) {
+          .ocf-title {
+            font-size: 32px;
           }
-          54% {
-            width: 0;
-            left: 1px;
-            top: 19px;
+          .ocf-actions {
+            flex-direction: column;
+            gap: 12px;
           }
-          70% {
-            width: 50px;
-            left: -8px;
-            top: 37px;
-          }
-          84% {
-            width: 17px;
-            left: 21px;
-            top: 48px;
-          }
-          100% {
-            width: 25px;
-            left: 14px;
-            top: 46px;
-          }
-        }
-        @keyframes icon-line-long {
-          0% {
-            width: 0;
-            right: 46px;
-            top: 54px;
-          }
-          65% {
-            width: 0;
-            right: 46px;
-            top: 54px;
-          }
-          84% {
-            width: 55px;
-            right: 0px;
-            top: 35px;
-          }
-          100% {
-            width: 47px;
-            right: 8px;
-            top: 38px;
+          .ocf-btn-primary, .ocf-btn-ghost {
+            width: 100%;
           }
         }
       `}</style>
