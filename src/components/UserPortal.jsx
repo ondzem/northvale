@@ -3,6 +3,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { FEATURE_FLAGS } from '../config';
 import { supabase } from '../supabase';
 import InvoiceTemplate from './admin/InvoiceTemplate';
+import { subscribeToNewsletter, deleteSubscriber } from '../services/newsletter';
 
 export default function UserPortal({ user, setUser, setActivePage, onLogout, showToast }) {
   const { lang, t } = useTranslation();
@@ -625,11 +626,22 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
       try {
         const { error } = await supabase
           .from('profiles')
-          .upsert({ id: user.id, newsletter: checked });
+          .update({ newsletter: checked })
+          .eq('id', user.id);
 
-        if (!error) isSuccess = true;
+        if (!error) {
+          isSuccess = true;
+          // Synchronize with the newsletter_subscribers table
+          if (user.email) {
+            if (checked) {
+              await subscribeToNewsletter(user.email, lang);
+            } else {
+              await deleteSubscriber(user.email);
+            }
+          }
+        }
       } catch (err) {
-        console.warn(err);
+        console.warn('Failed to sync newsletter preference:', err);
       }
     }
 
