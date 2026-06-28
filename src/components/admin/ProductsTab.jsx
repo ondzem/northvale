@@ -900,8 +900,55 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
         const generatedSku = `POK-${(card.set.ptcgoCode || card.set.id).toUpperCase()}-${card.number}`;
         setFormId(generatedSku);
 
-        const textDesc = `Typ: ${card.supertype} - ${card.subtypes?.join(', ') || ''}\nHra: Pokémon TCG\nEdice: ${card.set.name}\nIlustrátor: ${card.artist || 'Neznámý'}`;
-        setFormShortDesc(textDesc);
+        // Compile Short Description
+        const printedTotal = card.set.printedTotal || card.set.total || '';
+        const shortDescText = lang === 'CZ'
+          ? `Sběratelská karta Pokémon TCG\n• Edice: ${card.set.name}\n• Číslo karty: ${card.number}/${printedTotal}\n• Rarita: ${card.rarity || 'Common'}\n• Typ: ${card.supertype} - ${card.subtypes?.join(', ') || ''}\n• Ilustrátor: ${card.artist || 'Neznámý'}`
+          : `Collectible Pokémon TCG card\n• Expansion: ${card.set.name}\n• Card number: ${card.number}/${printedTotal}\n• Rarity: ${card.rarity || 'Common'}\n• Type: ${card.supertype} - ${card.subtypes?.join(', ') || ''}\n• Artist: ${card.artist || 'Unknown'}`;
+        setFormShortDesc(shortDescText);
+
+        // Compile Detailed Description
+        let detailText = '';
+        if (lang === 'CZ') {
+          detailText += `Originální sběratelská karta **${card.name}** ze sady **${card.set.name}**.\n\n`;
+          if (card.supertype === 'Pokémon') {
+            detailText += `Tato karta představuje Pokémona typu ${card.types?.join(', ') || ''} ve fázi ${card.subtypes?.join(', ') || ''}.\n`;
+          }
+          if (card.rules && card.rules.length > 0) {
+            detailText += `\n**Pravidla a efekty karty:**\n${card.rules.map(r => `• ${r}`).join('\n')}\n`;
+          }
+          if (card.abilities && card.abilities.length > 0) {
+            detailText += `\n**Schopnosti (Abilities):**\n${card.abilities.map(a => `• **${a.name}**: ${a.text}`).join('\n')}\n`;
+          }
+          if (card.attacks && card.attacks.length > 0) {
+            detailText += `\n**Útoky (Attacks):**\n${card.attacks.map(a => `• **${a.name}** (${a.damage ? `Zranění: ${a.damage}` : 'Bez zranění'}): ${a.text || ''}`).join('\n')}\n`;
+          }
+          if (card.flavorText) {
+            detailText += `\n*„${card.flavorText}“*\n`;
+          }
+        } else {
+          detailText += `Original collectible card **${card.name}** from the expansion **${card.set.name}**.\n\n`;
+          if (card.supertype === 'Pokémon') {
+            detailText += `This card represents a ${card.types?.join(', ') || ''} type Pokémon in its ${card.subtypes?.join(', ') || ''} stage.\n`;
+          }
+          if (card.rules && card.rules.length > 0) {
+            detailText += `\n**Card Rules & Effects:**\n${card.rules.map(r => `• ${r}`).join('\n')}\n`;
+          }
+          if (card.abilities && card.abilities.length > 0) {
+            detailText += `\n**Abilities:**\n${card.abilities.map(a => `• **${a.name}**: ${a.text}`).join('\n')}\n`;
+          }
+          if (card.attacks && card.attacks.length > 0) {
+            detailText += `\n**Attacks:**\n${card.attacks.map(a => `• **${a.name}** (${a.damage ? `Damage: ${a.damage}` : 'No damage'}): ${a.text || ''}`).join('\n')}\n`;
+          }
+          if (card.flavorText) {
+            detailText += `\n*“${card.flavorText}”*\n`;
+          }
+        }
+
+        setFormDesc(detailText);
+        setFormDescBlocks([
+          { id: 'b-' + Math.random().toString(36).substr(2, 5), type: 'text', value: detailText }
+        ]);
 
         setFormVariants([
           { id: 'v-' + Math.random().toString(36).substr(2, 5), condition: 'NM', lang: 'EN', foil: false, price: 100, stock: 1 }
