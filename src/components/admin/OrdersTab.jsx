@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import { useTranslation } from '../../context/LanguageContext';
 import { supabase } from '../../supabase';
 import InvoiceTemplate from './InvoiceTemplate';
@@ -738,6 +738,10 @@ export default function OrdersTab({ showToast }) {
   return (
     <div className="orders-tab-container">
       <style>{`
+        @keyframes ordersSlideDown {
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
         .orders-tab-container {
           color: #fff;
           font-family: var(--font-sans), system-ui, sans-serif;
@@ -1241,117 +1245,252 @@ export default function OrdersTab({ showToast }) {
                 const isGls = details && details.carrier.toUpperCase().includes('GLS');
 
                 return (
-                  <tr key={file.name}>
-                    <td className="orders-checkbox-col">
-                      <input 
-                        type="checkbox" 
-                        checked={isSelected}
-                        onChange={() => handleSelectOrder(details?.id || orderId)}
-                      />
-                    </td>
-                    <td style={{ fontWeight: '700', color: 'var(--nv-gold, #fdbd16)' }}>
-                      #{details?.id || orderId}
-                    </td>
-                    <td>
-                      {details?.date ? new Date(details.date).toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US') : fileDateStr}
-                    </td>
-                    <td>
-                      {details ? (
-                        <div>
-                          <div style={{ fontWeight: '600' }}>{details.customerName}</div>
-                          <div style={{ fontSize: '11px', color: '#8a8a92' }}>{details.email}</div>
-                        </div>
-                      ) : (
-                        <span style={{ color: '#8a8a92', fontSize: '12px' }}>{lang === 'CZ' ? 'Načítám...' : 'Loading...'}</span>
-                      )}
-                    </td>
-                    <td>
-                      {details ? (
-                        <span className={`orders-badge ${getCarrierBadgeClass(details.carrier)}`}>
-                          {details.carrier}
-                        </span>
-                      ) : (
-                        <span style={{ color: '#8a8a92', fontSize: '12px' }}>-</span>
-                      )}
-                    </td>
-                    <td>
-                      {details ? (
-                        <span style={{ fontSize: '12px' }}>{details.paymentMethod}</span>
-                      ) : (
-                        <span style={{ color: '#8a8a92', fontSize: '12px' }}>-</span>
-                      )}
-                    </td>
-                    <td style={{ fontWeight: '700' }}>
-                      {details ? (
-                        `${details.totalPrice.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč`
-                      ) : (
-                        <span style={{ color: '#8a8a92', fontSize: '12px' }}>-</span>
-                      )}
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
-                        {isGls && (
+                  <Fragment key={file.name}>
+                    <tr style={{ borderBottom: detailOrder && detailOrder.id === (details?.id || orderId) ? 'none' : '1px solid rgba(240, 240, 240, 0.04)' }}>
+                      <td className="orders-checkbox-col">
+                        <input 
+                          type="checkbox" 
+                          checked={isSelected}
+                          onChange={() => handleSelectOrder(details?.id || orderId)}
+                        />
+                      </td>
+                      <td style={{ fontWeight: '700', color: 'var(--nv-gold, #fdbd16)' }}>
+                        #{details?.id || orderId}
+                      </td>
+                      <td>
+                        {details?.date ? new Date(details.date).toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US') : fileDateStr}
+                      </td>
+                      <td>
+                        {details ? (
+                          <div>
+                            <div style={{ fontWeight: '600' }}>{details.customerName}</div>
+                            <div style={{ fontSize: '11px', color: '#8a8a92' }}>{details.email}</div>
+                          </div>
+                        ) : (
+                          <span style={{ color: '#8a8a92', fontSize: '12px' }}>{lang === 'CZ' ? 'Načítám...' : 'Loading...'}</span>
+                        )}
+                      </td>
+                      <td>
+                        {details ? (
+                          <span className={`orders-badge ${getCarrierBadgeClass(details.carrier)}`}>
+                            {details.carrier}
+                          </span>
+                        ) : (
+                          <span style={{ color: '#8a8a92', fontSize: '12px' }}>-</span>
+                        )}
+                      </td>
+                      <td>
+                        {details ? (
+                          <span style={{ fontSize: '12px' }}>{details.paymentMethod}</span>
+                        ) : (
+                          <span style={{ color: '#8a8a92', fontSize: '12px' }}>-</span>
+                        )}
+                      </td>
+                      <td style={{ fontWeight: '700' }}>
+                        {details ? (
+                          `${details.totalPrice.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč`
+                        ) : (
+                          <span style={{ color: '#8a8a92', fontSize: '12px' }}>-</span>
+                        )}
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                          {isGls && (
+                            <button 
+                              className="orders-action-btn orders-action-btn-primary"
+                              disabled={generatingLabelId === details.id}
+                              onClick={() => generateGlsLabelApi(details)}
+                              title="Vygenerovat štítek přímo přes GLS API"
+                            >
+                              {generatingLabelId === details.id ? (
+                                <div className="spinner-loader co-spinner" style={{ width: '12px', height: '12px', borderWidth: '1.5px' }}></div>
+                              ) : (
+                                '🏷️ GLS API'
+                              )}
+                            </button>
+                          )}
+                          <button 
+                            className="orders-action-btn"
+                            style={detailOrder && detailOrder.id === (details?.id || orderId) ? { background: 'var(--nv-gold, #fdbd16)', color: '#0b0c10', fontWeight: 'bold' } : {}}
+                            disabled={!details}
+                            onClick={() => setDetailOrder(detailOrder && detailOrder.id === (details?.id || orderId) ? null : details)}
+                          >
+                            {detailOrder && detailOrder.id === (details?.id || orderId) ? (lang === 'CZ' ? 'Skrýt' : 'Hide') : (lang === 'CZ' ? 'Detail' : 'Detail')}
+                          </button>
                           <button 
                             className="orders-action-btn orders-action-btn-primary"
-                            disabled={generatingLabelId === details.id}
-                            onClick={() => generateGlsLabelApi(details)}
-                            title="Vygenerovat štítek přímo přes GLS API"
+                            disabled={!details}
+                            onClick={() => setShowInvoiceOrder(details)}
+                            title={lang === 'CZ' ? 'Vytisknout / Uložit PDF fakturu' : 'Print / Save PDF Invoice'}
                           >
-                            {generatingLabelId === details.id ? (
-                              <div className="spinner-loader co-spinner" style={{ width: '12px', height: '12px', borderWidth: '1.5px' }}></div>
-                            ) : (
-                              '🏷️ GLS API'
-                            )}
+                            📄 {lang === 'CZ' ? 'Faktura' : 'Invoice'}
                           </button>
-                        )}
-                        <button 
-                          className="orders-action-btn"
-                          disabled={!details}
-                          onClick={() => setDetailOrder(details)}
-                        >
-                          {lang === 'CZ' ? 'Detail' : 'Detail'}
-                        </button>
-                        <button 
-                          className="orders-action-btn orders-action-btn-primary"
-                          disabled={!details}
-                          onClick={() => setShowInvoiceOrder(details)}
-                          title={lang === 'CZ' ? 'Vytisknout / Uložit PDF fakturu' : 'Print / Save PDF Invoice'}
-                        >
-                          📄 {lang === 'CZ' ? 'Faktura' : 'Invoice'}
-                        </button>
-                        <a 
-                          href={details ? URL.createObjectURL(new Blob([details.rawXml], { type: 'application/xml' })) : '#'} 
-                          download={`order_${details?.id || orderId}.xml`}
-                          className="orders-action-btn"
-                          onClick={(e) => {
-                            if (!details) {
-                              e.preventDefault();
-                              showToast(lang === 'CZ' ? 'XML soubor se načítá.' : 'XML file is loading.', 'warning');
-                            }
-                          }}
-                          title={lang === 'CZ' ? 'Stáhnout XML pro Pohodu' : 'Download XML for Pohoda'}
-                        >
-                          XML
-                        </a>
-                        <a 
-                          href={details ? `https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${details.id}.txt` : '#'} 
-                          download={`invoice_${details?.id || orderId}.txt`}
-                          className="orders-action-btn"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => {
-                            if (!details) {
-                              e.preventDefault();
-                              showToast(lang === 'CZ' ? 'Faktura se načítá.' : 'Invoice is loading.', 'warning');
-                            }
-                          }}
-                          title={lang === 'CZ' ? 'Stáhnout textovou fakturu' : 'Download text invoice'}
-                        >
-                          TXT
-                        </a>
-                      </div>
-                    </td>
-                  </tr>
+                          <a 
+                            href={details ? URL.createObjectURL(new Blob([details.rawXml], { type: 'application/xml' })) : '#'} 
+                            download={`order_${details?.id || orderId}.xml`}
+                            className="orders-action-btn"
+                            onClick={(e) => {
+                              if (!details) {
+                                e.preventDefault();
+                                showToast(lang === 'CZ' ? 'XML soubor se načítá.' : 'XML file is loading.', 'warning');
+                              }
+                            }}
+                            title={lang === 'CZ' ? 'Stáhnout XML pro Pohodu' : 'Download XML for Pohoda'}
+                          >
+                            XML
+                          </a>
+                          <a 
+                            href={details ? `https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${details.id}.txt` : '#'} 
+                            download={`invoice_${details?.id || orderId}.txt`}
+                            className="orders-action-btn"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => {
+                              if (!details) {
+                                e.preventDefault();
+                                showToast(lang === 'CZ' ? 'Faktura se načítá.' : 'Invoice is loading.', 'warning');
+                              }
+                            }}
+                            title={lang === 'CZ' ? 'Stáhnout textovou fakturu' : 'Download text invoice'}
+                          >
+                            TXT
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                    {detailOrder && detailOrder.id === (details?.id || orderId) && (
+                      <tr key={`${file.name}-details`}>
+                        <td colSpan={8} style={{ padding: 0 }}>
+                          <div style={{
+                            padding: '24px 32px 32px 32px',
+                            background: 'rgba(255, 255, 255, 0.015)',
+                            borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+                            animation: 'ordersSlideDown 0.2s ease-out'
+                          }}>
+                            <div className="orders-modal-grid" style={{ marginBottom: '16px' }}>
+                              <div className="orders-modal-col">
+                                <h4 style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Osobní údaje' : 'Customer Info'}</h4>
+                                <p><strong>{detailOrder.customerName}</strong></p>
+                                <p>Email: {detailOrder.email}</p>
+                                <p>Tel: {detailOrder.phone}</p>
+                              </div>
+                              <div className="orders-modal-col">
+                                <h4 style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Adresa doručení' : 'Shipping Address'}</h4>
+                                <p>{detailOrder.street}</p>
+                                <p>{detailOrder.city}, {detailOrder.zip}</p>
+                                <p>{lang === 'CZ' ? 'Země' : 'Country'}: CZ</p>
+                              </div>
+                            </div>
+
+                            <div className="orders-modal-grid" style={{ marginBottom: '24px', marginTop: '16px' }}>
+                              <div className="orders-modal-col">
+                                <h4 style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Fakturační údaje' : 'Billing Info'}</h4>
+                                {detailOrder.isCompany || detailOrder.companyName ? (
+                                  <>
+                                    <p><strong>{detailOrder.companyName}</strong></p>
+                                    {detailOrder.ico && <p>IČO: {detailOrder.ico}</p>}
+                                    {detailOrder.dic && <p>DIČ: {detailOrder.dic}</p>}
+                                  </>
+                                ) : (
+                                  <p style={{ color: '#8a8a92', fontStyle: 'italic' }}>
+                                    {lang === 'CZ' ? 'Stejné jako doručovací' : 'Same as shipping'}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="orders-modal-col">
+                                <h4 style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Poznámka k objednávce' : 'Order Notes'}</h4>
+                                {detailOrder.notes ? (
+                                  <p style={{ color: '#f0f0f0', whiteSpace: 'pre-wrap', background: 'rgba(253, 189, 22, 0.05)', padding: '10px 14px', borderLeft: '3px solid var(--nv-gold, #fdbd16)', borderRadius: '4px', margin: '4px 0 0 0' }}>
+                                    {detailOrder.notes}
+                                  </p>
+                                ) : (
+                                  <p style={{ color: '#8a8a92', fontStyle: 'italic' }}>
+                                    {lang === 'CZ' ? 'Bez poznámky' : 'No notes'}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="orders-modal-grid" style={{ marginTop: '16px', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '20px' }}>
+                              <div className="orders-modal-col">
+                                <h4 style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Doprava a platba' : 'Delivery & Payment'}</h4>
+                                <p>{lang === 'CZ' ? 'Způsob přepravy' : 'Shipping Method'}: <strong>{detailOrder.shippingMethod || detailOrder.carrier}</strong></p>
+                                <p>{lang === 'CZ' ? 'Platební metoda' : 'Payment Method'}: <strong>{detailOrder.paymentMethod}</strong></p>
+                              </div>
+                              <div className="orders-modal-col">
+                                <h4 style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Služba' : 'Service info'}</h4>
+                                <p>Dopravní kód: <span className="orders-badge orders-badge-gls" style={{ textTransform: 'none' }}>{detailOrder.carrier}</span></p>
+                              </div>
+                            </div>
+
+                            <div className="orders-modal-items" style={{ marginTop: '20px' }}>
+                              <h4 style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Položky objednávky' : 'Items'}</h4>
+                              <table>
+                                <thead>
+                                  <tr>
+                                    <th>{lang === 'CZ' ? 'Název položky' : 'Product Name'}</th>
+                                    <th>{lang === 'CZ' ? 'Kód / SKU' : 'SKU'}</th>
+                                    <th style={{ textAlign: 'center' }}>{lang === 'CZ' ? 'Množství' : 'Qty'}</th>
+                                    <th style={{ textAlign: 'right' }}>{lang === 'CZ' ? 'Cena' : 'Price'}</th>
+                                    <th style={{ textAlign: 'right' }}>{lang === 'CZ' ? 'Celkem' : 'Total'}</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {detailOrder.items.map((item, idx) => (
+                                    <tr key={idx} style={{ opacity: item.isService ? 0.7 : 1 }}>
+                                      <td>
+                                        {item.name}
+                                        {item.isService && <span style={{ fontSize: '10px', color: 'var(--nv-gold, #fdbd16)', marginLeft: '8px' }}>({lang === 'CZ' ? 'Poplatek/Služba' : 'Service fee'})</span>}
+                                      </td>
+                                      <td style={{ color: '#8a8a92', fontSize: '12px' }}>{item.code || '-'}</td>
+                                      <td style={{ textAlign: 'center' }}>{item.quantity} ks</td>
+                                      <td style={{ textAlign: 'right' }}>{item.price.toLocaleString()} Kč</td>
+                                      <td style={{ textAlign: 'right', fontWeight: '600' }}>{item.total.toLocaleString()} Kč</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            <div className="orders-modal-totals" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px' }}>
+                              <div className="orders-modal-total-row">
+                                <span>{lang === 'CZ' ? 'Mezisoučet produktů' : 'Subtotal products'}:</span>
+                                <span>{detailOrder.items.filter(i => !i.isService).reduce((s, i) => s + i.total, 0).toLocaleString()} Kč</span>
+                              </div>
+                              
+                              {detailOrder.shippingCost > 0 && (
+                                <div className="orders-modal-total-row">
+                                  <span>{lang === 'CZ' ? 'Náklady na doručení' : 'Shipping fee'}:</span>
+                                  <span>{detailOrder.shippingCost.toLocaleString()} Kč</span>
+                                </div>
+                              )}
+
+                              {detailOrder.paymentSurcharge > 0 && (
+                                <div className="orders-modal-total-row">
+                                  <span>{lang === 'CZ' ? 'Dobírkový příplatek' : 'COD fee'}:</span>
+                                  <span>{detailOrder.paymentSurcharge.toLocaleString()} Kč</span>
+                                </div>
+                              )}
+
+                              <div className="orders-modal-total-final" style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>
+                                <span>{lang === 'CZ' ? 'Celková cena' : 'Grand Total'}:</span>
+                                <span>{detailOrder.totalPrice.toLocaleString()} Kč</span>
+                              </div>
+                            </div>
+
+                            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                              <button className="orders-action-btn orders-action-btn-primary" onClick={() => setShowInvoiceOrder(detailOrder)}>
+                                {lang === 'CZ' ? 'Zobrazit fakturu' : 'Show Invoice'}
+                              </button>
+                              <button className="orders-action-btn" onClick={() => setDetailOrder(null)}>
+                                {lang === 'CZ' ? 'Skrýt detail' : 'Hide Details'}
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 );
               })}
             </tbody>
@@ -1387,117 +1526,7 @@ export default function OrdersTab({ showToast }) {
         </div>
       )}
 
-      {/* Modal Detail View */}
-      {detailOrder && (
-        <div className="orders-modal-overlay" onClick={() => setDetailOrder(null)}>
-          <div className="orders-modal-content" onClick={e => e.stopPropagation()}>
-            <button className="orders-modal-close" onClick={() => setDetailOrder(null)}>✕</button>
-            
-            <header className="orders-modal-header">
-              <h3 className="orders-modal-title">
-                {lang === 'CZ' ? `Detail objednávky #${detailOrder.id}` : `Order Detail #${detailOrder.id}`}
-              </h3>
-              <div className="orders-modal-meta">
-                {lang === 'CZ' ? `Vytvořeno dne: ${new Date(detailOrder.date).toLocaleDateString('cs-CZ')}` : `Placed on: ${new Date(detailOrder.date).toLocaleDateString('en-US')}`}
-              </div>
-            </header>
 
-            <div className="orders-modal-grid">
-              <div className="orders-modal-col">
-                <h4>{lang === 'CZ' ? 'Osobní údaje' : 'Customer Info'}</h4>
-                <p><strong>{detailOrder.customerName}</strong></p>
-                <p>Email: {detailOrder.email}</p>
-                <p>Tel: {detailOrder.phone}</p>
-              </div>
-              <div className="orders-modal-col">
-                <h4>{lang === 'CZ' ? 'Adresa doručení' : 'Shipping Address'}</h4>
-                <p>{detailOrder.street}</p>
-                <p>{detailOrder.city}, {detailOrder.zip}</p>
-                <p>Země: CZ</p>
-              </div>
-            </div>
-
-            <div className="orders-modal-grid" style={{ marginTop: '-16px', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '20px' }}>
-              <div className="orders-modal-col">
-                <h4>{lang === 'CZ' ? 'Doprava a platba' : 'Delivery & Payment'}</h4>
-                <p>{lang === 'CZ' ? 'Způsob přepravy' : 'Shipping Method'}: <strong>{detailOrder.shippingMethod || detailOrder.carrier}</strong></p>
-                <p>{lang === 'CZ' ? 'Platební metoda' : 'Payment Method'}: <strong>{detailOrder.paymentMethod}</strong></p>
-              </div>
-              <div className="orders-modal-col">
-                <h4>{lang === 'CZ' ? 'Služba' : 'Service info'}</h4>
-                <p>Dopravní kód: <span className="orders-badge orders-badge-gls" style={{ textTransform: 'none' }}>{detailOrder.carrier}</span></p>
-              </div>
-            </div>
-
-            <div className="orders-modal-items">
-              <h4>{lang === 'CZ' ? 'Položky objednávky' : 'Items'}</h4>
-              <table>
-                <thead>
-                  <tr>
-                    <th>{lang === 'CZ' ? 'Název položky' : 'Product Name'}</th>
-                    <th>{lang === 'CZ' ? 'Kód / SKU' : 'SKU'}</th>
-                    <th style={{ textAlign: 'center' }}>{lang === 'CZ' ? 'Množství' : 'Qty'}</th>
-                    <th style={{ textAlign: 'right' }}>{lang === 'CZ' ? 'Cena' : 'Price'}</th>
-                    <th style={{ textAlign: 'right' }}>{lang === 'CZ' ? 'Celkem' : 'Total'}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {detailOrder.items.map((item, idx) => (
-                    <tr key={idx} style={{ opacity: item.isService ? 0.7 : 1 }}>
-                      <td>
-                        {item.name}
-                        {item.isService && <span style={{ fontSize: '10px', color: 'var(--nv-gold, #fdbd16)', marginLeft: '8px' }}>({lang === 'CZ' ? 'Poplatek/Služba' : 'Service fee'})</span>}
-                      </td>
-                      <td style={{ color: '#8a8a92', fontSize: '12px' }}>{item.code || '-'}</td>
-                      <td style={{ textAlign: 'center' }}>{item.quantity} ks</td>
-                      <td style={{ textAlign: 'right' }}>{item.price.toLocaleString()} Kč</td>
-                      <td style={{ textAlign: 'right', fontWeight: '600' }}>{item.total.toLocaleString()} Kč</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="orders-modal-totals">
-              <div className="orders-modal-total-row">
-                <span>{lang === 'CZ' ? 'Mezisoučet produktů' : 'Subtotal products'}:</span>
-                <span>{detailOrder.items.filter(i => !i.isService).reduce((s, i) => s + i.total, 0).toLocaleString()} Kč</span>
-              </div>
-              
-              {detailOrder.shippingCost > 0 && (
-                <div className="orders-modal-total-row">
-                  <span>{lang === 'CZ' ? 'Náklady na doručení' : 'Shipping fee'}:</span>
-                  <span>{detailOrder.shippingCost.toLocaleString()} Kč</span>
-                </div>
-              )}
-
-              {detailOrder.paymentSurcharge > 0 && (
-                <div className="orders-modal-total-row">
-                  <span>{lang === 'CZ' ? 'Dobírkový příplatek' : 'COD fee'}:</span>
-                  <span>{detailOrder.paymentSurcharge.toLocaleString()} Kč</span>
-                </div>
-              )}
-
-              <div className="orders-modal-total-final">
-                <span>{lang === 'CZ' ? 'Celková cena' : 'Grand Total'}:</span>
-                <span>{detailOrder.totalPrice.toLocaleString()} Kč</span>
-              </div>
-            </div>
-
-            <div style={{ marginTop: '32px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <button className="orders-action-btn orders-action-btn-primary" onClick={() => {
-                setShowInvoiceOrder(detailOrder);
-                setDetailOrder(null);
-              }}>
-                {lang === 'CZ' ? 'Zobrazit fakturu' : 'Show Invoice'}
-              </button>
-              <button className="orders-action-btn" onClick={() => setDetailOrder(null)}>
-                {lang === 'CZ' ? 'Zavřít' : 'Close'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
