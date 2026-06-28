@@ -34,29 +34,75 @@ serve(async (req) => {
   // Endpoint: GET /export-orders
   if (pathname.endsWith("/export-orders")) {
     try {
-      // List files in the 'pohoda-orders' bucket
-      const { data: files, error: listError } = await supabase.storage
-        .from("pohoda-orders")
-        .list("", { limit: 100 });
+      let ordersData = [];
+      const isTest = url.searchParams.get("test") === "true" || url.searchParams.get("sample") === "true";
 
-      if (listError) throw listError;
-
-      const orderFiles = files?.filter(f => f.name.endsWith(".json")) || [];
-      const ordersData = [];
-
-      for (const file of orderFiles) {
-        const { data: fileData, error: downloadError } = await supabase.storage
+      if (isTest) {
+        ordersData = [{
+          order: {
+            id: "1004161",
+            customerEmail: "ondra.zeman05@gmail.com",
+            customerName: "Ondřej Zeman",
+            customerPhone: "+420 777 538 858",
+            shippingMethod: "Zásilkovna — Doručení na adresu",
+            shippingStreet: "Farmářská 290",
+            shippingCity: "Dolní Ředice",
+            shippingZip: "533 75",
+            finalTotal: 2579,
+            totalPrice: 2579,
+            paymentMethod: "GP webpay",
+            shippingCost: 79,
+            paymentSurcharge: 0,
+            creditApplied: 0,
+            date: "28. 6. 2026"
+          },
+          items: [
+            {
+              id: "charizard-ex-sv3",
+              name: "Charizard ex (Special Illustration Rare) - S DPH 21%",
+              quantity: 1,
+              price: 1000,
+              no_vat: false,
+              product: {
+                id: "charizard-ex-sv3"
+              }
+            },
+            {
+              id: "prod-used-001",
+              name: "Pokémon TCG - Charizard VMAX (Shiny § 90) - BEZ DPH",
+              quantity: 1,
+              price: 1500,
+              no_vat: true,
+              product: {
+                id: "prod-used-001"
+              }
+            }
+          ]
+        }];
+      } else {
+        // List files in the 'pohoda-orders' bucket
+        const { data: files, error: listError } = await supabase.storage
           .from("pohoda-orders")
-          .download(file.name);
+          .list("", { limit: 100 });
 
-        if (downloadError) {
-          console.error(`Error downloading ${file.name}:`, downloadError);
-          continue;
+        if (listError) throw listError;
+
+        const orderFiles = files?.filter(f => f.name.endsWith(".json")) || [];
+
+        for (const file of orderFiles) {
+          const { data: fileData, error: downloadError } = await supabase.storage
+            .from("pohoda-orders")
+            .download(file.name);
+
+          if (downloadError) {
+            console.error(`Error downloading ${file.name}:`, downloadError);
+            continue;
+          }
+
+          const text = await fileData.text();
+          const json = JSON.parse(text);
+          ordersData.push(json);
         }
-
-        const text = await fileData.text();
-        const json = JSON.parse(text);
-        ordersData.push(json);
       }
 
       // Convert orders to XML
