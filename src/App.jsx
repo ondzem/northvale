@@ -1177,11 +1177,11 @@ function AppContent() {
       if (session) {
         await supabase
           .from('profiles')
-          .upsert({
-            id: session.user.id,
+          .update({
             order_history: updatedOrders,
             store_credit: newCredit
-          });
+          })
+          .eq('id', session.user.id);
       }
     } catch (err) {
       console.error('Failed to sync order history to Supabase:', err);

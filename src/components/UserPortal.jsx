@@ -1208,7 +1208,26 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                                 setShowInvoiceOrder(formattedOrder);
                               }}
                             >
-                              📥 {lang === 'CZ' ? 'Zobrazit' : 'View'}
+                              👁️ {lang === 'CZ' ? 'Zobrazit' : 'View'}
+                            </button>
+                            <button 
+                              className="prf-edit"
+                              style={{ 
+                                marginLeft: '8px', 
+                                background: 'rgba(253, 189, 22, 0.1)', 
+                                color: 'var(--color-gold, #fdbd16)', 
+                                border: '1px solid rgba(253, 189, 22, 0.2)' 
+                              }}
+                              onClick={() => {
+                                const { data } = supabase.storage
+                                  .from('invoices')
+                                  .getPublicUrl(`invoice_${order.id}.pdf`);
+                                if (data && data.publicUrl) {
+                                  window.open(data.publicUrl, '_blank');
+                                }
+                              }}
+                            >
+                              📥 {lang === 'CZ' ? 'PDF' : 'PDF'}
                             </button>
                           </div>
                         </div>

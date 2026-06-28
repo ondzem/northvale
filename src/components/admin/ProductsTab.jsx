@@ -2525,14 +2525,14 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                     {/* Bez DPH Checkbox */}
                     <div className="pmf-field" style={{ marginTop: '16px', marginBottom: '16px' }}>
                       <label className="pmf-check-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'rgba(255,255,255,0.8)' }}>
-                        <input 
-                          type="checkbox" 
-                          className="pmf-check-box" 
-                          checked={formNoVat} 
-                          onChange={e => setFormNoVat(e.target.checked)} 
+                        <input
+                          type="checkbox"
+                          className="pmf-check-box"
+                          checked={formNoVat}
+                          onChange={e => setFormNoVat(e.target.checked)}
                           style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                         />
-                        {lang === 'CZ' ? 'Bez DPH (zvláštní režim podle § 90)' : 'No VAT (margin scheme under § 90)'}
+                        {lang === 'CZ' ? 'Bez DPH' : 'No VAT'}
                       </label>
                     </div>
 
