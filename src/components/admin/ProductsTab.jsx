@@ -1685,7 +1685,11 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     innerDimensions: formInnerDimensions,
 
     // Custom specifications/parameters
-    customParams: formCustomParams
+    customParams: formCustomParams,
+
+    // Discount / Omnibus details
+    originalPrice: formOriginalPrice ? Number(formOriginalPrice) : null,
+    lowestPrice30d: formLowestPrice30d ? Number(formLowestPrice30d) : null
   };
 
   return (
