@@ -489,7 +489,8 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
         try {
           const { error } = await supabase
             .from('profiles')
-            .upsert({ id: user.id, two_factor_enabled: true });
+            .update({ two_factor_enabled: true })
+            .eq('id', user.id);
 
           if (!error) isSuccess = true;
         } catch (err) {
@@ -543,7 +544,8 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
         try {
           const { error } = await supabase
             .from('profiles')
-            .upsert({ id: user.id, two_factor_enabled: true });
+            .update({ two_factor_enabled: true })
+            .eq('id', user.id);
 
           if (!error) isSuccess = true;
         } catch (err) {
@@ -596,7 +598,8 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
             try {
               const { error } = await supabase
                 .from('profiles')
-                .upsert({ id: user.id, two_factor_enabled: false });
+                .update({ two_factor_enabled: false })
+                .eq('id', user.id);
 
               if (!error) isSuccess = true;
             } catch (err) {
