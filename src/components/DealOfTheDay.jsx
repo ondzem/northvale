@@ -88,7 +88,6 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
   };
   const dealProductStock = getDealStock();
   const dealProductOriginalPrice = activeDeal.original_price ? Number(activeDeal.original_price) : null;
-  const dealProductLowestPrice30d = activeDeal.lowest_price_30d || (dealProduct && (dealProduct.lowestPrice30d || dealProduct.lowest_price_30d)) || null;
 
   // Countdown timer logic based on absolute ends_at timestamp
   useEffect(() => {
@@ -286,11 +285,6 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
           <span style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-gold)', marginTop: '2px', whiteSpace: 'nowrap' }}>
             {dealProductPrice.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}
           </span>
-          {dealProductOriginalPrice && dealProductLowestPrice30d && (
-            <span style={{ fontSize: '9px', color: 'var(--text-muted, #8a8a92)', marginTop: '2px', whiteSpace: 'nowrap' }}>
-              {lang === 'CZ' ? 'Nejnižší 30d:' : 'Lowest 30d:'} {Number(dealProductLowestPrice30d).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}
-            </span>
-          )}
         </div>
 
         <button 

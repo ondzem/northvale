@@ -338,8 +338,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [formReleaseDate, setFormReleaseDate] = useState('');
   const [formInvestment, setFormInvestment] = useState(false);
   const [formNoVat, setFormNoVat] = useState(false);
-  const [formOriginalPrice, setFormOriginalPrice] = useState('');
-  const [formLowestPrice30d, setFormLowestPrice30d] = useState('');
   const [formCategoryId, setFormCategoryId] = useState('');
 
   // Sealed fields
@@ -532,8 +530,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormReleaseDate('');
     setFormInvestment(false);
     setFormNoVat(false);
-    setFormOriginalPrice('');
-    setFormLowestPrice30d('');
     setFormCategoryId('');
     setFormPackagingType('Booster Box');
     setFormBoosterCount('');
@@ -602,8 +598,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormReleaseDate(p.releaseDate || p.foil_condition || '');
     setFormInvestment(!!p.investment);
     setFormNoVat(!!p.no_vat);
-    setFormOriginalPrice(p.originalPrice !== null && p.originalPrice !== undefined ? p.originalPrice.toString() : '');
-    setFormLowestPrice30d(p.lowestPrice30d !== null && p.lowestPrice30d !== undefined ? p.lowestPrice30d.toString() : '');
     setFormCategoryId(p.category_id || '');
 
     // Sealed fields
@@ -1048,8 +1042,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       releaseDate: formPreorder ? formReleaseDate : null,
       investment: formInvestment,
       no_vat: formNoVat,
-      originalPrice: formOriginalPrice ? Number(formOriginalPrice) : null,
-      lowestPrice30d: formLowestPrice30d ? Number(formLowestPrice30d) : null,
       category_id: formCategoryId || null,
       shortDesc: formShortDesc || null,
       additionalImages: formAdditionalImages || [],
@@ -1685,11 +1677,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     innerDimensions: formInnerDimensions,
 
     // Custom specifications/parameters
-    customParams: formCustomParams,
-
-    // Discount / Omnibus details
-    originalPrice: formOriginalPrice ? Number(formOriginalPrice) : null,
-    lowestPrice30d: formLowestPrice30d ? Number(formLowestPrice30d) : null
+    customParams: formCustomParams
   };
 
   return (
@@ -2535,7 +2523,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                     )}
 
                     {/* Bez DPH Checkbox */}
-                    <div className="pmf-field" style={{ marginTop: '16px', marginBottom: '8px' }}>
+                    <div className="pmf-field" style={{ marginTop: '16px', marginBottom: '16px' }}>
                       <label className="pmf-check-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'rgba(255,255,255,0.8)' }}>
                         <input 
                           type="checkbox" 
@@ -2546,36 +2534,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         />
                         {lang === 'CZ' ? 'Bez DPH (zvláštní režim podle § 90)' : 'No VAT (margin scheme under § 90)'}
                       </label>
-                    </div>
-
-                    {/* Discount / Omnibus Prices */}
-                    <div style={{ display: 'flex', gap: '16px', marginTop: '8px', marginBottom: '16px' }}>
-                      <div style={{ flex: 1 }} className="pmf-field">
-                        <label className="pmf-label" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>
-                          {lang === 'CZ' ? 'Původní přeškrtnutá cena (Kč)' : 'Original Price (CZK)'}
-                        </label>
-                        <input 
-                          type="number" 
-                          className="pmf-input" 
-                          value={formOriginalPrice} 
-                          onChange={e => setFormOriginalPrice(e.target.value)} 
-                          placeholder="např. 199" 
-                          style={{ padding: '8px 12px', fontSize: '13px' }}
-                        />
-                      </div>
-                      <div style={{ flex: 1 }} className="pmf-field">
-                        <label className="pmf-label" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>
-                          {lang === 'CZ' ? 'Nejnižší cena za 30 dní (Kč)' : 'Lowest price in 30 days (CZK)'}
-                        </label>
-                        <input 
-                          type="number" 
-                          className="pmf-input" 
-                          value={formLowestPrice30d} 
-                          onChange={e => setFormLowestPrice30d(e.target.value)} 
-                          placeholder="např. 149" 
-                          style={{ padding: '8px 12px', fontSize: '13px' }}
-                        />
-                      </div>
                     </div>
 
                     {/* Preorder & Investment checkboxes hidden for now
