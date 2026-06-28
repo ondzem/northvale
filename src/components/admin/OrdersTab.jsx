@@ -208,7 +208,7 @@ export default function OrdersTab({ showToast }) {
     const addressEl = partnerEl ? (partnerEl.getElementsByTagName('typ:address')[0] || 
                                    partnerEl.getElementsByTagName('address')[0]) : null;
 
-    const orderId = getVal(orderHeader, 'number') || filename.replace('order_', '').replace('.xml', '');
+    const orderId = getVal(orderHeader, 'number') || filename.replace('order_', '').replace('.json', '').replace('.xml', '');
     const date = getVal(orderHeader, 'date');
     const text = getVal(orderHeader, 'text');
     const paymentMethod = getVal(orderHeader, 'paymentType');
@@ -352,7 +352,7 @@ export default function OrdersTab({ showToast }) {
   const handleSelectAll = (filteredFiles) => {
     const filteredIds = filteredFiles.map(f => {
       const details = loadedOrders[f.name];
-      return details ? details.id : f.name.replace('order_', '').replace('.xml', '');
+      return details ? details.id : f.name.replace('order_', '').replace('.json', '').replace('.xml', '');
     });
 
     if (selectedOrderIds.length === filteredIds.length) {
@@ -381,7 +381,7 @@ export default function OrdersTab({ showToast }) {
     let csv = 'Jméno příjemce;Ulice a č.p.;Město;PSČ;Kód země;Telefon;Email;Variabilní symbol (ID);Částka dobírky (Kč);Poznámka\r\n';
 
     selectedOrderIds.forEach(id => {
-      const orderFile = files.find(f => f.name.replace('order_', '').replace('.xml', '') === id || (loadedOrders[f.name] && loadedOrders[f.name].id === id));
+      const orderFile = files.find(f => f.name.replace('order_', '').replace('.json', '').replace('.xml', '') === id || (loadedOrders[f.name] && loadedOrders[f.name].id === id));
       if (!orderFile) return;
       const order = loadedOrders[orderFile.name];
       if (!order) return;
@@ -418,7 +418,7 @@ export default function OrdersTab({ showToast }) {
     let csv = 'Name;Street;City;Zip;Country;Phone;Email;COD_Amount;Reference\r\n';
 
     selectedOrderIds.forEach(id => {
-      const orderFile = files.find(f => f.name.replace('order_', '').replace('.xml', '') === id || (loadedOrders[f.name] && loadedOrders[f.name].id === id));
+      const orderFile = files.find(f => f.name.replace('order_', '').replace('.json', '').replace('.xml', '') === id || (loadedOrders[f.name] && loadedOrders[f.name].id === id));
       if (!orderFile) return;
       const order = loadedOrders[orderFile.name];
       if (!order) return;
@@ -699,7 +699,7 @@ export default function OrdersTab({ showToast }) {
   const getFilteredOrders = () => {
     return files.filter(f => {
       const details = loadedOrders[f.name];
-      const orderId = f.name.replace('order_', '').replace('.xml', '');
+      const orderId = f.name.replace('order_', '').replace('.json', '').replace('.xml', '');
       
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
@@ -1227,7 +1227,7 @@ export default function OrdersTab({ showToast }) {
             <tbody>
               {filteredFiles.map(file => {
                 const details = loadedOrders[file.name];
-                const orderId = file.name.replace('order_', '').replace('.xml', '');
+                const orderId = file.name.replace('order_', '').replace('.json', '').replace('.xml', '');
                 const fileDateStr = new Date(file.created_at).toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US');
                 
                 const isSelected = selectedOrderIds.includes(details?.id || orderId);
