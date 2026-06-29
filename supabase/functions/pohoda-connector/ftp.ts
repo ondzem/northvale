@@ -17,6 +17,15 @@ async function connectClient(client: Client) {
     throw new Error("Missing FTP credentials in environment variables (FTP_HOST, FTP_USER, FTP_PASS).");
   }
   
+  console.log("CONNECTING TO FTP:", {
+    host,
+    port,
+    user,
+    passwordLength: password.length,
+    passwordFirstChar: password.charAt(0),
+    passwordLastChar: password.charAt(password.length - 1)
+  });
+  
   await client.access({
     host,
     port,
