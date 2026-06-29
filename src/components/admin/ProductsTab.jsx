@@ -2128,11 +2128,39 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       }}>{lang === 'CZ' ? '1. ČÁST: NÁHLEDOVÁ KARTA' : 'PART 1: CATALOG CARD PREVIEW'}</h3>
                     </div>
 
+                    {editingProduct?.id && (
+                      <div style={{
+                        padding: '12px 16px',
+                        backgroundColor: 'rgba(241, 196, 15, 0.1)',
+                        border: '1px solid #f1c40f',
+                        borderRadius: '6px',
+                        color: '#f1c40f',
+                        fontSize: '12px',
+                        marginTop: '16px',
+                        marginBottom: '16px',
+                        fontWeight: '500'
+                      }}>
+                        {lang === 'CZ' 
+                          ? '⚠️ Název, cena a stav skladu tohoto produktu jsou synchronizovány z Pohody a nelze je zde ručně upravovat.' 
+                          : '⚠️ Product name, price, and stock levels of this product are synchronized from Pohoda and cannot be edited manually.'}
+                      </div>
+                    )}
+
                     <div className="pmf-form-row" style={styles.row}>
                       <div className="pmf-form-col" style={{ ...styles.col, flex: '2 1 0' }}>
                         <div className="pmf-field">
                           <label className="pmf-label">{lang === 'CZ' ? 'Název produktu' : 'Product Name'}<span className="pmf-req-dot"> *</span></label>
-                          <input type="text" required className="pmf-input" autoComplete="new-password" value={formName} onChange={e => setFormName(e.target.value)} placeholder="např. Charizard ex" />
+                          <input 
+                            type="text" 
+                            required 
+                            className="pmf-input" 
+                            autoComplete="new-password" 
+                            value={formName} 
+                            onChange={e => setFormName(e.target.value)} 
+                            placeholder="např. Charizard ex" 
+                            disabled={!!editingProduct?.id}
+                            style={editingProduct?.id ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}}
+                          />
                         </div>
                       </div>
                       <div className="pmf-form-col" style={{ ...styles.col, flex: '1 1 0' }}>
@@ -2397,6 +2425,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               value={formPrice}
                               onChange={e => setFormPrice(e.target.value)}
                               placeholder="např. 150"
+                              disabled={!!editingProduct?.id}
+                              style={editingProduct?.id ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}}
                             />
                           </div>
                         </div>
@@ -2413,6 +2443,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               value={formStock}
                               onChange={e => setFormStock(e.target.value)}
                               placeholder="např. 5"
+                              disabled={!!editingProduct?.id}
+                              style={editingProduct?.id ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}}
                             />
                           </div>
                         </div>
@@ -2498,8 +2530,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                   className="pmf-input"
                                   value={v.price}
                                   onChange={e => handleVariantChange(v.id, 'price', e.target.value ? Number(e.target.value) : '')}
-                                  style={{ padding: '8px 12px', fontSize: '13px' }}
+                                  style={{ padding: '8px 12px', fontSize: '13px', ...(editingProduct?.id ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}) }}
                                   placeholder="100"
+                                  disabled={!!editingProduct?.id}
                                 />
                               </div>
                               {/* Stock */}
@@ -2512,8 +2545,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                   className="pmf-input"
                                   value={v.stock}
                                   onChange={e => handleVariantChange(v.id, 'stock', e.target.value ? Number(e.target.value) : '')}
-                                  style={{ padding: '8px 12px', fontSize: '13px' }}
+                                  style={{ padding: '8px 12px', fontSize: '13px', ...(editingProduct?.id ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}) }}
                                   placeholder="1"
+                                  disabled={!!editingProduct?.id}
                                 />
                               </div>
                             </div>

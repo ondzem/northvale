@@ -50,7 +50,21 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    
+    const action = url.searchParams.get("action");
+
+    // Pokud je to POST, můžeme vzít akci i z těla
+    let bodyData: any = {};
+    if (req.method === "POST") {
+      try {
+        bodyData = await req.json();
+      } catch {
+        // Ignorovat chybějící body
+      }
+    }
+
+    const currentAction = action || bodyData.action || "help";
+    const companyIco = Deno.env.get("POHODA_ICO") || "12345678"; // IČO firmy
+
     // Zabezpečení pomocí API klíče nebo Supabase Authorization
     const apiKey = url.searchParams.get("api_key");
     const validApiKey = Deno.env.get("POHODA_API_KEY");
@@ -62,7 +76,12 @@ serve(async (req) => {
       isAuthorized = true;
     }
     
-    // 2. Ověření přes přihlášeného admina v Supabase
+    // 2. Akce "export-order" může být volána z e-shopu kýmkoliv (včetně zákazníků při dokončení objednávky)
+    if (!isAuthorized && currentAction === "export-order") {
+      isAuthorized = true;
+    }
+    
+    // 3. Ověření přes přihlášeného admina v Supabase
     if (!isAuthorized) {
       const authHeader = req.headers.get("Authorization");
       if (authHeader) {
@@ -88,22 +107,6 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    // Rozhodnutí o akci podle URL parametru
-    const action = url.searchParams.get("action");
-
-    // Pokud je to POST, můžeme vzít akci i z těla
-    let bodyData: any = {};
-    if (req.method === "POST") {
-      try {
-        bodyData = await req.json();
-      } catch {
-        // Ignorovat chybějící body
-      }
-    }
-
-    const currentAction = action || bodyData.action || "help";
-    const companyIco = Deno.env.get("POHODA_ICO") || "12345678"; // IČO firmy
 
     // --- AKCE 1: Test připojení k FTP ---
     if (currentAction === "test-connection") {
