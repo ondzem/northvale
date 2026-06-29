@@ -7,6 +7,7 @@ import FaqTab from './admin/FaqTab';
 import NewsletterTab from './admin/NewsletterTab';
 import DiscountCodesTab from './admin/DiscountCodesTab';
 import OrdersTab from './admin/OrdersTab';
+import SyncTab from './admin/SyncTab';
 
 export default function AdminPanel({ showToast, setActivePage }) {
   const { lang } = useTranslation();
@@ -34,6 +35,7 @@ export default function AdminPanel({ showToast, setActivePage }) {
     { id: 'faq', name_cz: 'Správa FAQ', name_en: 'FAQ CMS' },
     { id: 'newsletter', name_cz: 'Newsletter', name_en: 'Newsletter' },
     { id: 'discount_codes', name_cz: 'Slevové kódy', name_en: 'Discount Codes' },
+    { id: 'sync', name_cz: 'Synchronizace', name_en: 'Sync / Pohoda' },
   ];
 
   return (
@@ -120,6 +122,12 @@ export default function AdminPanel({ showToast, setActivePage }) {
                   <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                   <line x1="7" y1="7" x2="7.01" y2="7"></line>
                 </svg>
+              ) : tab.id === 'sync' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <polyline points="1 20 1 14 7 14"></polyline>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
               ) : null}
               <span>{lang === 'CZ' ? tab.name_cz : tab.name_en}</span>
             </button>
@@ -169,6 +177,12 @@ export default function AdminPanel({ showToast, setActivePage }) {
 
           {activeTab === 'discount_codes' && (
             <DiscountCodesTab 
+              showToast={handleShowToastPlaceholder} 
+            />
+          )}
+
+          {activeTab === 'sync' && (
+            <SyncTab 
               showToast={handleShowToastPlaceholder} 
             />
           )}
