@@ -1292,9 +1292,48 @@ function AppContent() {
             no_vat: !!(item.no_vat || item.product?.no_vat)
           }))
         }
-      });
     } catch (emailErr) {
       console.error('Order email sending failed:', emailErr);
+    }
+
+    // Call Edge Function to export order to Pohoda (FTP XML)
+    try {
+      const now = new Date();
+      const createdDate = now.toISOString().split('T')[0];
+      
+      const orderPayload = {
+        orderNumber: order.id.toString(),
+        createdDate: createdDate,
+        email: order.customerEmail,
+        phone: order.customerPhone || '',
+        billingName: order.isCompany ? (order.companyName || order.customerName) : order.customerName,
+        billingStreet: order.shippingStreet,
+        billingCity: order.shippingCity,
+        billingZip: order.shippingZip,
+        billingCountry: 'CZ',
+        paymentMethod: order.paymentMethod?.toLowerCase().includes('karta') || order.paymentMethod?.toLowerCase().includes('card') ? 'karta' : 'převod',
+        totalAmount: order.finalTotal,
+        items: order.items.map(item => {
+          const sku = item.product?.type === 'single' ? item.id : (item.product?.id || item.id);
+          const vatRate = item.no_vat ? 0 : 21;
+          return {
+            sku: sku,
+            name: item.name || item.productName || 'Zboží',
+            quantity: item.quantity,
+            price: item.price,
+            vatRate: vatRate
+          };
+        })
+      };
+
+      await supabase.functions.invoke('pohoda-connector', {
+        body: {
+          action: 'export-order',
+          order: orderPayload
+        }
+      });
+    } catch (pohodaErr) {
+      console.error('Pohoda order export failed:', pohodaErr);
     }
   };
 
