@@ -1,10 +1,5 @@
 import { Client } from "npm:basic-ftp";
 
-const FTP_HOST = Deno.env.get("FTP_HOST") || "";
-const FTP_PORT = parseInt(Deno.env.get("FTP_PORT") || "21");
-const FTP_USER = Deno.env.get("FTP_USER") || "";
-const FTP_PASS = Deno.env.get("FTP_PASS") || "";
-
 function getClient() {
   const client = new Client();
   // Nastavíme rozumný timeout v milisekundách (např. 15 vteřin)
@@ -13,14 +8,20 @@ function getClient() {
 }
 
 async function connectClient(client: Client) {
-  if (!FTP_HOST || !FTP_USER || !FTP_PASS) {
+  const host = Deno.env.get("FTP_HOST") || "";
+  const port = parseInt(Deno.env.get("FTP_PORT") || "21");
+  const user = Deno.env.get("FTP_USER") || "";
+  const password = Deno.env.get("FTP_PASS") || "";
+
+  if (!host || !user || !password) {
     throw new Error("Missing FTP credentials in environment variables (FTP_HOST, FTP_USER, FTP_PASS).");
   }
+  
   await client.access({
-    host: FTP_HOST,
-    port: FTP_PORT,
-    user: FTP_USER,
-    password: FTP_PASS,
+    host,
+    port,
+    user,
+    password,
     secure: false // Nastavte true, pokud váš FTP server vyžaduje FTPS (Explicit TLS)
   });
 }

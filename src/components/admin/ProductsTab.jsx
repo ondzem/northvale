@@ -2128,24 +2128,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       }}>{lang === 'CZ' ? '1. ČÁST: NÁHLEDOVÁ KARTA' : 'PART 1: CATALOG CARD PREVIEW'}</h3>
                     </div>
 
-                    {editingProduct?.id && (
-                      <div style={{
-                        padding: '12px 16px',
-                        backgroundColor: 'rgba(241, 196, 15, 0.1)',
-                        border: '1px solid #f1c40f',
-                        borderRadius: '6px',
-                        color: '#f1c40f',
-                        fontSize: '12px',
-                        marginTop: '16px',
-                        marginBottom: '16px',
-                        fontWeight: '500'
-                      }}>
-                        {lang === 'CZ' 
-                          ? '⚠️ Název, cena a stav skladu tohoto produktu jsou synchronizovány z Pohody a nelze je zde ručně upravovat.' 
-                          : '⚠️ Product name, price, and stock levels of this product are synchronized from Pohoda and cannot be edited manually.'}
-                      </div>
-                    )}
-
                     <div className="pmf-form-row" style={styles.row}>
                       <div className="pmf-form-col" style={{ ...styles.col, flex: '2 1 0' }}>
                         <div className="pmf-field">
