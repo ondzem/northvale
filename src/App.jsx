@@ -1292,6 +1292,7 @@ function AppContent() {
             no_vat: !!(item.no_vat || item.product?.no_vat)
           }))
         }
+      });
     } catch (emailErr) {
       console.error('Order email sending failed:', emailErr);
     }
