@@ -119,9 +119,8 @@ export default function OrdersTab({ showToast }) {
         const batch = loadingQueueRef.current.splice(0, batchSize);
         await Promise.all(batch.map(async (filename) => {
           try {
-            const { data, error } = await supabase.functions.invoke('save-order-json', {
-              method: 'GET',
-              queryParams: { filename }
+            const { data, error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
+              method: 'GET'
             });
             
             if (error) throw error;
