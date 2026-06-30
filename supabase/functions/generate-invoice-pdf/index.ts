@@ -131,7 +131,7 @@ serve(async (req) => {
     // Bank & Dates Section
     let dateY = 565;
     drawText("Bankovní účet", 45, dateY, 8, regularFont, cGrey);
-    drawTextRight("123456789/0100", 240, dateY, 8, regularFont, cCharcoal);
+    drawTextRight("1854161005/2700", 240, dateY, 8, regularFont, cCharcoal);
     drawText("Datum vystavení", 320, dateY, 8, regularFont, cGrey);
     drawTextRight(order.date || new Date().toLocaleDateString("cs-CZ"), 550, dateY, 8, regularFont, cCharcoal);
 

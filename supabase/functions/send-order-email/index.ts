@@ -122,27 +122,38 @@ serve(async (req) => {
 
         <!-- Bank transfer details container -->
         ${isBankTransfer ? `
-        <div style="background-color: rgba(253, 189, 22, 0.05); border: 1px solid rgba(253, 189, 22, 0.2); padding: 20px; margin-bottom: 24px; border-radius: 6px;">
+        <div style="background-color: rgba(253, 189, 22, 0.04); border: 1px solid rgba(253, 189, 22, 0.15); padding: 20px; margin-bottom: 24px; border-radius: 6px;">
           <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em; font-family: sans-serif;">
             💰 Pokyny k platbě převodem
           </div>
-          <p style="font-size: 14px; color: #222222; margin: 0 0 12px 0; line-height: 1.5;">
+          <p style="font-size: 14px; color: #222222; margin: 0 0 16px 0; line-height: 1.5;">
             Zvolili jste platbu bankovním převodem. Prosím zašlete celkovou částku na náš bankovní účet:
           </p>
-          <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
             <tr>
-              <td style="padding: 6px 0; color: #666666; width: 130px; border-bottom: 1px solid rgba(0,0,0,0.04);">Číslo účtu:</td>
-              <td style="padding: 6px 0; color: #111111; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.04);">123456789/0100</td>
+              <td style="padding: 8px 0; color: #666666; width: 130px; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 14px;">Číslo účtu:</td>
+              <td style="padding: 8px 0; color: #111111; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 14px;">1854161005/2700</td>
             </tr>
             <tr>
-              <td style="padding: 6px 0; color: #666666; border-bottom: 1px solid rgba(0,0,0,0.04);">Částka k úhradě:</td>
-              <td style="padding: 6px 0; color: #fdbd16; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.04); font-family: monospace; font-size: 15px;">${total.toLocaleString('cs-CZ')} Kč</td>
+              <td style="padding: 8px 0; color: #666666; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 14px;">Částka k úhradě:</td>
+              <td style="padding: 8px 0; color: #fdbd16; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.04); font-family: monospace; font-size: 15px;">${total.toLocaleString('cs-CZ')} Kč</td>
             </tr>
             <tr>
-              <td style="padding: 6px 0; color: #666666; border-bottom: 1px solid rgba(0,0,0,0.04);">Variabilní symbol:</td>
-              <td style="padding: 6px 0; color: #111111; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.04); font-family: monospace; font-size: 15px;">${order.id}</td>
+              <td style="padding: 8px 0; color: #666666; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 14px;">Variabilní symbol:</td>
+              <td style="padding: 8px 0; color: #111111; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.04); font-family: monospace; font-size: 15px;">${order.id}</td>
             </tr>
           </table>
+
+          <div style="text-align: center; margin-top: 15px; padding: 15px; background: #ffffff; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05); display: inline-block;">
+            <img 
+              src="https://api.paylibo.com/paylibo/generator/czech/image?accountNumber=1854161005&bankCode=2700&amount=${total}&currency=CZK&vs=${order.id}&size=160"
+              alt="QR Kód pro platbu"
+              width="160"
+              height="160"
+              style="display: block; margin: 0 auto 8px auto;"
+            />
+            <span style="font-size: 11px; color: #888888; font-weight: 500; font-family: sans-serif;">Naskenujte v bankovní aplikaci pro okamžitou platbu</span>
+          </div>
         </div>
         ` : ''}
 

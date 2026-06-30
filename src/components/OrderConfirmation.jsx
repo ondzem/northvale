@@ -126,7 +126,7 @@ export default function OrderConfirmation({ order, setActivePage }) {
                 <tbody>
                   <tr style={{ borderBottom: '1px solid rgba(240, 240, 240, 0.05)' }}>
                     <td style={{ padding: '8px 0', color: '#8A8A92' }}>{lang === 'CZ' ? 'Číslo účtu:' : 'Account Number:'}</td>
-                    <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: 'bold' }}>123456789/0100</td>
+                    <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: 'bold' }}>1854161005/2700</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid rgba(240, 240, 240, 0.05)' }}>
                     <td style={{ padding: '8px 0', color: '#8A8A92' }}>{lang === 'CZ' ? 'Částka k úhradě:' : 'Amount to Pay:'}</td>
@@ -142,7 +142,7 @@ export default function OrderConfirmation({ order, setActivePage }) {
 
             <div style={{ flex: '0 0 150px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
               <img 
-                src={`https://api.paylibo.com/paylibo/generator/czech/image?accountNumber=123456789&bankCode=0100&amount=${order.finalTotal}&currency=CZK&vs=${order.id}&size=150`}
+                src={`https://api.paylibo.com/paylibo/generator/czech/image?accountNumber=1854161005&bankCode=2700&amount=${order.finalTotal}&currency=CZK&vs=${order.id}&size=150`}
                 alt="QR Code"
                 style={{ width: '150px', height: '150px', background: '#fff', padding: '6px', borderRadius: '4px', border: 'none' }}
               />

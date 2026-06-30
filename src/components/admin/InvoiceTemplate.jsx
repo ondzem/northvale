@@ -105,8 +105,8 @@ export default function InvoiceTemplate({ order, onClose, lang = 'CZ' }) {
           </div>
           <div className="payment-col">
             <p>{lang === 'CZ' ? 'Forma úhrady:' : 'Method of Payment:'} <strong>{order.paymentMethod}</strong></p>
-            <p>{lang === 'CZ' ? 'Bankovní účet:' : 'Bank Account:'} <strong>123456789 / 0100</strong> (Komerční banka)</p>
-            <p>IBAN: <strong>CZ12 0100 0000 0001 2345 6789</strong></p>
+            <p>{lang === 'CZ' ? 'Bankovní účet:' : 'Bank Account:'} <strong>1854161005 / 2700</strong> (UniCredit Bank)</p>
+            <p>IBAN: <strong>CZ37 2700 0000 0018 5416 1005</strong></p>
           </div>
         </div>
 
