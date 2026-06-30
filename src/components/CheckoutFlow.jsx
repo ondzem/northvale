@@ -1428,6 +1428,67 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   </button>
                 </div>
               </section>
+
+              {/* Step 5: Způsob platby */}
+              <section className="pof-step" style={{ marginTop: '24px' }}>
+                <div className="pof-step-head">
+                  <span className="pof-step-num"><span className="__om-t">05</span></span>
+                  <h3><span className="__om-t">{lang === 'CZ' ? 'Způsob platby' : 'Payment Method'}</span></h3>
+                </div>
+                <div className="pof-radios" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {/* Platební karta */}
+                  <button 
+                    type="button"
+                    className={`pof-radio ${payment === 'card' ? 'is-active' : ''}`}
+                    onClick={() => setPayment('card')}
+                  >
+                    <span className="pof-radio-dot" aria-hidden="true"></span>
+                    <span className="pof-radio-body">
+                      <span className="pof-radio-name">
+                        {lang === 'CZ' ? 'Online platební karta (GP webpay)' : 'Online Credit/Debit Card (GP webpay)'}
+                      </span>
+                      <span className="pof-radio-desc">
+                        {lang === 'CZ' ? 'Rychlá a bezpečná platba kartou přes bránu Global Payments.' : 'Fast and secure card payment via Global Payments gateway.'}
+                      </span>
+                    </span>
+                  </button>
+
+                  {/* Bankovní převod */}
+                  <button 
+                    type="button"
+                    className={`pof-radio ${payment === 'transfer' ? 'is-active' : ''}`}
+                    onClick={() => setPayment('transfer')}
+                  >
+                    <span className="pof-radio-dot" aria-hidden="true"></span>
+                    <span className="pof-radio-body">
+                      <span className="pof-radio-name">
+                        {lang === 'CZ' ? 'Bankovní převod' : 'Bank Transfer'}
+                      </span>
+                      <span className="pof-radio-desc">
+                        {lang === 'CZ' ? 'Převod peněz z Vašeho účtu. Objednávka se vyřídí po připsání platby (Ideální pro testování).' : 'Transfer money from your bank account. Order is processed after payment is received.'}
+                      </span>
+                    </span>
+                  </button>
+
+                  {/* Dobírka */}
+                  <button 
+                    type="button"
+                    className={`pof-radio ${payment === 'cod' ? 'is-active' : ''}`}
+                    onClick={() => setPayment('cod')}
+                  >
+                    <span className="pof-radio-dot" aria-hidden="true"></span>
+                    <span className="pof-radio-body">
+                      <span className="pof-radio-name">
+                        {lang === 'CZ' ? 'Dobírka' : 'Cash on Delivery'}
+                      </span>
+                      <span className="pof-radio-desc">
+                        {lang === 'CZ' ? 'Platba hotově nebo kartou kurýrovi při převzetí zásilky.' : 'Pay by cash or card to the courier upon parcel arrival.'}
+                      </span>
+                    </span>
+                    <span className="pof-price">+25 Kč</span>
+                  </button>
+                </div>
+              </section>
             </div>
 
             {/* Right Column: Sticky Sidebar */}
@@ -1637,7 +1698,11 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                 </div>
 
                 <button type="submit" className="pof-submit">
-                  <span className="__om-t">{lang === 'CZ' ? 'Objednat a zaplatit' : 'Place Order & Pay'} </span>
+                  <span className="__om-t">
+                    {payment === 'card' 
+                      ? (lang === 'CZ' ? 'Objednat a zaplatit' : 'Place Order & Pay') 
+                      : (lang === 'CZ' ? 'Dokončit objednávku' : 'Complete Order')}
+                  </span>
                   <span><span className="__om-t">→</span></span>
                 </button>
 
