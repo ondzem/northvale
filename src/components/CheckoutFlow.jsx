@@ -1593,33 +1593,71 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   {/* Conditional Pickup Point Address Entry */}
                   {(shipping === 'dpd-pickup' || shipping === 'gls-pickup') && (
                     <div className="fade-in" style={{ marginTop: '12px', padding: '16px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '6px' }}>
-                      <label className="pof-field" style={{ borderBottom: 'none', paddingBottom: 0, margin: 0 }}>
-                        <span style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold', fontSize: '13px' }}>
-                          {lang === 'CZ' ? 'Zadejte název a adresu výdejního místa:' : 'Enter name and address of the pickup point:'} *
-                        </span>
-                        <p style={{ margin: '4px 0 10px 0', fontSize: '11px', color: 'var(--text-muted)' }}>
-                          {lang === 'CZ' 
-                            ? 'Zadejte prosím název provozovny nebo boxu (např. GLS Box, trafika, AlzaBox atd.) včetně ulice a města.'
-                            : 'Please enter the name of the parcelshop/box (e.g. GLS Box, local shop, AlzaBox etc.) including street and city.'}
-                        </p>
-                        <input 
-                          type="text" 
-                          required
-                          value={pickupPoint}
-                          onChange={e => setPickupPoint(e.target.value)}
-                          placeholder={lang === 'CZ' ? 'Např. Trafika Tabák - Nádražní 45, Pardubice' : 'e.g. Local Newsagent - 45 Station Rd, London'}
-                          style={{
-                            width: '100%',
-                            background: 'transparent',
-                            border: '1px solid rgba(240, 240, 240, 0.12)',
-                            borderRadius: '4px',
-                            color: 'rgb(240, 240, 240)',
-                            padding: '10px 12px',
-                            fontSize: '13px',
-                            outline: 'none'
-                          }}
-                        />
-                      </label>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div>
+                          <span style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold', fontSize: '13px', display: 'block', marginBottom: '8px' }}>
+                            {lang === 'CZ' ? 'Výběr výdejního místa:' : 'Select Pickup Point:'} *
+                          </span>
+                          
+                          <button
+                            type="button"
+                            className="btn btn-outline"
+                            onClick={() => {
+                              setMapType(shipping === 'dpd-pickup' ? 'dpd' : 'gls');
+                              setShowMapModal(true);
+                            }}
+                            style={{
+                              borderColor: 'var(--nv-gold, #fdbd16)',
+                              color: 'var(--nv-gold, #fdbd16)',
+                              padding: '10px 16px',
+                              fontSize: '13px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              background: 'transparent',
+                              borderRadius: '4px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              border: '1px solid var(--nv-gold, #fdbd16)'
+                            }}
+                          >
+                            🗺️ {lang === 'CZ' ? 'Vybrat výdejní místo na mapě' : 'Select pickup point on map'}
+                          </button>
+                        </div>
+
+                        {pickupPoint && (
+                          <div style={{ padding: '10px 12px', background: 'rgba(46, 125, 50, 0.08)', border: '1px solid rgba(46, 125, 50, 0.2)', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#81c784' }}>
+                            <span style={{ fontSize: '16px' }}>✓</span>
+                            <span><strong>{lang === 'CZ' ? 'Vybráno:' : 'Selected:'}</strong> {pickupPoint}</span>
+                          </div>
+                        )}
+
+                        <label className="pof-field" style={{ borderBottom: 'none', paddingBottom: 0, margin: 0 }}>
+                          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                            {lang === 'CZ' 
+                              ? 'Vybranou pobočku můžete případně ručně upravit či přepsat zde:'
+                              : 'You can optionally modify or type the selected branch manually here:'}
+                          </span>
+                          <input 
+                            type="text" 
+                            required
+                            value={pickupPoint}
+                            onChange={e => setPickupPoint(e.target.value)}
+                            placeholder={lang === 'CZ' ? 'Zvolte z mapy výše nebo napište ručně...' : 'Choose from the map above or type manually...'}
+                            style={{
+                              width: '100%',
+                              background: 'transparent',
+                              border: '1px solid rgba(240, 240, 240, 0.12)',
+                              borderRadius: '4px',
+                              color: 'rgb(240, 240, 240)',
+                              padding: '10px 12px',
+                              fontSize: '13px',
+                              outline: 'none',
+                              marginTop: '6px'
+                            }}
+                          />
+                        </label>
+                      </div>
                     </div>
                   )}
                 </div>
