@@ -394,6 +394,17 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     };
   }, [lang]);
 
+  useEffect(() => {
+    if (showMapModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showMapModal]);
+
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
     if (cart.length === 0) {
