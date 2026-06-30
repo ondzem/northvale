@@ -1440,14 +1440,25 @@ export default function OrdersTab({ showToast }) {
                           >
                             {detailOrder && detailOrder.id === (details?.id || orderId) ? (lang === 'CZ' ? 'Skrýt' : 'Hide') : (lang === 'CZ' ? 'Detail' : 'Detail')}
                           </button>
-                          <button 
-                            className="orders-action-btn orders-action-btn-primary"
-                            disabled={!details}
-                            onClick={() => setShowInvoiceOrder(details)}
-                            title={lang === 'CZ' ? 'Vytisknout / Uložit PDF fakturu' : 'Print / Save PDF Invoice'}
-                          >
-                            📄 {lang === 'CZ' ? 'Faktura' : 'Invoice'}
-                          </button>
+                          {details ? (
+                             <a 
+                               href={`https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${details.id}.pdf`}
+                               target="_blank" 
+                               rel="noopener noreferrer"
+                               className="orders-action-btn orders-action-btn-primary"
+                               style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                               title={lang === 'CZ' ? 'Otevřít PDF fakturu' : 'Open PDF Invoice'}
+                             >
+                               📄 {lang === 'CZ' ? 'Faktura' : 'Invoice'}
+                             </a>
+                           ) : (
+                             <button 
+                               className="orders-action-btn orders-action-btn-primary"
+                               disabled
+                             >
+                               📄 {lang === 'CZ' ? 'Faktura' : 'Invoice'}
+                             </button>
+                           )}
                           <a 
                             href={details ? URL.createObjectURL(new Blob([details.rawXml], { type: 'application/xml' })) : '#'} 
                             download={`order_${details?.id || orderId}.xml`}
@@ -1602,9 +1613,15 @@ export default function OrdersTab({ showToast }) {
                             </div>
 
                             <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                              <button className="orders-action-btn orders-action-btn-primary" onClick={() => setShowInvoiceOrder(detailOrder)}>
-                                {lang === 'CZ' ? 'Zobrazit fakturu' : 'Show Invoice'}
-                              </button>
+                              <a 
+                                href={`https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${detailOrder.id}.pdf`}
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="orders-action-btn orders-action-btn-primary"
+                                style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                              >
+                                {lang === 'CZ' ? 'Zobrazit fakturu (PDF)' : 'Show Invoice (PDF)'}
+                              </a>
                               <button className="orders-action-btn" onClick={() => setDetailOrder(null)}>
                                 {lang === 'CZ' ? 'Skrýt detail' : 'Hide Details'}
                               </button>
