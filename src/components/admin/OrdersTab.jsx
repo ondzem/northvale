@@ -1367,7 +1367,7 @@ export default function OrdersTab({ showToast }) {
                         #{details?.id || orderId}
                       </td>
                       <td>
-                        {details?.date ? new Date(details.date).toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US') : fileDateStr}
+                        {details?.date ? (details.date.includes('.') ? details.date : new Date(details.date).toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US')) : fileDateStr}
                       </td>
                       <td>
                         {details ? (
