@@ -403,8 +403,10 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
 
     if ((shipping === 'dpd-pickup' || shipping === 'gls-pickup') && !pickupPoint.trim()) {
       alert(lang === 'CZ' 
-        ? 'Vyplňte prosím název nebo adresu výdejního místa.' 
-        : 'Please enter the name or address of the pickup point.', 'error');
+        ? 'Vyberte prosím výdejní místo na mapě.' 
+        : 'Please select a pickup point on the map.', 'error');
+      setMapType(shipping === 'dpd-pickup' ? 'dpd' : 'gls');
+      setShowMapModal(true);
       return;
     }
 
@@ -1511,24 +1513,45 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   </button>
 
                   {/* DPD - Výdejní místo */}
-                  <button 
-                    type="button"
-                    className={`pof-radio ${shipping === 'dpd-pickup' ? 'is-active' : ''}`}
-                    onClick={() => setShipping('dpd-pickup')}
-                  >
-                    <span className="pof-radio-dot" aria-hidden="true"></span>
-                    <span className="pof-radio-body">
-                      <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'DPD - Výdejní místo (Pickup)' : 'DPD - Pickup Point'}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <button 
+                      type="button"
+                      className={`pof-radio ${shipping === 'dpd-pickup' ? 'is-active' : ''}`}
+                      onClick={() => {
+                        setShipping('dpd-pickup');
+                        setMapType('dpd');
+                        setShowMapModal(true);
+                      }}
+                    >
+                      <span className="pof-radio-dot" aria-hidden="true"></span>
+                      <span className="pof-radio-body">
+                        <span className="pof-radio-name">
+                          {lang === 'CZ' ? 'DPD - Výdejní místo (Pickup)' : 'DPD - Pickup Point'}
+                        </span>
+                        <span className="pof-radio-desc">
+                          {lang === 'CZ' ? 'Doručení na výdejní místo DPD nebo do boxu.' : 'Delivery to a DPD pickup point or box.'}
+                        </span>
                       </span>
-                      <span className="pof-radio-desc">
-                        {lang === 'CZ' ? 'Doručení na výdejní místo DPD nebo do boxu.' : 'Delivery to a DPD pickup point or box.'}
+                      <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
+                        {getShippingPriceDisplay('dpd-pickup', 79)}
                       </span>
-                    </span>
-                    <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
-                      {getShippingPriceDisplay('dpd-pickup', 79)}
-                    </span>
-                  </button>
+                    </button>
+                    {shipping === 'dpd-pickup' && pickupPoint && (
+                      <div style={{ padding: '8px 12px 8px 36px', fontSize: '13px', color: '#81c784', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(46, 125, 50, 0.04)', borderRadius: '4px', border: '1px solid rgba(46, 125, 50, 0.1)' }}>
+                        <span>✓ <strong>{lang === 'CZ' ? 'Vybráno:' : 'Selected:'}</strong> {pickupPoint}</span>
+                        <span 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMapType('dpd');
+                            setShowMapModal(true);
+                          }}
+                          style={{ color: 'var(--nv-gold, #fdbd16)', cursor: 'pointer', textDecoration: 'underline', fontWeight: '600' }}
+                        >
+                          {lang === 'CZ' ? 'Změnit' : 'Change'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
                   {/* DPD - Doručení na adresu */}
                   <button 
@@ -1551,24 +1574,45 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   </button>
 
                   {/* GLS - Výdejní místo */}
-                  <button 
-                    type="button"
-                    className={`pof-radio ${shipping === 'gls-pickup' ? 'is-active' : ''}`}
-                    onClick={() => setShipping('gls-pickup')}
-                  >
-                    <span className="pof-radio-dot" aria-hidden="true"></span>
-                    <span className="pof-radio-body">
-                      <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'GLS - Výdejní místo (ParcelShop)' : 'GLS - Pickup Point'}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <button 
+                      type="button"
+                      className={`pof-radio ${shipping === 'gls-pickup' ? 'is-active' : ''}`}
+                      onClick={() => {
+                        setShipping('gls-pickup');
+                        setMapType('gls');
+                        setShowMapModal(true);
+                      }}
+                    >
+                      <span className="pof-radio-dot" aria-hidden="true"></span>
+                      <span className="pof-radio-body">
+                        <span className="pof-radio-name">
+                          {lang === 'CZ' ? 'GLS - Výdejní místo (ParcelShop)' : 'GLS - Pickup Point'}
+                        </span>
+                        <span className="pof-radio-desc">
+                          {lang === 'CZ' ? 'Doručení na výdejní místo GLS nebo do boxu.' : 'Delivery to a GLS pickup point or box.'}
+                        </span>
                       </span>
-                      <span className="pof-radio-desc">
-                        {lang === 'CZ' ? 'Doručení na výdejní místo GLS nebo do boxu.' : 'Delivery to a GLS pickup point or box.'}
+                      <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
+                        {getShippingPriceDisplay('gls-pickup', 89)}
                       </span>
-                    </span>
-                    <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
-                      {getShippingPriceDisplay('gls-pickup', 89)}
-                    </span>
-                  </button>
+                    </button>
+                    {shipping === 'gls-pickup' && pickupPoint && (
+                      <div style={{ padding: '8px 12px 8px 36px', fontSize: '13px', color: '#81c784', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(46, 125, 50, 0.04)', borderRadius: '4px', border: '1px solid rgba(46, 125, 50, 0.1)' }}>
+                        <span>✓ <strong>{lang === 'CZ' ? 'Vybráno:' : 'Selected:'}</strong> {pickupPoint}</span>
+                        <span 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMapType('gls');
+                            setShowMapModal(true);
+                          }}
+                          style={{ color: 'var(--nv-gold, #fdbd16)', cursor: 'pointer', textDecoration: 'underline', fontWeight: '600' }}
+                        >
+                          {lang === 'CZ' ? 'Změnit' : 'Change'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
                   {/* GLS - Doručení na adresu */}
                   <button 
@@ -1589,77 +1633,6 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                       {getShippingPriceDisplay('gls-address', 129)}
                     </span>
                   </button>
-
-                  {/* Conditional Pickup Point Address Entry */}
-                  {(shipping === 'dpd-pickup' || shipping === 'gls-pickup') && (
-                    <div className="fade-in" style={{ marginTop: '12px', padding: '16px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '6px' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div>
-                          <span style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold', fontSize: '13px', display: 'block', marginBottom: '8px' }}>
-                            {lang === 'CZ' ? 'Výběr výdejního místa:' : 'Select Pickup Point:'} *
-                          </span>
-                          
-                          <button
-                            type="button"
-                            className="btn btn-outline"
-                            onClick={() => {
-                              setMapType(shipping === 'dpd-pickup' ? 'dpd' : 'gls');
-                              setShowMapModal(true);
-                            }}
-                            style={{
-                              borderColor: 'var(--nv-gold, #fdbd16)',
-                              color: 'var(--nv-gold, #fdbd16)',
-                              padding: '10px 16px',
-                              fontSize: '13px',
-                              fontWeight: '600',
-                              cursor: 'pointer',
-                              background: 'transparent',
-                              borderRadius: '4px',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              border: '1px solid var(--nv-gold, #fdbd16)'
-                            }}
-                          >
-                            🗺️ {lang === 'CZ' ? 'Vybrat výdejní místo na mapě' : 'Select pickup point on map'}
-                          </button>
-                        </div>
-
-                        {pickupPoint && (
-                          <div style={{ padding: '10px 12px', background: 'rgba(46, 125, 50, 0.08)', border: '1px solid rgba(46, 125, 50, 0.2)', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#81c784' }}>
-                            <span style={{ fontSize: '16px' }}>✓</span>
-                            <span><strong>{lang === 'CZ' ? 'Vybráno:' : 'Selected:'}</strong> {pickupPoint}</span>
-                          </div>
-                        )}
-
-                        <label className="pof-field" style={{ borderBottom: 'none', paddingBottom: 0, margin: 0 }}>
-                          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                            {lang === 'CZ' 
-                              ? 'Vybranou pobočku můžete případně ručně upravit či přepsat zde:'
-                              : 'You can optionally modify or type the selected branch manually here:'}
-                          </span>
-                          <input 
-                            type="text" 
-                            required
-                            value={pickupPoint}
-                            onChange={e => setPickupPoint(e.target.value)}
-                            placeholder={lang === 'CZ' ? 'Zvolte z mapy výše nebo napište ručně...' : 'Choose from the map above or type manually...'}
-                            style={{
-                              width: '100%',
-                              background: 'transparent',
-                              border: '1px solid rgba(240, 240, 240, 0.12)',
-                              borderRadius: '4px',
-                              color: 'rgb(240, 240, 240)',
-                              padding: '10px 12px',
-                              fontSize: '13px',
-                              outline: 'none',
-                              marginTop: '6px'
-                            }}
-                          />
-                        </label>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </section>
 
