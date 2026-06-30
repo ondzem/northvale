@@ -23,6 +23,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const [companyName, setCompanyName] = useState('');
   const [ico, setIco] = useState('');
   const [dic, setDic] = useState('');
+  const [pickupPoint, setPickupPoint] = useState('');
   const [notes, setNotes] = useState('');
 
   // Discount code states
@@ -45,16 +46,26 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const subtotalAfterDiscount = Math.max(0, cartSubtotal - discountAmount);
 
   // Shipping cost
-  let shippingCost = 79;
-  if (shipping === 'zasilkovna') shippingCost = 79;
-  else if (shipping === 'gls') shippingCost = 99;
-  else if (shipping === 'dpd') shippingCost = 109;
-  else if (shipping === 'posta-doporucene') shippingCost = 85;
-  else if (shipping === 'posta-cenne') shippingCost = 110;
+  let shippingCost = 0;
+  if (shipping === 'dpd-pickup') shippingCost = 79;
+  else if (shipping === 'dpd-address') shippingCost = 109;
+  else if (shipping === 'gls-pickup') shippingCost = 89;
+  else if (shipping === 'gls-address') shippingCost = 129;
   else if (shipping === 'pardubice') shippingCost = 0;
+  else if (shipping === 'zasilkovna') shippingCost = 79;
+  else if (shipping === 'gls') shippingCost = 129;
+  else if (shipping === 'dpd') shippingCost = 109;
 
-  // Free shipping above 2000 CZK for Zásilkovna, GLS, DPD (checked on total after discount)
-  if (subtotalAfterDiscount > 2000 && (shipping === 'zasilkovna' || shipping === 'gls' || shipping === 'dpd')) {
+  // Free shipping above 2000 CZK (checked on total after discount)
+  if (subtotalAfterDiscount > 2000 && (
+    shipping === 'dpd-pickup' || 
+    shipping === 'dpd-address' || 
+    shipping === 'gls-pickup' || 
+    shipping === 'gls-address' || 
+    shipping === 'zasilkovna' || 
+    shipping === 'gls' || 
+    shipping === 'dpd'
+  )) {
     shippingCost = 0;
   }
 
@@ -67,7 +78,15 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const finalTotal = Math.max(0, totalBeforeCredit - actualAppliedCredit);
 
   const getShippingPriceDisplay = (method, basePrice) => {
-    const isFree = subtotalAfterDiscount > 2000 && (method === 'zasilkovna' || method === 'gls' || method === 'dpd');
+    const isFree = subtotalAfterDiscount > 2000 && (
+      method === 'zasilkovna' || 
+      method === 'gls' || 
+      method === 'dpd' ||
+      method === 'dpd-pickup' ||
+      method === 'dpd-address' ||
+      method === 'gls-pickup' ||
+      method === 'gls-address'
+    );
     if (isFree || basePrice === 0) {
       return lang === 'CZ' ? 'Zdarma' : 'Free';
     }
@@ -260,17 +279,18 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               isicApplied: false,
               isicDiscount: 0,
               finalTotal: orderFinalTotal,
-              shippingMethod: shipMethod === 'zasilkovna' 
-                ? (lang === 'CZ' ? 'Zásilkovna - Výdejní místo / Z-BOX' : 'Packeta - Pickup Point / Z-BOX') 
-                : shipMethod === 'gls'
-                  ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
-                  : shipMethod === 'dpd'
-                    ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
-                    : shipMethod === 'pardubice' 
-                      ? (lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)') 
-                      : shipMethod === 'posta-cenne'
-                        ? (lang === 'CZ' ? 'Česká pošta - Cenné psaní' : 'Czech Post - Insured Letter')
-                        : (lang === 'CZ' ? 'Česká pošta - Doporučené psaní' : 'Czech Post - Registered Mail'),
+              shippingMethod: shipMethod === 'dpd-pickup'
+                ? (lang === 'CZ' ? `DPD - Výdejní místo: ${pending.pickupPoint || ''}` : `DPD - Pickup Point: ${pending.pickupPoint || ''}`)
+                : shipMethod === 'dpd-address' || shipMethod === 'dpd'
+                  ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
+                  : shipMethod === 'gls-pickup'
+                    ? (lang === 'CZ' ? `GLS - Výdejní místo: ${pending.pickupPoint || ''}` : `GLS - Pickup Point: ${pending.pickupPoint || ''}`)
+                    : shipMethod === 'gls-address' || shipMethod === 'gls'
+                      ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
+                      : shipMethod === 'pardubice' 
+                        ? (lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)') 
+                        : (lang === 'CZ' ? 'Doprava' : 'Shipping'),
+              carrier: (shipMethod || '').startsWith('dpd') ? 'DPD' : (shipMethod || '').startsWith('gls') ? 'GLS' : 'OSOBNÍ ODBĚR',
               paymentMethod: lang === 'CZ' ? 'Online platební karta (GP webpay)' : 'Online Credit/Debit Card (GP webpay)',
               date: new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
               invoiceUrl: '#',
@@ -326,6 +346,13 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       return;
     }
 
+    if ((shipping === 'dpd-pickup' || shipping === 'gls-pickup') && !pickupPoint.trim()) {
+      alert(lang === 'CZ' 
+        ? 'Vyplňte prosím název nebo adresu výdejního místa.' 
+        : 'Please enter the name or address of the pickup point.', 'error');
+      return;
+    }
+
     if (payment === 'card') {
       setIsPaying(true);
       try {
@@ -360,6 +387,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           finalTotal,
           shippingMethod: shipping,
           paymentMethod: 'card',
+          pickupPoint,
           customerDetails: {
             name,
             email,
@@ -436,17 +464,18 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       isicApplied: false,
       isicDiscount: 0,
       finalTotal,
-      shippingMethod: shipping === 'zasilkovna' 
-        ? (lang === 'CZ' ? 'Zásilkovna - Výdejní místo / Z-BOX' : 'Packeta - Pickup Point / Z-BOX') 
-        : shipping === 'gls'
-          ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
-          : shipping === 'dpd'
-            ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
-            : shipping === 'pardubice' 
-              ? (lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)') 
-              : shipping === 'posta-cenne'
-                ? (lang === 'CZ' ? 'Česká pošta - Cenné psaní' : 'Czech Post - Insured Letter')
-                : (lang === 'CZ' ? 'Česká pošta - Doporučené psaní' : 'Czech Post - Registered Mail'),
+      shippingMethod: shipping === 'dpd-pickup'
+        ? (lang === 'CZ' ? `DPD - Výdejní místo: ${pickupPoint}` : `DPD - Pickup Point: ${pickupPoint}`)
+        : shipping === 'dpd-address' || shipping === 'dpd'
+          ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
+          : shipping === 'gls-pickup'
+            ? (lang === 'CZ' ? `GLS - Výdejní místo: ${pickupPoint}` : `GLS - Pickup Point: ${pickupPoint}`)
+            : shipping === 'gls-address' || shipping === 'gls'
+              ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
+              : shipping === 'pardubice' 
+                ? (lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)') 
+                : (lang === 'CZ' ? 'Doprava' : 'Shipping'),
+      carrier: shipping.startsWith('dpd') ? 'DPD' : shipping.startsWith('gls') ? 'GLS' : 'OSOBNÍ ODBĚR',
       paymentMethod: payment === 'card'
         ? (lang === 'CZ' ? 'Online platební karta' : 'Online Credit/Debit Card')
         : payment === 'transfer'
@@ -1387,31 +1416,31 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                     <span className={`pof-price ${shipping === 'pardubice' ? 'is-free' : ''}`}>{lang === 'CZ' ? 'Zdarma' : 'Free'}</span>
                   </button>
 
-                  {/* GLS */}
+                  {/* DPD - Výdejní místo */}
                   <button 
                     type="button"
-                    className={`pof-radio ${shipping === 'gls' ? 'is-active' : ''}`}
-                    onClick={() => setShipping('gls')}
+                    className={`pof-radio ${shipping === 'dpd-pickup' ? 'is-active' : ''}`}
+                    onClick={() => setShipping('dpd-pickup')}
                   >
                     <span className="pof-radio-dot" aria-hidden="true"></span>
                     <span className="pof-radio-body">
                       <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery'}
+                        {lang === 'CZ' ? 'DPD - Výdejní místo (Pickup)' : 'DPD - Pickup Point'}
                       </span>
                       <span className="pof-radio-desc">
-                        {lang === 'CZ' ? 'Doručení kurýrem GLS na Vaši adresu.' : 'Courier delivery to your address.'}
+                        {lang === 'CZ' ? 'Doručení na výdejní místo DPD nebo do boxu.' : 'Delivery to a DPD pickup point or box.'}
                       </span>
                     </span>
                     <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
-                      {getShippingPriceDisplay('gls', 99)}
+                      {getShippingPriceDisplay('dpd-pickup', 79)}
                     </span>
                   </button>
 
-                  {/* DPD */}
+                  {/* DPD - Doručení na adresu */}
                   <button 
                     type="button"
-                    className={`pof-radio ${shipping === 'dpd' ? 'is-active' : ''}`}
-                    onClick={() => setShipping('dpd')}
+                    className={`pof-radio ${shipping === 'dpd-address' ? 'is-active' : ''}`}
+                    onClick={() => setShipping('dpd-address')}
                   >
                     <span className="pof-radio-dot" aria-hidden="true"></span>
                     <span className="pof-radio-body">
@@ -1423,9 +1452,82 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                       </span>
                     </span>
                     <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
-                      {getShippingPriceDisplay('dpd', 109)}
+                      {getShippingPriceDisplay('dpd-address', 109)}
                     </span>
                   </button>
+
+                  {/* GLS - Výdejní místo */}
+                  <button 
+                    type="button"
+                    className={`pof-radio ${shipping === 'gls-pickup' ? 'is-active' : ''}`}
+                    onClick={() => setShipping('gls-pickup')}
+                  >
+                    <span className="pof-radio-dot" aria-hidden="true"></span>
+                    <span className="pof-radio-body">
+                      <span className="pof-radio-name">
+                        {lang === 'CZ' ? 'GLS - Výdejní místo (ParcelShop)' : 'GLS - Pickup Point'}
+                      </span>
+                      <span className="pof-radio-desc">
+                        {lang === 'CZ' ? 'Doručení na výdejní místo GLS nebo do boxu.' : 'Delivery to a GLS pickup point or box.'}
+                      </span>
+                    </span>
+                    <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
+                      {getShippingPriceDisplay('gls-pickup', 89)}
+                    </span>
+                  </button>
+
+                  {/* GLS - Doručení na adresu */}
+                  <button 
+                    type="button"
+                    className={`pof-radio ${shipping === 'gls-address' ? 'is-active' : ''}`}
+                    onClick={() => setShipping('gls-address')}
+                  >
+                    <span className="pof-radio-dot" aria-hidden="true"></span>
+                    <span className="pof-radio-body">
+                      <span className="pof-radio-name">
+                        {lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery'}
+                      </span>
+                      <span className="pof-radio-desc">
+                        {lang === 'CZ' ? 'Doručení kurýrem GLS na Vaši adresu.' : 'Courier delivery to your address.'}
+                      </span>
+                    </span>
+                    <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
+                      {getShippingPriceDisplay('gls-address', 129)}
+                    </span>
+                  </button>
+
+                  {/* Conditional Pickup Point Address Entry */}
+                  {(shipping === 'dpd-pickup' || shipping === 'gls-pickup') && (
+                    <div className="fade-in" style={{ marginTop: '12px', padding: '16px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '6px' }}>
+                      <label className="pof-field" style={{ borderBottom: 'none', paddingBottom: 0, margin: 0 }}>
+                        <span style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold', fontSize: '13px' }}>
+                          {lang === 'CZ' ? 'Zadejte název a adresu výdejního místa:' : 'Enter name and address of the pickup point:'} *
+                        </span>
+                        <p style={{ margin: '4px 0 10px 0', fontSize: '11px', color: 'var(--text-muted)' }}>
+                          {lang === 'CZ' 
+                            ? 'Zadejte prosím název provozovny nebo boxu (např. GLS Box, trafika, AlzaBox atd.) včetně ulice a města.'
+                            : 'Please enter the name of the parcelshop/box (e.g. GLS Box, local shop, AlzaBox etc.) including street and city.'}
+                        </p>
+                        <input 
+                          type="text" 
+                          required
+                          value={pickupPoint}
+                          onChange={e => setPickupPoint(e.target.value)}
+                          placeholder={lang === 'CZ' ? 'Např. Trafika Tabák - Nádražní 45, Pardubice' : 'e.g. Local Newsagent - 45 Station Rd, London'}
+                          style={{
+                            width: '100%',
+                            background: 'transparent',
+                            border: '1px solid rgba(240, 240, 240, 0.12)',
+                            borderRadius: '4px',
+                            color: 'rgb(240, 240, 240)',
+                            padding: '10px 12px',
+                            fontSize: '13px',
+                            outline: 'none'
+                          }}
+                        />
+                      </label>
+                    </div>
+                  )}
                 </div>
               </section>
 
