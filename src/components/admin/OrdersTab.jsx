@@ -3,6 +3,53 @@ import { useTranslation } from '../../context/LanguageContext';
 import { supabase } from '../../supabase';
 import InvoiceTemplate from './InvoiceTemplate';
 
+const generateTextInvoice = (order) => {
+  if (!order) return '';
+  const lines = [];
+  lines.push(`NORTHVALE TCG - OBJEDNÁVKA #${order.id}`);
+  lines.push(`========================================`);
+  lines.push(`Datum vystavení: ${order.date || ''}`);
+  lines.push(`Způsob platby:   ${order.paymentMethod || ''}`);
+  lines.push(`Způsob dopravy:  ${order.shippingMethod || ''}`);
+  if (order.pickupPoint) {
+    lines.push(`Výdejní místo:   ${order.pickupPoint}`);
+  }
+  lines.push(``);
+  lines.push(`ODBĚRATEL:`);
+  lines.push(`----------------------------------------`);
+  lines.push(`Jméno:           ${order.customerName || ''}`);
+  lines.push(`E-mail:          ${order.email || ''}`);
+  lines.push(`Telefon:         ${order.phone || '—'}`);
+  lines.push(`Adresa doručení: ${order.street || ''}, ${order.city || ''}, ${order.zip || ''}`);
+  if (order.isCompany) {
+    lines.push(`Firma:           ${order.companyName || ''}`);
+    lines.push(`IČO:             ${order.ico || ''}`);
+    lines.push(`DIČ:             ${order.dic || '—'}`);
+  }
+  lines.push(``);
+  lines.push(`POLOŽKY OBJEDNÁVKY:`);
+  lines.push(`----------------------------------------`);
+  if (order.items && Array.isArray(order.items)) {
+    order.items.forEach((item, index) => {
+      lines.push(`${index + 1}. ${item.name || ''}`);
+      lines.push(`   Množství: ${item.quantity}x | Cena za ks: ${item.price} Kč | Celkem: ${(item.price * item.quantity)} Kč`);
+    });
+  }
+  lines.push(`----------------------------------------`);
+  if (order.shippingCost > 0) {
+    lines.push(`Dopravné:              ${order.shippingCost} Kč`);
+  }
+  if (order.paymentSurcharge > 0) {
+    lines.push(`Dobírkový příplatek:   ${order.paymentSurcharge} Kč`);
+  }
+  if (order.creditApplied > 0) {
+    lines.push(`Uplatněný kredit:     -${order.creditApplied} Kč`);
+  }
+  lines.push(`CELKOVÁ CENA:          ${order.totalPrice} Kč`);
+  lines.push(`========================================`);
+  return lines.join('\n');
+};
+
 export default function OrdersTab({ showToast }) {
   const { lang } = useTranslation();
   const [files, setFiles] = useState([]);
@@ -28,9 +75,20 @@ export default function OrdersTab({ showToast }) {
   const [dpdApiKey, setDpdApiKey] = useState('');
   const [dpdCustomerNumber, setDpdCustomerNumber] = useState('10029618142');
   const [dpdAddressId, setDpdAddressId] = useState('15908093');
-  const [dpdTestMode, setDpdTestMode] = useState(true);
+  const [dpdTestMode, setDpdTestMode] = useState(false);
   const [showGlsPassword, setShowGlsPassword] = useState(false);
   const [showDpdApiKey, setShowDpdApiKey] = useState(false);
+  const [showSettingsBtn, setShowSettingsBtn] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.altKey && e.key === 'a') {
+        setShowSettingsBtn(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Background loading reference to avoid duplicates
   const loadingQueueRef = useRef([]);
@@ -53,7 +111,7 @@ export default function OrdersTab({ showToast }) {
     const savedDpdApiKey = localStorage.getItem('dpd_api_key') || '';
     const savedDpdCustomerNumber = localStorage.getItem('dpd_api_customer_number') || '10029618142';
     const savedDpdAddressId = localStorage.getItem('dpd_api_address_id') || '15908093';
-    const savedDpdTestMode = localStorage.getItem('dpd_api_test_mode') !== 'false';
+    const savedDpdTestMode = localStorage.getItem('dpd_api_test_mode') === 'true';
 
     setDpdApiKey(savedDpdApiKey);
     setDpdCustomerNumber(savedDpdCustomerNumber);
@@ -1314,14 +1372,15 @@ export default function OrdersTab({ showToast }) {
       )}
 
       <div className="orders-toolbar">
-        <div className="orders-search-group">
+        <div className="orders-search-group" onDoubleClick={() => setShowSettingsBtn(prev => !prev)} style={{ cursor: 'pointer' }} title={lang === 'CZ' ? 'Poklikáním zobrazíte/skryjete nastavení dopravy' : 'Double click to toggle shipping settings'}>
           <input 
             type="text" 
             placeholder={lang === 'CZ' ? 'Hledat podle ID, jména zákazníka...' : 'Search by ID, customer name...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onDoubleClick={(e) => e.stopPropagation()} // Prevent input double click from triggering it too easily
           />
-          <select value={carrierFilter} onChange={(e) => setCarrierFilter(e.target.value)}>
+          <select value={carrierFilter} onChange={(e) => setCarrierFilter(e.target.value)} onDoubleClick={(e) => e.stopPropagation()}>
             <option value="all">{lang === 'CZ' ? 'Všichni dopravci' : 'All Carriers'}</option>
             <option value="gls">GLS</option>
             <option value="dpd">DPD</option>
@@ -1332,9 +1391,11 @@ export default function OrdersTab({ showToast }) {
         </div>
 
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="orders-action-btn" onClick={() => setShowGlsSettings(!showGlsSettings)}>
-            ⚙️ {lang === 'CZ' ? 'Dopravci API Nastavení' : 'Shipping API Settings'}
-          </button>
+          {showSettingsBtn && (
+            <button className="orders-action-btn" onClick={() => setShowGlsSettings(!showGlsSettings)}>
+              ⚙️ {lang === 'CZ' ? 'Dopravci API Nastavení' : 'Shipping API Settings'}
+            </button>
+          )}
           <button className="orders-action-btn" onClick={fetchOrdersList} disabled={loading}>
             {loading ? (lang === 'CZ' ? 'Aktualizuji...' : 'Refreshing...') : (lang === 'CZ' ? 'Načíst znovu' : 'Refresh list')}
           </button>
@@ -1467,12 +1528,12 @@ export default function OrdersTab({ showToast }) {
                               className="orders-action-btn orders-action-btn-primary"
                               disabled={generatingLabelId === details.id}
                               onClick={() => generateGlsLabelApi(details)}
-                              title="Vygenerovat štítek přímo přes GLS API"
+                              title={lang === 'CZ' ? 'Vygenerovat štítek a odeslat zásilku do GLS' : 'Generate label and send to GLS'}
                             >
                               {generatingLabelId === details.id ? (
                                 <div className="spinner-loader co-spinner" style={{ width: '12px', height: '12px', borderWidth: '1.5px' }}></div>
                               ) : (
-                                '🏷️ GLS API'
+                                lang === 'CZ' ? '📦 Odeslat do GLS' : '📦 Send to GLS'
                               )}
                             </button>
                           )}
@@ -1481,12 +1542,12 @@ export default function OrdersTab({ showToast }) {
                               className="orders-action-btn orders-action-btn-primary"
                               disabled={generatingLabelId === details.id}
                               onClick={() => generateDpdLabelApi(details)}
-                              title="Vygenerovat štítek přímo přes DPD API"
+                              title={lang === 'CZ' ? 'Vygenerovat štítek a odeslat zásilku do DPD' : 'Generate label and send to DPD'}
                             >
                               {generatingLabelId === details.id ? (
                                 <div className="spinner-loader co-spinner" style={{ width: '12px', height: '12px', borderWidth: '1.5px' }}></div>
                               ) : (
-                                '🏷️ DPD API'
+                                lang === 'CZ' ? '📦 Odeslat do DPD' : '📦 Send to DPD'
                               )}
                             </button>
                           )}
@@ -1496,57 +1557,8 @@ export default function OrdersTab({ showToast }) {
                             disabled={!details}
                             onClick={() => setDetailOrder(detailOrder && detailOrder.id === (details?.id || orderId) ? null : details)}
                           >
-                            {detailOrder && detailOrder.id === (details?.id || orderId) ? (lang === 'CZ' ? 'Skrýt' : 'Hide') : (lang === 'CZ' ? 'Detail' : 'Detail')}
+                            {detailOrder && detailOrder.id === (details?.id || orderId) ? (lang === 'CZ' ? 'Skrýt detail' : 'Hide Detail') : (lang === 'CZ' ? '👁️ Detail' : '👁️ Detail')}
                           </button>
-                          {details ? (
-                             <a 
-                               href={`https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${details.id}.pdf`}
-                               target="_blank" 
-                               rel="noopener noreferrer"
-                               className="orders-action-btn orders-action-btn-primary"
-                               style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
-                               title={lang === 'CZ' ? 'Otevřít PDF fakturu' : 'Open PDF Invoice'}
-                             >
-                               📄 {lang === 'CZ' ? 'Faktura' : 'Invoice'}
-                             </a>
-                           ) : (
-                             <button 
-                               className="orders-action-btn orders-action-btn-primary"
-                               disabled
-                             >
-                               📄 {lang === 'CZ' ? 'Faktura' : 'Invoice'}
-                             </button>
-                           )}
-                          <a 
-                            href={details ? URL.createObjectURL(new Blob([details.rawXml], { type: 'application/xml' })) : '#'} 
-                            download={`order_${details?.id || orderId}.xml`}
-                            className="orders-action-btn"
-                            onClick={(e) => {
-                              if (!details) {
-                                e.preventDefault();
-                                showToast(lang === 'CZ' ? 'XML soubor se načítá.' : 'XML file is loading.', 'warning');
-                              }
-                            }}
-                            title={lang === 'CZ' ? 'Stáhnout XML pro Pohodu' : 'Download XML for Pohoda'}
-                          >
-                            XML
-                          </a>
-                          <a 
-                            href={details ? `https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${details.id}.txt` : '#'} 
-                            download={`invoice_${details?.id || orderId}.txt`}
-                            className="orders-action-btn"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => {
-                              if (!details) {
-                                e.preventDefault();
-                                showToast(lang === 'CZ' ? 'Faktura se načítá.' : 'Invoice is loading.', 'warning');
-                              }
-                            }}
-                            title={lang === 'CZ' ? 'Stáhnout textovou fakturu' : 'Download text invoice'}
-                          >
-                            TXT
-                          </a>
                         </div>
                       </td>
                     </tr>
@@ -1670,7 +1682,7 @@ export default function OrdersTab({ showToast }) {
                               </div>
                             </div>
 
-                            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px', flexWrap: 'wrap' }}>
                               <a 
                                 href={`https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${detailOrder.id}.pdf`}
                                 target="_blank" 
@@ -1678,7 +1690,23 @@ export default function OrdersTab({ showToast }) {
                                 className="orders-action-btn orders-action-btn-primary"
                                 style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
                               >
-                                {lang === 'CZ' ? 'Zobrazit fakturu (PDF)' : 'Show Invoice (PDF)'}
+                                📄 {lang === 'CZ' ? 'Faktura (PDF)' : 'Invoice (PDF)'}
+                              </a>
+                              <a 
+                                href={URL.createObjectURL(new Blob([detailOrder.rawXml || ''], { type: 'application/xml' }))} 
+                                download={`order_${detailOrder.id}.xml`}
+                                className="orders-action-btn orders-action-btn-primary"
+                                style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                              >
+                                📥 {lang === 'CZ' ? 'Stáhnout XML (Pohoda)' : 'Download XML (Pohoda)'}
+                              </a>
+                              <a 
+                                href={URL.createObjectURL(new Blob([generateTextInvoice(detailOrder)], { type: 'text/plain;charset=utf-8' }))} 
+                                download={`order_${detailOrder.id}.txt`}
+                                className="orders-action-btn orders-action-btn-primary"
+                                style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                              >
+                                📥 {lang === 'CZ' ? 'Stáhnout TXT' : 'Download TXT'}
                               </a>
                               <button className="orders-action-btn" onClick={() => setDetailOrder(null)}>
                                 {lang === 'CZ' ? 'Skrýt detail' : 'Hide Details'}

@@ -92,6 +92,8 @@ serve(async (req) => {
       order.shippingMethod.includes('Holice')
     );
 
+    const isBankTransfer = pm.toLowerCase().includes("převod") || pm.toLowerCase().includes("transfer");
+
     // Download URL from Supabase Storage public bucket
     const downloadInvoiceUrl = `https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${order.id}.pdf`;
 
@@ -118,6 +120,32 @@ serve(async (req) => {
           děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. V samostatném e-mailu Vám zasíláme také daňový doklad (fakturu).
         </p>
 
+        <!-- Bank transfer details container -->
+        ${isBankTransfer ? `
+        <div style="background-color: rgba(253, 189, 22, 0.05); border: 1px solid rgba(253, 189, 22, 0.2); padding: 20px; margin-bottom: 24px; border-radius: 6px;">
+          <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em; font-family: sans-serif;">
+            💰 Pokyny k platbě převodem
+          </div>
+          <p style="font-size: 14px; color: #222222; margin: 0 0 12px 0; line-height: 1.5;">
+            Zvolili jste platbu bankovním převodem. Prosím zašlete celkovou částku na náš bankovní účet:
+          </p>
+          <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 6px 0; color: #666666; width: 130px; border-bottom: 1px solid rgba(0,0,0,0.04);">Číslo účtu:</td>
+              <td style="padding: 6px 0; color: #111111; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.04);">123456789/0100</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #666666; border-bottom: 1px solid rgba(0,0,0,0.04);">Částka k úhradě:</td>
+              <td style="padding: 6px 0; color: #fdbd16; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.04); font-family: monospace; font-size: 15px;">${total.toLocaleString('cs-CZ')} Kč</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #666666; border-bottom: 1px solid rgba(0,0,0,0.04);">Variabilní symbol:</td>
+              <td style="padding: 6px 0; color: #111111; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.04); font-family: monospace; font-size: 15px;">${order.id}</td>
+            </tr>
+          </table>
+        </div>
+        ` : ''}
+
         <!-- Shipping details container -->
         <div style="border-top: 1px solid rgba(0,0,0,0.08); border-bottom: 1px solid rgba(0,0,0,0.08); padding: 20px 0; margin-bottom: 24px;">
           <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em; font-family: sans-serif;">
@@ -129,7 +157,9 @@ serve(async (req) => {
           <p style="font-size: 13.5px; line-height: 1.5; color: #666666; margin: 0;">
             ${isPersonalPickup 
               ? 'Zboží pro Vás začínáme připravovat. Jakmile bude objednávka připravena k vyzvednutí na naší kontaktní adrese <strong>Bratří Čapků 1095, 534 01 Holice</strong>, zašleme Vám e-mail a SMS.'
-              : 'Vaše platba byla úspěšně přijata. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. Sledujte prosím svůj e-mail pro sledovací číslo zásilky.'
+              : isBankTransfer
+                ? 'Jakmile obdržíme Vaši platbu na náš účet, objednávku zpracujeme a předáme dopravci. O odeslání Vás budeme informovat.'
+                : 'Vaše platba byla úspěšně přijata. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. Sledujte prosím svůj e-mail pro sledovací číslo zásilky.'
             }
           </p>
         </div>

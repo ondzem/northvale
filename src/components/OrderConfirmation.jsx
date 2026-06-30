@@ -25,6 +25,11 @@ export default function OrderConfirmation({ order, setActivePage }) {
     order.shippingMethod.includes('Holice')
   );
 
+  const isBankTransfer = order.paymentMethod && (
+    order.paymentMethod.toLowerCase().includes('převod') ||
+    order.paymentMethod.toLowerCase().includes('transfer')
+  );
+
   return (
     <div className="order-confirm-wrapper">
       <div className="order-confirm-card">
@@ -80,6 +85,10 @@ export default function OrderConfirmation({ order, setActivePage }) {
               lang === 'CZ' 
                 ? 'Zboží pro Vás začínáme připravovat. Jakmile bude objednávka připravena k vyzvednutí na naší kontaktní adrese Bratří Čapků 1095, 534 01 Holice, zašleme Vám e-mail a SMS.'
                 : 'We are preparing your items. As soon as your order is ready for pickup at our contact address Bratří Čapků 1095, 534 01 Holice, we will send you an email and SMS.'
+            ) : isBankTransfer ? (
+              lang === 'CZ'
+                ? 'Objednávku jsme úspěšně přijali a nyní čeká na zaplacení. Jakmile obdržíme Vaši platbu na náš účet, zboží okamžitě zabalíme a předáme dopravci.'
+                : 'Your order has been successfully received and is now pending payment. Once the payment is cleared on our account, we will immediately pack and ship your items.'
             ) : (
               lang === 'CZ'
                 ? 'Vaše platba byla úspěšně přijata. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. Sledujte prosím svůj e-mail pro sledovací číslo zásilky.'
@@ -87,6 +96,62 @@ export default function OrderConfirmation({ order, setActivePage }) {
             )}
           </p>
         </div>
+
+        {/* Bank transfer payment box */}
+        {isBankTransfer && (
+          <div style={{
+            width: '100%',
+            background: 'rgba(253, 189, 22, 0.04)',
+            border: '1px solid rgba(253, 189, 22, 0.15)',
+            borderRadius: '8px',
+            padding: '24px',
+            marginBottom: '36px',
+            textAlign: 'left',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '24px',
+            alignItems: 'center'
+          }}>
+            <div style={{ flex: '1 1 300px' }}>
+              <div style={{ color: 'var(--nv-gold, #fdbd16)', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '14px', letterSpacing: '0.05em', fontFamily: 'Outfit, sans-serif' }}>
+                💰 {lang === 'CZ' ? 'Pokyny k platbě převodem' : 'Bank Transfer Instructions'}
+              </div>
+              <p style={{ fontSize: '14px', color: '#8A8A92', margin: '0 0 16px 0', lineHeight: '1.5' }}>
+                {lang === 'CZ' 
+                  ? 'Zašlete prosím celkovou částku na náš účet. Jako variabilní symbol použijte číslo objednávky.' 
+                  : 'Please send the total amount to our account. Use the Order ID as the variable symbol.'}
+              </p>
+              
+              <table style={{ width: '100%', fontSize: '14px', borderCollapse: 'collapse', color: '#F0F0F0' }}>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid rgba(240, 240, 240, 0.05)' }}>
+                    <td style={{ padding: '8px 0', color: '#8A8A92' }}>{lang === 'CZ' ? 'Číslo účtu:' : 'Account Number:'}</td>
+                    <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: 'bold' }}>123456789/0100</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid rgba(240, 240, 240, 0.05)' }}>
+                    <td style={{ padding: '8px 0', color: '#8A8A92' }}>{lang === 'CZ' ? 'Částka k úhradě:' : 'Amount to Pay:'}</td>
+                    <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: 'bold', color: 'var(--nv-gold, #fdbd16)', fontFamily: 'monospace', fontSize: '16px' }}>{order.finalTotal.toLocaleString('cs-CZ')} Kč</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid rgba(240, 240, 240, 0.05)' }}>
+                    <td style={{ padding: '8px 0', color: '#8A8A92' }}>{lang === 'CZ' ? 'Variabilní symbol:' : 'Variable Symbol:'}</td>
+                    <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', fontSize: '16px' }}>{order.id}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div style={{ flex: '0 0 150px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+              <img 
+                src={`https://api.paylibo.com/paylibo/generator/czech/image?accountNumber=123456789&bankCode=0100&amount=${order.finalTotal}&currency=CZK&vs=${order.id}&size=150`}
+                alt="QR Code"
+                style={{ width: '150px', height: '150px', background: '#fff', padding: '6px', borderRadius: '4px', border: 'none' }}
+              />
+              <span style={{ fontSize: '11px', color: '#8A8A92', fontWeight: '500' }}>
+                {lang === 'CZ' ? 'Platba přes QR kód' : 'Pay via QR Code'}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Order Summary */}
         <div className="ocf-summary">

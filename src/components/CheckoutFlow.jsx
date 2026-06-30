@@ -395,12 +395,30 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   }, [lang]);
 
   useEffect(() => {
+    let scrollY = 0;
     if (showMapModal) {
+      scrollY = window.pageYOffset || document.documentElement.scrollTop;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
       document.body.style.overflow = 'hidden';
     } else {
+      const topStr = document.body.style.top;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
       document.body.style.overflow = '';
+      if (topStr) {
+        const scrollYPos = parseInt(topStr, 10) * -1;
+        if (!isNaN(scrollYPos)) {
+          window.scrollTo(0, scrollYPos);
+        }
+      }
     }
     return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
       document.body.style.overflow = '';
     };
   }, [showMapModal]);
@@ -570,7 +588,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       : `Thank you for your purchase! Order #${order.id} was successfully created and saved to your profile.`,
       'success'
     );
-    setActivePage('profile');
+    setActivePage('order-confirmation');
   };
 
   return (
@@ -592,40 +610,74 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       )}
 
       {showMapModal && (
-        <div className="co-modal-overlay" style={{ zIndex: 11000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="co-modal-content" style={{ width: '90%', maxWidth: '850px', height: '80vh', padding: '20px', display: 'flex', flexDirection: 'column', background: '#121212', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ margin: 0, color: 'var(--nv-gold, #fdbd16)', fontSize: '16px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {mapType === 'dpd' 
-                  ? (lang === 'CZ' ? 'Vyberte výdejní místo DPD' : 'Select DPD Pickup Point')
-                  : (lang === 'CZ' ? 'Vyberte výdejní místo GLS' : 'Select GLS Pickup Point')}
-              </h3>
-              <button 
-                type="button" 
-                onClick={() => setShowMapModal(false)}
-                style={{ background: 'transparent', border: 'none', color: '#8a8a92', fontSize: '24px', cursor: 'pointer', transition: 'color 0.2s' }}
-                onMouseEnter={(e) => e.target.style.color = '#fff'}
-                onMouseLeave={(e) => e.target.style.color = '#8a8a92'}
-              >
-                &times;
-              </button>
-            </div>
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          width: '100vw', 
+          height: '100vh', 
+          backgroundColor: 'rgba(0, 0, 0, 0.75)', 
+          zIndex: 15000, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          pointerEvents: 'auto'
+        }}>
+          <div style={{ 
+            position: 'relative', 
+            width: '95%', 
+            maxWidth: '900px', 
+            height: '85vh', 
+            background: '#fff', 
+            borderRadius: '8px', 
+            overflow: 'hidden', 
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.3)' 
+          }}>
             
-            <div style={{ flex: 1, width: '100%', background: '#fff', borderRadius: '6px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-              {mapType === 'dpd' ? (
-                <iframe 
-                  src="https://api.dpd.cz/widget/latest/index.html?hideCloseButton=true&countries=CZ" 
-                  style={{ width: '100%', height: '100%', border: 'none' }}
-                  title="DPD Widget"
-                />
-              ) : (
-                <iframe 
-                  src="https://ps-maps.gls-czech.com?find=1&ctrcode=CZ&lang=cs" 
-                  style={{ width: '100%', height: '100%', border: 'none' }}
-                  title="GLS Widget"
-                />
-              )}
-            </div>
+            {/* Close Button floating over the iframe */}
+            <button 
+              type="button" 
+              onClick={() => setShowMapModal(false)}
+              style={{ 
+                position: 'absolute', 
+                top: '12px', 
+                right: '12px', 
+                zIndex: 15001,
+                background: 'rgba(0, 0, 0, 0.6)', 
+                border: 'none', 
+                color: '#fff', 
+                fontSize: '20px', 
+                fontWeight: 'bold',
+                width: '32px', 
+                height: '32px', 
+                borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.background = 'rgba(0, 0, 0, 0.8)'}
+              onMouseLeave={(e) => e.target.style.background = 'rgba(0, 0, 0, 0.6)'}
+              title={lang === 'CZ' ? 'Zavřít' : 'Close'}
+            >
+              &times;
+            </button>
+            
+            {mapType === 'dpd' ? (
+              <iframe 
+                src="https://api.dpd.cz/widget/latest/index.html?hideCloseButton=true&countries=CZ" 
+                style={{ width: '100%', height: '100%', border: 'none' }}
+                title="DPD Widget"
+              />
+            ) : (
+              <iframe 
+                src="https://ps-maps.gls-czech.com?find=1&ctrcode=CZ&lang=cs" 
+                style={{ width: '100%', height: '100%', border: 'none' }}
+                title="GLS Widget"
+              />
+            )}
           </div>
         </div>
       )}
