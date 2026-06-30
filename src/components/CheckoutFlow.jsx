@@ -66,6 +66,14 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const actualAppliedCredit = Math.min(appliedCredit, totalBeforeCredit);
   const finalTotal = Math.max(0, totalBeforeCredit - actualAppliedCredit);
 
+  const getShippingPriceDisplay = (method, basePrice) => {
+    const isFree = subtotalAfterDiscount > 2000 && (method === 'zasilkovna' || method === 'gls' || method === 'dpd');
+    if (isFree || basePrice === 0) {
+      return lang === 'CZ' ? 'Zdarma' : 'Free';
+    }
+    return `${basePrice} Kč`;
+  };
+
   const handleApplyDiscount = async () => {
     if (!promoInput.trim()) return;
     setPromoLoading(true);
@@ -1360,10 +1368,11 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   <span className="pof-step-num"><span className="__om-t">04</span></span>
                   <h3><span className="__om-t">{lang === 'CZ' ? 'Způsob dopravy' : 'Shipping Method'}</span></h3>
                 </div>
-                <div className="pof-radios">
+                <div className="pof-radios" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {/* Osobní odběr */}
                   <button 
                     type="button"
-                    className="pof-radio is-active" 
+                    className={`pof-radio ${shipping === 'pardubice' ? 'is-active' : ''}`}
                     onClick={() => setShipping('pardubice')}
                   >
                     <span className="pof-radio-dot" aria-hidden="true"></span>
@@ -1375,7 +1384,67 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                         {lang === 'CZ' ? 'Vyzvednutí na naší provozovně. Zdarma.' : 'Pickup at our premises. Free.'}
                       </span>
                     </span>
-                    <span className="pof-price is-free">{lang === 'CZ' ? 'Zdarma' : 'Free'}</span>
+                    <span className={`pof-price ${shipping === 'pardubice' ? 'is-free' : ''}`}>{lang === 'CZ' ? 'Zdarma' : 'Free'}</span>
+                  </button>
+
+                  {/* Zásilkovna */}
+                  <button 
+                    type="button"
+                    className={`pof-radio ${shipping === 'zasilkovna' ? 'is-active' : ''}`}
+                    onClick={() => setShipping('zasilkovna')}
+                  >
+                    <span className="pof-radio-dot" aria-hidden="true"></span>
+                    <span className="pof-radio-body">
+                      <span className="pof-radio-name">
+                        {lang === 'CZ' ? 'Zásilkovna - Výdejní místo / Z-BOX' : 'Packeta - Pickup Point / Z-BOX'}
+                      </span>
+                      <span className="pof-radio-desc">
+                        {lang === 'CZ' ? 'Doručení na vybranou pobočku Zásilkovny.' : 'Delivery to selected Packeta pickup point.'}
+                      </span>
+                    </span>
+                    <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
+                      {getShippingPriceDisplay('zasilkovna', 79)}
+                    </span>
+                  </button>
+
+                  {/* GLS */}
+                  <button 
+                    type="button"
+                    className={`pof-radio ${shipping === 'gls' ? 'is-active' : ''}`}
+                    onClick={() => setShipping('gls')}
+                  >
+                    <span className="pof-radio-dot" aria-hidden="true"></span>
+                    <span className="pof-radio-body">
+                      <span className="pof-radio-name">
+                        {lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery'}
+                      </span>
+                      <span className="pof-radio-desc">
+                        {lang === 'CZ' ? 'Doručení kurýrem GLS na Vaši adresu.' : 'Courier delivery to your address.'}
+                      </span>
+                    </span>
+                    <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
+                      {getShippingPriceDisplay('gls', 99)}
+                    </span>
+                  </button>
+
+                  {/* DPD */}
+                  <button 
+                    type="button"
+                    className={`pof-radio ${shipping === 'dpd' ? 'is-active' : ''}`}
+                    onClick={() => setShipping('dpd')}
+                  >
+                    <span className="pof-radio-dot" aria-hidden="true"></span>
+                    <span className="pof-radio-body">
+                      <span className="pof-radio-name">
+                        {lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery'}
+                      </span>
+                      <span className="pof-radio-desc">
+                        {lang === 'CZ' ? 'Doručení kurýrem DPD na Vaši adresu.' : 'Courier delivery to your address.'}
+                      </span>
+                    </span>
+                    <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
+                      {getShippingPriceDisplay('dpd', 109)}
+                    </span>
                   </button>
                 </div>
               </section>
