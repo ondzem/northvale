@@ -24,6 +24,12 @@ export default function OrdersTab({ showToast }) {
   const [showGlsSettings, setShowGlsSettings] = useState(false);
   const [generatingLabelId, setGeneratingLabelId] = useState(null);
 
+  // DPD API configuration states (stored in localStorage)
+  const [dpdApiKey, setDpdApiKey] = useState('');
+  const [dpdCustomerNumber, setDpdCustomerNumber] = useState('10029618142');
+  const [dpdAddressId, setDpdAddressId] = useState('15908093');
+  const [dpdTestMode, setDpdTestMode] = useState(true);
+
   // Background loading reference to avoid duplicates
   const loadingQueueRef = useRef([]);
 
@@ -41,6 +47,17 @@ export default function OrdersTab({ showToast }) {
     setGlsTestMode(savedTestMode);
     setGlsPrinterType(savedPrinterType);
 
+    // Load DPD API credentials
+    const savedDpdApiKey = localStorage.getItem('dpd_api_key') || '';
+    const savedDpdCustomerNumber = localStorage.getItem('dpd_api_customer_number') || '10029618142';
+    const savedDpdAddressId = localStorage.getItem('dpd_api_address_id') || '15908093';
+    const savedDpdTestMode = localStorage.getItem('dpd_api_test_mode') !== 'false';
+
+    setDpdApiKey(savedDpdApiKey);
+    setDpdCustomerNumber(savedDpdCustomerNumber);
+    setDpdAddressId(savedDpdAddressId);
+    setDpdTestMode(savedDpdTestMode);
+
     fetchOrdersList();
   }, []);
 
@@ -50,8 +67,14 @@ export default function OrdersTab({ showToast }) {
     localStorage.setItem('gls_api_password', glsPassword);
     localStorage.setItem('gls_api_test_mode', glsTestMode.toString());
     localStorage.setItem('gls_api_printer_type', glsPrinterType);
+
+    localStorage.setItem('dpd_api_key', dpdApiKey);
+    localStorage.setItem('dpd_api_customer_number', dpdCustomerNumber);
+    localStorage.setItem('dpd_api_address_id', dpdAddressId);
+    localStorage.setItem('dpd_api_test_mode', dpdTestMode.toString());
+
     setShowGlsSettings(false);
-    showToast(lang === 'CZ' ? 'Nastavení GLS API bylo uloženo.' : 'GLS API Settings saved.', 'success');
+    showToast(lang === 'CZ' ? 'Nastavení dopravy API bylo uloženo.' : 'Shipping API Settings saved.', 'success');
   };
 
   const fetchOrdersList = async () => {
@@ -338,6 +361,64 @@ export default function OrdersTab({ showToast }) {
     } catch (err) {
       console.error('GLS Label generation failed:', err);
       showToast(lang === 'CZ' ? `Chyba API: ${err.message}` : `API Error: ${err.message}`, 'error');
+    } finally {
+      setGeneratingLabelId(null);
+    }
+  };
+
+  // Direct DPD API Labeling Call
+  const generateDpdLabelApi = async (order) => {
+    if (!dpdApiKey) {
+      showToast(lang === 'CZ' ? 'Zadejte prosím nejprve váš API klíč pro DPD v nastavení API.' : 'Please enter your DPD API key in the API settings first.', 'warning');
+      setShowGlsSettings(true);
+      return;
+    }
+
+    setGeneratingLabelId(order.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('dpd-labels', {
+        body: {
+          apiKey: dpdApiKey,
+          customerIdent: dpdCustomerNumber,
+          senderIt4emId: dpdAddressId,
+          testMode: dpdTestMode,
+          order: {
+            id: order.id,
+            customer_name: order.customerName,
+            customer_street: order.street,
+            customer_city: order.city,
+            customer_zip: order.zip,
+            customer_phone: order.phone,
+            customer_email: order.email,
+            total_price: order.totalPrice,
+            payment_method: order.paymentMethod
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      if (data && data.success) {
+        // Convert Base64 response to binary PDF Blob and download
+        const pdfBytes = Uint8Array.from(atob(data.pdfBase64), c => c.charCodeAt(0));
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `dpd_stitok_${order.id}_${data.parcelNumber}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showToast(lang === 'CZ' 
+          ? `Štítek DPD vygenerován! Balík č.: ${data.parcelNumber}` 
+          : `DPD Label generated! Parcel No.: ${data.parcelNumber}`, 'success');
+      } else {
+        throw new Error(data?.error || 'Neznámá chyba při komunikaci s DPD API.');
+      }
+    } catch (err) {
+      console.error('DPD Label generation failed:', err);
+      showToast(lang === 'CZ' ? `Chyba DPD API: ${err.message}` : `DPD API Error: ${err.message}`, 'error');
     } finally {
       setGeneratingLabelId(null);
     }
@@ -1106,35 +1187,65 @@ export default function OrdersTab({ showToast }) {
       {showGlsSettings && (
         <div className="orders-settings-card">
           <h3 style={{ margin: '0 0 16px 0', fontSize: '15px', color: 'var(--nv-gold, #fdbd16)', fontWeight: '800' }}>
-            {lang === 'CZ' ? 'Nastavení připojení GLS API' : 'GLS API Connection Settings'}
+            {lang === 'CZ' ? 'Nastavení připojení dopravy API' : 'Shipping API Connection Settings'}
           </h3>
-          <div className="orders-settings-grid">
-            <label className="orders-settings-field">
-              <span>{lang === 'CZ' ? 'Uživatelské jméno (Email)' : 'Username (Email)'}</span>
-              <input type="email" value={glsUsername} onChange={e => setGlsUsername(e.target.value)} />
-            </label>
-            <label className="orders-settings-field">
-              <span>{lang === 'CZ' ? 'Zákaznické číslo (Client ID)' : 'Customer ID'}</span>
-              <input type="text" value={glsClientNumber} onChange={e => setGlsClientNumber(e.target.value)} />
-            </label>
-            <label className="orders-settings-field">
-              <span>{lang === 'CZ' ? 'Heslo do MyGLS' : 'MyGLS Password'}</span>
-              <input type="password" placeholder="••••••••" value={glsPassword} onChange={e => setGlsPassword(e.target.value)} />
-            </label>
-            <label className="orders-settings-field">
-              <span>{lang === 'CZ' ? 'Typ tiskárny' : 'Printer Type'}</span>
-              <select value={glsPrinterType} onChange={e => setGlsPrinterType(e.target.value)}>
-                <option value="Thermo">Thermo (Standard)</option>
-                <option value="A4_2x2">A4 - 2x2 štítky</option>
-                <option value="A4_4x1">A4 - 4x1 štítky</option>
-                <option value="Connect">Connect</option>
-                <option value="ShipItThermoPdf">ShipIt Thermo PDF</option>
-              </select>
-            </label>
-            <label className="orders-settings-field" style={{ justifyContent: 'center', flexDirection: 'row', gap: '8px', alignItems: 'center' }}>
-              <input type="checkbox" id="test-mode" checked={glsTestMode} onChange={e => setGlsTestMode(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: 'var(--nv-gold, #fdbd16)' }} />
-              <span style={{ textTransform: 'none', cursor: 'pointer', fontSize: '13px' }} onClick={() => setGlsTestMode(!glsTestMode)}>Testovací režim</span>
-            </label>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '20px' }}>
+            {/* GLS Section */}
+            <div style={{ borderRight: '1px solid rgba(255,255,255,0.08)', paddingRight: '24px' }}>
+              <h4 style={{ margin: '0 0 12px 0', color: '#fff', fontSize: '13.5px', fontWeight: '700' }}>GLS API</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <label className="orders-settings-field">
+                  <span>{lang === 'CZ' ? 'Uživatelské jméno (Email)' : 'Username (Email)'}</span>
+                  <input type="email" value={glsUsername} onChange={e => setGlsUsername(e.target.value)} />
+                </label>
+                <label className="orders-settings-field">
+                  <span>{lang === 'CZ' ? 'Zákaznické číslo (Client ID)' : 'Customer ID'}</span>
+                  <input type="text" value={glsClientNumber} onChange={e => setGlsClientNumber(e.target.value)} />
+                </label>
+                <label className="orders-settings-field">
+                  <span>{lang === 'CZ' ? 'Heslo do MyGLS' : 'MyGLS Password'}</span>
+                  <input type="password" placeholder="••••••••" value={glsPassword} onChange={e => setGlsPassword(e.target.value)} />
+                </label>
+                <label className="orders-settings-field">
+                  <span>{lang === 'CZ' ? 'Typ tiskárny' : 'Printer Type'}</span>
+                  <select value={glsPrinterType} onChange={e => setGlsPrinterType(e.target.value)}>
+                    <option value="Thermo">Thermo (Standard)</option>
+                    <option value="A4_2x2">A4 - 2x2 štítky</option>
+                    <option value="A4_4x1">A4 - 4x1 štítky</option>
+                    <option value="Connect">Connect</option>
+                    <option value="ShipItThermoPdf">ShipIt Thermo PDF</option>
+                  </select>
+                </label>
+                <label className="orders-settings-field" style={{ justifyContent: 'flex-start', flexDirection: 'row', gap: '8px', alignItems: 'center' }}>
+                  <input type="checkbox" checked={glsTestMode} onChange={e => setGlsTestMode(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: 'var(--nv-gold, #fdbd16)', margin: 0 }} />
+                  <span style={{ textTransform: 'none', cursor: 'pointer', fontSize: '13px' }} onClick={() => setGlsTestMode(!glsTestMode)}>Testovací režim GLS</span>
+                </label>
+              </div>
+            </div>
+
+            {/* DPD Section */}
+            <div>
+              <h4 style={{ margin: '0 0 12px 0', color: '#fff', fontSize: '13.5px', fontWeight: '700' }}>DPD API (REST GeoAPI)</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <label className="orders-settings-field">
+                  <span>{lang === 'CZ' ? 'API Klíč' : 'API Key'}</span>
+                  <input type="password" placeholder="••••••••" value={dpdApiKey} onChange={e => setDpdApiKey(e.target.value)} />
+                </label>
+                <label className="orders-settings-field">
+                  <span>{lang === 'CZ' ? 'Zákaznické číslo (DSW)' : 'Customer Number (DSW)'}</span>
+                  <input type="text" value={dpdCustomerNumber} onChange={e => setDpdCustomerNumber(e.target.value)} />
+                </label>
+                <label className="orders-settings-field">
+                  <span>{lang === 'CZ' ? 'ID adresy odesílatele (It4em ID)' : 'Sender Address ID (It4em ID)'}</span>
+                  <input type="text" value={dpdAddressId} onChange={e => setDpdAddressId(e.target.value)} />
+                </label>
+                <label className="orders-settings-field" style={{ justifyContent: 'flex-start', flexDirection: 'row', gap: '8px', alignItems: 'center', marginTop: '22px' }}>
+                  <input type="checkbox" checked={dpdTestMode} onChange={e => setDpdTestMode(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: 'var(--nv-gold, #fdbd16)', margin: 0 }} />
+                  <span style={{ textTransform: 'none', cursor: 'pointer', fontSize: '13px' }} onClick={() => setDpdTestMode(!dpdTestMode)}>Testovací režim DPD</span>
+                </label>
+              </div>
+            </div>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
             <button className="orders-action-btn orders-action-btn-primary" onClick={saveGlsSettings}>
@@ -1167,7 +1278,7 @@ export default function OrdersTab({ showToast }) {
 
         <div style={{ display: 'flex', gap: '8px' }}>
           <button className="orders-action-btn" onClick={() => setShowGlsSettings(!showGlsSettings)}>
-            ⚙️ {lang === 'CZ' ? 'GLS API Nastavení' : 'GLS API Settings'}
+            ⚙️ {lang === 'CZ' ? 'Dopravci API Nastavení' : 'Shipping API Settings'}
           </button>
           <button className="orders-action-btn" onClick={fetchOrdersList} disabled={loading}>
             {loading ? (lang === 'CZ' ? 'Aktualizuji...' : 'Refreshing...') : (lang === 'CZ' ? 'Načíst znovu' : 'Refresh list')}
@@ -1243,6 +1354,7 @@ export default function OrdersTab({ showToast }) {
                 };
 
                 const isGls = details && details.carrier.toUpperCase().includes('GLS');
+                const isDpd = details && details.carrier.toUpperCase().includes('DPD');
 
                 return (
                   <Fragment key={file.name}>
@@ -1306,6 +1418,20 @@ export default function OrdersTab({ showToast }) {
                                 <div className="spinner-loader co-spinner" style={{ width: '12px', height: '12px', borderWidth: '1.5px' }}></div>
                               ) : (
                                 '🏷️ GLS API'
+                              )}
+                            </button>
+                          )}
+                          {isDpd && (
+                            <button 
+                              className="orders-action-btn orders-action-btn-primary"
+                              disabled={generatingLabelId === details.id}
+                              onClick={() => generateDpdLabelApi(details)}
+                              title="Vygenerovat štítek přímo přes DPD API"
+                            >
+                              {generatingLabelId === details.id ? (
+                                <div className="spinner-loader co-spinner" style={{ width: '12px', height: '12px', borderWidth: '1.5px' }}></div>
+                              ) : (
+                                '🏷️ DPD API'
                               )}
                             </button>
                           )}
