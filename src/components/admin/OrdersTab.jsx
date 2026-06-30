@@ -364,6 +364,78 @@ export default function OrdersTab({ showToast }) {
     };
   };
 
+  const handleDeleteOrder = async (orderId, filename) => {
+    const confirmMsg = lang === 'CZ' 
+      ? `Opravdu chcete smazat objednávku #${orderId}? Dojde k vymazání souborů XML i JSON z databáze e-shopu.`
+      : `Are you sure you want to delete order #${orderId}? This will remove both XML and JSON files from the e-shop database.`;
+    
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
+        method: 'DELETE'
+      });
+
+      if (error) throw error;
+
+      showToast(lang === 'CZ' ? `Objednávka #${orderId} byla úspěšně smazána.` : `Order #${orderId} deleted successfully.`, 'success');
+      
+      // Close detail view if it was the deleted order
+      if (detailOrder && detailOrder.id === orderId) {
+        setDetailOrder(null);
+      }
+
+      // Remove from selected list
+      setSelectedOrderIds(prev => prev.filter(id => id !== orderId));
+      
+      // Refresh the list
+      fetchOrdersList();
+    } catch (err) {
+      console.error('Failed to delete order:', err);
+      showToast(lang === 'CZ' ? 'Chyba při mazání objednávky.' : 'Error deleting order.', 'error');
+    }
+  };
+
+  const handleDeleteSelectedOrders = async () => {
+    const confirmMsg = lang === 'CZ'
+      ? `Opravdu chcete smazat ${selectedOrderIds.length} vybraných objednávek?`
+      : `Are you sure you want to delete ${selectedOrderIds.length} selected orders?`;
+
+    if (!window.confirm(confirmMsg)) return;
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const orderId of selectedOrderIds) {
+      try {
+        const filename = `order_${orderId}.json`;
+        const { error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
+          method: 'DELETE'
+        });
+        if (error) throw error;
+        successCount++;
+      } catch (err) {
+        console.error(`Failed to delete order ${orderId}:`, err);
+        failCount++;
+      }
+    }
+
+    if (successCount > 0) {
+      showToast(
+        lang === 'CZ' 
+          ? `Úspěšně smazáno ${successCount} objednávek.${failCount > 0 ? ` Se selháním u ${failCount} objednávek.` : ''}`
+          : `Successfully deleted ${successCount} orders.${failCount > 0 ? ` Failed for ${failCount} orders.` : ''}`,
+        'success'
+      );
+    } else if (failCount > 0) {
+      showToast(lang === 'CZ' ? 'Všechna mazání selhala.' : 'All deletions failed.', 'error');
+    }
+
+    setSelectedOrderIds([]);
+    setDetailOrder(null);
+    fetchOrdersList();
+  };
+
   // Direct GLS API Labeling Call
   const generateGlsLabelApi = async (order) => {
     if (!glsPassword) {
@@ -1708,6 +1780,14 @@ export default function OrdersTab({ showToast }) {
                               >
                                 📥 {lang === 'CZ' ? 'Stáhnout TXT' : 'Download TXT'}
                               </a>
+                              <button 
+                                type="button"
+                                className="orders-action-btn" 
+                                style={{ background: '#ef4444', color: '#fff', fontWeight: 'bold' }}
+                                onClick={() => handleDeleteOrder(detailOrder.id, `order_${detailOrder.id}.json`)}
+                              >
+                                🗑️ {lang === 'CZ' ? 'Smazat objednávku' : 'Delete Order'}
+                              </button>
                               <button className="orders-action-btn" onClick={() => setDetailOrder(null)}>
                                 {lang === 'CZ' ? 'Skrýt detail' : 'Hide Details'}
                               </button>
@@ -1747,6 +1827,13 @@ export default function OrdersTab({ showToast }) {
             </button>
             <button className="orders-action-btn orders-action-btn-primary" onClick={downloadAllInvoicesTxt}>
               {lang === 'CZ' ? 'Stáhnout faktury (TXT)' : 'Download Invoices (TXT)'}
+            </button>
+            <button 
+              className="orders-action-btn" 
+              style={{ background: '#ef4444', color: '#fff', fontWeight: 'bold' }} 
+              onClick={handleDeleteSelectedOrders}
+            >
+              🗑️ {lang === 'CZ' ? 'Smazat vybrané' : 'Delete Selected'}
             </button>
           </div>
         </div>
