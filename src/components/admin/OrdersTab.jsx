@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, Fragment } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from '../../context/LanguageContext';
 import { supabase } from '../../supabase';
 import InvoiceTemplate from './InvoiceTemplate';
@@ -79,6 +80,12 @@ export default function OrdersTab({ showToast }) {
   const [showGlsPassword, setShowGlsPassword] = useState(false);
   const [showDpdApiKey, setShowDpdApiKey] = useState(false);
   const [showSettingsBtn, setShowSettingsBtn] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: null
+  });
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -364,76 +371,88 @@ export default function OrdersTab({ showToast }) {
     };
   };
 
-  const handleDeleteOrder = async (orderId, filename) => {
-    const confirmMsg = lang === 'CZ' 
+  const handleDeleteOrder = (orderId, filename) => {
+    const title = lang === 'CZ' ? 'Smazat objednávku?' : 'Delete Order?';
+    const message = lang === 'CZ' 
       ? `Opravdu chcete smazat objednávku #${orderId}? Dojde k vymazání souborů XML i JSON z databáze e-shopu.`
       : `Are you sure you want to delete order #${orderId}? This will remove both XML and JSON files from the e-shop database.`;
-    
-    if (!window.confirm(confirmMsg)) return;
 
-    try {
-      const { data, error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
-        method: 'DELETE'
-      });
+    setConfirmModal({
+      isOpen: true,
+      title,
+      message,
+      onConfirm: async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
+            method: 'DELETE'
+          });
 
-      if (error) throw error;
+          if (error) throw error;
 
-      showToast(lang === 'CZ' ? `Objednávka #${orderId} byla úspěšně smazána.` : `Order #${orderId} deleted successfully.`, 'success');
-      
-      // Close detail view if it was the deleted order
-      if (detailOrder && detailOrder.id === orderId) {
-        setDetailOrder(null);
+          showToast(lang === 'CZ' ? `Objednávka #${orderId} byla úspěšně smazána.` : `Order #${orderId} deleted successfully.`, 'success');
+          
+          // Close detail view if it was the deleted order
+          if (detailOrder && detailOrder.id === orderId) {
+            setDetailOrder(null);
+          }
+
+          // Remove from selected list
+          setSelectedOrderIds(prev => prev.filter(id => id !== orderId));
+          
+          // Refresh the list
+          fetchOrdersList();
+        } catch (err) {
+          console.error('Failed to delete order:', err);
+          showToast(lang === 'CZ' ? 'Chyba při mazání objednávky.' : 'Error deleting order.', 'error');
+        }
       }
-
-      // Remove from selected list
-      setSelectedOrderIds(prev => prev.filter(id => id !== orderId));
-      
-      // Refresh the list
-      fetchOrdersList();
-    } catch (err) {
-      console.error('Failed to delete order:', err);
-      showToast(lang === 'CZ' ? 'Chyba při mazání objednávky.' : 'Error deleting order.', 'error');
-    }
+    });
   };
 
-  const handleDeleteSelectedOrders = async () => {
-    const confirmMsg = lang === 'CZ'
+  const handleDeleteSelectedOrders = () => {
+    const title = lang === 'CZ' ? 'Smazat vybrané?' : 'Delete Selected?';
+    const message = lang === 'CZ'
       ? `Opravdu chcete smazat ${selectedOrderIds.length} vybraných objednávek?`
       : `Are you sure you want to delete ${selectedOrderIds.length} selected orders?`;
 
-    if (!window.confirm(confirmMsg)) return;
+    setConfirmModal({
+      isOpen: true,
+      title,
+      message,
+      onConfirm: async () => {
+        let successCount = 0;
+        let failCount = 0;
 
-    let successCount = 0;
-    let failCount = 0;
+        for (const orderId of selectedOrderIds) {
+          try {
+            const filename = `order_${orderId}.json`;
+            const { error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
+              method: 'DELETE'
+            });
+            if (error) throw error;
+            successCount++;
+          } catch (err) {
+            console.error(`Failed to delete order ${orderId}:`, err);
+            failCount++;
+          }
+        }
 
-    for (const orderId of selectedOrderIds) {
-      try {
-        const filename = `order_${orderId}.json`;
-        const { error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
-          method: 'DELETE'
-        });
-        if (error) throw error;
-        successCount++;
-      } catch (err) {
-        console.error(`Failed to delete order ${orderId}:`, err);
-        failCount++;
+        if (successCount > 0) {
+          showToast(
+            lang === 'CZ' 
+              ? `Úspěšně smazáno ${successCount} objednávek.${failCount > 0 ? ` Se selháním u ${failCount} objednávek.` : ''}`
+              : `Successfully deleted ${successCount} orders.${failCount > 0 ? ` Failed for ${failCount} orders.` : ''}`,
+            'success'
+          );
+        } else if (failCount > 0) {
+          showToast(lang === 'CZ' ? 'Všechna mazání selhala.' : 'All deletions failed.', 'error');
+        }
+
+        setSelectedOrderIds([]);
+        setDetailOrder(null);
+        fetchOrdersList();
       }
-    }
-
-    if (successCount > 0) {
-      showToast(
-        lang === 'CZ' 
-          ? `Úspěšně smazáno ${successCount} objednávek.${failCount > 0 ? ` Se selháním u ${failCount} objednávek.` : ''}`
-          : `Successfully deleted ${successCount} orders.${failCount > 0 ? ` Failed for ${failCount} orders.` : ''}`,
-        'success'
-      );
-    } else if (failCount > 0) {
-      showToast(lang === 'CZ' ? 'Všechna mazání selhala.' : 'All deletions failed.', 'error');
-    }
-
-    setSelectedOrderIds([]);
-    setDetailOrder(null);
-    fetchOrdersList();
+    });
   };
 
   // Direct GLS API Labeling Call
@@ -1933,7 +1952,74 @@ export default function OrdersTab({ showToast }) {
           </div>
         </div>
       )}
-
+      {/* Custom Confirmation Modal */}
+      {confirmModal.isOpen && createPortal(
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.85)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'var(--bg-secondary, #141416)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '12px',
+            padding: '28px',
+            maxWidth: '400px',
+            width: '90%',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
+          }}>
+            <h4 style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff', margin: '0 0 12px 0' }}>
+              {confirmModal.title}
+            </h4>
+            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', margin: '0 0 24px 0', lineHeight: '1.5' }}>
+              {confirmModal.message}
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#fff',
+                  padding: '10px 16px',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null })}
+              >
+                {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                style={{
+                  background: '#ef4444',
+                  border: '1px solid #ef4444',
+                  color: '#fff',
+                  padding: '10px 16px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+                onClick={() => {
+                  if (confirmModal.onConfirm) confirmModal.onConfirm();
+                  setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null });
+                }}
+              >
+                {lang === 'CZ' ? 'Smazat' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
     </div>
   );
