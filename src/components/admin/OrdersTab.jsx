@@ -29,6 +29,8 @@ export default function OrdersTab({ showToast }) {
   const [dpdCustomerNumber, setDpdCustomerNumber] = useState('10029618142');
   const [dpdAddressId, setDpdAddressId] = useState('15908093');
   const [dpdTestMode, setDpdTestMode] = useState(true);
+  const [showGlsPassword, setShowGlsPassword] = useState(false);
+  const [showDpdApiKey, setShowDpdApiKey] = useState(false);
 
   // Background loading reference to avoid duplicates
   const loadingQueueRef = useRef([]);
@@ -1202,7 +1204,35 @@ export default function OrdersTab({ showToast }) {
                 </label>
                 <label className="orders-settings-field">
                   <span>{lang === 'CZ' ? 'Heslo do MyGLS' : 'MyGLS Password'}</span>
-                  <input type="password" placeholder="••••••••" value={glsPassword} onChange={e => setGlsPassword(e.target.value)} />
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input 
+                      type={showGlsPassword ? "text" : "password"} 
+                      placeholder="••••••••" 
+                      value={glsPassword} 
+                      onChange={e => setGlsPassword(e.target.value)} 
+                      style={{ width: '100%', paddingRight: '40px' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowGlsPassword(!showGlsPassword)}
+                      style={{
+                        position: 'absolute',
+                        right: '10px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#8a8a92',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        padding: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      title={showGlsPassword ? "Skrýt heslo" : "Zobrazit heslo"}
+                    >
+                      {showGlsPassword ? "🙈" : "👁️"}
+                    </button>
+                  </div>
                 </label>
                 <label className="orders-settings-field">
                   <span>{lang === 'CZ' ? 'Typ tiskárny' : 'Printer Type'}</span>
@@ -1227,7 +1257,35 @@ export default function OrdersTab({ showToast }) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <label className="orders-settings-field">
                   <span>{lang === 'CZ' ? 'API Klíč' : 'API Key'}</span>
-                  <input type="password" placeholder="••••••••" value={dpdApiKey} onChange={e => setDpdApiKey(e.target.value)} />
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input 
+                      type={showDpdApiKey ? "text" : "password"} 
+                      placeholder="••••••••" 
+                      value={dpdApiKey} 
+                      onChange={e => setDpdApiKey(e.target.value)} 
+                      style={{ width: '100%', paddingRight: '40px' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowDpdApiKey(!showDpdApiKey)}
+                      style={{
+                        position: 'absolute',
+                        right: '10px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#8a8a92',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        padding: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      title={showDpdApiKey ? "Skrýt klíč" : "Zobrazit klíč"}
+                    >
+                      {showDpdApiKey ? "🙈" : "👁️"}
+                    </button>
+                  </div>
                 </label>
                 <label className="orders-settings-field">
                   <span>{lang === 'CZ' ? 'Zákaznické číslo (DSW)' : 'Customer Number (DSW)'}</span>
