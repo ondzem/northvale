@@ -24,6 +24,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const [ico, setIco] = useState('');
   const [dic, setDic] = useState('');
   const [pickupPoint, setPickupPoint] = useState('');
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [mapType, setMapType] = useState('');
   const [notes, setNotes] = useState('');
 
   // Discount code states
@@ -339,6 +341,59 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     handleCallback();
   }, [cart, cartSubtotal, shippingCost, paymentSurcharge, finalTotal, actualAppliedCredit, shipping, lang, appliedDiscount, discountAmount]);
 
+  useEffect(() => {
+    const handleWidgetMessage = (event) => {
+      // 1. DPD Widget Message handler
+      if (event.data && event.data.dpdWidget) {
+        const dpd = event.data.dpdWidget;
+        console.log("DPD Widget message received:", dpd);
+        if (dpd.message === "widgetClose") {
+          setShowMapModal(false);
+          return;
+        }
+
+        let address = '';
+        if (dpd.pickupPointResult) {
+          address = dpd.pickupPointResult;
+        } else if (dpd.address) {
+          address = `${dpd.name || ''}, ${dpd.address}`;
+        } else if (typeof dpd === 'string') {
+          address = dpd;
+        } else {
+          address = dpd.name || dpd.label || dpd.id || JSON.stringify(dpd);
+        }
+
+        if (address && address !== "widgetClose") {
+          setPickupPoint(address);
+          setShowMapModal(false);
+          if (alert) {
+            alert(lang === 'CZ' ? 'Výdejní místo DPD bylo úspěšně vybráno.' : 'DPD pickup point selected.', 'success');
+          }
+        }
+      }
+
+      // 2. GLS Widget Message handler
+      if (event.data && event.data.parcelshop) {
+        const ps = event.data.parcelshop;
+        console.log("GLS Widget message received:", ps);
+        const detail = ps.detail;
+        if (detail) {
+          const address = `${detail.name}, ${detail.street}, ${detail.city} (ID: ${detail.pclshopid})`;
+          setPickupPoint(address);
+          setShowMapModal(false);
+          if (alert) {
+            alert(lang === 'CZ' ? 'Výdejní místo GLS bylo úspěšně vybráno.' : 'GLS pickup point selected.', 'success');
+          }
+        }
+      }
+    };
+
+    window.addEventListener('message', handleWidgetMessage);
+    return () => {
+      window.removeEventListener('message', handleWidgetMessage);
+    };
+  }, [lang]);
+
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
     if (cart.length === 0) {
@@ -518,6 +573,45 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '8px' }}>
                 {lang === 'CZ' ? 'Komunikujeme s platební bránou GP webpay, prosím nezavírejte toto okno.' : 'Communicating with GP webpay payment gateway, please do not close this window.'}
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showMapModal && (
+        <div className="co-modal-overlay" style={{ zIndex: 11000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="co-modal-content" style={{ width: '90%', maxWidth: '850px', height: '80vh', padding: '20px', display: 'flex', flexDirection: 'column', background: '#121212', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, color: 'var(--nv-gold, #fdbd16)', fontSize: '16px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {mapType === 'dpd' 
+                  ? (lang === 'CZ' ? 'Vyberte výdejní místo DPD' : 'Select DPD Pickup Point')
+                  : (lang === 'CZ' ? 'Vyberte výdejní místo GLS' : 'Select GLS Pickup Point')}
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => setShowMapModal(false)}
+                style={{ background: 'transparent', border: 'none', color: '#8a8a92', fontSize: '24px', cursor: 'pointer', transition: 'color 0.2s' }}
+                onMouseEnter={(e) => e.target.style.color = '#fff'}
+                onMouseLeave={(e) => e.target.style.color = '#8a8a92'}
+              >
+                &times;
+              </button>
+            </div>
+            
+            <div style={{ flex: 1, width: '100%', background: '#fff', borderRadius: '6px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+              {mapType === 'dpd' ? (
+                <iframe 
+                  src="https://api.dpd.cz/widget/latest/index.html?hideCloseButton=true&countries=CZ" 
+                  style={{ width: '100%', height: '100%', border: 'none' }}
+                  title="DPD Widget"
+                />
+              ) : (
+                <iframe 
+                  src="https://ps-maps.gls-czech.com?find=1&ctrcode=CZ&lang=cs" 
+                  style={{ width: '100%', height: '100%', border: 'none' }}
+                  title="GLS Widget"
+                />
+              )}
             </div>
           </div>
         </div>
