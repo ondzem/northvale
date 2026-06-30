@@ -9719,5 +9719,80 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   background: rgba(253, 189, 22, 0.2);
 }
 
-
-
+@media (max-width: 768px) {
+  .adf-toolbar {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+  .adf-tsearch {
+    max-width: none !important;
+    width: 100% !important;
+  }
+  .adf-toolbar > div {
+    width: 100% !important;
+  }
+  .adf-toolbar button, .adf-toolbar select, .adf-toolbar input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .nv-excel-container {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    margin-top: 12px;
+  }
+  .nv-excel-table,
+  .nv-excel-table thead,
+  .nv-excel-table tbody,
+  .nv-excel-table th,
+  .nv-excel-table td,
+  .nv-excel-table tr {
+    display: block;
+    min-width: 0 !important;
+  }
+  .nv-excel-table thead {
+    display: none;
+  }
+  .nv-excel-table tr {
+    background: rgba(24, 24, 28, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  }
+  .nv-excel-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 8px 0;
+    text-align: right;
+  }
+  .nv-excel-table td:last-child {
+    border-bottom: none;
+    padding-top: 12px;
+    justify-content: center;
+  }
+  .nv-excel-table td:before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: #8a8a92;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+    margin-right: 12px;
+  }
+  .nv-excel-input,
+  .nv-excel-select {
+    max-width: 60%;
+    font-size: 12px;
+  }
+  /* Fix modal layouts on mobile */
+  .pmf-modal-split-layout {
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+}

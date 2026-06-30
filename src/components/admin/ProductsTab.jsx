@@ -1789,7 +1789,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
                 return (
                   <tr key={p.id}>
-                    <td style={{ textAlign: 'center' }}>
+                    <td data-label={lang === 'CZ' ? 'Náhled' : 'Preview'} style={{ textAlign: 'center' }}>
                       <div style={{ width: '36px', height: '36px', overflow: 'hidden', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: '#121216', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
                         {p.image ? (
                           <img src={p.image} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }} />
@@ -1798,12 +1798,12 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         )}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="SKU / ID">
                       <code style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', color: 'var(--nv-gold, #fdbd16)', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '150px' }} title={p.id}>
                         {p.id}
                       </code>
                     </td>
-                    <td>
+                    <td data-label={lang === 'CZ' ? 'Název' : 'Name'}>
                       <input
                         type="text"
                         className="nv-excel-input"
@@ -1811,7 +1811,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         onChange={e => handleExcelRowChange(p.id, 'name', e.target.value)}
                       />
                     </td>
-                    <td>
+                    <td data-label={lang === 'CZ' ? 'Hra' : 'Game'}>
                       <select
                         className="nv-excel-select"
                         value={currentP.game || ''}
@@ -1828,7 +1828,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         <option value="Acrylics">{lang === 'CZ' ? 'Akryly' : 'Acrylics'}</option>
                       </select>
                     </td>
-                    <td>
+                    <td data-label={lang === 'CZ' ? 'Kategorie' : 'Category'}>
                       <select
                         className="nv-excel-select"
                         value={currentP.category_id || ''}
@@ -1842,7 +1842,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         ))}
                       </select>
                     </td>
-                    <td>
+                    <td data-label={lang === 'CZ' ? 'Typ' : 'Type'}>
                       <select
                         className="nv-excel-select"
                         value={currentP.type || ''}
@@ -1855,7 +1855,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         <option value="accessory">Accessory</option>
                       </select>
                     </td>
-                    <td>
+                    <td data-label={lang === 'CZ' ? 'Cena' : 'Price'}>
                       {currentP.type === 'single' ? (
                         <span className="nv-excel-badge-single" onClick={() => handleOpenEditModal(p)}>
                           {lang === 'CZ' ? 'Varianty' : 'Variants'}
@@ -1871,7 +1871,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         />
                       )}
                     </td>
-                    <td>
+                    <td data-label={lang === 'CZ' ? 'Sklad' : 'Stock'}>
                       {currentP.type === 'single' ? (
                         <span style={{ fontSize: '11px', color: '#8a8a92' }}>
                           {(p.variants || []).reduce((sum, v) => sum + v.stock, 0)} ks
@@ -1903,7 +1903,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           onChange={e => handleExcelRowChange(p.id, 'investment', e.target.checked)}
                         />
                       </td> */}
-                    <td style={{ textAlign: 'center' }}>
+                    <td data-label={lang === 'CZ' ? 'Akce' : 'Actions'} style={{ textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
                         <button
                           type="button"

@@ -1310,6 +1310,101 @@ export default function OrdersTab({ showToast }) {
           border-top: 1px solid rgba(255,255,255,0.08);
           padding-top: 8px;
         }
+
+        @media (max-width: 768px) {
+          .orders-toolbar {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 12px !important;
+          }
+          .orders-search-group {
+            max-width: none !important;
+            flex-direction: column;
+            width: 100%;
+          }
+          .orders-search-group input, .orders-search-group select {
+            width: 100%;
+            box-sizing: border-box;
+          }
+          .orders-table-wrapper {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+          }
+          .orders-table, .orders-table thead, .orders-table tbody, .orders-table th, .orders-table td, .orders-table tr {
+            display: block !important;
+          }
+          .orders-table thead {
+            display: none !important;
+          }
+          .orders-table tr {
+            background: rgba(24, 24, 28, 0.7) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 8px !important;
+            padding: 16px !important;
+            margin-bottom: 16px !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+          }
+          .orders-table td {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+            padding: 8px 0 !important;
+            text-align: right !important;
+          }
+          .orders-table td:last-child {
+            border-bottom: none !important;
+            padding-top: 12px !important;
+            justify-content: center !important;
+          }
+          .orders-table td:before {
+            content: attr(data-label);
+            font-weight: 700;
+            color: #8a8a92;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: left;
+            margin-right: 12px;
+          }
+          .orders-checkbox-col {
+            justify-content: flex-start !important;
+            padding-bottom: 12px !important;
+          }
+          .orders-checkbox-col:before {
+            content: attr(data-label) !important;
+          }
+          .orders-floating-bar {
+            width: calc(100% - 32px) !important;
+            bottom: 16px !important;
+            flex-direction: column !important;
+            gap: 12px !important;
+            padding: 12px 16px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            box-sizing: border-box;
+          }
+          .orders-floating-actions {
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            width: 100% !important;
+            gap: 8px !important;
+          }
+          .orders-floating-actions button {
+            flex: 1 1 45% !important;
+            font-size: 11px !important;
+            padding: 6px 8px !important;
+          }
+          /* Detail Modal responsive fixes */
+          .orders-modal-content {
+            padding: 16px !important;
+          }
+          .orders-modal-grid {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+          }
+        }
       `}</style>
 
       {/* API Settings Panel */}
@@ -1547,20 +1642,20 @@ export default function OrdersTab({ showToast }) {
                 return (
                   <Fragment key={file.name}>
                     <tr style={{ borderBottom: detailOrder && detailOrder.id === (details?.id || orderId) ? 'none' : '1px solid rgba(240, 240, 240, 0.04)' }}>
-                      <td className="orders-checkbox-col">
+                      <td className="orders-checkbox-col" data-label={lang === 'CZ' ? 'Vybrat' : 'Select'}>
                         <input 
                           type="checkbox" 
                           checked={isSelected}
                           onChange={() => handleSelectOrder(details?.id || orderId)}
                         />
                       </td>
-                      <td style={{ fontWeight: '700', color: 'var(--nv-gold, #fdbd16)' }}>
+                      <td data-label={lang === 'CZ' ? 'Číslo objednávky' : 'Order ID'} style={{ fontWeight: '700', color: 'var(--nv-gold, #fdbd16)' }}>
                         #{details?.id || orderId}
                       </td>
-                      <td>
+                      <td data-label={lang === 'CZ' ? 'Datum' : 'Date'}>
                         {details?.date ? (details.date.includes('.') ? details.date : new Date(details.date).toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US')) : fileDateStr}
                       </td>
-                      <td>
+                      <td data-label={lang === 'CZ' ? 'Zákazník' : 'Customer'}>
                         {details ? (
                           <div>
                             <div style={{ fontWeight: '600' }}>{details.customerName}</div>
@@ -1570,7 +1665,7 @@ export default function OrdersTab({ showToast }) {
                           <span style={{ color: '#8a8a92', fontSize: '12px' }}>{lang === 'CZ' ? 'Načítám...' : 'Loading...'}</span>
                         )}
                       </td>
-                      <td>
+                      <td data-label={lang === 'CZ' ? 'Dopravce' : 'Carrier'}>
                         {details ? (
                           <span className={`orders-badge ${getCarrierBadgeClass(details.carrier)}`}>
                             {details.carrier}
@@ -1579,21 +1674,21 @@ export default function OrdersTab({ showToast }) {
                           <span style={{ color: '#8a8a92', fontSize: '12px' }}>-</span>
                         )}
                       </td>
-                      <td>
+                      <td data-label={lang === 'CZ' ? 'Platba' : 'Payment'}>
                         {details ? (
                           <span style={{ fontSize: '12px' }}>{details.paymentMethod}</span>
                         ) : (
                           <span style={{ color: '#8a8a92', fontSize: '12px' }}>-</span>
                         )}
                       </td>
-                      <td style={{ fontWeight: '700' }}>
+                      <td data-label={lang === 'CZ' ? 'Celkem' : 'Total Price'} style={{ fontWeight: '700' }}>
                         {details ? (
                           `${details.totalPrice.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč`
                         ) : (
                           <span style={{ color: '#8a8a92', fontSize: '12px' }}>-</span>
                         )}
                       </td>
-                      <td style={{ textAlign: 'right' }}>
+                      <td data-label={lang === 'CZ' ? 'Akce' : 'Actions'} style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
                           {isGls && (
                             <button 
