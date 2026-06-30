@@ -1387,26 +1387,6 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                     <span className={`pof-price ${shipping === 'pardubice' ? 'is-free' : ''}`}>{lang === 'CZ' ? 'Zdarma' : 'Free'}</span>
                   </button>
 
-                  {/* Zásilkovna */}
-                  <button 
-                    type="button"
-                    className={`pof-radio ${shipping === 'zasilkovna' ? 'is-active' : ''}`}
-                    onClick={() => setShipping('zasilkovna')}
-                  >
-                    <span className="pof-radio-dot" aria-hidden="true"></span>
-                    <span className="pof-radio-body">
-                      <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'Zásilkovna - Výdejní místo / Z-BOX' : 'Packeta - Pickup Point / Z-BOX'}
-                      </span>
-                      <span className="pof-radio-desc">
-                        {lang === 'CZ' ? 'Doručení na vybranou pobočku Zásilkovny.' : 'Delivery to selected Packeta pickup point.'}
-                      </span>
-                    </span>
-                    <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
-                      {getShippingPriceDisplay('zasilkovna', 79)}
-                    </span>
-                  </button>
-
                   {/* GLS */}
                   <button 
                     type="button"
