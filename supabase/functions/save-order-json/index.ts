@@ -16,8 +16,37 @@ serve(async (req) => {
   }
 
   try {
+    if (req.method === "GET") {
+      const url = new URL(req.url);
+      const filename = url.searchParams.get("filename");
+
+      const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+      if (filename) {
+        const { data, error } = await supabase.storage.from("pohoda-orders").download(filename);
+        if (error) throw error;
+        const text = await data.text();
+        return new Response(text, {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      } else {
+        const { data, error } = await supabase.storage.from("pohoda-orders").list("", {
+          limit: 100,
+          sortBy: { column: "name", order: "desc" }
+        });
+        if (error) throw error;
+        return new Response(JSON.stringify({ files: data }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     if (req.method !== "POST") {
-      return new Response(JSON.stringify({ error: "Method not allowed. Use POST." }), {
+      return new Response(JSON.stringify({ error: "Method not allowed. Use POST or GET." }), {
         status: 405,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

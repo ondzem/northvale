@@ -80,17 +80,14 @@ export default function OrdersTab({ showToast }) {
   const fetchOrdersList = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.storage
-        .from('pohoda-orders')
-        .list('', {
-          limit: 100,
-          sortBy: { column: 'name', order: 'desc' }
-        });
+      const { data, error } = await supabase.functions.invoke('save-order-json', {
+        method: 'GET'
+      });
 
       if (error) throw error;
 
       // Filter files matching order_*.xml or order_*.json format
-      const orderFiles = (data || []).filter(f => f.name.startsWith('order_') && (f.name.endsWith('.xml') || f.name.endsWith('.json')));
+      const orderFiles = ((data && data.files) || []).filter(f => f.name.startsWith('order_') && (f.name.endsWith('.xml') || f.name.endsWith('.json')));
       setFiles(orderFiles);
       
       // Start background loading for missing details
@@ -122,17 +119,17 @@ export default function OrdersTab({ showToast }) {
         const batch = loadingQueueRef.current.splice(0, batchSize);
         await Promise.all(batch.map(async (filename) => {
           try {
-            const { data, error } = await supabase.storage
-              .from('pohoda-orders')
-              .download(filename);
+            const { data, error } = await supabase.functions.invoke('save-order-json', {
+              method: 'GET',
+              queryParams: { filename }
+            });
             
             if (error) throw error;
             
             let parsed;
-            const textContent = await data.text();
             
             if (filename.endsWith('.json')) {
-              const jsonObj = JSON.parse(textContent);
+              const jsonObj = typeof data === 'string' ? JSON.parse(data) : data;
               const o = jsonObj.order;
               parsed = {
                 id: o.id,
@@ -187,6 +184,7 @@ export default function OrdersTab({ showToast }) {
                 });
               }
             } else {
+              const textContent = typeof data === 'string' ? data : JSON.stringify(data);
               parsed = parseOrderXml(textContent, filename);
             }
             
