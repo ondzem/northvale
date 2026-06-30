@@ -101,10 +101,10 @@ export default function OrderConfirmation({ order, setActivePage }) {
         {isBankTransfer && (
           <div style={{
             width: '100%',
-            background: 'rgba(253, 189, 22, 0.04)',
-            border: '1px solid rgba(253, 189, 22, 0.15)',
-            borderRadius: '8px',
-            padding: '24px',
+            background: 'transparent',
+            border: 'none',
+            borderRadius: '0',
+            padding: '0',
             marginBottom: '36px',
             textAlign: 'left',
             display: 'flex',

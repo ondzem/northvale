@@ -120,13 +120,31 @@ serve(async (req) => {
           děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. V samostatném e-mailu Vám zasíláme také daňový doklad (fakturu).
         </p>
 
+        <!-- Shipping details container -->
+        <div style="border-top: 1px solid rgba(0,0,0,0.08); border-bottom: 1px solid rgba(0,0,0,0.08); padding: 20px 0; margin-bottom: 24px;">
+          <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em; font-family: sans-serif;">
+            ${isPersonalPickup ? '📍 Osobní odběr — Holice' : '📦 Doručení zásilky'}
+          </div>
+          <p style="font-size: 15px; color: #111111; margin: 0 0 8px 0;">
+            Způsob doručení: <strong>${order.shippingMethod}</strong>
+          </p>
+          <p style="font-size: 13.5px; line-height: 1.5; color: #666666; margin: 0;">
+            ${isPersonalPickup 
+              ? 'Zboží pro Vás začínáme připravovat. Jakmile bude objednávka připravena k vyzvednutí na naší kontaktní adrese <strong>Bratří Čapků 1095, 534 01 Holice</strong>, zašleme Vám e-mail a SMS.'
+              : isBankTransfer
+                ? 'Jakmile obdržíme Vaši platbu na náš účet, objednávku zpracujeme a předáme dopravci. O odeslání Vás budeme informovat.'
+                : 'Vaše platba byla úspěšně přijata. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. Sledujte prosím svůj e-mail pro sledovací číslo zásilky.'
+            }
+          </p>
+        </div>
+
         <!-- Bank transfer details container -->
         ${isBankTransfer ? `
-        <div style="background-color: rgba(253, 189, 22, 0.04); border: 1px solid rgba(253, 189, 22, 0.15); padding: 20px; margin-bottom: 24px; border-radius: 6px;">
+        <div style="border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 24px; margin-bottom: 24px;">
           <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em; font-family: sans-serif;">
             💰 Pokyny k platbě převodem
           </div>
-          <p style="font-size: 14px; color: #222222; margin: 0 0 16px 0; line-height: 1.5;">
+          <p style="font-size: 14.5px; color: #222222; margin: 0 0 16px 0; line-height: 1.5;">
             Zvolili jste platbu bankovním převodem. Prosím zašlete celkovou částku na náš bankovní účet:
           </p>
           <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
@@ -156,24 +174,6 @@ serve(async (req) => {
           </div>
         </div>
         ` : ''}
-
-        <!-- Shipping details container -->
-        <div style="border-top: 1px solid rgba(0,0,0,0.08); border-bottom: 1px solid rgba(0,0,0,0.08); padding: 20px 0; margin-bottom: 24px;">
-          <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em; font-family: sans-serif;">
-            ${isPersonalPickup ? '📍 Osobní odběr — Holice' : '📦 Doručení zásilky'}
-          </div>
-          <p style="font-size: 15px; color: #111111; margin: 0 0 8px 0;">
-            Způsob doručení: <strong>${order.shippingMethod}</strong>
-          </p>
-          <p style="font-size: 13.5px; line-height: 1.5; color: #666666; margin: 0;">
-            ${isPersonalPickup 
-              ? 'Zboží pro Vás začínáme připravovat. Jakmile bude objednávka připravena k vyzvednutí na naší kontaktní adrese <strong>Bratří Čapků 1095, 534 01 Holice</strong>, zašleme Vám e-mail a SMS.'
-              : isBankTransfer
-                ? 'Jakmile obdržíme Vaši platbu na náš účet, objednávku zpracujeme a předáme dopravci. O odeslání Vás budeme informovat.'
-                : 'Vaše platba byla úspěšně přijata. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. Sledujte prosím svůj e-mail pro sledovací číslo zásilky.'
-            }
-          </p>
-        </div>
 
         <!-- Summary Label -->
         <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #888888; margin-bottom: 14px; letter-spacing: 0.05em; font-family: sans-serif;">

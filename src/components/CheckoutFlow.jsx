@@ -1735,7 +1735,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                         {lang === 'CZ' ? 'Bankovní převod' : 'Bank Transfer'}
                       </span>
                       <span className="pof-radio-desc">
-                        {lang === 'CZ' ? 'Převod peněz z Vašeho účtu. Objednávka se vyřídí po připsání platby (Ideální pro testování).' : 'Transfer money from your bank account. Order is processed after payment is received.'}
+                        {lang === 'CZ' ? 'Převod peněz z Vašeho účtu. Objednávka se vyřídí po připsání platby.' : 'Transfer money from your bank account. Order is processed after payment is received.'}
                       </span>
                     </span>
                   </button>
@@ -1758,6 +1758,23 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                     <span className="pof-price">+25 Kč</span>
                   </button>
                 </div>
+
+                {payment === 'transfer' && (
+                  <div style={{
+                    marginTop: '12px',
+                    padding: '12px 16px',
+                    background: 'rgba(253, 189, 22, 0.04)',
+                    border: '1px dashed rgba(253, 189, 22, 0.25)',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    color: 'var(--nv-gold, #fdbd16)',
+                    lineHeight: '1.4'
+                  }}>
+                    💡 {lang === 'CZ' 
+                      ? 'Platební údaje a QR kód pro platbu se zobrazí ihned po dokončení objednávky a zašleme Vám je i e-mailem. Zásilku odešleme po připsání platby.' 
+                      : 'Payment details and QR code will be displayed immediately after completing your order and sent to your email. The shipment is dispatched once payment is received.'}
+                  </div>
+                )}
               </section>
             </div>
 
