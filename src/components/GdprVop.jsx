@@ -166,7 +166,10 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
           top: '90px'
         }}>
           <button
-            onClick={() => setActiveTab('doprava')}
+            onClick={() => {
+              setActiveTab('doprava');
+              setActivePage('gdpr-vop', 'doprava');
+            }}
             className={`btn ${activeTab === 'doprava' ? 'btn-primary' : ''}`}
             style={{
               width: '100%',
@@ -189,7 +192,10 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
             {lang === 'EN' ? 'Shipping & Payment' : 'Doprava a platba'}
           </button>
           <button
-            onClick={() => setActiveTab('vop')}
+            onClick={() => {
+              setActiveTab('vop');
+              setActivePage('gdpr-vop', 'vop');
+            }}
             className={`btn ${activeTab === 'vop' ? 'btn-primary' : ''}`}
             style={{
               width: '100%',
@@ -212,7 +218,10 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
             {t('Footer.terms')}
           </button>
           <button
-            onClick={() => setActiveTab('gdpr')}
+            onClick={() => {
+              setActiveTab('gdpr');
+              setActivePage('gdpr-vop', 'gdpr');
+            }}
             className={`btn ${activeTab === 'gdpr' ? 'btn-primary' : ''}`}
             style={{
               width: '100%',
@@ -235,7 +244,10 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
             {t('Footer.privacy')}
           </button>
           <button
-            onClick={() => setActiveTab('odstoupeni')}
+            onClick={() => {
+              setActiveTab('odstoupeni');
+              setActivePage('gdpr-vop', 'odstoupeni');
+            }}
             className={`btn ${activeTab === 'odstoupeni' ? 'btn-primary' : ''}`}
             style={{
               width: '100%',
@@ -571,7 +583,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   6.2. The withdrawal notice can be sent to the registered office address of NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice, or via email to info@northvaletcg.eu.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  6.3. For swift processing, the Buyer is highly recommended to use our **online interactive form** available directly on our website under the <span style={{ color: 'var(--color-gold)', fontWeight: '700', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setActiveTab('odstoupeni')}>Order Withdrawal</span> tab. Using this form ensures immediate registration of the request and speeds up the refund process.
+                  6.3. For swift processing, the Buyer is highly recommended to use our **online interactive form** available directly on our website under the <span style={{ color: 'var(--color-gold)', fontWeight: '700', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => { setActiveTab('odstoupeni'); setActivePage('gdpr-vop', 'odstoupeni'); }}>Order Withdrawal</span> tab. Using this form ensures immediate registration of the request and speeds up the refund process.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   6.4. The Buyer must return the goods to the Seller within 14 days of withdrawal. The Buyer bears the direct costs of returning the goods (e.g. postage/shipping fees).
@@ -763,7 +775,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   6.2. Odstoupení od kupní smlouvy může kupující zaslat na adresu sídla společnosti NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice, nebo na e-mailovou adresu info@northvaletcg.eu.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  6.3. Pro odstoupení doporučujeme využít **on-line interaktivní formulář** dostupný přímo na našem webu v záložce <span style={{ color: 'var(--color-gold)', fontWeight: '700', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setActiveTab('odstoupeni')}>Odstoupení od smlouvy</span>. Použitím tohoto formuláře dojde k okamžitému zaevidování vaší žádosti a zrychlení procesu vrácení peněz.
+                  6.3. Pro odstoupení doporučujeme využít **on-line interaktivní formulář** dostupný přímo na našem webu v záložce <span style={{ color: 'var(--color-gold)', fontWeight: '700', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => { setActiveTab('odstoupeni'); setActivePage('gdpr-vop', 'odstoupeni'); }}>Odstoupení od smlouvy</span>. Použitím tohoto formuláře dojde k okamžitému zaevidování vaší žádosti a zrychlení procesu vrácení peněz.
                 </p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   6.4. Kupující je povinen zaslat nebo předat zboží zpět prodávajícímu do 14 dnů od odstoupení od smlouvy. Kupující nese přímé náklady spojené s vrácením zboží (např. poštovné a balné).

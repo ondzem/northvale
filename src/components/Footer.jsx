@@ -113,20 +113,71 @@ export default function Footer({ setActivePage, activePage }) {
         <div className="footer-column footer-col-company">
           <h4 className="footer-heading">{lang === 'CZ' ? 'O společnosti' : 'Company'}</h4>
           <ul className="footer-list">
-            <li className="footer-link" onClick={() => setActivePage('about')}>{t('Navbar.aboutUs')}</li>
-            <li className="footer-link" onClick={() => setActivePage('support')}>{t('Navbar.contact')}</li>
-            <li className="footer-link" onClick={() => setActivePage('blog')}>Blog</li>
-            <li className="footer-link" onClick={() => setActivePage('faq')}>{t('Footer.faq')}</li>
-            <li className="footer-link" onClick={() => {
-              setActivePage('home');
-              setTimeout(() => {
-                const element = document.getElementById('popular-categories');
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-              }, 100);
-            }}>
-              {lang === 'CZ' ? 'Nabízené produkty' : 'Our Products'}
+            <li>
+              <a 
+                href="/about" 
+                className="footer-link" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActivePage('about');
+                }}
+              >
+                {t('Navbar.aboutUs')}
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/support" 
+                className="footer-link" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActivePage('support');
+                }}
+              >
+                {t('Navbar.contact')}
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/blog" 
+                className="footer-link" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActivePage('blog');
+                }}
+              >
+                Blog
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/faq" 
+                className="footer-link" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActivePage('faq');
+                }}
+              >
+                {t('Footer.faq')}
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/" 
+                className="footer-link" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActivePage('home');
+                  setTimeout(() => {
+                    const element = document.getElementById('popular-categories');
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                  }, 100);
+                }}
+              >
+                {lang === 'CZ' ? 'Nabízené produkty' : 'Our Products'}
+              </a>
             </li>
           </ul>
         </div>
@@ -135,11 +186,64 @@ export default function Footer({ setActivePage, activePage }) {
         <div className="footer-column footer-col-purchase">
           <h4 className="footer-heading">{t('Footer.customerService')}</h4>
           <ul className="footer-list">
-            <li className="footer-link" onClick={() => window.dispatchEvent(new Event('open-cookie-settings'))}>{t('Footer.cookies')}</li>
-            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'doprava')}>{lang === 'CZ' ? 'Doprava a osobní odběr' : 'Shipping & Pickup'}</li>
-            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'vop')}>{t('Footer.terms')}</li>
-            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'gdpr')}>{t('Footer.privacy')}</li>
-            <li className="footer-link" onClick={() => setActivePage('gdpr-vop', 'odstoupeni')}>{lang === 'CZ' ? 'Odstoupení od smlouvy' : 'Order Withdrawal'}</li>
+            <li>
+              <button 
+                type="button"
+                className="footer-link" 
+                onClick={() => window.dispatchEvent(new Event('open-cookie-settings'))}
+                style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', color: 'inherit', cursor: 'pointer' }}
+              >
+                {t('Footer.cookies')}
+              </button>
+            </li>
+            <li>
+              <a 
+                href="/gdpr-vop?tab=doprava" 
+                className="footer-link" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActivePage('gdpr-vop', 'doprava');
+                }}
+              >
+                {lang === 'CZ' ? 'Doprava a osobní odběr' : 'Shipping & Pickup'}
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/gdpr-vop?tab=vop" 
+                className="footer-link" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActivePage('gdpr-vop', 'vop');
+                }}
+              >
+                {t('Footer.terms')}
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/gdpr-vop?tab=gdpr" 
+                className="footer-link" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActivePage('gdpr-vop', 'gdpr');
+                }}
+              >
+                {t('Footer.privacy')}
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/gdpr-vop?tab=odstoupeni" 
+                className="footer-link" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActivePage('gdpr-vop', 'odstoupeni');
+                }}
+              >
+                {lang === 'CZ' ? 'Odstoupení od smlouvy' : 'Order Withdrawal'}
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -149,13 +253,46 @@ export default function Footer({ setActivePage, activePage }) {
             <h4 className="footer-heading">{lang === 'CZ' ? 'Pro zákazníky' : 'Customer Service'}</h4>
             <ul className="footer-list">
               {FEATURE_FLAGS.showBuylist && (
-                <li className="footer-link" onClick={() => setActivePage('buylist')}>{lang === 'CZ' ? 'Výkup karet (Buylist)' : 'Card Buylist'}</li>
+                <li>
+                  <a 
+                    href="/buylist" 
+                    className="footer-link" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActivePage('buylist');
+                    }}
+                  >
+                    {lang === 'CZ' ? 'Výkup karet (Buylist)' : 'Card Buylist'}
+                  </a>
+                </li>
               )}
               {FEATURE_FLAGS.showGrading && (
-                <li className="footer-link" onClick={() => setActivePage('grading')}>{lang === 'CZ' ? 'Grading servis' : 'Grading Service'}</li>
+                <li>
+                  <a 
+                    href="/grading" 
+                    className="footer-link" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActivePage('grading');
+                    }}
+                  >
+                    {lang === 'CZ' ? 'Grading servis' : 'Grading Service'}
+                  </a>
+                </li>
               )}
               {FEATURE_FLAGS.showGrading && (
-                <li className="footer-link" onClick={() => setActivePage('grading-guide')}>{t('Navbar.gradingGuide')}</li>
+                <li>
+                  <a 
+                    href="/grading-guide" 
+                    className="footer-link" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActivePage('grading-guide');
+                    }}
+                  >
+                    {t('Navbar.gradingGuide')}
+                  </a>
+                </li>
               )}
             </ul>
           </div>
