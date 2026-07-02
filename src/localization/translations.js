@@ -389,6 +389,7 @@ export const translations = {
       withdrawalStep4: "Zboží odešlete bez zbytečného odkladu zpět na naši adresu.",
       withdrawalFormTitle: "ELEKTRONICKÝ FORMULÁŘ PRO ODSTOUPENÍ",
       withdrawalFormHelper: "(Tento formulář slouží pro rychlé a elektronické odeslání oznámení o odstoupení od kupní smlouvy)",
+      fullNameLabel: "Jméno a příjmení",
       orderNumberLabel: "Číslo objednávky",
       emailLabel: "E-mailová adresa",
       bankAccountLabel: "Číslo bankovního účtu pro vrácení peněz",
@@ -406,6 +407,7 @@ export const translations = {
       refundType: "Způsob refundace",
       submittedOn: "Odesláno dne",
       errors: {
+        fullName: "Jméno a příjmení je povinné.",
         orderNumber: "Číslo objednávky je povinné.",
         emailRequired: "E-mailová adresa je povinná.",
         emailInvalid: "Zadejte platnou e-mailovou adresu.",
@@ -841,6 +843,7 @@ export const translations = {
       withdrawalStep4: "Ship the products back to our registered address within 14 days.",
       withdrawalFormTitle: "ELECTRONIC WITHDRAWAL FORM",
       withdrawalFormHelper: "(Use this form for quick, paperless submission of purchase agreements withdrawals)",
+      fullNameLabel: "Name and Surname",
       orderNumberLabel: "Order Number",
       emailLabel: "Email Address",
       bankAccountLabel: "Bank Account for Refunds",
@@ -858,6 +861,7 @@ export const translations = {
       refundType: "Refund Method",
       submittedOn: "Submitted on",
       errors: {
+        fullName: "Name and surname is required.",
         orderNumber: "Order number is required.",
         emailRequired: "Email address is required.",
         emailInvalid: "Please enter a valid email address.",

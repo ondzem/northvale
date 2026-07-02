@@ -26,7 +26,7 @@ serve(async (req) => {
       throw new Error("Missing BREVO_API_KEY environment variable in Supabase dashboard.");
     }
 
-    const { orderNumber, email, bankAccount, returnType, partialItemsText, refundMethod, lang } = await req.json();
+    const { orderNumber, email, bankAccount, returnType, partialItemsText, refundMethod, lang, fullName } = await req.json();
 
     if (!orderNumber || !email || !refundMethod || !returnType) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
@@ -48,18 +48,22 @@ serve(async (req) => {
 
     const customerHtmlContent = `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 5px; color: #333333;">
-        <div style="text-align: center; margin-bottom: 20px;">
+         <div style="text-align: center; margin-bottom: 20px;">
           <h2 style="color: #fdbd16; margin: 0;">NORTHVALE</h2>
           <p style="font-size: 14px; color: #666; margin: 5px 0 0 0;">${isCzech ? "Potvrzení o odstoupení od smlouvy" : "Order Withdrawal Confirmation"}</p>
         </div>
         
         <p style="font-size: 15px; line-height: 1.5;">
           ${isCzech 
-            ? "Dobrý den,<br><br>potvrzujeme přijetí Vašeho elektronického oznámení o odstoupení od kupní smlouvy. Níže naleznete rekapitulaci zadaných údajů:" 
-            : "Hello,<br><br>we confirm receipt of your electronic request to withdraw from the purchase agreement. Here is a summary of the details you submitted:"}
+            ? `Vážený/á ${fullName || 'zákazníku'},<br><br>potvrzujeme přijetí Vašeho elektronického oznámení o odstoupení od kupní smlouvy. Níže naleznete rekapitulaci zadaných údajů:` 
+            : `Dear ${fullName || 'Customer'},<br><br>we confirm receipt of your electronic request to withdraw from the purchase agreement. Here is a summary of the details you submitted:`}
         </p>
 
         <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px;">
+          <tr style="border-bottom: 1px solid #eaeaea;">
+            <td style="padding: 10px 0; font-weight: bold; color: #555;">${isCzech ? "Jméno a příjmení" : "Name and Surname"}:</td>
+            <td style="padding: 10px 0; text-align: right;">${fullName || '—'}</td>
+          </tr>
           <tr style="border-bottom: 1px solid #eaeaea;">
             <td style="padding: 10px 0; font-weight: bold; color: #555;">${isCzech ? "Číslo objednávky" : "Order Number"}:</td>
             <td style="padding: 10px 0; text-align: right;">#${orderNumber}</td>
@@ -120,6 +124,10 @@ serve(async (req) => {
         <h2 style="color: #fdbd16; border-bottom: 2px solid #fdbd16; padding-bottom: 10px; margin-top: 0;">Nové odstoupení od smlouvy</h2>
         <p style="font-size: 14.5px;">Zákazník odeslal online formulář pro odstoupení od kupní smlouvy:</p>
         <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; width: 150px;">Jméno zákazníka:</td>
+            <td style="padding: 8px 0;">${fullName || '—'}</td>
+          </tr>
           <tr>
             <td style="padding: 8px 0; font-weight: bold; width: 150px;">Číslo objednávky:</td>
             <td style="padding: 8px 0;">#${orderNumber}</td>

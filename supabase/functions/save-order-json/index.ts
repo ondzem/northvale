@@ -7,7 +7,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
 };
 
 serve(async (req) => {
@@ -16,6 +16,34 @@ serve(async (req) => {
   }
 
   try {
+    if (req.method === "DELETE") {
+      const url = new URL(req.url);
+      const filename = url.searchParams.get("filename");
+
+      if (!filename) {
+        return new Response(JSON.stringify({ error: "Missing filename parameter." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+      // Delete both json and xml representations
+      const baseName = filename.replace(/\.(json|xml)$/, "");
+      const filesToDelete = [`${baseName}.json`, `${baseName}.xml`];
+
+      const { data, error } = await supabase.storage.from("pohoda-orders").remove(filesToDelete);
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ success: true, message: `Files deleted: ${filesToDelete.join(", ")}`, deleted: data }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (req.method === "GET") {
       const url = new URL(req.url);
       const filename = url.searchParams.get("filename");
