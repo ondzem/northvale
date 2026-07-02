@@ -187,14 +187,16 @@ export default function Footer({ setActivePage, activePage }) {
           <h4 className="footer-heading">{t('Footer.customerService')}</h4>
           <ul className="footer-list">
             <li>
-              <button 
-                type="button"
+              <a 
+                href="#"
                 className="footer-link" 
-                onClick={() => window.dispatchEvent(new Event('open-cookie-settings'))}
-                style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', color: 'inherit', cursor: 'pointer' }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.dispatchEvent(new Event('open-cookie-settings'));
+                }}
               >
                 {t('Footer.cookies')}
-              </button>
+              </a>
             </li>
             <li>
               <a 
