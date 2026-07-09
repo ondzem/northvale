@@ -497,6 +497,41 @@ serve(async (req) => {
       const compiledHtmlCZ = compileHtml(subject, blocksHtmlCZ, false);
       const compiledHtmlEN = compileHtml(subjectEN || subject, blocksHtmlEN, true);
 
+      // If it's a test send request, deliver it directly as transactional email
+      const { isTest, testEmail, testLang } = body;
+      if (isTest && testEmail) {
+        const testHtml = testLang === 'EN' ? compiledHtmlEN : compiledHtmlCZ;
+        const testSubject = testLang === 'EN' ? (subjectEN || subject) : subject;
+
+        const sendTestResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: {
+            "api-key": brevoApiKey,
+            "content-type": "application/json",
+            "accept": "application/json"
+          },
+          body: JSON.stringify({
+            sender: {
+              name: senderName,
+              email: senderEmail
+            },
+            to: [{ email: testEmail }],
+            subject: `[TEST] ${testSubject}`,
+            htmlContent: testHtml
+          })
+        });
+
+        if (!sendTestResponse.ok) {
+          const errorText = await sendTestResponse.text();
+          throw new Error(`Failed to send test email. Brevo responded: ${errorText}`);
+        }
+
+        return new Response(JSON.stringify({ success: true, isTest: true }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const sentCampaignIds = [];
 
       // Step E1: Create and send Czech email campaign

@@ -45,6 +45,10 @@ export default function NewsletterTab({ showToast }) {
   // Campaign Import loading state
   const [loadingImport, setLoadingImport] = useState(false);
 
+  // Test Email states
+  const [testEmailInput, setTestEmailInput] = useState('');
+  const [isSendingTest, setIsSendingTest] = useState(false);
+
   // Cropping states
   const [isCropping, setIsCropping] = useState(false);
   const [cropTarget, setCropTarget] = useState(null); // { index }
@@ -128,6 +132,63 @@ export default function NewsletterTab({ showToast }) {
       showToast(lang === 'CZ' ? 'Chyba při mazání kampaně.' : 'Error deleting campaign.', 'error');
     } finally {
       setDeletingCampId(null);
+    }
+  };
+
+  const handleSendTestEmail = async () => {
+    if (!testEmailInput.trim()) {
+      showToast(lang === 'CZ' ? 'Prosím zadejte testovací e-mailovou adresu.' : 'Please enter a test email address.', 'error');
+      return;
+    }
+    if (blocks.length === 0) {
+      showToast(lang === 'CZ' ? 'Newsletter musí obsahovat alespoň jeden blok.' : 'Newsletter must contain at least one block.', 'error');
+      return;
+    }
+    const hasEmpty = blocks.some(b => b.type === 'text' && !b.content.trim());
+    const hasEmptyImg = blocks.some(b => b.type === 'image' && !b.content);
+    if (hasEmpty || hasEmptyImg) {
+      showToast(
+        lang === 'CZ'
+          ? 'Prosím vyplňte obsah všech textových a obrázkových bloků.'
+          : 'Please fill in content for all text and image blocks.',
+        'error'
+      );
+      return;
+    }
+
+    setIsSendingTest(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-newsletter', {
+        body: {
+          campaignName: campaignName || 'Testovací odeslání',
+          subject: subject || 'Zkušební newsletter',
+          subjectEN: subjectEN || subject || 'Test newsletter',
+          blocks,
+          isTest: true,
+          testEmail: testEmailInput.trim(),
+          testLang: previewLang
+        }
+      });
+
+      if (error) throw error;
+      if (data && data.error) throw new Error(data.error);
+
+      showToast(
+        lang === 'CZ'
+          ? `Zkušební e-mail (${previewLang}) byl odeslán na ${testEmailInput}!`
+          : `Test email (${previewLang}) was sent to ${testEmailInput}!`,
+        'success'
+      );
+    } catch (err) {
+      console.error(err);
+      showToast(
+        lang === 'CZ'
+          ? `Chyba při odesílání testovacího e-mailu: ${err.message}`
+          : `Error sending test email: ${err.message}`,
+        'error'
+      );
+    } finally {
+      setIsSendingTest(false);
     }
   };
 
@@ -1399,6 +1460,37 @@ export default function NewsletterTab({ showToast }) {
               : (lang === 'CZ' ? '🚀 ROZESLAT newsletter' : '🚀 SEND newsletter')
             }
           </button>
+
+          {/* Test Sending */}
+          <div style={{ marginTop: '20px', padding: '12px', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)', background: 'rgba(255,255,255,0.01)' }}>
+            <h5 style={{ margin: '0 0 8px 0', fontSize: '11px', fontWeight: 'bold', color: 'var(--text-muted)' }}>
+              🧪 {lang === 'CZ' ? 'Odeslat zkušební e-mail' : 'Send test email'}
+            </h5>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input
+                type="email"
+                placeholder={lang === 'CZ' ? 'Zkušební e-mail...' : 'Test email...'}
+                value={testEmailInput}
+                onChange={(e) => setTestEmailInput(e.target.value)}
+                className="ctf-input"
+                style={{ flex: 1, padding: '6px 10px', fontSize: '11px', boxSizing: 'border-box' }}
+              />
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ fontSize: '10px', padding: '6px 12px', fontWeight: 'bold', whiteSpace: 'nowrap' }}
+                disabled={isSendingTest || !testEmailInput}
+                onClick={handleSendTestEmail}
+              >
+                {isSendingTest ? (lang === 'CZ' ? 'Posílám...' : 'Sending...') : (lang === 'CZ' ? 'Poslat test' : 'Send test')}
+              </button>
+            </div>
+            <p style={{ margin: '6px 0 0 0', fontSize: '10px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+              {lang === 'CZ' 
+                ? 'Odešle zkušební kopii v aktuálně vybraném jazyku náhledu (CZ/EN) přímo do vaší schránky. Bleskové doručení (SMTP).' 
+                : 'Sends a test copy in the currently selected preview language (CZ/EN) directly to your inbox. Instant delivery (SMTP).'}
+            </p>
+          </div>
         </form>
       </section>
 
