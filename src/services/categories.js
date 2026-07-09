@@ -134,16 +134,13 @@ export async function fetchCategoriesFromDB() {
       throw error;
     }
 
-    let finalCategories = [...mockCategories];
+    // If query was successful and we have records in the database, return them.
+    // Otherwise, if the database has no records (e.g. not seeded yet), fallback to mockCategories.
+    let finalCategories = [];
     if (data && data.length > 0) {
-      data.forEach(dbCat => {
-        const idx = finalCategories.findIndex(m => m.id === dbCat.id);
-        if (idx !== -1) {
-          finalCategories[idx] = dbCat;
-        } else {
-          finalCategories.push(dbCat);
-        }
-      });
+      finalCategories = data;
+    } else {
+      finalCategories = mockCategories;
     }
     
     cachedCategories = finalCategories;

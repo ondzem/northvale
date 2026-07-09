@@ -1315,6 +1315,40 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                     <li>You will immediately receive an email confirmation with your summary.</li>
                     <li>Ship the products back to our registered address within 14 days.</li>
                   </ol>
+
+                  <div style={{
+                    background: 'rgba(253, 189, 22, 0.05)',
+                    border: '1px dashed rgba(253, 189, 22, 0.3)',
+                    padding: '16px',
+                    borderRadius: '6px',
+                    marginBottom: '24px',
+                    marginTop: '10px'
+                  }}>
+                    <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#fff', marginBottom: '8px' }}>
+                      📦 Return via DPD (Easiest way):
+                    </p>
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                      To easily generate a return label and ship the parcel back via DPD Pickup points, click the button below.
+                    </p>
+                    <a 
+                      href="https://rmp.dpdgroup.com/015/northvale" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="nv-btn nv-btn-gold"
+                      style={{
+                        display: 'inline-flex',
+                        textDecoration: 'none',
+                        padding: '8px 16px',
+                        fontSize: '12px',
+                        fontWeight: '800',
+                        borderRadius: '4px',
+                        color: '#000',
+                        background: 'var(--color-gold, #fdbd16)',
+                      }}
+                    >
+                      Create DPD Return Label
+                    </a>
+                  </div>
                 </div>
               ) : (
                 <div>
@@ -1341,6 +1375,40 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
                   Vrácení zboží: Zboží nám zašlete nebo předejte bez zbytečného odkladu, nejpozději do 14 dnů od odstoupení, na adresu NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice. Přímé náklady na vrácení zboží (poštovné a balné) nesete vy. Zásilky na dobírku nepřebíráme.
                 </p>
+
+                <div style={{
+                  background: 'rgba(253, 189, 22, 0.05)',
+                  border: '1px dashed rgba(253, 189, 22, 0.3)',
+                  padding: '16px',
+                  borderRadius: '6px',
+                  marginBottom: '20px',
+                  marginTop: '10px'
+                }}>
+                  <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#fff', marginBottom: '8px' }}>
+                    📦 Vrácení přes DPD (nejjednodušší cesta):
+                  </p>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                    Pro snadné vygenerování štítku a odeslání zpět přes výdejní místa DPD Pickup klikněte na odkaz níže.
+                  </p>
+                  <a 
+                    href="https://rmp.dpdgroup.com/015/northvale" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="nv-btn nv-btn-gold"
+                    style={{
+                      display: 'inline-flex',
+                      textDecoration: 'none',
+                      padding: '8px 16px',
+                      fontSize: '12px',
+                      fontWeight: '800',
+                      borderRadius: '4px',
+                      color: '#000',
+                      background: 'var(--color-gold, #fdbd16)',
+                    }}
+                  >
+                    Vytvořit vratku DPD
+                  </a>
+                </div>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
                   Vrácení peněz: Všechny peněžní prostředky, které jsme od vás přijali, včetně nákladů na dodání (kromě dodatečných nákladů vzniklých volbou jiného než nejlevnějšího námi nabízeného způsobu dodání), vám vrátíme bez zbytečného odkladu, nejpozději do 14 dnů od odstoupení, a to stejným způsobem, jakým jsme je přijali – při platbě kartou zpětnou transakcí na kartu, jinak převodem na vámi určený bankovní účet. Peníze nejsme povinni vrátit dříve, než obdržíme vrácené zboží zpět, nebo než prokážete, že jste nám zboží odeslali.

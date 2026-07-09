@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import { fetchProductsFromDB } from '../services/products';
+import { fetchCategoriesFromDB } from '../services/categories';
 
 export default function Navbar({ setActivePage, cart, user, setFilters, setSearchQuery, isLoggedIn, onOpenLogin, setSelectedProductId }) {
   const [drawerOpen, _setDrawerOpen] = useState(false);
@@ -45,8 +46,65 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
       }
     }, 150);
 
-    return () => clearTimeout(delayDebounceFn);
   }, [searchInput]);
+
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    async function loadCategories() {
+      try {
+        const data = await fetchCategoriesFromDB();
+        if (active) {
+          setCategories(data || []);
+        }
+      } catch (err) {
+        console.error("Failed to load categories in Navbar:", err);
+      }
+    }
+    loadCategories();
+    return () => { active = false; };
+  }, []);
+
+  const getCategoryIcon = (cat) => {
+    if (cat.image_url) return cat.image_url;
+    const id = cat.id || '';
+    if (id.includes('booster-box')) {
+      return 'https://tcgplayer-cdn.tcgplayer.com/product/552309_in_1000x1000.jpg';
+    }
+    if (id.includes('etb') || id.includes('trove')) {
+      return 'https://tcgplayer-cdn.tcgplayer.com/product/506307_in_1000x1000.jpg';
+    }
+    if (id.includes('bundle')) {
+      return 'https://tcgplayer-cdn.tcgplayer.com/product/530267_in_1000x1000.jpg';
+    }
+    if (id.includes('booster')) {
+      return 'https://tcgplayer-cdn.tcgplayer.com/product/550201_in_1000x1000.jpg';
+    }
+    if (id.includes('special')) {
+      return 'https://tcgplayer-cdn.tcgplayer.com/product/561990_in_1000x1000.jpg';
+    }
+    if (id.includes('sleeves')) {
+      return 'https://tcgplayer-cdn.tcgplayer.com/product/484394_in_1000x1000.jpg';
+    }
+    if (id.includes('toploader')) {
+      return 'https://tcgplayer-cdn.tcgplayer.com/product/251347_in_1000x1000.jpg';
+    }
+    if (id.includes('binder') || id.includes('album')) {
+      return 'https://tcgplayer-cdn.tcgplayer.com/product/251411_in_1000x1000.jpg';
+    }
+    if (id.includes('acrylic')) {
+      return '/acrylic-etb-box.webp';
+    }
+    return 'https://tcgplayer-cdn.tcgplayer.com/product/450463_in_1000x1000.jpg';
+  };
+
+  const pokemonCategories = categories.filter(c => c.game === 'Pokémon' && c.parent_id === 'game-pokemon');
+  const lorcanaCategories = categories.filter(c => c.game === 'Lorcana' && c.parent_id === 'game-lorcana');
+  const onepieceCategories = categories.filter(c => c.game === 'One Piece' && c.parent_id === 'game-onepiece');
+  const riftboundCategories = categories.filter(c => c.game === 'Riftbound' && c.parent_id === 'game-riftbound');
+  const accessoriesCategories = categories.filter(c => c.game === 'Accessories' && c.parent_id === 'game-accessories');
+  const acrylicsCategories = categories.filter(c => c.game === 'Acrylics' && c.parent_id === 'game-acrylics');
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -443,7 +501,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 {/* 1. Pokémon Dropdown */}
                 <div
                   style={styles.dropdownContainer}
-                  onMouseEnter={() => setActiveDropdown('pokemon')}
+                  onMouseEnter={() => { if (pokemonCategories.length > 0) setActiveDropdown('pokemon'); }}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <a 
@@ -456,47 +514,19 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       }
                     }}
                   >
-                    Pokémon <img src="/angle-small-down (1).png" style={styles.chevron} alt="" width="10" height="10" />
+                    Pokémon {pokemonCategories.length > 0 && <img src="/angle-small-down (1).png" style={styles.chevron} alt="" width="10" height="10" />}
                   </a>
-                  {activeDropdown === 'pokemon' && (
+                  {pokemonCategories.length > 0 && activeDropdown === 'pokemon' && (
                     <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                       <div className="nav-dropdown-row">
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', type: 'Booster Box' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/552309_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
+                        {pokemonCategories.map(cat => (
+                          <div key={cat.id} className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', category_id: cat.id })}>
+                            <div className="nav-dropdown-icon">
+                              <img src={getCategoryIcon(cat)} alt="" className="nav-dropdown-img" width="60" height="60" />
+                            </div>
+                            <span className="nav-dropdown-text">{lang === 'CZ' ? cat.name_cz : cat.name_en}</span>
                           </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Booster boxy')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', type: 'Elite Trainer Box' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/506307_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Elite trainer boxy')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', type: 'Booster Bundle' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/530267_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Bundles')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', type: 'Booster' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/550201_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Boostery')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', type: 'Special Collection' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/561990_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Speciální kolekce')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', type: 'Other' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/450463_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Ostatní')}</span>
-                        </div>
+                        ))}
                       </div>
                       <div className="nav-dropdown-footer">
                         <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon' })}>
@@ -514,7 +544,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 {/* 2. Disney Lorcana Dropdown */}
                 <div
                   style={styles.dropdownContainer}
-                  onMouseEnter={() => setActiveDropdown('lorcana')}
+                  onMouseEnter={() => { if (lorcanaCategories.length > 0) setActiveDropdown('lorcana'); }}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <a 
@@ -527,35 +557,19 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       }
                     }}
                   >
-                    Disney Lorcana <img src="/angle-small-down (1).png" style={styles.chevron} alt="" width="10" height="10" />
+                    Disney Lorcana {lorcanaCategories.length > 0 && <img src="/angle-small-down (1).png" style={styles.chevron} alt="" width="10" height="10" />}
                   </a>
-                  {activeDropdown === 'lorcana' && (
+                  {lorcanaCategories.length > 0 && activeDropdown === 'lorcana' && (
                     <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                       <div className="nav-dropdown-row">
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Booster Box' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/501783_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
+                        {lorcanaCategories.map(cat => (
+                          <div key={cat.id} className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', category_id: cat.id })}>
+                            <div className="nav-dropdown-icon">
+                              <img src={getCategoryIcon(cat)} alt="" className="nav-dropdown-img" width="60" height="60" />
+                            </div>
+                            <span className="nav-dropdown-text">{lang === 'CZ' ? cat.name_cz : cat.name_en}</span>
                           </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Booster boxy')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Trove Box' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/559441_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Trove boxy')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Booster' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/482406_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Boostery')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', type: 'Other' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/482407_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Ostatní')}</span>
-                        </div>
+                        ))}
                       </div>
                       <div className="nav-dropdown-footer">
                         <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('sealed', { game: 'Lorcana' })}>
@@ -573,7 +587,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 {/* 3. One Piece Dropdown */}
                 <div
                   style={styles.dropdownContainer}
-                  onMouseEnter={() => setActiveDropdown('onepiece')}
+                  onMouseEnter={() => { if (onepieceCategories.length > 0) setActiveDropdown('onepiece'); }}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <a 
@@ -586,29 +600,19 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       }
                     }}
                   >
-                    One Piece <img src="/angle-small-down (1).png" style={styles.chevron} alt="" width="10" height="10" />
+                    One Piece {onepieceCategories.length > 0 && <img src="/angle-small-down (1).png" style={styles.chevron} alt="" width="10" height="10" />}
                   </a>
-                  {activeDropdown === 'onepiece' && (
+                  {onepieceCategories.length > 0 && activeDropdown === 'onepiece' && (
                     <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                       <div className="nav-dropdown-row">
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'One Piece', type: 'Booster Box' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/532107_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
+                        {onepieceCategories.map(cat => (
+                          <div key={cat.id} className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'One Piece', category_id: cat.id })}>
+                            <div className="nav-dropdown-icon">
+                              <img src={getCategoryIcon(cat)} alt="" className="nav-dropdown-img" width="60" height="60" />
+                            </div>
+                            <span className="nav-dropdown-text">{lang === 'CZ' ? cat.name_cz : cat.name_en}</span>
                           </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Booster boxy')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'One Piece', type: 'Booster' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/536109_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Boostery')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'One Piece', type: 'Other' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/513361_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Ostatní')}</span>
-                        </div>
+                        ))}
                       </div>
                       <div className="nav-dropdown-footer">
                         <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('sealed', { game: 'One Piece' })}>
@@ -626,7 +630,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 {/* 4. Riftbound Dropdown */}
                 <div
                   style={styles.dropdownContainer}
-                  onMouseEnter={() => setActiveDropdown('riftbound')}
+                  onMouseEnter={() => { if (riftboundCategories.length > 0) setActiveDropdown('riftbound'); }}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <a 
@@ -639,35 +643,19 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       }
                     }}
                   >
-                    Riftbound <img src="/angle-small-down (1).png" style={styles.chevron} alt="" width="10" height="10" />
+                    Riftbound {riftboundCategories.length > 0 && <img src="/angle-small-down (1).png" style={styles.chevron} alt="" width="10" height="10" />}
                   </a>
-                  {activeDropdown === 'riftbound' && (
+                  {riftboundCategories.length > 0 && activeDropdown === 'riftbound' && (
                     <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                       <div className="nav-dropdown-row">
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Booster Box' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="/Riftbound.webp" alt="" className="nav-dropdown-img" width="60" height="60" />
+                        {riftboundCategories.map(cat => (
+                          <div key={cat.id} className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', category_id: cat.id })}>
+                            <div className="nav-dropdown-icon">
+                              <img src={getCategoryIcon(cat)} alt="" className="nav-dropdown-img" width="60" height="60" />
+                            </div>
+                            <span className="nav-dropdown-text">{lang === 'CZ' ? cat.name_cz : cat.name_en}</span>
                           </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Booster boxy')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Booster' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="/Riftbound.webp" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Boostery')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Trial Deck' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="/Riftbound.webp" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Trial decky')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', type: 'Other' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="/Riftbound.webp" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Ostatní')}</span>
-                        </div>
+                        ))}
                       </div>
                       <div className="nav-dropdown-footer">
                         <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('sealed', { game: 'Riftbound' })}>
@@ -685,7 +673,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 {/* 5. Příslušenství Dropdown */}
                 <div
                   style={styles.dropdownContainer}
-                  onMouseEnter={() => setActiveDropdown('accessories')}
+                  onMouseEnter={() => { if (accessoriesCategories.length > 0) setActiveDropdown('accessories'); }}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <a 
@@ -698,49 +686,19 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       }
                     }}
                   >
-                    {translateSubcat('Příslušenství')} <img src="/angle-small-down (1).png" style={styles.chevron} alt="" width="10" height="10" />
+                    {translateSubcat('Příslušenství')} {accessoriesCategories.length > 0 && <img src="/angle-small-down (1).png" style={styles.chevron} alt="" width="10" height="10" />}
                   </a>
-                  {activeDropdown === 'accessories' && (
+                  {accessoriesCategories.length > 0 && activeDropdown === 'accessories' && (
                     <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                       <div className="nav-dropdown-row">
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Binders', subsubcat: 'cards' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Na karty')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Binders', subsubcat: 'toploaders' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Na toploadery')}</span>
-                        </div>
-                        {FEATURE_FLAGS.showSlabs && (
-                          <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Binders', subsubcat: 'graded' })}>
+                        {accessoriesCategories.map(cat => (
+                          <div key={cat.id} className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Accessories', category_id: cat.id })}>
                             <div className="nav-dropdown-icon">
-                              <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
+                              <img src={getCategoryIcon(cat)} alt="" className="nav-dropdown-img" width="60" height="60" />
                             </div>
-                            <span className="nav-dropdown-text">{translateSubcat('Na graded karty')}</span>
+                            <span className="nav-dropdown-text">{lang === 'CZ' ? cat.name_cz : cat.name_en}</span>
                           </div>
-                        )}
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Sleeves' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/122159_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Sleevy')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Toploaders' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/142981_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Toploadery')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Accessories', subcat: 'Other' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="https://tcgplayer-cdn.tcgplayer.com/product/142827_in_1000x1000.jpg" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Ostatní')}</span>
-                        </div>
+                        ))}
                       </div>
                       <div className="nav-dropdown-footer">
                         <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('sealed', { game: 'Accessories' })}>
@@ -758,7 +716,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                 {/* 6. Akryly Dropdown */}
                 <div
                   style={styles.dropdownContainer}
-                  onMouseEnter={() => setActiveDropdown('acrylics')}
+                  onMouseEnter={() => { if (acrylicsCategories.length > 0) setActiveDropdown('acrylics'); }}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <a 
@@ -771,37 +729,19 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       }
                     }}
                   >
-                    {translateSubcat('Akryly')} <img src="/angle-small-down (1).png" style={styles.chevron} alt="" width="10" height="10" />
+                    {translateSubcat('Akryly')} {acrylicsCategories.length > 0 && <img src="/angle-small-down (1).png" style={styles.chevron} alt="" width="10" height="10" />}
                   </a>
-                  {activeDropdown === 'acrylics' && (
+                  {acrylicsCategories.length > 0 && activeDropdown === 'acrylics' && (
                     <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                       <div className="nav-dropdown-row">
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Pokémon' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="/acrylic-etb-box.webp" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Pokemon')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Lorcana' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="/acrylic-etb-box.webp" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Lorcana')}</span>
-                        </div>
-                        <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'Riftbound' })}>
-                          <div className="nav-dropdown-icon">
-                            <img src="/acrylic-etb-box.webp" alt="" className="nav-dropdown-img" width="60" height="60" />
-                          </div>
-                          <span className="nav-dropdown-text">{translateSubcat('Riftbound')}</span>
-                        </div>
-                        {FEATURE_FLAGS.showSlabs && (
-                          <div className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', gameFilter: 'PSA' })}>
+                        {acrylicsCategories.map(cat => (
+                          <div key={cat.id} className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', category_id: cat.id })}>
                             <div className="nav-dropdown-icon">
-                              <img src="/acrylic-etb-box.webp" alt="" className="nav-dropdown-img" width="60" height="60" />
+                              <img src={getCategoryIcon(cat)} alt="" className="nav-dropdown-img" width="60" height="60" />
                             </div>
-                            <span className="nav-dropdown-text">{translateSubcat('Psa karty')}</span>
+                            <span className="nav-dropdown-text">{lang === 'CZ' ? cat.name_cz : cat.name_en}</span>
                           </div>
-                        )}
+                        ))}
                       </div>
                       <div className="nav-dropdown-footer">
                         <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics' })}>

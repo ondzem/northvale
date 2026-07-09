@@ -484,8 +484,46 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
 
   if (loading) {
     return (
-      <div style={{ ...styles.errorContainer, minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="glass-panel">
-        <h3 style={{ color: 'var(--color-gold)' }}>{lang === 'CZ' ? 'Načítání...' : 'Loading...'}</h3>
+      <div style={styles.container} className="fade-in">
+        {/* Breadcrumbs Navigation Skeleton */}
+        <div className="container">
+          <nav className="breadcrumbs-nav" style={{ opacity: 0.3, pointerEvents: 'none' }}>
+            <span className="breadcrumb-item">{t ? t('common.home') : (lang === 'CZ' ? 'Domů' : 'Home')}</span>
+            <span className="breadcrumb-separator">/</span>
+            <span className="breadcrumb-item">...</span>
+          </nav>
+        </div>
+
+        <div className="container">
+          <div style={styles.layout}>
+            {/* Left Column: Image Skeleton */}
+            <div className="product-detail-left-col" style={{ ...styles.leftCol, marginBottom: isMobile ? '12px' : '0px' }}>
+              <div className="detail-gallery-wrapper nv-skeleton" style={{ 
+                width: '100%', 
+                maxWidth: '400px', 
+                height: '420px',
+                borderRadius: '8px'
+              }} />
+            </div>
+
+            {/* Right Column: Title and Details Skeleton */}
+            <div style={styles.rightCol}>
+              {/* Title */}
+              <div className="nv-skeleton" style={{ height: '36px', width: '70%', marginBottom: '8px' }} />
+              {/* Rating */}
+              <div className="nv-skeleton" style={{ height: '20px', width: '30%', marginBottom: '16px' }} />
+              
+              {/* Price & Add to Cart Panel */}
+              <div className="nv-skeleton" style={{ height: '120px', width: '100%', borderRadius: '12px', marginBottom: '24px' }} />
+              
+              {/* Short Description */}
+              <div className="nv-skeleton" style={{ height: '60px', width: '100%', marginBottom: '24px' }} />
+              
+              {/* Additional specs row */}
+              <div className="nv-skeleton" style={{ height: '40px', width: '100%' }} />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -1281,6 +1319,13 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
         const isAccessory = product.type === 'accessory' && !isAcrylic;
         const isSealed = !isAccessory && !isAcrylic;
 
+        const cleanName = product.name || '';
+        let parsedCardCode = '';
+        const nameMatch = cleanName.match(/\(([^)]+)\)$/);
+        if (nameMatch) {
+          parsedCardCode = nameMatch[1];
+        }
+
         const langFull = product.lang === 'JP' 
           ? (lang === 'CZ' ? 'Japonský - JP 🇯🇵' : 'Japanese - JP 🇯🇵') 
           : product.lang === 'CN' 
@@ -1393,6 +1438,42 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                           <tr>
                             <td>{lang === 'CZ' ? 'Stav originální fólie' : 'Original Foil Condition'}</td>
                             <td>{product.foilCondition}</td>
+                          </tr>
+                        )}
+                        {product.setCode && (
+                          <tr>
+                            <td>{lang === 'CZ' ? 'Zkratka edice (Set Code)' : 'Set Code'}</td>
+                            <td>{product.setCode}</td>
+                          </tr>
+                        )}
+                        {parsedCardCode && parsedCardCode !== product.edition && parsedCardCode !== String(product.year) && (
+                          <tr>
+                            <td>{lang === 'CZ' ? 'Sběratelské číslo' : 'Card Number'}</td>
+                            <td>{parsedCardCode}</td>
+                          </tr>
+                        )}
+                        {product.rarity && (
+                          <tr>
+                            <td>{lang === 'CZ' ? 'Rarita' : 'Rarity'}</td>
+                            <td>{product.rarity}</td>
+                          </tr>
+                        )}
+                        {product.element && (
+                          <tr>
+                            <td>{lang === 'CZ' ? 'Element / barva / typ' : 'Element / Color / Type'}</td>
+                            <td>{product.element}</td>
+                          </tr>
+                        )}
+                        {product.stage && (
+                          <tr>
+                            <td>{lang === 'CZ' ? 'Vývojové stádium' : 'Stage'}</td>
+                            <td>{product.stage}</td>
+                          </tr>
+                        )}
+                        {product.illustrator && (
+                          <tr>
+                            <td>{lang === 'CZ' ? 'Ilustrátor' : 'Illustrator'}</td>
+                            <td>{product.illustrator}</td>
                           </tr>
                         )}
                         {product.customParams && Array.isArray(product.customParams) && product.customParams.map((cp, idx) => (

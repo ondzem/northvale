@@ -688,6 +688,18 @@ function AppContent() {
     syncFavorites();
   }, [favorites, isLoggedIn, user.id]);
 
+  // Newsletter Confirmed Modal State
+  const [showNewsletterConfirmedModal, setShowNewsletterConfirmedModal] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('confirmed') === 'true') {
+      setShowNewsletterConfirmedModal(true);
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+  }, []);
+
   // Toast Notification State
   const [toast, setToast] = useState({ message: '', visible: false, type: 'success' });
 
@@ -701,6 +713,13 @@ function AppContent() {
       behavior: 'smooth'
     });
   }, [activePage, gdprVopTab]);
+
+  // Validate cart items when visiting checkout or loading pages
+  useEffect(() => {
+    if (cart.length > 0) {
+      validateCartItems(cart);
+    }
+  }, [activePage]);
 
   // Helpers for stripping HTML tags and JSON-LD structured data formatting
   const stripAndTruncate = (text, max = 155) => {
@@ -1057,6 +1076,112 @@ function AppContent() {
     }, 4000);
   };
 
+  // Real-time stock validation for cart items
+  const validateCartItems = async (currentCart) => {
+    if (!currentCart || currentCart.length === 0) return currentCart;
+
+    try {
+      const productIds = currentCart.map(item => item.product?.id).filter(Boolean);
+      if (productIds.length === 0) return currentCart;
+
+      const { data: dbProds, error } = await supabase
+        .from('products')
+        .select('id, stock, variants, name')
+        .in('id', productIds);
+
+      if (error) throw error;
+
+      let cartChanged = false;
+      const verifiedCart = [];
+      const messages = [];
+
+      for (const item of currentCart) {
+        const dbProd = dbProds?.find(p => p.id === item.product?.id);
+        
+        if (!dbProd) {
+          cartChanged = true;
+          messages.push(
+            lang === 'CZ'
+              ? `Produkt "${item.productName || item.name}" byl stažen z prodeje a odebrán z košíku.`
+              : `Product "${item.productName || item.name}" was removed from sale and deleted from your cart.`
+          );
+          continue;
+        }
+
+        const isSingle = item.product?.type === 'single';
+
+        if (isSingle) {
+          const variant = dbProd.variants?.find(v => v.id === item.id);
+          if (!variant) {
+            cartChanged = true;
+            messages.push(
+              lang === 'CZ'
+                ? `Varianta produktu "${item.name}" již není k dispozici a byla odebrána z košíku.`
+                : `Product variant "${item.name}" is no longer available and was removed from your cart.`
+            );
+            continue;
+          }
+
+          const maxStock = variant.stock || 0;
+          if (maxStock <= 0) {
+            cartChanged = true;
+            messages.push(
+              lang === 'CZ'
+                ? `Produkt "${item.name}" je již vyprodán a byl odebrán z košíku.`
+                : `Product "${item.name}" is sold out and was removed from your cart.`
+            );
+            continue;
+          }
+
+          if (item.quantity > maxStock) {
+            cartChanged = true;
+            verifiedCart.push({ ...item, quantity: maxStock });
+            messages.push(
+              lang === 'CZ'
+                ? `Množství u "${item.name}" bylo upraveno na ${maxStock} ks (maximum na skladě).`
+                : `Quantity of "${item.name}" was adjusted to ${maxStock} pcs (max in stock).`
+            );
+          } else {
+            verifiedCart.push(item);
+          }
+        } else {
+          const maxStock = dbProd.stock || 0;
+          if (maxStock <= 0) {
+            cartChanged = true;
+            messages.push(
+              lang === 'CZ'
+                ? `Produkt "${item.name}" je již vyprodán a byl odebrán z košíku.`
+                : `Product "${item.name}" is sold out and was removed from your cart.`
+            );
+            continue;
+          }
+
+          if (item.quantity > maxStock) {
+            cartChanged = true;
+            verifiedCart.push({ ...item, quantity: maxStock });
+            messages.push(
+              lang === 'CZ'
+                ? `Množství u "${item.name}" bylo upraveno na ${maxStock} ks (maximum na skladě).`
+                : `Quantity of "${item.name}" was adjusted to ${maxStock} pcs (max in stock).`
+            );
+          } else {
+            verifiedCart.push(item);
+          }
+        }
+      }
+
+      if (cartChanged) {
+        setCart(verifiedCart);
+        localStorage.setItem('northvale-cart', JSON.stringify(verifiedCart));
+        messages.forEach(msg => showToast(msg, 'error'));
+      }
+      return verifiedCart;
+    } catch (err) {
+      console.error("Failed to validate cart items:", err);
+      return currentCart;
+    }
+  };
+
   // Buylists State (Admin approvals)
   const [buylists, setBuylists] = useState([
     {
@@ -1298,43 +1423,45 @@ function AppContent() {
     }
 
     // Call Edge Function to export order to Pohoda (FTP XML)
-    try {
-      const now = new Date();
-      const createdDate = now.toISOString().split('T')[0];
-      
-      const orderPayload = {
-        orderNumber: order.id.toString(),
-        createdDate: createdDate,
-        email: order.customerEmail,
-        phone: order.customerPhone || '',
-        billingName: order.isCompany ? (order.companyName || order.customerName) : order.customerName,
-        billingStreet: order.shippingStreet,
-        billingCity: order.shippingCity,
-        billingZip: order.shippingZip,
-        billingCountry: 'CZ',
-        paymentMethod: order.paymentMethod?.toLowerCase().includes('karta') || order.paymentMethod?.toLowerCase().includes('card') ? 'karta' : 'převod',
-        totalAmount: order.finalTotal,
-        items: order.items.map(item => {
-          const sku = item.product?.type === 'single' ? item.id : (item.product?.id || item.id);
-          const vatRate = item.no_vat ? 0 : 21;
-          return {
-            sku: sku,
-            name: item.name || item.productName || 'Zboží',
-            quantity: item.quantity,
-            price: item.price,
-            vatRate: vatRate
-          };
-        })
-      };
+    if (import.meta.env.VITE_ENABLE_POHODA_SYNC === 'true') {
+      try {
+        const now = new Date();
+        const createdDate = now.toISOString().split('T')[0];
+        
+        const orderPayload = {
+          orderNumber: order.id.toString(),
+          createdDate: createdDate,
+          email: order.customerEmail,
+          phone: order.customerPhone || '',
+          billingName: order.isCompany ? (order.companyName || order.customerName) : order.customerName,
+          billingStreet: order.shippingStreet,
+          billingCity: order.shippingCity,
+          billingZip: order.shippingZip,
+          billingCountry: 'CZ',
+          paymentMethod: order.paymentMethod?.toLowerCase().includes('karta') || order.paymentMethod?.toLowerCase().includes('card') ? 'karta' : 'převod',
+          totalAmount: order.finalTotal,
+          items: order.items.map(item => {
+            const sku = item.product?.type === 'single' ? item.id : (item.product?.id || item.id);
+            const vatRate = item.no_vat ? 0 : 21;
+            return {
+              sku: sku,
+              name: item.name || item.productName || 'Zboží',
+              quantity: item.quantity,
+              price: item.price,
+              vatRate: vatRate
+            };
+          })
+        };
 
-      await supabase.functions.invoke('pohoda-connector', {
-        body: {
-          action: 'export-order',
-          order: orderPayload
-        }
-      });
-    } catch (pohodaErr) {
-      console.error('Pohoda order export failed:', pohodaErr);
+        await supabase.functions.invoke('pohoda-connector', {
+          body: {
+            action: 'export-order',
+            order: orderPayload
+          }
+        });
+      } catch (pohodaErr) {
+        console.error('Pohoda order export failed:', pohodaErr);
+      }
     }
   };
 
@@ -1540,6 +1667,7 @@ function AppContent() {
             onOpenLogin={() => setIsLoginModalOpen(true)}
             appliedDiscount={appliedDiscount}
             setAppliedDiscount={setAppliedDiscount}
+            validateCart={validateCartItems}
           />
         )}
 
@@ -1611,6 +1739,33 @@ function AppContent() {
         onClose={() => setIsResetPasswordModalOpen(false)}
         showToast={showToast}
       />
+
+      {showNewsletterConfirmedModal && (
+        <div className="newsletter-confirm-overlay" onClick={() => setShowNewsletterConfirmedModal(false)}>
+          <div className="newsletter-confirm-card" onClick={(e) => e.stopPropagation()}>
+            <div className="newsletter-confirm-check">
+              <svg viewBox="0 0 52 52" fill="none" aria-hidden="true" width="72" height="72">
+                <circle className="nc-check-ring" cx="26" cy="26" r="23" stroke="#10B981" strokeWidth="2.2" fill="none" />
+                <path className="nc-check-tick" d="M16 27l7 7 14-15" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              </svg>
+            </div>
+            <h2 className="newsletter-confirm-title">
+              {lang === 'CZ' ? 'Úspěšně přihlášeno!' : 'Successfully Subscribed!'}
+            </h2>
+            <p className="newsletter-confirm-desc">
+              {lang === 'CZ' 
+                ? 'Váš odběr newsletteru byl úspěšně potvrzen. Děkujeme za Váš zájem!' 
+                : 'Your newsletter subscription has been successfully confirmed. Thank you for your interest!'}
+            </p>
+            <button 
+              className="newsletter-confirm-btn" 
+              onClick={() => setShowNewsletterConfirmedModal(false)}
+            >
+              {lang === 'CZ' ? 'Zavřít' : 'Close'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Premium Custom Toast Banner */}
       {toast.visible && (() => {
@@ -1709,7 +1864,7 @@ const styles = {
   },
   toast: {
     position: 'fixed',
-    top: '24px',
+    bottom: '24px',
     right: '24px',
     padding: '14px 24px',
     zIndex: 9999,

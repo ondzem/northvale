@@ -413,7 +413,7 @@ serve(async (req) => {
         processedBlocks.push({
           ...block,
           content: contentUrl,
-          contentEN: contentENUrl || contentUrl
+          contentEN: contentENUrl || ''
         });
       }
 
@@ -430,6 +430,7 @@ serve(async (req) => {
             </div>
           `;
         } else if (block.type === 'image') {
+          if (!block.content) continue;
           const imgTag = `<img src="${block.content}" alt="Banner" style="width: 100%; max-width: 100%; height: auto; display: block; border: 0;" />`;
           const wrappedImg = block.linkUrl
             ? `<a href="${block.linkUrl}" target="_blank" style="display: block; text-decoration: none; border: 0;">${imgTag}</a>`
@@ -440,6 +441,7 @@ serve(async (req) => {
             </div>
           `;
         } else if (block.type === 'button') {
+          if (!block.text || !block.url) continue;
           blocksHtmlCZ += `
             <div class="block-button" style="text-align: center; padding: 12px 30px 20px 30px;">
               <a href="${block.url}" class="btn" target="_blank" style="display: inline-block; background-color: #E2BA5E; color: #0b0b0c !important; padding: 13px 32px; border-radius: 6px; font-weight: bold; text-decoration: none; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; font-family: sans-serif;">
@@ -454,7 +456,8 @@ serve(async (req) => {
       let blocksHtmlEN = "";
       for (const block of processedBlocks) {
         if (block.type === 'text') {
-          const rawContent = block.contentEN || block.content;
+          const rawContent = block.contentEN;
+          if (!rawContent) continue;
           const formattedContent = rawContent.includes('<') && rawContent.includes('>')
             ? rawContent 
             : rawContent.replace(/\n/g, '<br />');
@@ -464,8 +467,9 @@ serve(async (req) => {
             </div>
           `;
         } else if (block.type === 'image') {
-          const imgUrl = block.contentEN || block.content;
-          const targetLink = block.linkUrlEN || block.linkUrl;
+          const imgUrl = block.contentEN;
+          if (!imgUrl) continue;
+          const targetLink = block.linkUrlEN || '';
           const imgTag = `<img src="${imgUrl}" alt="Banner" style="width: 100%; max-width: 100%; height: auto; display: block; border: 0;" />`;
           const wrappedImg = targetLink
             ? `<a href="${targetLink}" target="_blank" style="display: block; text-decoration: none; border: 0;">${imgTag}</a>`
@@ -476,8 +480,9 @@ serve(async (req) => {
             </div>
           `;
         } else if (block.type === 'button') {
-          const btnText = block.textEN || block.text;
-          const btnUrl = block.urlEN || block.url;
+          const btnText = block.textEN || '';
+          const btnUrl = block.urlEN || '';
+          if (!btnText || !btnUrl) continue;
           blocksHtmlEN += `
             <div class="block-button" style="text-align: center; padding: 12px 30px 20px 30px;">
               <a href="${btnUrl}" class="btn" target="_blank" style="display: inline-block; background-color: #E2BA5E; color: #0b0b0c !important; padding: 13px 32px; border-radius: 6px; font-weight: bold; text-decoration: none; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; font-family: sans-serif;">

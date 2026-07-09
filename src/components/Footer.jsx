@@ -246,6 +246,16 @@ export default function Footer({ setActivePage, activePage }) {
                 {lang === 'CZ' ? 'Odstoupení od smlouvy' : 'Order Withdrawal'}
               </a>
             </li>
+            <li>
+              <a 
+                href="https://rmp.dpdgroup.com/015/northvale" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="footer-link"
+              >
+                {lang === 'CZ' ? 'Vrácení zboží (DPD)' : 'Return Goods (DPD)'}
+              </a>
+            </li>
           </ul>
         </div>
 

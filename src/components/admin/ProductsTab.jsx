@@ -145,6 +145,12 @@ const RichTextEditor = ({ value, onChange, placeholder, className, style }) => {
     handleInput();
   };
 
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData('text/plain');
+    document.execCommand('insertText', false, text);
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
       {/* Editor Toolbar */}
@@ -235,6 +241,7 @@ const RichTextEditor = ({ value, onChange, placeholder, className, style }) => {
         ref={editorRef}
         contentEditable
         onInput={handleInput}
+        onPaste={handlePaste}
         className={`${className || ''} tab-popis-text-html`}
         style={{
           minHeight: '100px',
@@ -589,7 +596,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormEdition(p.edition || '');
     setFormRarity(p.rarity || '');
     setFormImage(p.image || '');
-    setFormBackImage(p.backImage || p.back_image || 'https://images.pokemontcg.io/unbroken_bonds/back.png');
+    const defaultBack = (p.game || 'Pokémon') === 'Pokémon' ? 'https://images.pokemontcg.io/unbroken_bonds/back.png' : '';
+    setFormBackImage(p.backImage || p.back_image || defaultBack);
     setFormDesc(p.desc || p.description || '');
     setFormPrice(p.price !== null && p.price !== undefined ? p.price.toString() : '');
     setFormStock(p.stock !== null && p.stock !== undefined ? p.stock.toString() : '');
@@ -1050,7 +1058,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       element: formElement || null,
       illustrator: formIllustrator || null,
       year: formYear ? Number(formYear) : null,
-      customParams: finalCustomParams
+      customParams: finalCustomParams,
+      lang: formLang || 'EN'
     };
 
     if (formType === 'single') {
@@ -2177,6 +2186,11 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               const nextGame = e.target.value;
                               setFormGame(nextGame);
                               setFormCategoryId(''); // reset category selection
+                              if (nextGame === 'Pokémon') {
+                                setFormBackImage('https://images.pokemontcg.io/unbroken_bonds/back.png');
+                              } else {
+                                setFormBackImage('');
+                              }
                             }}>
                               <option value="Pokémon">Pokémon</option>
                               <option value="Lorcana">Lorcana</option>

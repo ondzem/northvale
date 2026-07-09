@@ -3,7 +3,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
 
 
-export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, alert, onOpenLogin, appliedDiscount, setAppliedDiscount }) {
+export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, alert, onOpenLogin, appliedDiscount, setAppliedDiscount, validateCart }) {
   const { lang, t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -430,6 +430,63 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       return;
     }
 
+    // Run stock validation right before submitting the order
+    if (validateCart) {
+      const currentCart = [...cart];
+      const validated = await validateCart(cart);
+      const isChanged = validated.length !== currentCart.length || 
+        validated.some((item, idx) => item.quantity !== currentCart[idx]?.quantity || item.id !== currentCart[idx]?.id);
+      
+      if (isChanged) {
+        alert(lang === 'CZ'
+          ? 'Některé položky ve vašem košíku již nejsou dostupné a košík byl automaticky upraven. Zkontrolujte prosím objednávku znovu.'
+          : 'Some items in your cart are no longer available and the cart has been adjusted. Please review your order again.',
+          'error'
+        );
+        return;
+      }
+    }
+
+    // General details presence check
+    if (!name.trim() || !email.trim() || !phone.trim() || !street.trim() || !city.trim() || !zip.trim()) {
+      alert(lang === 'CZ'
+        ? 'Vyplňte prosím všechny povinné osobní a doručovací údaje.'
+        : 'Please fill in all required personal and shipping details.',
+        'error'
+      );
+      return;
+    }
+
+    // Format and validate phone
+    let cleanedPhone = phone.trim().replace(/\s+/g, '');
+    if (/^\d{9}$/.test(cleanedPhone)) {
+      cleanedPhone = '+420' + cleanedPhone;
+    }
+    const phoneRegex = /^\+\d{9,15}$/;
+    if (!phoneRegex.test(cleanedPhone)) {
+      alert(lang === 'CZ'
+        ? 'Zadejte prosím platné telefonní číslo s předvolbou (např. +420 123 456 789).'
+        : 'Please enter a valid phone number with country code (e.g. +420 123 456 789).',
+        'error'
+      );
+      return;
+    }
+
+    // Format and validate ZIP (only if not personal pickup)
+    let cleanedZip = zip.trim().replace(/\s+/g, '');
+    if (shipping !== 'pardubice') {
+      const zipRegex = /^\d{5}$/;
+      if (!zipRegex.test(cleanedZip)) {
+        alert(lang === 'CZ'
+          ? 'Zadejte prosím platné pětimístné PSČ (např. 534 01).'
+          : 'Please enter a valid 5-digit postal code (e.g. 534 01).',
+          'error'
+        );
+        return;
+      }
+      cleanedZip = `${cleanedZip.slice(0, 3)} ${cleanedZip.slice(3)}`;
+    }
+
     if ((shipping === 'dpd-pickup' || shipping === 'gls-pickup') && !pickupPoint.trim()) {
       alert(lang === 'CZ' 
         ? 'Vyberte prosím výdejní místo na mapě.' 
@@ -477,10 +534,10 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           customerDetails: {
             name,
             email,
-            phone,
+            phone: cleanedPhone,
             street,
             city,
-            zip,
+            zip: cleanedZip,
             isCompany,
             companyName: isCompany ? companyName : '',
             ico: isCompany ? ico : '',
@@ -571,10 +628,10 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       invoiceUrl: '#',
       customerName: name,
       customerEmail: email,
-      customerPhone: phone,
+      customerPhone: cleanedPhone,
       shippingStreet: street,
       shippingCity: city,
-      shippingZip: zip,
+      shippingZip: cleanedZip,
       isCompany: isCompany,
       companyName: isCompany ? companyName : '',
       ico: isCompany ? ico : '',

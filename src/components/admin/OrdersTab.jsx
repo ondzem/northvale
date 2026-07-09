@@ -73,7 +73,7 @@ export default function OrdersTab({ showToast }) {
   const [generatingLabelId, setGeneratingLabelId] = useState(null);
 
   // DPD API configuration states (stored in localStorage)
-  const [dpdApiKey, setDpdApiKey] = useState('');
+  const [dpdApiKey, setDpdApiKey] = useState('76988bfbed23b6ca475daba84a919683');
   const [dpdCustomerNumber, setDpdCustomerNumber] = useState('10029618142');
   const [dpdAddressId, setDpdAddressId] = useState('15908093');
   const [dpdTestMode, setDpdTestMode] = useState(false);
@@ -115,7 +115,7 @@ export default function OrdersTab({ showToast }) {
     setGlsPrinterType(savedPrinterType);
 
     // Load DPD API credentials
-    const savedDpdApiKey = localStorage.getItem('dpd_api_key') || '';
+    const savedDpdApiKey = localStorage.getItem('dpd_api_key') || '76988bfbed23b6ca475daba84a919683';
     const savedDpdCustomerNumber = localStorage.getItem('dpd_api_customer_number') || '10029618142';
     const savedDpdAddressId = localStorage.getItem('dpd_api_address_id') || '15908093';
     const savedDpdTestMode = localStorage.getItem('dpd_api_test_mode') === 'true';

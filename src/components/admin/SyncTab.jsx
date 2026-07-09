@@ -147,75 +147,101 @@ export default function SyncTab() {
     <div style={styles.container}>
       
       {/* POHODA PANEL */}
-      <div style={styles.glassPanel}>
-        <div style={styles.logsHeader}>
-          <h2 style={styles.sectionHeading}>
-            {lang === 'CZ' ? 'Účetnictví POHODA (FTP)' : 'POHODA Accounting (FTP)'}
-          </h2>
-          <div style={styles.btnGroup}>
-            <button 
-              className="btn btn-secondary" 
-              style={styles.testBtn} 
-              onClick={handlePohodaTest}
-              disabled={isTesting || isSyncing}
-            >
-              {isTesting ? (lang === 'CZ' ? 'Testuji...' : 'Testing...') : (lang === 'CZ' ? 'Test FTP' : 'Test FTP')}
-            </button>
-            <button 
-              className="btn btn-primary" 
-              style={styles.syncBtn} 
-              onClick={handlePohodaSync}
-              disabled={isSyncing || isTesting}
-            >
-              {isSyncing ? (lang === 'CZ' ? 'Synchronizuji...' : 'Syncing...') : (lang === 'CZ' ? 'Synch Sklad nyní' : 'Sync Stock Now')}
-            </button>
-          </div>
-        </div>
-        
-        <p style={styles.desc}>
-          {lang === 'CZ'
-            ? 'Načítá aktuální stav zásob a ceny z FTP serveru (/pohoda/export/zasoby.xml) vyexportované z Pohody a páruje je podle SKU.'
-            : 'Fetches current stock levels and prices from the FTP server (/pohoda/export/zasoby.xml) exported from Pohoda, pairing by SKU.'}
-        </p>
-
-        {message.text && (
-          <div style={{
-            ...styles.alert,
-            backgroundColor: message.type === 'success' ? 'rgba(46, 204, 113, 0.15)' : 'rgba(231, 76, 60, 0.15)',
-            borderColor: message.type === 'success' ? '#2ecc71' : '#e74c3c',
-            color: message.type === 'success' ? '#2ecc71' : '#e74c3c'
-          }}>
-            {message.text}
-          </div>
-        )}
-
-        <div style={styles.logsConsole}>
-          {pohodaLogs.length === 0 ? (
-            <div style={styles.logEmpty}>
-              {lang === 'CZ' ? 'Žádné záznamy o synchronizaci v logu.' : 'No sync records found in the log.'}
+      {import.meta.env.VITE_ENABLE_POHODA_SYNC === 'true' ? (
+        <div style={styles.glassPanel}>
+          <div style={styles.logsHeader}>
+            <h2 style={styles.sectionHeading}>
+              {lang === 'CZ' ? 'Účetnictví POHODA (FTP)' : 'POHODA Accounting (FTP)'}
+            </h2>
+            <div style={styles.btnGroup}>
+              <button 
+                className="btn btn-secondary" 
+                style={styles.testBtn} 
+                onClick={handlePohodaTest}
+                disabled={isTesting || isSyncing}
+              >
+                {isTesting ? (lang === 'CZ' ? 'Testuji...' : 'Testing...') : (lang === 'CZ' ? 'Test FTP' : 'Test FTP')}
+              </button>
+              <button 
+                className="btn btn-primary" 
+                style={styles.syncBtn} 
+                onClick={handlePohodaSync}
+                disabled={isSyncing || isTesting}
+              >
+                {isSyncing ? (lang === 'CZ' ? 'Synchronizuji...' : 'Syncing...') : (lang === 'CZ' ? 'Synch Sklad nyní' : 'Sync Stock Now')}
+              </button>
             </div>
-          ) : (
-            pohodaLogs.map(log => {
-              const logTime = new Date(log.created_at).toLocaleTimeString();
-              const logDate = new Date(log.created_at).toLocaleDateString();
-              const isError = log.status === 'ERROR';
-              const isWarning = log.status === 'WARNING';
-              return (
-                <div key={log.id} style={styles.logRow}>
-                  <span style={styles.logTime}>[{logDate} {logTime}]</span>
-                  <span style={{
-                    ...styles.logStatus,
-                    color: isError ? '#e74c3c' : isWarning ? '#f1c40f' : '#2ecc71'
-                  }}>
-                    [{log.direction}][{log.status}]
-                  </span>
-                  <span style={styles.logEvent}>{log.message}</span>
-                </div>
-              );
-            })
+          </div>
+          
+          <p style={styles.desc}>
+            {lang === 'CZ'
+              ? 'Načítá aktuální stav zásob a ceny z FTP serveru (/pohoda/export/zasoby.xml) vyexportované z Pohody a páruje je podle SKU.'
+              : 'Fetches current stock levels and prices from the FTP server (/pohoda/export/zasoby.xml) exported from Pohoda, pairing by SKU.'}
+          </p>
+
+          {message.text && (
+            <div style={{
+              ...styles.alert,
+              backgroundColor: message.type === 'success' ? 'rgba(46, 204, 113, 0.15)' : 'rgba(231, 76, 60, 0.15)',
+              borderColor: message.type === 'success' ? '#2ecc71' : '#e74c3c',
+              color: message.type === 'success' ? '#2ecc71' : '#e74c3c'
+            }}>
+              {message.text}
+            </div>
           )}
+
+          <div style={styles.logsConsole}>
+            {pohodaLogs.length === 0 ? (
+              <div style={styles.logEmpty}>
+                {lang === 'CZ' ? 'Žádné záznamy o synchronizaci v logu.' : 'No sync records found in the log.'}
+              </div>
+            ) : (
+              pohodaLogs.map(log => {
+                const logTime = new Date(log.created_at).toLocaleTimeString();
+                const logDate = new Date(log.created_at).toLocaleDateString();
+                const isError = log.status === 'ERROR';
+                const isWarning = log.status === 'WARNING';
+                return (
+                  <div key={log.id} style={styles.logRow}>
+                    <span style={styles.logTime}>[{logDate} {logTime}]</span>
+                    <span style={{
+                      ...styles.logStatus,
+                      color: isError ? '#e74c3c' : isWarning ? '#f1c40f' : '#2ecc71'
+                    }}>
+                      [{log.direction}][{log.status}]
+                    </span>
+                    <span style={styles.logEvent}>{log.message}</span>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div style={styles.glassPanel}>
+          <div style={styles.logsHeader}>
+            <h2 style={styles.sectionHeading}>
+              {lang === 'CZ' ? 'Účetnictví POHODA (Režim spánku)' : 'POHODA Accounting (Sleep Mode)'}
+            </h2>
+            <span style={{
+              fontSize: '11px',
+              fontWeight: '700',
+              color: '#8a8a93',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              padding: '4px 10px',
+              borderRadius: '12px',
+              border: '1px solid var(--border)'
+            }}>
+              {lang === 'CZ' ? 'Mimo provoz' : 'Offline'}
+            </span>
+          </div>
+          <p style={styles.desc}>
+            {lang === 'CZ'
+              ? 'Propojení na Pohodu je aktuálně vypnuté, e-shop běží v samostatném režimu. Reaktivaci lze provést změnou konfigurace.'
+              : 'Pohoda connection is currently disabled; the e-shop is running in standalone mode. It can be re-enabled via configuration.'}
+          </p>
+        </div>
+      )}
 
       {/* CARDMARKET PANEL */}
       <div style={styles.glassPanel}>
