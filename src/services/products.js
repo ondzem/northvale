@@ -28,10 +28,15 @@ function mapDbProduct(p) {
     customParams: p.custom_params || []
   };
 }
-// In-memory cache for raw products list
+// In-memory cache for raw products list and detail lookups
 let cachedRawProducts = null;
 let productsCacheTime = 0;
 const PRODUCTS_CACHE_TTL = 30000; // 30 seconds cache TTL
+
+const singleProductCache = {};
+export function getProductFromCache(id) {
+  return singleProductCache[id] || null;
+}
 
 /**
  * Fetch products from Supabase database with filters and search query.
@@ -52,7 +57,7 @@ export async function fetchProductsFromDB(options = {}) {
     } else {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, image, back_image, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, additional_images, illustrator, set_code, stage, element, custom_params, no_vat');
+        .select('id, name, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, image, back_image, description, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, additional_images, illustrator, set_code, stage, element, custom_params, no_vat');
 
       if (error) {
         throw error;
@@ -64,6 +69,11 @@ export async function fetchProductsFromDB(options = {}) {
 
     // Filter rawData in memory (ignore singles and slabs unless includeAll is true)
     let filtered = rawData.map(mapDbProduct);
+    filtered.forEach(p => {
+      if (p && p.id) {
+        singleProductCache[p.id] = p;
+      }
+    });
     if (!includeAll) {
       filtered = filtered.filter(p => p.type !== 'single' && p.type !== 'slab');
       
@@ -166,6 +176,10 @@ export async function fetchProductsFromDB(options = {}) {
  * Fetch a single product by ID, with fallback to local mock data.
  */
 export async function fetchProductByIdFromDB(id) {
+  if (singleProductCache[id]) {
+    return singleProductCache[id];
+  }
+
   try {
     if (!supabase.from) {
       throw new Error('Supabase client is not initialized');
@@ -182,10 +196,16 @@ export async function fetchProductByIdFromDB(id) {
     }
 
     const product = mapDbProduct(data);
+    if (product) {
+      singleProductCache[id] = product;
+    }
     return product;
   } catch (err) {
     console.warn(`Database fetch for single product ${id} failed, using mock fallback:`, err.message || err);
     const mock = mockProducts.find(p => p.id === id);
+    if (mock) {
+      singleProductCache[id] = mock;
+    }
     return mock || null;
   }
 }
@@ -195,7 +215,7 @@ export async function fetchProductByIdFromDB(id) {
  */
 export function mapProductToDb(p) {
   if (!p) return null;
-  return {
+  const dbObj = {
     id: p.id,
     name: p.name,
     type: p.type,
@@ -207,35 +227,92 @@ export function mapProductToDb(p) {
     subsubcategory: p.subsubcategory,
     rarity: p.rarity,
     image: p.image,
-    back_image: p.backImage || p.back_image || null,
-    description: p.desc || p.description || null,
-    price: p.price !== undefined && p.price !== null ? Number(p.price) : null,
-    stock: p.stock !== undefined && p.stock !== null ? Number(p.stock) : null,
-    lang: p.lang || null,
-    packaging_type: p.packagingType || p.packaging_type || null,
-    booster_count: p.boosterCount !== undefined && p.boosterCount !== null ? Number(p.boosterCount) : null,
-    year: p.year !== undefined && p.year !== null ? Number(p.year) : null,
-    foil_condition: p.preorder ? (p.releaseDate || null) : (p.foilCondition || p.foil_condition || null),
-    preorder: !!p.preorder,
-    investment: !!p.investment,
-    company: p.company || null,
-    grade: p.grade !== undefined && p.grade !== null ? Number(p.grade) : null,
-    cert_number: p.certNumber || p.cert_number || null,
-    acrylic_thickness: p.acrylicThickness !== undefined && p.acrylicThickness !== null ? Number(p.acrylicThickness) : null,
-    uv_protection: !!(p.uvProtection || p.uv_protection),
-    closing_type: p.closingType || p.closing_type || null,
-    inner_dimensions: p.innerDimensions || p.inner_dimensions || null,
-    variants: p.variants || null,
-    category_id: p.category_id || null,
-    short_description: p.shortDesc || null,
-    additional_images: p.additional_images || null,
-    illustrator: p.illustrator || null,
-    set_code: p.setCode || null,
-    stage: p.stage || null,
-    element: p.element || null,
-    custom_params: p.customParams || [],
     no_vat: !!p.no_vat
   };
+
+  if (p.backImage !== undefined || p.back_image !== undefined) {
+    dbObj.back_image = p.backImage !== undefined ? p.backImage : p.back_image;
+  }
+  if (p.desc !== undefined || p.description !== undefined) {
+    dbObj.description = p.desc !== undefined ? p.desc : p.description;
+  }
+  if (p.price !== undefined) {
+    dbObj.price = p.price !== null ? Number(p.price) : null;
+  }
+  if (p.stock !== undefined) {
+    dbObj.stock = p.stock !== null ? Number(p.stock) : null;
+  }
+  if (p.lang !== undefined) {
+    dbObj.lang = p.lang;
+  }
+  if (p.packagingType !== undefined || p.packaging_type !== undefined) {
+    dbObj.packaging_type = p.packagingType !== undefined ? p.packagingType : p.packaging_type;
+  }
+  if (p.boosterCount !== undefined || p.booster_count !== undefined) {
+    dbObj.booster_count = p.boosterCount !== null && p.boosterCount !== undefined ? Number(p.boosterCount) : null;
+  }
+  if (p.year !== undefined) {
+    dbObj.year = p.year !== null ? Number(p.year) : null;
+  }
+  if (p.preorder !== undefined) {
+    dbObj.preorder = !!p.preorder;
+    dbObj.foil_condition = p.preorder ? (p.releaseDate || null) : (p.foilCondition || p.foil_condition || null);
+  } else if (p.foilCondition !== undefined || p.foil_condition !== undefined) {
+    dbObj.foil_condition = p.foilCondition !== undefined ? p.foilCondition : p.foil_condition;
+  }
+  if (p.investment !== undefined) {
+    dbObj.investment = !!p.investment;
+  }
+  if (p.company !== undefined) {
+    dbObj.company = p.company;
+  }
+  if (p.grade !== undefined) {
+    dbObj.grade = p.grade !== null ? Number(p.grade) : null;
+  }
+  if (p.certNumber !== undefined || p.cert_number !== undefined) {
+    dbObj.cert_number = p.certNumber !== undefined ? p.certNumber : p.cert_number;
+  }
+  if (p.acrylicThickness !== undefined || p.acrylic_thickness !== undefined) {
+    dbObj.acrylic_thickness = p.acrylicThickness !== null && p.acrylicThickness !== undefined ? Number(p.acrylicThickness) : null;
+  }
+  if (p.uvProtection !== undefined || p.uv_protection !== undefined) {
+    dbObj.uv_protection = !!(p.uvProtection || p.uv_protection);
+  }
+  if (p.closingType !== undefined || p.closing_type !== undefined) {
+    dbObj.closing_type = p.closingType !== undefined ? p.closingType : p.closing_type;
+  }
+  if (p.innerDimensions !== undefined || p.inner_dimensions !== undefined) {
+    dbObj.inner_dimensions = p.innerDimensions !== undefined ? p.innerDimensions : p.inner_dimensions;
+  }
+  if (p.variants !== undefined) {
+    dbObj.variants = p.variants;
+  }
+  if (p.category_id !== undefined) {
+    dbObj.category_id = p.category_id;
+  }
+  if (p.shortDesc !== undefined || p.short_description !== undefined) {
+    dbObj.short_description = p.shortDesc !== undefined ? p.shortDesc : p.short_description;
+  }
+  if (p.additionalImages !== undefined || p.additional_images !== undefined) {
+    dbObj.additional_images = p.additionalImages !== undefined ? p.additionalImages : p.additional_images;
+  }
+  if (p.illustrator !== undefined) {
+    dbObj.illustrator = p.illustrator;
+  }
+  if (p.setCode !== undefined || p.set_code !== undefined) {
+    dbObj.set_code = p.setCode !== undefined ? p.setCode : p.set_code;
+  }
+  if (p.stage !== undefined) {
+    dbObj.stage = p.stage;
+  }
+  if (p.element !== undefined) {
+    dbObj.element = p.element;
+  }
+  if (p.customParams !== undefined || p.custom_params !== undefined) {
+    dbObj.custom_params = p.customParams !== undefined ? p.customParams : p.custom_params;
+  }
+
+  return dbObj;
 }
 
 /**
@@ -262,7 +339,12 @@ export async function saveProductToDB(product) {
     cachedRawProducts = null;
     productsCacheTime = 0;
 
-    return { data: mapDbProduct(data), error: null };
+    const mappedProduct = mapDbProduct(data);
+    if (mappedProduct && mappedProduct.id) {
+      singleProductCache[mappedProduct.id] = mappedProduct;
+    }
+
+    return { data: mappedProduct, error: null };
   } catch (err) {
     console.error('Failed to save product to database, using mock fallback:', err.message || err);
     
@@ -275,6 +357,10 @@ export async function saveProductToDB(product) {
       mockProducts.push(mappedFallback);
     }
     
+    if (mappedFallback && mappedFallback.id) {
+      singleProductCache[mappedFallback.id] = mappedFallback;
+    }
+
     return { 
       data: mappedFallback, 
       error: null, 
@@ -305,6 +391,7 @@ export async function deleteProductFromDB(id) {
     // Invalidate products cache
     cachedRawProducts = null;
     productsCacheTime = 0;
+    delete singleProductCache[id];
 
     return { error: null };
   } catch (err) {
@@ -315,6 +402,7 @@ export async function deleteProductFromDB(id) {
     if (idx !== -1) {
       mockProducts.splice(idx, 1);
     }
+    delete singleProductCache[id];
     
     return { error: null, isMockFallback: true, dbError: err.message || String(err) };
   }

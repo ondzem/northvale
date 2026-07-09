@@ -113,7 +113,7 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
   let path = '/';
   const searchParams = new URLSearchParams();
   
-  if (page === 'sealed-detail' && productId) {
+  if ((page === 'sealed-detail' || page === 'singles-detail') && productId) {
     path = `/sealed-detail/${productId}`;
   } else if (page === 'sealed-catalog') {
     path = '/sealed-catalog';
@@ -1593,7 +1593,7 @@ function AppContent() {
         )}
 
 
-        {activePage === 'sealed-detail' && (
+        {(activePage === 'sealed-detail' || activePage === 'singles-detail') && (
           <SealedDetail 
             productId={selectedProductId}
             products={dbProducts}

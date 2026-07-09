@@ -3,7 +3,7 @@ import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 import { supabase } from '../supabase';
-import { fetchProductByIdFromDB } from '../services/products';
+import { fetchProductByIdFromDB, getProductFromCache } from '../services/products';
 
 const getGameImage = (product) => {
   if (product.category === 'Acrylics') return '/acrylic-etb-box.webp';
@@ -379,15 +379,20 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
 
 
 
-  const [localProduct, setLocalProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [localProduct, setLocalProduct] = useState(() => {
+    return getProductFromCache(productId) || products.find(p => p.id === productId) || null;
+  });
+  const [loading, setLoading] = useState(() => {
+    return !(getProductFromCache(productId) || products.find(p => p.id === productId));
+  });
   const product = localProduct;
 
   useEffect(() => {
     let active = true;
     async function loadProduct() {
       // 1. Show cached product details immediately if available to prevent blank screens
-      const found = products.find(p => p.id === productId);
+      const cached = getProductFromCache(productId);
+      const found = cached || products.find(p => p.id === productId);
       if (found) {
         setLocalProduct(found);
         setLoading(false);
