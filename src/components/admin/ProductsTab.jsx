@@ -2448,6 +2448,16 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           <img src={formImage} alt="Preview front" style={{ height: '70px', width: '50px', objectFit: 'contain', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }} onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }} />
                           <div style={{ flex: 1, display: 'flex', gap: '8px' }}>
                             <button type="button" className="pmf-variants-add" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => {
+                              const target = { type: 'front' };
+                              setCropTarget(target);
+                              setCropImageSrc(formImage);
+                              setCropImageFormat('image/png');
+                              setIsCropping(true);
+                              cropRefX.current = 0;
+                              cropRefY.current = 0;
+                              cropRefScale.current = 1;
+                            }}>{lang === 'CZ' ? 'Upravit ořez' : 'Edit Crop'}</button>
+                            <button type="button" className="pmf-variants-add" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => {
                               const input = document.createElement('input');
                               input.type = 'file';
                               input.accept = 'image/*';
