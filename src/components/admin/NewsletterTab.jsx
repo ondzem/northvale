@@ -655,21 +655,26 @@ export default function NewsletterTab({ showToast }) {
     const drawW = img.width * scale;
     const drawH = img.height * scale;
 
-    const minLimitX = frameW - drawW;
-    const maxLimitX = 0;
-    if (drawW <= frameW) {
-      cropRefX.current = 0;
+    let minLimitX, maxLimitX;
+    if (drawW >= frameW) {
+      minLimitX = (frameW - drawW) / 2;
+      maxLimitX = (drawW - frameW) / 2;
     } else {
-      cropRefX.current = Math.max(minLimitX, Math.min(maxLimitX, cropRefX.current));
+      minLimitX = -(frameW + drawW) / 2;
+      maxLimitX = (frameW + drawW) / 2;
     }
 
-    const minLimitY = frameH - drawH;
-    const maxLimitY = 0;
-    if (drawH <= frameH) {
-      cropRefY.current = 0;
+    let minLimitY, maxLimitY;
+    if (drawH >= frameH) {
+      minLimitY = (frameH - drawH) / 2;
+      maxLimitY = (drawH - frameH) / 2;
     } else {
-      cropRefY.current = Math.max(minLimitY, Math.min(maxLimitY, cropRefY.current));
+      minLimitY = -(frameH + drawH) / 2;
+      maxLimitY = (frameH + drawH) / 2;
     }
+
+    cropRefX.current = Math.max(minLimitX, Math.min(maxLimitX, cropRefX.current));
+    cropRefY.current = Math.max(minLimitY, Math.min(maxLimitY, cropRefY.current));
 
     const drawX = frameX + (frameW - drawW) / 2 + cropRefX.current;
     const drawY = frameY + (frameH - drawH) / 2 + cropRefY.current;
