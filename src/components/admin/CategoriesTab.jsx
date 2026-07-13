@@ -381,31 +381,13 @@ export default function CategoriesTab({ showToast }) {
     const imageLeft = (frameW - drawW) / 2 + cropRefX.current;
     const imageTop = (frameH - drawH) / 2 + cropRefY.current;
 
-    const visibleX = Math.max(0, imageLeft);
-    const visibleY = Math.max(0, imageTop);
-    const visibleW = Math.min(frameW, imageLeft + drawW) - visibleX;
-    const visibleH = Math.min(frameH, imageTop + drawH) - visibleY;
-
-    if (visibleW <= 0 || visibleH <= 0) {
-      showToast(lang === 'CZ' ? 'Obrázek je mimo ořezové pole!' : 'Image is outside the crop frame!', 'error');
-      return;
-    }
-
     const baseW = cropOrientation === 'landscape' ? 1400 : 1000;
     const scaleFactor = baseW / frameW;
 
     const cropCanvas = document.createElement('canvas');
-    cropCanvas.width = visibleW * scaleFactor;
-    cropCanvas.height = visibleH * scaleFactor;
+    cropCanvas.width = frameW * scaleFactor;
+    cropCanvas.height = frameH * scaleFactor;
     const cropCtx = cropCanvas.getContext('2d');
-
-    const sourceXInScaledImage = visibleX - imageLeft;
-    const sourceYInScaledImage = visibleY - imageTop;
-
-    const sx = sourceXInScaledImage / scale;
-    const sy = sourceYInScaledImage / scale;
-    const sw = visibleW / scale;
-    const sh = visibleH / scale;
 
     cropCtx.imageSmoothingEnabled = true;
     cropCtx.imageSmoothingQuality = 'high';
@@ -420,16 +402,21 @@ export default function CategoriesTab({ showToast }) {
       cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
     }
 
+    const dx = imageLeft * scaleFactor;
+    const dy = imageTop * scaleFactor;
+    const dw = drawW * scaleFactor;
+    const dh = drawH * scaleFactor;
+
     cropCtx.drawImage(
       img,
-      sx,
-      sy,
-      sw,
-      sh,
       0,
       0,
-      cropCanvas.width,
-      cropCanvas.height
+      img.width,
+      img.height,
+      dx,
+      dy,
+      dw,
+      dh
     );
 
     const outputFormat = cropImageFormat === 'image/webp' ? 'image/webp' : (isTransparent ? 'image/png' : 'image/jpeg');

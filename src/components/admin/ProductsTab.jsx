@@ -1388,35 +1388,15 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     const imageLeft = (frameW - drawW) / 2 + cropRefX.current;
     const imageTop = (frameH - drawH) / 2 + cropRefY.current;
 
-    // Bounding box of the visible image content inside the crop frame (in frame coordinates)
-    const visibleX = Math.max(0, imageLeft);
-    const visibleY = Math.max(0, imageTop);
-    const visibleW = Math.min(frameW, imageLeft + drawW) - visibleX;
-    const visibleH = Math.min(frameH, imageTop + drawH) - visibleY;
-
-    if (visibleW <= 0 || visibleH <= 0) {
-      showToast(lang === 'CZ' ? 'Obrázek je mimo ořezové pole!' : 'Image is outside the crop frame!', 'error');
-      return;
-    }
-
     // High resolution scaling factor (4x baseline: 1400px width for landscape, 1000px for portrait)
     const baseW = cropOrientation === 'landscape' ? 1400 : 1000;
     const scaleFactor = baseW / frameW;
 
-    // Create target canvas matching only the visible image bounding box inside the frame
+    // Create target canvas representing the entire crop frame
     const cropCanvas = document.createElement('canvas');
-    cropCanvas.width = visibleW * scaleFactor;
-    cropCanvas.height = visibleH * scaleFactor;
+    cropCanvas.width = frameW * scaleFactor;
+    cropCanvas.height = frameH * scaleFactor;
     const cropCtx = cropCanvas.getContext('2d');
-
-    // Convert crop frame visible coordinates back to source image coordinates
-    const sourceXInScaledImage = visibleX - imageLeft;
-    const sourceYInScaledImage = visibleY - imageTop;
-
-    const sx = sourceXInScaledImage / scale;
-    const sy = sourceYInScaledImage / scale;
-    const sw = visibleW / scale;
-    const sh = visibleH / scale;
 
     // Enable high quality image scaling on canvas
     cropCtx.imageSmoothingEnabled = true;
@@ -1432,16 +1412,21 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
     }
 
+    const dx = imageLeft * scaleFactor;
+    const dy = imageTop * scaleFactor;
+    const dw = drawW * scaleFactor;
+    const dh = drawH * scaleFactor;
+
     cropCtx.drawImage(
       img,
-      sx,
-      sy,
-      sw,
-      sh,
       0,
       0,
-      cropCanvas.width,
-      cropCanvas.height
+      img.width,
+      img.height,
+      dx,
+      dy,
+      dw,
+      dh
     );
 
     const outputFormat = cropImageFormat === 'image/webp' ? 'image/webp' : (isTransparent ? 'image/png' : 'image/jpeg');
