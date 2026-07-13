@@ -27,7 +27,7 @@ import Blog from './components/Blog';
 import { blogArticles } from './blogData';
 
 import { mockProducts } from './mockData';
-import { fetchProductsFromDB } from './services/products';
+import { fetchProductsFromDB, getCachedProducts, getProductFromCache } from './services/products';
 import { FEATURE_FLAGS } from './config';
 import { LanguageProvider, useTranslation } from './context/LanguageContext';
 import './App.css';
@@ -43,7 +43,7 @@ const parseUrlToState = () => {
   
   if (path.startsWith('/sealed-detail/')) {
     const parsedId = path.replace('/sealed-detail/', '');
-    const product = mockProducts.find(p => p.id === parsedId);
+    const product = getProductFromCache(parsedId) || mockProducts.find(p => p.id === parsedId);
     if (product && !FEATURE_FLAGS.showSlabs && (product.subsubcat === 'graded' || product.subcat === 'graded' || (product.category === 'Acrylics' && product.game === 'PSA'))) {
       page = 'home';
     } else {
@@ -251,8 +251,19 @@ function AppContent() {
     twoFactorEnabled: false
   });
 
-  // Centralized Products Fetching from Database with Fallbacks
-  const [dbProducts, setDbProducts] = useState(mockProducts);
+  const [dbProducts, setDbProducts] = useState(() => {
+    const initialOptions = {};
+    if (initialUrlState.page === 'sealed-catalog') {
+      initialOptions.types = ['sealed', 'accessory'];
+      if (initialUrlState.filters?.game) {
+        initialOptions.game = initialUrlState.filters.game;
+      }
+    }
+    if (initialUrlState.searchQuery) {
+      initialOptions.searchQuery = initialUrlState.searchQuery;
+    }
+    return getCachedProducts(initialOptions);
+  });
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
 
   useEffect(() => {

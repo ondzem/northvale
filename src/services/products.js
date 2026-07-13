@@ -28,14 +28,91 @@ function mapDbProduct(p) {
     customParams: p.custom_params || []
   };
 }
-// In-memory cache for raw products list and detail lookups
-let cachedRawProducts = null;
-let productsCacheTime = 0;
+// In-memory and localStorage cache for raw products list and detail lookups
+let cachedRawProducts = (() => {
+  try {
+    const val = localStorage.getItem('northvale-cached-raw-products');
+    return val ? JSON.parse(val) : null;
+  } catch {
+    return null;
+  }
+})();
+
+let productsCacheTime = (() => {
+  try {
+    const val = localStorage.getItem('northvale-cached-products-time');
+    return val ? Number(val) : 0;
+  } catch {
+    return 0;
+  }
+})();
+
 const PRODUCTS_CACHE_TTL = 30000; // 30 seconds cache TTL
 
 const singleProductCache = {};
 export function getProductFromCache(id) {
   return singleProductCache[id] || null;
+}
+
+/**
+ * Helper to filter cached/local raw products synchronously on initial mount.
+ */
+export function getCachedProducts(options = {}) {
+  const { type, types, game, searchQuery, edition, includeAll } = options;
+
+  const rawData = cachedRawProducts || mockProducts;
+
+  let filtered = rawData.map(mapDbProduct);
+  filtered.forEach(p => {
+    if (p && p.id) {
+      singleProductCache[p.id] = p;
+    }
+  });
+
+  if (!includeAll) {
+    filtered = filtered.filter(p => p.type !== 'single' && p.type !== 'slab');
+    
+    // Always hide out-of-stock items from public view
+    filtered = filtered.filter(p => {
+      if (p.type === 'single') {
+        const totalStock = p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
+        return totalStock > 0;
+      } else {
+        return (p.stock || 0) > 0;
+      }
+    });
+  }
+
+  if (types && types.length > 0) {
+    filtered = filtered.filter(p => types.includes(p.type));
+  } else if (type) {
+    filtered = filtered.filter(p => p.type === type);
+  }
+
+  if (game && game !== 'all' && game !== 'all-games') {
+    if (game === 'Accessories') {
+      filtered = filtered.filter(p => p.type === 'accessory' && (!p.category || p.category !== 'Acrylics'));
+    } else if (game === 'Acrylics') {
+      filtered = filtered.filter(p => p.category === 'Acrylics');
+    } else {
+      filtered = filtered.filter(p => p.game === game && (!p.category || p.category !== 'Acrylics'));
+    }
+  }
+
+  if (edition && edition !== 'all') {
+    filtered = filtered.filter(p => p.edition === edition);
+  }
+
+  if (searchQuery && searchQuery.trim() !== '') {
+    const lowerSearch = searchQuery.trim().toLowerCase();
+    filtered = filtered.filter(p => 
+      p.name.toLowerCase().includes(lowerSearch) || 
+      (p.edition && p.edition.toLowerCase().includes(lowerSearch))
+    );
+  }
+
+  filtered.sort((a, b) => (a.id > b.id ? 1 : -1));
+  return filtered;
 }
 
 /**
@@ -64,6 +141,14 @@ export async function fetchProductsFromDB(options = {}) {
       }
       cachedRawProducts = data || [];
       productsCacheTime = now;
+
+      try {
+        localStorage.setItem('northvale-cached-raw-products', JSON.stringify(cachedRawProducts));
+        localStorage.setItem('northvale-cached-products-time', String(productsCacheTime));
+      } catch (e) {
+        console.warn('Failed to save products cache to localStorage:', e);
+      }
+
       rawData = cachedRawProducts;
     }
 
