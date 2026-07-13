@@ -1389,8 +1389,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     const imageLeft = (frameW - drawW) / 2 + cropRefX.current;
     const imageTop = (frameH - drawH) / 2 + cropRefY.current;
 
-    // High resolution scaling factor (4x baseline: 1400px width for landscape, 1000px for portrait)
-    const baseW = cropOrientation === 'landscape' ? 1400 : 1000;
+    // Optimized resolution scaling factor (2x baseline: 700px width for landscape, 500px for portrait)
+    const baseW = cropOrientation === 'landscape' ? 700 : 500;
     const scaleFactor = baseW / frameW;
 
     // Create target canvas representing the entire crop frame
@@ -2451,7 +2451,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               const target = { type: 'front' };
                               setCropTarget(target);
                               setCropImageSrc(formImage);
-                              setCropImageFormat('image/png');
+                              setCropImageFormat('image/jpeg');
                               setIsCropping(true);
                               cropRefX.current = 0;
                               cropRefY.current = 0;
@@ -2705,7 +2705,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                     const target = { type: 'front' };
                                     setCropTarget(target);
                                     setCropImageSrc(formImage);
-                                    setCropImageFormat('image/png');
+                                    setCropImageFormat('image/jpeg');
                                     setIsCropping(true);
                                     cropRefX.current = 0;
                                     cropRefY.current = 0;
@@ -2758,7 +2758,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                     const target = { type: 'back' };
                                     setCropTarget(target);
                                     setCropImageSrc(formBackImage);
-                                    setCropImageFormat('image/png');
+                                    setCropImageFormat('image/jpeg');
                                     setIsCropping(true);
                                     cropRefX.current = 0;
                                     cropRefY.current = 0;
@@ -2812,7 +2812,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                     const target = { type: 'additional', index };
                                     setCropTarget(target);
                                     setCropImageSrc(imgUrl);
-                                    setCropImageFormat('image/png');
+                                    setCropImageFormat('image/jpeg');
                                     setIsCropping(true);
                                     cropRefX.current = 0;
                                     cropRefY.current = 0;
@@ -2937,7 +2937,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                             const target = { type: 'block', id: block.id };
                                             setCropTarget(target);
                                             setCropImageSrc(block.value);
-                                            setCropImageFormat('image/png');
+                                            setCropImageFormat('image/jpeg');
                                             setIsCropping(true);
                                             cropRefX.current = 0;
                                             cropRefY.current = 0;
