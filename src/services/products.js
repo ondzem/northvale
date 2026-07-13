@@ -58,6 +58,8 @@ let cachedRawProducts = (() => {
   }
 })();
 
+let isCachedDataFull = false; // Flag to track if cachedRawProducts has full base64 images
+
 let productsCacheTime = (() => {
   try {
     const val = localStorage.getItem('northvale-cached-products-time');
@@ -149,7 +151,7 @@ export async function fetchProductsFromDB(options = {}) {
 
     const now = Date.now();
     let rawData;
-    if (cachedRawProducts && (now - productsCacheTime < PRODUCTS_CACHE_TTL)) {
+    if (cachedRawProducts && isCachedDataFull && (now - productsCacheTime < PRODUCTS_CACHE_TTL)) {
       rawData = cachedRawProducts;
     } else {
       const { data, error } = await supabase
@@ -160,6 +162,7 @@ export async function fetchProductsFromDB(options = {}) {
         throw error;
       }
       cachedRawProducts = data || [];
+      isCachedDataFull = true;
       productsCacheTime = now;
 
       try {
