@@ -213,6 +213,7 @@ export default function CategoriesTab({ showToast }) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
       const img = new Image();
+      img.crossOrigin = "anonymous";
       img.onload = () => {
         loadedImage.current = img;
 
@@ -1092,6 +1093,21 @@ export default function CategoriesTab({ showToast }) {
                     onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }} 
                   />
                   <div style={{ flex: 1, display: 'flex', gap: '8px' }}>
+                    <button 
+                      type="button" 
+                      className="pmf-variants-add" 
+                      style={{ padding: '6px 12px', fontSize: '11px' }} 
+                      onClick={() => {
+                        setCropImageSrc(formImageUrl);
+                        setCropImageFormat('image/png');
+                        setIsCropping(true);
+                        cropRefX.current = 0;
+                        cropRefY.current = 0;
+                        cropRefScale.current = 1;
+                      }}
+                    >
+                      {lang === 'CZ' ? 'Upravit ořez' : 'Edit Crop'}
+                    </button>
                     <button 
                       type="button" 
                       className="pmf-variants-add" 

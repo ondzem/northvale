@@ -1204,6 +1204,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
       const img = new Image();
+      img.crossOrigin = "anonymous";
       img.onload = () => {
         loadedImage.current = img;
 
@@ -2690,6 +2691,16 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               <div style={styles.slotPreviewWrap}>
                                 <img src={formImage} alt="Front preview" style={styles.slotPreviewImg} />
                                 <div style={styles.slotActions}>
+                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px', marginRight: '6px' }} title={lang === 'CZ' ? 'Upravit ořez' : 'Edit crop'} onClick={() => {
+                                    const target = { type: 'front' };
+                                    setCropTarget(target);
+                                    setCropImageSrc(formImage);
+                                    setCropImageFormat('image/png');
+                                    setIsCropping(true);
+                                    cropRefX.current = 0;
+                                    cropRefY.current = 0;
+                                    cropRefScale.current = 1;
+                                  }}>✂️</button>
                                   <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
                                     const input = document.createElement('input');
                                     input.type = 'file';
@@ -2733,6 +2744,16 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               <div style={styles.slotPreviewWrap}>
                                 <img src={formBackImage} alt="Back preview" style={styles.slotPreviewImg} />
                                 <div style={styles.slotActions}>
+                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px', marginRight: '6px' }} title={lang === 'CZ' ? 'Upravit ořez' : 'Edit crop'} onClick={() => {
+                                    const target = { type: 'back' };
+                                    setCropTarget(target);
+                                    setCropImageSrc(formBackImage);
+                                    setCropImageFormat('image/png');
+                                    setIsCropping(true);
+                                    cropRefX.current = 0;
+                                    cropRefY.current = 0;
+                                    cropRefScale.current = 1;
+                                  }}>✂️</button>
                                   <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
                                     const input = document.createElement('input');
                                     input.type = 'file';
@@ -2747,7 +2768,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                     };
                                     input.click();
                                   }}>🔄</button>
-                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '11px' }} onClick={() => setFormBackImage('')}>🗑️</button>
+                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '11px', marginLeft: '6px' }} onClick={() => setFormBackImage('')}>🗑️</button>
                                 </div>
                               </div>
                             ) : (
@@ -2770,13 +2791,23 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             )}
                           </div>
 
-                          {/* Additional Photo Cards */}
+                           {/* Additional Photo Cards */}
                           {formAdditionalImages.map((imgUrl, index) => (
                             <div key={index} className="image-slot-card" style={styles.imageSlotCard}>
                               <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? `Další #${index + 1}` : `Extra #${index + 1}`}</span>
                               <div style={styles.slotPreviewWrap}>
                                 <img src={imgUrl} alt="Extra preview" style={styles.slotPreviewImg} />
                                 <div style={styles.slotActions}>
+                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px', marginRight: '6px' }} title={lang === 'CZ' ? 'Upravit ořez' : 'Edit crop'} onClick={() => {
+                                    const target = { type: 'additional', index };
+                                    setCropTarget(target);
+                                    setCropImageSrc(imgUrl);
+                                    setCropImageFormat('image/png');
+                                    setIsCropping(true);
+                                    cropRefX.current = 0;
+                                    cropRefY.current = 0;
+                                    cropRefScale.current = 1;
+                                  }}>✂️</button>
                                   <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
                                     const input = document.createElement('input');
                                     input.type = 'file';
@@ -2791,7 +2822,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                     };
                                     input.click();
                                   }}>🔄</button>
-                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
+                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '11px', marginLeft: '6px' }} onClick={() => {
                                     setFormAdditionalImages(formAdditionalImages.filter((_, i) => i !== index));
                                   }}>🗑️</button>
                                 </div>
@@ -2891,6 +2922,20 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                         <div style={{ height: '70px', width: '50px', borderRadius: '4px', border: '1px dashed rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '18px' }}>📷</div>
                                       )}
                                       <div style={{ flex: 1 }}>
+                                        {block.value && (
+                                          <button type="button" className="pmf-variants-add" style={{ padding: '6px 12px', fontSize: '11px', marginRight: '6px' }} onClick={() => {
+                                            const target = { type: 'block', id: block.id };
+                                            setCropTarget(target);
+                                            setCropImageSrc(block.value);
+                                            setCropImageFormat('image/png');
+                                            setIsCropping(true);
+                                            cropRefX.current = 0;
+                                            cropRefY.current = 0;
+                                            cropRefScale.current = 1;
+                                          }}>
+                                            {lang === 'CZ' ? 'Upravit ořez' : 'Edit Crop'}
+                                          </button>
+                                        )}
                                         <button type="button" className="pmf-variants-add" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => {
                                           const input = document.createElement('input');
                                           input.type = 'file';

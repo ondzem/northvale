@@ -601,6 +601,7 @@ export default function NewsletterTab({ showToast }) {
     if (isCropping && cropImageSrc && canvasRef.current) {
       const canvas = canvasRef.current;
       const img = new Image();
+      img.crossOrigin = "anonymous";
       img.onload = () => {
         loadedImage.current = img;
 
@@ -1175,6 +1176,25 @@ export default function NewsletterTab({ showToast }) {
                               style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '70px', objectFit: 'contain' }}
                             />
                             <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
+                              {block.ratio !== 'original' && (
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary"
+                                  style={{ flex: 1, fontSize: '9px', padding: '3px 0', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', cursor: 'pointer' }}
+                                  onClick={() => {
+                                    setCropImageSrc(block.content);
+                                    setCropImageFormat('image/png');
+                                    setCropTarget({ index, field: 'content' });
+                                    setIsCropping(true);
+                                    cropRefX.current = 0;
+                                    cropRefY.current = 0;
+                                    cropRefScale.current = 1;
+                                    minScaleRef.current = 0.1;
+                                  }}
+                                >
+                                  ✂️ {lang === 'CZ' ? 'Upravit' : 'Edit'}
+                                </button>
+                              )}
                               <label
                                 className="btn btn-secondary"
                                 style={{ flex: 1, fontSize: '9px', padding: '3px 0', textAlign: 'center', cursor: 'pointer' }}
@@ -1190,7 +1210,7 @@ export default function NewsletterTab({ showToast }) {
                               <button
                                 type="button"
                                 className="btn"
-                                style={{ flex: 1, fontSize: '9px', padding: '3px 0', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none' }}
+                                style={{ flex: 1, fontSize: '9px', padding: '3px 0', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', cursor: 'pointer' }}
                                 onClick={() => updateBlockContent(index, '', 'content')}
                               >
                                 🗑️
@@ -1244,6 +1264,25 @@ export default function NewsletterTab({ showToast }) {
                               style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '70px', objectFit: 'contain' }}
                             />
                             <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
+                              {block.ratio !== 'original' && (
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary"
+                                  style={{ flex: 1, fontSize: '9px', padding: '3px 0', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', cursor: 'pointer' }}
+                                  onClick={() => {
+                                    setCropImageSrc(block.contentEN);
+                                    setCropImageFormat('image/png');
+                                    setCropTarget({ index, field: 'contentEN' });
+                                    setIsCropping(true);
+                                    cropRefX.current = 0;
+                                    cropRefY.current = 0;
+                                    cropRefScale.current = 1;
+                                    minScaleRef.current = 0.1;
+                                  }}
+                                >
+                                  ✂️ {lang === 'CZ' ? 'Upravit' : 'Edit'}
+                                </button>
+                              )}
                               <label
                                 className="btn btn-secondary"
                                 style={{ flex: 1, fontSize: '9px', padding: '3px 0', textAlign: 'center', cursor: 'pointer' }}
@@ -1259,7 +1298,7 @@ export default function NewsletterTab({ showToast }) {
                               <button
                                 type="button"
                                 className="btn"
-                                style={{ flex: 1, fontSize: '9px', padding: '3px 0', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none' }}
+                                style={{ flex: 1, fontSize: '9px', padding: '3px 0', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', cursor: 'pointer' }}
                                 onClick={() => updateBlockContent(index, '', 'contentEN')}
                               >
                                 🗑️

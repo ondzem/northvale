@@ -741,6 +741,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
       const img = new Image();
+      img.crossOrigin = "anonymous";
       img.onload = () => {
         loadedImage.current = img;
 
@@ -1239,6 +1240,15 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                   <img src={formDesktopUrl} alt="Preview desktop" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
                 </div>
                 <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                  <button type="button" className="btn btn-secondary" style={{ flex: 1, fontSize: '11px', padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} onClick={() => {
+                    setCropTarget('desktop');
+                    setCropImageSrc(formDesktopUrl);
+                    setCropImageFormat('image/png');
+                    setIsCropping(true);
+                    cropRefX.current = 0;
+                    cropRefY.current = 0;
+                    cropRefScale.current = 1;
+                  }}>{lang === 'CZ' ? 'Upravit ořez' : 'Edit Crop'}</button>
                   <button type="button" className="btn btn-secondary" style={{ flex: 1, fontSize: '11px', padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} onClick={() => document.getElementById('desktop-file-input').click()}>{lang === 'CZ' ? 'Změnit fotku' : 'Change Photo'}</button>
                   <button type="button" className="btn btn-secondary" style={{ flex: 1, fontSize: '11px', padding: '6px 12px', color: '#ef4444', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.15)' }} onClick={() => setFormDesktopUrl('')}>{lang === 'CZ' ? 'Odstranit' : 'Remove'}</button>
                 </div>
@@ -1318,6 +1328,15 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                   <img src={formMobileUrl} alt="Preview mobile" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
                 </div>
                 <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                  <button type="button" className="btn btn-secondary" style={{ flex: 1, fontSize: '11px', padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} onClick={() => {
+                    setCropTarget('mobile');
+                    setCropImageSrc(formMobileUrl);
+                    setCropImageFormat('image/png');
+                    setIsCropping(true);
+                    cropRefX.current = 0;
+                    cropRefY.current = 0;
+                    cropRefScale.current = 1;
+                  }}>{lang === 'CZ' ? 'Upravit ořez' : 'Edit Crop'}</button>
                   <button type="button" className="btn btn-secondary" style={{ flex: 1, fontSize: '11px', padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} onClick={() => document.getElementById('mobile-file-input').click()}>{lang === 'CZ' ? 'Změnit fotku' : 'Change Photo'}</button>
                   <button type="button" className="btn btn-secondary" style={{ flex: 1, fontSize: '11px', padding: '6px 12px', color: '#ef4444', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.15)' }} onClick={() => setFormMobileUrl('')}>{lang === 'CZ' ? 'Odstranit' : 'Remove'}</button>
                 </div>
@@ -1606,6 +1625,15 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                       <img src={dealImageUrl} alt="Preview deal" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
                     </div>
                     <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                      <button type="button" className="btn btn-secondary" style={{ flex: 1, fontSize: '11px', padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} onClick={() => {
+                        setCropTarget('deal');
+                        setCropImageSrc(dealImageUrl);
+                        setCropImageFormat('image/png');
+                        setIsCropping(true);
+                        cropRefX.current = 0;
+                        cropRefY.current = 0;
+                        cropRefScale.current = 1;
+                      }}>{lang === 'CZ' ? 'Upravit ořez' : 'Edit Crop'}</button>
                       <button type="button" className="btn btn-secondary" style={{ flex: 1, fontSize: '11px', padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} onClick={() => document.getElementById('deal-file-input').click()}>{lang === 'CZ' ? 'Změnit fotku' : 'Change Photo'}</button>
                       <button type="button" className="btn btn-secondary" style={{ flex: 1, fontSize: '11px', padding: '6px 12px', color: '#ef4444', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.15)' }} onClick={() => setDealImageUrl('')}>{lang === 'CZ' ? 'Odstranit' : 'Remove'}</button>
                     </div>
