@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import { fetchProductsFromDB } from '../services/products';
-import { fetchCategoriesFromDB } from '../services/categories';
+import { fetchCategoriesFromDB, getCachedCategories } from '../services/categories';
 
 export default function Navbar({ setActivePage, cart, user, setFilters, setSearchQuery, isLoggedIn, onOpenLogin, setSelectedProductId }) {
   const [drawerOpen, _setDrawerOpen] = useState(false);
@@ -48,7 +48,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
 
   }, [searchInput]);
 
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(() => getCachedCategories());
 
   useEffect(() => {
     let active = true;

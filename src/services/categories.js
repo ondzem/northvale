@@ -106,10 +106,33 @@ export const mockCategories = [
   { id: 'acrylic-lorcana-trove', name_cz: 'Lorcana akryly', name_en: 'Lorcana Acrylics', type: 'accessory', game: 'Acrylics', parent_id: 'cat-acrylics-trove' }
 ];
 
-// In-memory cache for categories
-let cachedCategories = null;
-let categoriesCacheTime = 0;
+// In-memory and localStorage cache for categories
+let cachedCategories = (() => {
+  try {
+    const val = localStorage.getItem('northvale-cached-categories');
+    return val ? JSON.parse(val) : null;
+  } catch {
+    return null;
+  }
+})();
+
+let categoriesCacheTime = (() => {
+  try {
+    const val = localStorage.getItem('northvale-cached-categories-time');
+    return val ? Number(val) : 0;
+  } catch {
+    return 0;
+  }
+})();
+
 const CATEGORIES_CACHE_TTL = 300000; // 5 minutes cache TTL
+
+/**
+ * Helper to get cached/local categories synchronously on initial mount.
+ */
+export function getCachedCategories() {
+  return cachedCategories || [];
+}
 
 /**
  * Fetch all categories from Supabase, falling back to mockCategories on error.
@@ -145,10 +168,18 @@ export async function fetchCategoriesFromDB() {
     
     cachedCategories = finalCategories;
     categoriesCacheTime = now;
+
+    try {
+      localStorage.setItem('northvale-cached-categories', JSON.stringify(finalCategories));
+      localStorage.setItem('northvale-cached-categories-time', String(categoriesCacheTime));
+    } catch (e) {
+      console.warn('Failed to save categories cache to localStorage:', e);
+    }
+
     return finalCategories;
   } catch (err) {
     console.warn('Database categories query failed, using local fallback:', err.message || err);
-    return mockCategories;
+    return cachedCategories || mockCategories;
   }
 }
 

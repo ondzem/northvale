@@ -3,7 +3,7 @@ import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 import DealOfTheDay from './DealOfTheDay';
-import { fetchCategoriesFromDB, mockCategories } from '../services/categories';
+import { fetchCategoriesFromDB, mockCategories, getCachedCategories } from '../services/categories';
 
 function getGameFallbackLogo(game) {
   switch (game) {
@@ -770,7 +770,10 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
   const [selectedClosingTypes, setSelectedClosingTypes] = useState([]);
   const [selectedPackagingTypes, setSelectedPackagingTypes] = useState(filters.type ? [filters.type] : []);
 
-  const [dbCategories, setDbCategories] = useState(mockCategories);
+  const [dbCategories, setDbCategories] = useState(() => {
+    const cached = getCachedCategories();
+    return cached.length > 0 ? cached : mockCategories;
+  });
   const [categoriesLoaded, setCategoriesLoaded] = useState(true);
 
   const [activeSubcategory, setActiveSubcategory] = useState('all');
