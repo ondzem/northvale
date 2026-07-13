@@ -395,7 +395,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   // Image Crop State (Using Refs for 60fps performance to bypass React renders during drag/zoom)
   const [cropImageSrc, setCropImageSrc] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
-  const [cropImageFormat, setCropImageFormat] = useState('image/jpeg');
+  const [cropImageFormat, setCropImageFormat] = useState('image/webp');
   const [cropOrientation, setCropOrientation] = useState('portrait');
   const cropRefX = useRef(0);
   const cropRefY = useRef(0);
@@ -1180,7 +1180,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     const reader = new FileReader();
     reader.onload = (event) => {
       setCropImageSrc(event.target.result);
-      setCropImageFormat(file.type || 'image/jpeg');
+      setCropImageFormat('image/webp');
       setIsCropping(true);
 
       // Default crop orientation based on target type
@@ -2451,7 +2451,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               const target = { type: 'front' };
                               setCropTarget(target);
                               setCropImageSrc(formImage);
-                              setCropImageFormat('image/jpeg');
+                              setCropImageFormat('image/webp');
                               setIsCropping(true);
                               cropRefX.current = 0;
                               cropRefY.current = 0;
@@ -2705,7 +2705,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                     const target = { type: 'front' };
                                     setCropTarget(target);
                                     setCropImageSrc(formImage);
-                                    setCropImageFormat('image/jpeg');
+                                    setCropImageFormat('image/webp');
                                     setIsCropping(true);
                                     cropRefX.current = 0;
                                     cropRefY.current = 0;
@@ -2758,7 +2758,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                     const target = { type: 'back' };
                                     setCropTarget(target);
                                     setCropImageSrc(formBackImage);
-                                    setCropImageFormat('image/jpeg');
+                                    setCropImageFormat('image/webp');
                                     setIsCropping(true);
                                     cropRefX.current = 0;
                                     cropRefY.current = 0;
@@ -2812,7 +2812,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                     const target = { type: 'additional', index };
                                     setCropTarget(target);
                                     setCropImageSrc(imgUrl);
-                                    setCropImageFormat('image/jpeg');
+                                    setCropImageFormat('image/webp');
                                     setIsCropping(true);
                                     cropRefX.current = 0;
                                     cropRefY.current = 0;
@@ -2937,7 +2937,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                             const target = { type: 'block', id: block.id };
                                             setCropTarget(target);
                                             setCropImageSrc(block.value);
-                                            setCropImageFormat('image/jpeg');
+                                            setCropImageFormat('image/webp');
                                             setIsCropping(true);
                                             cropRefX.current = 0;
                                             cropRefY.current = 0;
