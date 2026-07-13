@@ -403,9 +403,9 @@ export default function CategoriesTab({ showToast }) {
     cropCtx.imageSmoothingEnabled = true;
     cropCtx.imageSmoothingQuality = 'high';
 
-    const isPng = cropImageFormat === 'image/png';
+    const isTransparent = cropImageFormat === 'image/png' || cropImageFormat === 'image/webp' || cropImageFormat === 'image/gif';
 
-    if (!isPng) {
+    if (!isTransparent) {
       // Fill background with theme color to avoid transparent areas turning black in JPEG
       cropCtx.fillStyle = '#1c1c22';
       cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
@@ -425,8 +425,8 @@ export default function CategoriesTab({ showToast }) {
       cropCanvas.height
     );
 
-    const outputFormat = isPng ? 'image/png' : 'image/jpeg';
-    const outputQuality = isPng ? undefined : 0.85;
+    const outputFormat = cropImageFormat === 'image/webp' ? 'image/webp' : (isTransparent ? 'image/png' : 'image/jpeg');
+    const outputQuality = outputFormat === 'image/webp' || outputFormat === 'image/jpeg' ? 0.85 : undefined;
     const croppedUrl = cropCanvas.toDataURL(outputFormat, outputQuality);
     setFormImageUrl(croppedUrl);
 

@@ -793,8 +793,9 @@ export default function NewsletterTab({ showToast }) {
     cropCtx.imageSmoothingEnabled = true;
     cropCtx.imageSmoothingQuality = 'high';
 
-    const isPng = cropImageFormat === 'image/png';
-    if (!isPng) {
+    const isTransparent = cropImageFormat === 'image/png' || cropImageFormat === 'image/webp' || cropImageFormat === 'image/gif';
+
+    if (!isTransparent) {
       cropCtx.fillStyle = '#ffffff';
       cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
     } else {
@@ -813,8 +814,8 @@ export default function NewsletterTab({ showToast }) {
       cropCanvas.height
     );
 
-    const outputFormat = isPng ? 'image/png' : 'image/jpeg';
-    const outputQuality = isPng ? undefined : 0.85;
+    const outputFormat = cropImageFormat === 'image/webp' ? 'image/webp' : (isTransparent ? 'image/png' : 'image/jpeg');
+    const outputQuality = outputFormat === 'image/webp' || outputFormat === 'image/jpeg' ? 0.85 : undefined;
     const croppedUrl = cropCanvas.toDataURL(outputFormat, outputQuality);
 
     setBlocks(prev => {

@@ -1415,9 +1415,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     cropCtx.imageSmoothingEnabled = true;
     cropCtx.imageSmoothingQuality = 'high';
 
-    const isPng = cropImageFormat === 'image/png';
+    const isTransparent = cropImageFormat === 'image/png' || cropImageFormat === 'image/webp' || cropImageFormat === 'image/gif';
 
-    if (!isPng) {
+    if (!isTransparent) {
       // Fill background with white to avoid transparent areas turning black in JPEG
       cropCtx.fillStyle = '#ffffff';
       cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
@@ -1437,8 +1437,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       cropCanvas.height
     );
 
-    const outputFormat = isPng ? 'image/png' : 'image/jpeg';
-    const outputQuality = isPng ? undefined : 0.85;
+    const outputFormat = cropImageFormat === 'image/webp' ? 'image/webp' : (isTransparent ? 'image/png' : 'image/jpeg');
+    const outputQuality = outputFormat === 'image/webp' || outputFormat === 'image/jpeg' ? 0.85 : undefined;
     const croppedUrl = cropCanvas.toDataURL(outputFormat, outputQuality);
     if (cropTarget.type === 'front') {
       setFormImage(croppedUrl);

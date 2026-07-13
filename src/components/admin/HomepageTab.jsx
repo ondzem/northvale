@@ -932,9 +932,9 @@ export default function HomepageTab({ showToast, onEditProduct }) {
     cropCtx.imageSmoothingEnabled = true;
     cropCtx.imageSmoothingQuality = 'high';
 
-    const isPng = cropImageFormat === 'image/png' || cropTarget === 'deal';
+    const isTransparent = cropImageFormat === 'image/png' || cropImageFormat === 'image/webp' || cropImageFormat === 'image/gif' || cropTarget === 'deal';
 
-    if (!isPng) {
+    if (!isTransparent) {
       cropCtx.fillStyle = '#1c1c22';
       cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
     } else {
@@ -953,8 +953,8 @@ export default function HomepageTab({ showToast, onEditProduct }) {
       cropCanvas.height
     );
 
-    const format = isPng ? 'image/png' : 'image/jpeg';
-    const quality = isPng ? undefined : 0.85;
+    const format = cropImageFormat === 'image/webp' ? 'image/webp' : (isTransparent ? 'image/png' : 'image/jpeg');
+    const quality = format === 'image/webp' || format === 'image/jpeg' ? 0.85 : undefined;
     const croppedUrl = cropCanvas.toDataURL(format, quality);
     if (cropTarget === 'desktop') {
       setFormDesktopUrl(croppedUrl);
