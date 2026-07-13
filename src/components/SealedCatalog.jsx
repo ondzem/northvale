@@ -772,7 +772,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
 
   const [dbCategories, setDbCategories] = useState(() => {
     const cached = getCachedCategories();
-    return cached.length > 0 ? cached : mockCategories;
+    return cached.length > 0 ? cached : [];
   });
   const [categoriesLoaded, setCategoriesLoaded] = useState(true);
 

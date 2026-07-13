@@ -28,6 +28,26 @@ function mapDbProduct(p) {
     customParams: p.custom_params || []
   };
 }
+function cleanProductsForCache(products) {
+  if (!products || !Array.isArray(products)) return [];
+  return products.map(p => {
+    if (!p) return p;
+    const clean = { ...p };
+    if (clean.image && clean.image.startsWith('data:')) {
+      clean.image = '';
+    }
+    if (clean.back_image && clean.back_image.startsWith('data:')) {
+      clean.back_image = '';
+    }
+    if (clean.additional_images && Array.isArray(clean.additional_images)) {
+      clean.additional_images = clean.additional_images.map(img => 
+        (img && img.startsWith('data:')) ? '' : img
+      );
+    }
+    return clean;
+  });
+}
+
 // In-memory and localStorage cache for raw products list and detail lookups
 let cachedRawProducts = (() => {
   try {
@@ -60,7 +80,7 @@ export function getProductFromCache(id) {
 export function getCachedProducts(options = {}) {
   const { type, types, game, searchQuery, edition, includeAll } = options;
 
-  const rawData = cachedRawProducts || mockProducts;
+  const rawData = cachedRawProducts || [];
 
   let filtered = rawData.map(mapDbProduct);
   filtered.forEach(p => {
@@ -143,7 +163,8 @@ export async function fetchProductsFromDB(options = {}) {
       productsCacheTime = now;
 
       try {
-        localStorage.setItem('northvale-cached-raw-products', JSON.stringify(cachedRawProducts));
+        const cleanData = cleanProductsForCache(cachedRawProducts);
+        localStorage.setItem('northvale-cached-raw-products', JSON.stringify(cleanData));
         localStorage.setItem('northvale-cached-products-time', String(productsCacheTime));
       } catch (e) {
         console.warn('Failed to save products cache to localStorage:', e);
@@ -207,10 +228,9 @@ export async function fetchProductsFromDB(options = {}) {
     return filtered;
 
   } catch (err) {
-    console.warn('Database products query failed, using local mock fallback:', err.message || err);
+    console.warn('Database products query failed, using local fallback:', err.message || err);
 
-    // Filter local mockProducts identically (ignore singles and slabs unless includeAll is true)
-    let filtered = mockProducts;
+    let filtered = cachedRawProducts && cachedRawProducts.length > 0 ? cachedRawProducts : mockProducts;
     if (!includeAll) {
       filtered = filtered.filter(p => p.type !== 'single' && p.type !== 'slab');
       
