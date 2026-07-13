@@ -306,6 +306,7 @@ export default function CategoriesTab({ showToast }) {
   };
 
   const handleCanvasMouseDown = (e) => {
+    e.preventDefault();
     isDragging.current = true;
     const rect = canvasRef.current.getBoundingClientRect();
     dragStart.current = {
@@ -336,6 +337,7 @@ export default function CategoriesTab({ showToast }) {
 
   const handleCanvasTouchStart = (e) => {
     if (e.touches.length !== 1) return;
+    e.preventDefault();
     isDragging.current = true;
     const rect = canvasRef.current.getBoundingClientRect();
     dragStart.current = {
@@ -346,6 +348,7 @@ export default function CategoriesTab({ showToast }) {
 
   const handleCanvasTouchMove = (e) => {
     if (!isDragging.current || !loadedImage.current || e.touches.length !== 1) return;
+    e.preventDefault();
     const rect = canvasRef.current.getBoundingClientRect();
     const mouseX = e.touches[0].clientX - rect.left;
     const mouseY = e.touches[0].clientY - rect.top;
@@ -1335,9 +1338,10 @@ export default function CategoriesTab({ showToast }) {
               <button
                 type="button"
                 className="pmf-btn-primary"
-                style={{ flex: 1, padding: '10px 16px', fontSize: '12px', borderRadius: '8px', border: 'none', background: 'var(--nv-gold, #fdbd16)', color: '#000', fontWeight: 'bold', cursor: 'pointer' }}
+                style={{ flex: 1, padding: '10px 16px', fontSize: '12px', borderRadius: '8px', border: 'none', background: 'var(--nv-gold, #fdbd16)', color: '#000', fontWeight: 'bold', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                 onClick={handleCropAction}
               >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"></polyline></svg>
                 {lang === 'CZ' ? 'Oříznout' : 'Crop'}
               </button>
             </div>

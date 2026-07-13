@@ -694,6 +694,7 @@ export default function NewsletterTab({ showToast }) {
   };
 
   const handleCanvasMouseDown = (e) => {
+    e.preventDefault();
     isDragging.current = true;
     const rect = canvasRef.current.getBoundingClientRect();
     dragStart.current = {
@@ -724,6 +725,7 @@ export default function NewsletterTab({ showToast }) {
 
   const handleCanvasTouchStart = (e) => {
     if (e.touches.length !== 1) return;
+    e.preventDefault();
     isDragging.current = true;
     const rect = canvasRef.current.getBoundingClientRect();
     dragStart.current = {
@@ -734,6 +736,7 @@ export default function NewsletterTab({ showToast }) {
 
   const handleCanvasTouchMove = (e) => {
     if (!isDragging.current || !loadedImage.current || e.touches.length !== 1) return;
+    e.preventDefault();
     const rect = canvasRef.current.getBoundingClientRect();
     const mouseX = e.touches[0].clientX - rect.left;
     const mouseY = e.touches[0].clientY - rect.top;
