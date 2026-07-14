@@ -318,6 +318,11 @@ export default function Footer({ setActivePage, activePage }) {
             <span className="contact-key">{lang === 'CZ' ? 'IČO' : 'Company ID'}</span>
             <span className="contact-value">29618142</span>
           </div>
+
+          <div className="footer-contact-row">
+            <span className="contact-key">{lang === 'CZ' ? 'DIČ' : 'VAT ID'}</span>
+            <span className="contact-value">CZ29618142</span>
+          </div>
           
           <div className="footer-contact-row">
             <span className="contact-key">E-mail</span>
