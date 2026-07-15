@@ -271,7 +271,36 @@ export function getCategoryIcon(cat) {
     return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30"><clipPath id="c"><circle cx="15" cy="15" r="14"/></clipPath><g clip-path="url(%23c)"><rect width="30" height="30" fill="%23ee1c25"/><polygon points="8,5 6.5,10 11,7 6,7 10,10" fill="%23ffde00"/></g><circle cx="15" cy="15" r="14.5" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/></svg>`;
   }
 
-  // Default to the game fallback logo
+  // Restore detailed category default icons
+  if (id.includes('booster-box')) {
+    return 'https://tcgplayer-cdn.tcgplayer.com/product/552309_in_1000x1000.jpg';
+  }
+  if (id.includes('etb') || id.includes('trove')) {
+    return 'https://tcgplayer-cdn.tcgplayer.com/product/506307_in_1000x1000.jpg';
+  }
+  if (id.includes('bundle')) {
+    return 'https://tcgplayer-cdn.tcgplayer.com/product/530267_in_1000x1000.jpg';
+  }
+  if (id.includes('booster')) {
+    return 'https://tcgplayer-cdn.tcgplayer.com/product/550201_in_1000x1000.jpg';
+  }
+  if (id.includes('special')) {
+    return 'https://tcgplayer-cdn.tcgplayer.com/product/561990_in_1000x1000.jpg';
+  }
+  if (id.includes('sleeves')) {
+    return 'https://tcgplayer-cdn.tcgplayer.com/product/484394_in_1000x1000.jpg';
+  }
+  if (id.includes('toploader')) {
+    return 'https://tcgplayer-cdn.tcgplayer.com/product/251347_in_1000x1000.jpg';
+  }
+  if (id.includes('binder') || id.includes('album')) {
+    return 'https://tcgplayer-cdn.tcgplayer.com/product/251411_in_1000x1000.jpg';
+  }
+  if (id.includes('acrylic')) {
+    return '/acrylic-etb-box.webp';
+  }
+
+  // Default to the game fallback logo if none of the above matches
   const game = cat.game || '';
   switch (game) {
     case 'Pokémon': return '/Pokemon.webp';
