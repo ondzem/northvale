@@ -3,7 +3,7 @@ import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 import DealOfTheDay from './DealOfTheDay';
-import { fetchCategoriesFromDB, mockCategories, getCachedCategories } from '../services/categories';
+import { fetchCategoriesFromDB, mockCategories, getCachedCategories, getCategoryIcon } from '../services/categories';
 
 function getGameFallbackLogo(game) {
   switch (game) {
@@ -213,7 +213,7 @@ export function getDisplaySubcategories(game, type, categories, lang) {
     {
       id: 'all',
       name: lang === 'CZ' ? root.name_cz : root.name_en,
-      icon: <img src={root.image_url || getGameFallbackLogo(game)} alt="" className="subcategory-img" width="44" height="44" />
+      icon: <img src={getCategoryIcon(root)} alt="" className="subcategory-img" width="44" height="44" />
     }
   ];
   
@@ -221,7 +221,7 @@ export function getDisplaySubcategories(game, type, categories, lang) {
     formatted.push({
       id: child.id,
       name: lang === 'CZ' ? child.name_cz : child.name_en,
-      icon: <img src={child.image_url || getGameFallbackLogo(game)} alt="" className="subcategory-img" width="44" height="44" />
+      icon: <img src={getCategoryIcon(child)} alt="" className="subcategory-img" width="44" height="44" />
     });
   });
   
@@ -832,7 +832,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       formatted.push({
         id: child.id,
         name: lang === 'CZ' ? child.name_cz : child.name_en,
-        icon: child.image_url ? <img src={child.image_url} alt="" className="subcategory-img" width="18" height="18" style={{ width: '18px', height: '18px', borderRadius: '4px', objectFit: 'cover' }} /> : '📁'
+        icon: <img src={getCategoryIcon(child)} alt="" className="subcategory-img" width="18" height="18" style={{ width: '18px', height: '18px', borderRadius: '4px', objectFit: 'cover' }} />
       });
     });
     return formatted;
