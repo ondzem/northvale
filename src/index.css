@@ -2522,8 +2522,13 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 .catalog-product-grid .vf-card,
 .favorites-slider-grid .vf-card {
   width: 240px;
-  height: 489px;
+  height: 442px;
   flex: 0 0 240px;
+}
+
+.catalog-product-grid .vf-card .vf-art,
+.favorites-slider-grid .vf-card .vf-art {
+  height: 300px;
 }
 
 .catalog-product-grid .vf-info,
@@ -2551,8 +2556,12 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   .catalog-product-grid .vf-card,
   .favorites-slider-grid .vf-card {
     width: 200px;
-    height: 409px;
+    height: 380px;
     flex: 0 0 200px;
+  }
+  .catalog-product-grid .vf-card .vf-art,
+  .favorites-slider-grid .vf-card .vf-art {
+    height: 250px;
   }
 }
 
@@ -3568,7 +3577,14 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.6));
+  transform: scale(1.35);
+  transition: transform 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .detail-clean-image-container img {
+    transform: scale(1.1);
+  }
 }
 
 @media (max-width: 768px) {
@@ -3585,7 +3601,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 }
 
 .lightbox-image-clean {
-  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.8));
+  /* No filter shadow as requested */
 }
 
 /* Rating Stars styling */

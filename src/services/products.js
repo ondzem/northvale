@@ -58,7 +58,7 @@ let cachedRawProducts = (() => {
   }
 })();
 
-let isCachedDataFull = false; // Flag to track if cachedRawProducts has full base64 images
+let isCachedDataFull = true; // Always true as main catalog list no longer loads massive base64 columns
 
 let productsCacheTime = (() => {
   try {
@@ -156,7 +156,7 @@ export async function fetchProductsFromDB(options = {}) {
     } else {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, image, back_image, description, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, additional_images, illustrator, set_code, stage, element, custom_params, no_vat');
+        .select('id, name, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, description, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, illustrator, set_code, stage, element, custom_params, no_vat');
 
       if (error) {
         throw error;
@@ -284,7 +284,7 @@ export async function fetchProductsFromDB(options = {}) {
  * Fetch a single product by ID, with fallback to local mock data.
  */
 export async function fetchProductByIdFromDB(id) {
-  if (singleProductCache[id]) {
+  if (singleProductCache[id] && singleProductCache[id].isFullyFetched) {
     return singleProductCache[id];
   }
 
@@ -305,13 +305,29 @@ export async function fetchProductByIdFromDB(id) {
 
     const product = mapDbProduct(data);
     if (product) {
+      product.isFullyFetched = true;
       singleProductCache[id] = product;
+      if (product.image) {
+        try {
+          localStorage.setItem(`nv-img-${id}`, product.image);
+          localStorage.setItem(`nv-img-time-${id}`, String(Date.now()));
+        } catch (e) {
+          console.warn('Quota exceeded caching single image:', e);
+        }
+      }
+      if (product.backImage) {
+        try {
+          localStorage.setItem(`nv-back-img-${id}`, product.backImage);
+          localStorage.setItem(`nv-back-img-time-${id}`, String(Date.now()));
+        } catch {}
+      }
     }
     return product;
   } catch (err) {
     console.warn(`Database fetch for single product ${id} failed, using mock fallback:`, err.message || err);
     const mock = mockProducts.find(p => p.id === id);
     if (mock) {
+      mock.isFullyFetched = true;
       singleProductCache[id] = mock;
     }
     return mock || null;
@@ -446,6 +462,12 @@ export async function saveProductToDB(product) {
     // Invalidate products cache
     cachedRawProducts = null;
     productsCacheTime = 0;
+    try {
+      localStorage.removeItem(`nv-img-${product.id}`);
+      localStorage.removeItem(`nv-img-time-${product.id}`);
+      localStorage.removeItem(`nv-back-img-${product.id}`);
+      localStorage.removeItem(`nv-back-img-time-${product.id}`);
+    } catch {}
 
     const mappedProduct = mapDbProduct(data);
     if (mappedProduct && mappedProduct.id) {
@@ -500,6 +522,12 @@ export async function deleteProductFromDB(id) {
     cachedRawProducts = null;
     productsCacheTime = 0;
     delete singleProductCache[id];
+    try {
+      localStorage.removeItem(`nv-img-${id}`);
+      localStorage.removeItem(`nv-img-time-${id}`);
+      localStorage.removeItem(`nv-back-img-${id}`);
+      localStorage.removeItem(`nv-back-img-time-${id}`);
+    } catch {}
 
     return { error: null };
   } catch (err) {
@@ -513,5 +541,108 @@ export async function deleteProductFromDB(id) {
     delete singleProductCache[id];
     
     return { error: null, isMockFallback: true, dbError: err.message || String(err) };
+  }
+}
+
+/**
+ * Lazy fetch single product front image (utilizes local cache first, refreshes every 2 hours max).
+ */
+export async function fetchProductImage(productId) {
+  if (!productId) return null;
+  const now = Date.now();
+  
+  // Try checking localStorage synchronously
+  try {
+    const cached = localStorage.getItem(`nv-img-${productId}`);
+    const cachedTime = localStorage.getItem(`nv-img-time-${productId}`);
+    if (cached && cachedTime && (now - Number(cachedTime) < 7200000)) {
+      return cached;
+    }
+  } catch (e) {
+    console.warn('LocalStorage error on image lookup:', e);
+  }
+
+  // Fetch from Database
+  try {
+    if (!supabase.from) return null;
+    const { data, error } = await supabase
+      .from('products')
+      .select('image')
+      .eq('id', productId)
+      .single();
+
+    if (!error && data && data.image) {
+      try {
+        localStorage.setItem(`nv-img-${productId}`, data.image);
+        localStorage.setItem(`nv-img-time-${productId}`, String(now));
+      } catch (e) {
+        console.warn('Quota exceeded for image cache:', e);
+      }
+      return data.image;
+    }
+  } catch (err) {
+    console.error('Failed to fetch image for product:', productId, err);
+  }
+
+  // Fallback to older cached value if database query failed
+  try {
+    return localStorage.getItem(`nv-img-${productId}`) || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Lazy fetch single product back image.
+ */
+export async function fetchProductBackImage(productId) {
+  if (!productId) return null;
+  const now = Date.now();
+  
+  try {
+    const cached = localStorage.getItem(`nv-back-img-${productId}`);
+    const cachedTime = localStorage.getItem(`nv-back-img-time-${productId}`);
+    if (cached && cachedTime && (now - Number(cachedTime) < 7200000)) {
+      return cached;
+    }
+  } catch {}
+
+  try {
+    if (!supabase.from) return null;
+    const { data, error } = await supabase
+      .from('products')
+      .select('back_image')
+      .eq('id', productId)
+      .single();
+
+    if (!error && data && data.back_image) {
+      try {
+        localStorage.setItem(`nv-back-img-${productId}`, data.back_image);
+        localStorage.setItem(`nv-back-img-time-${productId}`, String(now));
+      } catch (e) {
+        console.warn('Quota exceeded for back image cache:', e);
+      }
+      return data.back_image;
+    }
+  } catch (err) {
+    console.error('Failed to fetch back image for product:', productId, err);
+  }
+
+  try {
+    return localStorage.getItem(`nv-back-img-${productId}`) || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Synchronously retrieves a cached product image from localStorage if it exists.
+ */
+export function getProductImageCached(productId, fallbackSrc = '') {
+  if (!productId) return fallbackSrc || '';
+  try {
+    return localStorage.getItem(`nv-img-${productId}`) || fallbackSrc || '';
+  } catch {
+    return fallbackSrc || '';
   }
 }

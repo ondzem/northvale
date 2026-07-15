@@ -1,10 +1,35 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../context/LanguageContext';
+import { fetchProductImage } from '../services/products';
 
-const ProductImage = ({ src, alt, className = '' }) => {
+const ProductImage = ({ productId, fallbackSrc, alt, className = '' }) => {
+  const [imgSrc, setImgSrc] = useState(() => {
+    try {
+      return localStorage.getItem(`nv-img-${productId}`) || fallbackSrc || '';
+    } catch {
+      return fallbackSrc || '';
+    }
+  });
   const [aspectRatio, setAspectRatio] = useState(1.0);
   const [loaded, setLoaded] = useState(false);
+  const [dbLoading, setDbLoading] = useState(false);
   const imgRef = useRef(null);
+
+  useEffect(() => {
+    // If imgSrc doesn't start with data: and we don't have it loaded, try fetching from database
+    if (!imgSrc || (!imgSrc.startsWith('data:') && !imgSrc.startsWith('/') && !imgSrc.startsWith('http'))) {
+      setDbLoading(true);
+      fetchProductImage(productId).then(dbImage => {
+        if (dbImage) {
+          setImgSrc(dbImage);
+        }
+        setDbLoading(false);
+      }).catch(err => {
+        console.error('Failed to lazy load image for card:', productId, err);
+        setDbLoading(false);
+      });
+    }
+  }, [productId, imgSrc, fallbackSrc]);
 
   useEffect(() => {
     if (imgRef.current && imgRef.current.complete) {
@@ -14,7 +39,7 @@ const ProductImage = ({ src, alt, className = '' }) => {
         setAspectRatio(naturalWidth / naturalHeight);
       }
     }
-  }, [src]);
+  }, [imgSrc]);
 
   const handleLoad = (e) => {
     const { naturalWidth, naturalHeight } = e.target;
@@ -27,15 +52,33 @@ const ProductImage = ({ src, alt, className = '' }) => {
   const fitClass = aspectRatio >= 1.1 ? 'ca-fit-contain' : 'ca-fit-cover';
 
   return (
-    <img
-      ref={imgRef}
-      src={src}
-      alt={alt || 'Northvale TCG produkt'}
-      width="240"
-      height="336"
-      onLoad={handleLoad}
-      className={`${className} ${fitClass} ${loaded ? 'loaded' : ''}`}
-    />
+    <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {(!loaded || dbLoading) && (
+        <div className="image-skeleton-loader nv-skeleton" style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '8px'
+        }}></div>
+      )}
+      {imgSrc && (
+        <img
+          ref={imgRef}
+          src={imgSrc}
+          alt={alt || 'Northvale TCG produkt'}
+          width="240"
+          height="336"
+          onLoad={handleLoad}
+          className={`${className} ${fitClass} ${loaded ? 'loaded' : ''}`}
+          style={{
+            opacity: loaded ? 1 : 0,
+            transition: 'opacity 0.25s ease-in-out',
+            width: '100%',
+            height: '100%'
+          }}
+        />
+      )}
+    </div>
   );
 };
 
@@ -166,7 +209,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           <div className="ca-grain"></div>
 
           {/* Actual Card Image */}
-          <ProductImage src={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" />
+          <ProductImage productId={product.id} fallbackSrc={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" />
 
           {/* Slab Label Overlay if it is a graded slab */}
           {product.type === 'slab' && (

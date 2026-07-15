@@ -6,7 +6,7 @@ export const mockCategories = [
   { id: 'game-pokemon', name_cz: 'Pokémon TCG', name_en: 'Pokémon TCG', type: 'single', game: 'Pokémon', parent_id: null },
   { id: 'game-lorcana', name_cz: 'Disney Lorcana', name_en: 'Disney Lorcana', type: 'single', game: 'Lorcana', parent_id: null },
   { id: 'game-onepiece', name_cz: 'One Piece Card Game', name_en: 'One Piece Card Game', type: 'single', game: 'One Piece', parent_id: null },
-  { id: 'game-riftbound', name_cz: 'Riftbound', name_en: 'Riftbound', type: 'single', game: 'Riftbound', parent_id: null },
+  { id: 'game-ostatni', name_cz: 'Ostatní TCG', name_en: 'Other TCG', type: 'single', game: 'Ostatní TCG', parent_id: null },
   
   // --- POKEMON SUB-CATEGORIES (Level 2) ---
   { id: 'pokemon-booster-box', name_cz: 'Booster Boxy', name_en: 'Booster Boxes', type: 'sealed', game: 'Pokémon', parent_id: 'game-pokemon' },
@@ -66,17 +66,17 @@ export const mockCategories = [
   { id: 'onepiece-english-booster-pack', name_cz: 'English Booster Pack', name_en: 'English Booster Pack', type: 'sealed', game: 'One Piece', parent_id: 'onepiece-boostery' },
   { id: 'onepiece-starter-deck', name_cz: 'Starter Deck', name_en: 'Starter Deck', type: 'sealed', game: 'One Piece', parent_id: 'onepiece-other' },
 
-  // --- RIFTBOUND SUB-CATEGORIES (Level 2) ---
-  { id: 'riftbound-booster-box', name_cz: 'Booster Boxy', name_en: 'Booster Boxes', type: 'sealed', game: 'Riftbound', parent_id: 'game-riftbound' },
-  { id: 'riftbound-boostery', name_cz: 'Boostery', name_en: 'Booster Packs', type: 'sealed', game: 'Riftbound', parent_id: 'game-riftbound' },
-  { id: 'riftbound-trial-decky', name_cz: 'Trial Decky', name_en: 'Trial Decks', type: 'sealed', game: 'Riftbound', parent_id: 'game-riftbound' },
-  { id: 'riftbound-other', name_cz: 'Ostatní', name_en: 'Others', type: 'sealed', game: 'Riftbound', parent_id: 'game-riftbound' },
+  // --- OSTATNI TCG SUB-CATEGORIES (Level 2) ---
+  { id: 'ostatni-booster-box', name_cz: 'Booster Boxy', name_en: 'Booster Boxes', type: 'sealed', game: 'Ostatní TCG', parent_id: 'game-ostatni' },
+  { id: 'ostatni-boostery', name_cz: 'Boostery', name_en: 'Booster Packs', type: 'sealed', game: 'Ostatní TCG', parent_id: 'game-ostatni' },
+  { id: 'ostatni-trial-decky', name_cz: 'Trial Decky', name_en: 'Trial Decks', type: 'sealed', game: 'Ostatní TCG', parent_id: 'game-ostatni' },
+  { id: 'ostatni-other', name_cz: 'Ostatní', name_en: 'Others', type: 'sealed', game: 'Ostatní TCG', parent_id: 'game-ostatni' },
 
-  // --- RIFTBOUND SUB-SUBCATEGORIES (Level 3) ---
-  { id: 'riftbound-standard-booster-box', name_cz: 'Standard Booster Box', name_en: 'Standard Booster Box', type: 'sealed', game: 'Riftbound', parent_id: 'riftbound-booster-box' },
-  { id: 'riftbound-standard-booster-pack', name_cz: 'Standard Booster Pack', name_en: 'Standard Booster Pack', type: 'sealed', game: 'Riftbound', parent_id: 'riftbound-boostery' },
-  { id: 'riftbound-standard-trial-deck', name_cz: 'Standard Trial Deck', name_en: 'Standard Trial Deck', type: 'sealed', game: 'Riftbound', parent_id: 'riftbound-trial-decky' },
-  { id: 'riftbound-official-playmat', name_cz: 'Official Playmat', name_en: 'Official Playmat', type: 'sealed', game: 'Riftbound', parent_id: 'riftbound-other' },
+  // --- OSTATNI TCG SUB-SUBCATEGORIES (Level 3) ---
+  { id: 'ostatni-standard-booster-box', name_cz: 'Standard Booster Box', name_en: 'Standard Booster Box', type: 'sealed', game: 'Ostatní TCG', parent_id: 'ostatni-booster-box' },
+  { id: 'ostatni-standard-booster-pack', name_cz: 'Standard Booster Pack', name_en: 'Standard Booster Pack', type: 'sealed', game: 'Ostatní TCG', parent_id: 'ostatni-boostery' },
+  { id: 'ostatni-standard-trial-deck', name_cz: 'Standard Trial Deck', name_en: 'Standard Trial Deck', type: 'sealed', game: 'Ostatní TCG', parent_id: 'ostatni-trial-decky' },
+  { id: 'ostatni-official-playmat', name_cz: 'Official Playmat', name_en: 'Official Playmat', type: 'sealed', game: 'Ostatní TCG', parent_id: 'ostatni-other' },
 
   // --- ACCESSORIES SUB-CATEGORIES (Level 2) ---
   { id: 'game-accessories', name_cz: 'Všechno příslušenství', name_en: 'All Accessories', type: 'accessory', game: 'Accessories', parent_id: null },

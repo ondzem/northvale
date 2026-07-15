@@ -11,7 +11,7 @@ const getGameImage = (product) => {
   const g = game.toLowerCase();
   if (g.includes('pokémon') || g.includes('pokemon')) return '/Pokemon.webp';
   if (g.includes('lorcana')) return '/lorcana logo.webp';
-  if (g.includes('riftbound')) return '/Riftbound.webp';
+  if (g.includes('riftbound') || g.includes('ostatní') || g.includes('ostatni')) return '/OstatniTCG.webp';
   if (g.includes('magic')) return '/Magic the gathering.webp';
   if (g.includes('one piece') || g.includes('onepiece')) return '/One piece.webp';
   return '/logo s popisem.webp';
@@ -607,13 +607,13 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
     if (prod.id === 'prismatic-evolutions-etb') return 'SV8a-PE-ETB';
     if (prod.id === 'lorcana-first-chapter-booster-box') return 'DLC-TFC-BB';
     if (prod.id === 'lorcana-shimmering-skies-trove') return 'DLC-SKS-TR';
-    if (prod.id === 'riftbound-booster-box') return 'RFB-01-BB';
+    if (prod.id === 'riftbound-booster-box' || prod.id === 'ostatni-booster-box') return 'OTC-01-BB';
     if (prod.id === 'acrylic-booster-box-pokemon') return 'ACR-PK-BB';
     if (prod.id === 'op-08-booster-box') return 'OP08-BB';
     if (prod.id === 'shiny-treasure-ex-box') return 'SV4a-ST-JP';
     if (prod.id === 'pokemon-classic-case') return 'PK-CLASS-CS';
     if (prod.id === 'op-07-booster-box') return 'OP07-BB';
-    if (prod.id === 'riftbound-trial-deck') return 'RFB-TD-01';
+    if (prod.id === 'riftbound-trial-deck' || prod.id === 'ostatni-trial-deck') return 'OTC-TD-01';
     return prod.id.toUpperCase();
   };
 
@@ -1002,15 +1002,26 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
 
             <div 
               className="detail-clean-image-container"
-              onClick={() => setIsLightboxOpen(true)}
-              style={{ cursor: 'zoom-in' }}
+              onClick={() => activeImage ? setIsLightboxOpen(true) : null}
+              style={{ cursor: activeImage ? 'zoom-in' : 'default', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '300px' }}
             >
-              <img 
-                src={activeImage} 
-                alt={product.name || 'Northvale TCG produkt'} 
-                width="400"
-                height="420"
-              />
+              {(!activeImage || loading) ? (
+                <div className="nv-skeleton" style={{ width: '100%', height: '100%', minHeight: '350px', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.05)' }}></div>
+              ) : (
+                <img 
+                  src={activeImage} 
+                  alt={product.name || 'Northvale TCG produkt'} 
+                  width="400"
+                  height="420"
+                  style={{
+                    opacity: 1,
+                    transition: 'opacity 0.25s ease-in-out',
+                    maxHeight: '100%',
+                    maxWidth: '100%',
+                    objectFit: 'contain'
+                  }}
+                />
+              )}
             </div>
 
             {/* Right Nav Arrow */}

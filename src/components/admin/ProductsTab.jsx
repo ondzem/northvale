@@ -1,10 +1,33 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from '../../context/LanguageContext';
-import { fetchProductsFromDB, saveProductToDB, deleteProductFromDB, fetchProductByIdFromDB } from '../../services/products';
+import { fetchProductsFromDB, saveProductToDB, deleteProductFromDB, fetchProductByIdFromDB, fetchProductImage, fetchProductBackImage } from '../../services/products';
 import { fetchCategoriesFromDB } from '../../services/categories';
 import ProductCard from '../ProductCard';
 import { FEATURE_FLAGS } from '../../config';
+
+const AdminImageThumbnail = ({ productId, fallbackSrc }) => {
+  const [imgSrc, setImgSrc] = useState(() => {
+    try {
+      return localStorage.getItem(`nv-img-${productId}`) || fallbackSrc || '';
+    } catch {
+      return fallbackSrc || '';
+    }
+  });
+
+  useEffect(() => {
+    if (!imgSrc) {
+      fetchProductImage(productId).then(dbImage => {
+        if (dbImage) setImgSrc(dbImage);
+      });
+    }
+  }, [productId, imgSrc]);
+
+  if (imgSrc) {
+    return <img src={imgSrc} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }} />;
+  }
+  return <span style={{ fontSize: '10px', color: '#8a8a92' }}>N/A</span>;
+};
 
 // Rich text formatter function for custom headers, lists, check lists, bold text, and raw HTML
 const parseFormattedText = (text, isMini = false) => {
@@ -484,7 +507,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
           if (formGame === 'Pokémon') prefix = 'POK';
           else if (formGame === 'Lorcana') prefix = 'LOR';
           else if (formGame === 'One Piece') prefix = 'OP';
-          else if (formGame === 'Riftbound') prefix = 'RIF';
+          else if (formGame === 'Ostatní TCG') prefix = 'OTC';
           setFormId(`${prefix}-${cleanSet}-${cleanNum}`);
           return;
         }
@@ -595,9 +618,32 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormGame(p.game || 'Pokémon');
     setFormEdition(p.edition || '');
     setFormRarity(p.rarity || '');
-    setFormImage(p.image || '');
+    let finalImage = p.image || '';
+    if (!finalImage) {
+      try {
+        finalImage = localStorage.getItem(`nv-img-${p.id}`) || '';
+      } catch {}
+    }
+    setFormImage(finalImage);
+    if (!finalImage) {
+      fetchProductImage(p.id).then(dbImage => {
+        if (dbImage) setFormImage(dbImage);
+      });
+    }
+
     const defaultBack = (p.game || 'Pokémon') === 'Pokémon' ? 'https://images.pokemontcg.io/unbroken_bonds/back.png' : '';
-    setFormBackImage(p.backImage || p.back_image || defaultBack);
+    let finalBack = p.backImage || p.back_image || '';
+    if (!finalBack) {
+      try {
+        finalBack = localStorage.getItem(`nv-back-img-${p.id}`) || '';
+      } catch {}
+    }
+    setFormBackImage(finalBack || defaultBack);
+    if (!finalBack) {
+      fetchProductBackImage(p.id).then(dbBack => {
+        if (dbBack) setFormBackImage(dbBack);
+      });
+    }
     setFormDesc(p.desc || p.description || '');
     setFormPrice(p.price !== null && p.price !== undefined ? p.price.toString() : '');
     setFormStock(p.stock !== null && p.stock !== undefined ? p.stock.toString() : '');
@@ -1732,7 +1778,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
             <option value="Pokémon">Pokémon</option>
             <option value="Lorcana">Lorcana</option>
             <option value="One Piece">One Piece</option>
-            <option value="Riftbound">Riftbound</option>
+            <option value="Ostatní TCG">{lang === 'CZ' ? 'Ostatní TCG' : 'Other TCG'}</option>
             <option value="Accessories">{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}</option>
             <option value="Acrylics">{lang === 'CZ' ? 'Akryly' : 'Acrylics'}</option>
           </select>
@@ -1793,11 +1839,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                   <tr key={p.id}>
                     <td data-label={lang === 'CZ' ? 'Náhled' : 'Preview'} style={{ textAlign: 'center' }}>
                       <div style={{ width: '36px', height: '36px', overflow: 'hidden', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', background: '#121216', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-                        {p.image ? (
-                          <img src={p.image} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} onError={(e) => { e.target.onerror = null; e.target.src = '/Northvale Logo.webp'; }} />
-                        ) : (
-                          <span style={{ fontSize: '10px', color: '#8a8a92' }}>N/A</span>
-                        )}
+                        <AdminImageThumbnail productId={p.id} fallbackSrc={p.image} />
                       </div>
                     </td>
                     <td data-label="SKU / ID">
@@ -1825,7 +1867,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         <option value="Pokémon">Pokémon</option>
                         <option value="Lorcana">Lorcana</option>
                         <option value="One Piece">One Piece</option>
-                        <option value="Riftbound">Riftbound</option>
+                        <option value="Ostatní TCG">{lang === 'CZ' ? 'Ostatní TCG' : 'Other TCG'}</option>
                         <option value="Accessories">{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}</option>
                         <option value="Acrylics">{lang === 'CZ' ? 'Akryly' : 'Acrylics'}</option>
                       </select>
@@ -1991,7 +2033,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           <option value="Pokémon">Pokémon</option>
                           <option value="Lorcana">Lorcana</option>
                           <option value="One Piece">One Piece</option>
-                          <option value="Riftbound">Riftbound</option>
+                          <option value="Ostatní TCG">{lang === 'CZ' ? 'Ostatní TCG' : 'Other TCG'}</option>
                           <option value="Accessories">{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}</option>
                           <option value="Acrylics">{lang === 'CZ' ? 'Akryly' : 'Acrylics'}</option>
                         </select>
@@ -2188,7 +2230,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               <option value="Pokémon">Pokémon</option>
                               <option value="Lorcana">Lorcana</option>
                               <option value="One Piece">One Piece</option>
-                              <option value="Riftbound">Riftbound</option>
+                              <option value="Ostatní TCG">Other TCG</option>
                               <option value="Accessories">Accessories</option>
                               <option value="Acrylics">Acrylics</option>
                             </select>
@@ -4013,7 +4055,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       One Piece <span style={{ fontSize: '8px', opacity: 0.5 }}>▼</span>
                     </div>
                     <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--nv-gold, #fdbd16)' }}>
-                      Riftbound <span style={{ fontSize: '8px', opacity: 0.5 }}>▼</span>
+                      {lang === 'CZ' ? 'Ostatní TCG' : 'Other TCG'} <span style={{ fontSize: '8px', opacity: 0.5 }}>▼</span>
                     </div>
                     <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       {lang === 'CZ' ? 'Příslušenství' : 'Accessories'} <span style={{ fontSize: '8px', opacity: 0.5 }}>▼</span>

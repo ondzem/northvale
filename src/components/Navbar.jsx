@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
-import { fetchProductsFromDB } from '../services/products';
+import { fetchProductsFromDB, getProductImageCached } from '../services/products';
 import { fetchCategoriesFromDB, getCachedCategories } from '../services/categories';
 
 export default function Navbar({ setActivePage, cart, user, setFilters, setSearchQuery, isLoggedIn, onOpenLogin, setSelectedProductId }) {
@@ -102,7 +102,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
   const pokemonCategories = categories.filter(c => c.game === 'Pokémon' && c.parent_id === 'game-pokemon');
   const lorcanaCategories = categories.filter(c => c.game === 'Lorcana' && c.parent_id === 'game-lorcana');
   const onepieceCategories = categories.filter(c => c.game === 'One Piece' && c.parent_id === 'game-onepiece');
-  const riftboundCategories = categories.filter(c => c.game === 'Riftbound' && c.parent_id === 'game-riftbound');
+  const riftboundCategories = categories.filter(c => c.game === 'Ostatní TCG' && c.parent_id === 'game-ostatni');
   const accessoriesCategories = categories.filter(c => c.game === 'Accessories' && c.parent_id === 'game-accessories');
   const acrylicsCategories = categories.filter(c => c.game === 'Acrylics' && c.parent_id === 'game-acrylics');
 
@@ -148,7 +148,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
             }}
           >
             <img 
-              src={p.image || '/logo.png'} 
+              src={getProductImageCached(p.id, p.image || '/logo.png')} 
               alt={p.name || 'Northvale TCG'} 
               style={styles.suggestionThumb} 
               width="32"
@@ -627,29 +627,29 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   )}
                 </div>
 
-                {/* 4. Riftbound Dropdown */}
+                {/* 4. Ostatní TCG Dropdown */}
                 <div
                   style={styles.dropdownContainer}
                   onMouseEnter={() => { if (riftboundCategories.length > 0) setActiveDropdown('riftbound'); }}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <a 
-                    href="/sealed-catalog?game=Riftbound"
+                    href="/sealed-catalog?game=Ostatní TCG"
                     style={styles.categoryItem} 
                     onClick={(e) => {
                       if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
                         e.preventDefault();
-                        handleCategoryClick('sealed', { game: 'Riftbound' });
+                        handleCategoryClick('sealed', { game: 'Ostatní TCG' });
                       }
                     }}
                   >
-                    Riftbound {riftboundCategories.length > 0 && <img src="/angle-small-down (1).png" style={styles.chevron} alt="" width="10" height="10" />}
+                    {lang === 'CZ' ? 'Ostatní TCG' : 'Other TCG'} {riftboundCategories.length > 0 && <img src="/angle-small-down (1).png" style={styles.chevron} alt="" width="10" height="10" />}
                   </a>
                   {riftboundCategories.length > 0 && activeDropdown === 'riftbound' && (
                     <div style={styles.dropdownMenu} className="glass-panel dropdown-menu-animate">
                       <div className="nav-dropdown-row">
                         {riftboundCategories.map(cat => (
-                          <div key={cat.id} className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Riftbound', category_id: cat.id })}>
+                          <div key={cat.id} className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Ostatní TCG', category_id: cat.id })}>
                             <div className="nav-dropdown-icon">
                               <img src={getCategoryIcon(cat)} alt="" className="nav-dropdown-img" width="60" height="60" />
                             </div>
@@ -658,7 +658,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                         ))}
                       </div>
                       <div className="nav-dropdown-footer">
-                        <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('sealed', { game: 'Riftbound' })}>
+                        <span className="nav-dropdown-all-link" onClick={() => handleCategoryClick('sealed', { game: 'Ostatní TCG' })}>
                           {t('Navbar.allCategory')}
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -1041,10 +1041,10 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     </div>
                   </div>
 
-                  {/* 4. Riftbound */}
+                  {/* 4. Ostatní TCG */}
                   <div style={styles.mobileNavSection}>
-                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('sealed', { game: 'Riftbound' }); setDrawerOpen(false); }}>
-                      <span>Riftbound</span>
+                    <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('sealed', { game: 'Ostatní TCG' }); setDrawerOpen(false); }}>
+                      <span>{lang === 'CZ' ? 'Ostatní TCG' : 'Other TCG'}</span>
                     </div>
                   </div>
 

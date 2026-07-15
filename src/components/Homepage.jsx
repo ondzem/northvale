@@ -1308,8 +1308,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           <a href="/sealed-catalog?game=One+Piece" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'One Piece' }); setActivePage('sealed-catalog'); } }}>
             <img src="/One piece.webp" alt="One Piece" className="category-tile-img" width="3376" height="1248" />
           </a>
-          <a href="/sealed-catalog?game=Riftbound" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Riftbound' }); setActivePage('sealed-catalog'); } }}>
-            <img src="/Riftbound.webp" alt="Riftbound" className="category-tile-img" width="1233" height="456" />
+          <a href="/sealed-catalog?game=Ostatní TCG" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Ostatní TCG' }); setActivePage('sealed-catalog'); } }}>
+            <img src="/OstatniTCG.webp" alt="Ostatní TCG" className="category-tile-img" width="1000" height="1000" />
           </a>
           <a href="/sealed-catalog?game=Accessories" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); } }}>
             <img src="/Prislusentstvi.webp" alt={lang === 'CZ' ? 'Příslušenství' : 'Accessories'} className="category-tile-img" width="3376" height="1248" />

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
-
+import { getProductImageCached } from '../services/products';
 export default function Cart({ cart, setCart, setActivePage, appliedDiscount, setAppliedDiscount, alert }) {
   const { lang, t } = useTranslation();
   const [promoCode, setPromoCode] = useState(appliedDiscount ? appliedDiscount.code : '');
@@ -175,7 +175,7 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
                       {/* Product Image Wrapper */}
                       <div className="ckf-thumb">
                         <img 
-                          src={item.product?.image || item.image || '/Akce - NORTHVALE.webp'} 
+                          src={getProductImageCached(item.product?.id || item.id, item.product?.image || item.image || '/Akce - NORTHVALE.webp')} 
                           alt={item.name || 'Northvale TCG produkt'} 
                           width="72"
                           height="100"

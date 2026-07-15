@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
-
+import { getProductImageCached } from '../services/products';
 
 export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, alert, onOpenLogin, appliedDiscount, setAppliedDiscount, validateCart }) {
   const { lang, t } = useTranslation();
@@ -1872,7 +1872,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                     <div key={idx} className="pof-line-item">
                       <div className="pof-li-thumb">
                         <img 
-                          src={item.product?.image || item.image || '/Akce - NORTHVALE.webp'} 
+                          src={getProductImageCached(item.product?.id || item.id, item.product?.image || item.image || '/Akce - NORTHVALE.webp')} 
                           alt={item.name || (item.product && item.product.name) || 'Northvale TCG produkt'} 
                           style={{
                             width: '100%',

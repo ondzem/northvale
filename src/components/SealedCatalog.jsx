@@ -10,7 +10,7 @@ function getGameFallbackLogo(game) {
     case 'Pokémon': return '/Pokemon.webp';
     case 'Lorcana': return '/lorcana logo.webp';
     case 'One Piece': return '/One piece.webp';
-    case 'Riftbound': return '/Riftbound.webp';
+    case 'Ostatní TCG': return '/OstatniTCG.webp';
     case 'Accessories': return '/Prislusentstvi.webp';
     case 'Acrylics': return '/acrylic-etb-box.webp';
     default: return '/Northvale Logo.webp';
@@ -35,10 +35,10 @@ export function getHistoricalFilterForCategory(catId) {
     'onepiece-boostery': { packagingType: 'Booster' },
     'onepiece-other': { packagingType: 'Other' },
     
-    'riftbound-booster-box': { packagingType: 'Booster Box' },
-    'riftbound-boostery': { packagingType: 'Booster' },
-    'riftbound-trial-decky': { packagingType: 'Trial Deck' },
-    'riftbound-other': { packagingType: 'Other' },
+    'ostatni-booster-box': { packagingType: 'Booster Box' },
+    'ostatni-boostery': { packagingType: 'Booster' },
+    'ostatni-trial-decky': { packagingType: 'Trial Deck' },
+    'ostatni-other': { packagingType: 'Other' },
     
     'cat-sleeves': { subcat: 'Sleeves' },
     'cat-toploaders': { subcat: 'Toploaders' },
@@ -76,10 +76,10 @@ export function getHistoricalFilterForCategory(catId) {
     'onepiece-english-booster-pack': { subsubcategory: 'English Booster Pack' },
     'onepiece-starter-deck': { subsubcategory: 'Starter Deck' },
     
-    'riftbound-standard-booster-box': { subsubcategory: 'Standard Booster Box' },
-    'riftbound-standard-booster-pack': { subsubcategory: 'Standard Booster Pack' },
-    'riftbound-standard-trial-deck': { subsubcategory: 'Standard Trial Deck' },
-    'riftbound-official-playmat': { subsubcategory: 'Official Playmat' },
+    'ostatni-standard-booster-box': { subsubcategory: 'Standard Booster Box' },
+    'ostatni-standard-booster-pack': { subsubcategory: 'Standard Booster Pack' },
+    'ostatni-standard-trial-deck': { subsubcategory: 'Standard Trial Deck' },
+    'ostatni-official-playmat': { subsubcategory: 'Official Playmat' },
   };
   
   return mapping[catId] || null;
@@ -271,19 +271,19 @@ What we offer: Original English Booster Boxes, exclusive gift sets, starter deck
 Why invest: Due to limited print allocations and extraordinary global popularity, unopened products quickly become rare. Holding intact boxes offers appealing investment potential.
 Why choose us: All our booster boxes are kept in completely original, unweighted, and unsearched condition. We pack every order securely to withstand shipping stresses and ensure zero mechanical degradation.`
   },
-  'Riftbound': {
-    title: 'Riftbound',
-    desc: `Riftbound je originální taktická karetní hra s českými kořeny, která se prosazuje i v zahraničí. Hráčům nabízí hluboký strategický systém stavby balíčků a sběratelům možnost vlastnit unikátní edice od nezávislých tvůrců.
+  'Ostatní TCG': {
+    title: 'Ostatní TCG',
+    desc: `Objevte další populární sběratelské karetní hry z celého světa. V této kategorii najdete vybrané produkty pro ostatní TCG, jako je Magic: The Gathering, Flesh & Blood, Star Wars: Unlimited a další sběratelsky zajímavé tituly.
 
-Co nabízíme: Kompletní portfolio včetně Booster Boxů, samostatných boosterů, startovních Trial Decků a oficiálních neoprenových herních podložek.
-Proč investovat: Limitovaný náklad a status nezávislého projektu dává raným edicím Riftbound jedinečnou sběratelskou hodnotu. Jde o zajímavou sběratelskou příležitost v rozvíjejícím se herním ekosystému.
-Proč nakoupit u nás: Jako oficiální partner a přímý distributor hry Riftbound garantujeme nejlepší dostupné ceny, kompletní sortiment a garantovanou originalitu veškerého zboží.`,
-    enTitle: 'Riftbound',
-    enDesc: `Riftbound is an original tactical card game of Czech origin that is also succeeding abroad. It offers players a deep deck-building system and provides collectors with the opportunity to own unique editions from independent creators.
+Co nabízíme: Originální Booster Boxy, startovní balíčky, samostatné boostery a doplňkové edice pro různé karetní hry.
+Proč investovat: Mnoho vedlejších a nezávislých TCG projektů disponuje velmi nízkými tiskovými náklady a silnou komunitou, což dává jejich prvním edicím obrovský sběratelský a dlouhodý zhodnocovací potenciál.
+Proč nakoupit u nás: Garantujeme 100% originalitu veškerého zboží, pečlivé balení proti poškození při přepravě a profesionální přístup k vaší sbírce.`,
+    enTitle: 'Other TCGs',
+    enDesc: `Discover other popular trading card games from around the world. In this category, you will find curated products for other TCGs such as Magic: The Gathering, Flesh & Blood, Star Wars: Unlimited, and other collectible card games.
 
-What we offer: The complete range including Booster Boxes, individual booster packs, pre-built Trial Decks, and official high-quality neoprene playmats.
-Why invest: The limited print runs and independent project status give early editions of Riftbound a unique collector value. It is an interesting opportunity within an expanding gaming ecosystem.
-Why choose us: As an official partner and direct distributor of Riftbound, we guarantee the best market prices, full product availability, and certified authenticity.`
+What we offer: Original Booster Boxes, starter decks, single booster packs, and special editions for various card games.
+Why invest: Many secondary and independent TCG projects have low print runs combined with a highly dedicated community, giving their early editions strong collector appeal and long-term appreciation potential.
+Why choose us: We guarantee 100% authenticity of all products, secure packing to prevent shipping damage, and a professional attitude toward your collection.`
   },
   'Accessories': {
     title: 'Herní Příslušenství',
@@ -436,34 +436,34 @@ const subSubcategoriesConfig = {
       ]
     }
   },
-  'Riftbound': {
+  'Ostatní TCG': {
     'Booster Box': {
-      title: 'Riftbound TCG Booster Boxy',
-      desc: 'Originální boxy s 24 booster balíčky české strategické fantasy hry Riftbound. Skvělý nákup pro získání kompletní sady karet a posílení vašich elementárních balíčků.',
+      title: 'Ostatní TCG Booster Boxy',
+      desc: 'Originální uzavřené booster boxy pro ostatní sběratelské karetní hry. Skvělá příležitost pro sběratele k otevření nebo dlouhodobému uložení.',
       subsubcats: [
         { id: 'all', name: 'Všechny Booster Boxy', icon: '🌀' },
         { id: 'Standard Booster Box', name: 'Standard Booster Box', icon: '📦' }
       ]
     },
     'Booster': {
-      title: 'Riftbound TCG Samostatné Boostery',
-      desc: 'Samostatné boostery s kartami hry Riftbound pro postupné vylepšování balíčku.',
+      title: 'Ostatní TCG Samostatné Boostery',
+      desc: 'Samostatné doplňkové booster balíčky pro různorodé karetní hry z celého světa.',
       subsubcats: [
         { id: 'all', name: 'Všechny Boostery', icon: '⚡' },
         { id: 'Standard Booster Pack', name: 'Standard Booster Pack', icon: '📦' }
       ]
     },
     'Trial Deck': {
-      title: 'Riftbound TCG Trial Decky',
-      desc: 'Předpřipravené startovní Trial decky hry Riftbound navržené tak, aby dva hráči mohli okamžitě usednout k hernímu stolu a začít hrát.',
+      title: 'Ostatní TCG Startovní Decky',
+      desc: 'Předpřipravené startovní a trial balíčky (Starter / Structure Decks), se kterými můžete okamžitě začít hrát.',
       subsubcats: [
-        { id: 'all', name: 'Všechny Trial Decky', icon: '⚔️' },
+        { id: 'all', name: 'Všechny Startovní Decky', icon: '⚔️' },
         { id: 'Standard Trial Deck', name: 'Standard Trial Deck', icon: '📦' }
       ]
     },
     'Other': {
-      title: 'Riftbound TCG Ostatní',
-      desc: 'Oficiální herní podložky (playmaty) s fantastickými ilustracemi a další doplňkové materiály k Riftbound TCG.',
+      title: 'Ostatní TCG Ostatní Produkty',
+      desc: 'Limitované dárkové sady, oficiální herní podložky a další specifické doplňky z ostatních karetních her.',
       subsubcats: [
         { id: 'all', name: 'Vše ostatní', icon: '💫' },
         { id: 'Official Playmat', name: 'Official Playmat', icon: '🎨' }
@@ -564,7 +564,7 @@ const translateSubcatName = (sub, lang) => {
     'Pokémon TCG': 'Pokémon TCG',
     'Lorcana TCG': 'Lorcana TCG',
     'One Piece TCG': 'One Piece TCG',
-    'Riftbound TCG': 'Riftbound TCG',
+    'Ostatní TCG': 'Other TCG',
     'Na graded karty': 'For Graded Cards',
     'Všechny Booster Boxy': 'All Booster Boxes',
     'Všechny ETB': 'All ETBs',
@@ -611,10 +611,10 @@ const getSubSubcatTitle = (game, subcat, lang) => {
     'One Piece TCG Booster Boxy': 'One Piece TCG Booster Boxes',
     'One Piece TCG Samostatné Boostery': 'One Piece TCG Single Booster Packs',
     'One Piece TCG Ostatní Produkty': 'One Piece TCG Other Products',
-    'Riftbound TCG Booster Boxy': 'Riftbound TCG Booster Boxes',
-    'Riftbound TCG Samostatné Boostery': 'Riftbound TCG Single Booster Packs',
-    'Riftbound TCG Trial Decky': 'Riftbound TCG Trial Decks',
-    'Riftbound TCG Ostatní': 'Riftbound TCG Others',
+    'Ostatní TCG Booster Boxy': 'Other TCG Booster Boxes',
+    'Ostatní TCG Samostatné Boostery': 'Other TCG Single Booster Packs',
+    'Ostatní TCG Startovní Decky': 'Other TCG Starter Decks',
+    'Ostatní TCG Ostatní Produkty': 'Other TCG Other Products',
     'Alba na TCG karty': 'Albums for TCG Cards',
     'Alba na toploadery': 'Albums for Toploaders',
     'Alba a kufříky na graded karty': 'Albums & Cases for Graded Cards',
@@ -810,7 +810,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     if (categoriesLoaded && dbCategories.length > 0) {
       const resolved = resolveActiveCategoryFromFilters(selectedGame, filters, dbCategories);
       const matchedCat = dbCategories.find(c => c.id === resolved);
-      if (matchedCat && matchedCat.parent_id && matchedCat.parent_id !== 'game-pokemon' && matchedCat.parent_id !== 'game-lorcana' && matchedCat.parent_id !== 'game-onepiece' && matchedCat.parent_id !== 'game-riftbound' && matchedCat.parent_id !== 'game-accessories' && matchedCat.parent_id !== 'game-acrylics') {
+      if (matchedCat && matchedCat.parent_id && matchedCat.parent_id !== 'game-pokemon' && matchedCat.parent_id !== 'game-lorcana' && matchedCat.parent_id !== 'game-onepiece' && matchedCat.parent_id !== 'game-ostatni' && matchedCat.parent_id !== 'game-accessories' && matchedCat.parent_id !== 'game-acrylics') {
         setActiveSubcategory(matchedCat.parent_id);
         setActiveSubsubcategory(matchedCat.id);
       } else {
@@ -889,7 +889,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     if (filters.category_id) {
       const cat = dbCategories.find(c => c.id === filters.category_id);
       if (cat) {
-        if (cat.parent_id && cat.parent_id !== 'game-pokemon' && cat.parent_id !== 'game-lorcana' && cat.parent_id !== 'game-onepiece' && cat.parent_id !== 'game-riftbound' && cat.parent_id !== 'game-accessories' && cat.parent_id !== 'game-acrylics') {
+        if (cat.parent_id && cat.parent_id !== 'game-pokemon' && cat.parent_id !== 'game-lorcana' && cat.parent_id !== 'game-onepiece' && cat.parent_id !== 'game-ostatni' && cat.parent_id !== 'game-accessories' && cat.parent_id !== 'game-acrylics') {
           subcat = cat.parent_id;
           subsubcat = cat.id;
         } else {
@@ -900,7 +900,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       const resolved = resolveActiveCategoryFromFilters(nextGame, filters, dbCategories);
       const cat = dbCategories.find(c => c.id === resolved);
       if (cat) {
-        if (cat.parent_id && cat.parent_id !== 'game-pokemon' && cat.parent_id !== 'game-lorcana' && cat.parent_id !== 'game-onepiece' && cat.parent_id !== 'game-riftbound' && cat.parent_id !== 'game-accessories' && cat.parent_id !== 'game-acrylics') {
+        if (cat.parent_id && cat.parent_id !== 'game-pokemon' && cat.parent_id !== 'game-lorcana' && cat.parent_id !== 'game-onepiece' && cat.parent_id !== 'game-ostatni' && cat.parent_id !== 'game-accessories' && cat.parent_id !== 'game-acrylics') {
           subcat = cat.parent_id;
           subsubcat = cat.id;
         } else {
@@ -916,7 +916,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     if (filters.category_id) {
       const cat = dbCategories.find(c => c.id === filters.category_id);
       if (cat) {
-        const isLevel2 = cat.parent_id === 'game-pokemon' || cat.parent_id === 'game-lorcana' || cat.parent_id === 'game-onepiece' || cat.parent_id === 'game-riftbound';
+        const isLevel2 = cat.parent_id === 'game-pokemon' || cat.parent_id === 'game-lorcana' || cat.parent_id === 'game-onepiece' || cat.parent_id === 'game-ostatni';
         if (isLevel2) {
           setSelectedPackagingTypes([cat.id]);
         } else if (cat.parent_id) {
@@ -1467,7 +1467,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
   };
 
   const renderAcrylicsFilters = () => {
-    const compatibilityList = ['Pokémon', 'Lorcana', 'Riftbound', 'PSA'];
+    const compatibilityList = ['Pokémon', 'Lorcana', 'Ostatní TCG', 'PSA'];
     const thicknessList = ['4mm', '3mm'];
     const closingTypeList = ['Magnetic', 'Slip-in'];
 
@@ -1674,7 +1674,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                 <option value="Pokémon">Pokémon TCG</option>
                 <option value="Lorcana">Disney Lorcana</option>
                 <option value="One Piece">One Piece TCG</option>
-                <option value="Riftbound">Riftbound</option>
+                <option value="Ostatní TCG">{lang === 'CZ' ? 'Ostatní TCG' : 'Other TCG'}</option>
                 <option value="Accessories">{lang === 'CZ' ? 'Příslušenství' : 'Accessories'}</option>
                 <option value="Acrylics">{lang === 'CZ' ? 'Akryly' : 'Acrylic Cases'}</option>
               </select>
@@ -1779,7 +1779,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
               <h2 className="category-title">{(lang === 'CZ' ? gameInfo[selectedGame]?.title : gameInfo[selectedGame]?.enTitle) || (lang === 'CZ' ? 'Katalog produktů' : 'Products Catalog')}</h2>
               <div className="category-description-wrapper">
                 <div className={`category-description-text ${!isDescExpanded ? 'collapsed' : ''}`}>
-                  {renderFormattedDescription((lang === 'CZ' ? gameInfo[selectedGame]?.desc : gameInfo[selectedGame]?.enDesc) || (lang === 'CZ' ? 'Vstupte do světa originálních Pokémon, Disney Lorcana, One Piece, Riftbound produktů, herního příslušenství a prémiových akrylových boxů. Nabízíme široký výběr booster boxů, dárkových Elite Trainer Boxů, Trove boxů, booster bundlů i samostatných balíčků.' : 'Enter the world of original Pokémon, Disney Lorcana, One Piece, Riftbound products, gaming accessories, and premium acrylic cases. We stock booster boxes, gift Elite Trainer Boxes, Trove boxes, bundles, and single booster packs.'))}
+                  {renderFormattedDescription((lang === 'CZ' ? gameInfo[selectedGame]?.desc : gameInfo[selectedGame]?.enDesc) || (lang === 'CZ' ? 'Vstupte do světa originálních Pokémon, Disney Lorcana, One Piece a dalších TCG produktů, herního příslušenství a prémiových akrylových boxů. Nabízíme široký výběr booster boxů, dárkových Elite Trainer Boxů, Trove boxů, booster bundlů i samostatných balíčků.' : 'Enter the world of original Pokémon, Disney Lorcana, One Piece, and other TCG products, gaming accessories, and premium acrylic cases. We stock booster boxes, gift Elite Trainer Boxes, Trove boxes, bundles, and single booster packs.'))}
                 </div>
                 <button
                   className="description-toggle-btn"

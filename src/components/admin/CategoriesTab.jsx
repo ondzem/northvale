@@ -439,7 +439,7 @@ export default function CategoriesTab({ showToast }) {
       'Pokémon': 'game-pokemon',
       'Lorcana': 'game-lorcana',
       'One Piece': 'game-onepiece',
-      'Riftbound': 'game-riftbound',
+      'Ostatní TCG': 'game-ostatni',
       'Accessories': 'game-accessories',
       'Acrylics': 'game-acrylics'
     };
@@ -519,7 +519,7 @@ export default function CategoriesTab({ showToast }) {
   };
 
   // Group categories for rendering
-  const gamesList = ['Pokémon', 'Lorcana', 'One Piece', 'Riftbound', 'Accessories', 'Acrylics'];
+  const gamesList = ['Pokémon', 'Lorcana', 'One Piece', 'Ostatní TCG', 'Accessories', 'Acrylics'];
 
   const getCategoryDepth = (cat) => {
     let depth = 0;
@@ -715,7 +715,7 @@ export default function CategoriesTab({ showToast }) {
                   'Pokémon': 'Pokémon',
                   'Lorcana': 'Disney Lorcana',
                   'One Piece': 'One Piece',
-                  'Riftbound': 'Riftbound',
+                  'Ostatní TCG': lang === 'CZ' ? 'Ostatní TCG' : 'Other TCG',
                   'Accessories': lang === 'CZ' ? 'Herní příslušenství' : 'Gaming Accessories',
                   'Acrylics': lang === 'CZ' ? 'Prémiové akrylové boxy' : 'Premium Acrylic Cases'
                 };
