@@ -88,7 +88,7 @@ export default function CategoriesTab({ showToast }) {
   const [cropTarget, setCropTarget] = useState({ type: 'category' });
   const [cropImageSrc, setCropImageSrc] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
-  const [cropImageFormat, setCropImageFormat] = useState('image/jpeg');
+  const [cropImageFormat, setCropImageFormat] = useState('image/webp');
   const [cropOrientation, setCropOrientation] = useState('landscape');
 
   // Cropper Refs
@@ -193,7 +193,7 @@ export default function CategoriesTab({ showToast }) {
     const reader = new FileReader();
     reader.onload = (event) => {
       setCropImageSrc(event.target.result);
-      setCropImageFormat(file.type || 'image/jpeg');
+      setCropImageFormat('image/webp');
       setIsCropping(true);
       
       // Default to landscape for categories
@@ -382,7 +382,8 @@ export default function CategoriesTab({ showToast }) {
     const imageLeft = (frameW - drawW) / 2 + cropRefX.current;
     const imageTop = (frameH - drawH) / 2 + cropRefY.current;
 
-    const baseW = cropOrientation === 'landscape' ? 1400 : 1000;
+    // Optimized resolution scaling factor (2x baseline: 700px width for landscape, 500px for portrait)
+    const baseW = cropOrientation === 'landscape' ? 700 : 500;
     const scaleFactor = baseW / frameW;
 
     const cropCanvas = document.createElement('canvas');
@@ -1099,7 +1100,7 @@ export default function CategoriesTab({ showToast }) {
                       style={{ padding: '6px 12px', fontSize: '11px' }} 
                       onClick={() => {
                         setCropImageSrc(formImageUrl);
-                        setCropImageFormat('image/png');
+                        setCropImageFormat('image/webp');
                         setIsCropping(true);
                         cropRefX.current = 0;
                         cropRefY.current = 0;
