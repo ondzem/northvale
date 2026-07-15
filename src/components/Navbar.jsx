@@ -80,7 +80,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
     if (cat.image_url) return cat.image_url;
     const id = cat.id || '';
 
-    // Custom premium flag badges for language categories
+    // Custom premium flag badges for language categories (if no custom uploaded image is present)
     if (id === 'eng') {
       return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30"><clipPath id="c"><circle cx="15" cy="15" r="14"/></clipPath><g clip-path="url(%23c)"><rect width="30" height="30" fill="%23012169"/><path d="M0,0 L30,30 M30,0 L0,30" stroke="%23fff" strokeWidth="3.5"/><path d="M0,0 L30,30 M30,0 L0,30" stroke="%23C8102E" strokeWidth="2"/><path d="M15,0 v30 M0,15 h30" stroke="%23fff" strokeWidth="5"/><path d="M15,0 v30 M0,15 h30" stroke="%23C8102E" strokeWidth="3"/></g><circle cx="15" cy="15" r="14.5" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/></svg>`;
     }
@@ -91,34 +91,17 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
       return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30"><clipPath id="c"><circle cx="15" cy="15" r="14"/></clipPath><g clip-path="url(%23c)"><rect width="30" height="30" fill="%23ee1c25"/><polygon points="8,5 6.5,10 11,7 6,7 10,10" fill="%23ffde00"/></g><circle cx="15" cy="15" r="14.5" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/></svg>`;
     }
 
-    if (id.includes('booster-box')) {
-      return 'https://tcgplayer-cdn.tcgplayer.com/product/552309_in_1000x1000.jpg';
+    // Default to the exact same fallback logo used in SealedCatalog.jsx for visual consistency
+    const game = cat.game || '';
+    switch (game) {
+      case 'Pokémon': return '/Pokemon.webp';
+      case 'Lorcana': return '/lorcana logo.webp';
+      case 'One Piece': return '/One piece.webp';
+      case 'Ostatní TCG': return '/OstatniTCG.webp';
+      case 'Accessories': return '/Prislusentstvi.webp';
+      case 'Acrylics': return '/acrylic-etb-box.webp';
+      default: return '/Northvale Logo.webp';
     }
-    if (id.includes('etb') || id.includes('trove')) {
-      return 'https://tcgplayer-cdn.tcgplayer.com/product/506307_in_1000x1000.jpg';
-    }
-    if (id.includes('bundle')) {
-      return 'https://tcgplayer-cdn.tcgplayer.com/product/530267_in_1000x1000.jpg';
-    }
-    if (id.includes('booster')) {
-      return 'https://tcgplayer-cdn.tcgplayer.com/product/550201_in_1000x1000.jpg';
-    }
-    if (id.includes('special')) {
-      return 'https://tcgplayer-cdn.tcgplayer.com/product/561990_in_1000x1000.jpg';
-    }
-    if (id.includes('sleeves')) {
-      return 'https://tcgplayer-cdn.tcgplayer.com/product/484394_in_1000x1000.jpg';
-    }
-    if (id.includes('toploader')) {
-      return 'https://tcgplayer-cdn.tcgplayer.com/product/251347_in_1000x1000.jpg';
-    }
-    if (id.includes('binder') || id.includes('album')) {
-      return 'https://tcgplayer-cdn.tcgplayer.com/product/251411_in_1000x1000.jpg';
-    }
-    if (id.includes('acrylic')) {
-      return '/acrylic-etb-box.webp';
-    }
-    return 'https://tcgplayer-cdn.tcgplayer.com/product/450463_in_1000x1000.jpg';
   };
 
   const pokemonCategories = categories.filter(c => c.game === 'Pokémon' && c.parent_id === 'game-pokemon');
