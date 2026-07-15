@@ -8,6 +8,7 @@ import NewsletterTab from './admin/NewsletterTab';
 import DiscountCodesTab from './admin/DiscountCodesTab';
 import OrdersTab from './admin/OrdersTab';
 import SyncTab from './admin/SyncTab';
+import PreregistrationTab from './admin/PreregistrationTab';
 
 export default function AdminPanel({ showToast, setActivePage }) {
   const { lang } = useTranslation();
@@ -34,6 +35,7 @@ export default function AdminPanel({ showToast, setActivePage }) {
     { id: 'homepage', name_cz: 'Správa úvodní stránky', name_en: 'Homepage CMS' },
     { id: 'faq', name_cz: 'Správa FAQ', name_en: 'FAQ CMS' },
     { id: 'newsletter', name_cz: 'Newsletter', name_en: 'Newsletter' },
+    { id: 'preregistration', name_cz: 'Předregistrace', name_en: 'Pre-registrations' },
     { id: 'discount_codes', name_cz: 'Slevové kódy', name_en: 'Discount Codes' },
     { id: 'sync', name_cz: 'Synchronizace', name_en: 'Sync / Pohoda' },
   ];
@@ -117,6 +119,13 @@ export default function AdminPanel({ showToast, setActivePage }) {
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
+              ) : tab.id === 'preregistration' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="8.5" cy="7" r="4"></circle>
+                  <line x1="20" y1="8" x2="20" y2="14"></line>
+                  <line x1="23" y1="11" x2="17" y2="11"></line>
+                </svg>
               ) : tab.id === 'discount_codes' ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
                   <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
@@ -171,6 +180,12 @@ export default function AdminPanel({ showToast, setActivePage }) {
 
           {activeTab === 'newsletter' && (
             <NewsletterTab 
+              showToast={handleShowToastPlaceholder} 
+            />
+          )}
+
+          {activeTab === 'preregistration' && (
+            <PreregistrationTab 
               showToast={handleShowToastPlaceholder} 
             />
           )}

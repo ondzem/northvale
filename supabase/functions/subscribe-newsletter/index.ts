@@ -81,7 +81,7 @@ serve(async (req) => {
       const { data: dbData, error: dbError } = await supabase
         .from("newsletter_subscribers")
         .upsert(
-          { email, unsubscribed: false, confirmed: true, lang },
+          { email, unsubscribed: false, confirmed: true, lang, source: 'preregistration' },
           { onConflict: "email" }
         )
         .select();
