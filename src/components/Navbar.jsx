@@ -77,7 +77,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
   }, []);
 
 
-  const pokemonCategories = categories.filter(c => c.game === 'Pokémon' && c.parent_id !== null && c.parent_id !== 'game-pokemon');
+  const pokemonCategories = categories.filter(c => c.game === 'Pokémon' && c.parent_id === 'game-pokemon');
   const lorcanaCategories = categories.filter(c => c.game === 'Lorcana' && c.parent_id === 'game-lorcana');
   const onepieceCategories = categories.filter(c => c.game === 'One Piece' && c.parent_id === 'game-onepiece');
   const riftboundCategories = categories.filter(c => c.game === 'Ostatní TCG' && c.parent_id === 'game-ostatni');

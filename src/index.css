@@ -9939,3 +9939,361 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 @keyframes nc-checkmark-draw {
   to { stroke-dashoffset: 0; }
 }
+
+/* --- Email Pre-Registration Landing Page Styles --- */
+.pr-landing-wrapper {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background: #080809;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #ffffff;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.pr-glow-one {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 50%;
+  height: 50%;
+  background: radial-gradient(circle, rgba(253, 189, 22, 0.08) 0%, transparent 70%);
+  filter: blur(120px);
+  pointer-events: none;
+  animation: pr-float-glow 15s infinite alternate ease-in-out;
+}
+
+.pr-glow-two {
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 50%;
+  height: 50%;
+  background: radial-gradient(circle, rgba(253, 189, 22, 0.05) 0%, transparent 70%);
+  filter: blur(120px);
+  pointer-events: none;
+  animation: pr-float-glow-reverse 18s infinite alternate ease-in-out;
+}
+
+@keyframes pr-float-glow {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(40px, 30px) scale(1.15); }
+}
+
+@keyframes pr-float-glow-reverse {
+  0% { transform: translate(0, 0) scale(1.1); }
+  100% { transform: translate(-30px, -40px) scale(0.9); }
+}
+
+.pr-lang-switch {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 4px;
+  border-radius: 20px;
+  z-index: 10;
+}
+
+.pr-lang-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.5px;
+}
+
+.pr-lang-btn:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.pr-lang-btn.active {
+  background: var(--color-gold, #FDBD16);
+  color: #000000;
+  box-shadow: 0 2px 10px rgba(253, 189, 22, 0.3);
+}
+
+.pr-content-card {
+  position: relative;
+  max-width: 480px;
+  width: 100%;
+  background: rgba(14, 14, 16, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(253, 189, 22, 0.15);
+  border-radius: 24px;
+  padding: 45px 35px 35px 35px;
+  box-sizing: border-box;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 40px rgba(253, 189, 22, 0.03);
+  z-index: 5;
+  animation: pr-card-intro 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pr-card-intro {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.pr-logo-section {
+  margin-bottom: 35px;
+}
+
+.pr-logo-img {
+  width: 72px;
+  height: auto;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 12px rgba(253, 189, 22, 0.3));
+}
+
+.pr-brand-name {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  margin: 0;
+  color: #ffffff;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #ffffff 30%, #FDBD16 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.pr-brand-sub {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 4px 0 0 0;
+}
+
+.pr-form-box, .pr-success-box {
+  animation: pr-fade-in 0.5s ease forwards;
+}
+
+@keyframes pr-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pr-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 12px 0;
+  line-height: 1.35;
+}
+
+.pr-desc {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.pr-benefit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(253, 189, 22, 0.05);
+  border: 1px solid rgba(253, 189, 22, 0.2);
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--color-gold, #FDBD16);
+  margin-bottom: 30px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.pr-gift-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.pr-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pr-input-group {
+  position: relative;
+  width: 100%;
+}
+
+.pr-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 15px 18px;
+  font-size: 14px;
+  color: #ffffff;
+  box-sizing: border-box;
+  outline: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pr-input:focus {
+  border-color: var(--color-gold, #FDBD16);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px var(--color-gold, #FDBD16), 0 0 15px rgba(253, 189, 22, 0.08);
+}
+
+.pr-error-text {
+  display: block;
+  text-align: left;
+  font-size: 12px;
+  color: #ff4d4f;
+  margin-top: 6px;
+  padding-left: 4px;
+}
+
+.pr-submit-btn {
+  background: linear-gradient(135deg, var(--color-gold, #FDBD16), #e0a60b);
+  color: #000000;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(253, 189, 22, 0.2);
+}
+
+.pr-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(253, 189, 22, 0.35);
+  background: linear-gradient(135deg, #ffe28a, var(--color-gold, #FDBD16));
+}
+
+.pr-submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pr-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pr-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #000000;
+  border-radius: 50%;
+  animation: pr-spin 0.8s linear infinite;
+}
+
+@keyframes pr-spin {
+  to { transform: rotate(360deg); }
+}
+
+.pr-success-icon-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(253, 189, 22, 0.1);
+  border: 1px solid var(--color-gold, #FDBD16);
+  color: var(--color-gold, #FDBD16);
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px auto;
+  box-shadow: 0 0 20px rgba(253, 189, 22, 0.15);
+}
+
+.pr-success-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 10px 0;
+}
+
+.pr-success-desc {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  margin: 0 0 30px 0;
+}
+
+.pr-coupon-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border: 1px dashed var(--color-gold, #FDBD16);
+  padding: 24px 20px;
+  border-radius: 16px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.pr-coupon-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--color-gold, #FDBD16);
+  margin: 0 0 10px 0;
+  font-weight: 700;
+}
+
+.pr-coupon-code {
+  font-size: 32px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 5px;
+  margin: 0 0 10px 0;
+  font-family: monospace;
+  text-shadow: 0 0 15px rgba(255,255,255,0.1);
+}
+
+.pr-coupon-code::selection {
+  background: var(--color-gold, #FDBD16);
+  color: #000000;
+}
+
+.pr-coupon-note {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0;
+}
+
+.pr-footer {
+  margin-top: 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 20px;
+}
+
+.pr-footer-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.25);
+  transition: color 0.2s ease;
+}
+
+.pr-footer-text:hover {
+  color: rgba(255, 255, 255, 0.4);
+}

@@ -22,6 +22,7 @@ import LoginModal from './components/LoginModal';
 import ResetPasswordModal from './components/ResetPasswordModal';
 import CookieConsent from './components/CookieConsent';
 import ErrorPage from './components/ErrorPage';
+import PreRegistrationLanding from './components/PreRegistrationLanding';
 import { supabase } from './supabase';
 import Blog from './components/Blog';
 import { blogArticles } from './blogData';
@@ -1563,6 +1564,29 @@ function AppContent() {
       return updated;
     }));
   };
+
+  const isAdmin = isLoggedIn && user && (user.role === 'admin' || user.email === 'info@northvaletcg.eu');
+  const showPreRegistration = FEATURE_FLAGS.preRegistrationActive && !isAdmin;
+
+  if (showPreRegistration) {
+    return (
+      <div style={styles.appContainer}>
+        <PreRegistrationLanding 
+          onOpenLogin={() => setIsLoginModalOpen(true)}
+        />
+        
+        <LoginModal 
+          isOpen={isLoginModalOpen} 
+          onClose={() => setIsLoginModalOpen(false)} 
+          onLogin={handleLogin} 
+          onRegister={handleRegister} 
+          showToast={showToast}
+        />
+        
+        <CookieConsent lang={lang} />
+      </div>
+    );
+  }
 
   return (
     <div style={styles.appContainer}>
