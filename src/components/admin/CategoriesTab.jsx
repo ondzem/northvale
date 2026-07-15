@@ -47,6 +47,7 @@ export default function CategoriesTab({ showToast }) {
   const [formImageUrl, setFormImageUrl] = useState('');
   const [formDescCz, setFormDescCz] = useState('');
   const [formDescEn, setFormDescEn] = useState('');
+  const [formSortOrder, setFormSortOrder] = useState(0);
   
   const [isEditing, setIsEditing] = useState(false);
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
@@ -125,18 +126,10 @@ export default function CategoriesTab({ showToast }) {
 
   const handleNameCzChange = (val) => {
     setFormNameCz(val);
-    if (!isSlugManuallyEdited) {
-      const targetName = formNameEn || val;
-      setFormId(generateSlug(targetName));
-    }
   };
 
   const handleNameEnChange = (val) => {
     setFormNameEn(val);
-    if (!isSlugManuallyEdited) {
-      const targetName = val || formNameCz;
-      setFormId(generateSlug(targetName));
-    }
   };
 
   const handleSelectCategory = (cat) => {
@@ -150,6 +143,7 @@ export default function CategoriesTab({ showToast }) {
     setFormImageUrl(cat.image_url || '');
     setFormDescCz(cat.description_cz || '');
     setFormDescEn(cat.description_en || '');
+    setFormSortOrder(cat.sort_order || 0);
     setIsEditing(true);
     setIsSlugManuallyEdited(true); // Don't overwrite existing ID when editing
   };
@@ -165,6 +159,7 @@ export default function CategoriesTab({ showToast }) {
     setFormImageUrl('');
     setFormDescCz('');
     setFormDescEn('');
+    setFormSortOrder(0);
     setIsEditing(false);
     setIsSlugManuallyEdited(false);
   };
@@ -463,6 +458,35 @@ export default function CategoriesTab({ showToast }) {
     return 'sealed';
   };
 
+  // Automatic unique ID generator based on parent category context
+  useEffect(() => {
+    if (!isSlugManuallyEdited && !selectedCategory) {
+      const name = formNameEn || formNameCz || '';
+      if (name.trim()) {
+        const baseSlug = name
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "") // remove diacritics
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+
+        let pId = formParentId;
+        if (!pId || isParentRoot(pId)) {
+          pId = getGameRootCategoryId(formGame);
+        }
+
+        if (pId) {
+          const cleanParentId = pId.replace(/^game-/, '');
+          setFormId(`${cleanParentId}-${baseSlug}`);
+        } else {
+          setFormId(baseSlug);
+        }
+      } else {
+        setFormId('');
+      }
+    }
+  }, [formNameCz, formNameEn, formParentId, formGame, isSlugManuallyEdited, selectedCategory]);
+
   const handleSave = async (e) => {
     e.preventDefault();
     if (!formId.trim()) {
@@ -493,7 +517,8 @@ export default function CategoriesTab({ showToast }) {
       parent_id: resolvedParentId || null,
       image_url: formImageUrl,
       description_cz: formDescCz,
-      description_en: formDescEn
+      description_en: formDescEn,
+      sort_order: Number(formSortOrder) || 0
     };
 
     const { data, error } = await saveCategoryToDB(catData);
@@ -1048,6 +1073,22 @@ export default function CategoriesTab({ showToast }) {
                   onChange={e => handleNameEnChange(e.target.value)}
                 />
                 <p className="ctf-hint">{lang === 'CZ' ? 'Název zobrazený anglickým uživatelům.' : 'English version name.'}</p>
+              </div>
+            </div>
+
+            <div className="ctf-row2" style={{ marginTop: '16px' }}>
+              <div className="ctf-field ctf-field-half">
+                <label className="ctf-label">
+                  {lang === 'CZ' ? 'Pořadí (Řazení)' : 'Sort Order'}
+                </label>
+                <input 
+                  type="number" 
+                  className="ctf-input"
+                  value={formSortOrder}
+                  onChange={e => setFormSortOrder(e.target.value)}
+                  min="0"
+                />
+                <p className="ctf-hint">{lang === 'CZ' ? 'Číselné pořadí pro řazení v menu (0 = první).' : 'Numeric value to sort categories in menu (0 = first).'}</p>
               </div>
             </div>
 
