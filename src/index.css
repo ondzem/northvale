@@ -10297,3 +10297,161 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 .pr-footer-text:hover {
   color: rgba(255, 255, 255, 0.4);
 }
+
+/* --- GDPR Agreement Layout and Modal Overlay --- */
+.pr-gdpr-container {
+  text-align: left;
+  margin-top: 4px;
+  padding: 0 4px;
+}
+
+.pr-gdpr-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pr-gdpr-checkbox {
+  margin-top: 3px;
+  accent-color: var(--color-gold, #FDBD16);
+  cursor: pointer;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
+
+.pr-gdpr-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.4;
+}
+
+.pr-gdpr-link {
+  color: var(--color-gold, #FDBD16);
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.pr-gdpr-link:hover {
+  color: var(--color-gold-hover, #e0a60b);
+}
+
+/* Modal styling for GDPR overlay popup */
+.pr-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  box-sizing: border-box;
+  animation: pr-modal-fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.pr-modal-card {
+  max-width: 500px;
+  width: 100%;
+  background: #0f0f11;
+  border: 1px solid rgba(253, 189, 22, 0.2);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(253, 189, 22, 0.05);
+  animation: pr-modal-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pr-modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pr-modal-slide-in {
+  from { transform: translateY(30px) scale(0.97); }
+  to { transform: translateY(0) scale(1); }
+}
+
+.pr-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pr-modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.pr-modal-close-x {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 24px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.pr-modal-close-x:hover {
+  color: #ffffff;
+}
+
+.pr-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.6;
+  text-align: left;
+  /* Scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(253, 189, 22, 0.2) transparent;
+}
+
+.pr-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pr-modal-body::-webkit-scrollbar-thumb {
+  background-color: rgba(253, 189, 22, 0.2);
+  border-radius: 3px;
+}
+
+.pr-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pr-modal-btn {
+  background: linear-gradient(135deg, var(--color-gold, #FDBD16), #e0a60b);
+  color: #000000;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pr-modal-btn:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #ffe28a, var(--color-gold, #FDBD16));
+}
