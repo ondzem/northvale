@@ -206,6 +206,10 @@ export async function saveCategoryToDB(category) {
     cachedCategories = null;
     categoriesCacheTime = 0;
 
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('northvale-categories-updated'));
+    }
+
     return { data, error: null };
   } catch (err) {
     console.error('Failed to save category to database:', err.message || err);
@@ -234,6 +238,10 @@ export async function deleteCategoryFromDB(id) {
     // Invalidate categories cache
     cachedCategories = null;
     categoriesCacheTime = 0;
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('northvale-categories-updated'));
+    }
 
     return { error: null };
   } catch (err) {

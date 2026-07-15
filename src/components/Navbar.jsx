@@ -63,12 +63,34 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
       }
     }
     loadCategories();
-    return () => { active = false; };
+
+    const handleCategoriesUpdate = () => {
+      loadCategories();
+    };
+
+    window.addEventListener('northvale-categories-updated', handleCategoriesUpdate);
+
+    return () => {
+      active = false;
+      window.removeEventListener('northvale-categories-updated', handleCategoriesUpdate);
+    };
   }, []);
 
   const getCategoryIcon = (cat) => {
     if (cat.image_url) return cat.image_url;
     const id = cat.id || '';
+
+    // Custom premium flag badges for language categories
+    if (id === 'eng') {
+      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30"><clipPath id="c"><circle cx="15" cy="15" r="14"/></clipPath><g clip-path="url(%23c)"><rect width="30" height="30" fill="%23012169"/><path d="M0,0 L30,30 M30,0 L0,30" stroke="%23fff" strokeWidth="3.5"/><path d="M0,0 L30,30 M30,0 L0,30" stroke="%23C8102E" strokeWidth="2"/><path d="M15,0 v30 M0,15 h30" stroke="%23fff" strokeWidth="5"/><path d="M15,0 v30 M0,15 h30" stroke="%23C8102E" strokeWidth="3"/></g><circle cx="15" cy="15" r="14.5" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/></svg>`;
+    }
+    if (id === 'jpn') {
+      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30"><clipPath id="c"><circle cx="15" cy="15" r="14"/></clipPath><g clip-path="url(%23c)"><rect width="30" height="30" fill="%23fff"/><circle cx="15" cy="15" r="8" fill="%23BC002D"/></g><circle cx="15" cy="15" r="14.5" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/></svg>`;
+    }
+    if (id === 'chn') {
+      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30"><clipPath id="c"><circle cx="15" cy="15" r="14"/></clipPath><g clip-path="url(%23c)"><rect width="30" height="30" fill="%23ee1c25"/><polygon points="8,5 6.5,10 11,7 6,7 10,10" fill="%23ffde00"/></g><circle cx="15" cy="15" r="14.5" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/></svg>`;
+    }
+
     if (id.includes('booster-box')) {
       return 'https://tcgplayer-cdn.tcgplayer.com/product/552309_in_1000x1000.jpg';
     }
