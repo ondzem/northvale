@@ -271,32 +271,32 @@ export function getCategoryIcon(cat) {
     return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30"><clipPath id="c"><circle cx="15" cy="15" r="14"/></clipPath><g clip-path="url(%23c)"><rect width="30" height="30" fill="%23ee1c25"/><polygon points="8,5 6.5,10 11,7 6,7 10,10" fill="%23ffde00"/></g><circle cx="15" cy="15" r="14.5" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/></svg>`;
   }
 
-  // Restore detailed category default icons
-  if (id.includes('booster-box')) {
+  // Restore detailed category default icons with robust string checks matching database IDs
+  if (id.includes('booster-box') || id.includes('booset') || id.includes('booster-boxes')) {
     return 'https://tcgplayer-cdn.tcgplayer.com/product/552309_in_1000x1000.jpg';
   }
-  if (id.includes('etb') || id.includes('trove')) {
+  if (id.includes('etb') || id.includes('trove') || id.includes('trainer-box') || id.includes('trainer-boxes') || id.includes('etb-box')) {
     return 'https://tcgplayer-cdn.tcgplayer.com/product/506307_in_1000x1000.jpg';
   }
-  if (id.includes('bundle')) {
+  if (id.includes('bundle') || id.includes('bundles')) {
     return 'https://tcgplayer-cdn.tcgplayer.com/product/530267_in_1000x1000.jpg';
   }
-  if (id.includes('booster')) {
+  if (id.includes('booster') || id.includes('pack') || id.includes('packs') || id.includes('boostery')) {
     return 'https://tcgplayer-cdn.tcgplayer.com/product/550201_in_1000x1000.jpg';
   }
-  if (id.includes('special')) {
+  if (id.includes('special') || id.includes('kolekce') || id.includes('product') || id.includes('products')) {
     return 'https://tcgplayer-cdn.tcgplayer.com/product/561990_in_1000x1000.jpg';
   }
   if (id.includes('sleeves')) {
     return 'https://tcgplayer-cdn.tcgplayer.com/product/484394_in_1000x1000.jpg';
   }
-  if (id.includes('toploader')) {
+  if (id.includes('toploader') || id.includes('toploaders')) {
     return 'https://tcgplayer-cdn.tcgplayer.com/product/251347_in_1000x1000.jpg';
   }
-  if (id.includes('binder') || id.includes('album')) {
+  if (id.includes('binder') || id.includes('album') || id.includes('albums')) {
     return 'https://tcgplayer-cdn.tcgplayer.com/product/251411_in_1000x1000.jpg';
   }
-  if (id.includes('acrylic')) {
+  if (id.includes('acrylic') || id.includes('acrylics')) {
     return '/acrylic-etb-box.webp';
   }
 
