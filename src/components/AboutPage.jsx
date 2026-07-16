@@ -49,15 +49,18 @@ export default function AboutPage({ setActivePage }) {
 
         {/* Image Banner */}
         <div className="abf-image-banner-container">
-          <img 
-            src="/O nas.webp" 
-            alt={lang === 'CZ' ? 'O nás - Tým a příběh e-shopu Northvale TCG' : 'About Us - Northvale TCG E-shop Team and Story'} 
-            title={lang === 'CZ' ? 'Tým a příběh Northvale TCG' : 'Northvale TCG Team and Story'} 
-            className="abf-image-banner" 
-            width="1200"
-            height="480"
-            style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '12px' }}
-          />
+          <picture>
+            <source media="(min-width: 501px)" srcSet="/O nas Desktop.webp" />
+            <img 
+              src="/O nas.webp" 
+              alt={lang === 'CZ' ? 'O nás - Tým a příběh e-shopu Northvale TCG' : 'About Us - Northvale TCG E-shop Team and Story'} 
+              title={lang === 'CZ' ? 'Tým a příběh Northvale TCG' : 'Northvale TCG Team and Story'} 
+              className="abf-image-banner" 
+              width="1200"
+              height="480"
+              style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '12px' }}
+            />
+          </picture>
         </div>
 
         {/* Values list */}
