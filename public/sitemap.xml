@@ -86,6 +86,41 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://northvaletcg.eu/sealed-detail/wilds-unknown-booster-box</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/reign-of-jafar-illuminers-trove-box</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/winterspell-booster-box</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/archazia-s-island-booster-box</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/azurite-sea-booster-box</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/wilds-unknown-illuminer-s-trove-box</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/into-the-inklands-booster-box</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://northvaletcg.eu/sealed-detail/shimmering-skies-booster-box</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -96,17 +131,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/azurite-sea-booster-box</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/shimmering-skies-illuminers-trove-box</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/archazia-s-island-booster-box</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://northvaletcg.eu/sealed-detail/into-the-inklands-booster-box</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/winterspell-illuminer-s-trove-box</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

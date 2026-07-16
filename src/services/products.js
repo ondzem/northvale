@@ -1,6 +1,55 @@
 import { supabase } from '../supabase';
 import { mockProducts } from '../mockData';
 
+// Image cache version check - force invalidation of old base64 strings to clear space & fix stale JPEGs
+try {
+  const IMAGE_CACHE_VERSION = 'v3'; // Increment to force clear all clients
+  if (localStorage.getItem('nv-img-cache-version') !== IMAGE_CACHE_VERSION) {
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && (k.startsWith('nv-img-') || k.startsWith('nv-back-img-'))) {
+        keysToRemove.push(k);
+      }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+    localStorage.setItem('nv-img-cache-version', IMAGE_CACHE_VERSION);
+  }
+} catch (e) {
+  console.warn('LocalStorage error on image cache version invalidation:', e);
+}
+
+// In-memory cache for product images during session
+const productImageInMemoryCache = {};
+const productBackImageInMemoryCache = {};
+
+// Safe LocalStorage setItem helper that frees space if quota is exceeded
+function safeLocalStorageSetItem(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      console.warn('LocalStorage quota exceeded. Clearing product image cache...');
+      try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith('nv-img-') || k.startsWith('nv-back-img-'))) {
+            keysToRemove.push(k);
+          }
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+        // Try setting the item again
+        localStorage.setItem(key, value);
+      } catch (retryErr) {
+        console.error('Failed to set item even after clearing image cache:', retryErr);
+      }
+    } else {
+      console.error('LocalStorage write error:', e);
+    }
+  }
+}
+
 /**
  * Maps database snake_case fields back to frontend camelCase properties.
  */
@@ -308,18 +357,14 @@ export async function fetchProductByIdFromDB(id) {
       product.isFullyFetched = true;
       singleProductCache[id] = product;
       if (product.image) {
-        try {
-          localStorage.setItem(`nv-img-${id}`, product.image);
-          localStorage.setItem(`nv-img-time-${id}`, String(Date.now()));
-        } catch (e) {
-          console.warn('Quota exceeded caching single image:', e);
-        }
+        productImageInMemoryCache[id] = product.image;
+        safeLocalStorageSetItem(`nv-img-${id}`, product.image);
+        safeLocalStorageSetItem(`nv-img-time-${id}`, String(Date.now()));
       }
       if (product.backImage) {
-        try {
-          localStorage.setItem(`nv-back-img-${id}`, product.backImage);
-          localStorage.setItem(`nv-back-img-time-${id}`, String(Date.now()));
-        } catch {}
+        productBackImageInMemoryCache[id] = product.backImage;
+        safeLocalStorageSetItem(`nv-back-img-${id}`, product.backImage);
+        safeLocalStorageSetItem(`nv-back-img-time-${id}`, String(Date.now()));
       }
     }
     return product;
@@ -549,13 +594,18 @@ export async function deleteProductFromDB(id) {
  */
 export async function fetchProductImage(productId) {
   if (!productId) return null;
+  
+  if (productImageInMemoryCache[productId]) {
+    return productImageInMemoryCache[productId];
+  }
+
   const now = Date.now();
   
-  // Try checking localStorage synchronously
   try {
     const cached = localStorage.getItem(`nv-img-${productId}`);
     const cachedTime = localStorage.getItem(`nv-img-time-${productId}`);
-    if (cached && cachedTime && (now - Number(cachedTime) < 7200000)) {
+    if (cached && cachedTime && (now - Number(cachedTime) < 900000)) { // 15 minutes TTL
+      productImageInMemoryCache[productId] = cached;
       return cached;
     }
   } catch (e) {
@@ -572,12 +622,9 @@ export async function fetchProductImage(productId) {
       .single();
 
     if (!error && data && data.image) {
-      try {
-        localStorage.setItem(`nv-img-${productId}`, data.image);
-        localStorage.setItem(`nv-img-time-${productId}`, String(now));
-      } catch (e) {
-        console.warn('Quota exceeded for image cache:', e);
-      }
+      productImageInMemoryCache[productId] = data.image;
+      safeLocalStorageSetItem(`nv-img-${productId}`, data.image);
+      safeLocalStorageSetItem(`nv-img-time-${productId}`, String(now));
       return data.image;
     }
   } catch (err) {
@@ -586,7 +633,11 @@ export async function fetchProductImage(productId) {
 
   // Fallback to older cached value if database query failed
   try {
-    return localStorage.getItem(`nv-img-${productId}`) || null;
+    const backup = localStorage.getItem(`nv-img-${productId}`) || null;
+    if (backup) {
+      productImageInMemoryCache[productId] = backup;
+    }
+    return backup;
   } catch {
     return null;
   }
@@ -597,12 +648,18 @@ export async function fetchProductImage(productId) {
  */
 export async function fetchProductBackImage(productId) {
   if (!productId) return null;
+  
+  if (productBackImageInMemoryCache[productId]) {
+    return productBackImageInMemoryCache[productId];
+  }
+
   const now = Date.now();
   
   try {
     const cached = localStorage.getItem(`nv-back-img-${productId}`);
     const cachedTime = localStorage.getItem(`nv-back-img-time-${productId}`);
-    if (cached && cachedTime && (now - Number(cachedTime) < 7200000)) {
+    if (cached && cachedTime && (now - Number(cachedTime) < 900000)) { // 15 minutes TTL
+      productBackImageInMemoryCache[productId] = cached;
       return cached;
     }
   } catch {}
@@ -616,12 +673,9 @@ export async function fetchProductBackImage(productId) {
       .single();
 
     if (!error && data && data.back_image) {
-      try {
-        localStorage.setItem(`nv-back-img-${productId}`, data.back_image);
-        localStorage.setItem(`nv-back-img-time-${productId}`, String(now));
-      } catch (e) {
-        console.warn('Quota exceeded for back image cache:', e);
-      }
+      productBackImageInMemoryCache[productId] = data.back_image;
+      safeLocalStorageSetItem(`nv-back-img-${productId}`, data.back_image);
+      safeLocalStorageSetItem(`nv-back-img-time-${productId}`, String(now));
       return data.back_image;
     }
   } catch (err) {
@@ -629,7 +683,11 @@ export async function fetchProductBackImage(productId) {
   }
 
   try {
-    return localStorage.getItem(`nv-back-img-${productId}`) || null;
+    const backup = localStorage.getItem(`nv-back-img-${productId}`) || null;
+    if (backup) {
+      productBackImageInMemoryCache[productId] = backup;
+    }
+    return backup;
   } catch {
     return null;
   }
@@ -640,9 +698,15 @@ export async function fetchProductBackImage(productId) {
  */
 export function getProductImageCached(productId, fallbackSrc = '') {
   if (!productId) return fallbackSrc || '';
-  try {
-    return localStorage.getItem(`nv-img-${productId}`) || fallbackSrc || '';
-  } catch {
-    return fallbackSrc || '';
+  if (productImageInMemoryCache[productId]) {
+    return productImageInMemoryCache[productId];
   }
+  try {
+    const cached = localStorage.getItem(`nv-img-${productId}`);
+    if (cached) {
+      productImageInMemoryCache[productId] = cached;
+      return cached;
+    }
+  } catch {}
+  return fallbackSrc || '';
 }
