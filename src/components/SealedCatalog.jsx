@@ -770,6 +770,9 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
   const [selectedClosingTypes, setSelectedClosingTypes] = useState([]);
   const [selectedPackagingTypes, setSelectedPackagingTypes] = useState(filters.type ? [filters.type] : []);
 
+  const [activeSubcategory, setActiveSubcategory] = useState('all');
+  const [activeSubsubcategory, setActiveSubsubcategory] = useState('all');
+
   // Aspect ratio tracking for cards
   const [loadedRatios, setLoadedRatios] = useState({});
   const handleAspectRatioLoaded = (productId, ratio) => {
@@ -790,9 +793,6 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     return cached.length > 0 ? cached : [];
   });
   const [categoriesLoaded, setCategoriesLoaded] = useState(true);
-
-  const [activeSubcategory, setActiveSubcategory] = useState('all');
-  const [activeSubsubcategory, setActiveSubsubcategory] = useState('all');
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showAllSubcats, setShowAllSubcats] = useState(false);

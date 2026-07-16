@@ -96,11 +96,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/winterspell-booster-box</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://northvaletcg.eu/sealed-detail/archazia-s-island-booster-box</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -127,6 +122,11 @@
   </url>
   <url>
     <loc>https://northvaletcg.eu/sealed-detail/ursula-s-return-booster-box</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/winterspell-booster-box</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
