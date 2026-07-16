@@ -2096,6 +2096,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
               // Let's compute custom height variables if we find a taller card.
               let artHDesktop = 300;
               let artHMobile = 250;
+              let infoMt = 12;
 
               if (visibleRatios.length > 0) {
                 const minRatio = Math.min(...visibleRatios);
@@ -2104,19 +2105,21 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                   // Keep width fixed (240px desktop, 200px mobile) and calculate height based on tallest image aspect ratio
                   artHDesktop = Math.min(420, Math.round(240 / minRatio));
                   artHMobile = Math.min(350, Math.round(200 / minRatio));
+                  infoMt = 20; // Pushing title away from tall image
                 }
               }
 
-              // Base info block + buttons height is ~142px desktop, ~130px mobile.
-              // If we increase the image wrapper height, we also expand the card height.
-              const cardHDesktop = artHDesktop + 142;
-              const cardHMobile = artHMobile + 130;
+              // Base info block + buttons height is ~130px desktop, ~120px mobile.
+              // We add the dynamic infoMt margin to avoid overflows.
+              const cardHDesktop = artHDesktop + 130 + infoMt;
+              const cardHMobile = artHMobile + 120 + (infoMt - 2); // 18px on mobile if tall, 10px if standard
 
               const gridStyle = {
                 '--art-h-desktop': `${artHDesktop}px`,
                 '--art-h-mobile': `${artHMobile}px`,
                 '--card-h-desktop': `${cardHDesktop}px`,
-                '--card-h-mobile': `${cardHMobile}px`
+                '--card-h-mobile': `${cardHMobile}px`,
+                '--info-mt': `${infoMt}px`
               };
 
               return (

@@ -1384,23 +1384,26 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
             let artHDesktop = 300;
             let artHMobile = 250;
+            let infoMt = 12;
 
             if (visibleRatios.length > 0) {
               const minRatio = Math.min(...visibleRatios);
               if (minRatio < 0.72) {
                 artHDesktop = Math.min(420, Math.round(240 / minRatio));
                 artHMobile = Math.min(350, Math.round(200 / minRatio));
+                infoMt = 20;
               }
             }
 
-            const cardHDesktop = artHDesktop + 142;
-            const cardHMobile = artHMobile + 130;
+            const cardHDesktop = artHDesktop + 130 + infoMt;
+            const cardHMobile = artHMobile + 120 + (infoMt - 2);
 
             const gridStyle = {
               '--art-h-desktop': `${artHDesktop}px`,
               '--art-h-mobile': `${artHMobile}px`,
               '--card-h-desktop': `${cardHDesktop}px`,
-              '--card-h-mobile': `${cardHMobile}px`
+              '--card-h-mobile': `${cardHMobile}px`,
+              '--info-mt': `${infoMt}px`
             };
 
             return (
@@ -1476,23 +1479,26 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
                 let artHDesktop = 300;
                 let artHMobile = 250;
+                let infoMt = 12;
 
                 if (visibleRatios.length > 0) {
                   const minRatio = Math.min(...visibleRatios);
                   if (minRatio < 0.72) {
                     artHDesktop = Math.min(420, Math.round(240 / minRatio));
                     artHMobile = Math.min(350, Math.round(200 / minRatio));
+                    infoMt = 20;
                   }
                 }
 
-                const cardHDesktop = artHDesktop + 142;
-                const cardHMobile = artHMobile + 130;
+                const cardHDesktop = artHDesktop + 130 + infoMt;
+                const cardHMobile = artHMobile + 120 + (infoMt - 2);
 
                 const gridStyle = {
                   '--art-h-desktop': `${artHDesktop}px`,
                   '--art-h-mobile': `${artHMobile}px`,
                   '--card-h-desktop': `${cardHDesktop}px`,
-                  '--card-h-mobile': `${cardHMobile}px`
+                  '--card-h-mobile': `${cardHMobile}px`,
+                  '--info-mt': `${infoMt}px`
                 };
 
                 return (
@@ -1584,23 +1590,26 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
                 let artHDesktop = 300;
                 let artHMobile = 250;
+                let infoMt = 12;
 
                 if (visibleRatios.length > 0) {
                   const minRatio = Math.min(...visibleRatios);
                   if (minRatio < 0.72) {
                     artHDesktop = Math.min(420, Math.round(240 / minRatio));
                     artHMobile = Math.min(350, Math.round(200 / minRatio));
+                    infoMt = 20;
                   }
                 }
 
-                const cardHDesktop = artHDesktop + 142;
-                const cardHMobile = artHMobile + 130;
+                const cardHDesktop = artHDesktop + 130 + infoMt;
+                const cardHMobile = artHMobile + 120 + (infoMt - 2);
 
                 const gridStyle = {
                   '--art-h-desktop': `${artHDesktop}px`,
                   '--art-h-mobile': `${artHMobile}px`,
                   '--card-h-desktop': `${cardHDesktop}px`,
-                  '--card-h-mobile': `${cardHMobile}px`
+                  '--card-h-mobile': `${cardHMobile}px`,
+                  '--info-mt': `${infoMt}px`
                 };
 
                 return (
@@ -1670,23 +1679,26 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
             let artHDesktop = 300;
             let artHMobile = 250;
+            let infoMt = 12;
 
             if (visibleRatios.length > 0) {
               const minRatio = Math.min(...visibleRatios);
               if (minRatio < 0.72) {
                 artHDesktop = Math.min(420, Math.round(240 / minRatio));
                 artHMobile = Math.min(350, Math.round(200 / minRatio));
+                infoMt = 20;
               }
             }
 
-            const cardHDesktop = artHDesktop + 142;
-            const cardHMobile = artHMobile + 130;
+            const cardHDesktop = artHDesktop + 130 + infoMt;
+            const cardHMobile = artHMobile + 120 + (infoMt - 2);
 
             const gridStyle = {
               '--art-h-desktop': `${artHDesktop}px`,
               '--art-h-mobile': `${artHMobile}px`,
               '--card-h-desktop': `${cardHDesktop}px`,
-              '--card-h-mobile': `${cardHMobile}px`
+              '--card-h-mobile': `${cardHMobile}px`,
+              '--info-mt': `${infoMt}px`
             };
 
             return (

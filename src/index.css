@@ -1320,7 +1320,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 .vf-info {
   display: block;
   width: 100%;
-  margin-top: 0;
+  margin-top: var(--info-mt, 12px);
   box-sizing: border-box;
 }
 
@@ -1403,7 +1403,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   }
   
   .vf-info {
-    margin-top: 0;
+    margin-top: var(--info-mt, 10px);
   }
 
   .vf-name {
