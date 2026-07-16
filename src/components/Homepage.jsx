@@ -6,7 +6,7 @@ import { fetchDailyDealFromDB } from '../services/dailyDeal';
 import { fetchHomepageSectionsFromDB } from '../services/homepageSections';
 import { fetchProductByIdFromDB } from '../services/products';
 
-const ProductImage = ({ src, alt, className = '' }) => {
+const ProductImage = ({ src, alt, title, className = '' }) => {
   const [aspectRatio, setAspectRatio] = useState(1.0);
   const [loaded, setLoaded] = useState(false);
 
@@ -24,6 +24,7 @@ const ProductImage = ({ src, alt, className = '' }) => {
     <img
       src={src}
       alt={alt || 'Northvale TCG produkt'}
+      title={title || alt || 'Northvale TCG produkt'}
       onLoad={handleLoad}
       className={`${className} ${fitClass} ${loaded ? 'loaded' : ''}`}
       loading="lazy"
@@ -535,6 +536,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               <img 
                 src={currentImageUrl}
                 alt={lang === 'CZ' ? 'Akční nabídka a novinky - Northvale TCG' : 'Special offer and news - Northvale TCG'}
+                title={lang === 'CZ' ? 'Akční nabídka a novinky' : 'Special offer and news'}
                 loading="eager"
                 fetchpriority="high"
                 onLoad={() => {
@@ -668,6 +670,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   <img 
                     src={activeDeal.image_url || '/logo s popisem.webp'} 
                     alt={activeDeal.name || 'Akční nabídka - Northvale TCG'} 
+                    title={activeDeal.name || 'Akční nabídka'} 
                     width={!isMobile ? "164" : "125"}
                     height={!isMobile ? "230" : "175"}
                     style={{ 
@@ -968,9 +971,10 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                       justifyContent: 'flex-start',
                       cursor: catalogProduct ? 'pointer' : 'default'
                     }}>
-                      <img 
+                       <img 
                         src={activeDeal.image_url || '/logo s popisem.webp'} 
                         alt={activeDeal.name || 'Akční nabídka - Northvale TCG'} 
+                        title={activeDeal.name || 'Akční nabídka'} 
                         width="185"
                         height="185"
                         style={{ 
@@ -1133,6 +1137,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 <img 
                   src={item.icon} 
                   alt={item.title || 'Northvale TCG'} 
+                  title={item.title || 'Northvale TCG'} 
                   width="36"
                   height="36"
                   style={styles.uspIcon} 
@@ -1156,28 +1161,28 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       ) : (
         <section style={styles.uspBar} className="container">
           <div style={{ ...styles.uspBox, borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            <img src="/truck-moving.png" alt={lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'} width="36" height="36" style={styles.uspIcon} />
+            <img src="/truck-moving.png" alt={lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'} title={lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'} width="36" height="36" style={styles.uspIcon} />
             <div style={styles.uspText}>
               <h4 style={styles.uspTitle}>{lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'}</h4>
               <p style={styles.uspDesc}>{lang === 'CZ' ? 'při objednávce nad 1 000 Kč' : 'on orders over 1,000 Kč'}</p>
             </div>
           </div>
           <div style={{ ...styles.uspBox, borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            <img src="/tachometer-fast.png" alt={lang === 'CZ' ? 'Rychlost doručení' : 'Fast Delivery'} width="36" height="36" style={styles.uspIcon} />
+            <img src="/tachometer-fast.png" alt={lang === 'CZ' ? 'Rychlost doručení' : 'Fast Delivery'} title={lang === 'CZ' ? 'Rychlost doručení' : 'Fast Delivery'} width="36" height="36" style={styles.uspIcon} />
             <div style={styles.uspText}>
               <h4 style={styles.uspTitle}>{lang === 'CZ' ? 'Rychlost doručení' : 'Fast Shipping'}</h4>
               <p style={styles.uspDesc}>{lang === 'CZ' ? 'Odesíláme do 24 hodin' : 'Dispatched within 24 hours'}</p>
             </div>
           </div>
           <div style={{ ...styles.uspBox, borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            <img src="/badget-check-alt.png" alt={lang === 'CZ' ? '100% Originální' : '100% Authentic'} width="36" height="36" style={styles.uspIcon} />
+            <img src="/badget-check-alt.png" alt={lang === 'CZ' ? '100% Originální' : '100% Authentic'} title={lang === 'CZ' ? '100% Originální' : '100% Authentic'} width="36" height="36" style={styles.uspIcon} />
             <div style={styles.uspText}>
               <h4 style={styles.uspTitle}>{lang === 'CZ' ? '100% Originální' : '100% Authentic'}</h4>
               <p style={styles.uspDesc}>{lang === 'CZ' ? 'Pouze od ověřených distributorů' : 'Only from verified distributors'}</p>
             </div>
           </div>
           <div style={styles.uspBox}>
-            <img src="/credit-card.png" alt={lang === 'CZ' ? 'Bezpečná platba' : 'Secure Payment'} width="36" height="36" style={styles.uspIcon} />
+            <img src="/credit-card.png" alt={lang === 'CZ' ? 'Bezpečná platba' : 'Secure Payment'} title={lang === 'CZ' ? 'Bezpečná platba' : 'Secure Payment'} width="36" height="36" style={styles.uspIcon} />
             <div style={styles.uspText}>
               <h4 style={styles.uspTitle}>{lang === 'CZ' ? 'Bezpečná platba' : 'Secure Payment'}</h4>
               <p style={styles.uspDesc}>{lang === 'CZ' ? 'Karta, bankovní převod, dobírka' : 'Cards, bank transfer, COD'}</p>
@@ -1279,8 +1284,9 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
             }} className="about-us-img-container">
               <img 
-                src="/o nas northvale.webp" 
-                alt="O nás - Northvale" 
+                src="/O nas.webp" 
+                alt={lang === 'CZ' ? 'O nás - Příběh a tým e-shopu Northvale TCG' : 'About Us - Northvale TCG E-shop Story and Team'} 
+                title={lang === 'CZ' ? 'Příběh Northvale TCG' : 'Northvale TCG Story'} 
                 width="1254"
                 height="1254"
                 style={{
@@ -1300,26 +1306,26 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         <h2 style={styles.sectionHeading} className="section-title">{lang === 'CZ' ? 'Oblíbené kategorie' : 'Popular Categories'}</h2>
         <div className="category-tiles-grid">
           <a href="/sealed-catalog?game=Pok%C3%A9mon" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Pokémon' }); setActivePage('sealed-catalog'); } }}>
-            <img src="/Pokemon.webp" alt="Pokémon" className="category-tile-img" width="3376" height="1248" />
+            <img src="/Pokemon.webp" alt="Pokémon TCG - Sběratelské karty, booster boxy a příslušenství" title="Pokémon TCG" className="category-tile-img" width="3376" height="1248" />
           </a>
           <a href="/sealed-catalog?game=Lorcana" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Lorcana' }); setActivePage('sealed-catalog'); } }}>
-            <img src="/lorcana logo.webp" alt="Disney Lorcana" className="category-tile-img" width="3376" height="1248" />
+            <img src="/lorcana logo.webp" alt="Disney Lorcana TCG - Booster boxy, starter decky a doplňky" title="Disney Lorcana" className="category-tile-img" width="3376" height="1248" />
           </a>
           <a href="/sealed-catalog?game=One+Piece" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'One Piece' }); setActivePage('sealed-catalog'); } }}>
-            <img src="/One piece.webp" alt="One Piece" className="category-tile-img" width="3376" height="1248" />
+            <img src="/One piece.webp" alt="One Piece Card Game - Booster packy, sealed krabice a karty" title="One Piece Card Game" className="category-tile-img" width="3376" height="1248" />
           </a>
           <a href="/sealed-catalog?game=Ostatní TCG" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Ostatní TCG' }); setActivePage('sealed-catalog'); } }}>
-            <img src="/OstatniTCG.webp" alt="Ostatní TCG" className="category-tile-img" width="1000" height="1000" />
+            <img src="/OstatniTCG.webp" alt="Ostatní sběratelské karetní hry (TCG) - Magic: The Gathering, Star Wars a další" title="Ostatní TCG hry" className="category-tile-img" width="1000" height="1000" />
           </a>
           <a href="/sealed-catalog?game=Accessories" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); } }}>
-            <img src="/Prislusentstvi.webp" alt={lang === 'CZ' ? 'Příslušenství' : 'Accessories'} className="category-tile-img" width="3376" height="1248" />
+            <img src="/Prislusentstvi.webp" alt={lang === 'CZ' ? 'Příslušenství pro TCG - Ochranné obaly na karty, krabičky a alba' : 'TCG Accessories - card sleeves, deck boxes, and binders'} title={lang === 'CZ' ? 'TCG Příslušenství' : 'TCG Accessories'} className="category-tile-img" width="3376" height="1248" />
           </a>
           <a href="/sealed-catalog?game=Acrylics" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Acrylics' }); setActivePage('sealed-catalog'); } }}>
-            <img src="/Akryly.webp" alt="Akryly" className="category-tile-img" width="2800" height="1035" />
+            <img src="/Akryly.webp" alt="Akrylové case a ochranné boxy na booster boxy a karty" title="Akrylové ochranné obaly" className="category-tile-img" width="2800" height="1035" />
           </a>
           {FEATURE_FLAGS.showSlabs && (
             <a href="/slabs-catalog" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({}); setActivePage('slabs-catalog'); } }}>
-              <img src="/Ohodnoceni karet.webp" alt={lang === 'CZ' ? 'Ohodnocené karty' : 'Graded Cards'} className="category-tile-img" width="3376" height="1248" />
+              <img src="/Ohodnoceni karet.webp" alt={lang === 'CZ' ? 'Graded karty - Profesionálně ohodnocené karty PSA, AP grading' : 'Graded Cards - Professionally certified cards PSA, AP grading'} title={lang === 'CZ' ? 'Ohodnocené sběratelské karty' : 'Graded cards'} className="category-tile-img" width="3376" height="1248" />
             </a>
           )}
         </div>
@@ -1352,7 +1358,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               >
                 <div className="vf-art">
                   <div className="card-art">
-                    <ProductImage src={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" />
+                    <ProductImage src={product.image} alt={product.name || 'Northvale TCG produkt'} title={product.name} className="ca-card-img" />
                     <div className="ca-holo"></div>
                     <div className="ca-shine"></div>
                     <div className="ca-grain"></div>
@@ -1415,7 +1421,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               >
                 <div className="vf-art">
                   <div className="card-art">
-                    <ProductImage src={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" />
+                    <ProductImage src={product.image} alt={product.name || 'Northvale TCG produkt'} title={product.name} className="ca-card-img" />
                     <div className="ca-holo"></div>
                     <div className="ca-shine"></div>
                     <div className="ca-grain"></div>
@@ -1451,7 +1457,14 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 <button className="btn btn-primary" onClick={() => { setFilters({}); setActivePage('grading'); }}>{lang === 'CZ' ? 'Chci ohodnotit kartu' : 'Submit Cards for Grading'}</button>
               </div>
               <div className="grading-banner-img-wrapper">
-                <img src="/grading sekce.webp" alt="Grading karet" className="grading-banner-image" width="1672" height="941" />
+                 <img 
+                  src="/grading sekce.webp" 
+                  alt={lang === 'CZ' ? 'Profesionální grading a hodnocení karet PSA, Beckett, TAG' : 'Professional TCG card grading services PSA, Beckett, TAG'} 
+                  title={lang === 'CZ' ? 'Grading sběratelských karet' : 'TCG card grading services'} 
+                  className="grading-banner-image" 
+                  width="1672" 
+                  height="941" 
+                />
               </div>
             </div>
           </section>

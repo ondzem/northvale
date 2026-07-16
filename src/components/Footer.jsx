@@ -84,7 +84,8 @@ export default function Footer({ setActivePage, activePage }) {
         <div className="footer-column footer-col-about">
           <img 
             src="/logo s popisem.webp" 
-            alt="NORTHVALE TCG" 
+            alt="Northvale TCG Logo" 
+            title="Northvale TCG" 
             className="footer-logo" 
             width="168"
             height="84"

@@ -142,7 +142,7 @@ export default function PreRegistrationLanding({ onOpenLogin }) {
       <div className="pr-content-card">
         {/* Brand Logo & Name */}
         <div className="pr-logo-section">
-          <img src="/Northvale Logo.webp" alt="NORTHVALE Logo" className="pr-logo-img" />
+          <img src="/Northvale Logo.webp" alt="Northvale TCG Logo" title="Northvale TCG" className="pr-logo-img" />
           <h1 className="pr-brand-name">NORTHVALE</h1>
           <p className="pr-brand-sub">Trading Card Games</p>
         </div>

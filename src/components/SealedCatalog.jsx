@@ -213,7 +213,7 @@ export function getDisplaySubcategories(game, type, categories, lang) {
     {
       id: 'all',
       name: lang === 'CZ' ? root.name_cz : root.name_en,
-      icon: <img src={getCategoryIcon(root)} alt="" className="subcategory-img" width="44" height="44" />
+      icon: <img src={getCategoryIcon(root)} alt={lang === 'CZ' ? `${root.name_cz || root.name} - Northvale TCG` : `${root.name_en || root.name} - Northvale TCG`} title={lang === 'CZ' ? (root.name_cz || root.name) : (root.name_en || root.name)} className="subcategory-img" width="44" height="44" />
     }
   ];
   
@@ -221,7 +221,7 @@ export function getDisplaySubcategories(game, type, categories, lang) {
     formatted.push({
       id: child.id,
       name: lang === 'CZ' ? child.name_cz : child.name_en,
-      icon: <img src={getCategoryIcon(child)} alt="" className="subcategory-img" width="44" height="44" />
+      icon: <img src={getCategoryIcon(child)} alt={lang === 'CZ' ? `${child.name_cz || child.name} - Northvale TCG` : `${child.name_en || child.name} - Northvale TCG`} title={lang === 'CZ' ? (child.name_cz || child.name) : (child.name_en || child.name)} className="subcategory-img" width="44" height="44" />
     });
   });
   
@@ -832,7 +832,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       formatted.push({
         id: child.id,
         name: lang === 'CZ' ? child.name_cz : child.name_en,
-        icon: <img src={getCategoryIcon(child)} alt="" className="subcategory-img" width="18" height="18" style={{ width: '18px', height: '18px', borderRadius: '4px', objectFit: 'cover' }} />
+        icon: <img src={getCategoryIcon(child)} alt={lang === 'CZ' ? `${child.name_cz || child.name} - Northvale TCG` : `${child.name_en || child.name} - Northvale TCG`} title={lang === 'CZ' ? (child.name_cz || child.name) : (child.name_en || child.name)} className="subcategory-img" width="18" height="18" style={{ width: '18px', height: '18px', borderRadius: '4px', objectFit: 'cover' }} />
       });
     });
     return formatted;

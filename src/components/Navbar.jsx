@@ -406,7 +406,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   }
                 }}
               >
-                <img src="/logo s popisem.webp" alt="NORTHVALE TCG" style={styles.logoImg} width="168" height="84" />
+                <img src="/logo s popisem.webp" alt="Northvale TCG - Specialista na Pokémon, Lorcana a sběratelské karty" title="Northvale TCG" style={styles.logoImg} width="168" height="84" />
               </a>
 
               <form 
@@ -500,7 +500,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                         {pokemonCategories.map(cat => (
                           <div key={cat.id} className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Pokémon', category_id: cat.id })}>
                             <div className="nav-dropdown-icon">
-                              <img src={getCategoryIcon(cat)} alt="" className="nav-dropdown-img" width="60" height="60" />
+                              <img src={getCategoryIcon(cat)} alt={lang === 'CZ' ? `${cat.name_cz || cat.name} - Kategorie Northvale TCG` : `${cat.name_en || cat.name} - Northvale TCG Category`} title={lang === 'CZ' ? (cat.name_cz || cat.name) : (cat.name_en || cat.name)} className="nav-dropdown-img" width="60" height="60" />
                             </div>
                             <span className="nav-dropdown-text">{lang === 'CZ' ? cat.name_cz : cat.name_en}</span>
                           </div>
@@ -543,7 +543,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                         {lorcanaCategories.map(cat => (
                           <div key={cat.id} className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Lorcana', category_id: cat.id })}>
                             <div className="nav-dropdown-icon">
-                              <img src={getCategoryIcon(cat)} alt="" className="nav-dropdown-img" width="60" height="60" />
+                              <img src={getCategoryIcon(cat)} alt={lang === 'CZ' ? `${cat.name_cz || cat.name} - Kategorie Northvale TCG` : `${cat.name_en || cat.name} - Northvale TCG Category`} title={lang === 'CZ' ? (cat.name_cz || cat.name) : (cat.name_en || cat.name)} className="nav-dropdown-img" width="60" height="60" />
                             </div>
                             <span className="nav-dropdown-text">{lang === 'CZ' ? cat.name_cz : cat.name_en}</span>
                           </div>
@@ -586,7 +586,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                         {onepieceCategories.map(cat => (
                           <div key={cat.id} className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'One Piece', category_id: cat.id })}>
                             <div className="nav-dropdown-icon">
-                              <img src={getCategoryIcon(cat)} alt="" className="nav-dropdown-img" width="60" height="60" />
+                              <img src={getCategoryIcon(cat)} alt={lang === 'CZ' ? `${cat.name_cz || cat.name} - Kategorie Northvale TCG` : `${cat.name_en || cat.name} - Northvale TCG Category`} title={lang === 'CZ' ? (cat.name_cz || cat.name) : (cat.name_en || cat.name)} className="nav-dropdown-img" width="60" height="60" />
                             </div>
                             <span className="nav-dropdown-text">{lang === 'CZ' ? cat.name_cz : cat.name_en}</span>
                           </div>
@@ -629,7 +629,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                         {riftboundCategories.map(cat => (
                           <div key={cat.id} className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Ostatní TCG', category_id: cat.id })}>
                             <div className="nav-dropdown-icon">
-                              <img src={getCategoryIcon(cat)} alt="" className="nav-dropdown-img" width="60" height="60" />
+                              <img src={getCategoryIcon(cat)} alt={lang === 'CZ' ? `${cat.name_cz || cat.name} - Kategorie Northvale TCG` : `${cat.name_en || cat.name} - Northvale TCG Category`} title={lang === 'CZ' ? (cat.name_cz || cat.name) : (cat.name_en || cat.name)} className="nav-dropdown-img" width="60" height="60" />
                             </div>
                             <span className="nav-dropdown-text">{lang === 'CZ' ? cat.name_cz : cat.name_en}</span>
                           </div>
@@ -672,7 +672,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                         {accessoriesCategories.map(cat => (
                           <div key={cat.id} className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Accessories', category_id: cat.id })}>
                             <div className="nav-dropdown-icon">
-                              <img src={getCategoryIcon(cat)} alt="" className="nav-dropdown-img" width="60" height="60" />
+                              <img src={getCategoryIcon(cat)} alt={lang === 'CZ' ? `${cat.name_cz || cat.name} - Kategorie Northvale TCG` : `${cat.name_en || cat.name} - Northvale TCG Category`} title={lang === 'CZ' ? (cat.name_cz || cat.name) : (cat.name_en || cat.name)} className="nav-dropdown-img" width="60" height="60" />
                             </div>
                             <span className="nav-dropdown-text">{lang === 'CZ' ? cat.name_cz : cat.name_en}</span>
                           </div>
@@ -715,7 +715,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                         {acrylicsCategories.map(cat => (
                           <div key={cat.id} className="nav-dropdown-item" onClick={() => handleCategoryClick('sealed', { game: 'Acrylics', category_id: cat.id })}>
                             <div className="nav-dropdown-icon">
-                              <img src={getCategoryIcon(cat)} alt="" className="nav-dropdown-img" width="60" height="60" />
+                              <img src={getCategoryIcon(cat)} alt={lang === 'CZ' ? `${cat.name_cz || cat.name} - Kategorie Northvale TCG` : `${cat.name_en || cat.name} - Northvale TCG Category`} title={lang === 'CZ' ? (cat.name_cz || cat.name) : (cat.name_en || cat.name)} className="nav-dropdown-img" width="60" height="60" />
                             </div>
                             <span className="nav-dropdown-text">{lang === 'CZ' ? cat.name_cz : cat.name_en}</span>
                           </div>
@@ -897,7 +897,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   }
                 }}
               >
-                <img src="/Northvale Logo.webp" alt="NORTHVALE TCG" style={styles.mobileLogoImg} width="80" height="80" />
+                <img src="/Northvale Logo.webp" alt="Northvale TCG Logo" title="Northvale TCG" style={styles.mobileLogoImg} width="80" height="80" />
               </a>
 
               {/* Right: Profile & Cart */}
