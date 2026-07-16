@@ -343,6 +343,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [isApiLoading, setIsApiLoading] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
+  const isPohodaEnabled = import.meta.env.VITE_ENABLE_POHODA_SYNC === 'true';
+  const isFieldLockActive = isPohodaEnabled && !!editingProduct?.id;
+
   // CSV Import State
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
   const [csvContent, setCsvContent] = useState('');
@@ -2192,8 +2195,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             value={formName} 
                             onChange={e => setFormName(e.target.value)} 
                             placeholder="např. Charizard ex" 
-                            disabled={!!editingProduct?.id}
-                            style={editingProduct?.id ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}}
+                            disabled={isFieldLockActive}
+                            style={isFieldLockActive ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}}
                           />
                         </div>
                       </div>
@@ -2464,8 +2467,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               value={formPrice}
                               onChange={e => setFormPrice(e.target.value)}
                               placeholder="např. 150"
-                              disabled={!!editingProduct?.id}
-                              style={editingProduct?.id ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}}
+                              disabled={isFieldLockActive}
+                              style={isFieldLockActive ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}}
                             />
                           </div>
                         </div>
@@ -2482,8 +2485,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               value={formStock}
                               onChange={e => setFormStock(e.target.value)}
                               placeholder="např. 5"
-                              disabled={!!editingProduct?.id}
-                              style={editingProduct?.id ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}}
+                              disabled={isFieldLockActive}
+                              style={isFieldLockActive ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}}
                             />
                           </div>
                         </div>
@@ -2579,9 +2582,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                   className="pmf-input"
                                   value={v.price}
                                   onChange={e => handleVariantChange(v.id, 'price', e.target.value ? Number(e.target.value) : '')}
-                                  style={{ padding: '8px 12px', fontSize: '13px', ...(editingProduct?.id ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}) }}
+                                  style={{ padding: '8px 12px', fontSize: '13px', ...(isFieldLockActive ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}) }}
                                   placeholder="100"
-                                  disabled={!!editingProduct?.id}
+                                  disabled={isFieldLockActive}
                                 />
                               </div>
                               {/* Stock */}
@@ -2594,9 +2597,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                   className="pmf-input"
                                   value={v.stock}
                                   onChange={e => handleVariantChange(v.id, 'stock', e.target.value ? Number(e.target.value) : '')}
-                                  style={{ padding: '8px 12px', fontSize: '13px', ...(editingProduct?.id ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}) }}
+                                  style={{ padding: '8px 12px', fontSize: '13px', ...(isFieldLockActive ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}) }}
                                   placeholder="1"
-                                  disabled={!!editingProduct?.id}
+                                  disabled={isFieldLockActive}
                                 />
                               </div>
                             </div>
