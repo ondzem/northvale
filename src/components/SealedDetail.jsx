@@ -569,6 +569,25 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
 
   const activeImage = images[currentImageIndex] || product.image;
 
+  const [detailAspectRatio, setDetailAspectRatio] = useState(1.0);
+  const mainImageRef = useRef(null);
+
+  const handleDetailImageLoad = (e) => {
+    const { naturalWidth, naturalHeight } = e.target;
+    if (naturalWidth && naturalHeight) {
+      setDetailAspectRatio(naturalWidth / naturalHeight);
+    }
+  };
+
+  useEffect(() => {
+    if (mainImageRef.current && mainImageRef.current.complete) {
+      const { naturalWidth, naturalHeight } = mainImageRef.current;
+      if (naturalWidth && naturalHeight) {
+        setDetailAspectRatio(naturalWidth / naturalHeight);
+      }
+    }
+  }, [activeImage]);
+
   const handlePrevImage = (e) => {
     e.stopPropagation();
     setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -1009,17 +1028,20 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                 <div className="nv-skeleton" style={{ width: '100%', height: '100%', minHeight: '350px', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.05)' }}></div>
               ) : (
                 <img 
+                  ref={mainImageRef}
                   src={activeImage} 
                   alt={product.imageAlt || product.image_alt || product.name || 'Northvale TCG produkt'} 
                   title={product.imageTitle || product.image_title || product.name || 'Northvale TCG produkt'} 
                   width="400"
                   height="420"
+                  onLoad={handleDetailImageLoad}
                   style={{
                     opacity: 1,
-                    transition: 'opacity 0.25s ease-in-out',
+                    transition: 'transform 0.3s ease, opacity 0.25s ease-in-out',
                     maxHeight: '100%',
                     maxWidth: '100%',
-                    objectFit: 'contain'
+                    objectFit: 'contain',
+                    transform: `scale(${detailAspectRatio < 0.75 ? 1.0 : detailAspectRatio < 0.9 ? (isMobile ? 1.02 : 1.05) : detailAspectRatio < 1.15 ? (isMobile ? 1.1 : 1.15) : 1.0})`
                   }}
                 />
               )}
