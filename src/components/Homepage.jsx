@@ -1283,10 +1283,10 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               zIndex: 2,
               boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
             }} className="about-us-img-container">
-              <picture style={{ width: '100%', height: '100%' }}>
-                <source media="(min-width: 501px)" srcSet="/O nas Desktop.webp" />
+              <picture style={{ width: '100%', height: '100%', display: 'block' }}>
+                <source media="(max-width: 500px)" srcSet="/O nas.webp" />
                 <img 
-                  src="/O nas.webp" 
+                  src="/O nas Desktop.webp" 
                   alt={lang === 'CZ' ? 'O nás - Příběh a tým e-shopu Northvale TCG' : 'About Us - Northvale TCG E-shop Story and Team'} 
                   title={lang === 'CZ' ? 'Příběh Northvale TCG' : 'Northvale TCG Story'} 
                   width="1254"

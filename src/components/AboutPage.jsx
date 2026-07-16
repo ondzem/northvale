@@ -50,9 +50,9 @@ export default function AboutPage({ setActivePage }) {
         {/* Image Banner */}
         <div className="abf-image-banner-container">
           <picture>
-            <source media="(min-width: 501px)" srcSet="/O nas Desktop.webp" />
+            <source media="(max-width: 500px)" srcSet="/O nas.webp" />
             <img 
-              src="/O nas.webp" 
+              src="/O nas Desktop.webp" 
               alt={lang === 'CZ' ? 'O nás - Tým a příběh e-shopu Northvale TCG' : 'About Us - Northvale TCG E-shop Team and Story'} 
               title={lang === 'CZ' ? 'Tým a příběh Northvale TCG' : 'Northvale TCG Team and Story'} 
               className="abf-image-banner" 
