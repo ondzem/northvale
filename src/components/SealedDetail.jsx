@@ -1010,7 +1010,8 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
               ) : (
                 <img 
                   src={activeImage} 
-                  alt={product.name || 'Northvale TCG produkt'} 
+                  alt={product.imageAlt || product.image_alt || product.name || 'Northvale TCG produkt'} 
+                  title={product.imageTitle || product.image_title || product.name || 'Northvale TCG produkt'} 
                   width="400"
                   height="420"
                   style={{
@@ -1960,7 +1961,8 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
               >
                 <img 
                   src={activeImage} 
-                  alt={product.name || 'Northvale TCG produkt'} 
+                  alt={product.imageAlt || product.image_alt || product.name || 'Northvale TCG produkt'} 
+                  title={product.imageTitle || product.image_title || product.name || 'Northvale TCG produkt'} 
                   className="lightbox-image lightbox-image-clean" 
                 />
                 <div className="lightbox-magnifier-lens" style={lightboxZoomStyle} />

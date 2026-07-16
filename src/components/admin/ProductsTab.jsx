@@ -392,6 +392,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
   // Split-form and preview states
   const [formShortDesc, setFormShortDesc] = useState('');
+  const [formImageAlt, setFormImageAlt] = useState('');
+  const [formImageTitle, setFormImageTitle] = useState('');
   const [formAdditionalImages, setFormAdditionalImages] = useState([]);
   const [formDescBlocks, setFormDescBlocks] = useState([{ id: 'b-0', type: 'text', value: '' }]);
   const [cropTarget, setCropTarget] = useState({ type: 'front' });
@@ -578,6 +580,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
     // Reset split-form states
     setFormShortDesc('');
+    setFormImageAlt('');
+    setFormImageTitle('');
     setFormAdditionalImages([]);
     setFormDescBlocks([{ id: 'b-' + Math.random().toString(36).substr(2, 5), type: 'text', value: '' }]);
     setCropTarget({ type: 'front' });
@@ -714,6 +718,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormElement(p.element || '');
     setFormIllustrator(p.illustrator || '');
     setFormCustomParams(p.customParams || p.custom_params || []);
+    setFormImageAlt(p.imageAlt || p.image_alt || '');
+    setFormImageTitle(p.imageTitle || p.image_title || '');
 
     setIsModalOpen(true);
   };
@@ -1098,6 +1104,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       no_vat: formNoVat,
       category_id: formCategoryId || null,
       shortDesc: formShortDesc || null,
+      imageAlt: formImageAlt || null,
+      imageTitle: formImageTitle || null,
       additionalImages: formAdditionalImages || [],
       setCode: formSetCode || null,
       stage: formStage || null,
@@ -2919,6 +2927,54 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         <span style={styles.helperText}>
                           {lang === 'CZ' ? '💡 Krátký odstavec u nákupních tlačítek pod nadpisem karty.' : '💡 Displayed near price and cart button.'}
                         </span>
+                      </div>
+
+                      {/* SEO Image Metadata fields */}
+                      <div className="pmf-field" style={{ marginTop: '16px' }}>
+                        <h4 style={{ color: 'var(--color-gold, #fdbd16)', fontSize: '13px', fontWeight: '600', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          🔍 {lang === 'CZ' ? 'SEO Optimalizace náhledového obrázku' : 'SEO Image Metadata Optimization'}
+                        </h4>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                          <div className="pmf-field">
+                            <label className="pmf-label">
+                              {lang === 'CZ' ? 'Alternativní text obrázku (Alt)' : 'Image Alt Text'}
+                            </label>
+                            <input
+                              type="text"
+                              className="pmf-input"
+                              value={formImageAlt}
+                              onChange={e => setFormImageAlt(e.target.value)}
+                              placeholder={
+                                formName 
+                                  ? `${formGame || 'TCG'} - ${formName}${formEdition ? ' - ' + formEdition : ''} | E-shop Northvale TCG` 
+                                  : (lang === 'CZ' ? 'např. Pokémon - Charizard ex - anglická karta | E-shop Northvale TCG' : 'e.g. Pokémon - Charizard ex - English card')
+                              }
+                            />
+                            <span style={{ ...styles.helperText, fontSize: '10px' }}>
+                              {lang === 'CZ' ? '💡 Popisuje obsah obrázku pro vyhledávače (Google, Seznam). Ponechte prázdné pro automatické vygenerování.' : '💡 Describes the image content for search engines. Leave empty to auto-generate.'}
+                            </span>
+                          </div>
+                          
+                          <div className="pmf-field">
+                            <label className="pmf-label">
+                              {lang === 'CZ' ? 'Titulek obrázku (Title)' : 'Image Title Text'}
+                            </label>
+                            <input
+                              type="text"
+                              className="pmf-input"
+                              value={formImageTitle}
+                              onChange={e => setFormImageTitle(e.target.value)}
+                              placeholder={
+                                formName 
+                                  ? `${formName}${formGame ? ' - ' + formGame : ''}`
+                                  : (lang === 'CZ' ? 'např. Charizard ex - Pokémon' : 'e.g. Charizard ex - Pokémon')
+                              }
+                            />
+                            <span style={{ ...styles.helperText, fontSize: '10px' }}>
+                              {lang === 'CZ' ? '💡 Zobrazuje se při najetí myší na obrázek. Ponechte prázdné pro automatické vygenerování.' : '💡 Shows on image hover. Leave empty to auto-generate.'}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
 

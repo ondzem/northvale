@@ -59,6 +59,8 @@ function mapDbProduct(p) {
     ...p,
     desc: p.description,
     backImage: p.back_image,
+    imageAlt: p.image_alt || null,
+    imageTitle: p.image_title || null,
     packagingType: p.packaging_type,
     boosterCount: p.booster_count,
     foilCondition: p.foil_condition,
@@ -205,7 +207,7 @@ export async function fetchProductsFromDB(options = {}) {
     } else {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, description, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, illustrator, set_code, stage, element, custom_params, no_vat');
+        .select('id, name, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, description, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, illustrator, set_code, stage, element, custom_params, no_vat, image_alt, image_title');
 
       if (error) {
         throw error;
@@ -380,6 +382,41 @@ export async function fetchProductByIdFromDB(id) {
 }
 
 /**
+ * Generates descriptive, keyword-rich SEO metadata (alt text and title) for product images.
+ */
+export function generateDefaultSEOImageMetadata(product, type = 'alt') {
+  if (!product) return '';
+  const name = product.name || '';
+  const game = product.game || '';
+  const category = product.category || '';
+  const edition = product.edition || '';
+  const typeStr = product.type || '';
+  
+  if (type === 'alt') {
+    const parts = [];
+    if (game) parts.push(game);
+    if (category && category !== game) parts.push(category);
+    parts.push(name);
+    if (edition) parts.push(edition);
+    
+    if (typeStr === 'singles') {
+      parts.push('sběratelská karta');
+    } else if (typeStr === 'sealed') {
+      parts.push('originální balení (sealed)');
+    } else if (typeStr === 'accessory') {
+      parts.push('příslušenství');
+    }
+    
+    return `${parts.filter(Boolean).join(' - ')} | E-shop Northvale TCG`;
+  } else {
+    const parts = [];
+    parts.push(name);
+    if (game) parts.push(game);
+    return `${parts.filter(Boolean).join(' - ')}`;
+  }
+}
+
+/**
  * Maps frontend product representation to database snake_case structure.
  */
 export function mapProductToDb(p) {
@@ -396,7 +433,9 @@ export function mapProductToDb(p) {
     subsubcategory: p.subsubcategory,
     rarity: p.rarity,
     image: p.image,
-    no_vat: !!p.no_vat
+    no_vat: !!p.no_vat,
+    image_alt: p.imageAlt || p.image_alt || generateDefaultSEOImageMetadata(p, 'alt'),
+    image_title: p.imageTitle || p.image_title || generateDefaultSEOImageMetadata(p, 'title')
   };
 
   if (p.backImage !== undefined || p.back_image !== undefined) {

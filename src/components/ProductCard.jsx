@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { fetchProductImage } from '../services/products';
 
-const ProductImage = ({ productId, fallbackSrc, alt, className = '' }) => {
+const ProductImage = ({ productId, fallbackSrc, alt, title, className = '' }) => {
   const [imgSrc, setImgSrc] = useState(() => {
     try {
       return localStorage.getItem(`nv-img-${productId}`) || fallbackSrc || '';
@@ -66,6 +66,7 @@ const ProductImage = ({ productId, fallbackSrc, alt, className = '' }) => {
           ref={imgRef}
           src={imgSrc}
           alt={alt || 'Northvale TCG produkt'}
+          title={title || alt || 'Northvale TCG produkt'}
           width="240"
           height="336"
           onLoad={handleLoad}
@@ -209,7 +210,13 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           <div className="ca-grain"></div>
 
           {/* Actual Card Image */}
-          <ProductImage productId={product.id} fallbackSrc={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" />
+          <ProductImage 
+            productId={product.id} 
+            fallbackSrc={product.image} 
+            alt={product.imageAlt || product.image_alt || product.name || 'Northvale TCG produkt'} 
+            title={product.imageTitle || product.image_title || product.name || 'Northvale TCG produkt'} 
+            className="ca-card-img" 
+          />
 
           {/* Slab Label Overlay if it is a graded slab */}
           {product.type === 'slab' && (

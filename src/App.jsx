@@ -28,7 +28,7 @@ import Blog from './components/Blog';
 import { blogArticles } from './blogData';
 
 import { mockProducts } from './mockData';
-import { fetchProductsFromDB, getCachedProducts, getProductFromCache } from './services/products';
+import { fetchProductsFromDB, getCachedProducts, getProductFromCache, generateDefaultSEOImageMetadata } from './services/products';
 import { FEATURE_FLAGS } from './config';
 import { LanguageProvider, useTranslation } from './context/LanguageContext';
 import './App.css';
@@ -962,6 +962,12 @@ function AppContent() {
     }
     ogImageUrl = ogImageUrl.replace(/ /g, '%20');
     setMeta('property', 'og:image', ogImageUrl);
+    if (currentProduct) {
+      const imageAltVal = currentProduct.imageAlt || currentProduct.image_alt || generateDefaultSEOImageMetadata(currentProduct, 'alt');
+      setMeta('property', 'og:image:alt', imageAltVal);
+    } else {
+      setMeta('property', 'og:image:alt', 'Northvale TCG');
+    }
 
     // Structured Data (JSON-LD) injection
     let jsonLdScript = document.getElementById('structured-data-seo');
