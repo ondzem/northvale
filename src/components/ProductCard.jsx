@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { fetchProductImage } from '../services/products';
 
-const ProductImage = ({ productId, fallbackSrc, alt, title, className = '' }) => {
+const ProductImage = ({ productId, fallbackSrc, alt, title, className = '', onAspectRatioLoaded }) => {
   const [imgSrc, setImgSrc] = useState(() => {
     try {
       return localStorage.getItem(`nv-img-${productId}`) || fallbackSrc || '';
@@ -16,8 +16,16 @@ const ProductImage = ({ productId, fallbackSrc, alt, title, className = '' }) =>
   const imgRef = useRef(null);
 
   useEffect(() => {
+    // If fallbackSrc changes (e.g. from cropping or quick fill), update imgSrc instantly
+    if (fallbackSrc) {
+      setImgSrc(fallbackSrc);
+      setLoaded(false);
+    }
+  }, [fallbackSrc]);
+
+  useEffect(() => {
     // If imgSrc doesn't start with data: and we don't have it loaded, try fetching from database
-    if (!imgSrc || (!imgSrc.startsWith('data:') && !imgSrc.startsWith('/') && !imgSrc.startsWith('http'))) {
+    if (productId && (!imgSrc || (!imgSrc.startsWith('data:') && !imgSrc.startsWith('/') && !imgSrc.startsWith('http')))) {
       setDbLoading(true);
       fetchProductImage(productId).then(dbImage => {
         if (dbImage) {
@@ -29,14 +37,15 @@ const ProductImage = ({ productId, fallbackSrc, alt, title, className = '' }) =>
         setDbLoading(false);
       });
     }
-  }, [productId, imgSrc, fallbackSrc]);
+  }, [productId, imgSrc]);
 
   useEffect(() => {
     if (imgRef.current && imgRef.current.complete) {
       setLoaded(true);
       const { naturalWidth, naturalHeight } = imgRef.current;
       if (naturalWidth && naturalHeight) {
-        setAspectRatio(naturalWidth / naturalHeight);
+        const ratio = naturalWidth / naturalHeight;
+        setAspectRatio(ratio);
       }
     }
   }, [imgSrc]);
@@ -44,12 +53,26 @@ const ProductImage = ({ productId, fallbackSrc, alt, title, className = '' }) =>
   const handleLoad = (e) => {
     const { naturalWidth, naturalHeight } = e.target;
     if (naturalWidth && naturalHeight) {
-      setAspectRatio(naturalWidth / naturalHeight);
+      const ratio = naturalWidth / naturalHeight;
+      setAspectRatio(ratio);
+      if (onAspectRatioLoaded) {
+        onAspectRatioLoaded(productId, ratio);
+      }
     }
     setLoaded(true);
   };
 
-  const fitClass = aspectRatio >= 1.1 ? 'ca-fit-contain' : 'ca-fit-cover';
+  useEffect(() => {
+    if (loaded && aspectRatio && onAspectRatioLoaded) {
+      onAspectRatioLoaded(productId, aspectRatio);
+    }
+  }, [loaded, aspectRatio, productId]);
+
+  // Tall/vertical card shapes should not fit using cover, or else they get clipped.
+  // Standard card shape is around 0.7 aspect ratio (width/height = 2.5/3.5).
+  // If the aspect ratio is extremely tall (e.g. less than 0.72) or wide (e.g. above 1.1),
+  // we use contain to prevent clipping any graphics or titles.
+  const fitClass = (aspectRatio < 0.72 || aspectRatio >= 1.1) ? 'ca-fit-contain' : 'ca-fit-cover';
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -114,7 +137,7 @@ export const getCardCode = (product) => {
   return `${shortName}-${hash % 250 + 1}`;
 };
 
-export default function ProductCard({ product, addToCart, setSelectedProductId, setActivePage }) {
+export default function ProductCard({ product, addToCart, setSelectedProductId, setActivePage, onAspectRatioLoaded }) {
   const { lang, t } = useTranslation();
   const selectedVariantIndex = 0;
   const [isAdded, setIsAdded] = useState(false);
@@ -216,6 +239,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
             alt={product.imageAlt || product.image_alt || product.name || 'Northvale TCG produkt'} 
             title={product.imageTitle || product.image_title || product.name || 'Northvale TCG produkt'} 
             className="ca-card-img" 
+            onAspectRatioLoaded={onAspectRatioLoaded}
           />
 
           {/* Slab Label Overlay if it is a graded slab */}

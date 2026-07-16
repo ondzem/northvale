@@ -1294,7 +1294,24 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
         drawCanvas();
       };
-      img.src = cropImageSrc;
+      
+      img.onerror = () => {
+        console.error("Failed to load image for cropping, possible CORS error");
+        alert(lang === 'CZ' 
+          ? "Nepodařilo se načíst obrázek pro ořez. Může se jednat o zabezpečení serveru (CORS)." 
+          : "Failed to load image for cropping. This may be due to cross-origin security constraints (CORS)."
+        );
+        setIsCropping(false);
+        setCropImageSrc(null);
+      };
+
+      // Append cache buster query parameter to bypass browser CORS caching issues
+      if (cropImageSrc.startsWith('http')) {
+        const separator = cropImageSrc.includes('?') ? '&' : '?';
+        img.src = `${cropImageSrc}${separator}t=${Date.now()}`;
+      } else {
+        img.src = cropImageSrc;
+      }
     }
   }, [isCropping, cropImageSrc, cropOrientation]);
 

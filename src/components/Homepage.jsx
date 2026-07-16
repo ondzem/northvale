@@ -6,22 +6,46 @@ import { fetchDailyDealFromDB } from '../services/dailyDeal';
 import { fetchHomepageSectionsFromDB } from '../services/homepageSections';
 import { fetchProductByIdFromDB } from '../services/products';
 
-const ProductImage = ({ src, alt, title, className = '' }) => {
+const ProductImage = ({ productId, src, alt, title, className = '', onAspectRatioLoaded }) => {
   const [aspectRatio, setAspectRatio] = useState(1.0);
   const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef(null);
+
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      setLoaded(true);
+      const { naturalWidth, naturalHeight } = imgRef.current;
+      if (naturalWidth && naturalHeight) {
+        const ratio = naturalWidth / naturalHeight;
+        setAspectRatio(ratio);
+        if (onAspectRatioLoaded) onAspectRatioLoaded(productId, ratio);
+      }
+    }
+  }, [src, productId]);
 
   const handleLoad = (e) => {
     const { naturalWidth, naturalHeight } = e.target;
     if (naturalWidth && naturalHeight) {
-      setAspectRatio(naturalWidth / naturalHeight);
+      const ratio = naturalWidth / naturalHeight;
+      setAspectRatio(ratio);
+      if (onAspectRatioLoaded) {
+        onAspectRatioLoaded(productId, ratio);
+      }
     }
     setLoaded(true);
   };
 
-  const fitClass = aspectRatio >= 1.1 ? 'ca-fit-contain' : 'ca-fit-cover';
+  useEffect(() => {
+    if (loaded && aspectRatio && onAspectRatioLoaded) {
+      onAspectRatioLoaded(productId, aspectRatio);
+    }
+  }, [loaded, aspectRatio, productId]);
+
+  const fitClass = (aspectRatio < 0.72 || aspectRatio >= 1.1) ? 'ca-fit-contain' : 'ca-fit-cover';
 
   return (
     <img
+      ref={imgRef}
       src={src}
       alt={alt || 'Northvale TCG produkt'}
       title={title || alt || 'Northvale TCG produkt'}
@@ -56,6 +80,14 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   });
 
   const [loadedImages, setLoadedImages] = useState({});
+
+  const [loadedRatios, setLoadedRatios] = useState({});
+  const handleAspectRatioLoaded = (productId, ratio) => {
+    setLoadedRatios(prev => {
+      if (prev[productId] === ratio) return prev;
+      return { ...prev, [productId]: ratio };
+    });
+  };
 
 
 
@@ -1345,42 +1377,71 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         </header>
         <div className="slider-container-wrapper">
           <button onClick={() => handleScroll(newArrivalsRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
-          <div ref={newArrivalsRef} className="homepage-product-grid">
-            {newArrivals.map(product => (
-              <a 
-                key={product.id} 
-                href={`/sealed-detail/${product.id}`} 
-                className={`vf-card type-${product.type}`} 
-                style={{ textDecoration: 'none', color: 'inherit' }}
-                onClick={(e) => { 
-                  if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
-                    e.preventDefault(); 
-                    handleCardClick(product); 
-                  } 
-                }}
-              >
-                <div className="vf-art">
-                  <div className="card-art">
-                    <ProductImage src={product.image} alt={product.name || 'Northvale TCG produkt'} title={product.name} className="ca-card-img" />
-                    <div className="ca-holo"></div>
-                    <div className="ca-shine"></div>
-                    <div className="ca-grain"></div>
-                  </div>
-                </div>
-                <div className="vf-info">
-                  <div className="vf-name">{product.name.split(' (')[0]}</div>
-                  <div className="vf-rule"></div>
-                  <div className="vf-meta">
-                    <span className="vf-stock">
-                      <span className="vf-dot"></span>
-                      {lang === 'CZ' ? 'Skladem' : 'In Stock'}
-                    </span>
-                    <span className="vf-price">{((product.variants ? product.variants[0].price : product.price) || 1200).toLocaleString('cs-CZ')} Kč</span>
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
+          {(() => {
+            const visibleRatios = newArrivals
+              .map(p => loadedRatios[p.id])
+              .filter(Boolean);
+
+            let artHDesktop = 300;
+            let artHMobile = 250;
+
+            if (visibleRatios.length > 0) {
+              const minRatio = Math.min(...visibleRatios);
+              if (minRatio < 0.72) {
+                artHDesktop = Math.min(420, Math.round(240 / minRatio));
+                artHMobile = Math.min(350, Math.round(200 / minRatio));
+              }
+            }
+
+            const cardHDesktop = artHDesktop + 142;
+            const cardHMobile = artHMobile + 130;
+
+            const gridStyle = {
+              '--art-h-desktop': `${artHDesktop}px`,
+              '--art-h-mobile': `${artHMobile}px`,
+              '--card-h-desktop': `${cardHDesktop}px`,
+              '--card-h-mobile': `${cardHMobile}px`
+            };
+
+            return (
+              <div ref={newArrivalsRef} className="homepage-product-grid" style={gridStyle}>
+                {newArrivals.map(product => (
+                  <a 
+                    key={product.id} 
+                    href={`/sealed-detail/${product.id}`} 
+                    className={`vf-card type-${product.type}`} 
+                    style={{ textDecoration: 'none', color: 'inherit' }}
+                    onClick={(e) => { 
+                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
+                        e.preventDefault(); 
+                        handleCardClick(product); 
+                      } 
+                    }}
+                  >
+                    <div className="vf-art">
+                      <div className="card-art">
+                        <ProductImage productId={product.id} src={product.image} alt={product.name || 'Northvale TCG produkt'} title={product.name} className="ca-card-img" onAspectRatioLoaded={handleAspectRatioLoaded} />
+                        <div className="ca-holo"></div>
+                        <div className="ca-shine"></div>
+                        <div className="ca-grain"></div>
+                      </div>
+                    </div>
+                    <div className="vf-info">
+                      <div className="vf-name">{product.name.split(' (')[0]}</div>
+                      <div className="vf-rule"></div>
+                      <div className="vf-meta">
+                        <span className="vf-stock">
+                          <span className="vf-dot"></span>
+                          {lang === 'CZ' ? 'Skladem' : 'In Stock'}
+                        </span>
+                        <span className="vf-price">{((product.variants ? product.variants[0].price : product.price) || 1200).toLocaleString('cs-CZ')} Kč</span>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            );
+          })()}
           <button onClick={() => handleScroll(newArrivalsRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
         </div>
       </section>
@@ -1406,46 +1467,75 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               <h2 className="nv-title">{lang === 'CZ' ? 'Předobjednávky' : 'Pre-orders'}</h2>
             </div>
           </header>
-          <div className="slider-container-wrapper">
-            <button onClick={() => handleScroll(preordersRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
-            <div ref={preordersRef} className="homepage-product-grid">
-            {preorders.map(product => (
-              <a 
-                key={product.id} 
-                href={`/sealed-detail/${product.id}`} 
-                className={`vf-card type-${product.type}`} 
-                style={{ textDecoration: 'none', color: 'inherit' }}
-                onClick={(e) => { 
-                  if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
-                    e.preventDefault(); 
-                    handleCardClick(product); 
-                  } 
-                }}
-              >
-                <div className="vf-art">
-                  <div className="card-art">
-                    <ProductImage src={product.image} alt={product.name || 'Northvale TCG produkt'} title={product.name} className="ca-card-img" />
-                    <div className="ca-holo"></div>
-                    <div className="ca-shine"></div>
-                    <div className="ca-grain"></div>
+            <div className="slider-container-wrapper">
+              <button onClick={() => handleScroll(preordersRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
+              {(() => {
+                const visibleRatios = preorders
+                  .map(p => loadedRatios[p.id])
+                  .filter(Boolean);
+
+                let artHDesktop = 300;
+                let artHMobile = 250;
+
+                if (visibleRatios.length > 0) {
+                  const minRatio = Math.min(...visibleRatios);
+                  if (minRatio < 0.72) {
+                    artHDesktop = Math.min(420, Math.round(240 / minRatio));
+                    artHMobile = Math.min(350, Math.round(200 / minRatio));
+                  }
+                }
+
+                const cardHDesktop = artHDesktop + 142;
+                const cardHMobile = artHMobile + 130;
+
+                const gridStyle = {
+                  '--art-h-desktop': `${artHDesktop}px`,
+                  '--art-h-mobile': `${artHMobile}px`,
+                  '--card-h-desktop': `${cardHDesktop}px`,
+                  '--card-h-mobile': `${cardHMobile}px`
+                };
+
+                return (
+                  <div ref={preordersRef} className="homepage-product-grid" style={gridStyle}>
+                    {preorders.map(product => (
+                      <a 
+                        key={product.id} 
+                        href={`/sealed-detail/${product.id}`} 
+                        className={`vf-card type-${product.type}`} 
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                        onClick={(e) => { 
+                          if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
+                            e.preventDefault(); 
+                            handleCardClick(product); 
+                          } 
+                        }}
+                      >
+                        <div className="vf-art">
+                          <div className="card-art">
+                            <ProductImage productId={product.id} src={product.image} alt={product.name || 'Northvale TCG produkt'} title={product.name} className="ca-card-img" onAspectRatioLoaded={handleAspectRatioLoaded} />
+                            <div className="ca-holo"></div>
+                            <div className="ca-shine"></div>
+                            <div className="ca-grain"></div>
+                          </div>
+                        </div>
+                        <div className="vf-info">
+                          <div className="vf-name">{product.name}</div>
+                          <div className="vf-rule"></div>
+                          <div className="vf-meta">
+                            <span className="vf-stock">
+                              <span className="vf-dot"></span>
+                              {lang === 'CZ' ? 'Předobjednávka' : 'Pre-order'}
+                            </span>
+                            <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
                   </div>
-                </div>
-                <div className="vf-info">
-                  <div className="vf-name">{product.name}</div>
-                  <div className="vf-rule"></div>
-                  <div className="vf-meta">
-                    <span className="vf-stock">
-                      <span className="vf-dot"></span>
-                      {lang === 'CZ' ? 'Předobjednávka' : 'Pre-order'}
-                    </span>
-                    <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
-                  </div>
-                </div>
-              </a>
-            ))}
+                );
+              })()}
+              <button onClick={() => handleScroll(preordersRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
             </div>
-            <button onClick={() => handleScroll(preordersRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
-          </div>
         </section>
 
         {/* Grading Banner */}
@@ -1487,39 +1577,68 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             </header>
             <div className="slider-container-wrapper">
               <button onClick={() => handleScroll(gradedCardsRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
-              <div ref={gradedCardsRef} className="homepage-product-grid">
-              {gradedCards.map(product => (
-                <a 
-                  key={product.id} 
-                  href={`/sealed-detail/${product.id}`} 
-                  className={`vf-card type-${product.type}`} 
-                  style={{ textDecoration: 'none', color: 'inherit' }}
-                  onClick={(e) => { 
-                    if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
-                      e.preventDefault(); 
-                      handleCardClick(product); 
-                    } 
-                  }}
-                >
-                  <div className="vf-art">
-                    <div className="card-art">
-                      <ProductImage src={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" />
-                      <div className="ca-holo"></div>
-                      <div className="ca-shine"></div>
-                      <div className="ca-grain"></div>
-                    </div>
+              {(() => {
+                const visibleRatios = gradedCards
+                  .map(p => loadedRatios[p.id])
+                  .filter(Boolean);
+
+                let artHDesktop = 300;
+                let artHMobile = 250;
+
+                if (visibleRatios.length > 0) {
+                  const minRatio = Math.min(...visibleRatios);
+                  if (minRatio < 0.72) {
+                    artHDesktop = Math.min(420, Math.round(240 / minRatio));
+                    artHMobile = Math.min(350, Math.round(200 / minRatio));
+                  }
+                }
+
+                const cardHDesktop = artHDesktop + 142;
+                const cardHMobile = artHMobile + 130;
+
+                const gridStyle = {
+                  '--art-h-desktop': `${artHDesktop}px`,
+                  '--art-h-mobile': `${artHMobile}px`,
+                  '--card-h-desktop': `${cardHDesktop}px`,
+                  '--card-h-mobile': `${cardHMobile}px`
+                };
+
+                return (
+                  <div ref={gradedCardsRef} className="homepage-product-grid" style={gridStyle}>
+                    {gradedCards.map(product => (
+                      <a 
+                        key={product.id} 
+                        href={`/sealed-detail/${product.id}`} 
+                        className={`vf-card type-${product.type}`} 
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                        onClick={(e) => { 
+                          if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
+                            e.preventDefault(); 
+                            handleCardClick(product); 
+                          } 
+                        }}
+                      >
+                        <div className="vf-art">
+                          <div className="card-art">
+                            <ProductImage productId={product.id} src={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" onAspectRatioLoaded={handleAspectRatioLoaded} />
+                            <div className="ca-holo"></div>
+                            <div className="ca-shine"></div>
+                            <div className="ca-grain"></div>
+                          </div>
+                        </div>
+                        <div className="vf-info">
+                          <div className="vf-name">{product.name}</div>
+                          <div className="vf-rule"></div>
+                          <div className="vf-meta">
+                            <span className="slab-badge">{product.company} {product.grade}</span>
+                            <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
                   </div>
-                  <div className="vf-info">
-                    <div className="vf-name">{product.name}</div>
-                    <div className="vf-rule"></div>
-                    <div className="vf-meta">
-                      <span className="slab-badge">{product.company} {product.grade}</span>
-                      <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
-                    </div>
-                  </div>
-                </a>
-              ))}
-              </div>
+                );
+              })()}
               <button onClick={() => handleScroll(gradedCardsRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
             </div>
             <div className="more-link-mobile-wrapper">
@@ -1544,42 +1663,71 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         </header>
         <div className="slider-container-wrapper">
           <button onClick={() => handleScroll(accessoriesRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
-          <div ref={accessoriesRef} className="homepage-product-grid">
-            {accessories.map(product => (
-              <a 
-                key={product.id} 
-                href={`/sealed-detail/${product.id}`} 
-                className={`vf-card type-${product.type}`} 
-                style={{ textDecoration: 'none', color: 'inherit' }}
-                onClick={(e) => { 
-                  if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
-                    e.preventDefault(); 
-                    handleCardClick(product); 
-                  } 
-                }}
-              >
-                <div className="vf-art">
-                  <div className="card-art">
-                    <ProductImage src={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" />
-                    <div className="ca-holo"></div>
-                    <div className="ca-shine"></div>
-                    <div className="ca-grain"></div>
-                  </div>
-                </div>
-                <div className="vf-info">
-                  <div className="vf-name">{product.name}</div>
-                  <div className="vf-rule"></div>
-                  <div className="vf-meta">
-                    <span className="vf-stock">
-                      <span className="vf-dot"></span>
-                      {lang === 'CZ' ? 'Skladem' : 'In Stock'}
-                    </span>
-                    <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
+          {(() => {
+            const visibleRatios = accessories
+              .map(p => loadedRatios[p.id])
+              .filter(Boolean);
+
+            let artHDesktop = 300;
+            let artHMobile = 250;
+
+            if (visibleRatios.length > 0) {
+              const minRatio = Math.min(...visibleRatios);
+              if (minRatio < 0.72) {
+                artHDesktop = Math.min(420, Math.round(240 / minRatio));
+                artHMobile = Math.min(350, Math.round(200 / minRatio));
+              }
+            }
+
+            const cardHDesktop = artHDesktop + 142;
+            const cardHMobile = artHMobile + 130;
+
+            const gridStyle = {
+              '--art-h-desktop': `${artHDesktop}px`,
+              '--art-h-mobile': `${artHMobile}px`,
+              '--card-h-desktop': `${cardHDesktop}px`,
+              '--card-h-mobile': `${cardHMobile}px`
+            };
+
+            return (
+              <div ref={accessoriesRef} className="homepage-product-grid" style={gridStyle}>
+                {accessories.map(product => (
+                  <a 
+                    key={product.id} 
+                    href={`/sealed-detail/${product.id}`} 
+                    className={`vf-card type-${product.type}`} 
+                    style={{ textDecoration: 'none', color: 'inherit' }}
+                    onClick={(e) => { 
+                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
+                        e.preventDefault(); 
+                        handleCardClick(product); 
+                      } 
+                    }}
+                  >
+                    <div className="vf-art">
+                      <div className="card-art">
+                        <ProductImage productId={product.id} src={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" onAspectRatioLoaded={handleAspectRatioLoaded} />
+                        <div className="ca-holo"></div>
+                        <div className="ca-shine"></div>
+                        <div className="ca-grain"></div>
+                      </div>
+                    </div>
+                    <div className="vf-info">
+                      <div className="vf-name">{product.name}</div>
+                      <div className="vf-rule"></div>
+                      <div className="vf-meta">
+                        <span className="vf-stock">
+                          <span className="vf-dot"></span>
+                          {lang === 'CZ' ? 'Skladem' : 'In Stock'}
+                        </span>
+                        <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            );
+          })()}
           <button onClick={() => handleScroll(accessoriesRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
         </div>
         <div className="more-link-mobile-wrapper" style={{ marginTop: isMobile ? '-55px' : '16px' }}>

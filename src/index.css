@@ -1427,7 +1427,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   .homepage-product-grid .vf-card {
     flex: 0 0 200px;
     width: 200px;
-    height: 368px;
+    height: var(--card-h-mobile, 368px);
   }
 }
 
@@ -1435,7 +1435,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   flex: 0 0 240px;
   width: 240px;
   box-sizing: border-box;
-  height: 442px;
+  height: var(--card-h-desktop, 442px);
 }
 
 /* Card image as the entire card body (Floating Minimal) */
@@ -2522,13 +2522,13 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 .catalog-product-grid .vf-card,
 .favorites-slider-grid .vf-card {
   width: 240px;
-  height: 442px;
+  height: var(--card-h-desktop, 442px);
   flex: 0 0 240px;
 }
 
 .catalog-product-grid .vf-card .vf-art,
 .favorites-slider-grid .vf-card .vf-art {
-  height: 300px;
+  height: var(--art-h-desktop, 300px);
 }
 
 .catalog-product-grid .vf-info,
@@ -2556,12 +2556,12 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   .catalog-product-grid .vf-card,
   .favorites-slider-grid .vf-card {
     width: 200px;
-    height: 380px;
+    height: var(--card-h-mobile, 380px);
     flex: 0 0 200px;
   }
   .catalog-product-grid .vf-card .vf-art,
   .favorites-slider-grid .vf-card .vf-art {
-    height: 250px;
+    height: var(--art-h-mobile, 250px);
   }
 }
 

@@ -770,6 +770,21 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
   const [selectedClosingTypes, setSelectedClosingTypes] = useState([]);
   const [selectedPackagingTypes, setSelectedPackagingTypes] = useState(filters.type ? [filters.type] : []);
 
+  // Aspect ratio tracking for cards
+  const [loadedRatios, setLoadedRatios] = useState({});
+  const handleAspectRatioLoaded = (productId, ratio) => {
+    setLoadedRatios(prev => {
+      if (prev[productId] === ratio) return prev;
+      return { ...prev, [productId]: ratio };
+    });
+  };
+
+  // Reset ratios when filter states change
+  useEffect(() => {
+    setLoadedRatios({});
+  }, [selectedGame, selectedLangs, priceRange, onlyInStock, onlyPreorder, selectedEditions, selectedBrands, selectedCompatibilities, selectedColors, selectedThicknesses, selectedClosingTypes, selectedPackagingTypes, activeSubcategory, activeSubsubcategory, searchQuery]);
+
+
   const [dbCategories, setDbCategories] = useState(() => {
     const cached = getCachedCategories();
     return cached.length > 0 ? cached : [];
@@ -2067,17 +2082,58 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
               <h3 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>{lang === 'CZ' ? 'Nebyly nalezeny žádné produkty' : 'No products found'}</h3>
             </div>
           ) : (
-            <div className="catalog-product-grid">
-              {sortedProducts.map(product => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  addToCart={addToCart}
-                  setSelectedProductId={setSelectedProductId}
-                  setActivePage={setActivePage}
-                />
-              ))}
-            </div>
+            (() => {
+              // Standard card width is 240px desktop, 200px mobile.
+              // Find the tallest image (minimum ratio = width / height).
+              // Ensure we filter ratios to only currently visible products in sortedProducts.
+              const visibleRatios = sortedProducts
+                .map(p => loadedRatios[p.id])
+                .filter(Boolean);
+
+              // Standard card default height is 442px with 300px image height.
+              // Standard card ratio is ~0.7.
+              // If there's a taller card, minRatio will be smaller (e.g. 0.55).
+              // Let's compute custom height variables if we find a taller card.
+              let artHDesktop = 300;
+              let artHMobile = 250;
+
+              if (visibleRatios.length > 0) {
+                const minRatio = Math.min(...visibleRatios);
+                // If the aspect ratio indicates a tall vertical image (ratio < 0.72)
+                if (minRatio < 0.72) {
+                  // Keep width fixed (240px desktop, 200px mobile) and calculate height based on tallest image aspect ratio
+                  artHDesktop = Math.min(420, Math.round(240 / minRatio));
+                  artHMobile = Math.min(350, Math.round(200 / minRatio));
+                }
+              }
+
+              // Base info block + buttons height is ~142px desktop, ~130px mobile.
+              // If we increase the image wrapper height, we also expand the card height.
+              const cardHDesktop = artHDesktop + 142;
+              const cardHMobile = artHMobile + 130;
+
+              const gridStyle = {
+                '--art-h-desktop': `${artHDesktop}px`,
+                '--art-h-mobile': `${artHMobile}px`,
+                '--card-h-desktop': `${cardHDesktop}px`,
+                '--card-h-mobile': `${cardHMobile}px`
+              };
+
+              return (
+                <div className="catalog-product-grid" style={gridStyle}>
+                  {sortedProducts.map(product => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      addToCart={addToCart}
+                      setSelectedProductId={setSelectedProductId}
+                      setActivePage={setActivePage}
+                      onAspectRatioLoaded={handleAspectRatioLoaded}
+                    />
+                  ))}
+                </div>
+              );
+            })()
           )}
         </main>
       </div>
