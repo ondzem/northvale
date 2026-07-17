@@ -24,6 +24,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const [ico, setIco] = useState('');
   const [dic, setDic] = useState('');
   const [pickupPoint, setPickupPoint] = useState('');
+  const [pickupPointDetails, setPickupPointDetails] = useState(null);
   const [showMapModal, setShowMapModal] = useState(false);
   const [mapType, setMapType] = useState('');
   const [notes, setNotes] = useState('');
@@ -306,7 +307,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               companyName: customerDetails.companyName,
               ico: customerDetails.ico,
               dic: customerDetails.dic,
-              notes: customerDetails.notes
+              notes: customerDetails.notes,
+              pickupPointDetails: pending.pickupPointDetails || null
             };
 
             submitOrder(order, creditUsed);
@@ -340,31 +342,109 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     };
     handleCallback();
   }, [cart, cartSubtotal, shippingCost, paymentSurcharge, finalTotal, actualAppliedCredit, shipping, lang, appliedDiscount, discountAmount]);
-
   useEffect(() => {
     const handleWidgetMessage = (event) => {
       // 1. DPD Widget Message handler
       if (event.data && event.data.dpdWidget) {
         const dpd = event.data.dpdWidget;
-        console.log("DPD Widget message received:", dpd);
+        // console.log("DPD Widget message received:", dpd);
+        // console.log("RAW DPD Widget event.data:", JSON.stringify(event.data));
+        // console.log("RAW DPD pickupPointResult:", event.data?.dpdWidget?.pickupPointResult);
         if (dpd.message === "widgetClose") {
           setShowMapModal(false);
           return;
         }
 
         let address = '';
-        if (dpd.pickupPointResult) {
-          address = dpd.pickupPointResult;
-        } else if (dpd.address) {
-          address = `${dpd.name || ''}, ${dpd.address}`;
+        let details = null;
+
+        if (typeof dpd === 'object' && dpd !== null) {
+          if (dpd.pickupPointResult) {
+            address = dpd.pickupPointResult;
+          } else if (dpd.address) {
+            address = `${dpd.name || ''}, ${dpd.address}`;
+            if (dpd.city) address += `, ${dpd.city}`;
+            if (dpd.postcode) address += ` ${dpd.postcode}`;
+          } else {
+            address = dpd.name || dpd.label || dpd.id || JSON.stringify(dpd);
+          }
+
+          let pId = dpd.id || dpd.code || dpd.pclshopid || '';
+          if (!pId && address) {
+            const match = address.match(/ID:\s*([A-Za-z0-9]+)/);
+            if (match) pId = match[1];
+          }
+
+          details = {
+            id: pId,
+            name: dpd.name || dpd.label || '',
+            street: dpd.street || dpd.address || '',
+            city: dpd.city || '',
+            zip: (dpd.postcode || dpd.zip || dpd.zipCode || '').toString().replace(/\s+/g, ''),
+            country: dpd.country || 'CZ'
+          };
+
+          // If detail values are empty but we have the address string, attempt fallback parsing
+          if ((!details.street || !details.city) && address) {
+            const parts = address.split(',').map(p => p.trim());
+            if (!details.name) details.name = parts[0] || '';
+            if (!details.street) details.street = parts[1] || '';
+            if (parts[2]) {
+              const lastPart = parts[2].replace(/\(ID:\s*\S+\)/i, '').trim();
+              const zipMatch = lastPart.match(/\b\d{3}\s*\d{2}\b/);
+              if (zipMatch) {
+                details.zip = zipMatch[0].replace(/\s+/g, '');
+                details.city = lastPart.replace(zipMatch[0], '').trim();
+              } else {
+                const shortZipMatch = lastPart.match(/\b\d{5}\b/);
+                if (shortZipMatch) {
+                  details.zip = shortZipMatch[0];
+                  details.city = lastPart.replace(shortZipMatch[0], '').trim();
+                } else {
+                  details.city = lastPart;
+                }
+              }
+            }
+          }
         } else if (typeof dpd === 'string') {
           address = dpd;
-        } else {
-          address = dpd.name || dpd.label || dpd.id || JSON.stringify(dpd);
+          let pId = '';
+          const match = address.match(/ID:\s*([A-Za-z0-9]+)/);
+          if (match) pId = match[1];
+          
+          const parts = address.split(',').map(p => p.trim());
+          let streetVal = parts[1] || '';
+          let cityVal = '';
+          let zipVal = '';
+          if (parts[2]) {
+            const lastPart = parts[2].replace(/\(ID:\s*\S+\)/i, '').trim();
+            const zipMatch = lastPart.match(/\b\d{3}\s*\d{2}\b/);
+            if (zipMatch) {
+              zipVal = zipMatch[0].replace(/\s+/g, '');
+              cityVal = lastPart.replace(zipMatch[0], '').trim();
+            } else {
+              const shortZipMatch = lastPart.match(/\b\d{5}\b/);
+              if (shortZipMatch) {
+                zipVal = shortZipMatch[0];
+                cityVal = lastPart.replace(shortZipMatch[0], '').trim();
+              } else {
+                cityVal = lastPart;
+              }
+            }
+          }
+          details = {
+            id: pId,
+            name: parts[0] || '',
+            street: streetVal,
+            city: cityVal,
+            zip: zipVal,
+            country: 'CZ'
+          };
         }
 
         if (address && address !== "widgetClose") {
           setPickupPoint(address);
+          setPickupPointDetails(details);
           setShowMapModal(false);
           if (alert) {
             alert(lang === 'CZ' ? 'Výdejní místo DPD bylo úspěšně vybráno.' : 'DPD pickup point selected.', 'success');
@@ -375,11 +455,22 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       // 2. GLS Widget Message handler
       if (event.data && event.data.parcelshop) {
         const ps = event.data.parcelshop;
-        console.log("GLS Widget message received:", ps);
+        // console.log("GLS Widget message received:", ps);
         const detail = ps.detail;
         if (detail) {
           const address = `${detail.name}, ${detail.street}, ${detail.city} (ID: ${detail.pclshopid})`;
           setPickupPoint(address);
+          
+          const details = {
+            id: detail.pclshopid || '',
+            name: detail.name || '',
+            street: detail.street || '',
+            city: detail.city || '',
+            zip: (detail.zip || '').toString().replace(/\s+/g, ''),
+            country: detail.country || 'CZ'
+          };
+          setPickupPointDetails(details);
+          
           setShowMapModal(false);
           if (alert) {
             alert(lang === 'CZ' ? 'Výdejní místo GLS bylo úspěšně vybráno.' : 'GLS pickup point selected.', 'success');
@@ -452,6 +543,17 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       alert(lang === 'CZ'
         ? 'Vyplňte prosím všechny povinné osobní a doručovací údaje.'
         : 'Please fill in all required personal and shipping details.',
+        'error'
+      );
+      return;
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      alert(lang === 'CZ'
+        ? 'Zadejte prosím platnou e-mailovou adresu.'
+        : 'Please enter a valid email address.',
         'error'
       );
       return;
@@ -531,6 +633,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           shippingMethod: shipping,
           paymentMethod: 'card',
           pickupPoint,
+          pickupPointDetails,
           customerDetails: {
             name,
             email,
@@ -587,6 +690,14 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   };
 
   const finalizeOrder = () => {
+    let cleanedPhone = phone.trim().replace(/\s+/g, '');
+    if (/^\d{9}$/.test(cleanedPhone)) {
+      cleanedPhone = '+420' + cleanedPhone;
+    }
+    let cleanedZip = zip.trim().replace(/\s+/g, '');
+    if (shipping !== 'pardubice') {
+      cleanedZip = `${cleanedZip.slice(0, 3)} ${cleanedZip.slice(3)}`;
+    }
     const orderId = '100' + Math.floor(1000 + Math.random() * 9000);
     const order = {
       id: orderId,
@@ -636,7 +747,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       companyName: isCompany ? companyName : '',
       ico: isCompany ? ico : '',
       dic: isCompany ? dic : '',
-      notes: notes
+      notes: notes,
+      pickupPointDetails: shipping.includes('pickup') ? pickupPointDetails : null
     };
 
     submitOrder(order, actualAppliedCredit);
@@ -685,10 +797,12 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
             width: '95%', 
             maxWidth: '900px', 
             height: '85vh', 
-            background: '#fff', 
+            background: '#1a1d24', 
             borderRadius: '8px', 
             overflow: 'hidden', 
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.3)' 
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.3)',
+            display: 'flex',
+            flexDirection: 'column'
           }}>
             
             {/* Close Button floating over the iframe */}
@@ -722,19 +836,38 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               &times;
             </button>
             
-            {mapType === 'dpd' ? (
-              <iframe 
-                src="https://api.dpd.cz/widget/latest/index.html?hideCloseButton=true&countries=CZ" 
-                style={{ width: '100%', height: '100%', border: 'none' }}
-                title="DPD Widget"
-              />
-            ) : (
-              <iframe 
-                src="https://ps-maps.gls-czech.com?find=1&ctrcode=CZ&lang=cs" 
-                style={{ width: '100%', height: '100%', border: 'none' }}
-                title="GLS Widget"
-              />
-            )}
+            <div style={{ flex: 1, position: 'relative' }}>
+              {mapType === 'dpd' ? (
+                <iframe 
+                  src={`https://api.dpd.cz/widget/latest/index.html?hideCloseButton=true&countries=CZ${payment === 'cod' ? '&paymentFilter=cod' : ''}`} 
+                  style={{ width: '100%', height: '100%', border: 'none', background: '#fff' }}
+                  title="DPD Widget"
+                />
+              ) : (
+                <iframe 
+                  src={`https://ps-maps.gls-czech.com?find=1&ctrcode=CZ&lang=cs${payment === 'cod' ? '&cod=1' : ''}`} 
+                  style={{ width: '100%', height: '100%', border: 'none', background: '#fff' }}
+                  title="GLS Widget"
+                />
+              )}
+            </div>
+
+            <div style={{ 
+              height: '44px', 
+              background: '#0b0c10', 
+              borderTop: '1px solid rgba(255,255,255,0.08)',
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              padding: '0 16px',
+              color: '#8a8a92',
+              fontSize: '11.5px',
+              textAlign: 'center'
+            }}>
+              <span>💡 {lang === 'CZ' 
+                ? 'Pokud se mapa výdejních míst nenačte, zavřete prosím toto okno a zvolte doručení kurýrem na adresu.'
+                : 'If the pickup points map does not load, please close this window and select delivery by courier to your address.'}</span>
+            </div>
           </div>
         </div>
       )}

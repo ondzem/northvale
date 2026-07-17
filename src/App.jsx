@@ -1348,6 +1348,7 @@ function AppContent() {
             shipping_cost: order.shippingCost,
             payment_surcharge: order.paymentSurcharge,
             notes: order.notes || '',
+            pickup_point_details: order.pickupPointDetails || null,
             carrier: order.shippingMethod ? (
               order.shippingMethod.includes('GLS') ? 'GLS' :
               order.shippingMethod.includes('DPD') ? 'DPD' :

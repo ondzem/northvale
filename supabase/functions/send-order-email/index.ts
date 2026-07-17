@@ -26,11 +26,99 @@ serve(async (req) => {
       throw new Error("Missing BREVO_API_KEY environment variable.");
     }
 
-    const { order, items } = await req.json();
+    const body = await req.json();
+    const { order, items, emailType, trackingNumber, carrier } = body;
 
     if (!order || !order.id || !order.customerEmail) {
       return new Response(JSON.stringify({ error: "Missing required order or customer details." }), {
         status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (emailType === "expedited") {
+      const activeCarrier = carrier || ((order.shippingMethod || "").toLowerCase().includes("gls") ? "GLS" : "DPD");
+      const activeTrackingNo = trackingNumber || order.dpd_parcel_number || order.gls_parcel_number || "";
+      const trackingUrl = activeCarrier === "GLS"
+        ? `https://tracking.gls-group.eu/status/cs_CZ/parcel/${activeTrackingNo}`
+        : `https://tracking.dpd.de/status/cs_CZ/parcel/${activeTrackingNo}`;
+
+      const isCod = (order.paymentMethod || "").toLowerCase().includes("dobírk") || 
+                    (order.paymentMethod || "").toLowerCase().includes("cod");
+      const pickupDetails = order.pickupPointDetails || null;
+      const isPickup = (order.shippingMethod || "").toLowerCase().includes("pickup") || 
+                       (order.shippingMethod || "").toLowerCase().includes("výdej") || 
+                       !!pickupDetails;
+
+      const htmlExpeditedContent = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px 20px; background-color: transparent; color: #222222;">
+          <!-- Package Delivery Emoji -->
+          <div style="text-align: center; margin-bottom: 24px; font-size: 64px;">
+            📦
+          </div>
+
+          <!-- Header -->
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: #111111; font-size: 28px; font-weight: 800; margin: 0; letter-spacing: -0.5px; font-family: sans-serif;">Vaše objednávka byla expedována!</h2>
+            <p style="font-size: 14px; color: #888888; margin: 8px 0 0 0;">Číslo objednávky: <strong style="color: #fdbd16;">#${order.id}</strong></p>
+          </div>
+
+          <p style="font-size: 14.5px; color: #222222; line-height: 1.6; margin: 0 0 24px 0;">
+            Dobrý den,<br/><br/>
+            máme pro Vás skvělou zprávu! Vaši objednávku jsme zabalili a předali přepravní službě <strong>${activeCarrier}</strong>.
+          </p>
+
+          <!-- Tracking details container -->
+          <div style="background: rgba(253, 189, 22, 0.05); border-left: 4px solid #fdbd16; padding: 20px; margin-bottom: 24px; border-radius: 4px;">
+            <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; font-family: sans-serif;">
+              🚚 Sledování zásilky
+            </div>
+            <p style="font-size: 14.5px; color: #111111; margin: 0 0 12px 0; line-height: 1.6;">
+              Přepravce: <strong>${activeCarrier}</strong><br/>
+              Číslo zásilky: <strong>${activeTrackingNo}</strong>
+              ${isPickup && pickupDetails ? `<br/>Výdejní místo: <strong>${pickupDetails.name || 'Pickup Point'}</strong><br/>Adresa: <strong>${pickupDetails.street || ''}, ${pickupDetails.zip || ''} ${pickupDetails.city || ''}</strong>` : ''}
+              ${isCod ? `<br/>Částka k úhradě (dobírka): <strong style="color: #fdbd16;">${(order.totalPrice || 0).toLocaleString()} Kč</strong>` : ''}
+            </p>
+            ${activeTrackingNo ? `
+            <div style="text-align: left; margin-top: 10px;">
+              <a href="${trackingUrl}" target="_blank" style="background-color: #fdbd16; color: #111111; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13.5px; display: inline-block; border: 1px solid #e2a80f; font-family: sans-serif;">
+                Sledovat zásilku online ↗
+              </a>
+            </div>
+            ` : ''}
+          </div>
+
+          <p style="font-size: 14px; color: #666666; line-height: 1.6; margin: 0 0 24px 0;">
+            Zásilka by měla být doručena do 1-2 pracovních dnů. Přepravce Vás bude kontaktovat prostřednictvím SMS nebo e-mailu s podrobnějšími informacemi o čase doručení.
+          </p>
+
+          <!-- Help / System Info -->
+          <div style="border-top: 1px solid rgba(0,0,0,0.08); padding-top: 20px; margin-top: 20px; text-align: center;">
+            <p style="font-size: 12px; color: #888888; margin: 0; line-height: 1.6;">
+              Děkujeme za Váš nákup na NORTHVALE TCG. V případě dotazů nás kontaktujte na
+              <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; text-decoration: underline; font-weight: bold;">info@northvaletcg.eu</a>.
+            </p>
+          </div>
+        </div>
+      `;
+
+      await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "api-key": brevoApiKey,
+          "content-type": "application/json",
+          "accept": "application/json"
+        },
+        body: JSON.stringify({
+          sender: { name: senderName, email: senderEmail },
+          to: [{ email: order.customerEmail, name: order.customerName }],
+          subject: `Objednávka #${order.id} byla expedována`,
+          htmlContent: htmlExpeditedContent
+        })
+      });
+
+      return new Response(JSON.stringify({ success: true, message: "Expedited email sent successfully." }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

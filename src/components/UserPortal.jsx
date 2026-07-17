@@ -1149,6 +1149,30 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                           <span style={{ color: '#ccc', fontStyle: 'italic' }}>{order.notes}</span>
                         </div>
                       )}
+                      
+                      <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                        <a 
+                          href="https://rmp.dpdgroup.com/015/northvale" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          style={{ 
+                            textDecoration: 'none', 
+                            display: 'inline-flex', 
+                            alignItems: 'center', 
+                            fontSize: '12.5px',
+                            padding: '8px 16px',
+                            background: 'rgba(253, 189, 22, 0.05)',
+                            border: '1px solid var(--color-gold, #fdbd16)',
+                            color: 'var(--color-gold, #fdbd16)',
+                            fontWeight: '600',
+                            borderRadius: '6px',
+                            transition: 'all 0.2s ease',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          🔄 {lang === 'CZ' ? 'Vrátit zboží (DPD)' : 'Return items (DPD)'}
+                        </a>
+                      </div>
                     </div>
                   ))}
                 </div>

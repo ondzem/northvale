@@ -72,13 +72,7 @@ export default function OrdersTab({ showToast }) {
   const [showGlsSettings, setShowGlsSettings] = useState(false);
   const [generatingLabelId, setGeneratingLabelId] = useState(null);
 
-  // DPD API configuration states (stored in localStorage)
-  const [dpdApiKey, setDpdApiKey] = useState('76988bfbed23b6ca475daba84a919683');
-  const [dpdCustomerNumber, setDpdCustomerNumber] = useState('10029618142');
-  const [dpdAddressId, setDpdAddressId] = useState('15908093');
-  const [dpdTestMode, setDpdTestMode] = useState(false);
   const [showGlsPassword, setShowGlsPassword] = useState(false);
-  const [showDpdApiKey, setShowDpdApiKey] = useState(false);
   const [showSettingsBtn, setShowSettingsBtn] = useState(false);
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
@@ -114,16 +108,7 @@ export default function OrdersTab({ showToast }) {
     setGlsTestMode(savedTestMode);
     setGlsPrinterType(savedPrinterType);
 
-    // Load DPD API credentials
-    const savedDpdApiKey = localStorage.getItem('dpd_api_key') || '76988bfbed23b6ca475daba84a919683';
-    const savedDpdCustomerNumber = localStorage.getItem('dpd_api_customer_number') || '10029618142';
-    const savedDpdAddressId = localStorage.getItem('dpd_api_address_id') || '15908093';
-    const savedDpdTestMode = localStorage.getItem('dpd_api_test_mode') === 'true';
 
-    setDpdApiKey(savedDpdApiKey);
-    setDpdCustomerNumber(savedDpdCustomerNumber);
-    setDpdAddressId(savedDpdAddressId);
-    setDpdTestMode(savedDpdTestMode);
 
     fetchOrdersList();
   }, []);
@@ -135,10 +120,7 @@ export default function OrdersTab({ showToast }) {
     localStorage.setItem('gls_api_test_mode', glsTestMode.toString());
     localStorage.setItem('gls_api_printer_type', glsPrinterType);
 
-    localStorage.setItem('dpd_api_key', dpdApiKey);
-    localStorage.setItem('dpd_api_customer_number', dpdCustomerNumber);
-    localStorage.setItem('dpd_api_address_id', dpdAddressId);
-    localStorage.setItem('dpd_api_test_mode', dpdTestMode.toString());
+
 
     setShowGlsSettings(false);
     showToast(lang === 'CZ' ? 'Nastavení dopravy API bylo uloženo.' : 'Shipping API Settings saved.', 'success');
@@ -503,6 +485,34 @@ export default function OrdersTab({ showToast }) {
         showToast(lang === 'CZ' 
           ? `Štítek vygenerován! Balík č.: ${data.parcelNumber}` 
           : `Label generated! Parcel No.: ${data.parcelNumber}`, 'success');
+
+        // Call Edge Function to send email confirmation with tracking info only if it's the first time
+        const wasAlreadyGenerated = !!order.rawJson?.order?.gls_parcel_number;
+        if (!wasAlreadyGenerated) {
+          try {
+            await supabase.functions.invoke('send-order-email', {
+              body: {
+                emailType: 'expedited',
+                trackingNumber: data.parcelNumber,
+                carrier: 'GLS',
+                order: {
+                  id: order.id,
+                  customerName: order.customerName,
+                  customerEmail: order.email,
+                  customerPhone: order.phone,
+                  shippingMethod: order.shippingMethod,
+                  gls_parcel_number: data.parcelNumber,
+                  paymentMethod: order.paymentMethod,
+                  totalPrice: order.totalPrice,
+                  pickupPointDetails: order.rawJson?.order?.pickup_point_details || null
+                }
+              }
+            });
+            console.log(`Expedition email sent to ${order.email} for order ${order.id}`);
+          } catch (emailErr) {
+            console.error('Failed to send expedition email:', emailErr);
+          }
+        }
       } else {
         throw new Error(data?.error || 'Neznámá chyba při komunikaci s GLS API.');
       }
@@ -516,20 +526,10 @@ export default function OrdersTab({ showToast }) {
 
   // Direct DPD API Labeling Call
   const generateDpdLabelApi = async (order) => {
-    if (!dpdApiKey) {
-      showToast(lang === 'CZ' ? 'Zadejte prosím nejprve váš API klíč pro DPD v nastavení API.' : 'Please enter your DPD API key in the API settings first.', 'warning');
-      setShowGlsSettings(true);
-      return;
-    }
-
     setGeneratingLabelId(order.id);
     try {
       const { data, error } = await supabase.functions.invoke('dpd-labels', {
         body: {
-          apiKey: dpdApiKey,
-          customerIdent: dpdCustomerNumber,
-          senderIt4emId: dpdAddressId,
-          testMode: dpdTestMode,
           order: {
             id: order.id,
             customer_name: order.customerName,
@@ -539,7 +539,9 @@ export default function OrdersTab({ showToast }) {
             customer_phone: order.phone,
             customer_email: order.email,
             total_price: order.totalPrice,
-            payment_method: order.paymentMethod
+            payment_method: order.paymentMethod,
+            shipping_method: order.shippingMethod,
+            pickup_point_details: order.rawJson?.order?.pickup_point_details || null
           }
         }
       });
@@ -561,6 +563,37 @@ export default function OrdersTab({ showToast }) {
         showToast(lang === 'CZ' 
           ? `Štítek DPD vygenerován! Balík č.: ${data.parcelNumber}` 
           : `DPD Label generated! Parcel No.: ${data.parcelNumber}`, 'success');
+
+        // Call Edge Function to send email confirmation with tracking info only if it's the first time
+        const wasAlreadyGenerated = !!order.rawJson?.order?.dpd_parcel_number;
+        if (!wasAlreadyGenerated) {
+          try {
+            await supabase.functions.invoke('send-order-email', {
+              body: {
+                emailType: 'expedited',
+                trackingNumber: data.parcelNumber,
+                carrier: 'DPD',
+                order: {
+                  id: order.id,
+                  customerName: order.customerName,
+                  customerEmail: order.email,
+                  customerPhone: order.phone,
+                  shippingMethod: order.shippingMethod,
+                  dpd_parcel_number: data.parcelNumber,
+                  paymentMethod: order.paymentMethod,
+                  totalPrice: order.totalPrice,
+                  pickupPointDetails: order.rawJson?.order?.pickup_point_details || null
+                }
+              }
+            });
+            console.log(`Expedition email sent to ${order.email} for order ${order.id}`);
+          } catch (emailErr) {
+            console.error('Failed to send expedition email:', emailErr);
+          }
+        }
+        
+        // Refresh orders list to pull updated parcel numbers
+        fetchOrdersList();
       } else {
         throw new Error(data?.error || 'Neznámá chyba při komunikaci s DPD API.');
       }
@@ -1498,51 +1531,10 @@ export default function OrdersTab({ showToast }) {
             {/* DPD Section */}
             <div>
               <h4 style={{ margin: '0 0 12px 0', color: '#fff', fontSize: '13.5px', fontWeight: '700' }}>DPD API (REST GeoAPI)</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <label className="orders-settings-field">
-                  <span>{lang === 'CZ' ? 'API Klíč' : 'API Key'}</span>
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                    <input 
-                      type={showDpdApiKey ? "text" : "password"} 
-                      placeholder="••••••••" 
-                      value={dpdApiKey} 
-                      onChange={e => setDpdApiKey(e.target.value)} 
-                      style={{ width: '100%', paddingRight: '40px' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowDpdApiKey(!showDpdApiKey)}
-                      style={{
-                        position: 'absolute',
-                        right: '10px',
-                        background: 'none',
-                        border: 'none',
-                        color: '#8a8a92',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        padding: '4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                      title={showDpdApiKey ? "Skrýt klíč" : "Zobrazit klíč"}
-                    >
-                      {showDpdApiKey ? "🙈" : "👁️"}
-                    </button>
-                  </div>
-                </label>
-                <label className="orders-settings-field">
-                  <span>{lang === 'CZ' ? 'Zákaznické číslo (DSW)' : 'Customer Number (DSW)'}</span>
-                  <input type="text" value={dpdCustomerNumber} onChange={e => setDpdCustomerNumber(e.target.value)} />
-                </label>
-                <label className="orders-settings-field">
-                  <span>{lang === 'CZ' ? 'ID adresy odesílatele (It4em ID)' : 'Sender Address ID (It4em ID)'}</span>
-                  <input type="text" value={dpdAddressId} onChange={e => setDpdAddressId(e.target.value)} />
-                </label>
-                <label className="orders-settings-field" style={{ justifyContent: 'flex-start', flexDirection: 'row', gap: '8px', alignItems: 'center', marginTop: '22px' }}>
-                  <input type="checkbox" checked={dpdTestMode} onChange={e => setDpdTestMode(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: 'var(--nv-gold, #fdbd16)', margin: 0 }} />
-                  <span style={{ textTransform: 'none', cursor: 'pointer', fontSize: '13px' }} onClick={() => setDpdTestMode(!dpdTestMode)}>Testovací režim DPD</span>
-                </label>
+              <div style={{ padding: '12px 16px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '4px', border: '1px dashed rgba(255, 255, 255, 0.1)', color: '#8a8a92', fontSize: '12px', lineHeight: '1.5' }}>
+                {lang === 'CZ' 
+                  ? '🔒 Přihlašovací údaje DPD jsou z bezpečnostních důvodů uloženy na serveru (Supabase Secrets) a nelze je upravovat z administrace.'
+                  : '🔒 DPD credentials are stored securely on the server (Supabase Secrets) and cannot be modified from the administration panel.'}
               </div>
             </div>
           </div>
@@ -1719,7 +1711,9 @@ export default function OrdersTab({ showToast }) {
                               {generatingLabelId === details.id ? (
                                 <div className="spinner-loader co-spinner" style={{ width: '12px', height: '12px', borderWidth: '1.5px' }}></div>
                               ) : (
-                                lang === 'CZ' ? '📦 Odeslat do GLS' : '📦 Send to GLS'
+                                details.rawJson?.order?.gls_parcel_number
+                                  ? (lang === 'CZ' ? '🔄 Tisk štítku GLS' : '🔄 Print GLS Label')
+                                  : (lang === 'CZ' ? '📦 Odeslat do GLS' : '📦 Send to GLS')
                               )}
                             </button>
                           )}
@@ -1733,7 +1727,9 @@ export default function OrdersTab({ showToast }) {
                               {generatingLabelId === details.id ? (
                                 <div className="spinner-loader co-spinner" style={{ width: '12px', height: '12px', borderWidth: '1.5px' }}></div>
                               ) : (
-                                lang === 'CZ' ? '📦 Odeslat do DPD' : '📦 Send to DPD'
+                                details.rawJson?.order?.dpd_parcel_number
+                                  ? (lang === 'CZ' ? '🔄 Tisk štítku DPD' : '🔄 Print DPD Label')
+                                  : (lang === 'CZ' ? '📦 Odeslat do DPD' : '📦 Send to DPD')
                               )}
                             </button>
                           )}
@@ -1810,6 +1806,19 @@ export default function OrdersTab({ showToast }) {
                               <div className="orders-modal-col">
                                 <h4 style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Služba' : 'Service info'}</h4>
                                 <p>Dopravní kód: <span className="orders-badge orders-badge-gls" style={{ textTransform: 'none' }}>{detailOrder.carrier}</span></p>
+                                {detailOrder.rawJson?.order?.dpd_parcel_number && (
+                                  <p style={{ marginTop: '8px', fontSize: '13px' }}>
+                                    {lang === 'CZ' ? 'Sledování zásilky DPD: ' : 'DPD Tracking: '}
+                                    <a 
+                                      href={`https://tracking.dpd.de/status/${lang === 'CZ' ? 'cs_CZ' : 'en_US'}/parcel/${detailOrder.rawJson.order.dpd_parcel_number}`} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      style={{ color: 'var(--nv-gold, #fdbd16)', textDecoration: 'underline', fontWeight: 'bold' }}
+                                    >
+                                      {detailOrder.rawJson.order.dpd_parcel_number} ↗
+                                    </a>
+                                  </p>
+                                )}
                               </div>
                             </div>
 
