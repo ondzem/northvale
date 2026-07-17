@@ -63,16 +63,10 @@ export default function OrdersTab({ showToast }) {
   const [showInvoiceOrder, setShowInvoiceOrder] = useState(null);
   const [loadingDetailsProgress, setLoadingDetailsProgress] = useState({ current: 0, total: 0 });
 
-  // GLS API configuration states (stored in localStorage)
-  const [glsUsername, setGlsUsername] = useState('info@northvaletcg.eu');
-  const [glsClientNumber, setGlsClientNumber] = useState('53016731');
-  const [glsPassword, setGlsPassword] = useState('');
-  const [glsTestMode, setGlsTestMode] = useState(false);
-  const [glsPrinterType, setGlsPrinterType] = useState('Thermo');
+  // GLS API configuration states
   const [showGlsSettings, setShowGlsSettings] = useState(false);
   const [generatingLabelId, setGeneratingLabelId] = useState(null);
-
-  const [showGlsPassword, setShowGlsPassword] = useState(false);
+  const [cancelingGlsId, setCancelingGlsId] = useState(null);
   const [showSettingsBtn, setShowSettingsBtn] = useState(false);
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
@@ -95,36 +89,8 @@ export default function OrdersTab({ showToast }) {
   const loadingQueueRef = useRef([]);
 
   useEffect(() => {
-    // Load GLS API credentials from local storage on mount
-    const savedUsername = localStorage.getItem('gls_api_username') || 'info@northvaletcg.eu';
-    const savedClientNumber = localStorage.getItem('gls_api_client_number') || '53016731';
-    const savedPassword = localStorage.getItem('gls_api_password') || '';
-    const savedTestMode = localStorage.getItem('gls_api_test_mode') === 'true';
-    const savedPrinterType = localStorage.getItem('gls_api_printer_type') || 'Thermo';
-
-    setGlsUsername(savedUsername);
-    setGlsClientNumber(savedClientNumber);
-    setGlsPassword(savedPassword);
-    setGlsTestMode(savedTestMode);
-    setGlsPrinterType(savedPrinterType);
-
-
-
     fetchOrdersList();
   }, []);
-
-  const saveGlsSettings = () => {
-    localStorage.setItem('gls_api_username', glsUsername);
-    localStorage.setItem('gls_api_client_number', glsClientNumber);
-    localStorage.setItem('gls_api_password', glsPassword);
-    localStorage.setItem('gls_api_test_mode', glsTestMode.toString());
-    localStorage.setItem('gls_api_printer_type', glsPrinterType);
-
-
-
-    setShowGlsSettings(false);
-    showToast(lang === 'CZ' ? 'Nastavení dopravy API bylo uloženo.' : 'Shipping API Settings saved.', 'success');
-  };
 
   const fetchOrdersList = async () => {
     setLoading(true);
@@ -439,21 +405,10 @@ export default function OrdersTab({ showToast }) {
 
   // Direct GLS API Labeling Call
   const generateGlsLabelApi = async (order) => {
-    if (!glsPassword) {
-      showToast(lang === 'CZ' ? 'Zadejte prosím nejprve vaše heslo pro GLS v nastavení API.' : 'Please enter your GLS password in the API settings first.', 'warning');
-      setShowGlsSettings(true);
-      return;
-    }
-
     setGeneratingLabelId(order.id);
     try {
       const { data, error } = await supabase.functions.invoke('gls-labels', {
         body: {
-          username: glsUsername,
-          password: glsPassword,
-          clientNumber: glsClientNumber,
-          testMode: glsTestMode,
-          typeOfPrinter: glsPrinterType,
           order: {
             id: order.id,
             customer_name: order.customerName,
@@ -463,7 +418,9 @@ export default function OrdersTab({ showToast }) {
             customer_phone: order.phone,
             customer_email: order.email,
             total_price: order.totalPrice,
-            payment_method: order.paymentMethod
+            payment_method: order.paymentMethod,
+            shipping_method: order.shippingMethod,
+            pickup_point_details: order.rawJson?.order?.pickup_point_details || null
           }
         }
       });
@@ -521,6 +478,45 @@ export default function OrdersTab({ showToast }) {
       showToast(lang === 'CZ' ? `Chyba API: ${err.message}` : `API Error: ${err.message}`, 'error');
     } finally {
       setGeneratingLabelId(null);
+    }
+  };
+
+  // Cancel GLS Shipment API call
+  const cancelGlsShipmentApi = async (order) => {
+    const parcelId = order.rawJson?.order?.gls_parcel_id;
+    if (!parcelId) {
+      showToast(lang === 'CZ' ? 'Chybí ID balíku pro storno.' : 'Missing parcel ID for cancellation.', 'error');
+      return;
+    }
+
+    if (!window.confirm(lang === 'CZ' ? `Opravdu chcete stornovat GLS zásilku č. ${order.rawJson?.order?.gls_parcel_number}?` : `Are you sure you want to cancel GLS shipment No. ${order.rawJson?.order?.gls_parcel_number}?`)) {
+      return;
+    }
+
+    setCancelingGlsId(order.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('gls-labels', {
+        body: {
+          action: 'delete',
+          parcelIdList: [parseInt(parcelId, 10)],
+          order: { id: order.id }
+        }
+      });
+
+      if (error) throw error;
+
+      if (data && data.success) {
+        showToast(lang === 'CZ' ? 'GLS zásilka byla úspěšně stornována.' : 'GLS shipment cancelled successfully.', 'success');
+        fetchOrdersList();
+        setDetailOrder(null);
+      } else {
+        throw new Error(data?.error || 'Neznámá chyba při stornování zásilky u GLS.');
+      }
+    } catch (err) {
+      console.error('GLS Shipment cancellation failed:', err);
+      showToast(lang === 'CZ' ? `Chyba stornování GLS: ${err.message}` : `GLS Cancellation Error: ${err.message}`, 'error');
+    } finally {
+      setCancelingGlsId(null);
     }
   };
 
@@ -1470,61 +1466,10 @@ export default function OrdersTab({ showToast }) {
             {/* GLS Section */}
             <div style={{ borderRight: '1px solid rgba(255,255,255,0.08)', paddingRight: '24px' }}>
               <h4 style={{ margin: '0 0 12px 0', color: '#fff', fontSize: '13.5px', fontWeight: '700' }}>GLS API</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <label className="orders-settings-field">
-                  <span>{lang === 'CZ' ? 'Uživatelské jméno (Email)' : 'Username (Email)'}</span>
-                  <input type="email" value={glsUsername} onChange={e => setGlsUsername(e.target.value)} />
-                </label>
-                <label className="orders-settings-field">
-                  <span>{lang === 'CZ' ? 'Zákaznické číslo (Client ID)' : 'Customer ID'}</span>
-                  <input type="text" value={glsClientNumber} onChange={e => setGlsClientNumber(e.target.value)} />
-                </label>
-                <label className="orders-settings-field">
-                  <span>{lang === 'CZ' ? 'Heslo do MyGLS' : 'MyGLS Password'}</span>
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                    <input 
-                      type={showGlsPassword ? "text" : "password"} 
-                      placeholder="••••••••" 
-                      value={glsPassword} 
-                      onChange={e => setGlsPassword(e.target.value)} 
-                      style={{ width: '100%', paddingRight: '40px' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowGlsPassword(!showGlsPassword)}
-                      style={{
-                        position: 'absolute',
-                        right: '10px',
-                        background: 'none',
-                        border: 'none',
-                        color: '#8a8a92',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        padding: '4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                      title={showGlsPassword ? "Skrýt heslo" : "Zobrazit heslo"}
-                    >
-                      {showGlsPassword ? "🙈" : "👁️"}
-                    </button>
-                  </div>
-                </label>
-                <label className="orders-settings-field">
-                  <span>{lang === 'CZ' ? 'Typ tiskárny' : 'Printer Type'}</span>
-                  <select value={glsPrinterType} onChange={e => setGlsPrinterType(e.target.value)}>
-                    <option value="Thermo">Thermo (Standard)</option>
-                    <option value="A4_2x2">A4 - 2x2 štítky</option>
-                    <option value="A4_4x1">A4 - 4x1 štítky</option>
-                    <option value="Connect">Connect</option>
-                    <option value="ShipItThermoPdf">ShipIt Thermo PDF</option>
-                  </select>
-                </label>
-                <label className="orders-settings-field" style={{ justifyContent: 'flex-start', flexDirection: 'row', gap: '8px', alignItems: 'center' }}>
-                  <input type="checkbox" checked={glsTestMode} onChange={e => setGlsTestMode(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: 'var(--nv-gold, #fdbd16)', margin: 0 }} />
-                  <span style={{ textTransform: 'none', cursor: 'pointer', fontSize: '13px' }} onClick={() => setGlsTestMode(!glsTestMode)}>Testovací režim GLS</span>
-                </label>
+              <div style={{ padding: '12px 16px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '4px', border: '1px dashed rgba(255, 255, 255, 0.1)', color: '#8a8a92', fontSize: '12px', lineHeight: '1.5' }}>
+                {lang === 'CZ' 
+                  ? '🔒 Přihlašovací údaje GLS jsou z bezpečnostních důvodů uloženy na serveru (Supabase Secrets) a nelze je upravovat z administrace.'
+                  : '🔒 GLS credentials are stored securely on the server (Supabase Secrets) and cannot be modified from the administration panel.'}
               </div>
             </div>
 
@@ -1539,11 +1484,8 @@ export default function OrdersTab({ showToast }) {
             </div>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="orders-action-btn orders-action-btn-primary" onClick={saveGlsSettings}>
-              {lang === 'CZ' ? 'Uložit nastavení' : 'Save settings'}
-            </button>
-            <button className="orders-action-btn" onClick={() => setShowGlsSettings(false)}>
-              {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+            <button className="orders-action-btn orders-action-btn-primary" onClick={() => setShowGlsSettings(false)}>
+              {lang === 'CZ' ? 'Zavřít' : 'Close'}
             </button>
           </div>
         </div>
@@ -1819,6 +1761,19 @@ export default function OrdersTab({ showToast }) {
                                     </a>
                                   </p>
                                 )}
+                                {detailOrder.rawJson?.order?.gls_parcel_number && (
+                                  <p style={{ marginTop: '8px', fontSize: '13px' }}>
+                                    {lang === 'CZ' ? 'Sledování zásilky GLS: ' : 'GLS Tracking: '}
+                                    <a 
+                                      href={`https://tracking.gls-group.eu/status/${lang === 'CZ' ? 'cs_CZ' : 'en_US'}/parcel/${detailOrder.rawJson.order.gls_parcel_number}`} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      style={{ color: 'var(--nv-gold, #fdbd16)', textDecoration: 'underline', fontWeight: 'bold' }}
+                                    >
+                                      {detailOrder.rawJson.order.gls_parcel_number} ↗
+                                    </a>
+                                  </p>
+                                )}
                               </div>
                             </div>
 
@@ -1903,6 +1858,21 @@ export default function OrdersTab({ showToast }) {
                               >
                                 📥 {lang === 'CZ' ? 'Stáhnout TXT' : 'Download TXT'}
                               </a>
+                              {detailOrder.rawJson?.order?.gls_parcel_id && (
+                                <button 
+                                  type="button"
+                                  className="orders-action-btn" 
+                                  style={{ background: '#d97706', color: '#fff', fontWeight: 'bold' }}
+                                  disabled={cancelingGlsId === detailOrder.id}
+                                  onClick={() => cancelGlsShipmentApi(detailOrder)}
+                                >
+                                  {cancelingGlsId === detailOrder.id ? (
+                                    <div className="spinner-loader co-spinner" style={{ width: '12px', height: '12px', borderWidth: '1.5px' }}></div>
+                                  ) : (
+                                    `❌ ${lang === 'CZ' ? 'Storno GLS' : 'Cancel GLS'}`
+                                  )}
+                                </button>
+                              )}
                               <button 
                                 type="button"
                                 className="orders-action-btn" 

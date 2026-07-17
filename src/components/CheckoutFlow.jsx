@@ -455,7 +455,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       // 2. GLS Widget Message handler
       if (event.data && event.data.parcelshop) {
         const ps = event.data.parcelshop;
-        // console.log("GLS Widget message received:", ps);
+        console.log("GLS Widget message received:", ps);
         const detail = ps.detail;
         if (detail) {
           const address = `${detail.name}, ${detail.street}, ${detail.city} (ID: ${detail.pclshopid})`;
