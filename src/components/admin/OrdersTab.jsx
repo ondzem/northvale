@@ -74,6 +74,13 @@ export default function OrdersTab({ showToast }) {
     message: '',
     onConfirm: null
   });
+  
+  const [debugSessionEmail, setDebugSessionEmail] = useState('Checking...');
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setDebugSessionEmail(session?.user?.email || 'No active session (logged out)');
+    });
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -1505,22 +1512,27 @@ export default function OrdersTab({ showToast }) {
       )}
 
       <div className="orders-toolbar">
-        <div className="orders-search-group" onDoubleClick={() => setShowSettingsBtn(prev => !prev)} style={{ cursor: 'pointer' }} title={lang === 'CZ' ? 'Poklikáním zobrazíte/skryjete nastavení dopravy' : 'Double click to toggle shipping settings'}>
-          <input 
-            type="text" 
-            placeholder={lang === 'CZ' ? 'Hledat podle ID, jména zákazníka...' : 'Search by ID, customer name...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onDoubleClick={(e) => e.stopPropagation()} // Prevent input double click from triggering it too easily
-          />
-          <select value={carrierFilter} onChange={(e) => setCarrierFilter(e.target.value)} onDoubleClick={(e) => e.stopPropagation()}>
-            <option value="all">{lang === 'CZ' ? 'Všichni dopravci' : 'All Carriers'}</option>
-            <option value="gls">GLS</option>
-            <option value="dpd">DPD</option>
-            <option value="zasilkovna">Zásilkovna / Packeta</option>
-            <option value="posta">Česká pošta</option>
-            <option value="pickup">{lang === 'CZ' ? 'Osobní odběr' : 'Local Pickup'}</option>
-          </select>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div className="orders-search-group" onDoubleClick={() => setShowSettingsBtn(prev => !prev)} style={{ cursor: 'pointer' }} title={lang === 'CZ' ? 'Poklikáním zobrazíte/skryjete nastavení dopravy' : 'Double click to toggle shipping settings'}>
+            <input 
+              type="text" 
+              placeholder={lang === 'CZ' ? 'Hledat podle ID, jména zákazníka...' : 'Search by ID, customer name...'}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onDoubleClick={(e) => e.stopPropagation()} // Prevent input double click from triggering it too easily
+            />
+            <select value={carrierFilter} onChange={(e) => setCarrierFilter(e.target.value)} onDoubleClick={(e) => e.stopPropagation()}>
+              <option value="all">{lang === 'CZ' ? 'Všichni dopravci' : 'All Carriers'}</option>
+              <option value="gls">GLS</option>
+              <option value="dpd">DPD</option>
+              <option value="zasilkovna">Zásilkovna / Packeta</option>
+              <option value="posta">Česká pošta</option>
+              <option value="pickup">{lang === 'CZ' ? 'Osobní odběr' : 'Local Pickup'}</option>
+            </select>
+          </div>
+          <div style={{ fontSize: '11px', color: '#8a8a92', paddingLeft: '4px' }}>
+            DEBUG SESSION: <strong style={{ color: 'var(--nv-gold, #fdbd16)' }}>{debugSessionEmail}</strong>
+          </div>
         </div>
 
         <div style={{ display: 'flex', gap: '8px' }}>
