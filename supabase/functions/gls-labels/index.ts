@@ -336,7 +336,8 @@ serve(async (req) => {
       ClientNumberList: [clientNumInt],
       ParcelList: [parcel],
       PrintPosition: 1,
-      TypeOfPrinter: typeOfPrinter
+      TypeOfPrinter: typeOfPrinter,
+      WebshopEngine: "Custom"
     };
 
     const glsApiUrl = `https://${domain}/ParcelService.svc/json/PrintLabels`;
