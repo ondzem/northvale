@@ -38,6 +38,7 @@ serve(async (req) => {
 
     // 1. Authorize user (admin/superadmin check)
     let isAuthorized = false;
+    let authDetail = "No token provided.";
     const authHeader = req.headers.get("Authorization");
     
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
@@ -47,21 +48,32 @@ serve(async (req) => {
     if (authHeader) {
       const token = authHeader.replace("Bearer ", "");
       const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
-      if (!authError && user) {
-        const { data: profile } = await supabaseClient
+      if (authError) {
+        authDetail = `Auth Client error: ${authError.message}`;
+      } else if (!user) {
+        authDetail = "Valid session not found.";
+      } else {
+        const { data: profile, error: profileError } = await supabaseClient
           .from("profiles")
           .select("role")
           .eq("id", user.id)
           .maybeSingle();
           
-        if (profile && (profile.role === "admin" || profile.role === "superadmin")) {
+        if (profileError) {
+          authDetail = `Profile DB error: ${profileError.message}`;
+        } else if (!profile) {
+          authDetail = `Profile row missing for user ID ${user.id}`;
+        } else if (profile.role !== "admin" && profile.role !== "superadmin") {
+          authDetail = `Insufficient role: ${profile.role} (admin or superadmin required)`;
+        } else {
           isAuthorized = true;
         }
       }
     }
 
     if (!isAuthorized) {
-      return new Response(JSON.stringify({ error: "Unauthorized: Insufficient permissions to access GLS labeling API." }), {
+      console.log(`[gls-labels] Auth failed: ${authDetail}`);
+      return new Response(JSON.stringify({ error: `Unauthorized: ${authDetail}` }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
