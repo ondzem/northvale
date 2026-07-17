@@ -1558,9 +1558,6 @@ export default function OrdersTab({ showToast }) {
               <option value="pickup">{lang === 'CZ' ? 'Osobní odběr' : 'Local Pickup'}</option>
             </select>
           </div>
-          <div style={{ fontSize: '11px', color: '#8a8a92', paddingLeft: '4px' }}>
-            DEBUG SESSION: <strong style={{ color: 'var(--nv-gold, #fdbd16)' }}>{debugSessionEmail}</strong>
-          </div>
         </div>
 
         <div style={{ display: 'flex', gap: '8px' }}>

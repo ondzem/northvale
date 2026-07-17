@@ -11,7 +11,7 @@ const getGameImage = (product) => {
   const g = game.toLowerCase();
   if (g.includes('pokémon') || g.includes('pokemon')) return '/Pokemon.webp';
   if (g.includes('lorcana')) return '/lorcana logo.webp';
-  if (g.includes('riftbound') || g.includes('ostatní') || g.includes('ostatni')) return '/OstatniTCG.webp';
+  if (g.includes('riftbound') || g.includes('ostatní') || g.includes('ostatni')) return '/Logo_Ostatni_TCG.webp';
   if (g.includes('magic')) return '/Magic the gathering.webp';
   if (g.includes('one piece') || g.includes('onepiece')) return '/One piece.webp';
   return '/logo s popisem.webp';

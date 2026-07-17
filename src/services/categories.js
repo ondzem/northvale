@@ -307,7 +307,7 @@ export function getCategoryIcon(cat) {
     case 'Pokémon': return '/Pokemon.webp';
     case 'Lorcana': return '/lorcana logo.webp';
     case 'One Piece': return '/One piece.webp';
-    case 'Ostatní TCG': return '/OstatniTCG.webp';
+    case 'Ostatní TCG': return '/Logo_Ostatni_TCG.webp';
     case 'Accessories': return '/Prislusentstvi.webp';
     case 'Acrylics': return '/acrylic-etb-box.webp';
     default: return '/Northvale Logo.webp';

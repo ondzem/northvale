@@ -5832,7 +5832,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   .favorites-slider-grid .vf-card {
     flex: 0 0 240px !important;
     width: 240px !important;
-    height: 489px !important;
+    height: var(--card-h-desktop, 442px) !important;
     box-sizing: border-box !important;
   }
 }

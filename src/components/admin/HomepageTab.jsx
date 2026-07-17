@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from '../../context/LanguageContext';
 import { fetchSlidesFromDB, saveSlideToDB, deleteSlideFromDB } from '../../services/slides';
-import { fetchDailyDealFromDB, saveDailyDealToDB, fetchDailyDealsFromDB } from '../../services/dailyDeal';
+import { fetchDailyDealFromDB, saveDailyDealToDB, fetchDailyDealsFromDB, deleteDailyDealFromDB } from '../../services/dailyDeal';
 import { fetchProductsFromDB } from '../../services/products';
 import { fetchHomepageSectionsFromDB, saveHomepageSectionToDB } from '../../services/homepageSections';
 
@@ -568,6 +568,24 @@ export default function HomepageTab({ showToast, onEditProduct }) {
       setDealImageUrl(prod.image || '');
       showToast(lang === 'CZ' ? 'Pole předvyplněna z produktu!' : 'Form pre-filled from product!', 'success');
     }
+  };
+
+  const handleDeleteDailyDeal = async () => {
+    if (!window.confirm(lang === 'CZ' ? 'Opravdu chcete tuto akci dne smazat?' : 'Are you sure you want to delete this Deal of the Day?')) {
+      return;
+    }
+    setDealSaving(true);
+    try {
+      const { error } = await deleteDailyDealFromDB(selectedSlotId);
+      if (error) throw error;
+      showToast(lang === 'CZ' ? 'Akce dne byla úspěšně smazána!' : 'Deal of the Day successfully deleted!', 'success');
+      // Reload form states
+      await loadDailyDeal();
+    } catch (err) {
+      console.error('Failed to delete daily deal:', err);
+      showToast(lang === 'CZ' ? 'Chyba při mazání akce dne!' : 'Error deleting Deal of the Day!', 'error');
+    }
+    setDealSaving(false);
   };
 
   const handleSaveDailyDeal = async (e) => {
@@ -1708,17 +1726,35 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                 </p>
               </div>
 
-              {/* Submit */}
-              <button 
-                type="submit" 
-                className="btn btn-primary" 
-                style={{ marginTop: '28px', width: '100%', padding: '12px' }}
-                disabled={dealSaving}
-              >
-                {dealSaving 
-                  ? (lang === 'CZ' ? 'Ukládání...' : 'Saving...') 
-                  : (lang === 'CZ' ? 'Uložit akci dne' : 'Save Deal of the Day')}
-              </button>
+              {/* Submit & Delete Actions */}
+              <div style={{ display: 'flex', gap: '12px', marginTop: '28px' }}>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary" 
+                  style={{ flex: 1, padding: '12px' }}
+                  disabled={dealSaving}
+                >
+                  {dealSaving 
+                    ? (lang === 'CZ' ? 'Ukládání...' : 'Saving...') 
+                    : (lang === 'CZ' ? 'Uložit akci dne' : 'Save Deal of the Day')}
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-danger" 
+                  style={{ 
+                    padding: '12px 18px', 
+                    backgroundColor: '#dc3545', 
+                    color: '#fff', 
+                    border: 'none', 
+                    borderRadius: 'var(--radius-md, 6px)',
+                    cursor: dealSaving ? 'not-allowed' : 'pointer'
+                  }}
+                  disabled={dealSaving}
+                  onClick={handleDeleteDailyDeal}
+                >
+                  {lang === 'CZ' ? 'Odstranit akci dne' : 'Delete Deal of the Day'}
+                </button>
+              </div>
 
             </form>
 

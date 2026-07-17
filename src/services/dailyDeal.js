@@ -161,3 +161,57 @@ export async function saveDailyDealToDB(deal, slotId = 'active-deal') {
     };
   }
 }
+
+/**
+ * Delete a specific daily deal slot from Supabase.
+ */
+export async function deleteDailyDealFromDB(slotId) {
+  try {
+    if (!supabase.from) {
+      throw new Error('Supabase client is not initialized');
+    }
+
+    const { error } = await supabase
+      .from('daily_deal')
+      .delete()
+      .eq('id', slotId);
+
+    if (error) {
+      throw error;
+    }
+
+    // Refresh cachedDeals
+    cachedDeals = cachedDeals.filter(d => d.id !== slotId);
+    
+    // Update local cache
+    try {
+      localStorage.setItem('northvale-cached-deals', JSON.stringify(cachedDeals));
+      const active = getActiveDailyDeal(cachedDeals);
+      if (active) {
+        localStorage.setItem('northvale-cached-deal', JSON.stringify(active));
+      } else {
+        localStorage.removeItem('northvale-cached-deal');
+      }
+    } catch (e) {
+      console.warn('Failed to cache daily_deals locally after deletion:', e);
+    }
+
+    return { error: null };
+  } catch (err) {
+    console.error(`Failed to delete daily_deal slot ${slotId} from Supabase:`, err);
+    // Fallback: update local list
+    cachedDeals = cachedDeals.filter(d => d.id !== slotId);
+    try {
+      localStorage.setItem('northvale-cached-deals', JSON.stringify(cachedDeals));
+      const active = getActiveDailyDeal(cachedDeals);
+      if (active) {
+        localStorage.setItem('northvale-cached-deal', JSON.stringify(active));
+      } else {
+        localStorage.removeItem('northvale-cached-deal');
+      }
+    } catch (e) {
+      console.warn('Failed to cache daily_deals locally after deletion during fallback:', e);
+    }
+    return { error: err, isMockFallback: true };
+  }
+}

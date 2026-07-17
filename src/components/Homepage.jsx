@@ -1350,7 +1350,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             <img src="/One piece.webp" alt="One Piece Card Game - Booster packy, sealed krabice a karty" title="One Piece Card Game" className="category-tile-img" width="3376" height="1248" />
           </a>
           <a href="/sealed-catalog?game=Ostatní TCG" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Ostatní TCG' }); setActivePage('sealed-catalog'); } }}>
-            <img src="/OstatniTCG.webp" alt="Ostatní sběratelské karetní hry (TCG) - Magic: The Gathering, Star Wars a další" title="Ostatní TCG hry" className="category-tile-img" width="1000" height="1000" />
+            <img src="/Logo_Ostatni_TCG.webp" alt="Ostatní sběratelské karetní hry (TCG) - Magic: The Gathering, Star Wars a další" title="Ostatní TCG hry" className="category-tile-img" width="1000" height="1000" />
           </a>
           <a href="/sealed-catalog?game=Accessories" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Accessories' }); setActivePage('sealed-catalog'); } }}>
             <img src="/Prislusentstvi.webp" alt={lang === 'CZ' ? 'Příslušenství pro TCG - Ochranné obaly na karty, krabičky a alba' : 'TCG Accessories - card sleeves, deck boxes, and binders'} title={lang === 'CZ' ? 'TCG Příslušenství' : 'TCG Accessories'} className="category-tile-img" width="3376" height="1248" />
