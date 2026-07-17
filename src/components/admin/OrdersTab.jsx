@@ -414,7 +414,7 @@ export default function OrdersTab({ showToast }) {
     if (err && err.context && typeof err.context.json === 'function') {
       try {
         const body = await err.context.json();
-        return body?.error || err.message;
+        return body?.error || body?.message || err.message;
       } catch (_) {}
     }
     return err?.message || 'Neznámá chyba.';
