@@ -174,14 +174,22 @@ serve(async (req) => {
             address: receiverAddress
           },
           references: {
-            ref1: order.id.toString()
+            ref1: order.id.toString(),
+            reference1: order.id.toString()
           },
+          shipmentReferences: [
+            order.id.toString()
+          ],
           parcels: [
             {
               weightGrams: defaultWeight, // Configurable default weight (TODO: in the future, sum product weights dynamically from DB records)
               references: {
-                ref1: order.id.toString()
-              }
+                ref1: order.id.toString(),
+                reference1: order.id.toString()
+              },
+              mpsReferences: [
+                order.id.toString()
+              ]
             }
           ],
           services: {

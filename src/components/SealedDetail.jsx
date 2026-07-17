@@ -424,20 +424,13 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
   const similarSealed = useMemo(() => {
     if (!products || !product) return [];
     return products
-      .filter(p => p.type === 'sealed' && p.id !== product.id)
+      .filter(p => p && p.type === 'sealed' && p.id !== product.id)
       .map(p => {
         let score = 0;
         if (p.game === product.game) score += 25;
-        if (p.category === product.category) score += 20; // ETB with ETB, Booster Box with Booster Box
+        if (p.category === product.category) score += 20;
         if (p.subcat === product.subcat) score += 15;
         if (p.edition === product.edition) score += 15;
-        
-        // Price proximity (same price range)
-        if (p.price && product.price) {
-          const diff = Math.abs(p.price - product.price) / product.price;
-          if (diff < 0.2) score += 10;
-          else if (diff < 0.5) score += 5;
-        }
         return { product: p, score };
       })
       .filter(item => item.score > 0)
@@ -449,7 +442,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
   const relatedSealed = useMemo(() => {
     if (!products || !product) return [];
     return products
-      .filter(p => p.id !== product.id)
+      .filter(p => p && p.id !== product.id)
       .map(p => {
         let score = 0;
         
@@ -457,8 +450,8 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
         if (p.category === 'Acrylics') {
           score += 20;
           // Check if case is specific for this type of box (e.g. ETB case for ETB product)
-          const pNameLower = p.name.toLowerCase();
-          const prodNameLower = product.name.toLowerCase();
+          const pNameLower = (p.name || '').toLowerCase();
+          const prodNameLower = (product.name || '').toLowerCase();
           const isEtbCase = pNameLower.includes('etb') || pNameLower.includes('elite trainer');
           const isEtbProduct = prodNameLower.includes('etb') || prodNameLower.includes('elite trainer');
           const isBoosterBoxCase = pNameLower.includes('booster box') || pNameLower.includes('display');
