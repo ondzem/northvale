@@ -268,7 +268,7 @@ serve(async (req) => {
                   (order.payment_method || "").toLowerCase().includes("cod");
 
     // 5. Determine Pickup point flag (ParcelShop)
-    const pickupDetails = order.pickup_point_details || orderJsonObj?.order?.pickup_point_details || null;
+    const pickupDetails = order.pickup_point_details || order.pickupPointDetails || orderJsonObj?.order?.pickup_point_details || null;
     const isPickup = (order.shipping_method || "").toLowerCase().includes("pickup") || 
                      (order.shipping_method || "").toLowerCase().includes("výdej") ||
                      !!pickupDetails;
@@ -276,8 +276,8 @@ serve(async (req) => {
 
     const serviceList: any[] = [];
     
-    // Add FlexDeliveryService (FDS) for notifications
-    if (order.customer_email) {
+    // Add FlexDeliveryService (FDS) for notifications (only for home delivery)
+    if (!isPickup && order.customer_email) {
       serviceList.push({
         Code: "FDS",
         FDSParameter: { Value: order.customer_email }
