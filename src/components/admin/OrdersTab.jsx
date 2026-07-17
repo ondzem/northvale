@@ -445,8 +445,15 @@ export default function OrdersTab({ showToast }) {
       if (error) throw error;
 
       if (data && data.success) {
-        // Convert Base64 response to binary PDF Blob and download
-        const pdfBytes = Uint8Array.from(atob(data.pdfBase64), c => c.charCodeAt(0));
+        // Convert Base64 or Byte Array response to binary PDF Blob and download
+        let pdfBytes;
+        if (Array.isArray(data.pdfBase64)) {
+          pdfBytes = new Uint8Array(data.pdfBase64);
+        } else if (data.pdfBase64 && typeof data.pdfBase64 === 'object') {
+          pdfBytes = new Uint8Array(Object.values(data.pdfBase64));
+        } else {
+          pdfBytes = Uint8Array.from(atob(data.pdfBase64), c => c.charCodeAt(0));
+        }
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -564,8 +571,15 @@ export default function OrdersTab({ showToast }) {
       if (error) throw error;
 
       if (data && data.success) {
-        // Convert Base64 response to binary PDF Blob and download
-        const pdfBytes = Uint8Array.from(atob(data.pdfBase64), c => c.charCodeAt(0));
+        // Convert Base64 or Byte Array response to binary PDF Blob and download
+        let pdfBytes;
+        if (Array.isArray(data.pdfBase64)) {
+          pdfBytes = new Uint8Array(data.pdfBase64);
+        } else if (data.pdfBase64 && typeof data.pdfBase64 === 'object') {
+          pdfBytes = new Uint8Array(Object.values(data.pdfBase64));
+        } else {
+          pdfBytes = Uint8Array.from(atob(data.pdfBase64), c => c.charCodeAt(0));
+        }
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
