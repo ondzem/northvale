@@ -11,6 +11,34 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+function wrapInHtmlDocument(innerContent: string): string {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <style>
+    :root {
+      color-scheme: light;
+      supported-color-schemes: light;
+    }
+    body {
+      background-color: #f5f6f8 !important;
+      margin: 0;
+      padding: 0;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+  </style>
+</head>
+<body style="background-color: #f5f6f8; margin: 0; padding: 0;">
+  ${innerContent}
+</body>
+</html>`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -51,53 +79,61 @@ serve(async (req) => {
                        !!pickupDetails;
 
       const htmlExpeditedContent = `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px 20px; background-color: transparent; color: #222222;">
-          <!-- Package Delivery Emoji -->
-          <div style="text-align: center; margin-bottom: 24px; font-size: 64px;">
-            📦
-          </div>
-
-          <!-- Header -->
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h2 style="color: #111111; font-size: 28px; font-weight: 800; margin: 0; letter-spacing: -0.5px; font-family: sans-serif;">Vaše objednávka byla expedována!</h2>
-            <p style="font-size: 14px; color: #888888; margin: 8px 0 0 0;">Číslo objednávky: <strong style="color: #fdbd16;">#${order.id}</strong></p>
-          </div>
-
-          <p style="font-size: 14.5px; color: #222222; line-height: 1.6; margin: 0 0 24px 0;">
-            Dobrý den,<br/><br/>
-            máme pro Vás skvělou zprávu! Vaši objednávku jsme zabalili a předali přepravní službě <strong>${activeCarrier}</strong>.
-          </p>
-
-          <!-- Tracking details container -->
-          <div style="background: rgba(253, 189, 22, 0.05); border-left: 4px solid #fdbd16; padding: 20px; margin-bottom: 24px; border-radius: 4px;">
-            <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; font-family: sans-serif;">
-              🚚 Sledování zásilky
+        <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 40px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: #222222;">
+            
+            <!-- Logo Header -->
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #fdbd16; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: 2px; text-transform: uppercase;">NORTHVALE</h1>
+              <p style="color: #8a8a92; font-size: 11px; text-transform: uppercase; letter-spacing: 4px; margin: 3px 0 0 0;">Trading Card Games</p>
             </div>
-            <p style="font-size: 14.5px; color: #111111; margin: 0 0 12px 0; line-height: 1.6;">
-              Přepravce: <strong>${activeCarrier}</strong><br/>
-              Číslo zásilky: <strong>${activeTrackingNo}</strong>
-              ${isPickup && pickupDetails ? `<br/>Výdejní místo: <strong>${pickupDetails.name || 'Pickup Point'}</strong><br/>Adresa: <strong>${pickupDetails.street || ''}, ${pickupDetails.zip || ''} ${pickupDetails.city || ''}</strong>` : ''}
-              ${isCod ? `<br/>Částka k úhradě (dobírka): <strong style="color: #fdbd16;">${(order.totalPrice || 0).toLocaleString()} Kč</strong>` : ''}
-            </p>
-            ${activeTrackingNo ? `
-            <div style="text-align: left; margin-top: 10px;">
-              <a href="${trackingUrl}" target="_blank" style="background-color: #fdbd16; color: #111111; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13.5px; display: inline-block; border: 1px solid #e2a80f; font-family: sans-serif;">
-                Sledovat zásilku online ↗
-              </a>
+            
+            <div style="text-align: center; margin-bottom: 24px; font-size: 54px;">
+              📦
             </div>
-            ` : ''}
-          </div>
 
-          <p style="font-size: 14px; color: #666666; line-height: 1.6; margin: 0 0 24px 0;">
-            Zásilka by měla být doručena do 1-2 pracovních dnů. Přepravce Vás bude kontaktovat prostřednictvím SMS nebo e-mailu s podrobnějšími informacemi o čase doručení.
-          </p>
+            <!-- Header Title -->
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h2 style="color: #111111; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">Vaše objednávka byla expedována!</h2>
+              <p style="font-size: 14px; color: #888888; margin: 8px 0 0 0;">Číslo objednávky: <strong style="color: #fdbd16;">#${order.id}</strong></p>
+            </div>
 
-          <!-- Help / System Info -->
-          <div style="border-top: 1px solid rgba(0,0,0,0.08); padding-top: 20px; margin-top: 20px; text-align: center;">
-            <p style="font-size: 12px; color: #888888; margin: 0; line-height: 1.6;">
-              Děkujeme za Váš nákup na NORTHVALE TCG. V případě dotazů nás kontaktujte na
-              <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; text-decoration: underline; font-weight: bold;">info@northvaletcg.eu</a>.
+            <p style="font-size: 14.5px; color: #222222; line-height: 1.6; margin: 0 0 24px 0;">
+              Dobrý den,<br/><br/>
+              máme pro Vás skvělou zprávu! Vaši objednávku jsme zabalili a předali přepravní službě <strong>${activeCarrier}</strong>.
             </p>
+
+            <!-- Tracking details container -->
+            <div style="background-color: #fdfdfd; border: 1px solid #e1e4e8; border-left: 4px solid #fdbd16; padding: 22px; margin-bottom: 24px; border-radius: 8px;">
+              <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em;">
+                🚚 Sledování zásilky
+              </div>
+              <p style="font-size: 14.5px; color: #111111; margin: 0 0 16px 0; line-height: 1.6;">
+                Přepravce: <strong>${activeCarrier}</strong><br/>
+                Číslo zásilky: <strong>${activeTrackingNo}</strong>
+                ${isPickup && pickupDetails ? `<br/>Výdejní místo: <strong>${pickupDetails.name || 'Pickup Point'}</strong><br/>Adresa: <strong>${pickupDetails.street || ''}, ${pickupDetails.zip || ''} ${pickupDetails.city || ''}</strong>` : ''}
+                ${isCod ? `<br/>Částka k úhradě (dobírka): <strong style="color: #fdbd16;">${(order.totalPrice || order.finalTotal || 0).toLocaleString()} Kč</strong>` : ''}
+              </p>
+              ${activeTrackingNo ? `
+              <div style="text-align: left; margin-top: 10px;">
+                <a href="${trackingUrl}" target="_blank" style="background-color: #fdbd16; color: #111111; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; border: 1px solid #e2a80f; box-shadow: 0 2px 4px rgba(253, 189, 22, 0.15);">
+                  Sledovat zásilku online ↗
+                </a>
+              </div>
+              ` : ''}
+            </div>
+
+            <p style="font-size: 14px; color: #666666; line-height: 1.6; margin: 0 0 24px 0;">
+              Zásilka by měla být doručena do 1-2 pracovních dnů. Přepravce Vás bude kontaktovat prostřednictvím SMS nebo e-mailu s podrobnějšími informacemi o čase doručení.
+            </p>
+
+            <!-- Help / System Info -->
+            <div style="border-top: 1px solid #e1e4e8; padding-top: 24px; margin-top: 30px; text-align: center;">
+              <p style="font-size: 12px; color: #888888; margin: 0; line-height: 1.6;">
+                Děkujeme za Váš nákup na NORTHVALE TCG. V případě dotazů nás kontaktujte na
+                <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; text-decoration: underline; font-weight: bold;">info@northvaletcg.eu</a>.
+              </p>
+            </div>
           </div>
         </div>
       `;
@@ -113,7 +149,7 @@ serve(async (req) => {
           sender: { name: senderName, email: senderEmail },
           to: [{ email: order.customerEmail, name: order.customerName }],
           subject: `Objednávka #${order.id} byla expedována`,
-          htmlContent: htmlExpeditedContent
+          htmlContent: wrapInHtmlDocument(htmlExpeditedContent)
         })
       });
 
@@ -187,243 +223,269 @@ serve(async (req) => {
 
     // 1. Customer Order Confirmation Email Content (Email-safe, responsive, transparent with dark text and checkmark)
     const htmlConfirmContent = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px 20px; background-color: transparent; color: #222222;">
-        
-        <!-- Checkmark SVG -->
-        <div style="text-align: center; margin-bottom: 24px;">
-          <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="64" style="display: inline-block;">
-            <circle cx="26" cy="26" r="23" stroke="#10B981" stroke-width="2.2" fill="none" />
-            <path d="M16 27l7 7 14-15" stroke="#10B981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-          </svg>
-        </div>
-
-        <!-- Header -->
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h2 style="color: #111111; font-size: 28px; font-weight: 800; margin: 0; letter-spacing: -0.5px; font-family: sans-serif;">Děkujeme za objednávku!</h2>
-          <p style="font-size: 14px; color: #888888; margin: 8px 0 0 0;">Číslo objednávky: <strong style="color: #fdbd16;">#${order.id}</strong></p>
-        </div>
-
-        <p style="font-size: 14.5px; color: #222222; line-height: 1.6; margin: 0 0 24px 0;">
-          Dobrý den,<br/><br/>
-          děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. V samostatném e-mailu Vám zasíláme také daňový doklad (fakturu).
-        </p>
-
-        <!-- Shipping details container -->
-        <div style="border-top: 1px solid rgba(0,0,0,0.08); border-bottom: 1px solid rgba(0,0,0,0.08); padding: 20px 0; margin-bottom: 24px;">
-          <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em; font-family: sans-serif;">
-            ${isPersonalPickup ? '📍 Osobní odběr — Holice' : '📦 Doručení zásilky'}
+      <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 40px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: #222222;">
+          
+          <!-- Logo Header -->
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #fdbd16; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: 2px; text-transform: uppercase;">NORTHVALE</h1>
+            <p style="color: #8a8a92; font-size: 11px; text-transform: uppercase; letter-spacing: 4px; margin: 3px 0 0 0;">Trading Card Games</p>
           </div>
-          <p style="font-size: 15px; color: #111111; margin: 0 0 8px 0;">
-            Způsob doručení: <strong>${order.shippingMethod}</strong>
-          </p>
-          <p style="font-size: 13.5px; line-height: 1.5; color: #666666; margin: 0;">
-            ${isPersonalPickup 
-              ? 'Zboží pro Vás začínáme připravovat. Jakmile bude objednávka připravena k vyzvednutí na naší kontaktní adrese <strong>Bratří Čapků 1095, 534 01 Holice</strong>, zašleme Vám e-mail a SMS.'
-              : isBankTransfer
-                ? 'Jakmile obdržíme Vaši platbu na náš účet, objednávku zpracujeme a předáme dopravci. O odeslání Vás budeme informovat.'
-                : 'Vaše platba byla úspěšně přijata. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. Sledujte prosím svůj e-mail pro sledovací číslo zásilky.'
-            }
-          </p>
-        </div>
-
-        <!-- Bank transfer details container -->
-        ${isBankTransfer ? `
-        <div style="border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 24px; margin-bottom: 24px;">
-          <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em; font-family: sans-serif;">
-            💰 Pokyny k platbě převodem
+          
+          <!-- Checkmark SVG -->
+          <div style="text-align: center; margin-bottom: 24px;">
+            <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="64" style="display: inline-block;">
+              <circle cx="26" cy="26" r="23" stroke="#10B981" stroke-width="2.2" fill="none" />
+              <path d="M16 27l7 7 14-15" stroke="#10B981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            </svg>
           </div>
-          <p style="font-size: 14.5px; color: #222222; margin: 0 0 16px 0; line-height: 1.5;">
-            Zvolili jste platbu bankovním převodem. Prosím zašlete celkovou částku na náš bankovní účet:
-          </p>
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-            <tr>
-              <td style="padding: 8px 0; color: #666666; width: 130px; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 14px;">Číslo účtu:</td>
-              <td style="padding: 8px 0; color: #111111; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 14px;">1854161005/2700</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #666666; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 14px;">Částka k úhradě:</td>
-              <td style="padding: 8px 0; color: #fdbd16; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.04); font-family: monospace; font-size: 15px;">${total.toLocaleString('cs-CZ')} Kč</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #666666; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 14px;">Variabilní symbol:</td>
-              <td style="padding: 8px 0; color: #111111; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.04); font-family: monospace; font-size: 15px;">${order.id}</td>
-            </tr>
-          </table>
 
-          <div style="text-align: center; margin-top: 15px; padding: 15px; background: #ffffff; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05); display: inline-block;">
-            <img 
-              src="https://api.paylibo.com/paylibo/generator/czech/image?accountNumber=1854161005&bankCode=2700&amount=${total}&currency=CZK&vs=${order.id}&size=160"
-              alt="QR Kód pro platbu"
-              width="160"
-              height="160"
-              style="display: block; margin: 0 auto 8px auto;"
-            />
-            <span style="font-size: 11px; color: #888888; font-weight: 500; font-family: sans-serif;">Naskenujte v bankovní aplikaci pro okamžitou platbu</span>
+          <!-- Header -->
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: #111111; font-size: 28px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">Děkujeme za objednávku!</h2>
+            <p style="font-size: 14px; color: #888888; margin: 8px 0 0 0;">Číslo objednávky: <strong style="color: #fdbd16;">#${order.id}</strong></p>
           </div>
-        </div>
-        ` : ''}
 
-        <!-- Summary Label -->
-        <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #888888; margin-bottom: 14px; letter-spacing: 0.05em; font-family: sans-serif;">
-          Přehled objednávky
-        </div>
+          <p style="font-size: 14.5px; color: #222222; line-height: 1.6; margin: 0 0 24px 0;">
+            Dobrý den,<br/><br/>
+            děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. V samostatném e-mailu Vám zasíláme také daňový doklad (fakturu).
+          </p>
 
-        <!-- Items Table -->
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px;">
-          <tbody>
-            ${items.map((item: any) => {
-              const itemTotal = parseFloat(item.price) * parseInt(item.quantity);
-              return `
+          <!-- Shipping details container -->
+          <div style="border-top: 1px solid #e1e4e8; border-bottom: 1px solid #e1e4e8; padding: 20px 0; margin-bottom: 24px;">
+            <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em;">
+              ${isPersonalPickup ? '📍 Osobní odběr — Holice' : '📦 Doručení zásilky'}
+            </div>
+            <p style="font-size: 15px; color: #111111; margin: 0 0 8px 0;">
+              Způsob doručení: <strong>${order.shippingMethod}</strong>
+            </p>
+            <p style="font-size: 13.5px; line-height: 1.5; color: #666666; margin: 0;">
+              ${isPersonalPickup 
+                ? 'Zboží pro Vás začínáme připravovat. Jakmile bude objednávka připravena k vyzvednutí na naší kontaktní adrese <strong>Bratří Čapků 1095, 534 01 Holice</strong>, zašleme Vám e-mail a SMS.'
+                : isBankTransfer
+                  ? 'Jakmile obdržíme Vaši platbu na náš účet, objednávku zpracujeme a předáme dopravci. O odeslání Vás budeme informovat.'
+                  : 'Vaše platba byla úspěšně přijata. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. Sledujte prosím svůj e-mail pro sledovací číslo zásilky.'
+              }
+            </p>
+          </div>
+
+          <!-- Bank transfer details container -->
+          ${isBankTransfer ? `
+          <div style="border-bottom: 1px solid #e1e4e8; padding-bottom: 24px; margin-bottom: 24px;">
+            <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em;">
+              💰 Pokyny k platbě převodem
+            </div>
+            <p style="font-size: 14.5px; color: #222222; margin: 0 0 16px 0; line-height: 1.5;">
+              Zvolili jste platbu bankovním převodem. Prosím zašlete celkovou částku na náš bankovní účet:
+            </p>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+              <tr>
+                <td style="padding: 8px 0; color: #666666; width: 130px; border-bottom: 1px solid #e1e4e8; font-size: 14px;">Číslo účtu:</td>
+                <td style="padding: 8px 0; color: #111111; font-weight: bold; border-bottom: 1px solid #e1e4e8; font-size: 14px;">1854161005/2700</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666666; border-bottom: 1px solid #e1e4e8; font-size: 14px;">Částka k úhradě:</td>
+                <td style="padding: 8px 0; color: #fdbd16; font-weight: bold; border-bottom: 1px solid #e1e4e8; font-family: monospace; font-size: 15px;">${total.toLocaleString('cs-CZ')} Kč</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666666; border-bottom: 1px solid #e1e4e8; font-size: 14px;">Variabilní symbol:</td>
+                <td style="padding: 8px 0; color: #111111; font-weight: bold; border-bottom: 1px solid #e1e4e8; font-family: monospace; font-size: 15px;">${order.id}</td>
+              </tr>
+            </table>
+
+            <div style="text-align: center; margin-top: 15px; padding: 15px; background: #ffffff; border-radius: 8px; border: 1px solid #e1e4e8; display: inline-block;">
+              <img 
+                src="https://api.paylibo.com/paylibo/generator/czech/image?accountNumber=1854161005&bankCode=2700&amount=${total}&currency=CZK&vs=${order.id}&size=160"
+                alt="QR Kód pro platbu"
+                width="160"
+                height="160"
+                style="display: block; margin: 0 auto 8px auto;"
+              />
+              <span style="font-size: 11px; color: #888888; font-weight: 500;">Naskenujte v bankovní aplikaci pro okamžitou platbu</span>
+            </div>
+          </div>
+          ` : ''}
+
+          <!-- Summary Label -->
+          <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #888888; margin-bottom: 14px; letter-spacing: 0.05em;">
+            Přehled objednávky
+          </div>
+
+          <!-- Items Table -->
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px;">
+            <tbody>
+              ${items.map((item: any) => {
+                const itemTotal = parseFloat(item.price) * parseInt(item.quantity);
+                return `
+                  <tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #e1e4e8; color: #222222; font-weight: 600;">
+                      ${item.name} <span style="color: #888888; font-weight: 400; font-size: 12.5px;">(${item.quantity}x)</span>
+                    </td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: #222222; font-weight: 600; font-family: monospace;">
+                      ${itemTotal.toLocaleString('cs-CZ')} Kč
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+
+              ${order.shippingCost && parseFloat(order.shippingCost) > 0 ? `
                 <tr>
-                  <td style="padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.04); color: #222222; font-weight: 600;">
-                    ${item.name} <span style="color: #888888; font-weight: 400; font-size: 12.5px;">(${item.quantity}x)</span>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; color: #666666;">
+                    Dopravné
                   </td>
-                  <td style="padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.04); text-align: right; color: #222222; font-weight: 600; font-family: monospace;">
-                    ${itemTotal.toLocaleString('cs-CZ')} Kč
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: #666666; font-family: monospace;">
+                    ${parseFloat(order.shippingCost).toLocaleString('cs-CZ')} Kč
                   </td>
                 </tr>
-              `;
-            }).join('')}
+              ` : ''}
 
-            ${order.shippingCost && parseFloat(order.shippingCost) > 0 ? `
+              ${order.paymentSurcharge && parseFloat(order.paymentSurcharge) > 0 ? `
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; color: #666666;">
+                    Dobírkový příplatek
+                  </td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: #666666; font-family: monospace;">
+                    ${parseFloat(order.paymentSurcharge).toLocaleString('cs-CZ')} Kč
+                  </td>
+                </tr>
+              ` : ''}
+
+              ${order.creditApplied && parseFloat(order.creditApplied) > 0 ? `
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; color: #10B981;">
+                    Uplatněný kredit
+                  </td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: #10B981; font-family: monospace;">
+                    -${parseFloat(order.creditApplied).toLocaleString('cs-CZ')} Kč
+                  </td>
+                </tr>
+              ` : ''}
+
               <tr>
-                <td style="padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.04); color: #666666;">
-                  Dopravné
+                <td style="padding: 16px 0 0 0; color: #111111; font-weight: 700; font-size: 15px;">
+                  Celkem zaplaceno
                 </td>
-                <td style="padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.04); text-align: right; color: #666666; font-family: monospace;">
-                  ${parseFloat(order.shippingCost).toLocaleString('cs-CZ')} Kč
+                <td style="padding: 16px 0 0 0; text-align: right; color: #fdbd16; font-weight: 800; font-size: 22px; font-family: monospace;">
+                  ${total.toLocaleString('cs-CZ')} Kč
                 </td>
               </tr>
-            ` : ''}
+            </tbody>
+          </table>
 
-            ${order.paymentSurcharge && parseFloat(order.paymentSurcharge) > 0 ? `
-              <tr>
-                <td style="padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.04); color: #666666;">
-                  Dobírkový příplatek
-                </td>
-                <td style="padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.04); text-align: right; color: #666666; font-family: monospace;">
-                  ${parseFloat(order.paymentSurcharge).toLocaleString('cs-CZ')} Kč
-                </td>
-              </tr>
-            ` : ''}
-
-            ${order.creditApplied && parseFloat(order.creditApplied) > 0 ? `
-              <tr>
-                <td style="padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.04); color: #10B981;">
-                  Uplatněný kredit
-                </td>
-                <td style="padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.04); text-align: right; color: #10B981; font-family: monospace;">
-                  -${parseFloat(order.creditApplied).toLocaleString('cs-CZ')} Kč
-                </td>
-              </tr>
-            ` : ''}
-
-            <tr>
-              <td style="padding: 16px 0 0 0; color: #111111; font-weight: 700; font-size: 15px;">
-                Celkem zaplaceno
-              </td>
-              <td style="padding: 16px 0 0 0; text-align: right; color: #fdbd16; font-weight: 800; font-size: 22px; font-family: monospace;">
-                ${total.toLocaleString('cs-CZ')} Kč
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- Help / System Info -->
-        <div style="border-top: 1px solid rgba(0,0,0,0.08); padding-top: 20px; margin-top: 20px; text-align: center;">
-          <p style="font-size: 12px; color: #888888; margin: 0; line-height: 1.6;">
-            Tento e-mail byl odeslán automaticky. V případě jakýchkoli dotazů nás kontaktujte na
-            <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; text-decoration: underline; font-weight: bold;">info@northvaletcg.eu</a>.
-          </p>
+          <!-- Help / System Info -->
+          <div style="border-top: 1px solid #e1e4e8; padding-top: 24px; margin-top: 30px; text-align: center;">
+            <p style="font-size: 12px; color: #888888; margin: 0; line-height: 1.6;">
+              Tento e-mail byl odeslán automaticky. V případě jakýchkoli dotazů nás kontaktujte na
+              <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; text-decoration: underline; font-weight: bold;">info@northvaletcg.eu</a>.
+            </p>
+          </div>
         </div>
       </div>
     `;
 
     // 2. Customer Tax Invoice Email Content (Fakturoid-style layout, fully transparent, minimal, no double details)
     const htmlInvoiceContent = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px 20px; background-color: transparent;">
-        
-        <!-- Header -->
-        <div style="margin-bottom: 30px;">
-          <h2 style="color: #111111; font-size: 24px; font-weight: 800; margin: 0; letter-spacing: -0.5px; font-family: sans-serif;">NORTHVALE TCG</h2>
-          <p style="font-size: 12px; color: #888888; margin: 5px 0 0 0;">Faktura / Daňový doklad č. ${order.id}</p>
-        </div>
-
-        <p style="font-size: 14.5px; color: #222222; line-height: 1.6; margin: 0 0 20px 0;">
-          Dobrý den,<br/><br/>
-          Vaše platba přes platební bránu proběhla úspěšně. V příloze tohoto e-mailu naleznete oficiální daňový doklad (fakturu) ve formátu PDF. Fakturu si můžete také kdykoliv stáhnout kliknutím na níže uvedené tlačítko.
-        </p>
-
-        <!-- Download Action Box (Transparent Background) -->
-        <div style="background-color: transparent; padding: 25px 0; text-align: center; margin: 25px 0;">
-          <span style="font-size: 13px; color: #666666; display: block; margin-bottom: 5px;">Faktura / daňový doklad ke stažení:</span>
-          <strong style="font-size: 18px; color: #111111; display: block; margin-bottom: 15px;">Faktura č. ${order.id}</strong>
+      <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 40px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: #222222;">
           
-          <a href="${downloadInvoiceUrl}" target="_blank" style="background-color: #fdbd16; color: #111111; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; border: 1px solid #e2a80f; font-family: sans-serif;">
-            Stáhnout fakturu (PDF)
-          </a>
-        </div>
+          <!-- Logo Header -->
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #fdbd16; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: 2px; text-transform: uppercase;">NORTHVALE</h1>
+            <p style="color: #8a8a92; font-size: 11px; text-transform: uppercase; letter-spacing: 4px; margin: 3px 0 0 0;">Trading Card Games</p>
+          </div>
 
-        <!-- Help / System Info list (Fakturoid-style notes) -->
-        <div style="border-top: 1px solid rgba(0,0,0,0.08); padding-top: 20px; margin-bottom: 20px;">
-          <ul style="padding-left: 20px; margin: 0; font-size: 12.5px; color: #666666; line-height: 1.7;">
-            <li style="margin-bottom: 8px;">Pokud se Vám faktura v příloze nebo po kliknutí na tlačítko nezobrazila, zkuste to prosím o chvíli později. Může se stát, že dokument ještě plně neprošel celým naším systémem.</li>
-            <li style="margin-bottom: 8px;">Doklad si prosím pečlivě uschovejte pro případné pozdější využití. Rádi bychom Vás současně ujistili, že plně akceptujeme elektronickou podobu daňového dokladu.</li>
-            <li style="margin-bottom: 8px;">Věnujte prosím chvilku překontrolování všech uvedených údajů. Pokud by cokoliv nesouhlasilo, stačí nás kontaktovat na e-mailové adrese <a href="mailto:info@northvaletcg.eu" style="color: #111111; font-weight: bold; text-decoration: underline;">info@northvaletcg.eu</a>.</li>
-          </ul>
-        </div>
+          <!-- Header -->
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: #111111; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">Daňový doklad k objednávce</h2>
+            <p style="font-size: 14px; color: #888888; margin: 8px 0 0 0;">Faktura č. <strong style="color: #fdbd16;">${order.id}</strong></p>
+          </div>
 
-        <!-- Footer Details -->
-        <div style="text-align: center; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 20px; margin-top: 30px;">
-          <p style="font-size: 11px; color: #999999; margin: 0; line-height: 1.5;">
-            NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice | IČO: 29618142, DIČ: CZ29618142<br/>
-            Společnost zapsaná u Krajského soudu v Hradci Králové, oddíl C, vložka 29618142.
+          <p style="font-size: 14.5px; color: #222222; line-height: 1.6; margin: 0 0 20px 0;">
+            Dobrý den,<br/><br/>
+            Vaše platba proběhla úspěšně. V příloze tohoto e-mailu naleznete oficiální daňový doklad (fakturu) ve formátu PDF. Fakturu si můžete také kdykoliv stáhnout kliknutím na níže uvedené tlačítko.
           </p>
+
+          <!-- Download Action Box -->
+          <div style="background-color: #fdfdfd; border: 1px solid #e1e4e8; padding: 25px; text-align: center; margin: 25px 0; border-radius: 8px;">
+            <span style="font-size: 13px; color: #666666; display: block; margin-bottom: 5px;">Doklad ke stažení:</span>
+            <strong style="font-size: 16px; color: #111111; display: block; margin-bottom: 15px;">Faktura č. ${order.id}</strong>
+            
+            <a href="${downloadInvoiceUrl}" target="_blank" style="background-color: #fdbd16; color: #111111; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; border: 1px solid #e2a80f; box-shadow: 0 2px 4px rgba(253, 189, 22, 0.15);">
+              Stáhnout fakturu (PDF)
+            </a>
+          </div>
+
+          <!-- Help / System Info list -->
+          <div style="border-top: 1px solid #e1e4e8; padding-top: 24px; margin-bottom: 24px;">
+            <ul style="padding-left: 20px; margin: 0; font-size: 12.5px; color: #666666; line-height: 1.7;">
+              <li style="margin-bottom: 8px;">Pokud se Vám faktura v příloze nebo po kliknutí na tlačítko nezobrazila, zkuste to prosím o chvíli později. Může se stát, že dokument ještě plně neprošel celým naším systémem.</li>
+              <li style="margin-bottom: 8px;">Doklad si prosím pečlivě uschovejte pro případné pozdější využití. Rádi bychom Vás současně ujistili, že plně akceptujeme elektronickou podobu daňového dokladu.</li>
+              <li style="margin-bottom: 8px;">Věnujte prosím chvilku překontrolování všech uvedených údajů. Pokud by cokoliv nesouhlasilo, stačí nás kontaktovat na e-mailové adrese <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; font-weight: bold; text-decoration: underline;">info@northvaletcg.eu</a>.</li>
+            </ul>
+          </div>
+
+          <!-- Footer Details -->
+          <div style="text-align: center; border-top: 1px solid #e1e4e8; padding-top: 24px; margin-top: 30px;">
+            <p style="font-size: 11px; color: #999999; margin: 0; line-height: 1.5;">
+              NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice | IČO: 29618142, DIČ: CZ29618142<br/>
+              Společnost zapsaná u Krajského soudu v Hradci Králové, oddíl C, vložka 29618142.
+            </p>
+          </div>
         </div>
       </div>
     `;
 
     // 3. Admin Notification Content
     const htmlAdminAlertContent = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 1px solid #eaeaea; border-radius: 8px; background-color: #ffffff;">
-        <div style="text-align: center; margin-bottom: 25px;">
-          <h2 style="color: #2e7d32; font-size: 24px; font-weight: 800; margin: 0;">🚀 NOVÁ OBJEDNÁVKA</h2>
-          <p style="font-size: 14px; color: #555; margin: 5px 0 0 0;">Objednávka #${order.id} byla vytvořena a uhrazena.</p>
-        </div>
+      <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 40px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: #222222;">
+          
+          <!-- Logo Header -->
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #fdbd16; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: 2px; text-transform: uppercase;">NORTHVALE Admin</h1>
+            <p style="color: #8a8a92; font-size: 11px; text-transform: uppercase; letter-spacing: 4px; margin: 3px 0 0 0;">Nová objednávka v systému</p>
+          </div>
 
-        <h4 style="font-size: 12px; text-transform: uppercase; color: #777; margin: 20px 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px;">Údaje zákazníka:</h4>
-        <p style="font-size: 13px; color: #333; line-height: 1.5; margin: 0 0 16px 0;">
-          <strong>Jméno:</strong> ${order.customerName}<br/>
-          <strong>E-mail:</strong> ${order.customerEmail}<br/>
-          <strong>Telefon:</strong> ${order.customerPhone || '—'}<br/>
-          <strong>Adresa:</strong> ${order.shippingStreet || '—'}, ${order.shippingCity || '—'}, ${order.shippingZip || '—'}<br/>
-          <strong>Způsob dopravy:</strong> ${order.shippingMethod}<br/>
-          <strong>Poznámka:</strong> ${order.notes || '—'}
-        </p>
+          <!-- Header -->
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: #2e7d32; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">🚀 Nová objednávka</h2>
+            <p style="font-size: 14px; color: #888888; margin: 8px 0 0 0;">Číslo objednávky: <strong style="color: #fdbd16;">#${order.id}</strong></p>
+          </div>
 
-        <h4 style="font-size: 12px; text-transform: uppercase; color: #777; margin: 20px 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px;">Položky objednávky:</h4>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
-          <thead>
-            <tr style="background-color: #f5f5f7; text-align: left;">
-              <th style="padding: 8px; font-size: 11px; text-transform: uppercase; color: #555; font-weight: bold;">Položka</th>
-              <th style="padding: 8px; font-size: 11px; text-transform: uppercase; color: #555; font-weight: bold; text-align: center; width: 60px;">Množství</th>
-              <th style="padding: 8px; font-size: 11px; text-transform: uppercase; color: #555; font-weight: bold; text-align: right; width: 110px;">Celkem</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${items.map((item: any) => `
-              <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #eee; font-size: 12px; color: #333;">${item.name}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center; font-size: 12px; color: #333;">${item.quantity} ks</td>
-                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right; font-size: 12px; font-weight: bold; color: #111;">${(parseFloat(item.price) * parseInt(item.quantity)).toLocaleString('cs-CZ')} Kč</td>
+          <h4 style="font-size: 12px; text-transform: uppercase; color: #888888; margin: 20px 0 10px 0; border-bottom: 1px solid #e1e4e8; padding-bottom: 5px;">Údaje zákazníka:</h4>
+          <p style="font-size: 13.5px; color: #222222; line-height: 1.6; margin: 0 0 20px 0;">
+            <strong>Jméno:</strong> ${order.customerName}<br/>
+            <strong>E-mail:</strong> ${order.customerEmail}<br/>
+            <strong>Telefon:</strong> ${order.customerPhone || '—'}<br/>
+            <strong>Adresa:</strong> ${order.shippingStreet || '—'}, ${order.shippingCity || '—'}, ${order.shippingZip || '—'}<br/>
+            <strong>Způsob dopravy:</strong> ${order.shippingMethod}<br/>
+            <strong>Poznámka:</strong> ${order.notes || '—'}
+          </p>
+
+          <h4 style="font-size: 12px; text-transform: uppercase; color: #888888; margin: 20px 0 10px 0; border-bottom: 1px solid #e1e4e8; padding-bottom: 5px;">Položky objednávky:</h4>
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13.5px;">
+            <thead>
+              <tr style="background-color: #f8f9fa; text-align: left;">
+                <th style="padding: 10px 8px; font-size: 11px; text-transform: uppercase; color: #666666; font-weight: bold; border-bottom: 1px solid #e1e4e8;">Položka</th>
+                <th style="padding: 10px 8px; font-size: 11px; text-transform: uppercase; color: #666666; font-weight: bold; text-align: center; width: 60px; border-bottom: 1px solid #e1e4e8;">Množství</th>
+                <th style="padding: 10px 8px; font-size: 11px; text-transform: uppercase; color: #666666; font-weight: bold; text-align: right; width: 110px; border-bottom: 1px solid #e1e4e8;">Celkem</th>
               </tr>
-            `).join('')}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              ${items.map((item: any) => `
+                <tr>
+                  <td style="padding: 10px 8px; border-bottom: 1px solid #e1e4e8; color: #222222;">${item.name}</td>
+                  <td style="padding: 10px 8px; border-bottom: 1px solid #e1e4e8; text-align: center; color: #222222;">${item.quantity} ks</td>
+                  <td style="padding: 10px 8px; border-bottom: 1px solid #e1e4e8; text-align: right; font-weight: bold; color: #222222;">${(parseFloat(item.price) * parseInt(item.quantity)).toLocaleString('cs-CZ')} Kč</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
 
-        <div style="background-color: #f8f9fa; border: 1px solid #eee; padding: 15px; border-radius: 6px; text-align: right;">
-          <span style="font-size: 11px; color: #666;">Celková cena:</span><br/>
-          <strong style="font-size: 18px; color: #2e7d32; display: block; margin-top: 3px;">${total.toLocaleString('cs-CZ')} Kč</strong>
+          <div style="background-color: #fdfdfd; border: 1px solid #e1e4e8; padding: 15px; border-radius: 8px; text-align: right; margin-top: 20px;">
+            <span style="font-size: 11px; color: #666666;">Celková cena k vyplacení / zaúčtování:</span><br/>
+            <strong style="font-size: 20px; color: #2e7d32; display: block; margin-top: 3px;">${total.toLocaleString('cs-CZ')} Kč</strong>
+          </div>
         </div>
       </div>
     `;
@@ -448,7 +510,7 @@ serve(async (req) => {
     const invoiceEmailSubject = `Faktura - daňový doklad č. ${order.id} ze dne ${orderDate}`;
 
     // 1. Send Order Confirmation Email to Customer
-    await fetch("https://api.brevo.com/v3/smtp/email", {
+    const resConfirm = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         "api-key": brevoApiKey,
@@ -459,13 +521,15 @@ serve(async (req) => {
         sender: { name: senderName, email: senderEmail },
         to: [{ email: order.customerEmail, name: order.customerName }],
         subject: `Potvrzení objednávky #${order.id}`,
-        htmlContent: htmlConfirmContent,
+        htmlContent: wrapInHtmlDocument(htmlConfirmContent),
         attachment: confirmAttachments.length > 0 ? confirmAttachments : undefined
       })
     });
+    const txtConfirm = await resConfirm.text();
+    console.log(`[send-order-email] Confirm email response status: ${resConfirm.status}, body: ${txtConfirm}`);
 
     // 2. Send Invoice Email to Customer (Custom Subject and Fakturoid-style layout)
-    await fetch("https://api.brevo.com/v3/smtp/email", {
+    const resInvoice = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         "api-key": brevoApiKey,
@@ -476,13 +540,15 @@ serve(async (req) => {
         sender: { name: senderName, email: senderEmail },
         to: [{ email: order.customerEmail, name: order.customerName }],
         subject: invoiceEmailSubject,
-        htmlContent: htmlInvoiceContent,
+        htmlContent: wrapInHtmlDocument(htmlInvoiceContent),
         attachment: attachments.length > 0 ? attachments : undefined
       })
     });
+    const txtInvoice = await resInvoice.text();
+    console.log(`[send-order-email] Invoice email response status: ${resInvoice.status}, body: ${txtInvoice}`);
 
     // 3. Send Admin Alert Email
-    await fetch("https://api.brevo.com/v3/smtp/email", {
+    const resAdmin = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         "api-key": brevoApiKey,
@@ -493,10 +559,12 @@ serve(async (req) => {
         sender: { name: senderName, email: senderEmail },
         to: [{ email: "objednavky@northvaletcg.eu", name: "NORTHVALE Admin" }],
         subject: `[NORTHVALE - ADMIN] Nová objednávka #${order.id}`,
-        htmlContent: htmlAdminAlertContent,
+        htmlContent: wrapInHtmlDocument(htmlAdminAlertContent),
         attachment: attachments.length > 0 ? attachments : undefined
       })
     });
+    const txtAdmin = await resAdmin.text();
+    console.log(`[send-order-email] Admin email response status: ${resAdmin.status}, body: ${txtAdmin}`);
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

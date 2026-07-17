@@ -10,6 +10,34 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
 };
 
+function wrapInHtmlDocument(innerContent: string): string {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <style>
+    :root {
+      color-scheme: light;
+      supported-color-schemes: light;
+    }
+    body {
+      background-color: #f5f6f8 !important;
+      margin: 0;
+      padding: 0;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+  </style>
+</head>
+<body style="background-color: #f5f6f8; margin: 0; padding: 0;">
+  ${innerContent}
+</body>
+</html>`;
+}
+
 serve(async (req) => {
   // Handle CORS preflight request
   if (req.method === "OPTIONS") {
@@ -92,55 +120,58 @@ serve(async (req) => {
 
       // Build beautiful dynamic HTML transactional email for pre-registrations
       const htmlContent = `
-        <div style="background-color: #0b0b0b; padding: 40px 20px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #ffffff; text-align: center; border-radius: 12px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(253, 189, 22, 0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-          <!-- Logo Header -->
-          <div style="margin-bottom: 30px;">
-            <h1 style="color: #FDBD16; font-size: 28px; letter-spacing: 2px; margin: 0; text-transform: uppercase; font-weight: 800;">NORTHVALE</h1>
-            <p style="color: #8a8a92; font-size: 12px; text-transform: uppercase; letter-spacing: 4px; margin: 5px 0 0 0;">Trading Card Games</p>
-          </div>
-          
-          <hr style="border: 0; border-top: 1px solid rgba(253, 189, 22, 0.15); margin: 30px 0;" />
-          
-          <!-- Main Greeting -->
-          <h2 style="color: #ffffff; font-size: 20px; margin-bottom: 20px; font-weight: 600;">
-            ${lang === 'EN' ? 'Welcome to the Pre-registration!' : 'Vítejte v předregistraci!'}
-          </h2>
-          
-          <p style="color: #d1d1d6; font-size: 15px; line-height: 1.6; margin-bottom: 30px; text-align: left;">
-            ${lang === 'EN' 
-              ? 'Thank you for building a new TCG world with us! Your pre-registration has been successfully recorded. We are working hard to bring you the best experience, and we plan to officially launch the e-shop on <strong>August 1st</strong>.' 
-              : 'Děkujeme, že s námi stavíte nový TCG svět! Vaše předregistrace byla úspěšně zaznamenána. Na spuštění e-shopu usilovně pracujeme a oficiálně startujeme již <strong>1. srpna</strong>.'}
-          </p>
-          
-          <!-- Coupon Box -->
-          <div style="background: linear-gradient(135deg, #161618 0%, #1c1c1f 100%); border: 1px solid #FDBD16; padding: 25px; border-radius: 8px; margin: 30px 0; text-align: center; box-shadow: 0 4px 15px rgba(253, 189, 22, 0.1);">
-            <p style="color: #FDBD16; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 10px 0; font-weight: bold;">
-              ${lang === 'EN' ? 'Your 5% Discount Code' : 'Váš slevový kód na 5%'}
-            </p>
-            <div style="font-size: 32px; font-weight: bold; color: #ffffff; letter-spacing: 4px; margin: 10px 0; font-family: monospace;">
-              NORTHVALE5
+        <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%; text-align: center;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 40px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: #222222;">
+            
+            <!-- Logo Header -->
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #fdbd16; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: 2px; text-transform: uppercase;">NORTHVALE</h1>
+              <p style="color: #8a8a92; font-size: 11px; text-transform: uppercase; letter-spacing: 4px; margin: 3px 0 0 0;">Trading Card Games</p>
             </div>
-            <p style="color: #8a8a92; font-size: 11px; margin: 10px 0 0 0;">
-              ${lang === 'EN' ? 'Valid for your first purchase starting August 1st.' : 'Platný pro Váš první nákup od 1. srpna.'}
+            
+            <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 30px 0;" />
+            
+            <!-- Main Greeting -->
+            <h2 style="color: #111111; font-size: 20px; margin-bottom: 20px; font-weight: 600; text-align: center;">
+              ${lang === 'EN' ? 'Welcome to the Pre-registration!' : 'Vítejte v předregistraci!'}
+            </h2>
+            
+            <p style="color: #222222; font-size: 15px; line-height: 1.6; margin-bottom: 30px; text-align: left;">
+              ${lang === 'EN' 
+                ? 'Thank you for building a new TCG world with us! Your pre-registration has been successfully recorded. We are working hard to bring you the best experience, and we plan to officially launch the e-shop on <strong>August 1st</strong>.' 
+                : 'Děkujeme, že s námi stavíte nový TCG svět! Vaše předregistrace byla úspěšně zaznamenána. Na spuštění e-shopu usilovně pracujeme a oficiálně startujeme již <strong>1. srpna</strong>.'}
+            </p>
+            
+            <!-- Coupon Box -->
+            <div style="background-color: #fdfdfd; border: 1px solid #fdbd16; padding: 25px; border-radius: 8px; margin: 30px 0; text-align: center; box-shadow: 0 4px 15px rgba(253, 189, 22, 0.05);">
+              <p style="color: #fdbd16; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 10px 0; font-weight: bold;">
+                ${lang === 'EN' ? 'Your 5% Discount Code' : 'Váš slevový kód na 5%'}
+              </p>
+              <div style="font-size: 32px; font-weight: bold; color: #111111; letter-spacing: 4px; margin: 10px 0; font-family: monospace;">
+                NORTHVALE5
+              </div>
+              <p style="color: #8a8a92; font-size: 11px; margin: 10px 0 0 0;">
+                ${lang === 'EN' ? 'Valid for your first purchase starting August 1st.' : 'Platný pro Váš první nákup od 1. srpna.'}
+              </p>
+            </div>
+            
+            <p style="color: #222222; font-size: 14px; line-height: 1.6; margin-bottom: 35px; text-align: left;">
+              ${lang === 'EN'
+                ? 'We will send you a notification as soon as the doors open. In the meantime, you can follow us on our social networks.'
+                : 'Jakmile e-shop otevře své brány, pošleme Vám upozornění. Mezitím nás můžete sledovat na našich sociálních sítích.'}
+            </p>
+            
+            <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 30px 0;" />
+            
+            <!-- Footer -->
+            <p style="color: #8a8a92; font-size: 11px; line-height: 1.5; margin: 0; text-align: center;">
+              ${lang === 'EN'
+                ? 'This email was sent automatically based on your pre-registration at northvaletcg.eu.'
+                : 'Tento e-mail byl odeslán automaticky na základě Vaší předregistrace na webu northvaletcg.eu.'}
+              <br />
+              © 2026 NORTHVALE. All rights reserved.
             </p>
           </div>
-          
-          <p style="color: #d1d1d6; font-size: 14px; line-height: 1.6; margin-bottom: 35px; text-align: left;">
-            ${lang === 'EN'
-              ? 'We will send you a notification as soon as the doors open. In the meantime, you can follow us on our social networks.'
-              : 'Jakmile e-shop otevře své brány, pošleme Vám upozornění. Mezitím nás můžete sledovat na našich sociálních sítích.'}
-          </p>
-          
-          <hr style="border: 0; border-top: 1px solid rgba(253, 189, 22, 0.15); margin: 30px 0;" />
-          
-          <!-- Footer -->
-          <p style="color: #8a8a92; font-size: 11px; line-height: 1.5; margin: 0;">
-            ${lang === 'EN'
-              ? 'This email was sent automatically based on your pre-registration at northvaletcg.eu.'
-              : 'Tento e-mail byl odeslán automaticky na základě Vaší předregistrace na webu northvaletcg.eu.'}
-            <br />
-            © 2026 NORTHVALE. All rights reserved.
-          </p>
         </div>
       `;
 
@@ -163,7 +194,7 @@ serve(async (req) => {
             }
           ],
           subject: lang === 'EN' ? "Welcome to NORTHVALE Pre-registration!" : "Vítejte v předregistraci NORTHVALE!",
-          htmlContent: htmlContent
+          htmlContent: wrapInHtmlDocument(htmlContent)
         })
       });
 
@@ -197,6 +228,77 @@ serve(async (req) => {
     const redirectUrl = lang === 'EN' 
       ? `https://bfxzhggjpiyqfolqpxzz.supabase.co/functions/v1/subscribe-newsletter?action=confirm&email=${encodeURIComponent(email)}&lang=en` 
       : `https://bfxzhggjpiyqfolqpxzz.supabase.co/functions/v1/subscribe-newsletter?action=confirm&email=${encodeURIComponent(email)}`;
+
+    // Update/Sync Double Opt-in template in Brevo to match the new unified light style
+    try {
+      console.log(`[subscribe-newsletter] Updating Brevo template ID ${brevoTemplateId}...`);
+      const updateTemplateRes = await fetch(`https://api.brevo.com/v3/smtp/templates/${brevoTemplateId}`, {
+        method: "PUT",
+        headers: {
+          "api-key": brevoApiKey,
+          "content-type": "application/json",
+          "accept": "application/json"
+        },
+        body: JSON.stringify({
+          htmlContent: wrapInHtmlDocument(`
+            <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%; text-align: center;">
+              <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 40px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: #222222;">
+                
+                <!-- Logo Header -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                  <h1 style="color: #fdbd16; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: 2px; text-transform: uppercase;">NORTHVALE</h1>
+                  <p style="color: #8a8a92; font-size: 11px; text-transform: uppercase; letter-spacing: 4px; margin: 3px 0 0 0;">Trading Card Games</p>
+                </div>
+                
+                <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 30px 0;" />
+                
+                <!-- Main Greeting -->
+                <h2 style="color: #111111; font-size: 20px; margin-bottom: 20px; font-weight: 600; text-align: center;">
+                  ${lang === 'EN' ? 'Confirm newsletter subscription' : 'Potvrzení přihlášení k newsletteru'}
+                </h2>
+                
+                <p style="color: #222222; font-size: 15px; line-height: 1.6; margin-bottom: 30px; text-align: left;">
+                  ${lang === 'EN'
+                    ? 'Hello,<br/><br/>thank you for your interest in the NORTHVALE TCG newsletter. To complete your subscription and receive updates and exclusive offers, please confirm your email address by clicking the button below.'
+                    : 'Dobrý den,<br/><br/>děkujeme za Váš zájem o newsletter NORTHVALE TCG. Abychom dokončili Vaše přihlášení a mohli Vám posílat novinky a exkluzivní nabídky, potvrďte prosím svou e-mailovou adresu kliknutím na tlačítko níže.'}
+                </p>
+                
+                <!-- Action Button -->
+                <div style="margin: 30px 0; text-align: center;">
+                  <a href="{{ doubleoptin }}" target="_blank" style="background-color: #fdbd16; color: #111111; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px; display: inline-block; border: 1px solid #e2a80f; box-shadow: 0 2px 4px rgba(253, 189, 22, 0.15);">
+                    ${lang === 'EN' ? 'Confirm subscription' : 'Potvrdit přihlášení k odběru'}
+                  </a>
+                </div>
+                
+                <p style="color: #666666; font-size: 13px; line-height: 1.6; margin-bottom: 35px; text-align: left;">
+                  ${lang === 'EN'
+                    ? 'If the button above does not work, copy and paste the following link into your browser:'
+                    : 'Pokud na tlačítko nelze kliknout, zkopírujte následující odkaz do Vašeho prohlížeče:'}<br/>
+                  <span style="word-break: break-all; color: #fdbd16;">{{ doubleoptin }}</span>
+                </p>
+                
+                <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 30px 0;" />
+                
+                <!-- Footer -->
+                <p style="color: #8a8a92; font-size: 11px; line-height: 1.5; margin: 0; text-align: center;">
+                  ${lang === 'EN'
+                    ? 'This email was sent automatically based on your request on northvaletcg.eu. If you did not make this request, you can safely ignore this email.'
+                    : 'Tento e-mail byl odeslán automaticky na základě Vašeho požadavku o přihlášení na webu northvaletcg.eu. Pokud jste o přihlášení nežádali, můžete tento e-mail bez obav ignorovat.'}
+                  <br />
+                  © 2026 NORTHVALE. ${lang === 'EN' ? 'All rights reserved.' : 'Všechna práva vyhrazena.'}
+                </p>
+              </div>
+            </div>
+          `)
+        })
+      });
+      console.log(`[subscribe-newsletter] Update template ID ${brevoTemplateId} status: ${updateTemplateRes.status}`);
+      if (!updateTemplateRes.ok) {
+        console.error(`[subscribe-newsletter] Failed to update template: ${await updateTemplateRes.text()}`);
+      }
+    } catch (err) {
+      console.error(`[subscribe-newsletter] Error updating template ID ${brevoTemplateId}:`, err);
+    }
 
     const response = await fetch("https://api.brevo.com/v3/contacts/doubleOptinConfirmation", {
       method: "POST",
