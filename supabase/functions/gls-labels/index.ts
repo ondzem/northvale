@@ -37,36 +37,31 @@ serve(async (req) => {
     }
 
     // 1. Authorize user (admin/superadmin check)
+    let isAuthorized = false;
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized: Missing Authorization header." }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
+    
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
     const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized: Invalid JWT token." }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+      if (!authError && user) {
+        const { data: profile } = await supabaseClient
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle();
+          
+        if (profile && (profile.role === "admin" || profile.role === "superadmin")) {
+          isAuthorized = true;
+        }
+      }
     }
 
-    // Check user role in profiles table
-    const { data: profile, error: profileError } = await supabaseClient
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError || !profile || (profile.role !== "admin" && profile.role !== "superadmin")) {
-      return new Response(JSON.stringify({ error: "Unauthorized: Insufficient permissions." }), {
+    if (!isAuthorized) {
+      return new Response(JSON.stringify({ error: "Unauthorized: Insufficient permissions to access GLS labeling API." }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
