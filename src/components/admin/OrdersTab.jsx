@@ -72,6 +72,7 @@ export default function OrdersTab({ showToast }) {
     isOpen: false,
     title: '',
     message: '',
+    confirmText: '',
     onConfirm: null
   });
   
@@ -336,6 +337,7 @@ export default function OrdersTab({ showToast }) {
       isOpen: true,
       title,
       message,
+      confirmText: lang === 'CZ' ? 'Smazat' : 'Delete',
       onConfirm: async () => {
         try {
           const { data, error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
@@ -517,36 +519,45 @@ export default function OrdersTab({ showToast }) {
       return;
     }
 
-    if (!window.confirm(lang === 'CZ' ? `Opravdu chcete stornovat GLS zásilku č. ${order.rawJson?.order?.gls_parcel_number}?` : `Are you sure you want to cancel GLS shipment No. ${order.rawJson?.order?.gls_parcel_number}?`)) {
-      return;
-    }
+    const title = lang === 'CZ' ? 'Stornovat GLS zásilku?' : 'Cancel GLS Shipment?';
+    const message = lang === 'CZ'
+      ? `Opravdu chcete stornovat GLS zásilku č. ${order.rawJson?.order?.gls_parcel_number}?`
+      : `Are you sure you want to cancel GLS shipment No. ${order.rawJson?.order?.gls_parcel_number}?`;
 
-    setCancelingGlsId(order.id);
-    try {
-      const { data, error } = await supabase.functions.invoke('gls-labels', {
-        body: {
-          action: 'delete',
-          parcelIdList: [parseInt(parcelId, 10)],
-          order: { id: order.id }
+    setConfirmModal({
+      isOpen: true,
+      title,
+      message,
+      confirmText: lang === 'CZ' ? 'Stornovat' : 'Cancel',
+      onConfirm: async () => {
+        setCancelingGlsId(order.id);
+        try {
+          const { data, error } = await supabase.functions.invoke('gls-labels', {
+            body: {
+              action: 'delete',
+              parcelIdList: [parseInt(parcelId, 10)],
+              order: { id: order.id }
+            }
+          });
+
+          if (error) throw error;
+
+          if (data && data.success) {
+            showToast(lang === 'CZ' ? 'GLS zásilka byla úspěšně stornována.' : 'GLS shipment cancelled successfully.', 'success');
+            fetchOrdersList();
+            setDetailOrder(null);
+          } else {
+            throw new Error(data?.error || 'Neznámá chyba při stornování zásilky u GLS.');
+          }
+        } catch (err) {
+          console.error('GLS Shipment cancellation failed:', err);
+          const msg = await getFnErrorMessage(err);
+          showToast(lang === 'CZ' ? `Chyba stornování GLS: ${msg}` : `GLS Cancellation Error: ${msg}`, 'error');
+        } finally {
+          setCancelingGlsId(null);
         }
-      });
-
-      if (error) throw error;
-
-      if (data && data.success) {
-        showToast(lang === 'CZ' ? 'GLS zásilka byla úspěšně stornována.' : 'GLS shipment cancelled successfully.', 'success');
-        fetchOrdersList();
-        setDetailOrder(null);
-      } else {
-        throw new Error(data?.error || 'Neznámá chyba při stornování zásilky u GLS.');
       }
-    } catch (err) {
-      console.error('GLS Shipment cancellation failed:', err);
-      const msg = await getFnErrorMessage(err);
-      showToast(lang === 'CZ' ? `Chyba stornování GLS: ${msg}` : `GLS Cancellation Error: ${msg}`, 'error');
-    } finally {
-      setCancelingGlsId(null);
-    }
+    });
   };
 
   // Direct DPD API Labeling Call
@@ -2034,7 +2045,7 @@ export default function OrdersTab({ showToast }) {
                   setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null });
                 }}
               >
-                {lang === 'CZ' ? 'Smazat' : 'Delete'}
+                {confirmModal.confirmText || (lang === 'CZ' ? 'Potvrdit' : 'Confirm')}
               </button>
             </div>
           </div>
