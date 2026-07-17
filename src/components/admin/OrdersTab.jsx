@@ -494,6 +494,9 @@ export default function OrdersTab({ showToast }) {
             console.error('Failed to send expedition email:', emailErr);
           }
         }
+        // Refresh orders list to pull updated parcel numbers
+        fetchOrdersList();
+        setDetailOrder(null);
       } else {
         throw new Error(data?.error || 'Neznámá chyba při komunikaci s GLS API.');
       }

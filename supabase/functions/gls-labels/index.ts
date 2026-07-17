@@ -215,16 +215,21 @@ serve(async (req) => {
     let savedParcelNo = "";
     let savedParcelId = "";
     try {
-      const { data: fileData } = await supabaseClient.storage
+      const { data: fileData, error: downloadError } = await supabaseClient.storage
         .from("pohoda-orders")
         .download(`order_${order.id}.json`);
+      if (downloadError) {
+        console.warn(`[gls-labels] Storage download failed for order_${order.id}.json:`, downloadError.message);
+      }
       if (fileData) {
         const text = await fileData.text();
         orderJsonObj = JSON.parse(text);
         savedParcelNo = orderJsonObj?.order?.gls_parcel_number || "";
         savedParcelId = orderJsonObj?.order?.gls_parcel_id || "";
       }
-    } catch (_) {}
+    } catch (err) {
+      console.warn(`[gls-labels] Error parsing JSON for order_${order.id}.json:`, err.message);
+    }
 
     // 2. Idempotence Check: if label is already generated, retrieve the PDF using GetPrintedLabels
     if (savedParcelNo && savedParcelId) {
@@ -379,15 +384,23 @@ serve(async (req) => {
 
     // Save parcel number to local storage JSON representation
     if (orderJsonObj) {
+      console.log(`[gls-labels] Saving parcel metadata to order_${order.id}.json: parcelNumber=${newParcelNumber}, parcelId=${newParcelId}`);
       orderJsonObj.order.gls_parcel_number = newParcelNumber.toString();
       orderJsonObj.order.gls_parcel_id = newParcelId.toString();
       const updatedBytes = encoder.encode(JSON.stringify(orderJsonObj, null, 2));
-      await supabaseClient.storage
+      const { error: uploadError } = await supabaseClient.storage
         .from("pohoda-orders")
         .upload(`order_${order.id}.json`, updatedBytes, {
           contentType: "application/json",
           upsert: true
         });
+      if (uploadError) {
+        console.warn(`[gls-labels] Storage upload failed for order_${order.id}.json:`, uploadError.message);
+      } else {
+        console.log(`[gls-labels] Successfully saved parcel metadata to storage.`);
+      }
+    } else {
+      console.warn(`[gls-labels] orderJsonObj is null! Skipping metadata save for order ${order.id}`);
     }
 
     return new Response(JSON.stringify({
