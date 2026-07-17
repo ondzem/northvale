@@ -403,6 +403,16 @@ export default function OrdersTab({ showToast }) {
     });
   };
 
+  const getFnErrorMessage = async (err) => {
+    if (err && err.context && typeof err.context.json === 'function') {
+      try {
+        const body = await err.context.json();
+        return body?.error || err.message;
+      } catch (_) {}
+    }
+    return err?.message || 'Neznámá chyba.';
+  };
+
   // Direct GLS API Labeling Call
   const generateGlsLabelApi = async (order) => {
     setGeneratingLabelId(order.id);
@@ -475,7 +485,8 @@ export default function OrdersTab({ showToast }) {
       }
     } catch (err) {
       console.error('GLS Label generation failed:', err);
-      showToast(lang === 'CZ' ? `Chyba API: ${err.message}` : `API Error: ${err.message}`, 'error');
+      const msg = await getFnErrorMessage(err);
+      showToast(lang === 'CZ' ? `Chyba API: ${msg}` : `API Error: ${msg}`, 'error');
     } finally {
       setGeneratingLabelId(null);
     }
@@ -514,7 +525,8 @@ export default function OrdersTab({ showToast }) {
       }
     } catch (err) {
       console.error('GLS Shipment cancellation failed:', err);
-      showToast(lang === 'CZ' ? `Chyba stornování GLS: ${err.message}` : `GLS Cancellation Error: ${err.message}`, 'error');
+      const msg = await getFnErrorMessage(err);
+      showToast(lang === 'CZ' ? `Chyba stornování GLS: ${msg}` : `GLS Cancellation Error: ${msg}`, 'error');
     } finally {
       setCancelingGlsId(null);
     }
@@ -595,7 +607,8 @@ export default function OrdersTab({ showToast }) {
       }
     } catch (err) {
       console.error('DPD Label generation failed:', err);
-      showToast(lang === 'CZ' ? `Chyba DPD API: ${err.message}` : `DPD API Error: ${err.message}`, 'error');
+      const msg = await getFnErrorMessage(err);
+      showToast(lang === 'CZ' ? `Chyba DPD API: ${msg}` : `DPD API Error: ${msg}`, 'error');
     } finally {
       setGeneratingLabelId(null);
     }
