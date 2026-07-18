@@ -212,6 +212,16 @@ export default function FaqTab({ showToast }) {
 
   // Start adding an item
   const handleInitAddItem = (catId = '') => {
+    if (faqData.length === 0) {
+      showToast(
+        lang === 'CZ'
+          ? 'Před vytvořením dotazu musíte nejprve založit alespoň jedno téma (kategorii).'
+          : 'Please create at least one topic (category) before adding a question.',
+        'warning'
+      );
+      return;
+    }
+
     const targetCat = faqData.find(c => c.id === catId) || faqData[0];
     const defaultPosition = targetCat ? (targetCat.questions || []).length : 0;
 
@@ -358,7 +368,6 @@ export default function FaqTab({ showToast }) {
               type="button" 
               className="btn btn-primary" 
               style={{ flex: isMobile ? 1 : 'none', fontSize: '11px', padding: '6px 12px' }}
-              disabled={faqData.length === 0}
               onClick={() => handleInitAddItem()}
             >
               + {lang === 'CZ' ? 'Nový dotaz' : 'New Question'}
