@@ -6,19 +6,19 @@ import { blogArticles } from '../blogData';
 const getArticleDate = (id) => {
   switch (id) {
     case 'jak-rozpoznat-falesnou-pokemon-kartu':
-      return '18. 06. 2026';
+      return '28. 07. 2026';
     case 'jak-zacit-s-pokemon-kartami':
-      return '17. 06. 2026';
+      return '25. 07. 2026';
     case 'kde-koupit-pokemon-karty-v-cesku':
-      return '16. 06. 2026';
+      return '22. 07. 2026';
     case 'kde-sehnat-pokemon-karty-v-cr':
-      return '15. 06. 2026';
+      return '19. 07. 2026';
     case 'prislusenstvi-pro-karty':
-      return '14. 06. 2026';
+      return '15. 07. 2026';
     case 'vybava-sberatele-pokemon-karet':
-      return '13. 06. 2026';
+      return '12. 07. 2026';
     default:
-      return '18. 06. 2026';
+      return '28. 07. 2026';
   }
 };
 
