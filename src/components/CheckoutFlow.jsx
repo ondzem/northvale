@@ -458,15 +458,17 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         console.log("GLS Widget message received:", ps);
         const detail = ps.detail;
         if (detail) {
-          const address = `${detail.name}, ${detail.street}, ${detail.city} (ID: ${detail.pclshopid})`;
+          const resolvedStreet = detail.address || detail.street || '';
+          const resolvedZip = (detail.zipcode || detail.zip || '').toString().replace(/\s+/g, '');
+          const address = `${detail.name}, ${resolvedStreet}, ${detail.city} (ID: ${detail.pclshopid})`;
           setPickupPoint(address);
           
           const details = {
             id: detail.pclshopid || '',
             name: detail.name || '',
-            street: detail.street || '',
+            street: resolvedStreet,
             city: detail.city || '',
-            zip: (detail.zip || '').toString().replace(/\s+/g, ''),
+            zip: resolvedZip,
             country: detail.country || 'CZ'
           };
           setPickupPointDetails(details);

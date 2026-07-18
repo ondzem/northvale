@@ -58,7 +58,11 @@ serve(async (req) => {
         const text = await data.text();
         return new Response(text, {
           status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json",
+            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"
+          },
         });
       } else {
         const { data, error } = await supabase.storage.from("pohoda-orders").list("", {
@@ -68,7 +72,11 @@ serve(async (req) => {
         if (error) throw error;
         return new Response(JSON.stringify({ files: data }), {
           status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json",
+            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"
+          },
         });
       }
     }

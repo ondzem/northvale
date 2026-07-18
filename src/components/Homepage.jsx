@@ -4,12 +4,42 @@ import { useTranslation } from '../context/LanguageContext';
 import { fetchSlidesFromDB, DEFAULT_SLIDES } from '../services/slides';
 import { fetchDailyDealFromDB } from '../services/dailyDeal';
 import { fetchHomepageSectionsFromDB } from '../services/homepageSections';
-import { fetchProductByIdFromDB } from '../services/products';
+import { fetchProductByIdFromDB, fetchProductImage } from '../services/products';
 
 const ProductImage = ({ productId, src, alt, title, className = '', onAspectRatioLoaded }) => {
+  const [imgSrc, setImgSrc] = useState(() => {
+    try {
+      return localStorage.getItem(`nv-img-${productId}`) || src || '';
+    } catch {
+      return src || '';
+    }
+  });
   const [aspectRatio, setAspectRatio] = useState(1.0);
   const [loaded, setLoaded] = useState(false);
+  const [dbLoading, setDbLoading] = useState(false);
   const imgRef = useRef(null);
+
+  useEffect(() => {
+    if (src) {
+      setImgSrc(src);
+      setLoaded(false);
+    }
+  }, [src]);
+
+  useEffect(() => {
+    if (productId && (!imgSrc || (!imgSrc.startsWith('data:') && !imgSrc.startsWith('/') && !imgSrc.startsWith('http')))) {
+      setDbLoading(true);
+      fetchProductImage(productId).then(dbImage => {
+        if (dbImage) {
+          setImgSrc(dbImage);
+        }
+        setDbLoading(false);
+      }).catch(err => {
+        console.error('Failed to lazy load image for homepage card:', productId, err);
+        setDbLoading(false);
+      });
+    }
+  }, [productId, imgSrc]);
 
   useEffect(() => {
     if (imgRef.current && imgRef.current.complete) {
@@ -21,7 +51,7 @@ const ProductImage = ({ productId, src, alt, title, className = '', onAspectRati
         if (onAspectRatioLoaded) onAspectRatioLoaded(productId, ratio);
       }
     }
-  }, [src, productId]);
+  }, [imgSrc, productId]);
 
   const handleLoad = (e) => {
     const { naturalWidth, naturalHeight } = e.target;
@@ -44,15 +74,33 @@ const ProductImage = ({ productId, src, alt, title, className = '', onAspectRati
   const fitClass = (aspectRatio < 0.72 || aspectRatio >= 1.1) ? 'ca-fit-contain' : 'ca-fit-cover';
 
   return (
-    <img
-      ref={imgRef}
-      src={src}
-      alt={alt || 'Northvale TCG produkt'}
-      title={title || alt || 'Northvale TCG produkt'}
-      onLoad={handleLoad}
-      className={`${className} ${fitClass} ${loaded ? 'loaded' : ''}`}
-      loading="lazy"
-    />
+    <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {(!loaded || dbLoading) && (
+        <div className="image-skeleton-loader nv-skeleton" style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '8px'
+        }}></div>
+      )}
+      {imgSrc && (
+        <img
+          ref={imgRef}
+          src={imgSrc}
+          alt={alt || 'Northvale TCG produkt'}
+          title={title || alt || 'Northvale TCG produkt'}
+          onLoad={handleLoad}
+          className={`${className} ${fitClass} ${loaded ? 'loaded' : ''}`}
+          style={{
+            opacity: loaded ? 1 : 0,
+            transition: 'opacity 0.25s ease-in-out',
+            width: '100%',
+            height: '100%'
+          }}
+          loading="lazy"
+        />
+      )}
+    </div>
   );
 };
 
@@ -370,6 +418,14 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         .filter(Boolean);
     }
     return products.filter(defaultFilter).slice(0, 5);
+  };
+
+  const getProductPrice = (product) => {
+    if (!product) return 0;
+    if (product.variants && product.variants.length > 0) {
+      return product.variants[0].price || 0;
+    }
+    return product.price || 0;
   };
 
   const newArrivals = getSectionProducts('newArrivals', p => p.type === 'single');
@@ -1437,7 +1493,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                           <span className="vf-dot"></span>
                           {lang === 'CZ' ? 'Skladem' : 'In Stock'}
                         </span>
-                        <span className="vf-price">{((product.variants ? product.variants[0].price : product.price) || 1200).toLocaleString('cs-CZ')} Kč</span>
+                        <span className="vf-price">{getProductPrice(product).toLocaleString('cs-CZ')} Kč</span>
                       </div>
                     </div>
                   </a>
@@ -1532,7 +1588,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                               <span className="vf-dot"></span>
                               {lang === 'CZ' ? 'Předobjednávka' : 'Pre-order'}
                             </span>
-                            <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
+                            <span className="vf-price">{getProductPrice(product).toLocaleString('cs-CZ')} Kč</span>
                           </div>
                         </div>
                       </a>
@@ -1640,7 +1696,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                           <div className="vf-rule"></div>
                           <div className="vf-meta">
                             <span className="slab-badge">{product.company} {product.grade}</span>
-                            <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
+                            <span className="vf-price">{getProductPrice(product).toLocaleString('cs-CZ')} Kč</span>
                           </div>
                         </div>
                       </a>
@@ -1732,7 +1788,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                           <span className="vf-dot"></span>
                           {lang === 'CZ' ? 'Skladem' : 'In Stock'}
                         </span>
-                        <span className="vf-price">{product.price.toLocaleString('cs-CZ')} Kč</span>
+                        <span className="vf-price">{getProductPrice(product).toLocaleString('cs-CZ')} Kč</span>
                       </div>
                     </div>
                   </a>

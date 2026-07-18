@@ -1320,7 +1320,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 .vf-info {
   display: block;
   width: 100%;
-  margin-top: var(--info-mt, 12px);
+  margin-top: var(--info-mt, 18px);
   box-sizing: border-box;
 }
 
@@ -2712,7 +2712,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 }
 
 .card-buy-container {
-  margin-top: auto;
+  margin-top: 14px;
   padding-top: 10px;
 }
 

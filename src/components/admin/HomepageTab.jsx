@@ -57,6 +57,14 @@ export default function HomepageTab({ showToast, onEditProduct }) {
   const [sectionsLoading, setSectionsLoading] = useState(true);
   const [searchQueries, setSearchQueries] = useState({ newArrivals: '', preorders: '', accessories: '' });
 
+  const getProductPrice = (product) => {
+    if (!product) return 0;
+    if (product.variants && product.variants.length > 0) {
+      return product.variants[0].price || 0;
+    }
+    return product.price || 0;
+  };
+
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 900);
     window.addEventListener('resize', handleResize);
@@ -265,7 +273,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                         />
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <span style={{ fontSize: '13px', fontWeight: '600', color: '#fff', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{prod.name}</span>
-                          <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{prod.price} Kč • {prod.type}</span>
+                          <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{getProductPrice(prod)} Kč • {prod.type}</span>
                         </div>
                       </div>
                       <button
@@ -346,7 +354,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                         {prod.name}
                       </span>
                       <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
-                        {prod.price.toLocaleString('cs-CZ')} Kč • {prod.stock > 0 ? (lang === 'CZ' ? 'Skladem' : 'In Stock') : (lang === 'CZ' ? 'Nedostupné' : 'Out of stock')}
+                        {getProductPrice(prod).toLocaleString('cs-CZ')} Kč • {prod.stock > 0 ? (lang === 'CZ' ? 'Skladem' : 'In Stock') : (lang === 'CZ' ? 'Nedostupné' : 'Out of stock')}
                       </span>
                     </div>
                   </div>
@@ -1562,7 +1570,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                     <option value="">{lang === 'CZ' ? '-- Nepropojeno (Čistě grafická karta) --' : '-- Not Linked (Graphical card only) --'}</option>
                     {dealProductsList.map(prod => (
                       <option key={prod.id} value={prod.id}>
-                        {prod.name} ({prod.price} Kč)
+                        {prod.name} ({getProductPrice(prod)} Kč)
                       </option>
                     ))}
                   </select>

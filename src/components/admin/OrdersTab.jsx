@@ -100,10 +100,10 @@ export default function OrdersTab({ showToast }) {
     fetchOrdersList();
   }, []);
 
-  const fetchOrdersList = async () => {
+  const fetchOrdersList = async (filenameToClear = null) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('save-order-json', {
+      const { data, error } = await supabase.functions.invoke(`save-order-json?t=${Date.now()}`, {
         method: 'GET'
       });
 
@@ -113,10 +113,18 @@ export default function OrdersTab({ showToast }) {
       const orderFiles = ((data && data.files) || []).filter(f => f.name.startsWith('order_') && (f.name.endsWith('.xml') || f.name.endsWith('.json')));
       setFiles(orderFiles);
       
+      if (filenameToClear) {
+        setLoadedOrders(prev => {
+          const next = { ...prev };
+          delete next[filenameToClear];
+          return next;
+        });
+      }
+
       // Start background loading for missing details
       const missingIds = orderFiles
         .map(f => f.name)
-        .filter(name => !loadedOrders[name]);
+        .filter(name => !loadedOrders[name] || name === filenameToClear);
       
       if (missingIds.length > 0) {
         setLoadingDetailsProgress({ current: 0, total: missingIds.length });
@@ -142,7 +150,7 @@ export default function OrdersTab({ showToast }) {
         const batch = loadingQueueRef.current.splice(0, batchSize);
         await Promise.all(batch.map(async (filename) => {
           try {
-            const { data, error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
+            const { data, error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}&t=${Date.now()}`, {
               method: 'GET'
             });
             
@@ -497,7 +505,7 @@ export default function OrdersTab({ showToast }) {
           }
         }
         // Refresh orders list to pull updated parcel numbers
-        fetchOrdersList();
+        fetchOrdersList(`order_${order.id}.json`);
         setDetailOrder(null);
       } else {
         throw new Error(data?.error || 'Neznámá chyba při komunikaci s GLS API.');
@@ -544,7 +552,7 @@ export default function OrdersTab({ showToast }) {
 
           if (data && data.success) {
             showToast(lang === 'CZ' ? 'GLS zásilka byla úspěšně stornována.' : 'GLS shipment cancelled successfully.', 'success');
-            fetchOrdersList();
+            fetchOrdersList(`order_${order.id}.json`);
             setDetailOrder(null);
           } else {
             throw new Error(data?.error || 'Neznámá chyba při stornování zásilky u GLS.');
@@ -636,7 +644,7 @@ export default function OrdersTab({ showToast }) {
         }
         
         // Refresh orders list to pull updated parcel numbers
-        fetchOrdersList();
+        fetchOrdersList(`order_${order.id}.json`);
       } else {
         throw new Error(data?.error || 'Neznámá chyba při komunikaci s DPD API.');
       }

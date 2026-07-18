@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
@@ -248,7 +248,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
         } else if (active) {
           setReviews((revData || []).map(r => ({
             id: r.id,
-            author: r.author_name,
+            author: formatAuthorName(r.author_name, null),
             rating: r.rating,
             date: new Date(r.created_at).toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
             text: r.comment_text
@@ -266,7 +266,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
         } else if (active) {
           setComments((comData || []).map(c => ({
             id: c.id,
-            author: c.author_name,
+            author: formatAuthorName(c.author_name, null),
             date: new Date(c.created_at).toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
             text: c.comment_text,
             parent_id: c.parent_id,
@@ -386,6 +386,38 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
     return !(getProductFromCache(productId) || products.find(p => p.id === productId));
   });
   const product = localProduct;
+
+  const [detailAspectRatio, setDetailAspectRatio] = useState(1.0);
+  const mainImageRef = useRef(null);
+
+  const images = useMemo(() => {
+    if (!product) return [];
+    return [
+      product.image,
+      ...(product.additionalImages || [])
+    ].filter(Boolean);
+  }, [product]);
+
+  const activeImage = useMemo(() => {
+    if (!product) return '';
+    return images[currentImageIndex] || product.image || '';
+  }, [product, images, currentImageIndex]);
+
+  useEffect(() => {
+    if (mainImageRef.current && mainImageRef.current.complete) {
+      const { naturalWidth, naturalHeight } = mainImageRef.current;
+      if (naturalWidth && naturalHeight) {
+        setDetailAspectRatio(naturalWidth / naturalHeight);
+      }
+    }
+  }, [activeImage]);
+
+  const handleDetailImageLoad = (e) => {
+    const { naturalWidth, naturalHeight } = e.target;
+    if (naturalWidth && naturalHeight) {
+      setDetailAspectRatio(naturalWidth / naturalHeight);
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -555,32 +587,6 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
   const firstBlockText = descBlocks.find(b => b.type === 'text')?.value || '';
   const fallbackShortDesc = firstBlockText ? (firstBlockText.split('.').slice(0, 2).filter(Boolean).join('. ') + '.') : '';
 
-  const images = [
-    product.image,
-    ...(product.additionalImages || [])
-  ].filter(Boolean);
-
-  const activeImage = images[currentImageIndex] || product.image;
-
-  const [detailAspectRatio, setDetailAspectRatio] = useState(1.0);
-  const mainImageRef = useRef(null);
-
-  const handleDetailImageLoad = (e) => {
-    const { naturalWidth, naturalHeight } = e.target;
-    if (naturalWidth && naturalHeight) {
-      setDetailAspectRatio(naturalWidth / naturalHeight);
-    }
-  };
-
-  useEffect(() => {
-    if (mainImageRef.current && mainImageRef.current.complete) {
-      const { naturalWidth, naturalHeight } = mainImageRef.current;
-      if (naturalWidth && naturalHeight) {
-        setDetailAspectRatio(naturalWidth / naturalHeight);
-      }
-    }
-  }, [activeImage]);
-
   const handlePrevImage = (e) => {
     e.stopPropagation();
     setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -642,7 +648,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
     const months = lang === 'CZ'
       ? ['Čec', 'Srp', 'Zář', 'Říj', 'Lis', 'Pro', 'Led', 'Úno', 'Bře', 'Dub', 'Kvě', 'Čer']
       : ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    const seed = product.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const seed = (product.id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     const history = [];
     let tempPrice = price;
     for (let i = 11; i >= 0; i--) {
@@ -1673,7 +1679,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
           {reviews.length > 0 ? (
             <div className="reviews-list">
               {reviews.map((rev, i) => {
-                const initials = rev.author.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                const initials = (rev.author || 'Uživatel').split(' ').map(n => n ? n[0] : '').join('').substring(0, 2).toUpperCase();
                 return (
                   <div key={rev.id || i} className="premium-review-card">
                     <div className="review-avatar-col">
@@ -1756,7 +1762,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
           {comments.filter(c => !c.parent_id).length > 0 ? (
             <div className="comments-list-wrapper">
               {comments.filter(c => !c.parent_id).map((comm) => {
-                const initials = comm.author.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                const initials = (comm.author || 'Uživatel').split(' ').map(n => n ? n[0] : '').join('').substring(0, 2).toUpperCase();
                 const repliesList = comments.filter(c => c.parent_id === comm.id);
                 
                 return (
@@ -1832,7 +1838,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                     {/* Child Replies */}
                     {repliesList.map((reply) => {
                       const isSupportReply = reply.is_admin_reply || reply.author.includes('Team') || reply.author.includes('Support');
-                      const replyInitials = reply.author.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                      const replyInitials = (reply.author || 'Uživatel').split(' ').map(n => n ? n[0] : '').join('').substring(0, 2).toUpperCase();
                       
                       return (
                         <div key={reply.id} className="premium-comment-card reply-card">

@@ -203,6 +203,34 @@ serve(async (req) => {
         throw new Error(`Brevo SMTP API responded with error status ${response.status}: ${errorText}`);
       }
 
+      // Also subscribe the email to the Brevo newsletter list directly since GDPR consent was given
+      try {
+        const brevoListId = lang === 'EN' ? parseInt(brevoListIdENStr, 10) : parseInt(brevoListIdCZStr, 10);
+        console.log(`[subscribe-newsletter] Pre-registration subscribing email ${email} to Brevo list ${brevoListId}...`);
+        const contactResponse = await fetch("https://api.brevo.com/v3/contacts", {
+          method: "POST",
+          headers: {
+            "api-key": brevoApiKey,
+            "content-type": "application/json",
+            "accept": "application/json"
+          },
+          body: JSON.stringify({
+            email: email,
+            listIds: [brevoListId],
+            updateEnabled: true
+          })
+        });
+        
+        if (!contactResponse.ok) {
+          const contactErrText = await contactResponse.text();
+          console.error(`[subscribe-newsletter] Failed to sync pre-registered contact to Brevo newsletter list: ${contactErrText}`);
+        } else {
+          console.log(`[subscribe-newsletter] Successfully synced pre-registered contact to Brevo newsletter list.`);
+        }
+      } catch (contactErr) {
+        console.error(`[subscribe-newsletter] Error syncing contact to Brevo:`, contactErr);
+      }
+
       return new Response(JSON.stringify({ success: true, message: lang === 'EN' ? 'Successfully registered!' : 'Úspěšně předregistrováno!' }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

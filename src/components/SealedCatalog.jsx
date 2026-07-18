@@ -120,13 +120,14 @@ export function matchesHistoricalCategory(product, catId) {
 }
 
 export function getCategoryAndDescendantIds(catId, categories) {
+  if (!categories) return [catId];
   const ids = [catId];
   const queue = [catId];
   while (queue.length > 0) {
     const current = queue.shift();
-    const children = categories.filter(c => c.parent_id === current);
+    const children = categories.filter(c => c && c.parent_id === current);
     for (const child of children) {
-      if (!ids.includes(child.id)) {
+      if (child && child.id && !ids.includes(child.id)) {
         ids.push(child.id);
         queue.push(child.id);
       }
@@ -136,30 +137,34 @@ export function getCategoryAndDescendantIds(catId, categories) {
 }
 
 export function resolveActiveCategoryFromFilters(game, filters, categories) {
+  if (!categories) return 'all';
   if (filters.category_id) {
     return filters.category_id;
   }
   
-  const gameCats = categories.filter(c => c.game === game);
+  const gameCats = categories.filter(c => c && c.game === game);
   for (const cat of gameCats) {
-    const hist = getHistoricalFilterForCategory(cat.id);
-    if (hist) {
-      let match = true;
-      for (const [key, val] of Object.entries(hist)) {
-        const filterVal = filters[key] || (key === 'packagingType' ? filters.type : null) || (key === 'subcat' ? filters.subcat : null) || (key === 'subsubcat' ? filters.subsubcat : null);
-        if (filterVal !== val) {
-          match = false;
-          break;
+    if (cat && cat.id) {
+      const hist = getHistoricalFilterForCategory(cat.id);
+      if (hist) {
+        let match = true;
+        for (const [key, val] of Object.entries(hist)) {
+          const filterVal = filters[key] || (key === 'packagingType' ? filters.type : null) || (key === 'subcat' ? filters.subcat : null) || (key === 'subsubcat' ? filters.subsubcat : null);
+          if (filterVal !== val) {
+            match = false;
+            break;
+          }
         }
+        if (match) return cat.id;
       }
-      if (match) return cat.id;
     }
   }
   return 'all';
 }
 
 export function getDisplaySubcategories(game, type, categories, lang) {
-  const root = categories.find(c => c.game === game && c.parent_id === null);
+  if (!categories) return [];
+  const root = categories.find(c => c && c.game === game && c.parent_id === null);
   if (!root) {
     return [{
       id: 'all',
@@ -168,12 +173,12 @@ export function getDisplaySubcategories(game, type, categories, lang) {
     }];
   }
   
-  let children = categories.filter(c => c.parent_id === root.id);
+  let children = categories.filter(c => c && c.parent_id === root.id);
   
   if (type === 'single') {
-    children = children.filter(c => c.type === 'single');
+    children = children.filter(c => c && c.type === 'single');
   } else if (type === 'sealed') {
-    children = children.filter(c => c.type === 'sealed' || c.type === 'accessory');
+    children = children.filter(c => c && (c.type === 'sealed' || c.type === 'accessory'));
   }
   
   if (children.length === 0 && type === 'single') {
@@ -212,15 +217,16 @@ export function getDisplaySubcategories(game, type, categories, lang) {
   const formatted = [
     {
       id: 'all',
-      name: lang === 'CZ' ? root.name_cz : root.name_en,
+      name: lang === 'CZ' ? (root.name_cz || root.name || '') : (root.name_en || root.name || ''),
       icon: <img src={getCategoryIcon(root)} alt={lang === 'CZ' ? `${root.name_cz || root.name} - Northvale TCG` : `${root.name_en || root.name} - Northvale TCG`} title={lang === 'CZ' ? (root.name_cz || root.name) : (root.name_en || root.name)} className="subcategory-img" width="44" height="44" />
     }
   ];
   
   children.forEach(child => {
+    if (!child) return;
     formatted.push({
       id: child.id,
-      name: lang === 'CZ' ? child.name_cz : child.name_en,
+      name: lang === 'CZ' ? (child.name_cz || child.name || '') : (child.name_en || child.name || ''),
       icon: <img src={getCategoryIcon(child)} alt={lang === 'CZ' ? `${child.name_cz || child.name} - Northvale TCG` : `${child.name_en || child.name} - Northvale TCG`} title={lang === 'CZ' ? (child.name_cz || child.name) : (child.name_en || child.name)} className="subcategory-img" width="44" height="44" />
     });
   });
@@ -824,7 +830,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
   useEffect(() => {
     if (categoriesLoaded && dbCategories.length > 0) {
       const resolved = resolveActiveCategoryFromFilters(selectedGame, filters, dbCategories);
-      const matchedCat = dbCategories.find(c => c.id === resolved);
+      const matchedCat = dbCategories.find(c => c && c.id === resolved);
       if (matchedCat && matchedCat.parent_id && matchedCat.parent_id !== 'game-pokemon' && matchedCat.parent_id !== 'game-lorcana' && matchedCat.parent_id !== 'game-onepiece' && matchedCat.parent_id !== 'game-ostatni' && matchedCat.parent_id !== 'game-accessories' && matchedCat.parent_id !== 'game-acrylics') {
         setActiveSubcategory(matchedCat.parent_id);
         setActiveSubsubcategory(matchedCat.id);
@@ -836,19 +842,31 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
   }, [filters, selectedGame, dbCategories, categoriesLoaded]);
 
   const getSubSubcategories = (parentCatId) => {
-    if (parentCatId === 'all') return [];
-    const children = dbCategories.filter(c => c.parent_id === parentCatId);
+    console.log("[DEBUG getSubSubcategories] parentCatId:", parentCatId);
+    if (!parentCatId || parentCatId === 'all') return [];
+    if (!dbCategories) return [];
+    
+    const children = dbCategories.filter(c => c && c.parent_id === parentCatId);
     if (children.length === 0) return [];
     
     const formatted = [
       { id: 'all', name: lang === 'CZ' ? 'Všechny' : 'All', icon: '💎' }
     ];
-    children.forEach(child => {
-      formatted.push({
-        id: child.id,
-        name: lang === 'CZ' ? child.name_cz : child.name_en,
-        icon: <img src={getCategoryIcon(child)} alt={lang === 'CZ' ? `${child.name_cz || child.name} - Northvale TCG` : `${child.name_en || child.name} - Northvale TCG`} title={lang === 'CZ' ? (child.name_cz || child.name) : (child.name_en || child.name)} className="subcategory-img" width="18" height="18" style={{ width: '18px', height: '18px', borderRadius: '4px', objectFit: 'cover' }} />
-      });
+    
+    children.forEach((child, index) => {
+      try {
+        if (!child) {
+          console.error(`[DEBUG getSubSubcategories] child at index ${index} is null or undefined`);
+          return;
+        }
+        formatted.push({
+          id: child.id,
+          name: lang === 'CZ' ? (child.name_cz || child.name || '') : (child.name_en || child.name || ''),
+          icon: <img src={getCategoryIcon(child)} alt={lang === 'CZ' ? `${child.name_cz || child.name} - Northvale TCG` : `${child.name_en || child.name} - Northvale TCG`} title={lang === 'CZ' ? (child.name_cz || child.name) : (child.name_en || child.name)} className="subcategory-img" width="18" height="18" style={{ width: '18px', height: '18px', borderRadius: '4px', objectFit: 'cover' }} />
+        });
+      } catch (e) {
+        console.error(`[DEBUG getSubSubcategories] error rendering child index ${index}:`, e);
+      }
     });
     return formatted;
   };
@@ -902,7 +920,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     let subcat = 'all';
     let subsubcat = 'all';
     if (filters.category_id) {
-      const cat = dbCategories.find(c => c.id === filters.category_id);
+      const cat = dbCategories.find(c => c && c.id === filters.category_id);
       if (cat) {
         if (cat.parent_id && cat.parent_id !== 'game-pokemon' && cat.parent_id !== 'game-lorcana' && cat.parent_id !== 'game-onepiece' && cat.parent_id !== 'game-ostatni' && cat.parent_id !== 'game-accessories' && cat.parent_id !== 'game-acrylics') {
           subcat = cat.parent_id;
@@ -913,7 +931,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       }
     } else {
       const resolved = resolveActiveCategoryFromFilters(nextGame, filters, dbCategories);
-      const cat = dbCategories.find(c => c.id === resolved);
+      const cat = dbCategories.find(c => c && c.id === resolved);
       if (cat) {
         if (cat.parent_id && cat.parent_id !== 'game-pokemon' && cat.parent_id !== 'game-lorcana' && cat.parent_id !== 'game-onepiece' && cat.parent_id !== 'game-ostatni' && cat.parent_id !== 'game-accessories' && cat.parent_id !== 'game-acrylics') {
           subcat = cat.parent_id;
@@ -929,7 +947,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     
     // Set packaging types based on category_id or type
     if (filters.category_id) {
-      const cat = dbCategories.find(c => c.id === filters.category_id);
+      const cat = dbCategories.find(c => c && c.id === filters.category_id);
       if (cat) {
         const isLevel2 = cat.parent_id === 'game-pokemon' || cat.parent_id === 'game-lorcana' || cat.parent_id === 'game-onepiece' || cat.parent_id === 'game-ostatni';
         if (isLevel2) {
@@ -939,9 +957,9 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
         }
       }
     } else if (filters.type) {
-      const root = dbCategories.find(c => c.game === nextGame && c.parent_id === null);
+      const root = dbCategories.find(c => c && c.game === nextGame && c.parent_id === null);
       if (root) {
-        const matchedSubcat = dbCategories.find(c => c.parent_id === root.id && getHistoricalFilterForCategory(c.id)?.packagingType === filters.type);
+        const matchedSubcat = dbCategories.find(c => c && c.parent_id === root.id && getHistoricalFilterForCategory(c.id)?.packagingType === filters.type);
         if (matchedSubcat) {
           setSelectedPackagingTypes([matchedSubcat.id]);
         }
@@ -1316,10 +1334,10 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       return null;
     }
 
-    const root = dbCategories.find(c => c.game === selectedGame && c.parent_id === null);
+    const root = dbCategories.find(c => c && c.game === selectedGame && c.parent_id === null);
     if (!root) return null;
 
-    const gameSubcats = dbCategories.filter(c => c.parent_id === root.id && (c.type === 'sealed' || c.type === 'accessory'));
+    const gameSubcats = dbCategories.filter(c => c && c.parent_id === root.id && (c.type === 'sealed' || c.type === 'accessory'));
     if (gameSubcats.length === 0) return null;
 
     return (

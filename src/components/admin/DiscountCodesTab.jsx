@@ -23,6 +23,7 @@ export default function DiscountCodesTab({ showToast }) {
   // Form states
   const [newCode, setNewCode] = useState('');
   const [newPercent, setNewPercent] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, id: null, codeString: '' });
 
   useEffect(() => {
     loadCodes();
@@ -99,13 +100,13 @@ export default function DiscountCodesTab({ showToast }) {
     }
   };
 
-  const handleDeleteCode = async (id, codeString) => {
-    const confirmed = window.confirm(
-      lang === 'CZ' 
-        ? `Opravdu chcete smazat slevový kód "${codeString}"?` 
-        : `Are you sure you want to delete discount code "${codeString}"?`
-    );
-    if (!confirmed) return;
+  const requestDeleteCode = (id, codeString) => {
+    setDeleteConfirm({ isOpen: true, id, codeString });
+  };
+
+  const executeDeleteCode = async () => {
+    const { id } = deleteConfirm;
+    if (!id) return;
 
     try {
       const { error } = await supabase
@@ -120,6 +121,8 @@ export default function DiscountCodesTab({ showToast }) {
     } catch (err) {
       console.error(err);
       showToast(lang === 'CZ' ? 'Nepodařilo se smazat slevový kód.' : 'Failed to delete discount code.', 'error');
+    } finally {
+      setDeleteConfirm({ isOpen: false, id: null, codeString: '' });
     }
   };
 
@@ -173,7 +176,7 @@ export default function DiscountCodesTab({ showToast }) {
                     <td style={styles.tdAction}>
                       <button
                         type="button"
-                        onClick={() => handleDeleteCode(c.id, c.code)}
+                        onClick={() => requestDeleteCode(c.id, c.code)}
                         style={styles.deleteBtn}
                         title={lang === 'CZ' ? 'Smazat kód' : 'Delete Code'}
                       >
@@ -237,6 +240,60 @@ export default function DiscountCodesTab({ showToast }) {
           </button>
         </form>
       </section>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm.isOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.85)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'var(--bg-secondary, #141416)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '380px',
+            width: '90%',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
+          }}>
+            <h4 style={{ fontSize: '16px', fontWeight: 'bold', color: '#fff', margin: '0 0 10px 0' }}>
+              {lang === 'CZ' ? 'Smazat slevový kód?' : 'Delete Discount Code?'}
+            </h4>
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', margin: '0 0 20px 0', lineHeight: '1.5' }}>
+              {lang === 'CZ'
+                ? `Opravdu chcete smazat slevový kód "${deleteConfirm.codeString}"?`
+                : `Are you sure you want to delete discount code "${deleteConfirm.codeString}"?`}
+            </p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ padding: '6px 12px', fontSize: '12px' }}
+                onClick={() => setDeleteConfirm({ isOpen: false, id: null, codeString: '' })}
+              >
+                {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                style={{ background: '#ef4444', color: '#fff', padding: '6px 12px', fontSize: '12px' }}
+                onClick={executeDeleteCode}
+              >
+                {lang === 'CZ' ? 'Smazat' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -64,14 +64,18 @@ serve(async (req) => {
       const token = authHeader.replace("Bearer ", "");
       const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
       if (!authError && user) {
-        const { data: profile } = await supabaseClient
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .maybeSingle();
-          
-        if (profile && (profile.role === "admin" || profile.role === "superadmin")) {
+        if (user.email === "info@northvaletcg.eu") {
           isAuthorized = true;
+        } else {
+          const { data: profile } = await supabaseClient
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .maybeSingle();
+            
+          if (profile && (profile.role === "admin" || profile.role === "superadmin")) {
+            isAuthorized = true;
+          }
         }
       }
     }
@@ -177,19 +181,13 @@ serve(async (req) => {
             ref1: order.id.toString(),
             reference1: order.id.toString()
           },
-          shipmentReferences: [
-            order.id.toString()
-          ],
           parcels: [
             {
               weightGrams: defaultWeight, // Configurable default weight (TODO: in the future, sum product weights dynamically from DB records)
               references: {
                 ref1: order.id.toString(),
                 reference1: order.id.toString()
-              },
-              mpsReferences: [
-                order.id.toString()
-              ]
+              }
             }
           ],
           services: {

@@ -88,14 +88,18 @@ serve(async (req) => {
         const token = authHeader.replace("Bearer ", "");
         const { data: { user }, error: authError } = await supabase.auth.getUser(token);
         if (!authError && user) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", user.id)
-            .maybeSingle();
-            
-          if (profile && (profile.role === "admin" || profile.role === "superadmin")) {
+          if (user.email === "info@northvaletcg.eu") {
             isAuthorized = true;
+          } else {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("role")
+              .eq("id", user.id)
+              .maybeSingle();
+              
+            if (profile && (profile.role === "admin" || profile.role === "superadmin")) {
+              isAuthorized = true;
+            }
           }
         }
       }
