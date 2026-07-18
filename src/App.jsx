@@ -28,7 +28,7 @@ import Blog from './components/Blog';
 import { blogArticles } from './blogData';
 
 import { mockProducts } from './mockData';
-import { fetchProductsFromDB, getCachedProducts, getProductFromCache, generateDefaultSEOImageMetadata } from './services/products';
+import { fetchProductsFromDB, getCachedProducts, getProductFromCache, generateDefaultSEOImageMetadata, invalidateProductsCache } from './services/products';
 import { FEATURE_FLAGS } from './config';
 import { LanguageProvider, useTranslation } from './context/LanguageContext';
 import './App.css';
@@ -1312,6 +1312,9 @@ function AppContent() {
     } catch (stockErr) {
       console.error('Failed to update product stock on Supabase:', stockErr);
     }
+
+    // Invalidate local client-side raw products cache to force reload fresh stock values
+    invalidateProductsCache();
 
     // Save to Supabase if logged in
     try {

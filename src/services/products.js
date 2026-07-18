@@ -127,6 +127,15 @@ export function getProductFromCache(id) {
   return singleProductCache[id] || null;
 }
 
+export function invalidateProductsCache() {
+  cachedRawProducts = null;
+  productsCacheTime = 0;
+  try {
+    localStorage.removeItem('northvale-cached-raw-products');
+    localStorage.removeItem('northvale-cached-products-time');
+  } catch {}
+}
+
 /**
  * Helper to filter cached/local raw products synchronously on initial mount.
  */
