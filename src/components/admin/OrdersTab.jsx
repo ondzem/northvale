@@ -119,6 +119,7 @@ export default function OrdersTab({ showToast }) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [carrierFilter, setCarrierFilter] = useState('all');
+  const [timeFilter, setTimeFilter] = useState('all');
   const [loadedOrders, setLoadedOrders] = useState({});
   const [selectedOrderIds, setSelectedOrderIds] = useState([]);
   const [detailOrder, setDetailOrder] = useState(null);
@@ -1168,9 +1169,20 @@ export default function OrdersTab({ showToast }) {
         const detailsCarrier = (details?.carrier || 'GLS').toLowerCase();
         if (carrierFilter === 'gls' && !detailsCarrier.includes('gls')) return false;
         if (carrierFilter === 'dpd' && !detailsCarrier.includes('dpd')) return false;
-        if (carrierFilter === 'zasilkovna' && !(detailsCarrier.includes('zasilkovna') || detailsCarrier.includes('packeta'))) return false;
-        if (carrierFilter === 'posta' && !detailsCarrier.includes('pošta')) return false;
         if (carrierFilter === 'pickup' && !detailsCarrier.includes('odběr')) return false;
+      }
+
+      if (timeFilter !== 'all') {
+        const dateStr = details?.rawJson?.created_at || details?.rawJson?.order?.created_at || f.created_at;
+        if (dateStr) {
+          const orderTime = new Date(dateStr).getTime();
+          const now = Date.now();
+          const diffMs = now - orderTime;
+          if (timeFilter === '24h' && diffMs > 24 * 60 * 60 * 1000) return false;
+          if (timeFilter === 'week' && diffMs > 7 * 24 * 60 * 60 * 1000) return false;
+          if (timeFilter === 'month' && diffMs > 30 * 24 * 60 * 60 * 1000) return false;
+          if (timeFilter === 'year' && diffMs > 365 * 24 * 60 * 60 * 1000) return false;
+        }
       }
 
       return true;
@@ -1213,7 +1225,7 @@ export default function OrdersTab({ showToast }) {
           display: flex;
           gap: 12px;
           flex-grow: 1;
-          max-width: 550px;
+          max-width: 750px;
         }
         .orders-search-group input {
           flex-grow: 1;
@@ -1702,9 +1714,14 @@ export default function OrdersTab({ showToast }) {
               <option value="all">{lang === 'CZ' ? 'Všichni dopravci' : 'All Carriers'}</option>
               <option value="gls">GLS</option>
               <option value="dpd">DPD</option>
-              <option value="zasilkovna">Zásilkovna / Packeta</option>
-              <option value="posta">Česká pošta</option>
               <option value="pickup">{lang === 'CZ' ? 'Osobní odběr' : 'Local Pickup'}</option>
+            </select>
+            <select value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)} onDoubleClick={(e) => e.stopPropagation()}>
+              <option value="all">{lang === 'CZ' ? 'Všechna období' : 'All Time'}</option>
+              <option value="24h">{lang === 'CZ' ? 'Dnes (posledních 24h)' : 'Today (last 24h)'}</option>
+              <option value="week">{lang === 'CZ' ? 'Tento týden (posledních 7d)' : 'This Week (last 7d)'}</option>
+              <option value="month">{lang === 'CZ' ? 'Tento měsíc (posledních 30d)' : 'This Month (last 30d)'}</option>
+              <option value="year">{lang === 'CZ' ? 'Tento rok (posledních 365d)' : 'This Year (last 365d)'}</option>
             </select>
           </div>
         </div>
