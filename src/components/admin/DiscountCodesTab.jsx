@@ -109,18 +109,23 @@ export default function DiscountCodesTab({ showToast }) {
     if (!id) return;
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('discount_codes')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
       if (error) throw error;
+
+      if (!data || data.length === 0) {
+        throw new Error('No rows deleted. Check Row Level Security (RLS) policies.');
+      }
 
       showToast(lang === 'CZ' ? 'Slevový kód byl smazán.' : 'Discount code was deleted.', 'success');
       loadCodes();
     } catch (err) {
-      console.error(err);
-      showToast(lang === 'CZ' ? 'Nepodařilo se smazat slevový kód.' : 'Failed to delete discount code.', 'error');
+      console.error('Delete discount code error:', err);
+      showToast(lang === 'CZ' ? 'Nepodařilo se smazat slevový kód. Ověřte svá administrátorská práva.' : 'Failed to delete discount code. Verify your administrator permissions.', 'error');
     } finally {
       setDeleteConfirm({ isOpen: false, id: null, codeString: '' });
     }

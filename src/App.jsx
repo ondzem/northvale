@@ -316,7 +316,7 @@ function AppContent() {
         const defaultProfile = {
           id: authUser.id,
           full_name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || '',
-          role: 'customer',
+          role: authUser.email === 'info@northvaletcg.eu' ? 'admin' : 'customer',
           store_credit: 0,
           cart: cart || [],
           favorites: favorites || []
@@ -343,7 +343,7 @@ function AppContent() {
         email: authUser.email || '',
         name: profile?.full_name || authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || '',
         phone: profile?.phone || authUser.user_metadata?.phone || '',
-        role: profile?.role || 'customer',
+        role: profile?.role || (authUser.email === 'info@northvaletcg.eu' ? 'admin' : 'customer'),
         storeCredit: profile?.store_credit || 0,
         avatar: authUser.user_metadata?.avatar_url || '/user.png',
         billingCompany: profile?.billing_company || '',
