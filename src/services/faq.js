@@ -110,11 +110,6 @@ export async function fetchFaqData() {
       };
     });
 
-    // If categories are empty, it means DB is unseeded. Load defaults.
-    if (structuredFaq.length === 0) {
-      return [...DEFAULT_FAQ];
-    }
-
     // Save to cache
     try {
       localStorage.setItem('northvale-cached-faq', JSON.stringify(structuredFaq));

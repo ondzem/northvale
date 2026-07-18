@@ -7,7 +7,8 @@ import {
   saveFaqItem,
   deleteFaqItem,
   saveFaqCategoriesOrder,
-  saveFaqItemsOrder
+  saveFaqItemsOrder,
+  DEFAULT_FAQ
 } from '../../services/faq';
 
 export default function FaqTab({ showToast }) {
@@ -76,6 +77,44 @@ export default function FaqTab({ showToast }) {
     const data = await fetchFaqData();
     setFaqData(data);
     setLoading(false);
+  };
+
+  const handleImportDefaults = async () => {
+    setLoading(true);
+    try {
+      for (const cat of DEFAULT_FAQ) {
+        const catPayload = {
+          name_cz: cat.name_cz,
+          name_en: cat.name_en,
+          position: cat.position
+        };
+        const catRes = await saveFaqCategory(catPayload);
+        if (catRes.error) throw catRes.error;
+        
+        const newCatId = catRes.data.id;
+        
+        if (cat.questions && cat.questions.length > 0) {
+          for (const item of cat.questions) {
+            const itemPayload = {
+              category_id: newCatId,
+              question_cz: item.question_cz,
+              question_en: item.question_en,
+              answer_cz: item.answer_cz,
+              answer_en: item.answer_en,
+              position: item.position
+            };
+            const itemRes = await saveFaqItem(itemPayload);
+            if (itemRes.error) throw itemRes.error;
+          }
+        }
+      }
+      showToast(lang === 'CZ' ? 'Výchozí dotazy byly úspěšně importovány.' : 'Default FAQs imported successfully.', 'success');
+      await loadData();
+    } catch (err) {
+      console.error('Failed to import default FAQs:', err);
+      showToast(lang === 'CZ' ? 'Chyba při importu výchozích dotazů.' : 'Error importing default FAQs.', 'error');
+      setLoading(false);
+    }
   };
 
   const handleToggleExpand = (catId) => {
@@ -330,10 +369,20 @@ export default function FaqTab({ showToast }) {
         {loading ? (
           <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>{lang === 'CZ' ? 'Načítání témat...' : 'Loading topics...'}</p>
         ) : faqData.length === 0 ? (
-          <div style={{ padding: '32px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-secondary)', border: '1px dashed rgba(255,255,255,0.08)', textAlign: 'center' }}>
+          <div style={{ padding: '32px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-secondary)', border: '1px dashed rgba(255,255,255,0.08)', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
             <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>
-              {lang === 'CZ' ? 'Žádné FAQ položky nenalezeny.' : 'No FAQ items found.'}
+              {lang === 'CZ' 
+                ? 'Žádná témata ani dotazy nebyly v databázi nalezeny.' 
+                : 'No FAQ topics or questions were found in the database.'}
             </p>
+            <button 
+              type="button" 
+              className="btn btn-primary" 
+              style={{ fontSize: '12px', padding: '8px 16px' }}
+              onClick={handleImportDefaults}
+            >
+              🚀 {lang === 'CZ' ? 'Importovat výchozí dotazy' : 'Import Default FAQ'}
+            </button>
           </div>
         ) : (
           <div className="ctf-tree" style={{ 
