@@ -383,9 +383,6 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   <a href="https://www.facebook.com/share/18yajuq6N1/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="topbar-social-link" style={styles.socialLink}>
                     <img src="/facebook.png" alt="Facebook" className="topbar-social-icon" style={styles.socialIcon} width="14" height="14" />
                   </a>
-                  <a href="https://www.tiktok.com/@northvaletcg" target="_blank" rel="noopener noreferrer" className="topbar-social-link" style={styles.socialLink}>
-                    <img src="/tik-tok.png" alt="TikTok" className="topbar-social-icon" style={styles.socialIcon} width="14" height="14" />
-                  </a>
                 </div>
               </div>
             </div>
@@ -1238,9 +1235,6 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   </a>
                   <a href="https://www.facebook.com/share/18yajuq6N1/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="drawer-social-link" style={styles.drawerSocialLink}>
                     <img src="/facebook.png" alt="Facebook" className="drawer-social-icon" style={styles.drawerSocialIcon} width="18" height="18" />
-                  </a>
-                  <a href="https://www.tiktok.com/@northvaletcg" target="_blank" rel="noopener noreferrer" className="drawer-social-link" style={styles.drawerSocialLink}>
-                    <img src="/tik-tok.png" alt="TikTok" className="drawer-social-icon" style={styles.drawerSocialIcon} width="18" height="18" />
                   </a>
                 </div>
 

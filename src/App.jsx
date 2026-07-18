@@ -989,8 +989,7 @@ function AppContent() {
             "logo": "https://northvaletcg.eu/Northvale%20Logo.webp",
             "sameAs": [
               "https://www.instagram.com/northvaletcg/?utm_source=ig_web_button_share_sheet",
-              "https://www.facebook.com/share/18yajuq6N1/?mibextid=wwXIfr",
-              "https://www.tiktok.com/@northvaletcg"
+              "https://www.facebook.com/share/18yajuq6N1/?mibextid=wwXIfr"
             ]
           },
           {
