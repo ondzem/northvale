@@ -10,6 +10,69 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
   const [activeTab, setActiveTab] = useState('settings');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showInvoiceOrder, setShowInvoiceOrder] = useState(null);
+  const [expandedOrders, setExpandedOrders] = useState({});
+
+  const getPaymentStatusText = (status, lang) => {
+    switch (status) {
+      case 'paid':
+      case 'uhrazeno':
+        return lang === 'CZ' ? 'Uhrazeno' : 'Paid';
+      case 'awaiting_payment':
+      case 'neuhrazeno':
+        return lang === 'CZ' ? 'Čeká na platbu' : 'Awaiting Payment';
+      case 'cod':
+      case 'na dobírku':
+        return lang === 'CZ' ? 'Na dobírku' : 'Cash on Delivery';
+      default:
+        return lang === 'CZ' ? 'Čeká na platbu' : 'Awaiting Payment';
+    }
+  };
+
+  const getPaymentStatusColor = (status) => {
+    switch (status) {
+      case 'paid':
+      case 'uhrazeno':
+        return { bg: 'rgba(16, 185, 129, 0.08)', text: '#10b981' };
+      case 'awaiting_payment':
+      case 'neuhrazeno':
+        return { bg: 'rgba(245, 158, 11, 0.08)', text: '#f59e0b' };
+      case 'cod':
+      case 'na dobírku':
+        return { bg: 'rgba(59, 130, 246, 0.08)', text: '#3b82f6' };
+      default:
+        return { bg: 'rgba(245, 158, 11, 0.08)', text: '#f59e0b' };
+    }
+  };
+
+  const getFulfillmentStatusText = (status, lang) => {
+    switch (status) {
+      case 'shipped':
+      case 'odesláno':
+        return lang === 'CZ' ? 'Odesláno' : 'Shipped';
+      case 'cancelled':
+      case 'stornováno':
+        return lang === 'CZ' ? 'Stornováno' : 'Cancelled';
+      case 'pending':
+      case 'přijato':
+      default:
+        return lang === 'CZ' ? 'Nevyřízeno' : 'Pending';
+    }
+  };
+
+  const getFulfillmentStatusColor = (status) => {
+    switch (status) {
+      case 'shipped':
+      case 'odesláno':
+        return { bg: 'rgba(16, 185, 129, 0.08)', text: '#10b981' };
+      case 'cancelled':
+      case 'stornováno':
+        return { bg: 'rgba(239, 68, 68, 0.08)', text: '#ef4444' };
+      case 'pending':
+      case 'přijato':
+      default:
+        return { bg: 'rgba(245, 158, 11, 0.08)', text: '#f59e0b' };
+    }
+  };
 
   // Contact Info states
   const [isEditingContact, setIsEditingContact] = useState(false);
@@ -1072,109 +1135,310 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  {user.orderHistory.map((order, idx) => (
-                    <div key={idx} className="prf-block" style={{ paddingBottom: '24px' }}>
-                      <div className="prf-block-head" style={{ marginBottom: '12px' }}>
-                        <h3 style={{ fontSize: '14px', textTransform: 'none', letterSpacing: 'normal' }}>
-                          {lang === 'CZ' ? 'Objednávka' : 'Order'} <strong style={{ color: '#f0f0f0' }}>#{order.id}</strong>
-                          <span style={{ color: '#8a8a92', marginLeft: '12px', fontSize: '12px' }}>{order.date}</span>
-                        </h3>
-                        <span style={{ color: 'var(--color-gold)', fontWeight: '800', fontSize: '15px' }}>
-                          {(order.finalTotal || order.total || 0).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          {order.items && order.items.map((it, itemIdx) => (
-                            <span key={itemIdx} style={{ fontSize: '13px', color: '#8a8a92' }}>
-                              {it.quantity}x {it.name} ({it.price.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč)
-                            </span>
-                          ))}
-                        </div>
-                        <div>
-                          <span style={{ fontSize: '11px', fontWeight: '700', backgroundColor: 'rgba(16, 185, 129, 0.08)', color: '#10b981', padding: '4px 10px', borderRadius: '4px' }}>
-                            {lang === 'CZ' ? 'Vyřízeno' : 'Completed'}
-                          </span>
-                        </div>
-                      </div>
+                  {user.orderHistory.map((order, idx) => {
+                    const isExpanded = !!expandedOrders[order.id];
+                    const paymentColor = getPaymentStatusColor(order.paymentStatus);
+                    const fulfillmentColor = getFulfillmentStatusColor(order.fulfillmentStatus);
+                    const subtotalAmount = order.subtotal || (order.items || []).reduce((acc, it) => acc + (it.price * it.quantity), 0);
 
-                      {(order.isCompany || order.companyName) && (
-                        <div style={{
-                          marginTop: '16px',
-                          padding: '12px 16px',
-                          background: 'rgba(255, 255, 255, 0.02)',
-                          borderLeft: '2px solid var(--color-gold, #fdbd16)',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          color: '#8a8a92',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '4px'
-                        }}>
-                          <span style={{ fontWeight: 'bold', color: '#f0f0f0', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '1px', marginBottom: '2px' }}>
-                            {lang === 'CZ' ? 'Fakturační údaje (Firma)' : 'Billing Details (Company)'}
+                    return (
+                      <div 
+                        key={idx} 
+                        className="prf-block" 
+                        style={{ 
+                          paddingBottom: '24px', 
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s ease',
+                          position: 'relative'
+                        }}
+                        onClick={() => setExpandedOrders(prev => ({ ...prev, [order.id]: !prev[order.id] }))}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.01)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <div className="prf-block-head" style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <h3 style={{ fontSize: '14px', textTransform: 'none', letterSpacing: 'normal', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                            <span style={{ 
+                              fontSize: '10px', 
+                              color: 'var(--color-gold)', 
+                              display: 'inline-block',
+                              transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', 
+                              transition: 'transform 0.2s ease',
+                              marginRight: '4px'
+                            }}>▶</span>
+                            {lang === 'CZ' ? 'Objednávka' : 'Order'} <strong style={{ color: '#f0f0f0' }}>#{order.id}</strong>
+                            <span style={{ color: '#8a8a92', marginLeft: '12px', fontSize: '12px' }}>{order.date}</span>
+                          </h3>
+                          <span style={{ color: 'var(--color-gold)', fontWeight: '800', fontSize: '15px' }}>
+                            {(order.finalTotal || order.total || 0).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč
                           </span>
-                          <div>
-                            <span style={{ color: '#aaa' }}>{lang === 'CZ' ? 'Název: ' : 'Company: '}</span>
-                            <span style={{ color: '#eee' }}>{order.companyName}</span>
+                        </div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            {order.items && order.items.map((it, itemIdx) => (
+                              <span key={itemIdx} style={{ fontSize: '13px', color: '#8a8a92' }}>
+                                {it.quantity}x {it.name} ({it.price.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč)
+                              </span>
+                            ))}
                           </div>
-                          <div style={{ display: 'flex', gap: '16px' }}>
-                            <div>
-                              <span style={{ color: '#aaa' }}>{lang === 'CZ' ? 'IČO: ' : 'ID (IČO): '}</span>
-                              <span style={{ color: '#eee' }}>{order.ico}</span>
-                            </div>
-                            {order.dic && (
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            {/* Payment Status Badge */}
+                            <span style={{ 
+                              fontSize: '11px', 
+                              fontWeight: '700', 
+                              backgroundColor: paymentColor.bg, 
+                              color: paymentColor.text, 
+                              padding: '4px 10px', 
+                              borderRadius: '4px' 
+                            }}>
+                              {getPaymentStatusText(order.paymentStatus, lang)}
+                            </span>
+                            {/* Fulfillment Status Badge */}
+                            <span style={{ 
+                              fontSize: '11px', 
+                              fontWeight: '700', 
+                              backgroundColor: fulfillmentColor.bg, 
+                              color: fulfillmentColor.text, 
+                              padding: '4px 10px', 
+                              borderRadius: '4px' 
+                            }}>
+                              {getFulfillmentStatusText(order.fulfillmentStatus, lang)}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Expanded details container */}
+                        {isExpanded && (
+                          <div 
+                            style={{ 
+                              marginTop: '20px', 
+                              paddingTop: '20px', 
+                              borderTop: '1px solid rgba(240, 240, 240, 0.06)',
+                              fontSize: '13px',
+                              color: '#aaa',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '20px'
+                            }}
+                            onClick={(e) => e.stopPropagation()} // Prevent toggling when clicking details content
+                          >
+                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px' }}>
+                              {/* Shipping address info */}
                               <div>
-                                <span style={{ color: '#aaa' }}>{lang === 'CZ' ? 'DIČ: ' : 'Tax ID (DIČ): '}</span>
-                                <span style={{ color: '#eee' }}>{order.dic}</span>
+                                <h4 style={{ color: '#eee', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', marginTop: 0 }}>
+                                  {lang === 'CZ' ? 'Doručovací adresa' : 'Shipping Address'}
+                                </h4>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                  <span style={{ color: '#fff', fontWeight: 'bold' }}>{order.customerName}</span>
+                                  <span>{order.shippingStreet}</span>
+                                  <span>{order.shippingCity}, {order.shippingZip}</span>
+                                  {order.customerPhone && <span>📞 {order.customerPhone}</span>}
+                                  <span>📧 {order.customerEmail}</span>
+                                </div>
+                              </div>
+
+                              {/* Carrier & Payment details */}
+                              <div>
+                                <h4 style={{ color: '#eee', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', marginTop: 0 }}>
+                                  {lang === 'CZ' ? 'Způsob dopravy a platby' : 'Delivery & Payment'}
+                                </h4>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                  <span>{lang === 'CZ' ? 'Doprava: ' : 'Carrier: '} <strong>{order.shippingMethod}</strong></span>
+                                  <span>{lang === 'CZ' ? 'Platba: ' : 'Payment: '} <strong>{order.paymentMethod}</strong></span>
+                                  {order.pickupPointDetails && (
+                                    <div style={{ fontSize: '12px', color: '#8a8a92', marginTop: '4px', backgroundColor: 'rgba(255,255,255,0.02)', padding: '8px', borderRadius: '4px' }}>
+                                      <span style={{ fontWeight: '600', color: '#ccc', display: 'block', marginBottom: '2px' }}>
+                                        {lang === 'CZ' ? 'Výdejní místo:' : 'Pickup Point:'}
+                                      </span>
+                                      {order.pickupPointDetails.name}<br/>
+                                      {order.pickupPointDetails.street}, {order.pickupPointDetails.city}
+                                    </div>
+                                  )}
+                                  {order.gls_parcel_number && (
+                                    <span style={{ marginTop: '4px' }}>
+                                      {lang === 'CZ' ? 'Sledovací číslo GLS: ' : 'GLS Tracking Number: '}
+                                      <a 
+                                        href={`https://tracking.gls-group.eu/status/${lang === 'CZ' ? 'cs_CZ' : 'en_US'}/parcel/${order.gls_parcel_number}`}
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        style={{ color: 'var(--color-gold, #fdbd16)', fontWeight: 'bold', textDecoration: 'underline' }}
+                                      >
+                                        {order.gls_parcel_number} ↗
+                                      </a>
+                                    </span>
+                                  )}
+                                  {order.dpd_parcel_number && (
+                                    <span style={{ marginTop: '4px' }}>
+                                      {lang === 'CZ' ? 'Sledovací číslo DPD: ' : 'DPD Tracking Number: '}
+                                      <a 
+                                        href={`https://tracking.dpd.de/status/${lang === 'CZ' ? 'cs_CZ' : 'en_US'}/parcel/${order.dpd_parcel_number}`}
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        style={{ color: 'var(--color-gold, #fdbd16)', fontWeight: 'bold', textDecoration: 'underline' }}
+                                      >
+                                        {order.dpd_parcel_number} ↗
+                                      </a>
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Billing Address / Company info */}
+                            {(order.isCompany || order.companyName) && (
+                              <div style={{
+                                padding: '12px 16px',
+                                background: 'rgba(255, 255, 255, 0.02)',
+                                borderLeft: '2px solid var(--color-gold, #fdbd16)',
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                color: '#8a8a92',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '4px'
+                              }}>
+                                <span style={{ fontWeight: 'bold', color: '#f0f0f0', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '1px', marginBottom: '2px' }}>
+                                  {lang === 'CZ' ? 'Fakturační údaje (Firma)' : 'Billing Details (Company)'}
+                                </span>
+                                <div>
+                                  <span style={{ color: '#aaa' }}>{lang === 'CZ' ? 'Název: ' : 'Company: '}</span>
+                                  <span style={{ color: '#eee' }}>{order.companyName}</span>
+                                </div>
+                                <div style={{ display: 'flex', gap: '16px' }}>
+                                  <div>
+                                    <span style={{ color: '#aaa' }}>{lang === 'CZ' ? 'IČO: ' : 'ID (IČO): '}</span>
+                                    <span style={{ color: '#eee' }}>{order.ico}</span>
+                                  </div>
+                                  {order.dic && (
+                                    <div>
+                                      <span style={{ color: '#aaa' }}>{lang === 'CZ' ? 'DIČ: ' : 'Tax ID (DIČ): '}</span>
+                                      <span style={{ color: '#eee' }}>{order.dic}</span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             )}
-                          </div>
-                        </div>
-                      )}
 
-                      {order.notes && (
-                        <div style={{
-                          marginTop: '12px',
-                          padding: '12px 16px',
-                          background: 'rgba(255, 255, 255, 0.01)',
-                          border: '1px dashed rgba(240, 240, 240, 0.08)',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          color: '#8a8a92'
-                        }}>
-                          <span style={{ fontWeight: 'bold', color: '#f0f0f0', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '1px', display: 'block', marginBottom: '4px' }}>
-                            {lang === 'CZ' ? 'Poznámka k objednávce' : 'Order Note'}
-                          </span>
-                          <span style={{ color: '#ccc', fontStyle: 'italic' }}>{order.notes}</span>
-                        </div>
-                      )}
-                      
-                      <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
-                        <a 
-                          href="https://rmp.dpdgroup.com/015/northvale" 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          style={{ 
-                            textDecoration: 'none', 
-                            display: 'inline-flex', 
-                            alignItems: 'center', 
-                            fontSize: '12.5px',
-                            padding: '8px 16px',
-                            background: 'rgba(253, 189, 22, 0.05)',
-                            border: '1px solid var(--color-gold, #fdbd16)',
-                            color: 'var(--color-gold, #fdbd16)',
-                            fontWeight: '600',
-                            borderRadius: '6px',
-                            transition: 'all 0.2s ease',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          🔄 {lang === 'CZ' ? 'Vrátit zboží (DPD)' : 'Return items (DPD)'}
-                        </a>
+                            {order.notes && (
+                              <div style={{
+                                padding: '12px 16px',
+                                background: 'rgba(255, 255, 255, 0.01)',
+                                border: '1px dashed rgba(240, 240, 240, 0.08)',
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                color: '#8a8a92'
+                              }}>
+                                <span style={{ fontWeight: 'bold', color: '#f0f0f0', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '1px', display: 'block', marginBottom: '4px' }}>
+                                  {lang === 'CZ' ? 'Poznámka k objednávce' : 'Order Note'}
+                                </span>
+                                <span style={{ color: '#ccc', fontStyle: 'italic' }}>{order.notes}</span>
+                              </div>
+                            )}
+
+                            {/* Summary Totals Calculation */}
+                            <div style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '6px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.01)',
+                              padding: '16px',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(255, 255, 255, 0.03)'
+                            }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#888' }}>
+                                <span>{lang === 'CZ' ? 'Mezisoučet:' : 'Subtotal:'}</span>
+                                <span>{subtotalAmount.toLocaleString()} Kč</span>
+                              </div>
+                              {order.shippingCost > 0 && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#888' }}>
+                                  <span>{lang === 'CZ' ? 'Doprava:' : 'Shipping:'}</span>
+                                  <span>{order.shippingCost.toLocaleString()} Kč</span>
+                                </div>
+                              )}
+                              {order.paymentSurcharge > 0 && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#888' }}>
+                                  <span>{lang === 'CZ' ? 'Příplatek za platbu:' : 'Payment Surcharge:'}</span>
+                                  <span>{order.paymentSurcharge.toLocaleString()} Kč</span>
+                                </div>
+                              )}
+                              {order.discountAmount > 0 && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ef4444' }}>
+                                  <span>{lang === 'CZ' ? `Sleva (kód: ${order.discountCode}):` : `Discount (code: ${order.discountCode}):`}</span>
+                                  <span>-{order.discountAmount.toLocaleString()} Kč</span>
+                                </div>
+                              )}
+                              {order.creditApplied > 0 && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#3b82f6' }}>
+                                  <span>{lang === 'CZ' ? 'Uplatněný kredit:' : 'Store Credit Applied:'}</span>
+                                  <span>-{order.creditApplied.toLocaleString()} Kč</span>
+                                </div>
+                              )}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', color: '#fff', fontSize: '14px', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '8px', marginTop: '4px' }}>
+                                <span>{lang === 'CZ' ? 'Celkem k úhradě:' : 'Total Price:'}</span>
+                                <span style={{ color: 'var(--color-gold)' }}>{(order.finalTotal || order.total || 0).toLocaleString()} Kč</span>
+                              </div>
+                            </div>
+
+                            {/* Actions block inside expanded view */}
+                            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-start', flexWrap: 'wrap', marginTop: '4px' }}>
+                              <button 
+                                type="button"
+                                className="prf-edit"
+                                style={{ 
+                                  background: 'rgba(253, 189, 22, 0.1)', 
+                                  color: 'var(--color-gold, #fdbd16)', 
+                                  border: '1px solid rgba(253, 189, 22, 0.2)',
+                                  padding: '8px 16px',
+                                  fontSize: '12.5px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer'
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const { data } = supabase.storage
+                                    .from('invoices')
+                                    .getPublicUrl(`invoice_${order.id}.pdf`);
+                                  if (data && data.publicUrl) {
+                                    window.open(data.publicUrl, '_blank');
+                                  }
+                                }}
+                              >
+                                📥 {lang === 'CZ' ? 'Stáhnout fakturu (PDF)' : 'Download Invoice (PDF)'}
+                              </button>
+                              
+                              {(order.fulfillmentStatus === 'shipped' || order.stav === 'odesláno') && (
+                                <a 
+                                  href="https://rmp.dpdgroup.com/015/northvale" 
+                                  target="_blank" 
+                                  rel="noopener noreferrer" 
+                                  onClick={(e) => e.stopPropagation()}
+                                  style={{ 
+                                    textDecoration: 'none', 
+                                    display: 'inline-flex', 
+                                    alignItems: 'center', 
+                                    fontSize: '12.5px',
+                                    padding: '8px 16px',
+                                    background: 'rgba(253, 189, 22, 0.05)',
+                                    border: '1px solid var(--color-gold, #fdbd16)',
+                                    color: 'var(--color-gold, #fdbd16)',
+                                    fontWeight: '600',
+                                    borderRadius: '6px',
+                                    transition: 'all 0.2s ease',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  🔄 {lang === 'CZ' ? 'Vrátit zboží (DPD)' : 'Return items (DPD)'}
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

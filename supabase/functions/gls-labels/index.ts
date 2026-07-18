@@ -439,6 +439,9 @@ serve(async (req) => {
       console.log(`[gls-labels] Saving parcel metadata to order_${order.id}.json: parcelNumber=${newParcelNumber}, parcelId=${newParcelId}`);
       orderJsonObj.order.gls_parcel_number = newParcelNumber.toString();
       orderJsonObj.order.gls_parcel_id = newParcelId.toString();
+      orderJsonObj.order.fulfillmentStatus = 'shipped';
+      orderJsonObj.order.stav = 'odesláno';
+
       const updatedBytes = encoder.encode(JSON.stringify(orderJsonObj, null, 2));
       const { error: uploadError } = await supabaseClient.storage
         .from("pohoda-orders")
@@ -446,10 +449,45 @@ serve(async (req) => {
           contentType: "application/json",
           upsert: true
         });
+
       if (uploadError) {
         console.warn(`[gls-labels] Storage upload failed for order_${order.id}.json:`, uploadError.message);
       } else {
         console.log(`[gls-labels] Successfully saved parcel metadata to storage.`);
+        
+        // Also update order_history array inside user profile if userId is present
+        if (orderJsonObj.order.userId) {
+          try {
+            console.log(`[gls-labels] Syncing order history to profile for userId: ${orderJsonObj.order.userId}`);
+            const { data: profile } = await supabaseClient
+              .from("profiles")
+              .select("order_history")
+              .eq("id", orderJsonObj.order.userId)
+              .single();
+
+            if (profile) {
+              const history = profile.order_history || [];
+              const orderIdx = history.findIndex((o: any) => o.id === order.id);
+              if (orderIdx >= 0) {
+                const updatedHistory = [...history];
+                updatedHistory[orderIdx] = { 
+                  ...updatedHistory[orderIdx], 
+                  gls_parcel_number: newParcelNumber.toString(),
+                  gls_parcel_id: newParcelId.toString(),
+                  fulfillmentStatus: 'shipped',
+                  stav: 'odesláno'
+                };
+                await supabaseClient
+                  .from("profiles")
+                  .update({ order_history: updatedHistory })
+                  .eq("id", orderJsonObj.order.userId);
+                console.log(`[gls-labels] Successfully synced order history in user profile.`);
+              }
+            }
+          } catch (profileErr) {
+            console.error("[gls-labels] Failed to sync order history in profile:", profileErr);
+          }
+        }
       }
     } else {
       console.warn(`[gls-labels] orderJsonObj is null! Skipping metadata save for order ${order.id}`);

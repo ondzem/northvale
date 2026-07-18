@@ -64,6 +64,76 @@ serve(async (req) => {
       });
     }
 
+    if (emailType === "payment_received") {
+      const htmlPaymentConfirmedContent = `
+        <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 40px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: #222222;">
+            
+            <!-- Logo Header -->
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #fdbd16; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: 2px; text-transform: uppercase;">NORTHVALE</h1>
+              <p style="color: #8a8a92; font-size: 11px; text-transform: uppercase; letter-spacing: 4px; margin: 3px 0 0 0;">Trading Card Games</p>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 24px; font-size: 54px;">
+              💳
+            </div>
+
+            <!-- Header Title -->
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h2 style="color: #111111; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">Platba byla přijata!</h2>
+              <p style="font-size: 14px; color: #888888; margin: 8px 0 0 0;">Číslo objednávky: <strong style="color: #fdbd16;">#${order.id}</strong></p>
+            </div>
+
+            <p style="font-size: 14.5px; color: #222222; line-height: 1.6; margin: 0 0 24px 0;">
+              Dobrý den,<br/><br/>
+              obdrželi jsme Vaši platbu bankovním převodem pro objednávku <strong>#${order.id}</strong>. 
+              Objednávka je nyní označena jako uhrazená a začínáme ji pro Vás připravovat k odeslání.
+            </p>
+
+            <div style="background-color: #fdfdfd; border: 1px solid #e1e4e8; border-left: 4px solid #10b981; padding: 22px; margin-bottom: 24px; border-radius: 8px;">
+              <p style="font-size: 14.5px; color: #111111; margin: 0; line-height: 1.6;">
+                Celková částka: <strong>${parseFloat(order.finalTotal || order.totalPrice || '0').toLocaleString('cs-CZ')} Kč</strong><br/>
+                Stav platby: <strong style="color: #10b981;">Uhrazeno (Bankovní převod)</strong>
+              </p>
+            </div>
+
+            <p style="font-size: 14px; color: #666666; line-height: 1.6; margin: 0 0 24px 0;">
+              Jakmile zásilku předáme dopravci, zašleme Vám další e-mail se sledovacím číslem.
+            </p>
+
+            <!-- Help / System Info -->
+            <div style="border-top: 1px solid #e1e4e8; padding-top: 24px; margin-top: 30px; text-align: center;">
+              <p style="font-size: 12px; color: #888888; margin: 0; line-height: 1.6;">
+                Děkujeme za Váš nákup na NORTHVALE TCG. V případě dotazů nás kontaktujte na
+                <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; text-decoration: underline; font-weight: bold;">info@northvaletcg.eu</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "api-key": brevoApiKey,
+          "content-type": "application/json",
+          "accept": "application/json"
+        },
+        body: JSON.stringify({
+          sender: { name: senderName, email: senderEmail },
+          to: [{ email: order.customerEmail, name: order.customerName }],
+          subject: `Platba přijata - Objednávka #${order.id}`,
+          htmlContent: wrapInHtmlDocument(htmlPaymentConfirmedContent)
+        })
+      });
+
+      return new Response(JSON.stringify({ success: true, message: "Payment confirmed email sent." }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (emailType === "expedited") {
       const activeCarrier = carrier || ((order.shippingMethod || "").toLowerCase().includes("gls") ? "GLS" : "DPD");
       const activeTrackingNo = trackingNumber || order.dpd_parcel_number || order.gls_parcel_number || "";

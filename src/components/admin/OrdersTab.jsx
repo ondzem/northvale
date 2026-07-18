@@ -54,6 +54,68 @@ const generateTextInvoice = (order) => {
 export default function OrdersTab({ showToast }) {
   const { lang } = useTranslation();
   const [files, setFiles] = useState([]);
+
+  const getPaymentStatusText = (status, lang) => {
+    switch (status) {
+      case 'paid':
+      case 'uhrazeno':
+        return lang === 'CZ' ? 'Uhrazeno' : 'Paid';
+      case 'awaiting_payment':
+      case 'neuhrazeno':
+        return lang === 'CZ' ? 'Čeká na platbu' : 'Awaiting Payment';
+      case 'cod':
+      case 'na dobírku':
+        return lang === 'CZ' ? 'Na dobírku' : 'Cash on Delivery';
+      default:
+        return lang === 'CZ' ? 'Čeká na platbu' : 'Awaiting Payment';
+    }
+  };
+
+  const getPaymentStatusColor = (status) => {
+    switch (status) {
+      case 'paid':
+      case 'uhrazeno':
+        return { bg: 'rgba(16, 185, 129, 0.08)', text: '#10b981' };
+      case 'awaiting_payment':
+      case 'neuhrazeno':
+        return { bg: 'rgba(245, 158, 11, 0.08)', text: '#f59e0b' };
+      case 'cod':
+      case 'na dobírku':
+        return { bg: 'rgba(59, 130, 246, 0.08)', text: '#3b82f6' };
+      default:
+        return { bg: 'rgba(245, 158, 11, 0.08)', text: '#f59e0b' };
+    }
+  };
+
+  const getFulfillmentStatusText = (status, lang) => {
+    switch (status) {
+      case 'shipped':
+      case 'odesláno':
+        return lang === 'CZ' ? 'Odesláno' : 'Shipped';
+      case 'cancelled':
+      case 'stornováno':
+        return lang === 'CZ' ? 'Stornováno' : 'Cancelled';
+      case 'pending':
+      case 'přijato':
+      default:
+        return lang === 'CZ' ? 'Nevyřízeno' : 'Pending';
+    }
+  };
+
+  const getFulfillmentStatusColor = (status) => {
+    switch (status) {
+      case 'shipped':
+      case 'odesláno':
+        return { bg: 'rgba(16, 185, 129, 0.08)', text: '#10b981' };
+      case 'cancelled':
+      case 'stornováno':
+        return { bg: 'rgba(239, 68, 68, 0.08)', text: '#ef4444' };
+      case 'pending':
+      case 'přijato':
+      default:
+        return { bg: 'rgba(245, 158, 11, 0.08)', text: '#f59e0b' };
+    }
+  };
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [carrierFilter, setCarrierFilter] = useState('all');
@@ -516,6 +578,85 @@ export default function OrdersTab({ showToast }) {
       showToast(lang === 'CZ' ? `Chyba API: ${msg}` : `API Error: ${msg}`, 'error');
     } finally {
       setGeneratingLabelId(null);
+    }
+  };
+
+  // Confirm Bank Transfer Payment Flow
+  const handleConfirmPayment = (order) => {
+    setConfirmModal({
+      isOpen: true,
+      title: lang === 'CZ' ? 'Potvrdit platbu?' : 'Confirm Payment?',
+      message: lang === 'CZ'
+        ? `Opravdu chcete potvrdit přijetí platby pro objednávku #${order.id}? Zákazníkovi bude odeslán potvrzovací e-mail.`
+        : `Are you sure you want to confirm payment for order #${order.id}? A confirmation email will be sent to the customer.`,
+      confirmText: lang === 'CZ' ? 'Potvrdit platbu' : 'Confirm Payment',
+      onConfirm: () => executeConfirmPayment(order)
+    });
+  };
+
+  const executeConfirmPayment = async (order) => {
+    try {
+      const updatedRaw = { ...order.rawJson };
+      if (!updatedRaw.order) {
+        updatedRaw.order = {
+          id: order.id,
+          customer_name: order.customerName,
+          customer_email: order.email,
+          customer_phone: order.phone,
+          customer_street: order.street,
+          customer_city: order.city,
+          customer_zip: order.zip,
+          payment_method: order.paymentMethod,
+          shipping_method: order.shippingMethod,
+          shipping_cost: order.shippingCost.toString(),
+          payment_surcharge: order.paymentSurcharge.toString(),
+          final_total: order.totalPrice.toString(),
+          userId: order.rawJson?.order?.userId || null
+        };
+      }
+      updatedRaw.order.paymentStatus = 'paid';
+      updatedRaw.order.platba = 'uhrazeno';
+
+      // 1. Save updated order JSON in Storage and sync profile
+      const { error: saveError } = await supabase.functions.invoke('save-order-json', {
+        body: {
+          order: updatedRaw.order,
+          items: updatedRaw.items || []
+        }
+      });
+      if (saveError) throw saveError;
+
+      // 2. Trigger Brevo email to customer
+      try {
+        await supabase.functions.invoke('send-order-email', {
+          body: {
+            order: {
+              id: order.id,
+              customerName: order.customerName,
+              customerEmail: order.email,
+              paymentMethod: order.paymentMethod,
+              finalTotal: order.totalPrice
+            },
+            emailType: 'payment_received'
+          }
+        });
+      } catch (emailErr) {
+        console.error('Failed to send payment received email:', emailErr);
+      }
+
+      showToast(
+        lang === 'CZ' 
+          ? 'Platba byla úspěšně potvrzena.' 
+          : 'Payment was successfully confirmed.', 
+        'success'
+      );
+
+      // 3. Reload order list & details
+      fetchOrdersList(`order_${order.id}.json`);
+      setDetailOrder(null);
+    } catch (err) {
+      console.error('Failed to confirm payment:', err);
+      showToast(lang === 'CZ' ? 'Chyba při potvrzování platby.' : 'Error confirming payment.', 'error');
     }
   };
 
@@ -1687,7 +1828,21 @@ export default function OrdersTab({ showToast }) {
                       </td>
                       <td data-label={lang === 'CZ' ? 'Platba' : 'Payment'}>
                         {details ? (
-                          <span style={{ fontSize: '12px' }}>{details.paymentMethod}</span>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span style={{ fontSize: '12px' }}>{details.paymentMethod}</span>
+                            <span className="orders-badge" style={{
+                              backgroundColor: getPaymentStatusColor(details.rawJson?.order?.paymentStatus || details.rawJson?.order?.platba).bg,
+                              color: getPaymentStatusColor(details.rawJson?.order?.paymentStatus || details.rawJson?.order?.platba).text,
+                              alignSelf: 'flex-start',
+                              fontSize: '10px',
+                              marginTop: '2px',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              fontWeight: 'bold'
+                            }}>
+                              {getPaymentStatusText(details.rawJson?.order?.paymentStatus || details.rawJson?.order?.platba, lang)}
+                            </span>
+                          </div>
                         ) : (
                           <span style={{ color: '#8a8a92', fontSize: '12px' }}>-</span>
                         )}
@@ -1802,6 +1957,18 @@ export default function OrdersTab({ showToast }) {
                                 <h4 style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Doprava a platba' : 'Delivery & Payment'}</h4>
                                 <p>{lang === 'CZ' ? 'Způsob přepravy' : 'Shipping Method'}: <strong>{detailOrder.shippingMethod || detailOrder.carrier}</strong></p>
                                 <p>{lang === 'CZ' ? 'Platební metoda' : 'Payment Method'}: <strong>{detailOrder.paymentMethod}</strong></p>
+                                <p>
+                                  {lang === 'CZ' ? 'Stav platby' : 'Payment Status'}:{' '}
+                                  <strong style={{ color: getPaymentStatusColor(detailOrder.rawJson?.order?.paymentStatus || detailOrder.rawJson?.order?.platba).text }}>
+                                    {getPaymentStatusText(detailOrder.rawJson?.order?.paymentStatus || detailOrder.rawJson?.order?.platba, lang)}
+                                  </strong>
+                                </p>
+                                <p>
+                                  {lang === 'CZ' ? 'Stav vyřízení' : 'Fulfillment Status'}:{' '}
+                                  <strong style={{ color: getFulfillmentStatusColor(detailOrder.rawJson?.order?.fulfillmentStatus || detailOrder.rawJson?.order?.stav).text }}>
+                                    {getFulfillmentStatusText(detailOrder.rawJson?.order?.fulfillmentStatus || detailOrder.rawJson?.order?.stav, lang)}
+                                  </strong>
+                                </p>
                               </div>
                               <div className="orders-modal-col">
                                 <h4 style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Služba' : 'Service info'}</h4>
@@ -1929,6 +2096,16 @@ export default function OrdersTab({ showToast }) {
                                   ) : (
                                     `❌ ${lang === 'CZ' ? 'Storno GLS' : 'Cancel GLS'}`
                                   )}
+                                </button>
+                              )}
+                              {(detailOrder.rawJson?.order?.paymentStatus === 'awaiting_payment' || detailOrder.rawJson?.order?.platba === 'neuhrazeno' || (detailOrder.paymentMethod.toLowerCase().includes('převod') && detailOrder.rawJson?.order?.paymentStatus !== 'paid')) && (
+                                <button 
+                                  type="button"
+                                  className="orders-action-btn"
+                                  style={{ background: '#10b981', color: '#fff', fontWeight: 'bold' }}
+                                  onClick={() => handleConfirmPayment(detailOrder)}
+                                >
+                                  ✅ {lang === 'CZ' ? 'Potvrdit platbu' : 'Confirm Payment'}
                                 </button>
                               )}
                               <button 

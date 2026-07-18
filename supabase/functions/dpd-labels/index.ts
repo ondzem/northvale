@@ -268,6 +268,9 @@ serve(async (req) => {
       // Save parcel number to local storage JSON representation
       if (orderJsonObj) {
         orderJsonObj.order.dpd_parcel_number = parcelNo;
+        orderJsonObj.order.fulfillmentStatus = 'shipped';
+        orderJsonObj.order.stav = 'odesláno';
+
         const encoder = new TextEncoder();
         const updatedBytes = encoder.encode(JSON.stringify(orderJsonObj, null, 2));
         const { error: uploadError } = await supabaseClient.storage
@@ -280,6 +283,39 @@ serve(async (req) => {
           console.error("Failed to update order JSON with parcel number:", uploadError);
         } else {
           console.log(`Saved parcel number ${parcelNo} to order_${order.id}.json`);
+
+          // Also update order_history array inside user profile if userId is present
+          if (orderJsonObj.order.userId) {
+            try {
+              console.log(`[dpd-labels] Syncing order history to profile for userId: ${orderJsonObj.order.userId}`);
+              const { data: profile } = await supabaseClient
+                .from("profiles")
+                .select("order_history")
+                .eq("id", orderJsonObj.order.userId)
+                .single();
+
+              if (profile) {
+                const history = profile.order_history || [];
+                const orderIdx = history.findIndex((o: any) => o.id === order.id);
+                if (orderIdx >= 0) {
+                  const updatedHistory = [...history];
+                  updatedHistory[orderIdx] = { 
+                    ...updatedHistory[orderIdx], 
+                    dpd_parcel_number: parcelNo,
+                    fulfillmentStatus: 'shipped',
+                    stav: 'odesláno'
+                  };
+                  await supabaseClient
+                    .from("profiles")
+                    .update({ order_history: updatedHistory })
+                    .eq("id", orderJsonObj.order.userId);
+                  console.log(`[dpd-labels] Successfully synced order history in user profile.`);
+                }
+              }
+            } catch (profileErr) {
+              console.error("[dpd-labels] Failed to sync order history in profile:", profileErr);
+            }
+          }
         }
       }
     }

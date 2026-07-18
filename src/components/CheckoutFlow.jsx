@@ -720,6 +720,9 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       isicApplied: false,
       isicDiscount: 0,
       finalTotal,
+      paymentStatus: payment === 'card' ? 'paid' : payment === 'transfer' ? 'awaiting_payment' : 'cod',
+      fulfillmentStatus: 'pending',
+      userId: user?.id || null,
       shippingMethod: shipping === 'dpd-pickup'
         ? (lang === 'CZ' ? `DPD - Výdejní místo: ${pickupPoint}` : `DPD - Pickup Point: ${pickupPoint}`)
         : shipping === 'dpd-address' || shipping === 'dpd'

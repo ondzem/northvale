@@ -122,6 +122,46 @@ serve(async (req) => {
       throw uploadError;
     }
 
+    // Also update order_history array inside user profile if userId is present
+    if (order.userId) {
+      try {
+        console.log(`[save-order-json] Syncing order history for userId: ${order.userId}`);
+        const { data: profile, error: fetchError } = await supabase
+          .from("profiles")
+          .select("order_history")
+          .eq("id", order.userId)
+          .single();
+
+        if (fetchError) {
+          console.error(`[save-order-json] Failed to fetch profile for userId ${order.userId}:`, fetchError.message);
+        } else {
+          const history = profile?.order_history || [];
+          const orderIdx = history.findIndex((o: any) => o.id === order.id);
+          let updatedHistory;
+          
+          if (orderIdx >= 0) {
+            updatedHistory = [...history];
+            updatedHistory[orderIdx] = { ...updatedHistory[orderIdx], ...order, items: items || [] };
+          } else {
+            updatedHistory = [{ ...order, items: items || [] }, ...history];
+          }
+
+          const { error: updateError } = await supabase
+            .from("profiles")
+            .update({ order_history: updatedHistory })
+            .eq("id", order.userId);
+
+          if (updateError) {
+            console.error(`[save-order-json] Failed to update order_history for userId ${order.userId}:`, updateError.message);
+          } else {
+            console.log(`[save-order-json] Successfully updated order_history in profiles.`);
+          }
+        }
+      } catch (err) {
+        console.error("[save-order-json] Unexpected error updating profile order_history:", err);
+      }
+    }
+
     return new Response(JSON.stringify({ success: true, message: `Order ${order.id} saved successfully.` }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
