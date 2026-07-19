@@ -201,24 +201,17 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
           textAlign: 'center',
           padding: '24px 8px'
         }}>
-          <div style={{
-            background: 'rgba(253, 189, 22, 0.1)',
-            border: '1px solid rgba(253, 189, 22, 0.2)',
-            borderRadius: '50%',
-            width: '64px',
-            height: '64px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '20px',
-            boxShadow: '0 0 20px rgba(253, 189, 22, 0.05)'
-          }}>
-            <img 
-              src="/logo s popisem.webp" 
-              alt="" 
-              style={{ width: '36px', height: '36px', objectFit: 'contain', filter: 'grayscale(0.2) brightness(1.2)' }} 
-            />
-          </div>
+          <img 
+            src="/logo s popisem.webp" 
+            alt="" 
+            style={{ 
+              width: '180px', 
+              height: 'auto', 
+              objectFit: 'contain', 
+              marginBottom: '24px',
+              filter: 'brightness(1.15)'
+            }} 
+          />
           <h3 style={{
             fontSize: '18px',
             fontWeight: '700',
