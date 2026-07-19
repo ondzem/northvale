@@ -862,7 +862,7 @@ function AppContent() {
       case 'gdpr-vop':
         if (gdprVopTab === 'doprava') {
           pageTitle = t('GdprVop.dopravaTitle');
-          metaDescription = 'Informace o možnostech dopravy a platby. Doručení po celé ČR a na Slovensko přes Zásilkovnu a PPL.';
+          metaDescription = 'Informace o možnostech dopravy a platby. Doručení po celé ČR přes DPD a GLS.';
         } else if (gdprVopTab === 'vop') {
           pageTitle = t('GdprVop.vopTitle');
           metaDescription = 'Všeobecné obchodní podmínky (VOP) e-shopu Northvale TCG.';

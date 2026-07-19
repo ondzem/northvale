@@ -33,12 +33,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const [promoInput, setPromoInput] = useState(appliedDiscount ? appliedDiscount.code : '');
   const [promoLoading, setPromoLoading] = useState(false);
 
-  // ComGate Payment Gateway Simulator States
-  const [isGatewayOpen, setIsGatewayOpen] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvv, setCardCvv] = useState('');
 
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
@@ -55,19 +50,13 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   else if (shipping === 'gls-pickup') shippingCost = 89;
   else if (shipping === 'gls-address') shippingCost = 129;
   else if (shipping === 'pardubice') shippingCost = 0;
-  else if (shipping === 'zasilkovna') shippingCost = 79;
-  else if (shipping === 'gls') shippingCost = 129;
-  else if (shipping === 'dpd') shippingCost = 109;
 
   // Free shipping above 2000 CZK (checked on total after discount)
   if (subtotalAfterDiscount > 2000 && (
     shipping === 'dpd-pickup' || 
     shipping === 'dpd-address' || 
     shipping === 'gls-pickup' || 
-    shipping === 'gls-address' || 
-    shipping === 'zasilkovna' || 
-    shipping === 'gls' || 
-    shipping === 'dpd'
+    shipping === 'gls-address'
   )) {
     shippingCost = 0;
   }
@@ -82,9 +71,6 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
 
   const getShippingPriceDisplay = (method, basePrice) => {
     const isFree = subtotalAfterDiscount > 2000 && (
-      method === 'zasilkovna' || 
-      method === 'gls' || 
-      method === 'dpd' ||
       method === 'dpd-pickup' ||
       method === 'dpd-address' ||
       method === 'gls-pickup' ||
@@ -603,7 +589,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     if (payment === 'card') {
       setIsPaying(true);
       try {
-        const orderId = '100' + Math.floor(1000 + Math.random() * 9000);
+        const orderId = '100' + String(Date.now()).slice(-6) + String(Math.floor(10 + Math.random() * 90));
         const amountCents = Math.round(finalTotal * 100);
         const returnUrl = window.location.origin + '/checkout?status=callback';
 
@@ -667,28 +653,18 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         document.body.appendChild(form);
         form.submit();
       } catch (err) {
-        console.warn('GP webpay signature function failed. Falling back to mockup gateway simulator:', err);
+        console.error('GP webpay signature function failed:', err);
         setIsPaying(false);
-        setIsGatewayOpen(true); // Fallback na simulovanou bránu v případě nedostupnosti
+        alert(
+          lang === 'CZ' 
+            ? 'Platební brána je momentálně nedostupná. Zvolte prosím jinou platební metodu (převod nebo dobírku).' 
+            : 'Payment gateway is currently unavailable. Please choose another payment method (bank transfer or cash on delivery).', 
+          'error'
+        );
       }
     } else {
       finalizeOrder();
     }
-  };
-
-  const handleGatewayPay = (e) => {
-    e.preventDefault();
-    if (!cardNumber || !cardExpiry || !cardCvv) {
-      alert(lang === 'CZ' ? 'Vyplňte prosím všechny údaje platební karty.' : 'Please fill in all credit card details.', 'error');
-      return;
-    }
-    
-    setIsPaying(true);
-    setTimeout(() => {
-      setIsPaying(false);
-      setIsGatewayOpen(false);
-      finalizeOrder();
-    }, 1500);
   };
 
   const finalizeOrder = () => {
@@ -700,7 +676,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     if (shipping !== 'pardubice') {
       cleanedZip = `${cleanedZip.slice(0, 3)} ${cleanedZip.slice(3)}`;
     }
-    const orderId = '100' + Math.floor(1000 + Math.random() * 9000);
+    const orderId = '100' + String(Date.now()).slice(-6) + String(Math.floor(10 + Math.random() * 90));
     const order = {
       id: orderId,
       items: cart.map(item => ({
@@ -2238,112 +2214,6 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
             </aside>
           </div>
         </form>
-      )}
-
-      {/* ComGate Payment Gateway Simulator Modal */}
-      {isGatewayOpen && (
-        <div className="co-modal-overlay" style={{ zIndex: 9999 }}>
-          <div className="co-modal-content">
-            <div className="co-modal-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '18px' }}>💳</span>
-                <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-gold)' }}>
-                  {lang === 'CZ' ? 'Zabezpečená platba GP Webpay' : 'Secure GP Webpay Payment'}
-                </span>
-              </div>
-              <button 
-                type="button" 
-                onClick={() => setIsGatewayOpen(false)} 
-                disabled={isPaying}
-                className="co-modal-close-btn"
-              >
-                ✕
-              </button>
-            </div>
-
-            {isPaying ? (
-              <div className="co-loader-container">
-                <div className="spinner-loader co-spinner"></div>
-                <p style={{ marginTop: '16px', fontSize: '14px', fontWeight: '600' }}>
-                  {lang === 'CZ' ? 'Zpracování platby, prosím vyčkejte...' : 'Processing payment, please wait...'}
-                </p>
-                <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                  {lang === 'CZ' ? 'Komunikace s bankou...' : 'Communicating with the bank...'}
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleGatewayPay} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '12px' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{lang === 'CZ' ? 'ČÁSTKA K ÚHRADĚ' : 'AMOUNT TO PAY'}</div>
-                  <div style={{ fontSize: '20px', fontWeight: '800', color: 'var(--text-main)' }}>
-                    {finalTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} {lang === 'CZ' ? 'Kč' : 'CZK'}
-                  </div>
-                </div>
-
-                <div className="pof-field" style={{ marginBottom: '16px' }}>
-                  <span>{lang === 'CZ' ? 'Číslo platební karty' : 'Card Number'}</span>
-                  <input 
-                    type="text" 
-                    required 
-                    placeholder="4111 2222 3333 4444"
-                    maxLength="19"
-                    value={cardNumber}
-                    onChange={(e) => {
-                      let v = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-                      let matches = v.match(/\d{4,16}/g);
-                      let match = matches && matches[0] || '';
-                      let parts = [];
-                      for (let i = 0, len = match.length; i < len; i += 4) {
-                        parts.push(match.substring(i, i + 4));
-                      }
-                      if (parts.length > 0) {
-                        setCardNumber(parts.join(' '));
-                      } else {
-                        setCardNumber(v);
-                      }
-                    }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', gap: '16px' }}>
-                  <div className="pof-field" style={{ flex: 1, marginBottom: '16px' }}>
-                    <span>{lang === 'CZ' ? 'Platnost (MM/RR)' : 'Expiry (MM/YY)'}</span>
-                    <input 
-                      type="text" 
-                      required 
-                      placeholder="12/28"
-                      maxLength="5"
-                      value={cardExpiry}
-                      onChange={(e) => {
-                        let v = e.target.value.replace('/', '').replace(/[^0-9]/gi, '');
-                        if (v.length >= 2) {
-                          setCardExpiry(v.substring(0, 2) + '/' + v.substring(2, 4));
-                        } else {
-                          setCardExpiry(v);
-                        }
-                      }}
-                    />
-                  </div>
-                  <div className="pof-field" style={{ flex: 1, marginBottom: '16px' }}>
-                    <span>CVV / CVC</span>
-                    <input 
-                      type="password" 
-                      required 
-                      placeholder="123"
-                      maxLength="3"
-                      value={cardCvv}
-                      onChange={(e) => setCardCvv(e.target.value.replace(/[^0-9]/gi, ''))}
-                    />
-                  </div>
-                </div>
-
-                <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '8px' }}>
-                  {lang === 'CZ' ? 'Zaplatit bezpečně' : 'Pay Securely'}
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
       )}
       </div>
     </div>
