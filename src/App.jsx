@@ -1099,20 +1099,78 @@ function AppContent() {
 
     try {
       const productIds = currentCart.map(item => item.product?.id).filter(Boolean);
-      if (productIds.length === 0) return currentCart;
-
-      const { data: dbProds, error } = await supabase
-        .from('products')
-        .select('id, stock, variants, name')
-        .in('id', productIds);
+      
+      const { data: dbProds, error } = productIds.length > 0 
+        ? await supabase.from('products').select('id, stock, variants, name').in('id', productIds)
+        : { data: [], error: null };
 
       if (error) throw error;
+
+      // Fetch daily deal allocations for daily deal items
+      let dbDeals = [];
+      if (currentCart.some(item => item.product?.isDailyDeal || item.product?.id === 'deal-of-the-day')) {
+        const { data } = await supabase.from('daily_deal').select('id, stock, name');
+        dbDeals = data || [];
+      }
 
       let cartChanged = false;
       const verifiedCart = [];
       const messages = [];
 
       for (const item of currentCart) {
+        // Handle custom deal of the day items
+        if (item.product?.isDailyDeal || item.product?.id === 'deal-of-the-day') {
+          const slotId = item.product?.dealSlotId || 'active-deal';
+          const activeDealRecord = dbDeals.find(d => d.id === slotId);
+
+          if (!activeDealRecord) {
+            cartChanged = true;
+            messages.push(
+              lang === 'CZ'
+                ? `Akce dne "${item.name}" již skončila a byla odebrána z košíku.`
+                : `Daily deal "${item.name}" has expired and was removed from your cart.`
+            );
+            continue;
+          }
+
+          const dbProd = dbProds?.find(p => p.id === item.product?.id);
+          let maxStock = Number(activeDealRecord.stock || 0);
+
+          if (dbProd) {
+            let catalogStock = 0;
+            if (item.product?.type === 'single') {
+              const variant = dbProd.variants?.find(v => v.id === item.id);
+              catalogStock = variant ? Number(variant.stock || 0) : 0;
+            } else {
+              catalogStock = Number(dbProd.stock || 0);
+            }
+            maxStock = Math.min(maxStock, catalogStock);
+          }
+
+          if (maxStock <= 0) {
+            cartChanged = true;
+            messages.push(
+              lang === 'CZ'
+                ? `Produkt "${item.name}" v akci dne je již vyprodán a byl odebrán z košíku.`
+                : `Product "${item.name}" in daily deal is sold out and was removed from your cart.`
+            );
+            continue;
+          }
+
+          if (item.quantity > maxStock) {
+            cartChanged = true;
+            verifiedCart.push({ ...item, quantity: maxStock });
+            messages.push(
+              lang === 'CZ'
+                ? `Množství u "${item.name}" bylo upraveno na ${maxStock} ks (maximum na skladě).`
+                : `Quantity of "${item.name}" was adjusted to ${maxStock} pcs (max in stock).`
+            );
+          } else {
+            verifiedCart.push(item);
+          }
+          continue;
+        }
+
         const dbProd = dbProds?.find(p => p.id === item.product?.id);
         
         if (!dbProd) {
@@ -1272,39 +1330,64 @@ function AppContent() {
         const prod = item.product;
         if (!prod || !prod.id) continue;
 
-        if (prod.type === 'single') {
-          const { data: dbProd } = await supabase
-            .from('products')
-            .select('variants')
-            .eq('id', prod.id)
-            .single();
+        // Decrement daily deal slot stock
+        if (prod.isDailyDeal) {
+          try {
+            const slotId = prod.dealSlotId || 'active-deal';
+            const { data: dbDeal } = await supabase
+              .from('daily_deal')
+              .select('stock')
+              .eq('id', slotId)
+              .single();
 
-          if (dbProd && dbProd.variants) {
-            const updatedVariants = dbProd.variants.map(v => {
-              if (v.id === item.id) {
-                return { ...v, stock: Math.max(0, (v.stock || 0) - item.quantity) };
-              }
-              return v;
-            });
-
-            await supabase
-              .from('products')
-              .update({ variants: updatedVariants })
-              .eq('id', prod.id);
+            if (dbDeal) {
+              const newDealStock = Math.max(0, (dbDeal.stock || 0) - item.quantity);
+              await supabase
+                .from('daily_deal')
+                .update({ stock: newDealStock })
+                .eq('id', slotId);
+              console.log(`[submitOrder] Decremented daily_deal slot ${slotId} stock to ${newDealStock}`);
+            }
+          } catch (dealStockErr) {
+            console.error('Failed to update daily deal stock on Supabase:', dealStockErr);
           }
-        } else {
-          const { data: dbProd } = await supabase
-            .from('products')
-            .select('stock')
-            .eq('id', prod.id)
-            .single();
+        }
 
-          if (dbProd) {
-            const newStock = Math.max(0, (dbProd.stock || 0) - item.quantity);
-            await supabase
+        if (prod.id !== 'deal-of-the-day') {
+          if (prod.type === 'single') {
+            const { data: dbProd } = await supabase
               .from('products')
-              .update({ stock: newStock })
-              .eq('id', prod.id);
+              .select('variants')
+              .eq('id', prod.id)
+              .single();
+
+            if (dbProd && dbProd.variants) {
+              const updatedVariants = dbProd.variants.map(v => {
+                if (v.id === item.id) {
+                  return { ...v, stock: Math.max(0, (v.stock || 0) - item.quantity) };
+                }
+                return v;
+              });
+
+              await supabase
+                .from('products')
+                .update({ variants: updatedVariants })
+                .eq('id', prod.id);
+            }
+          } else {
+            const { data: dbProd } = await supabase
+              .from('products')
+              .select('stock')
+              .eq('id', prod.id)
+              .single();
+
+            if (dbProd) {
+              const newStock = Math.max(0, (dbProd.stock || 0) - item.quantity);
+              await supabase
+                .from('products')
+                .update({ stock: newStock })
+                .eq('id', prod.id);
+            }
           }
         }
       }

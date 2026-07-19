@@ -292,12 +292,16 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     let active = true;
     async function loadDailyDeal() {
       const dbDeal = await fetchDailyDealFromDB();
-      if (active && dbDeal) {
+      if (active) {
         setDeal(dbDeal);
-        try {
-          localStorage.setItem('northvale-cached-deal', JSON.stringify(dbDeal));
-        } catch (e) {
-          console.warn('Failed to cache daily deal:', e);
+        if (dbDeal) {
+          try {
+            localStorage.setItem('northvale-cached-deal', JSON.stringify(dbDeal));
+          } catch (e) {
+            console.warn('Failed to cache daily deal:', e);
+          }
+        } else {
+          localStorage.removeItem('northvale-cached-deal');
         }
       }
     }
@@ -307,17 +311,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     };
   }, []);
 
-  const fallbackEndsAt = useMemo(() => new Date(Date.now() + 14.5 * 3600 * 1000).toISOString(), []);
-
-  const activeDeal = deal || {
-    name: 'Booster Box SV06 Twilight Masquerade',
-    image_url: '/9.png',
-    stock: 14,
-    price: 2690,
-    original_price: 3590,
-    ends_at: fallbackEndsAt,
-    product_id: 'deal-of-the-day'
-  };
+  const activeDeal = deal;
 
   // Deal of the day countdown timer
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -331,21 +325,23 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   useEffect(() => {
     let active = true;
     async function loadProduct() {
-      if (activeDeal && activeDeal.product_id) {
+      if (activeDeal && activeDeal.product_id && activeDeal.product_id !== 'deal-of-the-day') {
         const prod = await fetchProductByIdFromDB(activeDeal.product_id);
         if (active) {
           setDealProductState(prod);
         }
+      } else {
+        setDealProductState(null);
       }
     }
     loadProduct();
     return () => {
       active = false;
     };
-  }, [activeDeal.product_id]);
+  }, [activeDeal?.product_id]);
 
   useEffect(() => {
-    if (!activeDeal.ends_at) return;
+    if (!activeDeal || !activeDeal.ends_at) return;
 
     const updateTimer = () => {
       const endsAt = new Date(activeDeal.ends_at).getTime();
@@ -368,7 +364,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     updateTimer();
     const timer = setInterval(updateTimer, 1000);
     return () => clearInterval(timer);
-  }, [activeDeal.ends_at]);
+  }, [activeDeal?.ends_at]);
 
   const nextSlide = () => {
     setCurrentSlide((currentSlide + 1) % slides.length);
@@ -485,6 +481,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   };
 
   const getDealStock = () => {
+    if (!activeDeal) return 0;
     if (activeDeal.stock && Number(activeDeal.stock) > 0) {
       return Number(activeDeal.stock);
     }
@@ -496,35 +493,38 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     }
     return Number(activeDeal.stock || 0);
   };
-  const dealProductStock = getDealStock();
-  const dealProductPrice = Number(activeDeal.price || 0);
-  const dealProductOriginalPrice = activeDeal.original_price ? Number(activeDeal.original_price) : null;
-  const discountPercent = dealProductOriginalPrice 
+  const dealProductStock = activeDeal ? getDealStock() : 0;
+  const dealProductPrice = activeDeal ? Number(activeDeal.price || 0) : 0;
+  const dealProductOriginalPrice = activeDeal && activeDeal.original_price ? Number(activeDeal.original_price) : null;
+  const discountPercent = (activeDeal && dealProductOriginalPrice) 
     ? Math.round(((dealProductOriginalPrice - dealProductPrice) / dealProductOriginalPrice) * 100)
     : 0;
 
   const catalogProduct = dealProductState;
-  const dealProduct = catalogProduct || {
+  const dealProduct = activeDeal ? (catalogProduct || {
     id: activeDeal.product_id || 'deal-of-the-day',
     name: activeDeal.name,
-    image: activeDeal.image_url || '/9.png',
+    image: activeDeal.image_url || '/logo s popisem.webp',
     stock: dealProductStock,
     price: dealProductPrice,
     originalPrice: dealProductOriginalPrice,
     type: 'sealed'
-  };
+  }) : null;
 
   const handleCardClick = (product) => {
-    if (!catalogProduct || product.id === 'deal-of-the-day') return;
+    if (!catalogProduct || !product || product.id === 'deal-of-the-day') return;
     setSelectedProductId(product.id);
     setActivePage('sealed-detail');
   };
 
   const handleBuyDealClick = (e) => {
     if (e) e.stopPropagation();
+    if (!activeDeal) return;
     const productToBuy = catalogProduct || dealProduct;
     const cartProduct = {
       ...productToBuy,
+      isDailyDeal: true,
+      dealSlotId: activeDeal.id,
       name: activeDeal.name,
       price: dealProductPrice,
       originalPrice: dealProductOriginalPrice,
@@ -535,6 +535,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     const cartVariant = productToBuy.variants && productToBuy.variants.length > 0 
       ? { 
           ...productToBuy.variants[0], 
+          isDailyDeal: true,
+          dealSlotId: activeDeal.id,
           price: dealProductPrice, 
           stock: dealProductStock 
         } 
@@ -699,14 +701,66 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           ...styles.dealWidget, 
           flex: !isMobile ? '2.7 1 22%' : '3 1 25%',
           height: !isMobile ? 'auto' : (useMobileImage ? '410px' : '380px'), 
-          padding: (!isMobile || useMobileImage) ? '16px 16px 0 16px' : '0 16px 0 0',
-          flexDirection: (!isMobile || useMobileImage) ? 'column' : 'row',
+          padding: (!activeDeal || !isMobile || useMobileImage) ? '16px' : '0 16px 0 0',
+          flexDirection: (!activeDeal || !isMobile || useMobileImage) ? 'column' : 'row',
           alignItems: 'stretch',
           justifyContent: 'space-between',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          display: 'flex',
+          textAlign: 'center',
+          background: !activeDeal ? 'rgba(255, 255, 255, 0.02)' : undefined,
+          border: !activeDeal ? '1px solid rgba(255, 255, 255, 0.05)' : undefined
         }} className="glass-panel deal-widget-banner">
-          
-          {(!isMobile || useMobileImage) ? (
+          {!activeDeal ? (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              width: '100%',
+              padding: '24px 8px'
+            }}>
+              <div style={{
+                background: 'rgba(253, 189, 22, 0.1)',
+                border: '1px solid rgba(253, 189, 22, 0.2)',
+                borderRadius: '50%',
+                width: '64px',
+                height: '64px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '20px',
+                boxShadow: '0 0 20px rgba(253, 189, 22, 0.05)'
+              }}>
+                <img 
+                  src="/logo s popisem.webp" 
+                  alt="" 
+                  style={{ width: '36px', height: '36px', objectFit: 'contain', filter: 'grayscale(0.2) brightness(1.2)' }} 
+                />
+              </div>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '700',
+                color: 'var(--text-main)',
+                margin: '0 0 10px 0',
+                fontFamily: 'var(--font-heading)'
+              }}>
+                {lang === 'CZ' ? 'Připravujeme akci dne' : 'Daily Deal Coming Soon'}
+              </h3>
+              <p style={{
+                fontSize: '13px',
+                color: 'var(--text-muted)',
+                margin: 0,
+                lineHeight: '1.6',
+                maxWidth: '240px'
+              }}>
+                {lang === 'CZ' 
+                  ? 'Již brzy zde naleznete další skvělou nabídku za výjimečnou cenu. Sledujte nás, ať vám nic neuteče!' 
+                  : 'Check back soon for our next exclusive deal at an exceptional price. Stay tuned!'}
+              </p>
+            </div>
+          ) : (!isMobile || useMobileImage) ? (
             // --- VERTICAL LAYOUT (DESKTOP & MOBILE) ---
             <>
               {/* Product link wrapping title and image */}

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from '../../context/LanguageContext';
 import { fetchSlidesFromDB, saveSlideToDB, deleteSlideFromDB } from '../../services/slides';
 import { fetchDailyDealFromDB, saveDailyDealToDB, fetchDailyDealsFromDB, deleteDailyDealFromDB } from '../../services/dailyDeal';
-import { fetchProductsFromDB } from '../../services/products';
+import { fetchProductsFromDB, fetchProductImage } from '../../services/products';
 import { fetchHomepageSectionsFromDB, saveHomepageSectionToDB } from '../../services/homepageSections';
 
 export default function HomepageTab({ showToast, onEditProduct }) {
@@ -560,7 +560,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
     setDealLoading(false);
   };
 
-  const handleAutoFillFromProduct = (prodId) => {
+  const handleAutoFillFromProduct = async (prodId) => {
     const prod = dealProductsList.find(p => p.id === prodId);
     if (prod) {
       setDealName(prod.name || '');
@@ -573,7 +573,13 @@ export default function HomepageTab({ showToast, onEditProduct }) {
       const activeOriginalPrice = prod.originalPrice || (prod.variants && prod.variants.length > 0 ? prod.variants[0].originalPrice : null);
       setDealOriginalPrice(activeOriginalPrice ? String(activeOriginalPrice) : String(Math.round(activePrice * 1.3)));
       
-      setDealImageUrl(prod.image || '');
+      try {
+        const img = await fetchProductImage(prodId);
+        setDealImageUrl(img || prod.image || '');
+      } catch (e) {
+        console.warn('Failed to fetch product image for daily deal prefill:', e);
+        setDealImageUrl(prod.image || '');
+      }
       showToast(lang === 'CZ' ? 'Pole předvyplněna z produktu!' : 'Form pre-filled from product!', 'success');
     }
   };
@@ -598,13 +604,24 @@ export default function HomepageTab({ showToast, onEditProduct }) {
 
   const handleSaveDailyDeal = async (e) => {
     e.preventDefault();
-    setDealSaving(true);
 
     const daysOffset = Number(dealDays || 0) * 24 * 3600 * 1000;
     const hoursOffset = Number(dealHours || 0) * 3600 * 1000;
     const minsOffset = Number(dealMinutes || 0) * 60 * 1000;
     const secsOffset = Number(dealSeconds || 0) * 1000;
     const durationMs = daysOffset + hoursOffset + minsOffset + secsOffset;
+
+    if (durationMs <= 0) {
+      showToast(
+        lang === 'CZ' 
+          ? 'Chyba: Musíte nastavit platný odpočet času do konce akce (dny, hodiny, minuty nebo sekundy)!' 
+          : 'Error: You must set a valid countdown duration for the deal!', 
+        'error'
+      );
+      return;
+    }
+
+    setDealSaving(true);
 
     try {
       const dealsList = await fetchDailyDealsFromDB();

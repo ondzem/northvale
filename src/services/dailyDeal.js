@@ -1,16 +1,6 @@
 import { supabase } from '../supabase';
 
-// Static default deal for fallback if DB is empty, inaccessible, or table does not exist
-export const DEFAULT_DEAL = {
-  id: 'active-deal',
-  name: 'Booster Box SV06 Twilight Masquerade',
-  image_url: '/9.png',
-  stock: 14,
-  price: 2690,
-  original_price: 3590,
-  ends_at: new Date(Date.now() + 14.5 * 3600 * 1000).toISOString(), // 14 hours 30 mins from now
-  product_id: 'deal-of-the-day'
-};
+
 
 let cachedDeals = [];
 
@@ -32,9 +22,7 @@ export async function fetchDailyDealsFromDB() {
     }
 
     if (!data || data.length === 0) {
-      // If table is empty, insert default active-deal
-      await saveDailyDealToDB(DEFAULT_DEAL, 'active-deal');
-      return [DEFAULT_DEAL];
+      return [];
     }
 
     cachedDeals = data;
@@ -49,35 +37,78 @@ export async function fetchDailyDealsFromDB() {
     } catch (e) {
       console.warn('Failed to read cached daily_deals:', e);
     }
-    return [DEFAULT_DEAL];
+    return [];
   }
 }
 
 /**
- * Get the currently active daily deal from a list of deals based on ends_at values.
- * Returns the first deal that ends in the future.
+ * Compute the effective remaining stock for a daily deal.
+ * If linked to a catalog product, takes the minimum of deal allocation and actual product stock.
  */
-export function getActiveDailyDeal(allDeals) {
+export function getEffectiveDealStock(deal, linkedProducts = []) {
+  if (!deal) return 0;
+  const dealStock = Number(deal.stock || 0);
+  if (deal.product_id && deal.product_id !== 'deal-of-the-day') {
+    const catalogProduct = linkedProducts.find(p => p.id === deal.product_id);
+    if (catalogProduct) {
+      let prodStock = 0;
+      if (catalogProduct.variants && catalogProduct.variants.length > 0) {
+        prodStock = catalogProduct.variants.reduce((sum, v) => sum + Number(v.stock || 0), 0);
+      } else {
+        prodStock = Number(catalogProduct.stock || 0);
+      }
+      return Math.min(dealStock, prodStock);
+    }
+  }
+  return dealStock;
+}
+
+/**
+ * Get the currently active daily deal from a list of deals based on ends_at values.
+ * Returns the first deal that ends in the future and has stock remaining.
+ */
+export function getActiveDailyDeal(allDeals, linkedProducts = []) {
   if (!allDeals || allDeals.length === 0) return null;
   
   // Sort deals by ends_at ascending
   const sortedDeals = [...allDeals].sort((a, b) => new Date(a.ends_at) - new Date(b.ends_at));
   
-  // Find first deal that expires in the future
+  // Find first deal that expires in the future and has stock remaining > 0
   const now = Date.now();
-  const active = sortedDeals.find(d => new Date(d.ends_at).getTime() > now);
+  const active = sortedDeals.find(d => {
+    if (new Date(d.ends_at).getTime() <= now) return false;
+    const stock = getEffectiveDealStock(d, linkedProducts);
+    if (stock <= 0) return false;
+    return true;
+  });
   
   return active || null;
 }
 
 /**
- * Fetch the active daily deal (or fallback to DEFAULT_DEAL if none are in the future).
- * This function is used by the storefront so it doesn't need to know about slots.
+ * Fetch the active daily deal, evaluating real-time stock levels of linked catalog products.
+ * Returns null if no valid daily deal is scheduled or active.
  */
 export async function fetchDailyDealFromDB() {
   const deals = await fetchDailyDealsFromDB();
-  const active = getActiveDailyDeal(deals);
-  return active || DEFAULT_DEAL;
+  
+  // Fetch current stock from Supabase for all products linked to these deals
+  const productIds = deals.map(d => d.product_id).filter(id => id && id !== 'deal-of-the-day');
+  let products = [];
+  if (productIds.length > 0) {
+    try {
+      const { data } = await supabase
+        .from('products')
+        .select('id, stock, variants')
+        .in('id', productIds);
+      products = data || [];
+    } catch (e) {
+      console.warn('Failed to fetch linked products for stock validation:', e);
+    }
+  }
+
+  const active = getActiveDailyDeal(deals, products);
+  return active || null;
 }
 
 /**
