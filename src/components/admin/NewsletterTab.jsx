@@ -421,7 +421,7 @@ export default function NewsletterTab({ showToast }) {
     ]);
 
     const csvContent = [headers, ...rows]
-      .map(e => e.map(val => `"${val.replace(/"/g, '""')}"`).join(','))
+      .map(e => e.map(val => `"${String(val || '').replace(/"/g, '""')}"`).join(','))
       .join('\n');
 
     const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });

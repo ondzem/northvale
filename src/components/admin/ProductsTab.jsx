@@ -1826,7 +1826,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 9l6 6 6-6"></path></svg>
         </div>
 
-        <button type="button" className="adf-tcsv" onClick={() => showToast(lang === 'CZ' ? 'Tato funkce hromadného importu CSV zatím není nastavená.' : 'Bulk CSV Import function is not configured yet.', 'warning')}>
+        <button type="button" className="adf-tcsv" onClick={() => setIsCsvModalOpen(true)}>
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2h9l5 5v15H6z"></path><path d="M14 2v6h6M9 13h6M9 17h6"></path></svg>
           <span> {lang === 'CZ' ? 'Hromadný CSV import' : 'Bulk CSV Import'}</span>
         </button>
