@@ -994,7 +994,8 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
             <div style={styles.drawerBody} className="drawer-body-no-scrollbar">
               {/* Mobile Navigation Categories (Only shown on mobile) */}
               {isMobile && (
-                <div style={styles.mobileDrawerNav}>
+                <>
+                  <div style={styles.mobileDrawerNav}>
                   {/* 1. Pokémon */}
                   <div style={styles.mobileNavSection}>
                     <div className="mobile-nav-header" style={styles.mobileNavHeader} onClick={() => { handleCategoryClick('sealed', { game: 'Pokémon' }); setDrawerOpen(false); }}>
@@ -1108,7 +1109,36 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     </div>
                   </div>
                 </div>
-              )}
+
+                {/* Mobile Help & Socials (Only shown on mobile, scrolls inside body) */}
+                <div style={styles.mobileDrawerFooter}>
+                  {/* Actions Row (Oblíbené, Kontakt) */}
+                  <div style={styles.drawerActionsRow}>
+                    <button className="drawer-action-link" style={styles.drawerActionLink} onClick={() => { setActivePage('favorites'); setDrawerOpen(false); }}>
+                      <img src="/heart.png" alt="" style={styles.drawerActionIcon} width="16" height="16" /> {t('Navbar.favorites')}
+                    </button>
+                    <button className="drawer-action-link" style={styles.drawerActionLink} onClick={() => { setActivePage('support'); setDrawerOpen(false); }}>
+                      Kontakt
+                    </button>
+                  </div>
+
+                  {/* Socials */}
+                  <div style={styles.drawerSocials}>
+                    <a href="https://www.instagram.com/northvaletcg/?utm_source=ig_web_button_share_sheet" target="_blank" rel="noopener noreferrer" className="drawer-social-link" style={styles.drawerSocialLink}>
+                      <img src="/instagram.png" alt="Instagram" className="drawer-social-icon" style={styles.drawerSocialIcon} width="18" height="18" />
+                    </a>
+                    <a href="https://www.facebook.com/share/18yajuq6N1/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="drawer-social-link" style={styles.drawerSocialLink}>
+                      <img src="/facebook.png" alt="Facebook" className="drawer-social-icon" style={styles.drawerSocialIcon} width="18" height="18" />
+                    </a>
+                  </div>
+
+                  {/* FAQ Banner */}
+                  <div style={styles.faqBanner} onClick={() => { setActivePage('faq'); setDrawerOpen(false); }}>
+                    {t('Navbar.advice')} <span style={styles.faqBannerLink}>{t('Navbar.faqLink')}</span>
+                  </div>
+                </div>
+              </>
+            )}
 
               {/* Desktop Drawer Content (Only shown on desktop) */}
               {!isMobile && (
@@ -1203,47 +1233,17 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
 
                   <div style={{ ...styles.drawerSection, borderBottom: 'none', marginTop: 'auto', paddingBottom: '0', alignItems: 'flex-start', textAlign: 'left' }}>
                     <h4 style={{ ...styles.drawerSectionTitle, textAlign: 'left' }}>{translateSubcat('Kontakty')}</h4>
-                    <p style={{ ...styles.drawerText, textAlign: 'left' }}>
-                      <strong>{translateSubcat('Provozovatel')}:</strong> NORTHVALE s.r.o.<br />
-                      <strong>{translateSubcat('Sídlo')}:</strong> Bratří Čapků 1095, Holice<br />
-                      <strong>{translateSubcat('Odběr')}:</strong> Sladkovského 512, Pardubice<br />
+                    <p style={{ ...styles.drawerText, textAlign: 'left', lineHeight: '1.6' }}>
+                      <strong>{lang === 'CZ' ? 'IČO' : 'Company ID'}:</strong> 29618142<br />
+                      <strong>{lang === 'CZ' ? 'DIČ' : 'VAT ID'}:</strong> CZ29618142<br />
                       <strong>E-mail:</strong> info@northvaletcg.eu<br />
-                      <strong>Telefon:</strong> +420 739 666 779
+                      <strong>{lang === 'CZ' ? 'Telefon' : 'Phone'}:</strong> +420 739 666 779<br />
+                      <strong>{lang === 'CZ' ? 'Odběr' : 'Pickup'}:</strong> Bratří Čapků 1095, Holice
                     </p>
                   </div>
                 </>
               )}
             </div>
-
-            {/* Mobile Help & Socials (Only shown on mobile, pinned at the bottom) */}
-            {isMobile && (
-              <div style={styles.mobileDrawerFooter}>
-                {/* Actions Row (Oblíbené, Kontakt) */}
-                <div style={styles.drawerActionsRow}>
-                  <button className="drawer-action-link" style={styles.drawerActionLink} onClick={() => { setActivePage('favorites'); setDrawerOpen(false); }}>
-                    <img src="/heart.png" alt="" style={styles.drawerActionIcon} width="16" height="16" /> {t('Navbar.favorites')}
-                  </button>
-                  <button className="drawer-action-link" style={styles.drawerActionLink} onClick={() => { setActivePage('support'); setDrawerOpen(false); }}>
-                    Kontakt
-                  </button>
-                </div>
-
-                {/* Socials */}
-                <div style={styles.drawerSocials}>
-                  <a href="https://www.instagram.com/northvaletcg/?utm_source=ig_web_button_share_sheet" target="_blank" rel="noopener noreferrer" className="drawer-social-link" style={styles.drawerSocialLink}>
-                    <img src="/instagram.png" alt="Instagram" className="drawer-social-icon" style={styles.drawerSocialIcon} width="18" height="18" />
-                  </a>
-                  <a href="https://www.facebook.com/share/18yajuq6N1/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="drawer-social-link" style={styles.drawerSocialLink}>
-                    <img src="/facebook.png" alt="Facebook" className="drawer-social-icon" style={styles.drawerSocialIcon} width="18" height="18" />
-                  </a>
-                </div>
-
-                {/* FAQ Banner */}
-                <div style={styles.faqBanner} onClick={() => { setActivePage('faq'); setDrawerOpen(false); }}>
-                  {t('Navbar.advice')} <span style={styles.faqBannerLink}>{t('Navbar.faqLink')}</span>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}
@@ -1930,7 +1930,8 @@ const styles = {
     flexDirection: 'column',
     width: '100%',
     gap: '8px',
-    marginTop: 'auto',
+    marginTop: '32px',
+    paddingBottom: '24px',
   },
   searchSuggestions: {
     position: 'absolute',
