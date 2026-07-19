@@ -91,9 +91,20 @@ async function run() {
     { loc: `${baseUrl}/faq/`, priority: '0.6', changefreq: 'monthly' },
     { loc: `${baseUrl}/about/`, priority: '0.6', changefreq: 'monthly' },
     { loc: `${baseUrl}/blog/`, priority: '0.7', changefreq: 'daily' },
-    { loc: `${baseUrl}/gdpr-vop/`, priority: '0.5', changefreq: 'monthly' },
-    { loc: `${baseUrl}/kalendar-vydani/`, priority: '0.7', changefreq: 'daily' }
+    { loc: `${baseUrl}/gdpr-vop/`, priority: '0.5', changefreq: 'monthly' }
   ];
+
+  try {
+    const configPath = path.resolve(__dirname, '../src/config.js');
+    if (fs.existsSync(configPath)) {
+      const configText = fs.readFileSync(configPath, 'utf-8');
+      if (configText.includes('showCalendar: true')) {
+        staticUrls.push({ loc: `${baseUrl}/kalendar-vydani/`, priority: '0.7', changefreq: 'daily' });
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to parse showCalendar from config.js:', err);
+  }
 
   // 2. Blog URLs (Note: We use the cleaned up slug 'jak-rozpoznat-falesnou-pokemon-kartu' for first article)
   const blogUrls = blogArticles.map(article => {

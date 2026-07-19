@@ -159,18 +159,20 @@ export default function Footer({ setActivePage, activePage }) {
                 {t('Footer.faq')}
               </a>
             </li>
-            <li>
-              <a 
-                href="/kalendar-vydani/" 
-                className="footer-link" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActivePage('tcg-calendar');
-                }}
-              >
-                {lang === 'CZ' ? 'Kalendář vydání' : 'Release Calendar'}
-              </a>
-            </li>
+            {FEATURE_FLAGS.showCalendar && (
+              <li>
+                <a 
+                  href="/kalendar-vydani/" 
+                  className="footer-link" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActivePage('tcg-calendar');
+                  }}
+                >
+                  {lang === 'CZ' ? 'Kalendář vydání' : 'Release Calendar'}
+                </a>
+              </li>
+            )}
             <li>
               <a 
                 href="/" 

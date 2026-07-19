@@ -78,7 +78,7 @@ const parseUrlToState = () => {
   } else if (path === '/about') {
     page = 'about';
   } else if (path === '/kalendar-vydani') {
-    page = 'tcg-calendar';
+    page = FEATURE_FLAGS.showCalendar ? 'tcg-calendar' : 'home';
   } else if (path.startsWith('/blog/')) {
     page = 'blog';
     productId = path.replace('/blog/', '');
@@ -139,7 +139,7 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
   } else if (page === 'about') {
     path = '/about/';
   } else if (page === 'tcg-calendar') {
-    path = '/kalendar-vydani/';
+    path = FEATURE_FLAGS.showCalendar ? '/kalendar-vydani/' : '/';
   } else if (page === 'blog') {
     if (productId) {
       path = `/blog/${productId}/`;
@@ -1828,7 +1828,7 @@ function AppContent() {
           <AboutPage setActivePage={navigateToPage} />
         )}
 
-        {activePage === 'tcg-calendar' && (
+        {activePage === 'tcg-calendar' && FEATURE_FLAGS.showCalendar && (
           <TcgCalendarPage setActivePage={navigateToPage} />
         )}
 
