@@ -190,7 +190,7 @@ async function run() {
     }
 
     heurekaXml += '  <SHOPITEM>\n';
-    heurekaXml += `    <ITEM_ID>${escapeXml(p.id)}</ITEM_ID>\n`;
+    heurekaXml += `    <ITEM_ID>${escapeXml(p.id.substring(0, 36))}</ITEM_ID>\n`;
     heurekaXml += `    <PRODUCTNAME>${escapeXml(title)}</PRODUCTNAME>\n`;
     heurekaXml += `    <DESCRIPTION>${escapeXml(desc)}</DESCRIPTION>\n`;
     heurekaXml += `    <URL>${escapeXml(link)}</URL>\n`;
@@ -226,7 +226,7 @@ async function run() {
     }
 
     zboziXml += '  <SHOPITEM>\n';
-    zboziXml += `    <ITEM_ID>${escapeXml(p.id)}</ITEM_ID>\n`;
+    zboziXml += `    <ITEM_ID>${escapeXml(p.id.substring(0, 36))}</ITEM_ID>\n`;
     zboziXml += `    <PRODUCTNAME>${escapeXml(title)}</PRODUCTNAME>\n`;
     zboziXml += `    <DESCRIPTION>${escapeXml(desc)}</DESCRIPTION>\n`;
     zboziXml += `    <URL>${escapeXml(link)}</URL>\n`;
