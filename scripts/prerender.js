@@ -116,6 +116,21 @@ function extractPlaintextDescription(rawDesc) {
   return trimmed.replace(/<[^>]*>/g, '');
 }
 
+// Clean product images from inline base64 bloat for prerendered HTML
+function cleanImageUrl(imgUrl) {
+  if (!imgUrl || imgUrl.startsWith('data:')) {
+    return '/Northvale Logo.webp';
+  }
+  return imgUrl;
+}
+
+function cleanAbsoluteImageUrl(imgUrl) {
+  if (!imgUrl || imgUrl.startsWith('data:')) {
+    return 'https://northvaletcg.eu/Northvale Logo.webp';
+  }
+  return imgUrl;
+}
+
 // Generate JSON-LD Schema block
 function generateJsonLd(type, data) {
   return `<script type="application/ld+json">\n${JSON.stringify(data, null, 2)}\n</script>`;
@@ -129,11 +144,11 @@ const headerHtml = `
       <img src="/Northvale Logo.webp" alt="Northvale Logo" style="height: 32px;" />
     </a>
     <nav class="nv-nav-menu" style="display: flex; gap: 24px; font-weight: 500;">
-      <a href="/sealed-catalog" style="color: #c5c6c7; text-decoration: none;">Sealed Produkty</a>
-      <a href="/grading" style="color: #c5c6c7; text-decoration: none;">Grading</a>
-      <a href="/buylist" style="color: #c5c6c7; text-decoration: none;">Výkup</a>
-      <a href="/faq" style="color: #c5c6c7; text-decoration: none;">FAQ</a>
-      <a href="/blog" style="color: #c5c6c7; text-decoration: none;">Blog</a>
+      <a href="/sealed-catalog/" style="color: #c5c6c7; text-decoration: none;">Sealed Produkty</a>
+      <a href="/grading/" style="color: #c5c6c7; text-decoration: none;">Grading</a>
+      <a href="/buylist/" style="color: #c5c6c7; text-decoration: none;">Výkup</a>
+      <a href="/faq/" style="color: #c5c6c7; text-decoration: none;">FAQ</a>
+      <a href="/blog/" style="color: #c5c6c7; text-decoration: none;">Blog</a>
     </nav>
   </div>
 </header>
@@ -149,9 +164,13 @@ const footerHtml = `
     </div>
     <div style="flex: 1; min-width: 200px;">
       <h4 style="color: #fff; margin-bottom: 16px; font-family: 'Outfit', sans-serif;">Užitečné Odkazy</h4>
-      <a href="/gdpr-vop?tab=doprava" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Doprava a platba</a>
-      <a href="/gdpr-vop?tab=vop" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Obchodní podmínky (VOP)</a>
-      <a href="/gdpr-vop?tab=gdpr" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Ochrana osobních údajů</a>
+      <a href="/gdpr-vop/?tab=doprava" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Doprava a platba</a>
+      <a href="/gdpr-vop/?tab=vop" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Obchodní podmínky (VOP)</a>
+      <a href="/gdpr-vop/?tab=gdpr" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Ochrana osobních údajů</a>
+      <a href="/about/" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">O nás</a>
+      <a href="/community/" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Komunita</a>
+      <a href="/support/" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Zákaznická podpora</a>
+      <a href="/grading-guide/" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Průvodce gradingem</a>
     </div>
     <div style="flex: 1; min-width: 200px;">
       <h4 style="color: #fff; margin-bottom: 16px; font-family: 'Outfit', sans-serif;">Kontakt</h4>
@@ -161,6 +180,7 @@ const footerHtml = `
     </div>
   </div>
 </footer>
+
 `;
 
 async function prerender() {
@@ -261,10 +281,10 @@ async function prerender() {
         <h1 style="font-size: 32px; font-family: 'Outfit', sans-serif; color: #fff; margin-bottom: 24px;">Katalog Sealed Produktů</h1>
         <p style="font-size: 16px; color: #8a8a92; margin-bottom: 32px;">Kompletní sortiment sběratelských karetních produktů. Booster Boxy, Elite Trainer Boxy a speciální balení.</p>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;">
-          ${products.slice(0, 12).map(prod => `
+          ${products.map(prod => `
             <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; text-align: left; display: flex; flex-direction: column;">
               <div style="height: 180px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.15); border-radius: 4px; margin-bottom: 16px; overflow: hidden;">
-                <img src="${prod.image || '/Northvale Logo.webp'}" alt="${escapeHtml(prod.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+                <img src="${cleanImageUrl(prod.image)}" alt="${escapeHtml(prod.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
               </div>
               <h3 style="font-size: 15px; color: #fff; margin-bottom: 8px; font-weight: 600; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 42px;">${escapeHtml(prod.name)}</h3>
               <p style="font-size: 18px; color: #fdbd16; font-weight: 700; margin-top: auto;">${prod.price.toLocaleString()} Kč</p>
@@ -331,9 +351,9 @@ async function prerender() {
       } else {
         let rawText = escapeHtml(blk.text);
         rawText = rawText
-          .replace(/katalogu sealed produktů/g, '<a href="/sealed-catalog" style="color:#fdbd16;text-decoration:underline;">katalogu sealed produktů</a>')
-          .replace(/jak poznat falešné TCG karty/g, '<a href="/blog/jak-rozpoznat-falesnou-pokemon-kartu" style="color:#fdbd16;text-decoration:underline;">jak poznat falešné TCG karty</a>')
-          .replace(/jak rozpoznat falešnou Pokémon kartu/g, '<a href="/blog/jak-rozpoznat-falesnou-pokemon-kartu" style="color:#fdbd16;text-decoration:underline;">jak rozpoznat falešnou Pokémon kartu</a>');
+          .replace(/katalogu sealed produktů/g, '<a href="/sealed-catalog/" style="color:#fdbd16;text-decoration:underline;">katalogu sealed produktů</a>')
+          .replace(/jak poznat falešné TCG karty/g, '<a href="/blog/jak-rozpoznat-falesnou-pokemon-kartu/" style="color:#fdbd16;text-decoration:underline;">jak poznat falešné TCG karty</a>')
+          .replace(/jak rozpoznat falešnou Pokémon kartu/g, '<a href="/blog/jak-rozpoznat-falesnou-pokemon-kartu/" style="color:#fdbd16;text-decoration:underline;">jak rozpoznat falešnou Pokémon kartu</a>');
         
         bodyHtml += `<p style="font-size: 15px; color: #c5c6c7; line-height: 1.7; margin-bottom: 16px;">${rawText}</p>`;
       }
@@ -352,10 +372,23 @@ async function prerender() {
       .filter(blk => blk.type !== 'image')
       .reduce((sum, blk) => sum + (blk.text ? blk.text.split(/\s+/).length : 0), 0);
 
+    let pageTitle = `${art.title} | Northvale TCG`;
+    if (pageTitle.length > 60) {
+      pageTitle = art.title;
+    }
+    if (pageTitle.length > 60) {
+      pageTitle = pageTitle.substring(0, 57) + "...";
+    }
+
+    let metaDesc = art.description || "";
+    if (metaDesc.length > 160) {
+      metaDesc = metaDesc.substring(0, 157) + "...";
+    }
+
     routes.push({
       path: `blog/${slug}`,
-      title: `${art.title} | Northvale TCG`,
-      description: art.description,
+      title: pageTitle,
+      description: metaDesc,
       canonicalUrl: `https://northvaletcg.eu/blog/${slug}/`,
       schema: {
         "@context": "https://schema.org",
@@ -408,7 +441,7 @@ async function prerender() {
       },
       content: `
         <main style="max-width: 800px; margin: 0 auto; padding: 48px 16px; text-align: left;">
-          <a href="/blog" style="color: #8a8a92; text-decoration: none; font-size: 14px; display: inline-block; margin-bottom: 24px;">← Zpět na blog</a>
+          <a href="/blog/" style="color: #8a8a92; text-decoration: none; font-size: 14px; display: inline-block; margin-bottom: 24px;">← Zpět na blog</a>
           <span style="color: #fdbd16; font-size: 12px; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 8px;">${escapeHtml(art.category)}</span>
           <h1 style="font-size: 32px; font-family: 'Outfit', sans-serif; color: #fff; margin-bottom: 16px; line-height: 1.3;">${escapeHtml(art.title)}</h1>
           <div style="font-size: 13px; color: #8a8a92; margin-bottom: 32px;">Doba čtení: ${art.readTime}</div>
@@ -420,6 +453,21 @@ async function prerender() {
           <article>
             ${bodyHtml}
           </article>
+
+          <div style="margin-top: 64px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 32px;">
+            <h3 style="color: #fff; font-size: 20px; font-family: 'Outfit', sans-serif; margin-bottom: 20px;">Související články</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+              ${blogArticles.filter(a => a.id !== art.id).slice(0, 2).map(rel => {
+                const relSlug = rel.id === 'jak-rozpoznat-fale-nou-pok-mon-kartu' ? 'jak-rozpoznat-falesnou-pokemon-kartu' : rel.id;
+                return `
+                  <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 16px;">
+                    <h4 style="font-size: 14px; margin-bottom: 8px; font-family: 'Outfit', sans-serif; line-height: 1.4;"><a href="/blog/${relSlug}/" style="color: #fff; text-decoration: none;">${escapeHtml(rel.title)}</a></h4>
+                    <a href="/blog/${relSlug}/" style="color: #fdbd16; font-size: 13px; text-decoration: none; font-weight: 600;">Číst článek →</a>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
         </main>
       `
     });
@@ -479,9 +527,20 @@ async function prerender() {
       metaDesc = metaDesc.substring(0, 157) + "...";
     }
 
+    let pageTitle = `${prod.name} | koupit online | Northvale TCG`;
+    if (pageTitle.length > 60) {
+      pageTitle = `${prod.name} | Northvale TCG`;
+    }
+    if (pageTitle.length > 60) {
+      pageTitle = prod.name;
+    }
+    if (pageTitle.length > 60) {
+      pageTitle = pageTitle.substring(0, 57) + "...";
+    }
+
     routes.push({
       path: `sealed-detail/${prod.id}`,
-      title: `${prod.name} | koupit online | Northvale TCG`,
+      title: pageTitle,
       description: metaDesc,
       canonicalUrl: `https://northvaletcg.eu/sealed-detail/${prod.id}/`,
       schema: {
@@ -539,7 +598,7 @@ async function prerender() {
       content: `
         <main style="max-width: 1200px; margin: 0 auto; padding: 48px 16px; display: flex; flex-wrap: wrap; gap: 48px; text-align: left;">
           <div style="flex: 1; min-width: 300px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.15); border-radius: 8px; padding: 32px; height: 400px;">
-            <img src="${prod.image || '/Northvale Logo.webp'}" alt="${escapeHtml(prod.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+            <img src="${cleanImageUrl(prod.image)}" alt="${escapeHtml(prod.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
           </div>
           <div style="flex: 1.2; min-width: 300px; display: flex; flex-direction: column;">
             <span style="color: #fdbd16; font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">${escapeHtml(prod.game || 'TCG')} / ${escapeHtml(prod.type || 'Sealed')}</span>
@@ -557,6 +616,22 @@ async function prerender() {
             <div style="color: #c5c6c7; font-size: 15px; line-height: 1.6;">
               <h3 style="color: #fff; margin-bottom: 8px; font-family: 'Outfit', sans-serif;">Popis produktu</h3>
               <p>${escapeHtml(prod.shortDesc || prod.desc || 'Originální sealed produkt pro sběratele a hráče.')}</p>
+            </div>
+          </div>
+
+          <div style="width: 100%; margin-top: 64px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 48px;">
+            <h3 style="color: #fff; font-size: 22px; font-family: 'Outfit', sans-serif; margin-bottom: 24px;">Související produkty</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+              ${products.filter(p => p.id !== prod.id && p.type !== 'single' && p.type !== 'slab').slice(0, 3).map(rel => `
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; display: flex; flex-direction: column;">
+                  <div style="height: 150px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.15); border-radius: 4px; margin-bottom: 12px; overflow: hidden;">
+                    <img src="${cleanImageUrl(rel.image)}" alt="${escapeHtml(rel.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+                  </div>
+                  <h4 style="font-size: 14px; color: #fff; margin-bottom: 8px; font-weight: 600; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 38px;">${escapeHtml(rel.name)}</h4>
+                  <p style="font-size: 16px; color: #fdbd16; font-weight: 700; margin-top: auto;">${rel.price.toLocaleString()} Kč</p>
+                  <a href="/sealed-detail/${rel.id}/" style="display: block; text-align: center; background: rgba(253, 189, 22, 0.08); border: 1px solid rgba(253, 189, 22, 0.3); color: #fdbd16; padding: 6px 0; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 600; margin-top: 8px;">Detail produktu</a>
+                </div>
+              `).join('')}
             </div>
           </div>
         </main>
@@ -749,19 +824,22 @@ async function prerender() {
       `<meta name="description" content="${escapeHtml(r.description)}" />`
     );
 
-    // Resolve dynamic social share metadata images
+    // Resolve dynamic social share metadata type and images
+    let ogType = 'website';
     let ogImageUrl = 'https://northvaletcg.eu/Northvale Logo.webp';
     if (r.path.startsWith('blog/')) {
+      ogType = 'article';
       const slug = r.path.split('/')[1];
       const art = blogArticles.find(a => (a.id === slug || (a.id === 'jak-rozpoznat-fale-nou-pok-mon-kartu' && slug === 'jak-rozpoznat-falesnou-pokemon-kartu')));
       if (art && art.image) {
         ogImageUrl = `https://northvaletcg.eu${art.image}`;
       }
     } else if (r.path.startsWith('sealed-detail/')) {
+      ogType = 'product';
       const prodId = r.path.split('/')[1];
       const prod = products.find(p => p.id === prodId);
-      if (prod && prod.image && !prod.image.startsWith('data:')) {
-        ogImageUrl = prod.image;
+      if (prod && prod.image) {
+        ogImageUrl = cleanAbsoluteImageUrl(prod.image);
       }
     }
 
@@ -770,7 +848,10 @@ async function prerender() {
     <meta property="og:title" content="${escapeHtml(r.title)}" />
     <meta property="og:description" content="${escapeHtml(r.description)}" />
     <meta property="og:url" content="${r.canonicalUrl}" />
+    <meta property="og:type" content="${ogType}" />
     <meta property="og:image" content="${ogImageUrl}" />
+    <meta property="og:site_name" content="Northvale TCG" />
+    <meta property="og:locale" content="cs_CZ" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(r.title)}" />
     <meta name="twitter:description" content="${escapeHtml(r.description)}" />
