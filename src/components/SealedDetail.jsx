@@ -1462,7 +1462,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '14px' }}>
                     <li style={{ marginBottom: '8px' }}>
                       <a 
-                        href="/blog/jak-rozpoznat-falesnou-pokemon-kartu" 
+                        href="/blog/jak-rozpoznat-falesnou-pokemon-kartu/" 
                         onClick={(e) => {
                           e.preventDefault();
                           setActivePage('blog');
@@ -1475,7 +1475,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                     </li>
                     <li>
                       <a 
-                        href="/blog/jak-zacit-s-pokemon-kartami" 
+                        href="/blog/jak-zacit-s-pokemon-kartami/" 
                         onClick={(e) => {
                           e.preventDefault();
                           setActivePage('blog');

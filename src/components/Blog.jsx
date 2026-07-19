@@ -201,24 +201,24 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
                 const parts = [];
                 
                 const linksToMap = [
-                  { pattern: 'katalogu sealed produktů', href: '/sealed-catalog', action: () => handleInternalNav('sealed-catalog') },
-                  { pattern: 'katalog sealed produktů', href: '/sealed-catalog', action: () => handleInternalNav('sealed-catalog') },
-                  { pattern: 'booster boxů', href: '/sealed-catalog', action: () => handleInternalNav('sealed-catalog') },
-                  { pattern: 'Elite Trainer Boxů', href: '/sealed-catalog', action: () => handleInternalNav('sealed-catalog') },
-                  { pattern: 'nabídku toploaderů', href: '/sealed-catalog?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
-                  { pattern: 'pokémon obaly', href: '/sealed-catalog?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
-                  { pattern: 'obaly na karty', href: '/sealed-catalog?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
-                  { pattern: 'akrylové stojánky', href: '/sealed-catalog?game=Acrylics', action: () => handleInternalNav('sealed-catalog', { game: 'Acrylics' }) },
-                  { pattern: 'obaly Ultra PRO', href: '/sealed-catalog?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
-                  { pattern: 'stojánky a display systémy', href: '/sealed-catalog?game=Acrylics', action: () => handleInternalNav('sealed-catalog', { game: 'Acrylics' }) },
-                  { pattern: 'jak poznat fake Pokémon kartu', href: '/blog/jak-rozpoznat-falesnou-pokemon-kartu', action: () => handleArticleClick('jak-rozpoznat-falesnou-pokemon-kartu') },
-                  { pattern: 'jak poznat falešnou Pokémon kartu', href: '/blog/jak-rozpoznat-falesnou-pokemon-kartu', action: () => handleArticleClick('jak-rozpoznat-falesnou-pokemon-kartu') },
-                  { pattern: 'jak poznat falešné karty Pokémon', href: '/blog/jak-rozpoznat-falesnou-pokemon-kartu', action: () => handleArticleClick('jak-rozpoznat-falesnou-pokemon-kartu') },
-                  { pattern: 'jak začít s Pokémon kartami', href: '/blog/jak-zacit-s-pokemon-kartami', action: () => handleArticleClick('jak-zacit-s-pokemon-kartami') },
-                  { pattern: 'kde koupit Pokémon karty v Česku', href: '/blog/kde-koupit-pokemon-karty-v-cesku', action: () => handleArticleClick('kde-koupit-pokemon-karty-v-cesku') },
-                  { pattern: 'kde sehnat Pokémon karty v ČR', href: '/blog/kde-sehnat-pokemon-karty-v-cr', action: () => handleArticleClick('kde-sehnat-pokemon-karty-v-cr') },
-                  { pattern: 'příslušenství pro karty', href: '/blog/prislusenstvi-pro-karty', action: () => handleArticleClick('prislusenstvi-pro-karty') },
-                  { pattern: 'výbavu sběratele Pokémon karet', href: '/blog/vybava-sberatele-pokemon-karet', action: () => handleArticleClick('vybava-sberatele-pokemon-karet') }
+                  { pattern: 'katalogu sealed produktů', href: '/sealed-catalog/', action: () => handleInternalNav('sealed-catalog') },
+                  { pattern: 'katalog sealed produktů', href: '/sealed-catalog/', action: () => handleInternalNav('sealed-catalog') },
+                  { pattern: 'booster boxů', href: '/sealed-catalog/', action: () => handleInternalNav('sealed-catalog') },
+                  { pattern: 'Elite Trainer Boxů', href: '/sealed-catalog/', action: () => handleInternalNav('sealed-catalog') },
+                  { pattern: 'nabídku toploaderů', href: '/sealed-catalog/?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
+                  { pattern: 'pokémon obaly', href: '/sealed-catalog/?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
+                  { pattern: 'obaly na karty', href: '/sealed-catalog/?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
+                  { pattern: 'akrylové stojánky', href: '/sealed-catalog/?game=Acrylics', action: () => handleInternalNav('sealed-catalog', { game: 'Acrylics' }) },
+                  { pattern: 'obaly Ultra PRO', href: '/sealed-catalog/?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
+                  { pattern: 'stojánky a display systémy', href: '/sealed-catalog/?game=Acrylics', action: () => handleInternalNav('sealed-catalog', { game: 'Acrylics' }) },
+                  { pattern: 'jak poznat fake Pokémon kartu', href: '/blog/jak-rozpoznat-falesnou-pokemon-kartu/', action: () => handleArticleClick('jak-rozpoznat-falesnou-pokemon-kartu') },
+                  { pattern: 'jak poznat falešnou Pokémon kartu', href: '/blog/jak-rozpoznat-falesnou-pokemon-kartu/', action: () => handleArticleClick('jak-rozpoznat-falesnou-pokemon-kartu') },
+                  { pattern: 'jak poznat falešné karty Pokémon', href: '/blog/jak-rozpoznat-falesnou-pokemon-kartu/', action: () => handleArticleClick('jak-rozpoznat-falesnou-pokemon-kartu') },
+                  { pattern: 'jak začít s Pokémon kartami', href: '/blog/jak-zacit-s-pokemon-kartami/', action: () => handleArticleClick('jak-zacit-s-pokemon-kartami') },
+                  { pattern: 'kde koupit Pokémon karty v Česku', href: '/blog/kde-koupit-pokemon-karty-v-cesku/', action: () => handleArticleClick('kde-koupit-pokemon-karty-v-cesku') },
+                  { pattern: 'kde sehnat Pokémon karty v ČR', href: '/blog/kde-sehnat-pokemon-karty-v-cr/', action: () => handleArticleClick('kde-sehnat-pokemon-karty-v-cr') },
+                  { pattern: 'příslušenství pro karty', href: '/blog/prislusenstvi-pro-karty/', action: () => handleArticleClick('prislusenstvi-pro-karty') },
+                  { pattern: 'výbavu sběratele Pokémon karet', href: '/blog/vybava-sberatele-pokemon-karet/', action: () => handleArticleClick('vybava-sberatele-pokemon-karet') }
                 ];
 
                 let matches = [];

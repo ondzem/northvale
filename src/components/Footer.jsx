@@ -280,7 +280,7 @@ export default function Footer({ setActivePage, activePage }) {
               {FEATURE_FLAGS.showBuylist && (
                 <li>
                   <a 
-                    href="/buylist" 
+                    href="/buylist/" 
                     className="footer-link" 
                     onClick={(e) => {
                       e.preventDefault();
@@ -294,7 +294,7 @@ export default function Footer({ setActivePage, activePage }) {
               {FEATURE_FLAGS.showGrading && (
                 <li>
                   <a 
-                    href="/grading" 
+                    href="/grading/" 
                     className="footer-link" 
                     onClick={(e) => {
                       e.preventDefault();
@@ -308,7 +308,7 @@ export default function Footer({ setActivePage, activePage }) {
               {FEATURE_FLAGS.showGrading && (
                 <li>
                   <a 
-                    href="/grading-guide" 
+                    href="/grading-guide/" 
                     className="footer-link" 
                     onClick={(e) => {
                       e.preventDefault();
