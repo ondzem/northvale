@@ -221,7 +221,7 @@ export async function fetchProductsFromDB(options = {}) {
       if (error) {
         throw error;
       }
-      cachedRawProducts = data || [];
+      cachedRawProducts = (data || []).filter(p => p.id !== 'POK-SV2-112');
       isCachedDataFull = true;
       productsCacheTime = now;
 

@@ -1028,7 +1028,7 @@ function AppContent() {
               "contactType": "customer service",
               "email": "info@northvaletcg.eu"
             },
-            "vatID": "CZ07438316"
+            "vatID": "CZ29618142"
           },
           {
             "@type": "WebSite",

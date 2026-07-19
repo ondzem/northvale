@@ -4,12 +4,12 @@ Vítejte v podrobné informační bázi e-shopu a komunitního portálu Northval
 
 ## 1. Identita a Základní Údaje
 - **Název e-shopu**: Northvale TCG
-- **Provozovatel**: Alvion s.r.o.
+- **Provozovatel**: NORTHVALE s.r.o.
 - **Sídlo/Adresa**: Bratří Čapků 1095, Holice, 53401, Česká republika
 - **E-mail**: info@northvaletcg.eu
 - **Telefon**: +420 739 666 779
-- **IČO**: 07438316
-- **DIČ**: CZ07438316
+- **IČO**: 29618142
+- **DIČ**: CZ29618142
 - **Země doručení**: Česká republika (ČR) a Slovensko (SR)
 
 ## 2. Naše Mise a Přidaná Hodnota

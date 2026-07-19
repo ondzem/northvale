@@ -48,7 +48,8 @@ async function getProducts() {
       .from('products')
       .select('*');
     if (error) throw error;
-    return data && data.length > 0 ? data : mockProducts;
+    const filtered = data ? data.filter(p => p.id !== 'POK-SV2-112') : [];
+    return filtered.length > 0 ? filtered : mockProducts;
   } catch (err) {
     console.warn('Prerender db products fetch failed, using mockProducts:', err.message);
     return mockProducts;
@@ -92,6 +93,29 @@ function escapeHtml(text) {
     .replace(/'/g, '&#039;');
 }
 
+// Extract plain text from either block editor JSON or raw HTML descriptions
+function extractPlaintextDescription(rawDesc) {
+  if (!rawDesc) return '';
+  if (typeof rawDesc !== 'string') return '';
+  
+  const trimmed = rawDesc.trim();
+  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    try {
+      const blocks = JSON.parse(trimmed);
+      if (Array.isArray(blocks)) {
+        return blocks
+          .filter(b => b.type === 'text' && b.value)
+          .map(b => b.value.replace(/<[^>]*>/g, ''))
+          .join(' ');
+      }
+    } catch (e) {
+      // Fallback if parsing fails
+    }
+  }
+  
+  return trimmed.replace(/<[^>]*>/g, '');
+}
+
 // Generate JSON-LD Schema block
 function generateJsonLd(type, data) {
   return `<script type="application/ld+json">\n${JSON.stringify(data, null, 2)}\n</script>`;
@@ -133,7 +157,7 @@ const footerHtml = `
       <h4 style="color: #fff; margin-bottom: 16px; font-family: 'Outfit', sans-serif;">Kontakt</h4>
       <p style="font-size: 14px; margin-bottom: 8px;">E-mail: <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; text-decoration: none;">info@northvaletcg.eu</a></p>
       <p style="font-size: 14px; margin-bottom: 8px;">Telefon: <a href="tel:+420739666779" style="color: #fdbd16; text-decoration: none;">+420 739 666 779</a></p>
-      <p style="font-size: 13px;">Provozovatel: Alvion s.r.o., Holice, IČO: 07438316</p>
+      <p style="font-size: 13px;">Provozovatel: NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice, IČO: 29618142</p>
     </div>
   </div>
 </footer>
@@ -161,7 +185,7 @@ async function prerender() {
   routes.push({
     path: '',
     title: 'Pokémon karty, Lorcana a One Piece TCG | Northvale TCG',
-    description: 'Originální Pokémon karty, Disney Lorcana a One Piece TCG produkty skladem. Booster boxy, ETB, kusovky i grading karet. Bezpečné sběratelské balení, doprava po ČR.',
+    description: 'Originální Pokémon karty, Disney Lorcana a One Piece TCG produkty. Booster boxy, ETB, kusovky i grading. Bezpečné sběratelské balení a rychlá doprava po ČR.',
     canonicalUrl: 'https://northvaletcg.eu/',
     schema: {
       "@context": "https://schema.org",
@@ -189,7 +213,7 @@ async function prerender() {
             "contactType": "customer service",
             "email": "info@northvaletcg.eu"
           },
-          "vatID": "CZ07438316"
+          "vatID": "CZ29618142"
         },
         {
           "@type": "WebSite",
@@ -209,17 +233,17 @@ async function prerender() {
           <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 32px; border-radius: 8px;">
             <h2 style="color: #fff; margin-bottom: 16px;">Sealed Produkty</h2>
             <p style="color: #8a8a92; font-size: 14px; margin-bottom: 24px;">Booster boxy, Elite Trainer Boxy (ETB), speciální edice a dárkové kufříky.</p>
-            <a href="/sealed-catalog" style="color: #fdbd16; text-decoration: none; font-weight: 600;">Prozkoumat katalog →</a>
+            <a href="/sealed-catalog/" style="color: #fdbd16; text-decoration: none; font-weight: 600;">Prozkoumat katalog →</a>
           </div>
           <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 32px; border-radius: 8px;">
             <h2 style="color: #fff; margin-bottom: 16px;">Grading Karet</h2>
             <p style="color: #8a8a92; font-size: 14px; margin-bottom: 24px;">Profesionální ověření pravosti a stavu vašich nejvzácnějších TCG karet.</p>
-            <a href="/grading" style="color: #fdbd16; text-decoration: none; font-weight: 600;">Více o gradingu →</a>
+            <a href="/grading/" style="color: #fdbd16; text-decoration: none; font-weight: 600;">Více o gradingu →</a>
           </div>
           <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 32px; border-radius: 8px;">
             <h2 style="color: #fff; margin-bottom: 16px;">Sběratelský Blog</h2>
             <p style="color: #8a8a92; font-size: 14px; margin-bottom: 24px;">Návody jak poznat falešné karty, investiční tipy a produktové recenze.</p>
-            <a href="/blog" style="color: #fdbd16; text-decoration: none; font-weight: 600;">Číst články →</a>
+            <a href="/blog/" style="color: #fdbd16; text-decoration: none; font-weight: 600;">Číst články →</a>
           </div>
         </div>
       </main>
@@ -231,7 +255,7 @@ async function prerender() {
     path: 'sealed-catalog',
     title: 'Pokémon booster boxy a ETB | Northvale TCG',
     description: 'Originální balíčky (boostery), boxy, ETB a příslušenství pro karetní hry Pokémon, Lorcana a One Piece.',
-    canonicalUrl: 'https://northvaletcg.eu/sealed-catalog',
+    canonicalUrl: 'https://northvaletcg.eu/sealed-catalog/',
     content: `
       <main style="max-width: 1200px; margin: 0 auto; padding: 48px 16px;">
         <h1 style="font-size: 32px; font-family: 'Outfit', sans-serif; color: #fff; margin-bottom: 24px;">Katalog Sealed Produktů</h1>
@@ -240,11 +264,11 @@ async function prerender() {
           ${products.slice(0, 12).map(prod => `
             <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; text-align: left; display: flex; flex-direction: column;">
               <div style="height: 180px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.15); border-radius: 4px; margin-bottom: 16px; overflow: hidden;">
-                <img src="${prod.image_url || '/Northvale Logo.webp'}" alt="${escapeHtml(prod.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+                <img src="${prod.image || '/Northvale Logo.webp'}" alt="${escapeHtml(prod.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
               </div>
               <h3 style="font-size: 15px; color: #fff; margin-bottom: 8px; font-weight: 600; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 42px;">${escapeHtml(prod.name)}</h3>
               <p style="font-size: 18px; color: #fdbd16; font-weight: 700; margin-top: auto;">${prod.price.toLocaleString()} Kč</p>
-              <a href="/sealed-detail/${prod.id}" style="display: block; text-align: center; background: rgba(253, 189, 22, 0.08); border: 1px solid rgba(253, 189, 22, 0.3); color: #fdbd16; padding: 8px; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: 600; margin-top: 12px;">Zobrazit detail</a>
+              <a href="/sealed-detail/${prod.id}/" style="display: block; text-align: center; background: rgba(253, 189, 22, 0.08); border: 1px solid rgba(253, 189, 22, 0.3); color: #fdbd16; padding: 8px; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: 600; margin-top: 12px;">Zobrazit detail</a>
             </div>
           `).join('')}
         </div>
@@ -263,7 +287,7 @@ async function prerender() {
     path: 'blog',
     title: 'Průvodce a články ze světa TCG | Northvale TCG',
     description: 'Průvodce světem karetních her, tipy na ochranu sbírky, rady pro začátečníky a návody pro rozpoznání padělaných karet.',
-    canonicalUrl: 'https://northvaletcg.eu/blog',
+    canonicalUrl: 'https://northvaletcg.eu/blog/',
     content: `
       <main style="max-width: 1200px; margin: 0 auto; padding: 48px 16px;">
         <h1 style="font-size: 32px; font-family: 'Outfit', sans-serif; color: #fff; margin-bottom: 16px;">Northvale TCG Blog</h1>
@@ -279,9 +303,9 @@ async function prerender() {
                 </div>
                 <div style="padding: 24px; display: flex; flex-direction: column; flex: 1;">
                   <span style="color: #fdbd16; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">${escapeHtml(art.category)}</span>
-                  <h3 style="font-size: 18px; color: #fff; margin-bottom: 12px; font-family: 'Outfit', sans-serif;"><a href="/blog/${slug}" style="color: #fff; text-decoration: none;">${escapeHtml(art.title)}</a></h3>
+                  <h3 style="font-size: 18px; color: #fff; margin-bottom: 12px; font-family: 'Outfit', sans-serif;"><a href="/blog/${slug}/" style="color: #fff; text-decoration: none;">${escapeHtml(art.title)}</a></h3>
                   <p style="font-size: 14px; color: #8a8a92; line-height: 1.6; margin-bottom: 20px;">${escapeHtml(art.description)}</p>
-                  <a href="/blog/${slug}" style="color: #fdbd16; text-decoration: none; font-size: 14px; font-weight: 600; margin-top: auto;">Číst více →</a>
+                  <a href="/blog/${slug}/" style="color: #fdbd16; text-decoration: none; font-size: 14px; font-weight: 600; margin-top: auto;">Číst více →</a>
                 </div>
               </div>
             `;
@@ -332,7 +356,7 @@ async function prerender() {
       path: `blog/${slug}`,
       title: `${art.title} | Northvale TCG`,
       description: art.description,
-      canonicalUrl: `https://northvaletcg.eu/blog/${slug}`,
+      canonicalUrl: `https://northvaletcg.eu/blog/${slug}/`,
       schema: {
         "@context": "https://schema.org",
         "@graph": [
@@ -349,13 +373,13 @@ async function prerender() {
                 "@type": "ListItem",
                 "position": 2,
                 "name": "Blog",
-                "item": "https://northvaletcg.eu/blog"
+                "item": "https://northvaletcg.eu/blog/"
               },
               {
                 "@type": "ListItem",
                 "position": 3,
                 "name": art.title,
-                "item": `https://northvaletcg.eu/blog/${slug}`
+                "item": `https://northvaletcg.eu/blog/${slug}/`
               }
             ]
           },
@@ -417,11 +441,49 @@ async function prerender() {
       brandName = prodGame;
     }
 
+    // If description is missing/thin in DB, generate and attempt to save it
+    if (supabase && (!prod.description || prod.description.trim().length < 10)) {
+      const generatedDesc = `Originální ${prod.name} pro sběratele a hráče karetní hry ${brandName}. Sběratelské balení, 100% originální distribuce.`;
+      const generatedShort = `Koupit originální ${prod.name} online na Northvale TCG za skvělou cenu.`;
+      
+      supabase
+        .from('products')
+        .update({
+          description: JSON.stringify([{ id: 'b-auto-generated', type: 'text', value: generatedDesc }]),
+          short_description: generatedShort
+        })
+        .eq('id', prod.id)
+        .then(({ error }) => {
+          if (error) {
+            console.warn(`Could not update description for product ${prod.id} in DB:`, error.message);
+          } else {
+            console.log(`Successfully saved generated description for ${prod.id} to DB.`);
+          }
+        })
+        .catch(err => {
+          console.warn(`Failed database write attempt for product ${prod.id}:`, err);
+        });
+
+      prod.description = JSON.stringify([{ id: 'b-auto-generated', type: 'text', value: generatedDesc }]);
+      prod.short_description = generatedShort;
+    }
+
+    let plainDesc = extractPlaintextDescription(prod.short_description || prod.shortDesc || prod.description || prod.desc);
+    if (!plainDesc || plainDesc.trim().length < 10) {
+      const typeLabel = prod.type === 'booster_box' ? 'booster box' : (prod.type === 'etb' ? 'Elite Trainer Box' : 'speciální balení');
+      plainDesc = `Kupte si originální ${prod.name} na Northvale TCG. Tento exkluzivní ${typeLabel} pro hru ${brandName} je perfektní volbou pro hráče i sběratele. Zaručujeme originalitu a doručení.`;
+    }
+
+    let metaDesc = plainDesc.replace(/\s+/g, ' ').trim();
+    if (metaDesc.length > 160) {
+      metaDesc = metaDesc.substring(0, 157) + "...";
+    }
+
     routes.push({
       path: `sealed-detail/${prod.id}`,
       title: `${prod.name} | koupit online | Northvale TCG`,
-      description: prod.shortDesc || prod.desc || `Koupit ${prod.name} online na Northvale TCG za výhodnou cenu.`,
-      canonicalUrl: `https://northvaletcg.eu/sealed-detail/${prod.id}`,
+      description: metaDesc,
+      canonicalUrl: `https://northvaletcg.eu/sealed-detail/${prod.id}/`,
       schema: {
         "@context": "https://schema.org",
         "@graph": [
@@ -438,21 +500,21 @@ async function prerender() {
                 "@type": "ListItem",
                 "position": 2,
                 "name": prod.type === 'single' ? "Kusovky" : "Sealed",
-                "item": prod.type === 'single' ? "https://northvaletcg.eu/singles-catalog" : "https://northvaletcg.eu/sealed-catalog"
+                "item": prod.type === 'single' ? "https://northvaletcg.eu/singles-catalog/" : "https://northvaletcg.eu/sealed-catalog/"
               },
               {
                 "@type": "ListItem",
                 "position": 3,
                 "name": prod.name,
-                "item": `https://northvaletcg.eu/sealed-detail/${prod.id}`
+                "item": `https://northvaletcg.eu/sealed-detail/${prod.id}/`
               }
             ]
           },
           {
             "@type": "Product",
             "name": prod.name,
-            "description": prod.shortDesc || prod.desc,
-            "image": prod.image_url,
+            "description": plainDesc || "Originální sealed produkt pro sběratele a hráče.",
+            "image": (prod.image && !prod.image.startsWith('data:')) ? prod.image : 'https://northvaletcg.eu/Northvale Logo.webp',
             "sku": prod.sku || prod.id,
             "mpn": prod.id,
             "brand": {
@@ -461,7 +523,7 @@ async function prerender() {
             },
             "offers": {
               "@type": "Offer",
-              "url": `https://northvaletcg.eu/sealed-detail/${prod.id}`,
+              "url": `https://northvaletcg.eu/sealed-detail/${prod.id}/`,
               "priceCurrency": "CZK",
               "price": prod.price,
               "availability": prod.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
@@ -477,7 +539,7 @@ async function prerender() {
       content: `
         <main style="max-width: 1200px; margin: 0 auto; padding: 48px 16px; display: flex; flex-wrap: wrap; gap: 48px; text-align: left;">
           <div style="flex: 1; min-width: 300px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.15); border-radius: 8px; padding: 32px; height: 400px;">
-            <img src="${prod.image_url || '/Northvale Logo.webp'}" alt="${escapeHtml(prod.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+            <img src="${prod.image || '/Northvale Logo.webp'}" alt="${escapeHtml(prod.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
           </div>
           <div style="flex: 1.2; min-width: 300px; display: flex; flex-direction: column;">
             <span style="color: #fdbd16; font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">${escapeHtml(prod.game || 'TCG')} / ${escapeHtml(prod.type || 'Sealed')}</span>
@@ -507,7 +569,7 @@ async function prerender() {
     path: 'faq',
     title: 'Často kladené dotazy (FAQ) | Northvale TCG',
     description: 'Často kladené dotazy ohledně doručení, bezpečného balení, gradingových služeb a ověřování originality karet.',
-    canonicalUrl: 'https://northvaletcg.eu/faq',
+    canonicalUrl: 'https://northvaletcg.eu/faq/',
     schema: {
       "@context": "https://schema.org",
       "@graph": [
@@ -524,7 +586,7 @@ async function prerender() {
               "@type": "ListItem",
               "position": 2,
               "name": "FAQ",
-              "item": "https://northvaletcg.eu/faq"
+              "item": "https://northvaletcg.eu/faq/"
             }
           ]
         },
@@ -627,6 +689,20 @@ async function prerender() {
       description: 'Všeobecné obchodní podmínky (VOP), zásady ochrany osobních údajů (GDPR) a informace o dopravě a reklamacích.',
       h1: 'Obchodní a Právní Informace',
       body: 'Na této stránce najdete veškeré právní a smluvní dokumenty e-shopu. Všeobecné obchodní podmínky, reklamační řád, podrobnosti o možnostech dopravy a platby, a zásady nakládání s osobními údaji sběratelů.'
+    },
+    {
+      path: 'community',
+      title: 'TCG komunitní turnaje a akce | Northvale TCG',
+      description: 'Podporujeme místní herní komunity karetních her Pokémon a Lorcana. Sponzorujeme ceny do turnajů, dodáváme herní obaly a boostery.',
+      h1: 'TCG Komunita a Turnaje',
+      body: 'Northvale TCG aktivně podporuje místní herní skupiny a turnaje v karetních hrách. Nechceme konkurovat lokálním hernám, ale pomáhat jim růst – sponzorujeme prize pooly a dodáváme příslušenství.'
+    },
+    {
+      path: 'support',
+      title: 'Kontakt a zákaznická podpora | Northvale TCG',
+      description: 'Máte dotaz k objednávce, doručení nebo výkupu? Kontaktujte naši zákaznickou podporu prostřednictvím e-mailu nebo telefonu.',
+      h1: 'Zákaznická Podpora',
+      body: 'Jsme tu pro vás. Pokud máte jakýkoliv dotaz k doručení zásilky, stavu objednávky, výkupu karet nebo k naší nabídce, ozvěte se nám přes e-mail nebo na telefonním čísle.'
     }
   ];
 
@@ -635,7 +711,7 @@ async function prerender() {
       path: spec.path,
       title: spec.title,
       description: spec.description,
-      canonicalUrl: `https://northvaletcg.eu/${spec.path}`,
+      canonicalUrl: `https://northvaletcg.eu/${spec.path}/`,
       content: `
         <main style="max-width: 800px; margin: 0 auto; padding: 48px 16px; text-align: left;">
           <h1 style="font-size: 32px; font-family: 'Outfit', sans-serif; color: #fff; margin-bottom: 24px;">${escapeHtml(spec.h1)}</h1>
@@ -673,9 +749,33 @@ async function prerender() {
       `<meta name="description" content="${escapeHtml(r.description)}" />`
     );
 
+    // Resolve dynamic social share metadata images
+    let ogImageUrl = 'https://northvaletcg.eu/Northvale Logo.webp';
+    if (r.path.startsWith('blog/')) {
+      const slug = r.path.split('/')[1];
+      const art = blogArticles.find(a => (a.id === slug || (a.id === 'jak-rozpoznat-fale-nou-pok-mon-kartu' && slug === 'jak-rozpoznat-falesnou-pokemon-kartu')));
+      if (art && art.image) {
+        ogImageUrl = `https://northvaletcg.eu${art.image}`;
+      }
+    } else if (r.path.startsWith('sealed-detail/')) {
+      const prodId = r.path.split('/')[1];
+      const prod = products.find(p => p.id === prodId);
+      if (prod && prod.image && !prod.image.startsWith('data:')) {
+        ogImageUrl = prod.image;
+      }
+    }
+
     const headInsertion = `
     <link rel="canonical" href="${r.canonicalUrl}" />
-    ${r.schema ? generateJsonLd(r.schema["@type"], r.schema) : ''}
+    <meta property="og:title" content="${escapeHtml(r.title)}" />
+    <meta property="og:description" content="${escapeHtml(r.description)}" />
+    <meta property="og:url" content="${r.canonicalUrl}" />
+    <meta property="og:image" content="${ogImageUrl}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${escapeHtml(r.title)}" />
+    <meta name="twitter:description" content="${escapeHtml(r.description)}" />
+    <meta name="twitter:image" content="${ogImageUrl}" />
+    ${r.schema ? generateJsonLd(r.schema["@type"] || r.schema[0]?.["@type"], r.schema) : ''}
     </head>`;
 
     rendered = rendered.replace('</head>', headInsertion);

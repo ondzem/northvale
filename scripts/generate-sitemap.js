@@ -57,8 +57,9 @@ async function getProducts(supabaseUrl, supabaseAnonKey) {
       throw error;
     }
     if (data && data.length > 0) {
-      console.log(`Successfully fetched ${data.length} products from Supabase.`);
-      return data;
+      const filtered = data.filter(p => p.id !== 'POK-SV2-112');
+      console.log(`Successfully fetched ${filtered.length} products from Supabase (excluding POK-SV2-112).`);
+      return filtered;
     }
     console.warn('Supabase query returned empty product list. Falling back to mockProducts.');
     return mockProducts;
@@ -81,16 +82,16 @@ async function run() {
   // 1. Static URLs
   const staticUrls = [
     { loc: `${baseUrl}/`, priority: '1.0', changefreq: 'daily' },
-    { loc: `${baseUrl}/sealed-catalog`, priority: '0.8', changefreq: 'daily' },
-    { loc: `${baseUrl}/buylist`, priority: '0.7', changefreq: 'weekly' },
-    { loc: `${baseUrl}/grading`, priority: '0.7', changefreq: 'weekly' },
-    { loc: `${baseUrl}/grading-guide`, priority: '0.6', changefreq: 'monthly' },
-    { loc: `${baseUrl}/community`, priority: '0.6', changefreq: 'weekly' },
-    { loc: `${baseUrl}/support`, priority: '0.6', changefreq: 'monthly' },
-    { loc: `${baseUrl}/faq`, priority: '0.6', changefreq: 'monthly' },
-    { loc: `${baseUrl}/about`, priority: '0.6', changefreq: 'monthly' },
-    { loc: `${baseUrl}/blog`, priority: '0.7', changefreq: 'daily' },
-    { loc: `${baseUrl}/gdpr-vop`, priority: '0.5', changefreq: 'monthly' }
+    { loc: `${baseUrl}/sealed-catalog/`, priority: '0.8', changefreq: 'daily' },
+    { loc: `${baseUrl}/buylist/`, priority: '0.7', changefreq: 'weekly' },
+    { loc: `${baseUrl}/grading/`, priority: '0.7', changefreq: 'weekly' },
+    { loc: `${baseUrl}/grading-guide/`, priority: '0.6', changefreq: 'monthly' },
+    { loc: `${baseUrl}/community/`, priority: '0.6', changefreq: 'weekly' },
+    { loc: `${baseUrl}/support/`, priority: '0.6', changefreq: 'monthly' },
+    { loc: `${baseUrl}/faq/`, priority: '0.6', changefreq: 'monthly' },
+    { loc: `${baseUrl}/about/`, priority: '0.6', changefreq: 'monthly' },
+    { loc: `${baseUrl}/blog/`, priority: '0.7', changefreq: 'daily' },
+    { loc: `${baseUrl}/gdpr-vop/`, priority: '0.5', changefreq: 'monthly' }
   ];
 
   // 2. Blog URLs (Note: We use the cleaned up slug 'jak-rozpoznat-falesnou-pokemon-kartu' for first article)
@@ -100,7 +101,7 @@ async function run() {
       ? 'jak-rozpoznat-falesnou-pokemon-kartu' 
       : article.id;
     return {
-      loc: `${baseUrl}/blog/${slug}`,
+      loc: `${baseUrl}/blog/${slug}/`,
       priority: '0.6',
       changefreq: 'weekly'
     };
@@ -111,7 +112,7 @@ async function run() {
     .filter(product => product.type !== 'single' && product.type !== 'slab')
     .map(product => {
       return {
-        loc: `${baseUrl}/sealed-detail/${product.id}`,
+        loc: `${baseUrl}/sealed-detail/${product.id}/`,
         priority: '0.6',
         changefreq: 'weekly'
       };
