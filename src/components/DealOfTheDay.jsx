@@ -205,7 +205,7 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
             src="/logo s popisem.webp" 
             alt="" 
             style={{ 
-              width: '180px', 
+              width: '120px', 
               height: 'auto', 
               objectFit: 'contain', 
               marginBottom: '24px',

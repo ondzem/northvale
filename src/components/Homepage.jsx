@@ -725,7 +725,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 src="/logo s popisem.webp" 
                 alt="" 
                 style={{ 
-                  width: '180px', 
+                  width: '120px', 
                   height: 'auto', 
                   objectFit: 'contain', 
                   marginBottom: '24px',
