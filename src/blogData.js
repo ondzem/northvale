@@ -1176,5 +1176,274 @@ export const blogArticles = [
         "text": "Celou výbavu, od prvního booster packu přes sleeve obaly až po příslušenství pro gradované karty, najdeš na Northvale TCG."
       }
     ]
+  },
+  {
+    "id": "disney-lorcana-pro-zacatecniky-kompletni-pruvodce-2026",
+    "title": "Disney Lorcana pro začátečníky: kompletní průvodce 2026",
+    "category": "Návody",
+    "readTime": "12 min",
+    "description": "Chcete začít sbírat a hrát Disney Lorcana? Náš podrobný průvodce pro začátečníky vás provede pravidly, inkousty i nejlepšími startovními produkty pro rok 2026.",
+    "image": "/blog/disney-lorcana-pruvodce.png",
+    "content": [
+      {
+        "type": "p",
+        "text": "Sběratelské karetní hry zažívají v posledních letech neuvěřitelný rozkvět a vedle tradičních pilířů jako Pokémon TCG nebo Magic: The Gathering se v roce 2023 objevila nová, mimořádně silná značka – Disney Lorcana. Tato hra, vytvořená ve spolupráci německého vydavatelství Ravensburger a studia Disney, si okamžitě získala srdce milionů hráčů i sběratelů po celém světě. A není se čemu divit. Spojuje totiž oblíbené pohádkové postavy s moderními a velmi přístupnými herními mechanikami. V tomto průvodci pro rok 2026 se detailně podíváme na to, jak fungují lorcana karty, jak začít hrát a jaké produkty vybrat pro snadný vstup do tohoto úžasného světa."
+      },
+      {
+        "type": "p",
+        "text": "Pokud se zajímáte o disney lorcana cz scénu, zjistíte, že komunita u nás roste rychlým tempem. Konají se pravidelné turnaje, ligy pro začátečníky a sběratelé si vyměňují cenné foilové kousky. Hra je navržená tak, aby byla snadno pochopitelná pro rodiny s dětmi, ale zároveň nabízela dostatečnou strategickou hloubku pro zkušené hráče karetních her. Ať už je vaším cílem porážet soupeře na turnajích, nebo jen vlastnit krásné ilustrace Popelky, Simby či Elsy, Disney Lorcana nabízí pro každého něco."
+      },
+      {
+        "type": "h2",
+        "text": "Co jsou to Lorcana karty a jaký je příběh hry?"
+      },
+      {
+        "type": "p",
+        "text": "V herním světě Disney Lorcana se stáváte takzvaným Illumineerem – mocným čarodějem s bujnou představivostí. Vaším úkolem je s pomocí magického inkoustu (Ink) vyvolávat z knižních stránek známé Disney postavy, které se v této hře nazývají Glimmers (záblesky). Tyto postavy pak vysíláte na výpravy (Quests), abyste sbírali ztracené střípky příběhů, reprezentované body legend (Lore). První hráč, který nasbírá 20 bodů Lore, se stává vítězem."
+      },
+      {
+        "type": "p",
+        "text": "Celá hra se točí kolem sbírání a strategického využívání zdrojů. Oproti jiným hrám zde postavy přímo nebojují na život a na smrt, ale spíše se navzájem vyzývají (Challenge), aby zpomalily soupeře v jeho honbě za body Lore. Tento tematický přístup dělá z Lorcany velmi přívětivou a nenásilnou hru, což ocení zejména mladší hráči a rodiče. Zároveň jsou však pravidla navržena tak precizně, že eliminují mnoho frustrujících prvků známých z jiných TCG."
+      },
+      {
+        "type": "h2",
+        "text": "Základní terminologie: Jak se ve hře neztratit"
+      },
+      {
+        "type": "p",
+        "text": "Než se pustíte do první partie, je dobré si osvojit několik základních pojmů, se kterými se na kartách budete neustále setkávat. Prvním je Inkwell (inkoustový zdroj) – zóna na stole, kam ukládáte karty rubem nahoru, abyste je mohli využívat jako platidlo pro vyvolávání jiných karet. Dalším důležitým pojmem je Questing (vyslání na výpravu). Když postavu otočíte na bok (vyčerpáte ji, neboli exertnete), získáte počet lore bodů, který je na ní vyznačen symbolem malých hvězdiček."
+      },
+      {
+        "type": "p",
+        "text": "Naopak Challenging (vyzývání) je způsob, jak napadnout soupeřovu vyčerpanou postavu. Vaše postava způsobí soupeřově postavě zranění odpovídající její síle (Strength) a sama obdrží zranění podle obrany (Willpower) soupeřovy postavy. Pokud počet žetonů zranění na postavě dosáhne nebo překročí její hodnotu Willpower, postava odchází do odhazovacího balíčku (Banished zone). Důležitým pravidlem je, že vyzývat můžete pouze ty soupeřovy postavy, které jsou již vyčerpané (otočené na bok) – postavy stojící rovně (Ready) jsou v bezpečí."
+      },
+      {
+        "type": "h2",
+        "text": "Šest barev inkoustu (Inks) a herní styly"
+      },
+      {
+        "type": "p",
+        "text": "Podobně jako má Magic: The Gathering své barvy a Pokémon své typy, v Disney Lorcaně najdeme šest druhů inkoustů. Každý balíček může obsahovat maximálně dvě barvy, což umožňuje vytvářet zajímavé kombinace. Každá barva má svou specifickou filozofii a herní styl:"
+      },
+      {
+        "type": "h3",
+        "text": "Amber (Jantarový inkoust)"
+      },
+      {
+        "type": "p",
+        "text": "Jantarové karty se zaměřují na podporu, léčení a spolupráci. Často pracují s velkým množstvím menších postav, které dokážou vracet z odhazovacího balíčku zpět do ruky nebo je chránit před útoky soupeře. Je to ideální volba pro hráče, kteří mají rádi defenzivnější styl a budování silné synergie na herním stole."
+      },
+      {
+        "type": "h3",
+        "text": "Amethyst (Ametystový inkoust)"
+      },
+      {
+        "type": "p",
+        "text": "Ametyst je barvou magie, triků a kontroly karet. Tyto karty vám umožňují lízat velké množství karet z balíčku, manipulovat s postavami na stole a využívat nečekané efekty, které soupeře zaskočí. Tento inkoust je velmi flexibilní a hodí se pro taktické hráče."
+      },
+      {
+        "type": "h3",
+        "text": "Emerald (Smaragdový inkoust)"
+      },
+      {
+        "type": "p",
+        "text": "Smaragdové karty jsou mistři přizpůsobivosti a trestání soupeře. Často mají schopnosti, které se spustí, když na ně soupeř zaútočí (například donutí soupeře zahodit kartu nebo vrátit postavu do ruky). Hrají styl, který nutí soupeře dělat chyby."
+      },
+      {
+        "type": "h3",
+        "text": "Ruby (Rubínový inkoust)"
+      },
+      {
+        "type": "p",
+        "text": "Rubín představuje agresi, rychlost a přímou akci. Rubínové postavy jsou často velmi silné v útoku, mají schopnost Rush (mohou vyzvat soupeře hned v kole, kdy jsou vyvolány) a dokážou přímo ubírat body Lore soupeřům. Pokud chcete diktovat tempo hry, Rubín je správná volba."
+      },
+      {
+        "type": "h3",
+        "text": "Sapphire (Safírový inkoust)"
+      },
+      {
+        "type": "p",
+        "text": "Safír je barvou vědy, plánování a rychlého generování zdrojů (Ramp). Umožňuje vám ukládat do zóny Inkwell více karet za kolo, takže můžete mnohem dříve vyvolat obří a drahé postavy. Je vhodný pro hráče, kteří rádi plánují na několik tahů dopředu."
+      },
+      {
+        "type": "h3",
+        "text": "Steel (Ocelový inkoust)"
+      },
+      {
+        "type": "p",
+        "text": "Ocel představuje hrubou sílu, obranu a přímé poškození. Ocelové karty mají vysokou obranu, klíčové slovo Resist (snižuje obdržené poškození) a obsahují mnoho akcí, které dokážou udělit zranění soupeřovým postavám přímo, bez nutnosti jít do souboje. Skvěle čistí stůl."
+      },
+      {
+        "type": "h2",
+        "text": "Typy karet v Disney Lorcaně"
+      },
+      {
+        "type": "p",
+        "text": "Ve svém šedesátikartovém balíčku můžete kombinovat celkem čtyři základní typy karet. Každý typ plní na herním stole jinou úlohu a jejich správný poměr je klíčem k úspěchu:"
+      },
+      {
+        "type": "p",
+        "text": "1. Characters (Postavy): Jsou základem hry. Pouze postavy mohou chodit na výpravy pro body Lore a vyzývat soupeřovy postavy. Na kartě najdete jejich cenu v inkoustu, sílu, životy a speciální schopnosti."
+      },
+      {
+        "type": "p",
+        "text": "2. Items (Předměty): Jakmile předmět vyvoláte, zůstává na stole a poskytuje vám trvalou výhodu nebo možnost aktivovat jeho schopnost jednou za kolo (často za zaplacení drobné ceny nebo vyčerpání předmětu)."
+      },
+      {
+        "type": "p",
+        "text": "3. Actions (Akce): Jednorázové karty. Zaplatíte jejich cenu, vyhodnotíte efekt popsaný na kartě a okamžitě ji odešlete do odhazovacího balíčku."
+      },
+      {
+        "type": "p",
+        "text": "4. Songs (Písně): Speciální poddruh akčních karet. Můžete za ně zaplatit inkoustem jako obvykle, nebo je zahrát zdarma tak, že vyčerpáte (otočíte na bok) některou ze svých postav, která splňuje minimální požadovanou cenu písně. Tento prvek dodává hře úžasnou dynamiku a věrně odráží hudební tradici Disney pohádek."
+      },
+      {
+        "type": "h2",
+        "text": "Jak začít s Disney Lorcana v roce 2026?"
+      },
+      {
+        "type": "p",
+        "text": "Pokud držíte lorcana karty poprvé v ruce, nejlepší cestou pro rychlý start je pořízení takzvaného Starter Decku. Jedná se o předpřipravený balíček 60 karet, který obsahuje dvě barvy inkoustu, stručný návod k pravidlům, žetony zranění a jeden booster balíček pro vylepšení. S tímto produktem můžete okamžitě začít hrát proti kamarádovi a vyzkoušet si mechaniky v praxi. Všechny aktuální startovní balíčky a edice najdete v našem katalogu sealed produktů na Northvale TCG."
+      },
+      {
+        "type": "p",
+        "text": "Pro sběratele, kteří chtějí rozbalovat balíčky a stavět vlastní balíčky, je skvělou volbou Illumineer's Trove. Tato stylová krabice obsahuje 8 boosterů, kostky na počítání životů, pořadače na karty a praktický box na uložení sbírky. Při rozbalování boosterů buďte vždy opatrní a chraňte své nejcennější kousky. Pro bezpečné uložení a dlouhodobou ochranu doporučujeme navštívit náš článek o příslušenství pro karty, kde najdete tipy na nejlepší obaly (sleeves) a alba."
+      },
+      {
+        "type": "p",
+        "text": "Pokud nakupujete karty z druhé ruky na sociálních sítích nebo internetových bazarech, buďte velmi obezřetní, protože s rostoucí popularitou hry se na trhu začínají objevovat i padělky. Abyste předešli zklamání z nákupu falešných karet, doporučujeme prostudovat náš podrobný návod jak rozpoznat falešnou Pokémon kartu, jehož základní fyzické principy (kontrola tloušťky papíru, tiskové rastry a světelný test) se dají velmi dobře aplikovat i na karty Disney Lorcana."
+      },
+      {
+        "type": "h2",
+        "text": "Závěr: Lorcana je tu s námi natrvalo"
+      },
+      {
+        "type": "p",
+        "text": "Disney Lorcana prokázala, že není jen krátkodobým trendem, ale etablovanou karetní hrou s jasnou budoucností. Díky silnému zázemí Ravensburgeru a nekonečné studnici Disney postav nás v následujících letech čeká spousta skvělých edic. Vstup do hry je snadný, komunita přátelská a sběratelský potenciál obrovský. Pořiďte si svůj první Starter Deck, pozvěte rodinu nebo přátele ke stolu a objevte kouzlo magických inkoustů ještě dnes!"
+      }
+    ]
+  },
+  {
+    "id": "kolik-stoji-grading-karet-v-cr-psa-vs-beckett-ceny-a-postup",
+    "title": "Kolik stojí grading karet v ČR? PSA vs. Beckett ceny a postup",
+    "category": "Grading",
+    "readTime": "15 min",
+    "description": "Zvažujete profesionální grading karet PSA, Beckett nebo APG? Srovnali jsme ceny, proces odeslání a výhody jednotlivých služeb pro české sběratele.",
+    "image": "/blog/grading-karet-porovnani.png",
+    "content": [
+      {
+        "type": "p",
+        "text": "Každý sběratel, který ve své kolekci najde vzácnou kartu, dříve či později narazí na termín grading karet. Tento proces, při kterém nezávislá profesionální autorita posoudí fyzický stav karty a uzavře ji do ochranného plastového pouzdra (slabu), se stal celosvětovým standardem pro určování pravosti a hodnoty sběratelských předmětů. Nicméně pro české a slovenské sběratele bývá proces odeslání karet do zahraničí často zahalen tajemstvím a obavami ze skrytých poplatků. V tomto článku si podrobně rozebereme, kolik tento proces reálně stojí, jaké jsou rozdíly mezi giganty PSA a Beckett, a jaké možnosti máte v České republice."
+      },
+      {
+        "type": "p",
+        "text": "Hlavní otázka, kterou si musíte položit, zní: vyplatí se mi to? Professionální grading totiž není levná záležitost a nesprávné rozhodnutí může vést k finanční ztrátě. Pokud ale pošlete správnou kartu ve skvělém stavu, může se její tržní hodnota zvýšit i několikanásobně. Pojďme se podívat na konkrétní čísla, abyste si mohli sami spočítat, zda je psa grading cena pro vaši kartu adekvátní."
+      },
+      {
+        "type": "h2",
+        "text": "Co je to grading karet a jak probíhá hodnocení?"
+      },
+      {
+        "type": "p",
+        "text": "Grading provádějí vyškolení experti za použití speciálních optických přístrojů, mikroskopů a šablon pod silným světlem. Hodnotí se celkem čtyři základní atributy karty: vycentrování (Centering), rohy (Corners), hrany (Edges) a povrch (Surface). Výsledkem je známka na stupnici od 1 (Poor) do 10 (Gem Mint). Karta je následně hermeticky uzavřena do plastového obalu s originálním štítkem, který obsahuje název karty, edici, rok vydání, certifikační číslo a výslednou známku."
+      },
+      {
+        "type": "p",
+        "text": "Plastový obal (slab) plní dvě funkce: poskytuje kartě stoprocentní ochranu před mechanickým poškozením, vlhkostí a UV zářením a zároveň slouží jako garance stavu pro budoucí kupující. Kupující na internetu nemusí zkoumat detailní fotky škrábanců – stačí mu vidět známku PSA 10 a má jistotu, že karta je v perfektním stavu."
+      },
+      {
+        "type": "h2",
+        "text": "Srovnání hlavních gradingových společností"
+      },
+      {
+        "type": "p",
+        "text": "Na trhu působí několik velkých hráčů, ale pro sběratele TCG karet (Pokémon, Lorcana, Magic) mají největší váhu následující tři:"
+      },
+      {
+        "type": "h3",
+        "text": "1. PSA (Professional Sports Authenticator)"
+      },
+      {
+        "type": "p",
+        "text": "PSA je nejstarší, největší a celosvětově nejuznávanější gradingová společnost. Na sekundárním trhu mají karty v PSA obalech nejvyšší likviditu – prodáte je nejrychleji a za nejstabilnější cenu. PSA je známá tím, že je poměrně přísná u hodnocení povrchu a rohů, ale občas bývá mírnější u vycentrování karty. Známka PSA 10 Gem Mint je zlatým standardem každého sběratele."
+      },
+      {
+        "type": "h3",
+        "text": "2. BGS (Beckett Grading Services)"
+      },
+      {
+        "type": "p",
+        "text": "Beckett je známý svými prémiovými, robustními a těžkými slaby a detailním hodnocením pomocí tzv. Subgrades (čtyři známky pro jednotlivá kritéria na štítku). Beckett je extrémně přísný. Získat u nich známku 10 (Pristine) je mnohem těžší než u PSA. Pokud karta získá známku 10 a všechna čtyři podhodnocení jsou také 10, karta obdrží legendární černý štítek (Black Label). Hodnota takové karty je pak astronomická, ale šance na její získání je minimální."
+      },
+      {
+        "type": "h3",
+        "text": "3. APG (APGrading) - Evropská cesta"
+      },
+      {
+        "type": "p",
+        "text": "Německá společnost APG představuje skvělou alternativu pro evropské sběratele, kteří nechtějí posílat karty přes oceán. Nabízí moderní design štítků, velmi kvalitní pevné slaby a výrazně nižší náklady na dopravu a pojištění. Hodnocení je velmi přísné a přesné. I když na sekundárním trhu nemají karty APG tak obrovskou prémii jako PSA 10, jsou skvělou volbou pro osobní sbírky nebo evropský trh."
+      },
+      {
+        "type": "h2",
+        "text": "Cena gradingu: Kolik zaplatíte z České republiky?"
+      },
+      {
+        "type": "p",
+        "text": "Při odesílání z ČR máte dvě možnosti: poslat karty na vlastní pěst (což vyžaduje registraci, vyplnění složitých celních deklarací, platbu drahého pojištěného poštovného do USA a řešení případného cla a DPH při návratu zásilky), nebo využít služeb autorizovaného českého zprostředkovatele. Druhá možnost je pro většinu sběratelů bezpečnější a často i levnější díky množstevním slevám."
+      },
+      {
+        "type": "p",
+        "text": "Zde je přehled průměrných koncových cen za grading jedné karty přes zprostředkovatele v ČR v roce 2026 (ceny zahrnují poplatek za hodnocení, dopravu tam i zpět, pojištění zásilky, clo a DPH):"
+      },
+      {
+        "type": "p",
+        "text": "- **PSA Grading (Základní/Bulk služba):** 890 Kč až 1 190 Kč za kartu. Doba zpracování bývá 45 až 60 pracovních dnů. U karet s deklarovanou hodnotou nad $499 se cena zvyšuje podle zvoleného tarifu."
+      },
+      {
+        "type": "p",
+        "text": "- **PSA Grading (Expresní služba):** 1 990 Kč až 2 890 Kč za kartu. Doba zpracování cca 10 až 15 pracovních dnů."
+      },
+      {
+        "type": "p",
+        "text": "- **Beckett Grading (Standard bez Subgrades):** 990 Kč až 1 290 Kč za kartu."
+      },
+      {
+        "type": "p",
+        "text": "- **Beckett Grading (Se Subgrades na štítku):** 1 290 Kč až 1 590 Kč za kartu."
+      },
+      {
+        "type": "p",
+        "text": "- **APG Grading (Německo):** 490 Kč až 690 Kč za kartu. Doba zpracování je obvykle kratší (kolem 20 až 30 dnů) a nehrozí zde celní řízení mimo EU."
+      },
+      {
+        "type": "h2",
+        "text": "Jak správně připravit kartu na odeslání?"
+      },
+      {
+        "type": "p",
+        "text": "Příprava karty před odesláním je klíčová. Sebemenší smítko prachu nebo otisk prstu uzavřený v plastovém pouzdře může snížit výslednou známku. Nejprve kartu opatrně položte na čistou podložku pod silné světlo a zkontrolujte povrch pod lupou. Pokud na ní najdete prach, jemně jej odstraňte utěrkou z mikrovlákna. Nikdy na kartu netlačte."
+      },
+      {
+        "type": "p",
+        "text": "Následně kartu vložte do nového, čistého penny sleeve obalu a teprve poté do pevného, polotvrdého obalu typu Card Saver (zprostředkovatelé i gradingové firmy často odmítají karty zaslané v klasických toploaderech, protože z nich karta může během přepravy vyklouznout a poškodit se). Pro podrobný návod, jak vybrat správné ochranné pomůcky, navštivte náš článek o příslušenství pro karty. Pokud si nejste jistí stavem a pravostí karty před odesláním, doporučujeme také projít náš článek o tom, jak rozpoznat falešnou Pokémon kartu, abyste zbytečně neplatili za grading padělku."
+      },
+      {
+        "type": "h2",
+        "text": "Kdy se grading vyplatí: Matematika sběratele"
+      },
+      {
+        "type": "p",
+        "text": "Grading má finanční smysl pouze v případě, že hodnota karty po odeslání vzroste o více, než kolik celý proces stál. Obecně platí, že nemá smysl posílat levné karty (s hodnotou pod 500 Kč), pokud si nejste stoprocentně jistí, že karta získá známku 10 a vy ji plánujete prodat sběrateli, který tuto konkrétní známku vyžaduje."
+      },
+      {
+        "type": "p",
+        "text": "Příklad: Máte kartu s tržní hodnotou 1 000 Kč v negradovaném stavu (Near Mint). Náklady na grading jsou 1 000 Kč. Pokud karta získá známku PSA 9, její hodnota na trhu bude přibližně 1 500 Kč (jste v minusu 500 Kč). Pokud ale získá známku PSA 10, její hodnota může vyskočit na 3 500 Kč (jste v plusu 1 500 Kč). Před odesláním proto buďte k hodnocení stavu svých karet maximálně kritičtí."
+      },
+      {
+        "type": "p",
+        "text": "Pro více informací o standardech hodnocení, procesu odesílání a pojištění zásilek si přečtěte našeho kompletního průvodce na stránce o gradingu karet, kde najdete veškeré podrobnosti pro český trh."
+      }
+    ]
   }
 ];
+
