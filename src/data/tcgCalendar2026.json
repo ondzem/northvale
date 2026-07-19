@@ -1,0 +1,58 @@
+[
+  {
+    "id": "1",
+    "name": "One Piece TCG: Wings of Captain (OP-09)",
+    "game": "One Piece",
+    "releaseDate": "10. 01. 2026",
+    "preorderStatus": "Dokončeno"
+  },
+  {
+    "id": "2",
+    "name": "Pokémon TCG: Scarlet & Violet - Paldean Legacies",
+    "game": "Pokémon",
+    "releaseDate": "15. 02. 2026",
+    "preorderStatus": "Spuštěno"
+  },
+  {
+    "id": "3",
+    "name": "Disney Lorcana: Realm of Heroes (Set 9)",
+    "game": "Disney Lorcana",
+    "releaseDate": "18. 03. 2026",
+    "preorderStatus": "Spuštěno"
+  },
+  {
+    "id": "4",
+    "name": "Pokémon TCG: Scarlet & Violet - Dragonite ex Collection",
+    "game": "Pokémon",
+    "releaseDate": "12. 04. 2026",
+    "preorderStatus": "Spuštěno"
+  },
+  {
+    "id": "5",
+    "name": "One Piece TCG: Legend of the Pirates (OP-10)",
+    "game": "One Piece",
+    "releaseDate": "24. 04. 2026",
+    "preorderStatus": "Spuštěno"
+  },
+  {
+    "id": "6",
+    "name": "Riftbound TCG: Chaos Gate Expansion",
+    "game": "Riftbound",
+    "releaseDate": "14. 05. 2026",
+    "preorderStatus": "Spuštěno"
+  },
+  {
+    "id": "7",
+    "name": "Disney Lorcana: Sea of Dreams (Set 10)",
+    "game": "Disney Lorcana",
+    "releaseDate": "25. 05. 2026",
+    "preorderStatus": "Připravuje se"
+  },
+  {
+    "id": "8",
+    "name": "Pokémon TCG: Scarlet & Violet - Eternal Flame",
+    "game": "Pokémon",
+    "releaseDate": "20. 06. 2026",
+    "preorderStatus": "Připravuje se"
+  }
+]

@@ -8,6 +8,10 @@ import { mockProducts } from '../src/mockData.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const calendarData = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, '../src/data/tcgCalendar2026.json'), 'utf-8')
+);
+
 // Helper to load environment variables from process.env and .env.local
 function loadEnv() {
   const env = { ...process.env };
@@ -795,6 +799,67 @@ async function prerender() {
         </main>
       `
     });
+  });
+
+  // 8. TCG Release Calendar Spec
+  const calendarItemsHtml = calendarData.map(item => `
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+      <td style="padding: 16px 20px; color: #fff;"><strong>${escapeHtml(item.name)}</strong></td>
+      <td style="padding: 16px 20px; color: #a855f7;">${escapeHtml(item.game)}</td>
+      <td style="padding: 16px 20px; color: rgba(255,255,255,0.7); font-family: monospace;">${escapeHtml(item.releaseDate)}</td>
+      <td style="padding: 16px 20px; color: #10b981;">${escapeHtml(item.preorderStatus)}</td>
+    </tr>
+  `).join('');
+
+  routes.push({
+    path: 'kalendar-vydani',
+    title: 'Kalendář vydání Pokémon, Lorcana a One Piece setů 2026 | Northvale TCG',
+    description: 'Aktuální přehled plánovaných setů Pokémon, Disney Lorcana, One Piece TCG a Riftbound pro rok 2026. Sledujte data vydání a stav předobjednávek na Northvale TCG.',
+    canonicalUrl: 'https://northvaletcg.eu/kalendar-vydani/',
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Kalendář vydání TCG setů 2026",
+      "description": "Přehled nadcházejících setů pro Pokémon, Lorcana, One Piece a Riftbound.",
+      "itemListElement": calendarData.map((item, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "item": {
+          "@type": "Event",
+          "name": item.name,
+          "startDate": item.releaseDate.split('. ').reverse().join('-'),
+          "description": `${item.game} TCG set release. Stav předobjednávek: ${item.preorderStatus}.`,
+          "location": {
+            "@type": "Place",
+            "name": "Northvale TCG",
+            "address": "Bratří Čapků 1095, 534 01 Holice"
+          }
+        }
+      }))
+    },
+    content: `
+      <main style="max-width: 900px; margin: 0 auto; padding: 48px 16px; text-align: left;">
+        <span style="font-size: 11.5px; font-weight: 700; color: #fdbd16; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 8px;">TCG RELEASES • 2026</span>
+        <h1 style="font-size: 32px; font-family: 'Outfit', sans-serif; color: #fff; margin-bottom: 12px;">Kalendář vydání TCG setů 2026</h1>
+        <p style="font-size: 16px; color: #8a8a92; margin-bottom: 32px; line-height: 1.6;">Sledujte plánované novinky a start předobjednávek pro karetní hry Pokémon, Disney Lorcana, One Piece a Riftbound.</p>
+        
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; overflow-x: auto; margin-bottom: 32px;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14.5px;">
+            <thead>
+              <tr style="background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <th style="padding: 16px 20px; color: rgba(255,255,255,0.6); font-weight: 600;">Název setu / produktu</th>
+                <th style="padding: 16px 20px; color: rgba(255,255,255,0.6); font-weight: 600;">Hra</th>
+                <th style="padding: 16px 20px; color: rgba(255,255,255,0.6); font-weight: 600;">Datum vydání</th>
+                <th style="padding: 16px 20px; color: rgba(255,255,255,0.6); font-weight: 600;">Stav předobjednávek</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${calendarItemsHtml}
+            </tbody>
+          </table>
+        </div>
+      </main>
+    `
   });
 
   // Write files

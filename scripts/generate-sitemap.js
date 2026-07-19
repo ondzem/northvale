@@ -91,7 +91,8 @@ async function run() {
     { loc: `${baseUrl}/faq/`, priority: '0.6', changefreq: 'monthly' },
     { loc: `${baseUrl}/about/`, priority: '0.6', changefreq: 'monthly' },
     { loc: `${baseUrl}/blog/`, priority: '0.7', changefreq: 'daily' },
-    { loc: `${baseUrl}/gdpr-vop/`, priority: '0.5', changefreq: 'monthly' }
+    { loc: `${baseUrl}/gdpr-vop/`, priority: '0.5', changefreq: 'monthly' },
+    { loc: `${baseUrl}/kalendar-vydani/`, priority: '0.7', changefreq: 'daily' }
   ];
 
   // 2. Blog URLs (Note: We use the cleaned up slug 'jak-rozpoznat-falesnou-pokemon-kartu' for first article)

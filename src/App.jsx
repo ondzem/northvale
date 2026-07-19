@@ -16,6 +16,7 @@ import AdminPanel from './components/AdminPanel';
 import OrderConfirmation from './components/OrderConfirmation';
 import GdprVop from './components/GdprVop';
 import AboutPage from './components/AboutPage';
+import TcgCalendarPage from './components/TcgCalendarPage';
 import Cart from './components/Cart';
 import Favorites from './components/Favorites';
 import LoginModal from './components/LoginModal';
@@ -76,6 +77,8 @@ const parseUrlToState = () => {
     page = 'faq';
   } else if (path === '/about') {
     page = 'about';
+  } else if (path === '/kalendar-vydani') {
+    page = 'tcg-calendar';
   } else if (path.startsWith('/blog/')) {
     page = 'blog';
     productId = path.replace('/blog/', '');
@@ -135,6 +138,8 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
     path = '/faq/';
   } else if (page === 'about') {
     path = '/about/';
+  } else if (page === 'tcg-calendar') {
+    path = '/kalendar-vydani/';
   } else if (page === 'blog') {
     if (productId) {
       path = `/blog/${productId}/`;
@@ -878,6 +883,10 @@ function AppContent() {
       case 'about':
         pageTitle = t('AboutPage.title');
         metaDescription = 'O nás - Northvale TCG. Příběh e-shopu založeného z vášně pro sbírání karetních her Pokémon, Lorcana a One Piece.';
+        break;
+      case 'tcg-calendar':
+        pageTitle = 'Kalendář vydání Pokémon, Lorcana a One Piece setů 2026';
+        metaDescription = 'Aktuální přehled plánovaných setů Pokémon, Disney Lorcana, One Piece TCG a Riftbound pro rok 2026. Sledujte data vydání a stav předobjednávek na Northvale TCG.';
         break;
       case 'admin':
         pageTitle = 'Administrace';
@@ -1817,6 +1826,10 @@ function AppContent() {
 
         {activePage === 'about' && (
           <AboutPage setActivePage={navigateToPage} />
+        )}
+
+        {activePage === 'tcg-calendar' && (
+          <TcgCalendarPage setActivePage={navigateToPage} />
         )}
 
         {activePage === 'blog' && (
