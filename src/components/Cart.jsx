@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
 import { getProductImageCached } from '../services/products';
@@ -6,6 +6,28 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
   const { lang, t } = useTranslation();
   const [promoCode, setPromoCode] = useState(appliedDiscount ? appliedDiscount.code : '');
   const [promoLoading, setPromoLoading] = useState(false);
+
+  useEffect(() => {
+    try {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ ecommerce: null });
+      window.dataLayer.push({
+        event: 'view_cart',
+        ecommerce: {
+          currency: 'CZK',
+          value: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+          items: cart.map(item => ({
+            item_id: item.id,
+            item_name: item.name,
+            price: item.price,
+            quantity: item.quantity
+          }))
+        }
+      });
+    } catch (gaErr) {
+      console.error('GA4 view_cart failed:', gaErr);
+    }
+  }, []);
 
   const handleApplyPromo = async () => {
     if (!promoCode.trim()) return;
@@ -63,6 +85,31 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
   const finalTotal = Math.max(0, subtotal - discountAmount);
   
   const updateQuantity = (itemId, delta) => {
+    const item = cart.find(i => i.id === itemId);
+    if (item) {
+      try {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ ecommerce: null });
+        window.dataLayer.push({
+          event: delta > 0 ? 'add_to_cart' : 'remove_from_cart',
+          ecommerce: {
+            currency: 'CZK',
+            value: item.price * Math.abs(delta),
+            items: [
+              {
+                item_id: item.id,
+                item_name: item.name,
+                price: item.price,
+                quantity: Math.abs(delta)
+              }
+            ]
+          }
+        });
+      } catch (gaErr) {
+        console.error('GA4 cart quantity update event failed:', gaErr);
+      }
+    }
+
     setCart(prev => {
       const updated = prev.map(item => {
         if (item.id === itemId) {
@@ -75,6 +122,30 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
   };
 
   const removeItem = (itemId) => {
+    const item = cart.find(i => i.id === itemId);
+    if (item) {
+      try {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ ecommerce: null });
+        window.dataLayer.push({
+          event: 'remove_from_cart',
+          ecommerce: {
+            currency: 'CZK',
+            value: item.price * item.quantity,
+            items: [
+              {
+                item_id: item.id,
+                item_name: item.name,
+                price: item.price,
+                quantity: item.quantity
+              }
+            ]
+          }
+        });
+      } catch (gaErr) {
+        console.error('GA4 cart remove item event failed:', gaErr);
+      }
+    }
     setCart(prev => prev.filter(item => item.id !== itemId));
   };
 

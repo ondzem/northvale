@@ -1483,6 +1483,28 @@ function AppContent() {
     const itemName = isSingle ? `${product.name} (${variant.condition})` : product.name;
     const itemPrice = isSingle ? variant.price : product.price;
 
+    try {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ ecommerce: null });
+      window.dataLayer.push({
+        event: 'add_to_cart',
+        ecommerce: {
+          currency: 'CZK',
+          value: itemPrice * quantityToAdd,
+          items: [
+            {
+              item_id: itemId,
+              item_name: itemName,
+              price: itemPrice,
+              quantity: quantityToAdd
+            }
+          ]
+        }
+      });
+    } catch (gaErr) {
+      console.error('GA4 add_to_cart failed:', gaErr);
+    }
+
     setCart(prevCart => {
       const existing = prevCart.find(item => item.id === itemId);
       if (existing) {

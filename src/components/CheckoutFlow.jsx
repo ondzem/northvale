@@ -160,6 +160,85 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     }
   }, [user]);
 
+  // GA4 begin_checkout
+  useEffect(() => {
+    try {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ ecommerce: null });
+      window.dataLayer.push({
+        event: 'begin_checkout',
+        ecommerce: {
+          currency: 'CZK',
+          value: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+          items: cart.map(item => ({
+            item_id: item.id,
+            item_name: item.name,
+            price: item.price,
+            quantity: item.quantity
+          }))
+        }
+      });
+    } catch (gaErr) {
+      console.error('GA4 begin_checkout failed:', gaErr);
+    }
+  }, []);
+
+  // GA4 add_shipping_info
+  const trackedShippingRef = useRef(null);
+  useEffect(() => {
+    if (shipping && shipping !== trackedShippingRef.current) {
+      trackedShippingRef.current = shipping;
+      try {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ ecommerce: null });
+        window.dataLayer.push({
+          event: 'add_shipping_info',
+          ecommerce: {
+            currency: 'CZK',
+            value: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+            shipping_tier: shipping,
+            items: cart.map(item => ({
+              item_id: item.id,
+              item_name: item.name,
+              price: item.price,
+              quantity: item.quantity
+            }))
+          }
+        });
+      } catch (gaErr) {
+        console.error('GA4 add_shipping_info failed:', gaErr);
+      }
+    }
+  }, [shipping, cart]);
+
+  // GA4 add_payment_info
+  const trackedPaymentRef = useRef(null);
+  useEffect(() => {
+    if (payment && payment !== trackedPaymentRef.current) {
+      trackedPaymentRef.current = payment;
+      try {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ ecommerce: null });
+        window.dataLayer.push({
+          event: 'add_payment_info',
+          ecommerce: {
+            currency: 'CZK',
+            value: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+            payment_type: payment,
+            items: cart.map(item => ({
+              item_id: item.id,
+              item_name: item.name,
+              price: item.price,
+              quantity: item.quantity
+            }))
+          }
+        });
+      } catch (gaErr) {
+        console.error('GA4 add_payment_info failed:', gaErr);
+      }
+    }
+  }, [payment, cart]);
+
   const [isVerifying, setIsVerifying] = useState(false);
   const callbackProcessedRef = useRef(false);
 

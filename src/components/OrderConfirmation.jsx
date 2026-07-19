@@ -4,6 +4,36 @@ import { useTranslation } from '../context/LanguageContext';
 export default function OrderConfirmation({ order, setActivePage }) {
   const { lang } = useTranslation();
 
+  const trackedOrderIdRef = React.useRef(null);
+  React.useEffect(() => {
+    if (order && trackedOrderIdRef.current !== order.id) {
+      trackedOrderIdRef.current = order.id;
+      try {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ ecommerce: null });
+        window.dataLayer.push({
+          event: 'purchase',
+          ecommerce: {
+            transaction_id: order.id,
+            value: order.finalTotal,
+            tax: 0,
+            shipping: order.shippingCost || 0,
+            currency: 'CZK',
+            coupon: order.discountCode || undefined,
+            items: (order.items || []).map(item => ({
+              item_id: item.id || item.product_id,
+              item_name: item.name || item.productName,
+              price: item.price,
+              quantity: item.quantity
+            }))
+          }
+        });
+      } catch (gaErr) {
+        console.error('GA4 purchase failed:', gaErr);
+      }
+    }
+  }, [order]);
+
   if (!order) {
     return (
       <div className="order-confirm-wrapper" style={{ padding: '80px 24px', textAlign: 'center', background: '#18181C', minHeight: '80vh', color: '#F0F0F0' }}>

@@ -389,6 +389,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
 
   const [detailAspectRatio, setDetailAspectRatio] = useState(1.0);
   const mainImageRef = useRef(null);
+  const trackedProductIdRef = useRef(null);
 
   const images = useMemo(() => {
     if (!product) return [];
@@ -452,6 +453,33 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
       active = false;
     };
   }, [productId, products]);
+
+  useEffect(() => {
+    if (localProduct && trackedProductIdRef.current !== localProduct.id) {
+      trackedProductIdRef.current = localProduct.id;
+      try {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ ecommerce: null });
+        window.dataLayer.push({
+          event: 'view_item',
+          ecommerce: {
+            currency: 'CZK',
+            value: localProduct.price,
+            items: [
+              {
+                item_id: localProduct.id,
+                item_name: localProduct.name,
+                price: localProduct.price,
+                quantity: 1
+              }
+            ]
+          }
+        });
+      } catch (gaErr) {
+        console.error('GA4 view_item failed:', gaErr);
+      }
+    }
+  }, [localProduct]);
 
   const similarSealed = useMemo(() => {
     if (!products || !product) return [];
