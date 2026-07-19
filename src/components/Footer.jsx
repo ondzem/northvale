@@ -113,7 +113,7 @@ export default function Footer({ setActivePage, activePage }) {
           <ul className="footer-list">
             <li>
               <a 
-                href="/about" 
+                href="/about/" 
                 className="footer-link" 
                 onClick={(e) => {
                   e.preventDefault();
@@ -125,7 +125,7 @@ export default function Footer({ setActivePage, activePage }) {
             </li>
             <li>
               <a 
-                href="/support" 
+                href="/support/" 
                 className="footer-link" 
                 onClick={(e) => {
                   e.preventDefault();
@@ -137,7 +137,7 @@ export default function Footer({ setActivePage, activePage }) {
             </li>
             <li>
               <a 
-                href="/blog" 
+                href="/blog/" 
                 className="footer-link" 
                 onClick={(e) => {
                   e.preventDefault();
@@ -149,7 +149,7 @@ export default function Footer({ setActivePage, activePage }) {
             </li>
             <li>
               <a 
-                href="/faq" 
+                href="/faq/" 
                 className="footer-link" 
                 onClick={(e) => {
                   e.preventDefault();
@@ -198,7 +198,19 @@ export default function Footer({ setActivePage, activePage }) {
             </li>
             <li>
               <a 
-                href="/gdpr-vop?tab=doprava" 
+                href="/gdpr-vop/" 
+                className="footer-link" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActivePage('gdpr-vop');
+                }}
+              >
+                {lang === 'CZ' ? 'Obchodní & GDPR dokumentace' : 'Terms & Privacy'}
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/gdpr-vop/?tab=doprava" 
                 className="footer-link" 
                 onClick={(e) => {
                   e.preventDefault();
@@ -210,8 +222,7 @@ export default function Footer({ setActivePage, activePage }) {
             </li>
             <li>
               <a 
-                href="/gdpr-vop?tab=vop" 
-                className="footer-link" 
+                href="/gdpr-vop/?tab=vop"                 className="footer-link" 
                 onClick={(e) => {
                   e.preventDefault();
                   setActivePage('gdpr-vop', 'vop');
@@ -222,7 +233,7 @@ export default function Footer({ setActivePage, activePage }) {
             </li>
             <li>
               <a 
-                href="/gdpr-vop?tab=gdpr" 
+                href="/gdpr-vop/?tab=gdpr" 
                 className="footer-link" 
                 onClick={(e) => {
                   e.preventDefault();
@@ -234,7 +245,7 @@ export default function Footer({ setActivePage, activePage }) {
             </li>
             <li>
               <a 
-                href="/gdpr-vop?tab=odstoupeni" 
+                href="/gdpr-vop/?tab=odstoupeni" 
                 className="footer-link" 
                 onClick={(e) => {
                   e.preventDefault();

@@ -34,7 +34,10 @@ import { LanguageProvider, useTranslation } from './context/LanguageContext';
 import './App.css';
 
 const parseUrlToState = () => {
-  const path = window.location.pathname;
+  let path = window.location.pathname;
+  if (path !== '/' && path.endsWith('/')) {
+    path = path.slice(0, -1);
+  }
   const searchParams = new URLSearchParams(window.location.search);
   
   let page = 'home';
@@ -115,44 +118,44 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
   const searchParams = new URLSearchParams();
   
   if ((page === 'sealed-detail' || page === 'singles-detail') && productId) {
-    path = `/sealed-detail/${productId}`;
+    path = `/sealed-detail/${productId}/`;
   } else if (page === 'sealed-catalog') {
-    path = '/sealed-catalog';
+    path = '/sealed-catalog/';
   } else if (page === 'buylist') {
-    path = FEATURE_FLAGS.showBuylist ? '/buylist' : '/';
+    path = FEATURE_FLAGS.showBuylist ? '/buylist/' : '/';
   } else if (page === 'grading') {
-    path = FEATURE_FLAGS.showGrading ? '/grading' : '/';
+    path = FEATURE_FLAGS.showGrading ? '/grading/' : '/';
   } else if (page === 'grading-guide') {
-    path = FEATURE_FLAGS.showGrading ? '/grading-guide' : '/';
+    path = FEATURE_FLAGS.showGrading ? '/grading-guide/' : '/';
   } else if (page === 'community') {
-    path = '/community';
+    path = '/community/';
   } else if (page === 'support') {
-    path = '/support';
+    path = '/support/';
   } else if (page === 'faq') {
-    path = '/faq';
+    path = '/faq/';
   } else if (page === 'about') {
-    path = '/about';
+    path = '/about/';
   } else if (page === 'blog') {
     if (productId) {
-      path = `/blog/${productId}`;
+      path = `/blog/${productId}/`;
     } else {
-      path = '/blog';
+      path = '/blog/';
     }
   } else if (page === 'checkout') {
-    path = '/checkout';
+    path = '/checkout/';
   } else if (page === 'profile') {
-    path = '/profile';
+    path = '/profile/';
   } else if (page === 'admin') {
-    path = '/admin';
+    path = '/admin/';
   } else if (page === 'gdpr-vop') {
-    path = '/gdpr-vop';
+    path = '/gdpr-vop/';
     if (tab) {
       searchParams.set('tab', tab);
     }
   } else if (page === 'cart') {
-    path = '/cart';
+    path = '/cart/';
   } else if (page === 'favorites') {
-    path = '/favorites';
+    path = '/favorites/';
   } else if (page === 'error') {
     path = window.location.pathname;
   }

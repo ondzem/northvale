@@ -480,7 +480,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <a 
-                    href="/sealed-catalog?game=Pokémon"
+                    href="/sealed-catalog/?game=Pokémon"
                     style={{ ...styles.categoryItem, paddingLeft: 0 }} 
                     onClick={(e) => {
                       if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
@@ -523,7 +523,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <a 
-                    href="/sealed-catalog?game=Lorcana"
+                    href="/sealed-catalog/?game=Lorcana"
                     style={styles.categoryItem} 
                     onClick={(e) => {
                       if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
@@ -566,7 +566,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <a 
-                    href="/sealed-catalog?game=One+Piece"
+                    href="/sealed-catalog/?game=One+Piece"
                     style={styles.categoryItem} 
                     onClick={(e) => {
                       if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
@@ -609,7 +609,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <a 
-                    href="/sealed-catalog?game=Ostatní TCG"
+                    href="/sealed-catalog/?game=Ostatní TCG"
                     style={styles.categoryItem} 
                     onClick={(e) => {
                       if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
@@ -652,7 +652,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <a 
-                    href="/sealed-catalog?game=Accessories"
+                    href="/sealed-catalog/?game=Accessories"
                     style={styles.categoryItem} 
                     onClick={(e) => {
                       if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
@@ -695,7 +695,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <a 
-                    href="/sealed-catalog?game=Acrylics"
+                    href="/sealed-catalog/?game=Acrylics"
                     style={styles.categoryItem} 
                     onClick={(e) => {
                       if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
@@ -739,7 +739,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     onMouseLeave={() => setActiveDropdown(null)}
                   >
                     <a 
-                      href="/slabs-catalog"
+                      href="/slabs-catalog/"
                       style={styles.categoryItem} 
                       onClick={(e) => {
                         if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
@@ -794,7 +794,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     onMouseLeave={() => setActiveDropdown(null)}
                   >
                     <a 
-                      href="/grading"
+                      href="/grading/"
                       style={styles.categoryItem} 
                       onClick={(e) => {
                         if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {

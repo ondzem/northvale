@@ -164,6 +164,7 @@ const footerHtml = `
     </div>
     <div style="flex: 1; min-width: 200px;">
       <h4 style="color: #fff; margin-bottom: 16px; font-family: 'Outfit', sans-serif;">Užitečné Odkazy</h4>
+      <a href="/gdpr-vop/" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Obchodní & GDPR dokumentace</a>
       <a href="/gdpr-vop/?tab=doprava" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Doprava a platba</a>
       <a href="/gdpr-vop/?tab=vop" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Obchodní podmínky (VOP)</a>
       <a href="/gdpr-vop/?tab=gdpr" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Ochrana osobních údajů</a>
