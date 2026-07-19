@@ -22,6 +22,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
 
   const [isEditing, setIsEditing] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, slideId: '' });
+  const [dealDeleteConfirm, setDealDeleteConfirm] = useState(false);
 
   // Cropping State
   const [cropTarget, setCropTarget] = useState('desktop'); // 'desktop', 'mobile' or 'deal'
@@ -585,9 +586,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
   };
 
   const handleDeleteDailyDeal = async () => {
-    if (!window.confirm(lang === 'CZ' ? 'Opravdu chcete tuto akci dne smazat?' : 'Are you sure you want to delete this Deal of the Day?')) {
-      return;
-    }
+    setDealDeleteConfirm(false);
     setDealSaving(true);
     try {
       const { error } = await deleteDailyDealFromDB(selectedSlotId);
@@ -1775,7 +1774,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                     cursor: dealSaving ? 'not-allowed' : 'pointer'
                   }}
                   disabled={dealSaving}
-                  onClick={handleDeleteDailyDeal}
+                  onClick={() => setDealDeleteConfirm(true)}
                 >
                   {lang === 'CZ' ? 'Odstranit akci dne' : 'Delete Deal of the Day'}
                 </button>
@@ -2292,6 +2291,73 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                   fontWeight: 'bold'
                 }}
                 onClick={() => handleDelete(deleteConfirm.slideId)}
+              >
+                {lang === 'CZ' ? 'Smazat' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Daily Deal Delete Confirmation Modal Portal */}
+      {dealDeleteConfirm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.85)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'var(--bg-secondary, #141416)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '12px',
+            padding: '28px',
+            maxWidth: '400px',
+            width: '90%',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
+          }}>
+            <h4 style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff', margin: '0 0 12px 0' }}>
+              {lang === 'CZ' ? 'Opravdu smazat?' : 'Confirm Delete?'}
+            </h4>
+            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', margin: '0 0 24px 0', lineHeight: '1.5' }}>
+              {lang === 'CZ' 
+                ? 'Opravdu chcete tuto akci dne smazat? Tuto akci nelze vzít zpět.' 
+                : 'Are you sure you want to delete this Deal of the Day? This cannot be undone.'}
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#fff',
+                  padding: '10px 16px',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setDealDeleteConfirm(false)}
+              >
+                {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                style={{
+                  background: '#ef4444',
+                  border: 'none',
+                  color: '#fff',
+                  padding: '10px 16px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+                onClick={handleDeleteDailyDeal}
               >
                 {lang === 'CZ' ? 'Smazat' : 'Delete'}
               </button>
