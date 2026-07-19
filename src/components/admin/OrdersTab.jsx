@@ -1173,15 +1173,32 @@ export default function OrdersTab({ showToast }) {
       }
 
       if (timeFilter !== 'all') {
-        const dateStr = details?.rawJson?.created_at || details?.rawJson?.order?.created_at || f.created_at;
+        const dateStr = details?.rawJson?.created_at || details?.rawJson?.order?.created_at || details?.date || f.created_at;
         if (dateStr) {
-          const orderTime = new Date(dateStr).getTime();
-          const now = Date.now();
-          const diffMs = now - orderTime;
-          if (timeFilter === '24h' && diffMs > 24 * 60 * 60 * 1000) return false;
-          if (timeFilter === 'week' && diffMs > 7 * 24 * 60 * 60 * 1000) return false;
-          if (timeFilter === 'month' && diffMs > 30 * 24 * 60 * 60 * 1000) return false;
-          if (timeFilter === 'year' && diffMs > 365 * 24 * 60 * 60 * 1000) return false;
+          let orderTime = NaN;
+          // Check if it is a local Czech date string like "19. 7. 2026"
+          if (typeof dateStr === 'string' && dateStr.includes('.')) {
+            const parts = dateStr.split('.').map(p => p.trim());
+            if (parts.length === 3) {
+              const day = parts[0].padStart(2, '0');
+              const month = parts[1].padStart(2, '0');
+              const year = parts[2];
+              orderTime = new Date(`${year}-${month}-${day}`).getTime();
+            }
+          }
+          
+          if (isNaN(orderTime)) {
+            orderTime = new Date(dateStr).getTime();
+          }
+
+          if (!isNaN(orderTime)) {
+            const now = Date.now();
+            const diffMs = now - orderTime;
+            if (timeFilter === '24h' && diffMs > 24 * 60 * 60 * 1000) return false;
+            if (timeFilter === 'week' && diffMs > 7 * 24 * 60 * 60 * 1000) return false;
+            if (timeFilter === 'month' && diffMs > 30 * 24 * 60 * 60 * 1000) return false;
+            if (timeFilter === 'year' && diffMs > 365 * 24 * 60 * 60 * 1000) return false;
+          }
         }
       }
 
@@ -1238,10 +1255,14 @@ export default function OrdersTab({ showToast }) {
           outline: none;
         }
         .orders-search-group select {
-          background: rgba(24, 24, 28, 0.98);
+          appearance: none;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          background: rgba(24, 24, 28, 0.98) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") no-repeat right 12px center;
+          background-size: 14px;
           border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 4px;
-          padding: 10px 14px;
+          padding: 10px 36px 10px 14px;
           color: #fff;
           font-size: 14px;
           outline: none;
