@@ -23,7 +23,7 @@ const translations = {
     gdprModalBody: `
       <p style="margin-top: 0;">Vaše soukromí je pro nás klíčové. Níže naleznete stručné a srozumitelné informace o tom, jak nakládáme s Vaším e-mailem v souladu s nařízením GDPR:</p>
       <h4 style="color:#FDBD16; margin: 15px 0 5px 0; font-size:14px;">1. Správce osobních údajů</h4>
-      <p style="margin: 0 0 10px 0;">Správcem Vašich osobních údajů je <strong>Ondřej Škrba</strong>, se sídlem v České republice, IČO 29618142, DIČ CZ29618142 (dále jen „Správce“). Kontakt: <a href="mailto:info@northvaletcg.eu" style="color:#FDBD16;">info@northvaletcg.eu</a>.</p>
+      <p style="margin: 0 0 10px 0;">Správcem Vašich osobních údajů je společnost <strong>NORTHVALE s.r.o.</strong>, se sídlem Bratří Čapků 1095, 534 01 Holice, IČO 29618142, DIČ CZ29618142 (dále jen „Správce“). Kontakt: <a href="mailto:info@northvaletcg.eu" style="color:#FDBD16;">info@northvaletcg.eu</a>.</p>
       <h4 style="color:#FDBD16; margin: 15px 0 5px 0; font-size:14px;">2. Účel a právní základ zpracování</h4>
       <p style="margin: 0 0 10px 0;">Zadáním e-mailu a zaškrtnutím políčka udělujete souhlas se zpracováním Vaší e-mailové adresy za účelem <strong>předregistrace do nového e-shopu NORTHVALE, odeslání 5% slevového kódu</strong> a informování o oficiálním otevření webu dne 1. srpna. Právním základem je Váš dobrovolný souhlas (čl. 6 odst. 1 písm. a) GDPR).</p>
       <h4 style="color:#FDBD16; margin: 15px 0 5px 0; font-size:14px;">3. Doba uchování</h4>
@@ -52,7 +52,7 @@ const translations = {
     gdprModalBody: `
       <p style="margin-top: 0;">Your privacy is our priority. Below you can find concise and clear information about how we process your email address under GDPR guidelines:</p>
       <h4 style="color:#FDBD16; margin: 15px 0 5px 0; font-size:14px;">1. Data Controller</h4>
-      <p style="margin: 0 0 10px 0;">The controller of your personal data is <strong>Ondřej Škrba</strong>, based in the Czech Republic, Reg. No. 29618142, VAT ID CZ29618142 (hereinafter "Controller"). Contact: <a href="mailto:info@northvaletcg.eu" style="color:#FDBD16;">info@northvaletcg.eu</a>.</p>
+      <p style="margin: 0 0 10px 0;">The controller of your personal data is company <strong>NORTHVALE s.r.o.</strong>, with registered office at Bratří Čapků 1095, 534 01 Holice, Czech Republic, Reg. No. 29618142, VAT ID CZ29618142 (hereinafter "Controller"). Contact: <a href="mailto:info@northvaletcg.eu" style="color:#FDBD16;">info@northvaletcg.eu</a>.</p>
       <h4 style="color:#FDBD16; margin: 15px 0 5px 0; font-size:14px;">2. Purpose and Legal Basis</h4>
       <p style="margin: 0 0 10px 0;">By entering your email and checking the box, you give consent to process your email address to <strong>pre-register you for the new NORTHVALE e-shop, send you a 5% discount code</strong>, and notify you about the official launch on August 1st. The legal basis is your voluntary consent (Art. 6 (1) (a) GDPR).</p>
       <h4 style="color:#FDBD16; margin: 15px 0 5px 0; font-size:14px;">3. Storage Period</h4>

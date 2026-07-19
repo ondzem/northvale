@@ -498,7 +498,7 @@ serve(async (req) => {
           <div style="text-align: center; border-top: 1px solid #e1e4e8; padding-top: 24px; margin-top: 30px;">
             <p style="font-size: 11px; color: #999999; margin: 0; line-height: 1.5;">
               NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice | IČO: 29618142, DIČ: CZ29618142<br/>
-              Společnost zapsaná u Krajského soudu v Hradci Králové, oddíl C, vložka 29618142.
+              Společnost zapsaná u Krajského soudu v Hradci Králové, oddíl C, vložka 56872.
             </p>
           </div>
         </div>

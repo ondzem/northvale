@@ -316,7 +316,7 @@ serve(async (req) => {
 
     // Footer - register details
     drawTextCenter(
-      "Společnost zapsaná v obchodním rejstříku u Krajského soudu v Hradci Králové, oddíl C, vložka 29618142.",
+      "Společnost zapsaná v obchodním rejstříku u Krajského soudu v Hradci Králové, oddíl C, vložka 56872.",
       width / 2,
       40,
       7,
