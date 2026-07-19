@@ -11,7 +11,7 @@ export default function BuylistTab({ buylists, approveBuylist }) {
   };
 
   return (
-    <div style={styles.glassPanel}>
+    <div style={styles.glassPanel} className="glass-panel">
       <h2 style={styles.sectionHeading}>
         {lang === 'CZ' ? 'Správa podaných výkupů' : 'Manage Submitted Buylists'}
       </h2>

@@ -1653,6 +1653,13 @@ export default function OrdersTab({ showToast }) {
             font-size: 11px !important;
             padding: 6px 8px !important;
           }
+          .orders-settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 20px;
+          }
+
           /* Detail Modal responsive fixes */
           .orders-modal-content {
             padding: 16px !important;
@@ -1660,6 +1667,16 @@ export default function OrdersTab({ showToast }) {
           .orders-modal-grid {
             grid-template-columns: 1fr !important;
             gap: 16px !important;
+          }
+          .orders-settings-grid {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+          }
+          .orders-settings-card-gls {
+            border-right: none !important;
+            padding-right: 0 !important;
+            border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+            padding-bottom: 16px !important;
           }
         }
       `}</style>
@@ -1671,9 +1688,9 @@ export default function OrdersTab({ showToast }) {
             {lang === 'CZ' ? 'Nastavení připojení dopravy API' : 'Shipping API Connection Settings'}
           </h3>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '20px' }}>
+          <div className="orders-settings-grid">
             {/* GLS Section */}
-            <div style={{ borderRight: '1px solid rgba(255,255,255,0.08)', paddingRight: '24px' }}>
+            <div className="orders-settings-card-gls" style={{ borderRight: '1px solid rgba(255,255,255,0.08)', paddingRight: '24px' }}>
               <h4 style={{ margin: '0 0 12px 0', color: '#fff', fontSize: '13.5px', fontWeight: '700' }}>GLS API</h4>
               <div style={{ padding: '12px 16px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '4px', border: '1px dashed rgba(255, 255, 255, 0.1)', color: '#8a8a92', fontSize: '12px', lineHeight: '1.5' }}>
                 {lang === 'CZ' 

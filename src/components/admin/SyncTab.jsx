@@ -148,7 +148,7 @@ export default function SyncTab() {
       
       {/* POHODA PANEL */}
       {import.meta.env.VITE_ENABLE_POHODA_SYNC === 'true' ? (
-        <div style={styles.glassPanel}>
+        <div style={styles.glassPanel} className="glass-panel">
           <div style={styles.logsHeader}>
             <h2 style={styles.sectionHeading}>
               {lang === 'CZ' ? 'Účetnictví POHODA (FTP)' : 'POHODA Accounting (FTP)'}
@@ -218,7 +218,7 @@ export default function SyncTab() {
           </div>
         </div>
       ) : (
-        <div style={styles.glassPanel}>
+        <div style={styles.glassPanel} className="glass-panel">
           <div style={styles.logsHeader}>
             <h2 style={styles.sectionHeading}>
               {lang === 'CZ' ? 'Účetnictví POHODA (Režim spánku)' : 'POHODA Accounting (Sleep Mode)'}
@@ -244,7 +244,7 @@ export default function SyncTab() {
       )}
 
       {/* CARDMARKET PANEL */}
-      <div style={styles.glassPanel}>
+      <div style={styles.glassPanel} className="glass-panel">
         <div style={styles.logsHeader}>
           <h2 style={styles.sectionHeading}>
             {lang === 'CZ' ? 'Cardmarket Synchronizace (API)' : 'Cardmarket Sync (API)'}

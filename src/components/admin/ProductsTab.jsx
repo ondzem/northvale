@@ -2954,7 +2954,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         <h4 style={{ color: 'var(--color-gold, #fdbd16)', fontSize: '13px', fontWeight: '600', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                           🔍 {lang === 'CZ' ? 'SEO Optimalizace náhledového obrázku' : 'SEO Image Metadata Optimization'}
                         </h4>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div className="pmf-two-column-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                           <div className="pmf-field">
                             <label className="pmf-label">
                               {lang === 'CZ' ? 'Alternativní text obrázku (Alt)' : 'Image Alt Text'}

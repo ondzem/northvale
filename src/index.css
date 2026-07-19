@@ -8601,6 +8601,22 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
     flex-wrap: wrap !important;
     gap: 6px !important;
   }
+
+  /* General admin panel glass container responsiveness */
+  .glass-panel {
+    padding: 16px !important;
+    gap: 16px !important;
+  }
+  /* Give a nice spacing below the vertical navigation bar */
+  .adf-nav {
+    margin-bottom: 24px !important;
+    padding-bottom: 16px !important;
+  }
+  /* Multi-column grid responsiveness */
+  .pmf-two-column-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
 }
 
 /* ==========================================
