@@ -777,7 +777,7 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
           {lang === 'CZ' ? 'Přihlášen jako' : 'Logged in as'}:{' '}
           <strong>{user.name || user.email.split('@')[0]}</strong>
         </span>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div className="prf-topbar-actions">
           {user && (user.role === 'admin' || user.email === 'info@northvaletcg.eu') && (
             <button 
               className="prf-topbar-logout" 
@@ -833,8 +833,8 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
               <span>{lang === 'CZ' ? 'Newslettery' : 'Newsletters'}</span>
             </button>
           )}
-          <div className="prf-nav-divider"></div>
-           {user && (user.role === 'admin' || user.email === 'info@northvaletcg.eu') && (
+          {!isMobile && <div className="prf-nav-divider"></div>}
+          {!isMobile && user && (user.role === 'admin' || user.email === 'info@northvaletcg.eu') && (
             <>
               <button 
                 className="prf-nav-item"
@@ -846,13 +846,15 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
               <div className="prf-nav-divider"></div>
             </>
           )}
-          <button 
-            className="prf-nav-item prf-nav-logout"
-            onClick={onLogout}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-            <span>{lang === 'CZ' ? 'Odhlásit se' : 'Logout'}</span>
-          </button>
+          {!isMobile && (
+            <button 
+              className="prf-nav-item prf-nav-logout"
+              onClick={onLogout}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              <span>{lang === 'CZ' ? 'Odhlásit se' : 'Logout'}</span>
+            </button>
+          )}
         </aside>
 
         {/* Right Content Area */}

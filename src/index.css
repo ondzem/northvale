@@ -6957,10 +6957,11 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   line-height: 1.5;
 }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
   .prf-dl-row {
     grid-template-columns: 1fr;
-    gap: 4px;
+    gap: 6px;
+    padding: 10px 0;
   }
 }
 
@@ -6992,9 +6993,10 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   grid-template-columns: 150px 1fr;
 }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
   .prf-dl-2col .prf-dl-row {
     grid-template-columns: 1fr;
+    gap: 6px;
   }
 }
 
@@ -7175,6 +7177,76 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 .prf-btn-secondary:hover {
   color: #f0f0f0;
   border-color: rgba(240, 240, 240, 0.25);
+}
+
+/* Responsive adjustments for Account settings */
+.prf-topbar-actions {
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .prf-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+  }
+  
+  .prf-topbar-user {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .prf-topbar-actions {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .prf-topbar-actions .prf-topbar-logout {
+    flex: 1;
+    font-size: 11px;
+    padding: 10px 8px;
+    border-radius: 8px;
+    white-space: nowrap;
+    text-align: center;
+  }
+  
+  .prf-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 12px;
+    gap: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .prf-nav::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .prf-nav-item {
+    padding: 10px 16px;
+    font-size: 13px;
+    flex-shrink: 0;
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .prf-nav-item.is-active {
+    background-color: rgba(253, 189, 22, 0.1);
+    border-color: rgba(253, 189, 22, 0.3);
+  }
+  
+  .prf-nav-item svg {
+    width: 14px;
+    height: 14px;
+    margin-right: 2px;
+  }
 }
 
 @keyframes scan {
