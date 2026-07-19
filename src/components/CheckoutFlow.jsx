@@ -73,7 +73,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   }
 
   // Payment surcharge for Cash on Delivery (Dobírka)
-  const paymentSurcharge = payment === 'cod' ? 25 : 0;
+  const paymentSurcharge = 0;
 
   // Store Credit capping calculations
   const totalBeforeCredit = Math.max(0, subtotalAfterDiscount + shippingCost + paymentSurcharge);
@@ -294,7 +294,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                         ? (lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)') 
                         : (lang === 'CZ' ? 'Doprava' : 'Shipping'),
               carrier: (shipMethod || '').startsWith('dpd') ? 'DPD' : (shipMethod || '').startsWith('gls') ? 'GLS' : 'OSOBNÍ ODBĚR',
-              paymentMethod: lang === 'CZ' ? 'Online platební karta (GP webpay)' : 'Online Credit/Debit Card (GP webpay)',
+              paymentMethod: lang === 'CZ' ? 'Online platební karta' : 'Online Credit/Debit Card',
               date: new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
               invoiceUrl: '#',
               customerName: customerDetails.name,
@@ -822,8 +822,6 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                 background: 'rgba(0, 0, 0, 0.6)', 
                 border: 'none', 
                 color: '#fff', 
-                fontSize: '20px', 
-                fontWeight: 'bold',
                 width: '32px', 
                 height: '32px', 
                 borderRadius: '50%',
@@ -832,13 +830,17 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                transition: 'background 0.2s'
+                transition: 'background 0.2s',
+                padding: 0
               }}
-              onMouseEnter={(e) => e.target.style.background = 'rgba(0, 0, 0, 0.8)'}
-              onMouseLeave={(e) => e.target.style.background = 'rgba(0, 0, 0, 0.6)'}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)'}
               title={lang === 'CZ' ? 'Zavřít' : 'Close'}
             >
-              &times;
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
             </button>
             
             <div style={{ flex: 1, position: 'relative' }}>
@@ -1903,14 +1905,14 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                 <div className="pof-radios" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {/* Platební karta */}
                   <button 
-                    type="button"
+                    type="button" 
                     className={`pof-radio ${payment === 'card' ? 'is-active' : ''}`}
                     onClick={() => setPayment('card')}
                   >
                     <span className="pof-radio-dot" aria-hidden="true"></span>
                     <span className="pof-radio-body">
                       <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'Online platební karta (GP webpay)' : 'Online Credit/Debit Card (GP webpay)'}
+                        {lang === 'CZ' ? 'Online platební karta' : 'Online Credit/Debit Card'}
                       </span>
                       <span className="pof-radio-desc">
                         {lang === 'CZ' ? 'Rychlá a bezpečná platba kartou přes bránu Global Payments.' : 'Fast and secure card payment via Global Payments gateway.'}
@@ -1920,7 +1922,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
 
                   {/* Bankovní převod */}
                   <button 
-                    type="button"
+                    type="button" 
                     className={`pof-radio ${payment === 'transfer' ? 'is-active' : ''}`}
                     onClick={() => setPayment('transfer')}
                   >
@@ -1937,7 +1939,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
 
                   {/* Dobírka */}
                   <button 
-                    type="button"
+                    type="button" 
                     className={`pof-radio ${payment === 'cod' ? 'is-active' : ''}`}
                     onClick={() => setPayment('cod')}
                   >
@@ -1950,7 +1952,6 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                         {lang === 'CZ' ? 'Platba hotově nebo kartou kurýrovi při převzetí zásilky.' : 'Pay by cash or card to the courier upon parcel arrival.'}
                       </span>
                     </span>
-                    <span className="pof-price">+25 Kč</span>
                   </button>
                 </div>
 
