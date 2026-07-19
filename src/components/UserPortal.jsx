@@ -1708,25 +1708,109 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
               <span className="nv-eyebrow">{lang === 'CZ' ? 'Můj účet' : 'My Account'}</span>
               <h2 className="prf-title">{lang === 'CZ' ? 'Newslettery' : 'Newsletters'}</h2>
               
-              <section className="prf-block">
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-                  <input 
-                    type="checkbox" 
-                    id="newsletter-sub" 
-                    checked={user.newsletter}
-                    onChange={(e) => handleToggleNewsletter(e.target.checked)}
-                    style={{ width: '16px', height: '16px', cursor: 'pointer', marginTop: '4px' }}
-                  />
-                  <label htmlFor="newsletter-sub" style={{ cursor: 'pointer', userSelect: 'none' }}>
-                    <strong style={{ display: 'block', fontSize: '14px', color: '#f0f0f0' }}>
-                      {lang === 'CZ' ? 'Chci odebírat newsletter a novinky ze světa NORTHVALE TCG' : 'I wish to receive newsletters and card market updates from NORTHVALE TCG'}
-                    </strong>
-                    <span style={{ display: 'block', fontSize: '13px', color: '#8a8a92', marginTop: '6px', lineHeight: '1.5' }}>
-                      {lang === 'CZ'
-                        ? 'Budete dostávat exkluzivní přednostní informace o naskladnění nových booster boxů, speciálních slevových akcích a chystaných turnajích.'
-                        : 'Receive priority announcements regarding booster box stock arrivals, special promotion campaigns, and local card tournaments.'}
-                    </span>
-                  </label>
+              <section className="prf-block" style={{ borderBottom: 'none', paddingBottom: '0' }}>
+                <div style={{
+                  padding: '24px',
+                  borderRadius: '12px',
+                  border: user.newsletter ? '1px solid rgba(253, 189, 22, 0.2)' : '1px solid rgba(255, 255, 255, 0.08)',
+                  backgroundColor: user.newsletter ? 'rgba(253, 189, 22, 0.02)' : 'rgba(255, 255, 255, 0.01)',
+                  display: 'flex',
+                  flexDirection: isMobile ? 'column' : 'row',
+                  alignItems: isMobile ? 'flex-start' : 'center',
+                  justifyContent: 'space-between',
+                  gap: '20px',
+                  transition: 'all 0.3s ease'
+                }}>
+                  <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      backgroundColor: user.newsletter ? 'rgba(253, 189, 22, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '20px',
+                      color: user.newsletter ? 'var(--color-gold)' : '#8a8a92',
+                      flexShrink: 0
+                    }}>
+                      {user.newsletter ? '✉️' : '🔕'}
+                    </div>
+                    <div>
+                      <h3 style={{ margin: '0 0 4px 0', fontSize: '15px', fontWeight: '700', color: '#fff' }}>
+                        {lang === 'CZ' ? 'Stav odběru newsletteru' : 'Newsletter Subscription Status'}
+                      </h3>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: user.newsletter ? '#4caf50' : '#8a8a92'
+                        }} />
+                        <span style={{
+                          fontSize: '13px',
+                          fontWeight: '600',
+                          color: user.newsletter ? '#4caf50' : '#8a8a92',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }}>
+                          {user.newsletter 
+                            ? (lang === 'CZ' ? 'Aktivní (Odebíráte)' : 'Active (Subscribed)') 
+                            : (lang === 'CZ' ? 'Neaktivní (Neodebíráte)' : 'Inactive (Unsubscribed)')}
+                        </span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '13px', color: '#8a8a92', lineHeight: '1.5', maxWidth: '480px' }}>
+                        {lang === 'CZ'
+                          ? 'Odběrem získáte jako první informace o předobjednávkách nových edic Pokémonů, Lorcany, slevových akcích a chystaných turnajích.'
+                          : 'By subscribing, you will be the first to know about pre-orders of new Pokémon/Lorcana releases, discount promotions, and upcoming local tournaments.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div style={{ width: isMobile ? '100%' : 'auto', flexShrink: 0 }}>
+                    {user.newsletter ? (
+                      <button 
+                        className="prf-edit"
+                        style={{
+                          width: isMobile ? '100%' : 'auto',
+                          padding: '10px 20px',
+                          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                          color: '#ef4444',
+                          border: '1px solid rgba(239, 68, 68, 0.2)',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px'
+                        }}
+                        onClick={() => handleToggleNewsletter(false)}
+                      >
+                        🔕 {lang === 'CZ' ? 'Zrušit odběr novinek' : 'Cancel Subscription'}
+                      </button>
+                    ) : (
+                      <button 
+                        className="prf-edit"
+                        style={{
+                          width: isMobile ? '100%' : 'auto',
+                          padding: '10px 20px',
+                          backgroundColor: 'rgba(253, 189, 22, 0.1)',
+                          color: 'var(--color-gold)',
+                          border: '1px solid rgba(253, 189, 22, 0.2)',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px'
+                        }}
+                        onClick={() => handleToggleNewsletter(true)}
+                      >
+                        🔔 {lang === 'CZ' ? 'Přihlásit se k odběru' : 'Subscribe to Newsletter'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </section>
             </div>
