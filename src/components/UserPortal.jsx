@@ -1712,8 +1712,8 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                 <div style={{
                   padding: '24px',
                   borderRadius: '12px',
-                  border: user.newsletter ? '1px solid rgba(253, 189, 22, 0.2)' : '1px solid rgba(255, 255, 255, 0.08)',
-                  backgroundColor: user.newsletter ? 'rgba(253, 189, 22, 0.02)' : 'rgba(255, 255, 255, 0.01)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.01)',
                   display: 'flex',
                   flexDirection: isMobile ? 'column' : 'row',
                   alignItems: isMobile ? 'flex-start' : 'center',
@@ -1722,22 +1722,8 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                   transition: 'all 0.3s ease'
                 }}>
                   <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-                    <div style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '50%',
-                      backgroundColor: user.newsletter ? 'rgba(253, 189, 22, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '20px',
-                      color: user.newsletter ? 'var(--color-gold)' : '#8a8a92',
-                      flexShrink: 0
-                    }}>
-                      {user.newsletter ? '✉️' : '🔕'}
-                    </div>
                     <div>
-                      <h3 style={{ margin: '0 0 4px 0', fontSize: '15px', fontWeight: '700', color: '#fff' }}>
+                      <h3 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: '700', color: '#fff' }}>
                         {lang === 'CZ' ? 'Stav odběru newsletteru' : 'Newsletter Subscription Status'}
                       </h3>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
@@ -1760,10 +1746,10 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                             : (lang === 'CZ' ? 'Neaktivní (Neodebíráte)' : 'Inactive (Unsubscribed)')}
                         </span>
                       </div>
-                      <p style={{ margin: 0, fontSize: '13px', color: '#8a8a92', lineHeight: '1.5', maxWidth: '480px' }}>
+                      <p style={{ margin: 0, fontSize: '13px', color: '#8a8a92', lineHeight: '1.5', maxWidth: '520px' }}>
                         {lang === 'CZ'
-                          ? 'Odběrem získáte jako první informace o předobjednávkách nových edic Pokémonů, Lorcany, slevových akcích a chystaných turnajích.'
-                          : 'By subscribing, you will be the first to know about pre-orders of new Pokémon/Lorcana releases, discount promotions, and upcoming local tournaments.'}
+                          ? 'Odběrem získáte jako první informace o předobjednávkách nových edic Pokémonů, Lorcany a slevových akcích.'
+                          : 'By subscribing, you will be the first to know about pre-orders of new Pokémon/Lorcana releases and discount promotions.'}
                       </p>
                     </div>
                   </div>
@@ -1771,43 +1757,37 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                   <div style={{ width: isMobile ? '100%' : 'auto', flexShrink: 0 }}>
                     {user.newsletter ? (
                       <button 
-                        className="prf-edit"
+                        className="prf-topbar-logout"
                         style={{
                           width: isMobile ? '100%' : 'auto',
                           padding: '10px 20px',
-                          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                          backgroundColor: 'rgba(239, 68, 68, 0.05)',
                           color: '#ef4444',
-                          border: '1px solid rgba(239, 68, 68, 0.2)',
+                          borderColor: 'rgba(239, 68, 68, 0.2)',
+                          borderRadius: '10px',
                           fontWeight: '600',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '8px'
+                          cursor: 'pointer'
                         }}
                         onClick={() => handleToggleNewsletter(false)}
                       >
-                        🔕 {lang === 'CZ' ? 'Zrušit odběr novinek' : 'Cancel Subscription'}
+                        {lang === 'CZ' ? 'Zrušit odběr novinek' : 'Cancel Subscription'}
                       </button>
                     ) : (
                       <button 
-                        className="prf-edit"
+                        className="prf-topbar-logout"
                         style={{
                           width: isMobile ? '100%' : 'auto',
                           padding: '10px 20px',
-                          backgroundColor: 'rgba(253, 189, 22, 0.1)',
+                          backgroundColor: 'rgba(253, 189, 22, 0.05)',
                           color: 'var(--color-gold)',
-                          border: '1px solid rgba(253, 189, 22, 0.2)',
+                          borderColor: 'rgba(253, 189, 22, 0.2)',
+                          borderRadius: '10px',
                           fontWeight: '600',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '8px'
+                          cursor: 'pointer'
                         }}
                         onClick={() => handleToggleNewsletter(true)}
                       >
-                        🔔 {lang === 'CZ' ? 'Přihlásit se k odběru' : 'Subscribe to Newsletter'}
+                        {lang === 'CZ' ? 'Přihlásit se k odběru' : 'Subscribe to Newsletter'}
                       </button>
                     )}
                   </div>
