@@ -80,7 +80,7 @@ export default function InvoiceTemplate({ order, onClose, lang = 'CZ' }) {
             )}
             <p>{order.street}</p>
             <p>{order.city}, {order.zip}</p>
-            <p>Země: CZ</p>
+            <p>{lang === 'CZ' ? 'Země:' : 'Country:'} {order.shippingCountry || 'CZ'}</p>
             {order.isCompany && (
               <div className="party-tax-ids" style={{ marginTop: '10px' }}>
                 {order.ico && <p>IČO: <strong>{order.ico}</strong></p>}

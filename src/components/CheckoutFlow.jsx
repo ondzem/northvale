@@ -13,6 +13,16 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const [zip, setZip] = useState('');
   const [shipping, setShipping] = useState('pardubice');
   const [payment, setPayment] = useState('card');
+  const [selectedCountry, setSelectedCountry] = useState('CZ');
+
+  // Auto-correct shipping if SK is selected and pickup/store pickup doesn't apply
+  useEffect(() => {
+    if (selectedCountry === 'SK') {
+      if (shipping === 'pardubice') {
+        setShipping('gls-address');
+      }
+    }
+  }, [selectedCountry, shipping]);
   
   // Store Credit applied state
   const [creditInput, setCreditInput] = useState('');
@@ -45,11 +55,18 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
 
   // Shipping cost
   let shippingCost = 0;
-  if (shipping === 'dpd-pickup') shippingCost = 79;
-  else if (shipping === 'dpd-address') shippingCost = 109;
-  else if (shipping === 'gls-pickup') shippingCost = 89;
-  else if (shipping === 'gls-address') shippingCost = 129;
-  else if (shipping === 'pardubice') shippingCost = 0;
+  if (selectedCountry === 'SK') {
+    if (shipping === 'dpd-pickup') shippingCost = 149;
+    else if (shipping === 'dpd-address') shippingCost = 189;
+    else if (shipping === 'gls-pickup') shippingCost = 149;
+    else if (shipping === 'gls-address') shippingCost = 189;
+  } else {
+    if (shipping === 'dpd-pickup') shippingCost = 79;
+    else if (shipping === 'dpd-address') shippingCost = 109;
+    else if (shipping === 'gls-pickup') shippingCost = 89;
+    else if (shipping === 'gls-address') shippingCost = 129;
+    else if (shipping === 'pardubice') shippingCost = 0;
+  }
 
   // Free shipping above 2000 CZK (checked on total after discount)
   if (subtotalAfterDiscount > 2000 && (
@@ -79,7 +96,12 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     if (isFree || basePrice === 0) {
       return lang === 'CZ' ? 'Zdarma' : 'Free';
     }
-    return `${basePrice} Kč`;
+    let effectivePrice = basePrice;
+    if (selectedCountry === 'SK') {
+      if (method === 'dpd-pickup' || method === 'gls-pickup') effectivePrice = 149;
+      if (method === 'dpd-address' || method === 'gls-address') effectivePrice = 189;
+    }
+    return `${effectivePrice} Kč`;
   };
 
   const handleApplyDiscount = async () => {
@@ -294,7 +316,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               ico: customerDetails.ico,
               dic: customerDetails.dic,
               notes: customerDetails.notes,
-              pickupPointDetails: pending.pickupPointDetails || null
+              pickupPointDetails: pending.pickupPointDetails || null,
+              shippingCountry: customerDetails.shippingCountry || 'CZ'
             };
 
             submitOrder(order, creditUsed);
@@ -550,7 +573,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     // Format and validate phone
     let cleanedPhone = phone.trim().replace(/\s+/g, '');
     if (/^\d{9}$/.test(cleanedPhone)) {
-      cleanedPhone = '+420' + cleanedPhone;
+      cleanedPhone = (selectedCountry === 'SK' ? '+421' : '+420') + cleanedPhone;
     }
     const phoneRegex = /^\+\d{9,15}$/;
     if (!phoneRegex.test(cleanedPhone)) {
@@ -670,7 +693,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const finalizeOrder = () => {
     let cleanedPhone = phone.trim().replace(/\s+/g, '');
     if (/^\d{9}$/.test(cleanedPhone)) {
-      cleanedPhone = '+420' + cleanedPhone;
+      cleanedPhone = (selectedCountry === 'SK' ? '+421' : '+420') + cleanedPhone;
     }
     let cleanedZip = zip.trim().replace(/\s+/g, '');
     if (shipping !== 'pardubice') {
@@ -729,7 +752,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       ico: isCompany ? ico : '',
       dic: isCompany ? dic : '',
       notes: notes,
-      pickupPointDetails: shipping.includes('pickup') ? pickupPointDetails : null
+      pickupPointDetails: shipping.includes('pickup') ? pickupPointDetails : null,
+      shippingCountry: selectedCountry
     };
 
     submitOrder(order, actualAppliedCredit);
@@ -822,13 +846,13 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
             <div style={{ flex: 1, position: 'relative' }}>
               {mapType === 'dpd' ? (
                 <iframe 
-                  src={`https://api.dpd.cz/widget/latest/index.html?hideCloseButton=true&countries=CZ${payment === 'cod' ? '&paymentFilter=cod' : ''}`} 
+                  src={`https://api.dpd.cz/widget/latest/index.html?hideCloseButton=true&countries=${selectedCountry}${payment === 'cod' ? '&paymentFilter=cod' : ''}`} 
                   style={{ width: '100%', height: '100%', border: 'none', background: '#fff' }}
                   title="DPD Widget"
                 />
               ) : (
                 <iframe 
-                  src={`https://ps-maps.gls-czech.com?find=1&ctrcode=CZ&lang=cs${payment === 'cod' ? '&cod=1' : ''}`} 
+                  src={`https://ps-maps.gls-czech.com?find=1&ctrcode=${selectedCountry}&lang=${selectedCountry === 'SK' ? 'sk' : 'cs'}${payment === 'cod' ? '&cod=1' : ''}`} 
                   style={{ width: '100%', height: '100%', border: 'none', background: '#fff' }}
                   title="GLS Widget"
                 />
@@ -1596,9 +1620,43 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               {/* Step 2: Adresa doručení */}
               <section className="pof-step">
                 <div className="pof-step-head">
-                  <span className="pof-step-num"><span className="__om-t">02</span></span>
-                  <h3><span className="__om-t">{lang === 'CZ' ? 'Adresa doručení' : 'Shipping Address'}</span></h3>
+                   <span className="pof-step-num"><span className="__om-t">02</span></span>
+                   <h3><span className="__om-t">{lang === 'CZ' ? 'Adresa doručení' : 'Shipping Address'}</span></h3>
                 </div>
+
+                {/* Country Selection Dropdown */}
+                <label className="pof-field" style={{ marginBottom: '20px' }}>
+                  <span><span className="__om-t">{lang === 'CZ' ? 'Země doručení' : 'Country'}</span></span>
+                  <select
+                    value={selectedCountry}
+                    onChange={e => {
+                      setSelectedCountry(e.target.value);
+                      if (!phone) {
+                        setPhone(e.target.value === 'SK' ? '+421 ' : '+420 ');
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '6px',
+                      color: 'var(--text-main, #f0f0f0)',
+                      outline: 'none',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontFamily: 'inherit',
+                      appearance: 'none',
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fdbd16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 12px center',
+                      backgroundSize: '16px'
+                    }}
+                  >
+                    <option value="CZ" style={{ background: '#1a1d24' }}>{lang === 'CZ' ? 'Česká republika' : 'Czech Republic'}</option>
+                    <option value="SK" style={{ background: '#1a1d24' }}>{lang === 'CZ' ? 'Slovensko' : 'Slovakia'}</option>
+                  </select>
+                </label>
 
                 {/* Company Checkbox */}
                 <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1731,22 +1789,24 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                 </div>
                 <div className="pof-radios" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {/* Osobní odběr */}
-                  <button 
-                    type="button"
-                    className={`pof-radio ${shipping === 'pardubice' ? 'is-active' : ''}`}
-                    onClick={() => setShipping('pardubice')}
-                  >
-                    <span className="pof-radio-dot" aria-hidden="true"></span>
-                    <span className="pof-radio-body">
-                      <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)'}
+                  {selectedCountry !== 'SK' && (
+                    <button 
+                      type="button"
+                      className={`pof-radio ${shipping === 'pardubice' ? 'is-active' : ''}`}
+                      onClick={() => setShipping('pardubice')}
+                    >
+                      <span className="pof-radio-dot" aria-hidden="true"></span>
+                      <span className="pof-radio-body">
+                        <span className="pof-radio-name">
+                          {lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)'}
+                        </span>
+                        <span className="pof-radio-desc">
+                          {lang === 'CZ' ? 'Vyzvednutí na naší provozovně. Zdarma.' : 'Pickup at our premises. Free.'}
+                        </span>
                       </span>
-                      <span className="pof-radio-desc">
-                        {lang === 'CZ' ? 'Vyzvednutí na naší provozovně. Zdarma.' : 'Pickup at our premises. Free.'}
-                      </span>
-                    </span>
-                    <span className={`pof-price ${shipping === 'pardubice' ? 'is-free' : ''}`}>{lang === 'CZ' ? 'Zdarma' : 'Free'}</span>
-                  </button>
+                      <span className={`pof-price ${shipping === 'pardubice' ? 'is-free' : ''}`}>{lang === 'CZ' ? 'Zdarma' : 'Free'}</span>
+                    </button>
+                  )}
 
                   {/* DPD - Výdejní místo */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
