@@ -1512,265 +1512,81 @@ function AppContent() {
   };
 
   // Submit Order Action
-  const submitOrder = async (order, creditApplied = 0) => {
-    setLastCompletedOrder(order);
-    let updatedOrders = [];
-    let newCredit = 0;
-    setUser(prev => {
-      updatedOrders = [order, ...prev.orderHistory];
-      newCredit = Math.max(0, prev.storeCredit - creditApplied);
-      return {
-        ...prev,
-        orderHistory: updatedOrders,
-        storeCredit: newCredit
-      };
-    });
-
-    setCart([]);
-    setAppliedDiscount(null);
-
-    // Subtract stock from Supabase Database
+  const submitOrder = async (order, creditApplied = 0, options = {}) => {
     try {
-      for (const item of order.items) {
-        const prod = item.product;
-        if (!prod || !prod.id) continue;
-
-        // Decrement daily deal slot stock
-        if (prod.isDailyDeal) {
-          try {
-            const slotId = prod.dealSlotId || 'active-deal';
-            const { data: dbDeal } = await supabase
-              .from('daily_deal')
-              .select('stock')
-              .eq('id', slotId)
-              .single();
-
-            if (dbDeal) {
-              const newDealStock = Math.max(0, (dbDeal.stock || 0) - item.quantity);
-              await supabase
-                .from('daily_deal')
-                .update({ stock: newDealStock })
-                .eq('id', slotId);
-              console.log(`[submitOrder] Decremented daily_deal slot ${slotId} stock to ${newDealStock}`);
-            }
-          } catch (dealStockErr) {
-            console.error('Failed to update daily deal stock on Supabase:', dealStockErr);
-          }
-        }
-
-        if (prod.id !== 'deal-of-the-day') {
-          if (prod.type === 'single') {
-            const { data: dbProd } = await supabase
-              .from('products')
-              .select('variants')
-              .eq('id', prod.id)
-              .single();
-
-            if (dbProd && dbProd.variants) {
-              const updatedVariants = dbProd.variants.map(v => {
-                if (v.id === item.id) {
-                  return { ...v, stock: Math.max(0, (v.stock || 0) - item.quantity) };
-                }
-                return v;
-              });
-
-              await supabase
-                .from('products')
-                .update({ variants: updatedVariants })
-                .eq('id', prod.id);
-            }
-          } else {
-            const { data: dbProd } = await supabase
-              .from('products')
-              .select('stock')
-              .eq('id', prod.id)
-              .single();
-
-            if (dbProd) {
-              const newStock = Math.max(0, (dbProd.stock || 0) - item.quantity);
-              await supabase
-                .from('products')
-                .update({ stock: newStock })
-                .eq('id', prod.id);
-            }
-          }
-        }
-      }
-    } catch (stockErr) {
-      console.error('Failed to update product stock on Supabase:', stockErr);
-    }
-
-    // Invalidate local client-side raw products cache to force reload fresh stock values
-    invalidateProductsCache();
-
-    // Save to Supabase if logged in
-    try {
-      const sessionRes = await supabase.auth.getSession();
-      const session = sessionRes.data?.session;
-      if (session) {
-        await supabase
-          .from('profiles')
-          .update({
-            order_history: updatedOrders,
-            store_credit: newCredit
-          })
-          .eq('id', session.user.id);
-      }
-    } catch (err) {
-      console.error('Failed to sync order history to Supabase:', err);
-    }
-
-    // Call Edge Function to save order JSON in storage
-    try {
-      await supabase.functions.invoke('save-order-json', {
-        body: {
-          order: {
-            id: order.id,
-            created_at: new Date().toISOString(),
-            customer_name: order.customerName,
-            customer_city: order.shippingCity,
-            customer_street: order.shippingStreet,
-            customer_zip: order.shippingZip,
-            customer_email: order.customerEmail,
-            customer_phone: order.customerPhone,
-            payment_method: order.paymentMethod,
-            shipping_method: order.shippingMethod,
-            shipping_cost: order.shippingCost,
-            payment_surcharge: order.paymentSurcharge,
-            notes: order.notes || '',
-            pickup_point_details: order.pickupPointDetails || null,
-            carrier: order.shippingMethod ? (
-              order.shippingMethod.includes('GLS') ? 'GLS' :
-              order.shippingMethod.includes('DPD') ? 'DPD' :
-              (order.shippingMethod.includes('Zásilkovna') || order.shippingMethod.includes('Packeta')) ? 'Zásilkovna' :
-              order.shippingMethod.includes('Pošta') ? 'Česká pošta' :
-              'Osobní odběr'
-            ) : 'GLS'
-          },
-          items: order.items.map(item => ({
-            name: item.name,
-            product_id: item.id || item.product_id || item.name,
-            quantity: item.quantity,
-            price: item.price
-          }))
-        }
-      });
-    } catch (exportErr) {
-      console.error('Order save invocation failed:', exportErr);
-    }
-
-    // Call Edge Function to generate invoice PDF/document
-    try {
-      await supabase.functions.invoke('generate-invoice-pdf', {
-        body: {
-          order: {
-            id: order.id,
-            date: order.date || new Date().toLocaleDateString('cs-CZ'),
-            customerName: order.customerName,
-            customerEmail: order.customerEmail,
-            customerPhone: order.customerPhone,
-            shippingStreet: order.shippingStreet,
-            shippingCity: order.shippingCity,
-            shippingZip: order.shippingZip,
-            paymentMethod: order.paymentMethod,
-            shippingMethod: order.shippingMethod,
-            shippingCost: order.shippingCost,
-            paymentSurcharge: order.paymentSurcharge,
-            finalTotal: order.finalTotal,
-            isCompany: order.isCompany,
-            companyName: order.companyName,
-            ico: order.ico,
-            dic: order.dic,
-            notes: order.notes || '',
-            items: order.items.map(item => ({
-              name: item.name || item.productName,
-              quantity: item.quantity,
-              price: item.price,
-              no_vat: !!(item.no_vat || item.product?.no_vat)
-            }))
-          }
-        }
-      });
-    } catch (pdfErr) {
-      console.error('Invoice generation failed:', pdfErr);
-    }
-
-    // Call Edge Function to send email confirmation with full invoice
-    try {
-      await supabase.functions.invoke('send-order-email', {
-        body: {
-          order: {
-            id: order.id,
-            date: order.date || new Date().toLocaleDateString('cs-CZ'),
-            customerName: order.customerName,
-            customerEmail: order.customerEmail,
-            customerPhone: order.customerPhone,
-            shippingStreet: order.shippingStreet,
-            shippingCity: order.shippingCity,
-            shippingZip: order.shippingZip,
-            paymentMethod: order.paymentMethod,
-            shippingMethod: order.shippingMethod,
-            shippingCost: order.shippingCost,
-            paymentSurcharge: order.paymentSurcharge,
-            finalTotal: order.finalTotal,
-            isCompany: order.isCompany,
-            companyName: order.companyName,
-            ico: order.ico,
-            dic: order.dic,
-            notes: order.notes || ''
-          },
-          items: order.items.map(item => ({
-            name: item.name || item.productName,
-            quantity: item.quantity,
-            price: item.price,
-            no_vat: !!(item.no_vat || item.product?.no_vat)
-          }))
-        }
-      });
-    } catch (emailErr) {
-      console.error('Order email sending failed:', emailErr);
-    }
-
-    // Call Edge Function to export order to Pohoda (FTP XML)
-    if (import.meta.env.VITE_ENABLE_POHODA_SYNC === 'true') {
-      try {
-        const now = new Date();
-        const createdDate = now.toISOString().split('T')[0];
-        
-        const orderPayload = {
-          orderNumber: order.id.toString(),
-          createdDate: createdDate,
-          email: order.customerEmail,
-          phone: order.customerPhone || '',
-          billingName: order.isCompany ? (order.companyName || order.customerName) : order.customerName,
-          billingStreet: order.shippingStreet,
-          billingCity: order.shippingCity,
-          billingZip: order.shippingZip,
-          billingCountry: 'CZ',
-          paymentMethod: order.paymentMethod?.toLowerCase().includes('karta') || order.paymentMethod?.toLowerCase().includes('card') ? 'karta' : 'převod',
-          totalAmount: order.finalTotal,
-          items: order.items.map(item => {
-            const sku = item.product?.type === 'single' ? item.id : (item.product?.id || item.id);
-            const vatRate = item.no_vat ? 0 : 21;
-            return {
-              sku: sku,
-              name: item.name || item.productName || 'Zboží',
-              quantity: item.quantity,
-              price: item.price,
-              vatRate: vatRate
-            };
-          })
-        };
-
-        await supabase.functions.invoke('pohoda-connector', {
+      if (options.isCardPaid) {
+        // Case B: Mark paid
+        const { data, error } = await supabase.functions.invoke('finalize-order', {
           body: {
-            action: 'export-order',
-            order: orderPayload
+            action: 'mark_paid',
+            orderId: options.orderId
           }
         });
-      } catch (pohodaErr) {
-        console.error('Pohoda order export failed:', pohodaErr);
+
+        if (error || !data || !data.success) {
+          throw new Error(error?.message || 'Failed to mark order as paid on server');
+        }
+
+        const serverOrder = {
+          ...order,
+          id: options.orderId,
+          paymentStatus: 'paid'
+        };
+
+        setLastCompletedOrder(serverOrder);
+
+        // Update local user state
+        setUser(prev => {
+          if (!prev) return null;
+          const history = prev.orderHistory || [];
+          const updatedHistory = history.map(o => o.id === options.orderId ? { ...o, paymentStatus: 'paid' } : o);
+          return {
+            ...prev,
+            orderHistory: updatedHistory
+          };
+        });
+
+        setCart([]);
+        setAppliedDiscount(null);
+        invalidateProductsCache();
+        return serverOrder;
+      } else {
+        // Case A: Create order (Transfer, COD)
+        const { data, error } = await supabase.functions.invoke('finalize-order', {
+          body: {
+            action: 'create',
+            orderDetails: order
+          }
+        });
+
+        if (error || !data || !data.success) {
+          throw new Error(error?.message || 'Server failed to create order');
+        }
+
+        const serverOrder = data.order;
+        setLastCompletedOrder(serverOrder);
+
+        let updatedOrders = [];
+        let newCredit = 0;
+        setUser(prev => {
+          if (!prev) return null;
+          updatedOrders = [serverOrder, ...prev.orderHistory];
+          newCredit = Math.max(0, prev.storeCredit - creditApplied);
+          return {
+            ...prev,
+            orderHistory: updatedOrders,
+            storeCredit: newCredit
+          };
+        });
+
+        setCart([]);
+        setAppliedDiscount(null);
+        invalidateProductsCache();
+        return serverOrder;
       }
+    } catch (err) {
+      console.error('submitOrder error:', err);
+      throw err;
     }
   };
 

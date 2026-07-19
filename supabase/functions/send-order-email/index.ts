@@ -288,8 +288,20 @@ serve(async (req) => {
 
     const isBankTransfer = pm.toLowerCase().includes("převod") || pm.toLowerCase().includes("transfer");
 
-    // Download URL from Supabase Storage public bucket
-    const downloadInvoiceUrl = `https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${order.id}.pdf`;
+    // Generate a signed URL for download (expires in 1 year)
+    let downloadInvoiceUrl = `https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${order.id}.pdf`; // default fallback
+    try {
+      const { data: signedData, error: signedError } = await supabase.storage
+        .from("invoices")
+        .createSignedUrl(`invoice_${order.id}.pdf`, 60 * 60 * 24 * 365); // 1 year expiry
+      if (signedError) {
+        console.error("Error creating signed URL for email:", signedError);
+      } else if (signedData?.signedUrl) {
+        downloadInvoiceUrl = signedData.signedUrl;
+      }
+    } catch (urlErr) {
+      console.error("Error creating signed URL in try-catch:", urlErr);
+    }
 
     // 1. Customer Order Confirmation Email Content (Email-safe, responsive, transparent with dark text and checkmark)
     const htmlConfirmContent = `

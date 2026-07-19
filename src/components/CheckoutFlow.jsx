@@ -230,9 +230,10 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               dic: isCompany ? dic : '',
               notes: notes
             };
+            let pending = {};
 
             if (pendingStr) {
-              const pending = JSON.parse(pendingStr);
+              pending = JSON.parse(pendingStr);
               orderItems = pending.cart || [];
               orderSubtotal = pending.cartSubtotal || 0;
               orderDiscountCode = pending.discountCode || null;
@@ -297,7 +298,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               pickupPointDetails: pending.pickupPointDetails || null
             };
 
-            submitOrder(order, creditUsed);
+            await submitOrder(order, creditUsed, { isCardPaid: true, orderId: orderNumber });
             alert(lang === 'CZ'
               ? `Platba pro objednávku ${orderNumber} byla úspěšně ověřena! Objednávka byla vytvořena.`
               : `Payment for order ${orderNumber} has been successfully verified! Order created.`,
@@ -589,25 +590,87 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     if (payment === 'card') {
       setIsPaying(true);
       try {
-        const orderId = '100' + String(Date.now()).slice(-6) + String(Math.floor(10 + Math.random() * 90));
+        const order = {
+          items: cart.map(item => ({
+            id: item.id,
+            product_id: item.product?.id || item.id,
+            name: item.name || item.productName,
+            price: item.price,
+            quantity: item.quantity,
+            product: item.product || item
+          })),
+          subtotal: cartSubtotal,
+          discountCode: appliedDiscount ? appliedDiscount.code : null,
+          discountAmount: discountAmount,
+          shippingCost,
+          paymentSurcharge,
+          creditApplied: actualAppliedCredit,
+          isicApplied: false,
+          isicDiscount: 0,
+          finalTotal,
+          paymentStatus: 'awaiting_payment',
+          fulfillmentStatus: 'pending',
+          userId: user?.id || null,
+          shippingMethod: shipping === 'dpd-pickup'
+            ? (lang === 'CZ' ? `DPD - Výdejní místo: ${pickupPoint}` : `DPD - Pickup Point: ${pickupPoint}`)
+            : shipping === 'dpd-address' || shipping === 'dpd'
+              ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
+              : shipping === 'gls-pickup'
+                ? (lang === 'CZ' ? `GLS - Výdejní místo: ${pickupPoint}` : `GLS - Pickup Point: ${pickupPoint}`)
+                : shipping === 'gls-address' || shipping === 'gls'
+                  ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
+                  : shipping === 'pardubice' 
+                    ? (lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)') 
+                    : (lang === 'CZ' ? 'Doprava' : 'Shipping'),
+          carrier: shipping.startsWith('dpd') ? 'DPD' : shipping.startsWith('gls') ? 'GLS' : 'OSOBNÍ ODBĚR',
+          paymentMethod: lang === 'CZ' ? 'Online platební karta' : 'Online Credit/Debit Card',
+          date: new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
+          invoiceUrl: '#',
+          customerName: name,
+          customerEmail: email,
+          customerPhone: cleanedPhone,
+          shippingStreet: street,
+          shippingCity: city,
+          shippingZip: cleanedZip,
+          isCompany: isCompany,
+          companyName: isCompany ? companyName : '',
+          ico: isCompany ? ico : '',
+          dic: isCompany ? dic : '',
+          notes: notes,
+          pickupPointDetails: shipping.includes('pickup') ? pickupPointDetails : null
+        };
+
+        // 1. Invoke finalize-order to create order and reserve stock
+        const { data: createData, error: createError } = await supabase.functions.invoke('finalize-order', {
+          body: {
+            action: 'create',
+            orderDetails: order
+          }
+        });
+
+        if (createError || !createData || !createData.success) {
+          throw new Error(createError?.message || 'Server failed to initialize card order');
+        }
+
+        const orderId = createData.orderId;
         const amountCents = Math.round(finalTotal * 100);
         const returnUrl = window.location.origin + '/checkout?status=callback';
 
-        // Vyžádání podpisu platby z Edge funkce
-        const { data, error } = await supabase.functions.invoke('gp-webpay/sign', {
+        // 2. Sign payment
+        const { data: signData, error: signError } = await supabase.functions.invoke('gp-webpay/sign', {
           body: {
             orderId,
             amount: amountCents,
-            currency: '203', // CZK
+            currency: '203',
             returnUrl
           }
         });
 
-        if (error || !data || !data.DIGEST) {
-          throw new Error(error?.message || 'Neplatná data podpisu');
+        if (signError || !signData || !signData.DIGEST) {
+          throw new Error(signError?.message || 'Neplatná data podpisu');
         }
 
-        // Uložit rozpracovanou objednávku do localStorage pro návrat
+        // 3. Save pending details in localStorage
         localStorage.setItem('pending-order-data', JSON.stringify({
           orderId,
           cart,
@@ -637,23 +700,23 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           }
         }));
 
-        // Přesměrovat na bránu pomocí POST formuláře
+        // 4. Redirect via POST
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = 'https://3dsecure.gpwebpay.com/pgw/order.do';
 
-        Object.keys(data).forEach(key => {
+        Object.keys(signData).forEach(key => {
           const input = document.createElement('input');
           input.type = 'hidden';
           input.name = key;
-          input.value = data[key];
+          input.value = signData[key];
           form.appendChild(input);
         });
 
         document.body.appendChild(form);
         form.submit();
       } catch (err) {
-        console.error('GP webpay signature function failed:', err);
+        console.error('GP webpay checkout init failed:', err);
         setIsPaying(false);
         alert(
           lang === 'CZ' 
@@ -667,7 +730,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     }
   };
 
-  const finalizeOrder = () => {
+  const finalizeOrder = async () => {
     let cleanedPhone = phone.trim().replace(/\s+/g, '');
     if (/^\d{9}$/.test(cleanedPhone)) {
       cleanedPhone = '+420' + cleanedPhone;
@@ -676,9 +739,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     if (shipping !== 'pardubice') {
       cleanedZip = `${cleanedZip.slice(0, 3)} ${cleanedZip.slice(3)}`;
     }
-    const orderId = '100' + String(Date.now()).slice(-6) + String(Math.floor(10 + Math.random() * 90));
     const order = {
-      id: orderId,
       items: cart.map(item => ({
         id: item.id,
         product_id: item.product?.id || item.id,
@@ -732,13 +793,25 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       pickupPointDetails: shipping.includes('pickup') ? pickupPointDetails : null
     };
 
-    submitOrder(order, actualAppliedCredit);
-    alert(lang === 'CZ'
-      ? `Děkujeme za Váš nákup! Objednávka #${order.id} byla úspěšně vytvořena a uložena do Vašeho profilu.`
-      : `Thank you for your purchase! Order #${order.id} was successfully created and saved to your profile.`,
-      'success'
-    );
-    setActivePage('order-confirmation');
+    setIsPaying(true);
+    try {
+      const serverOrder = await submitOrder(order, actualAppliedCredit);
+      setIsPaying(false);
+      alert(lang === 'CZ'
+        ? `Děkujeme za Váš nákup! Objednávka #${serverOrder.id} byla úspěšně vytvořena a uložena do Vašeho profilu.`
+        : `Thank you for your purchase! Order #${serverOrder.id} was successfully created and saved to your profile.`,
+        'success'
+      );
+      setActivePage('order-confirmation');
+    } catch (err) {
+      console.error('Error finalizing order:', err);
+      setIsPaying(false);
+      alert(lang === 'CZ'
+        ? 'Došlo k chybě při dokončování objednávky. Zkontrolujte prosím připojení k internetu.'
+        : 'An error occurred while finalizing your order. Please check your internet connection.',
+        'error'
+      );
+    }
   };
 
   return (

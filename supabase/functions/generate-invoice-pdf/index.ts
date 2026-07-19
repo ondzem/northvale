@@ -329,9 +329,14 @@ serve(async (req) => {
     const fileName = `invoice_${order.id}.pdf`;
 
     try {
-      await supabase.storage.createBucket("invoices", { public: true });
+      await supabase.storage.createBucket("invoices", { public: false });
     } catch (_bErr) {
       // Ignore if exists
+    }
+    try {
+      await supabase.storage.updateBucket("invoices", { public: false });
+    } catch (_uErr) {
+      // Ignore if error
     }
 
     const { data: uploadData, error: uploadError } = await supabase.storage

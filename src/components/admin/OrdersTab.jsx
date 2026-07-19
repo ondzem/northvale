@@ -138,13 +138,27 @@ export default function OrdersTab({ showToast }) {
     confirmText: '',
     onConfirm: null
   });
-  
   const [debugSessionEmail, setDebugSessionEmail] = useState('Checking...');
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setDebugSessionEmail(session?.user?.email || 'No active session (logged out)');
     });
   }, []);
+
+  const handleDownloadPdf = async (orderId) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('invoices')
+        .createSignedUrl(`invoice_${orderId}.pdf`, 120);
+      if (error) throw error;
+      if (data && data.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (err) {
+      console.error('Error generating signed URL:', err.message);
+      showToast(lang === 'CZ' ? 'Chyba při stahování faktury.' : 'Error downloading invoice.', 'error');
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -1134,14 +1148,22 @@ export default function OrdersTab({ showToast }) {
       return;
     }
     
-    selectedOrderIds.forEach(orderId => {
+    selectedOrderIds.forEach(id => {
+      const orderFile = files.find(f => f.name.replace('order_', '').replace('.json', '').replace('.xml', '') === id || (loadedOrders[f.name] && loadedOrders[f.name].id === id));
+      if (!orderFile) return;
+      const order = loadedOrders[orderFile.name];
+      if (!order) return;
+
+      const txtContent = generateTextInvoice(order);
+      const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = `https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${orderId}.txt`;
-      link.download = `invoice_${orderId}.txt`;
-      link.target = '_blank';
+      link.href = url;
+      link.download = `invoice_${id}.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     });
     
     showToast(
@@ -2113,15 +2135,13 @@ export default function OrdersTab({ showToast }) {
                             </div>
 
                             <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px', flexWrap: 'wrap' }}>
-                              <a 
-                                href={`https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${detailOrder.id}.pdf`}
-                                target="_blank" 
-                                rel="noopener noreferrer"
+                              <button 
+                                onClick={() => handleDownloadPdf(detailOrder.id)}
                                 className="orders-action-btn orders-action-btn-primary"
-                                style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                                style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
                               >
                                 📄 {lang === 'CZ' ? 'Faktura (PDF)' : 'Invoice (PDF)'}
-                              </a>
+                              </button>
                               <a 
                                 href={URL.createObjectURL(new Blob([detailOrder.rawXml || ''], { type: 'application/xml' }))} 
                                 download={`order_${detailOrder.id}.xml`}

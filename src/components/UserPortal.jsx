@@ -1398,13 +1398,19 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                                   borderRadius: '6px',
                                   cursor: 'pointer'
                                 }}
-                                onClick={(e) => {
+                                onClick={async (e) => {
                                   e.stopPropagation();
-                                  const { data } = supabase.storage
-                                    .from('invoices')
-                                    .getPublicUrl(`invoice_${order.id}.pdf`);
-                                  if (data && data.publicUrl) {
-                                    window.open(data.publicUrl, '_blank');
+                                  try {
+                                    const { data, error } = await supabase.storage
+                                      .from('invoices')
+                                      .createSignedUrl(`invoice_${order.id}.pdf`, 120);
+                                    if (error) throw error;
+                                    if (data && data.signedUrl) {
+                                      window.open(data.signedUrl, '_blank');
+                                    }
+                                  } catch (err) {
+                                    console.error('Error generating signed URL:', err.message);
+                                    alert(lang === 'CZ' ? 'Chyba při stahování faktury.' : 'Error downloading invoice.');
                                   }
                                 }}
                               >
@@ -1523,12 +1529,18 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                                 color: 'var(--color-gold, #fdbd16)', 
                                 border: '1px solid rgba(253, 189, 22, 0.2)' 
                               }}
-                              onClick={() => {
-                                const { data } = supabase.storage
-                                  .from('invoices')
-                                  .getPublicUrl(`invoice_${order.id}.pdf`);
-                                if (data && data.publicUrl) {
-                                  window.open(data.publicUrl, '_blank');
+                              onClick={async () => {
+                                try {
+                                  const { data, error } = await supabase.storage
+                                    .from('invoices')
+                                    .createSignedUrl(`invoice_${order.id}.pdf`, 120);
+                                  if (error) throw error;
+                                  if (data && data.signedUrl) {
+                                    window.open(data.signedUrl, '_blank');
+                                  }
+                                } catch (err) {
+                                  console.error('Error generating signed URL:', err.message);
+                                  alert(lang === 'CZ' ? 'Chyba při stahování faktury.' : 'Error downloading invoice.');
                                 }
                               }}
                             >
