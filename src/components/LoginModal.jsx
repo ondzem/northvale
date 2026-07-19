@@ -26,6 +26,15 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
   const [localMessage, setLocalMessage] = useState(null);
   const [isResetting, setIsResetting] = useState(false);
 
+  // MFA / 2FA Verification States
+  const [isAwaiting2FA, setIsAwaiting2FA] = useState(false);
+  const [mfaCode, setMfaCode] = useState('');
+  const [mfaCodeError, setMfaCodeError] = useState(false);
+  const [mfaFactorId, setMfaFactorId] = useState('');
+  const [mfaError, setMfaError] = useState(null);
+  const [isMfaVerifying, setIsMfaVerifying] = useState(false);
+  const [tempLoginData, setTempLoginData] = useState(null);
+
   useEffect(() => {
     if (!isOpen) {
       setLocalMessage(null);
@@ -33,6 +42,12 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
       setEmailError(false);
       setPasswordError(false);
       setFullNameError(false);
+      setIsAwaiting2FA(false);
+      setMfaCode('');
+      setMfaCodeError(false);
+      setMfaFactorId('');
+      setMfaError(null);
+      setTempLoginData(null);
     }
   }, [isOpen]);
 
@@ -137,6 +152,28 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
         return;
       }
 
+      // Check if user has enabled multi-factor authentication (2FA)
+      try {
+        const { data: factors, error: listError } = await supabase.auth.mfa.listFactors();
+        if (!listError && factors?.all && factors.all.length > 0) {
+          const verifiedTotp = factors.all.find(f => f.factor_type === 'totp' && f.status === 'verified');
+          if (verifiedTotp) {
+            setMfaFactorId(verifiedTotp.id);
+            setTempLoginData({
+              email,
+              fullName: data.user?.user_metadata?.full_name || email.split('@')[0]
+            });
+            setIsAwaiting2FA(true);
+            setMfaCode('');
+            setMfaError(null);
+            setMfaCodeError(false);
+            return; // Stay open to complete 2FA
+          }
+        }
+      } catch (mfaCheckErr) {
+        console.warn('MFA check failed, proceeding to direct login:', mfaCheckErr);
+      }
+
       onLogin(email, data.user?.user_metadata?.full_name || email.split('@')[0]);
     }
 
@@ -150,6 +187,108 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
     setPasswordError(false);
     setFullNameError(false);
     onClose();
+  };
+
+  const handleClose = async () => {
+    if (isAwaiting2FA) {
+      try {
+        await supabase.auth.signOut();
+      } catch (err) {
+        console.warn('Sign out during close failed:', err);
+      }
+      setIsAwaiting2FA(false);
+      setMfaCode('');
+      setMfaCodeError(false);
+      setMfaFactorId('');
+      setMfaError(null);
+      setTempLoginData(null);
+    }
+    onClose();
+  };
+
+  const handleCancel2FA = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.warn('Sign out during cancel failed:', err);
+    }
+    setIsAwaiting2FA(false);
+    setMfaCode('');
+    setMfaCodeError(false);
+    setMfaFactorId('');
+    setMfaError(null);
+    setTempLoginData(null);
+  };
+
+  const handleVerifyMFA = async (e) => {
+    e.preventDefault();
+    if (mfaCode.length !== 6) {
+      setMfaCodeError(true);
+      setMfaError(lang === 'CZ' ? 'Zadejte platný šestimístný kód.' : 'Please enter a valid 6-digit code.');
+      return;
+    }
+
+    setIsMfaVerifying(true);
+    setMfaError(null);
+    setMfaCodeError(false);
+
+    try {
+      // 1. Create challenge
+      const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({
+        factorId: mfaFactorId
+      });
+
+      if (challengeError) {
+        setMfaCodeError(true);
+        setMfaError(lang === 'CZ' ? `Chyba ověření: ${challengeError.message}` : `Verification error: ${challengeError.message}`);
+        setIsMfaVerifying(false);
+        return;
+      }
+
+      // 2. Verify challenge
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId: mfaFactorId,
+        challengeId: challengeData.id,
+        code: mfaCode.trim()
+      });
+
+      if (verifyError) {
+        setMfaCodeError(true);
+        setMfaError(lang === 'CZ' ? 'Neplatný ověřovací kód z aplikace.' : 'Invalid validation code from app.');
+        setIsMfaVerifying(false);
+        return;
+      }
+
+      // Complete login successfully!
+      if (tempLoginData) {
+        onLogin(tempLoginData.email, tempLoginData.fullName);
+      }
+      
+      // Cleanup states
+      setIsAwaiting2FA(false);
+      setMfaCode('');
+      setMfaCodeError(false);
+      setMfaFactorId('');
+      setMfaError(null);
+      setTempLoginData(null);
+      
+      // Clear inputs
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      setFullName('');
+      setNewsletter(false);
+      setEmailError(false);
+      setPasswordError(false);
+      setFullNameError(false);
+      
+      onClose();
+    } catch (err) {
+      console.error('MFA verify error:', err);
+      setMfaError(lang === 'CZ' ? 'Neočekávaná chyba při ověřování.' : 'Unexpected error during verification.');
+    } finally {
+      setIsMfaVerifying(false);
+    }
   };
 
   const handleForgotPassword = async () => {
@@ -230,16 +369,79 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
   };
 
   return (
-    <div className="login-modal-overlay" onClick={onClose}>
+    <div className="login-modal-overlay" onClick={handleClose}>
       <div className="login-modal-container" onClick={(e) => e.stopPropagation()}>
         {/* Close Button */}
-        <button className="login-modal-close" onClick={onClose} aria-label={t('common.close')}>
+        <button className="login-modal-close" onClick={handleClose} aria-label={t('common.close')}>
           ✕
         </button>
 
+        {isAwaiting2FA ? (
+          <div style={{ padding: '32px 40px', textAlign: 'center' }}>
+            <span style={{ fontSize: '40px', display: 'block', marginBottom: '16px' }}>🛡️</span>
+            <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '8px', color: 'var(--text-main)' }}>
+              {lang === 'CZ' ? 'Dvoufaktorové ověření (2FA)' : 'Two-Factor Verification (2FA)'}
+            </h3>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.4' }}>
+              {lang === 'CZ' 
+                ? 'Tento účet má zapnuté dvoufaktorové zabezpečení. Zadejte prosím kód ze své autentizační aplikace.' 
+                : 'This account has two-factor protection enabled. Please enter the code from your authenticator app.'}
+            </p>
+            
+            <form onSubmit={handleVerifyMFA} style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'stretch' }}>
+              <div className="login-form-group">
+                <input
+                  type="text"
+                  maxLength="6"
+                  placeholder="123456"
+                  value={mfaCode}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    setMfaCode(val);
+                  }}
+                  className={`login-form-input ${mfaCodeError ? 'input-error' : ''}`}
+                  style={{
+                    fontSize: '24px',
+                    letterSpacing: '8px',
+                    textAlign: 'center',
+                    fontWeight: 'bold',
+                    padding: '12px',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}
+                  autoFocus
+                  required
+                />
+              </div>
 
+              {mfaError && (
+                <p style={{ color: '#ef4444', fontSize: '12px', textAlign: 'center', margin: '0 0 8px 0' }}>
+                  {mfaError}
+                </p>
+              )}
 
-        {showConfig ? (
+              <button
+                type="submit"
+                className="login-submit-btn"
+                disabled={isMfaVerifying || mfaCode.length !== 6}
+                style={{ width: '100%' }}
+              >
+                {isMfaVerifying 
+                  ? (lang === 'CZ' ? 'Ověřování...' : 'Verifying...') 
+                  : (lang === 'CZ' ? 'Ověřit a přihlásit se' : 'Verify & Log In')}
+              </button>
+
+              <button
+                type="button"
+                className="login-submit-btn"
+                style={{ width: '100%', background: 'rgba(255, 255, 255, 0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}
+                onClick={handleCancel2FA}
+              >
+                {lang === 'CZ' ? 'Zpět k přihlášení' : 'Back to Login'}
+              </button>
+            </form>
+          </div>
+        ) : showConfig ? (
           <div style={{ padding: '32px 40px', textAlign: 'left' }}>
             <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '8px', color: 'var(--text-main)' }}>{t('LoginModal.apiSettingsTitle')}</h3>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.4' }}>
