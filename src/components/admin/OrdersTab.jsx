@@ -846,7 +846,7 @@ export default function OrdersTab({ showToast }) {
       const street = order.street || '';
       const city = order.city || '';
       const zip = (order.zip || '').replace(/\s+/g, '');
-      const country = order.shippingCountry || 'CZ';
+      const country = 'CZ';
       const phone = order.phone || '';
       const email = order.email || '';
       const refId = order.id || '';
@@ -883,7 +883,7 @@ export default function OrdersTab({ showToast }) {
       const street = order.street || '';
       const city = order.city || '';
       const zip = (order.zip || '').replace(/\s+/g, '');
-      const country = order.shippingCountry || 'CZ';
+      const country = 'CZ';
       const phone = order.phone || '';
       const email = order.email || '';
       const refId = order.id || '';
@@ -1974,7 +1974,7 @@ export default function OrdersTab({ showToast }) {
                                 <h4 style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Adresa doručení' : 'Shipping Address'}</h4>
                                 <p>{detailOrder.street}</p>
                                 <p>{detailOrder.city}, {detailOrder.zip}</p>
-                                <p>{lang === 'CZ' ? 'Země' : 'Country'}: {detailOrder.shippingCountry || 'CZ'}</p>
+                                <p>{lang === 'CZ' ? 'Země' : 'Country'}: CZ</p>
                               </div>
                             </div>
 

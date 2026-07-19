@@ -2131,7 +2131,6 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
               // We add the dynamic infoMt margin to avoid overflows.
               const cardHDesktop = artHDesktop + 130 + infoMt;
               const cardHMobile = artHMobile + 120 + (infoMt - 2); // 18px on mobile if tall, 10px if standard
-
               const gridStyle = {
                 '--art-h-desktop': `${artHDesktop}px`,
                 '--art-h-mobile': `${artHMobile}px`,
@@ -2139,19 +2138,32 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                 '--card-h-mobile': `${cardHMobile}px`,
                 '--info-mt': `${infoMt}px`
               };
-
               return (
-                <div className="catalog-product-grid" style={gridStyle}>
-                  {sortedProducts.map(product => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      addToCart={addToCart}
-                      setSelectedProductId={setSelectedProductId}
-                      setActivePage={setActivePage}
-                      onAspectRatioLoaded={handleAspectRatioLoaded}
-                    />
-                  ))}
+                <div>
+                  <div className="catalog-product-grid" style={gridStyle}>
+                    {sortedProducts.map(product => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        addToCart={addToCart}
+                        setSelectedProductId={setSelectedProductId}
+                        setActivePage={setActivePage}
+                        onAspectRatioLoaded={handleAspectRatioLoaded}
+                      />
+                    ))}
+                  </div>
+                  {lang === 'CZ' && (
+                    <div className="catalog-seo-text-block" style={{ marginTop: '64px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '32px', textAlign: 'left' }}>
+                      <h2 style={{ color: '#fff', fontSize: '20px', marginBottom: '12px', fontFamily: 'Outfit, sans-serif' }}>Co je Pokémon booster box a pro koho se hodí?</h2>
+                      <p style={{ color: '#8a8a92', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px' }}>
+                        Pokémon Booster Box (nebo též displej) obsahuje obvykle 36 samostatných balíčků (boosterů) vybrané edice. Jedná se o finančně nejvýhodnější způsob, jak nasbírat velké množství karet z konkrétního setu. Rozbalování booster boxu přináší garanci určitého počtu vzácných a tajných (secret rare) karet, což jej činí ideálním dárkem pro náročné sběratele i hráče, kteří chtějí sestavit turnajový balíček.
+                      </p>
+                      <h2 style={{ color: '#fff', fontSize: '20px', marginBottom: '12px', fontFamily: 'Outfit, sans-serif' }}>Co je Elite Trainer Box (ETB)?</h2>
+                      <p style={{ color: '#8a8a92', fontSize: '14px', lineHeight: '1.6' }}>
+                        Elite Trainer Box (ETB) je speciální sběratelská krabice, která kromě 8 až 10 boosterů obsahuje kompletní příslušenství ke hraní: obaly na karty s ilustrací edice, kostky, žetony poškození, energetické karty a stručného průvodce setem. Krabice sama slouží jako stylový pořadač. ETB je skvělým dárkem pro začátečníky i pokročilé sběratele, kteří ocení exkluzivní promo karty a designové obaly.
+                      </p>
+                    </div>
+                  )}
                 </div>
               );
             })()

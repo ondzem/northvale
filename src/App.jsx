@@ -769,12 +769,14 @@ function AppContent() {
   useEffect(() => {
     let pageTitle = '';
     let metaDescription = lang === 'CZ'
-      ? 'Vstupte do prémiového e-shopu pro sběratele. Zaručujeme 100% originální sealed produkty, kusovky a bezpečné balení.'
-      : 'Welcome to the premium shop for collectors. We guarantee 100% authentic sealed products, singles & safe packing.';
+      ? 'Originální Pokémon karty, Disney Lorcana a One Piece TCG produkty skladem. Booster boxy, ETB, kusovky i grading karet. Bezpečné sběratelské balení, doprava po ČR.'
+      : 'Authentic Pokémon cards, Disney Lorcana & One Piece TCG products in stock. Booster boxes, ETBs, singles & card grading. Safe collector packing, shipping in EU.';
 
     switch (activePage) {
       case 'home':
-        pageTitle = 'Northvale TCG';
+        pageTitle = lang === 'CZ'
+          ? 'Pokémon karty, Lorcana a One Piece TCG'
+          : 'Pokémon cards, Lorcana & One Piece TCG';
         break;
       case 'singles-catalog': {
         const gamePart = filters.game && filters.game !== 'all' && filters.game !== 'all-games' ? filters.game : '';
@@ -790,9 +792,27 @@ function AppContent() {
       case 'sealed-catalog': {
         const gamePart = filters.game && filters.game !== 'all' && filters.game !== 'all-games' ? filters.game : '';
         const typePart = filters.type || '';
-        pageTitle = gamePart || typePart 
-          ? `${[typePart, gamePart].filter(Boolean).join(' ')}` 
-          : t('Catalogs.sealedTitle');
+        if (lang === 'CZ') {
+          if (gamePart === 'Pokémon') {
+            if (typePart.includes('box')) {
+              pageTitle = 'Pokémon booster boxy';
+            } else if (typePart.includes('etb') || typePart.includes('elite')) {
+              pageTitle = 'Pokémon Elite Trainer Boxy (ETB)';
+            } else {
+              pageTitle = 'Pokémon booster boxy a ETB';
+            }
+          } else if (gamePart.toLowerCase().includes('lorcana')) {
+            pageTitle = 'Disney Lorcana TCG karty';
+          } else if (gamePart.toLowerCase().includes('piece')) {
+            pageTitle = 'One Piece TCG karty';
+          } else {
+            pageTitle = 'Pokémon booster boxy a ETB';
+          }
+        } else {
+          pageTitle = gamePart || typePart 
+            ? `${[typePart, gamePart].filter(Boolean).join(' ')}` 
+            : t('Catalogs.sealedTitle');
+        }
         metaDescription = gamePart || typePart
           ? `${[typePart, gamePart].filter(Boolean).join(' ')} skladem na Northvale TCG. Originální produkty Pokémon, Lorcana a One Piece.`
           : 'Originální balíčky (boostery), boxy, ETB a příslušenství pro karetní hry Pokémon, Lorcana a One Piece.';
@@ -888,9 +908,13 @@ function AppContent() {
     }
 
     if (activePage === 'home') {
-      document.title = 'Northvale TCG';
+      document.title = lang === 'CZ'
+        ? 'Pokémon karty, Lorcana a One Piece TCG | Northvale TCG'
+        : 'Pokémon cards, Lorcana & One Piece TCG | Northvale TCG';
+    } else if (activePage === 'sealed-detail' || activePage === 'singles-detail') {
+      document.title = pageTitle ? `${pageTitle} | koupit online | Northvale TCG` : 'Northvale TCG';
     } else {
-      document.title = pageTitle ? `${pageTitle} - Northvaletcg.eu` : 'Northvaletcg.eu';
+      document.title = pageTitle ? `${pageTitle} | Northvale TCG` : 'Northvale TCG';
     }
 
     // Synchronize HTML language code dynamically
@@ -990,7 +1014,21 @@ function AppContent() {
             "sameAs": [
               "https://www.instagram.com/northvaletcg/?utm_source=ig_web_button_share_sheet",
               "https://www.facebook.com/share/18yajuq6N1/?mibextid=wwXIfr"
-            ]
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Bratří Čapků 1095",
+              "addressLocality": "Holice",
+              "postalCode": "53401",
+              "addressCountry": "CZ"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+420-739-666-779",
+              "contactType": "customer service",
+              "email": "info@northvaletcg.eu"
+            },
+            "vatID": "CZ07438316"
           },
           {
             "@type": "WebSite",
@@ -1005,39 +1043,159 @@ function AppContent() {
       const price = currentProduct.price ?? 0;
       const stock = currentProduct.stock ?? 0;
       const offersStock = stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock";
+      
+      let brandName = "Pokémon";
+      const prodGame = currentProduct.game || "";
+      if (prodGame.toLowerCase().includes("lorcana") || currentProduct.name.toLowerCase().includes("lorcana")) {
+        brandName = "Disney Lorcana";
+      } else if (prodGame.toLowerCase().includes("piece") || currentProduct.name.toLowerCase().includes("one piece")) {
+        brandName = "One Piece TCG";
+      } else if (prodGame.toLowerCase().includes("riftbound")) {
+        brandName = "Riftbound";
+      } else if (prodGame) {
+        brandName = prodGame;
+      }
+
       jsonLdData = {
         "@context": "https://schema.org",
-        "@type": "Product",
-        "name": currentProduct.name,
-        "image": ogImageUrl,
-        "description": metaDescription,
-        "offers": {
-          "@type": "Offer",
-          "url": canonicalUrl,
-          "priceCurrency": "CZK",
-          "price": price,
-          "availability": offersStock
-        }
+        "@graph": [
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": lang === 'CZ' ? "Domů" : "Home",
+                "item": "https://northvaletcg.eu/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": currentProduct.type === 'single' ? (lang === 'CZ' ? "Kusovky" : "Singles") : (lang === 'CZ' ? "Sealed" : "Sealed"),
+                "item": currentProduct.type === 'single' ? "https://northvaletcg.eu/singles-catalog" : "https://northvaletcg.eu/sealed-catalog"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": currentProduct.name,
+                "item": canonicalUrl
+              }
+            ]
+          },
+          {
+            "@type": "Product",
+            "name": currentProduct.name,
+            "image": ogImageUrl,
+            "description": metaDescription,
+            "sku": currentProduct.sku || currentProduct.id,
+            "mpn": currentProduct.id,
+            "brand": {
+              "@type": "Brand",
+              "name": brandName
+            },
+            "offers": {
+              "@type": "Offer",
+              "url": canonicalUrl,
+              "priceCurrency": "CZK",
+              "price": price,
+              "availability": offersStock,
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@type": "Organization",
+                "name": "Northvale TCG"
+              }
+            }
+          }
+        ]
       };
     } else if (activePage === 'blog') {
       if (selectedProductId) {
         const currentArticle = blogArticles.find(a => a.id === selectedProductId);
         if (currentArticle) {
+          const dates = {
+            'jak-rozpoznat-falesnou-pokemon-kartu': '2026-07-28T12:00:00Z',
+            'jak-zacit-s-pokemon-kartami': '2026-07-25T12:00:00Z',
+            'kde-koupit-pokemon-karty-v-cesku': '2026-07-22T12:00:00Z',
+            'kde-sehnat-pokemon-karty-v-cr': '2026-07-19T12:00:00Z',
+            'prislusenstvi-pro-karty': '2026-07-15T12:00:00Z',
+            'vybava-sberatele-pokemon-karet': '2026-07-12T12:00:00Z'
+          };
+          const pubDate = dates[currentArticle.id] || '2026-06-18T12:00:00Z';
+          const wordCount = currentArticle.content
+            .filter(blk => blk.type !== 'image')
+            .reduce((sum, blk) => sum + (blk.text ? blk.text.split(/\s+/).length : 0), 0);
+
           jsonLdData = {
             "@context": "https://schema.org",
-            "@type": "BlogPosting",
-            "headline": currentArticle.title,
-            "description": currentArticle.description,
-            "image": ogImageUrl,
-            "datePublished": "2026-06-18T12:00:00Z",
-            "author": {
-              "@type": "Organization",
-              "name": "Northvale TCG"
-            }
+            "@graph": [
+              {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                  {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": lang === 'CZ' ? "Domů" : "Home",
+                    "item": "https://northvaletcg.eu/"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Blog",
+                    "item": "https://northvaletcg.eu/blog"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": currentArticle.title,
+                    "item": canonicalUrl
+                  }
+                ]
+              },
+              {
+                "@type": "BlogPosting",
+                "headline": currentArticle.title,
+                "description": currentArticle.description,
+                "image": ogImageUrl,
+                "datePublished": pubDate,
+                "dateModified": pubDate,
+                "wordCount": wordCount,
+                "author": {
+                  "@type": "Person",
+                  "name": "Northvale TCG Team"
+                },
+                "publisher": {
+                  "@type": "Organization",
+                  "name": "Northvale TCG",
+                  "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://northvaletcg.eu/Northvale%20Logo.webp"
+                  }
+                }
+              }
+            ]
           };
         }
+      } else {
+        jsonLdData = {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": lang === 'CZ' ? "Domů" : "Home",
+              "item": "https://northvaletcg.eu/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Blog",
+              "item": canonicalUrl
+            }
+          ]
+        };
       }
-    } else if (activePage === 'sealed-catalog') {
+    } else if (activePage === 'sealed-catalog' || activePage === 'singles-catalog') {
       jsonLdData = {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
@@ -1053,6 +1211,50 @@ function AppContent() {
             "position": 2,
             "name": pageTitle,
             "item": canonicalUrl
+          }
+        ]
+      };
+    } else if (activePage === 'faq') {
+      jsonLdData = {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": lang === 'CZ' ? "Domů" : "Home",
+                "item": "https://northvaletcg.eu/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": lang === 'CZ' ? "Často kladené dotazy" : "FAQ",
+                "item": canonicalUrl
+              }
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": lang === 'CZ' ? "Jak garantujete pravost karet?" : "How do you guarantee authenticity?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": lang === 'CZ' ? "Všechny produkty nakupujeme výhradně od oficiálních distributorů a každá karta prochází fyzickým ověřením pravosti před odesláním." : "All products are sourced directly from official distributors and every single card is physically inspected for authenticity."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": lang === 'CZ' ? "Jak probíhá doručení objednávek?" : "How does delivery work?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": lang === 'CZ' ? "Doručujeme po celé České republice a Slovensku přes kurýrní služby DPD a GLS, na adresu i výdejní místa." : "We deliver across the Czech Republic and Slovakia using DPD and GLS services, both to address and pickup points."
+                }
+              }
+            ]
           }
         ]
       };

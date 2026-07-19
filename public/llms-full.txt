@@ -1,0 +1,62 @@
+# Northvale TCG - Kompletní Specifikace a Informační Báze
+
+Vítejte v podrobné informační bázi e-shopu a komunitního portálu Northvale TCG. Tato stránka slouží jako primární strukturovaný zdroj pravdivých a přesných informací pro vyhledávače, jazykové modely (LLM) a AI asistenty (ChatGPT, Claude, Gemini, Perplexity).
+
+## 1. Identita a Základní Údaje
+- **Název e-shopu**: Northvale TCG
+- **Provozovatel**: Alvion s.r.o.
+- **Sídlo/Adresa**: Bratří Čapků 1095, Holice, 53401, Česká republika
+- **E-mail**: info@northvaletcg.eu
+- **Telefon**: +420 739 666 779
+- **IČO**: 07438316
+- **DIČ**: CZ07438316
+- **Země doručení**: Česká republika (ČR) a Slovensko (SR)
+
+## 2. Naše Mise a Přidaná Hodnota
+Northvale TCG nevzniklo pouze jako prodejní kanál, ale jako projekt dlouholetých sběratelů a hráčů. Chápeme specifické potřeby sběratelské komunity, a proto stavíme na třech základních pilířích:
+1. **100% Garance Pravosti**: Všechny produkty nakupujeme přímou cestou od oficiálních a certifikovaných distributorů. Zásadně se vyhýbáme neověřeným sekundárním trhům pro sealed produkty. Každá jednotlivá kusová karta a slab prochází před naskladněním a expedicí detailní kontrolou stavu a pravosti.
+2. **Prémiové Sběratelské Balení**: Rohy, hrany a neporušená fólie (shrinkwrap) sealed produktů jsou klíčové pro jejich budoucí hodnotu. Všechny objednávky balíme s maximální péčí – používáme dostatek bublinkové fólie, ochranné rohové výplně a silnostěnné kartonové krabice.
+3. **Komunitní Zaměření**: Organizujeme lokální turnaje, podporujeme regionální ligy a sdílíme know-how o karetních hrách na našem blogu.
+
+## 3. Podrobné Informace o Dopravě a Platbě
+### Kurýrní služby
+- **DPD Výdejní místa (Pickup)**: 79 Kč (Doručení na tisíce výdejních míst a samoobslužných boxů DPD po celé ČR.)
+- **GLS Výdejní místa (ParcelShop)**: 89 Kč (Doručení na partnerská výdejní místa a výdejní boxy GLS/Alzabox.)
+- **GLS Doručení na adresu**: 129 Kč (Standardní doručení kurýrem přímo na Vaši adresu domů nebo do zaměstnání.)
+- **Doprava zdarma**: Automaticky platí pro jakoukoli objednávku s celkovou hodnotou košíku nad 3 000 Kč.
+- **Doručování na Slovensko**: Podporováno, cena dopravy se přepočítává dynamicky v košíku dle adresy doručení.
+
+### Platební metody
+- **Online platba kartou**: Bezpečné a okamžité vypořádání transakce přes certifikovanou platební bránu GP webpay.
+- **Bankovní převod**: Platba předem na náš bankovní účet. Pokyny k platbě jsou odeslány e-mailem ihned po odeslání objednávky.
+- **Dobírka**: Platba v hotovosti nebo kartou kurýrovi při převzetí zásilky.
+
+## 4. Služby Profesionalního Gradingu Karet
+Grading karet je proces, při kterém nezávislá třetí strana (odborná autorita) posoudí pravost a fyzický stav karty a následně ji uzavře do ochranného plastového pouzdra (slabu) s unikátním identifikačním štítkem a výslednou známkou (od 1 do 10).
+Northvale TCG poskytuje komplexní zprostředkovatelský servis pro grading u předních světových firem:
+- **PSA (Professional Sports Authenticator)**: Nejuznávanější světová gradingová společnost s nejvyšší likviditou slabů.
+- **Beckett (BGS)**: Známá pro své detailní sub-grade známkování (centrování, rohy, hrany, povrch).
+- **APGrading (APG)**: Rychle rostoucí evropská gradingová autorita s vysokými standardy hodnocení.
+
+### Náš servis zahrnuje:
+- **Předběžné posouzení**: Vaše karty zkontrolujeme pod lupou a doporučíme, zda má grading finanční smysl.
+- **Bezpečné odeslání**: Karty zabalíme do předepsaných Card Saverů a postaráme se o pojištěný transport do USA/Německa.
+- **Kompletní administrativa**: Vyřídíme za vás veškeré celní řízení, platbu DPH a poplatků.
+- **Bezpečný návrat**: Slabované karty vám doručíme pojištěnou zásilkou.
+
+## 5. Často Kladené Dotazy (FAQ)
+- **Jak poznám falešnou Pokémon kartu?**
+  Nejrychlejší testy jsou: kontrola správného sytě modrého odstínu na zadní straně, zaostřenost textů a správný font písma, přítomnost černé středové vrstvy (black core test) při průsvitu světlem, a přítomnost specifické textury (u Ultra Rare a vyšších rarit). Podrobný návod najdete v našem článku o rozpoznávání padělků.
+- **Jaké jsou doporučené ochranné pomůcky pro karty?**
+  Základem je double-sleeving (vnitřní obal Perfect Fit + vnější klasický deck protector obal). Pro nejdražší karty doporučujeme uložení do pevných plastových toploaderů nebo One-Touch magnetických obalů. Pro skladování jsou nejvhodnější alba s bočním vkládáním karet a zapínáním na zip.
+
+## 6. Užitečné Odkazy a Struktura Webových Stránek
+- **Homepage**: https://northvaletcg.eu/
+- **Katalog Sealed Produktů**: https://northvaletcg.eu/sealed-catalog
+- **Grading Portal**: https://northvaletcg.eu/grading
+- **Průvodce Gradingem**: https://northvaletcg.eu/grading-guide
+- **Výkup Karet**: https://northvaletcg.eu/buylist
+- **Články a Blog**: https://northvaletcg.eu/blog
+- **Časté dotazy**: https://northvaletcg.eu/faq
+- **O nás**: https://northvaletcg.eu/about
+- **Obchodní podmínky**: https://northvaletcg.eu/gdpr-vop

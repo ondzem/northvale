@@ -4,7 +4,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { fetchSlidesFromDB, DEFAULT_SLIDES } from '../services/slides';
 import { fetchDailyDealFromDB } from '../services/dailyDeal';
 import { fetchHomepageSectionsFromDB } from '../services/homepageSections';
-import { fetchProductByIdFromDB, fetchProductImage } from '../services/products';
+import { fetchProductByIdFromDB, fetchProductImage, generateDefaultSEOImageMetadata } from '../services/products';
 
 const ProductImage = ({ productId, src, alt, title, className = '', onAspectRatioLoaded }) => {
   const [imgSrc, setImgSrc] = useState(() => {
@@ -1526,7 +1526,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   >
                     <div className="vf-art">
                       <div className="card-art">
-                        <ProductImage productId={product.id} src={product.image} alt={product.name || 'Northvale TCG produkt'} title={product.name} className="ca-card-img" onAspectRatioLoaded={handleAspectRatioLoaded} />
+                        <ProductImage productId={product.id} src={product.image} alt={product.imageAlt || product.image_alt || generateDefaultSEOImageMetadata(product, 'alt') || product.name} title={product.imageTitle || product.image_title || generateDefaultSEOImageMetadata(product, 'title') || product.name} className="ca-card-img" onAspectRatioLoaded={handleAspectRatioLoaded} />
                         <div className="ca-holo"></div>
                         <div className="ca-shine"></div>
                         <div className="ca-grain"></div>
@@ -1621,7 +1621,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                       >
                         <div className="vf-art">
                           <div className="card-art">
-                            <ProductImage productId={product.id} src={product.image} alt={product.name || 'Northvale TCG produkt'} title={product.name} className="ca-card-img" onAspectRatioLoaded={handleAspectRatioLoaded} />
+                            <ProductImage productId={product.id} src={product.image} alt={product.imageAlt || product.image_alt || generateDefaultSEOImageMetadata(product, 'alt') || product.name} title={product.imageTitle || product.image_title || generateDefaultSEOImageMetadata(product, 'title') || product.name} className="ca-card-img" onAspectRatioLoaded={handleAspectRatioLoaded} />
                             <div className="ca-holo"></div>
                             <div className="ca-shine"></div>
                             <div className="ca-grain"></div>
@@ -1732,7 +1732,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                       >
                         <div className="vf-art">
                           <div className="card-art">
-                            <ProductImage productId={product.id} src={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" onAspectRatioLoaded={handleAspectRatioLoaded} />
+                            <ProductImage productId={product.id} src={product.image} alt={product.imageAlt || product.image_alt || generateDefaultSEOImageMetadata(product, 'alt') || product.name} title={product.imageTitle || product.image_title || generateDefaultSEOImageMetadata(product, 'title') || product.name} className="ca-card-img" onAspectRatioLoaded={handleAspectRatioLoaded} />
                             <div className="ca-holo"></div>
                             <div className="ca-shine"></div>
                             <div className="ca-grain"></div>
@@ -1821,7 +1821,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   >
                     <div className="vf-art">
                       <div className="card-art">
-                        <ProductImage productId={product.id} src={product.image} alt={product.name || 'Northvale TCG produkt'} className="ca-card-img" onAspectRatioLoaded={handleAspectRatioLoaded} />
+                        <ProductImage productId={product.id} src={product.image} alt={product.imageAlt || product.image_alt || generateDefaultSEOImageMetadata(product, 'alt') || product.name} title={product.imageTitle || product.image_title || generateDefaultSEOImageMetadata(product, 'title') || product.name} className="ca-card-img" onAspectRatioLoaded={handleAspectRatioLoaded} />
                         <div className="ca-holo"></div>
                         <div className="ca-shine"></div>
                         <div className="ca-grain"></div>

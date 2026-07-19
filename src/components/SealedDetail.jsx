@@ -1427,6 +1427,39 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                   </div>
                 </div>
 
+                <div className="detail-guides-section" style={{ marginTop: '32px', padding: '20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px' }}>
+                  <h4 style={{ color: '#fff', marginBottom: '12px', marginTop: 0, fontFamily: 'Outfit, sans-serif', fontSize: '15px' }}>
+                    {lang === 'CZ' ? '💡 Užitečné návody pro sběratele' : '💡 Useful collector guides'}
+                  </h4>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '14px' }}>
+                    <li style={{ marginBottom: '8px' }}>
+                      <a 
+                        href="/blog/jak-rozpoznat-falesnou-pokemon-kartu" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setActivePage('blog');
+                          setSelectedProductId('jak-rozpoznat-falesnou-pokemon-kartu');
+                        }}
+                        style={{ color: '#fdbd16', textDecoration: 'underline', fontWeight: 500 }}
+                      >
+                        {lang === 'CZ' ? 'Jak rozpoznat falešnou Pokémon kartu: 9 rychlých testů' : 'How to spot a fake Pokémon card: 9 quick tests'}
+                      </a>
+                    </li>
+                    <li>
+                      <a 
+                        href="/blog/jak-zacit-s-pokemon-kartami" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setActivePage('blog');
+                          setSelectedProductId('jak-zacit-s-pokemon-kartami');
+                        }}
+                        style={{ color: '#fdbd16', textDecoration: 'underline', fontWeight: 500 }}
+                      >
+                        {lang === 'CZ' ? 'Jak začít s Pokémon kartami: průvodce pro začátečníky' : 'How to start with Pokémon cards: beginners guide'}
+                      </a>
+                    </li>
+                  </ul>
+                </div>
 
               </div>
               

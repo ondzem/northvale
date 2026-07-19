@@ -201,6 +201,10 @@ export default function Blog({ selectedArticleId, setSelectedProductId, setActiv
                 const parts = [];
                 
                 const linksToMap = [
+                  { pattern: 'katalogu sealed produktů', href: '/sealed-catalog', action: () => handleInternalNav('sealed-catalog') },
+                  { pattern: 'katalog sealed produktů', href: '/sealed-catalog', action: () => handleInternalNav('sealed-catalog') },
+                  { pattern: 'booster boxů', href: '/sealed-catalog', action: () => handleInternalNav('sealed-catalog') },
+                  { pattern: 'Elite Trainer Boxů', href: '/sealed-catalog', action: () => handleInternalNav('sealed-catalog') },
                   { pattern: 'nabídku toploaderů', href: '/sealed-catalog?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
                   { pattern: 'pokémon obaly', href: '/sealed-catalog?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },
                   { pattern: 'obaly na karty', href: '/sealed-catalog?game=Accessories', action: () => handleInternalNav('sealed-catalog', { game: 'Accessories' }) },

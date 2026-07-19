@@ -1,25 +1,37 @@
 # Northvale TCG
 
-Northvale TCG je specializovaný e-shop a komunita pro sběratele a hráče karetních her (TCG) jako jsou Pokémon, Disney Lorcana, One Piece a Riftbound. Nabízíme sealed produkty, kusové karty (singles), ohodnocené karty (slaby) a služby profesionálního gradingování karet.
+Northvale TCG je specializovaný e-shop a komunitní portál zaměřený na sběratele a hráče karetních her (TCG). Nabízíme 100% originální sealed produkty, kusové karty (singles), ohodnocené slabované karty (slaby) a kompletní služby profesionálního gradingování karet.
 
-## Hlavní sekce webu
+## Nabízené Hry & Sortiment
+- **Pokémon TCG**: Booster boxy, Elite Trainer Boxy (ETBs), booster balíčky, speciální sběratelské kolekce, dárkové plechovky, příslušenství (obaly, alba, toploadery) a kusové karty.
+- **Disney Lorcana**: Booster displeje, Starter decky, Illuminer's Trove boxy, speciální dárkové sety a doplňky.
+- **One Piece TCG**: Booster boxy, startovní balíčky, dárkové kolekce a příslušenství.
+- **Ostatní TCG & Riftbound**: Další populární karetní hry a doplňkový herní sortiment.
 
-- [Úvodní stránka](https://northvaletcg.eu/) - Hlavní stránka e-shopu s aktuální nabídkou a akcemi.
-- [Sealed produkty](https://northvaletcg.eu/sealed-catalog) - Nabídka neotevřených produktů (booster boxy, ETB, balíčky).
-- [Kusové karty](https://northvaletcg.eu/singles-catalog) - Prodej samostatných kusových karet pro hráče i sběratele.
-- [Slaby (Graded karty)](https://northvaletcg.eu/slabs-catalog) - Profesionálně ohodnocené karty od společností PSA, Becket a dalších.
-- [Výkup karet (Buylist)](https://northvaletcg.eu/buylist) - Informace o výkupu vašich karet.
-- [Grading karet](https://northvaletcg.eu/grading) - Služby spojené s odesíláním karet k profesionálnímu ohodnocení.
-- [Návod ke gradingu](https://northvaletcg.eu/grading-guide) - Jak správně připravit a posoudit karty před gradingem.
-- [Komunita](https://northvaletcg.eu/community) - Turnaje, komunitní akce a informace pro hráče.
-- [Časté dotazy (FAQ)](https://northvaletcg.eu/faq) - Otázky a odpovědi ohledně dopravy, plateb a služeb.
-- [O nás](https://northvaletcg.eu/about) - Příběh a mise týmu Northvale TCG.
-- [Blog](https://northvaletcg.eu/blog) - Články, návody, tipy a novinky ze světa sběratelských karet.
+## Doprava a Platba
+- **GLS - Doručení na adresu**: 129 Kč
+- **GLS - Výdejní místo (ParcelShop/Alzabox)**: 89 Kč
+- **DPD - Výdejní místo (Pickup Point)**: 79 Kč
+- **Doprava zdarma**: Pro všechny objednávky nad 3 000 Kč.
+- **Platební metody**: Online platba kartou (GP webpay), bankovní převod, dobírka.
 
-## Populární články na blogu
+## Garance Originality
+Klademe absolutní důraz na pravost všech prodávaných karet a produktů. Veškeré zboží odebíráme výhradně od oficiálních licencovaných distributorů. Před odesláním zásilky prochází každý rozbalený produkt i kusová karta přísnou fyzickou kontrolou pravosti naším odborníkem.
 
-- [Jak rozpoznat falešnou Pokémon kartu](https://northvaletcg.eu/blog/jak-rozpoznat-falesnou-pokemon-kartu) - Kompletní průvodce pro ověření pravosti karet.
-- [Jak začít s Pokémon kartami](https://northvaletcg.eu/blog/jak-zacit-s-pokemon-kartami) - Průvodce pro začínající sběratele a hráče.
-- [Kde koupit Pokémon karty v Česku](https://northvaletcg.eu/blog/kde-koupit-pokemon-karty-v-cesku) - Tipy na bezpečný nákup originálních karet.
-- [Příslušenství pro karty](https://northvaletcg.eu/blog/prislusenstvi-pro-karty) - Ochranné obaly, alba, toploadery a další doplňky.
-- [Výbava sběratele Pokémon karet](https://northvaletcg.eu/blog/vybava-sberatele-pokemon-karet) - Co vše potřebuje správný sběratel.
+## Profesionální Grading Karet
+Zprostředkováváme ověření pravosti a stavu vašich karet u předních světových autorit (PSA, Beckett, APGrading). Poskytujeme kompletní servis od bezpečného zabalení, pojištění, celního odbavení až po bezpečné vrácení ohodnocené slabované karty zpět k vám.
+
+## Často kladené dotazy (FAQ)
+- **Odesíláte na Slovensko?** Ano, doručujeme do České republiky a na Slovensko. Ceny dopravy jsou automaticky vypočteny v košíku.
+- **Jsou všechny produkty skladem?** Ano, produkty označené "Skladem" máme fyzicky v našem zázemí a expedujeme je standardně do 24 hodin od přijetí objednávky.
+- **Jak chráníte zásilky?** Jako sběratelé víme, jak důležitý je stav rohů a krabiček. Produkty balíme do bublinkových fólií a pevných kartonových krabic, aby se zabránilo jakémukoli poškození při přepravě.
+
+## Hlavní odkazy
+- [Úvodní stránka](https://northvaletcg.eu/)
+- [Katalog Sealed Produktů](https://northvaletcg.eu/sealed-catalog)
+- [Grading Servis](https://northvaletcg.eu/grading)
+- [Návod ke Gradingu](https://northvaletcg.eu/grading-guide)
+- [Výkup Karet (Buylist)](https://northvaletcg.eu/buylist)
+- [O nás](https://northvaletcg.eu/about)
+- [Blog a Články](https://northvaletcg.eu/blog)
+- [Časté dotazy (FAQ)](https://northvaletcg.eu/faq)

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../context/LanguageContext';
-import { fetchProductImage } from '../services/products';
+import { fetchProductImage, generateDefaultSEOImageMetadata } from '../services/products';
 
 const ProductImage = ({ productId, fallbackSrc, alt, title, className = '', onAspectRatioLoaded }) => {
   const [imgSrc, setImgSrc] = useState(() => {
@@ -236,8 +236,8 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           <ProductImage 
             productId={product.id} 
             fallbackSrc={product.image} 
-            alt={product.imageAlt || product.image_alt || product.name || 'Northvale TCG produkt'} 
-            title={product.imageTitle || product.image_title || product.name || 'Northvale TCG produkt'} 
+            alt={product.imageAlt || product.image_alt || generateDefaultSEOImageMetadata(product, 'alt') || product.name} 
+            title={product.imageTitle || product.image_title || generateDefaultSEOImageMetadata(product, 'title') || product.name} 
             className="ca-card-img" 
             onAspectRatioLoaded={onAspectRatioLoaded}
           />
