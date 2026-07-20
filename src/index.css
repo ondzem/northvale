@@ -10672,3 +10672,106 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   line-height: 1.6;
   margin: 0;
 }
+
+/* ==========================================================================
+   XXL & XXXL ULTRA-WIDE RESPONSIVE SCREEN OPTIMIZATIONS (1920px & 2560px+)
+   ========================================================================== */
+
+@media (min-width: 1920px) {
+  /* Scale container width for high resolution displays */
+  .container {
+    max-width: 1780px !important;
+  }
+
+  /* Catalog Product Grid - Center items for symmetric visual balance */
+  .catalog-product-grid {
+    justify-content: center !important;
+    column-gap: 36px !important;
+    row-gap: 48px !important;
+  }
+
+  /* Subcategory lists - balance layout spacing */
+  .subcategory-grid {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)) !important;
+    gap: 16px !important;
+  }
+
+  /* Main Footer layout column balance */
+  .footer-grid {
+    column-gap: 60px !important;
+  }
+
+  /* Product Details Grid Overrides for wide displays */
+  .product-detail-main-layout {
+    display: grid !important;
+    grid-template-columns: 520px 1fr !important;
+    gap: 64px !important;
+  }
+  .product-detail-left-col {
+    max-width: 520px !important;
+    flex: none !important;
+    align-items: flex-start !important;
+  }
+  .detail-gallery-wrapper {
+    max-width: 520px !important;
+    height: 550px !important;
+  }
+}
+
+@media (min-width: 2560px) {
+  /* Scale container width for ultra-wide / 4K displays */
+  .container {
+    max-width: 2360px !important;
+  }
+
+  /* Catalog Product Grid - adjust columns and gaps for 2560px+ screens */
+  .catalog-product-grid {
+    justify-content: center !important;
+    column-gap: 44px !important;
+    row-gap: 56px !important;
+  }
+
+  /* Subcategory lists - adjust box widths */
+  .subcategory-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+    gap: 20px !important;
+  }
+
+  /* Main Footer column balance */
+  .footer-grid {
+    column-gap: 80px !important;
+  }
+  
+  /* Increase core typography slightly for better legibility on ultra-wides */
+  .nv-title {
+    font-size: 52px !important;
+  }
+  
+  .adf-mtitle {
+    font-size: 32px !important;
+  }
+  
+  .detail-section-title {
+    font-size: 22px !important;
+  }
+  
+  .footer-heading {
+    font-size: 16px !important;
+  }
+
+  /* Product Details Grid Overrides for ultra-wide displays */
+  .product-detail-main-layout {
+    display: grid !important;
+    grid-template-columns: 640px 1fr !important;
+    gap: 80px !important;
+  }
+  .product-detail-left-col {
+    max-width: 640px !important;
+    flex: none !important;
+    align-items: flex-start !important;
+  }
+  .detail-gallery-wrapper {
+    max-width: 640px !important;
+    height: 680px !important;
+  }
+}

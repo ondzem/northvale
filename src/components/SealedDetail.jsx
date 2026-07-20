@@ -1126,7 +1126,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
       </div>
 
       <div className="container">
-        <div style={styles.layout}>
+        <div style={styles.layout} className="product-detail-main-layout">
         {/* Mobile-only Header */}
         {isMobile && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', marginBottom: '24px' }}>
