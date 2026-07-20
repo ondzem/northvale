@@ -106,7 +106,7 @@ async function run() {
 
   const { data: products, error } = await supabase
     .from('products')
-    .select('id, name, game, edition, category, subcat, description, short_description, price, stock, preorder, image, custom_params');
+    .select('id, name, game, edition, category, subcat, description, short_description, price, stock, preorder, image, custom_params, ean');
 
   if (error) {
     console.error('Failed to fetch products:', error.message);
@@ -146,7 +146,7 @@ async function run() {
     const availability = p.preorder ? 'preorder' : (p.stock > 0 ? 'in_stock' : 'out_of_stock');
     const price = `${parseFloat(p.price || 0).toFixed(2)} CZK`;
     const brand = getBrand(p.game);
-    const gtin = p.custom_params?.ean || p.custom_params?.gtin || '';
+    const gtin = p.ean || p.custom_params?.ean || p.custom_params?.gtin || '';
 
     googleXml += '    <item>\n';
     googleXml += `      <g:id>${escapeXml(p.id)}</g:id>\n`;
@@ -189,7 +189,7 @@ async function run() {
       deliveryDate = '30'; // Out of stock
     }
 
-    const ean = p.custom_params?.ean || p.custom_params?.gtin || '';
+    const ean = p.ean || p.custom_params?.ean || p.custom_params?.gtin || '';
     const brand = getBrand(p.game);
     const heurekaCpc = p.custom_params?.heureka_cpc || '5';
 
@@ -234,7 +234,7 @@ async function run() {
       deliveryDate = '-1';
     }
 
-    const ean = p.custom_params?.ean || p.custom_params?.gtin || '';
+    const ean = p.ean || p.custom_params?.ean || p.custom_params?.gtin || '';
     const brand = getBrand(p.game);
     const zboziCpc = p.custom_params?.zbozi_cpc || p.custom_params?.heureka_cpc || '5';
 
