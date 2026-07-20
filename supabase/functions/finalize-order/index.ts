@@ -205,6 +205,38 @@ serve(async (req) => {
         }
       }
 
+      // 5. Trigger Heureka "Ověřeno zákazníky" if enabled
+      const heurekaOzEnabled = Deno.env.get("HEUREKA_OZ_ENABLED");
+      if (heurekaOzEnabled !== "false" && order.customerEmail) {
+        const heurekaOzKey = Deno.env.get("HEUREKA_OZ_KEY");
+        if (heurekaOzKey) {
+          try {
+            const productItemIds = (order.items || []).map((item: any) => item.product_id || item.id);
+            const response = await fetch("https://api.heureka.cz/shop-certification/v2/order/log", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                apiKey: heurekaOzKey,
+                email: order.customerEmail,
+                orderId: String(order.id),
+                productItemIds,
+              }),
+            });
+            console.log(`Heureka OZ response status: ${response.status}`);
+            if (!response.ok) {
+              const resText = await response.text();
+              console.error(`Heureka OZ error response: ${resText}`);
+            }
+          } catch (heurekaErr) {
+            console.error("Failed to trigger Heureka OZ:", heurekaErr);
+          }
+        } else {
+          console.warn("HEUREKA_OZ_ENABLED is set, but HEUREKA_OZ_KEY is missing.");
+        }
+      }
+
       return new Response(JSON.stringify({ success: true, orderId: order.id, order }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

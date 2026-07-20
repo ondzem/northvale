@@ -365,6 +365,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [formPrice, setFormPrice] = useState('');
   const [formStock, setFormStock] = useState('');
   const [formLang, setFormLang] = useState('EN');
+  const [formEan, setFormEan] = useState('');
 
   // Specialized fields based on type
   const [formPreorder, setFormPreorder] = useState(false);
@@ -566,6 +567,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormInvestment(false);
     setFormNoVat(false);
     setFormCategoryId('');
+    setFormEan('');
     setFormPackagingType('Booster Box');
     setFormBoosterCount('');
     setFormYear('');
@@ -660,6 +662,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormInvestment(!!p.investment);
     setFormNoVat(!!p.no_vat);
     setFormCategoryId(p.category_id || '');
+    setFormEan(p.ean || '');
 
     // Sealed fields
     setFormPackagingType(p.packagingType || p.packaging_type || 'Booster Box');
@@ -1116,7 +1119,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       illustrator: formIllustrator || null,
       year: formYear ? Number(formYear) : null,
       customParams: finalCustomParams,
-      lang: formLang || 'EN'
+      lang: formLang || 'EN',
+      ean: formEan || null
     };
 
     if (formType === 'single') {
@@ -3260,7 +3264,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             </div>
                           </div>
 
-                          {/* Rok vydání */}
+                          {/* Rok vydání & EAN */}
                           <div className="pmf-form-row" style={styles.row}>
                             <div className="pmf-form-col" style={styles.col}>
                               <div className="pmf-field">
@@ -3269,7 +3273,17 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               </div>
                             </div>
                             <div className="pmf-form-col" style={styles.col}>
-                              {/* Empty column for visual symmetry */}
+                              <div className="pmf-field">
+                                <label className="pmf-label">{lang === 'CZ' ? 'EAN kód' : 'EAN Code'}</label>
+                                <input
+                                  type="text"
+                                  className="pmf-input"
+                                  value={formEan}
+                                  onChange={e => setFormEan(e.target.value)}
+                                  placeholder="např. 8591234567890"
+                                  maxLength="13"
+                                />
+                              </div>
                             </div>
                           </div>
 

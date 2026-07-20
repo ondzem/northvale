@@ -444,7 +444,8 @@ export function mapProductToDb(p) {
     image: p.image,
     no_vat: !!p.no_vat,
     image_alt: p.imageAlt || p.image_alt || generateDefaultSEOImageMetadata(p, 'alt'),
-    image_title: p.imageTitle || p.image_title || generateDefaultSEOImageMetadata(p, 'title')
+    image_title: p.imageTitle || p.image_title || generateDefaultSEOImageMetadata(p, 'title'),
+    ean: p.ean || null
   };
 
   if (p.backImage !== undefined || p.back_image !== undefined) {
