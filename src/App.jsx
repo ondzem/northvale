@@ -7,7 +7,6 @@ import SealedDetail from './components/SealedDetail';
 import BuylistPortal from './components/BuylistPortal';
 import GradingPortal from './components/GradingPortal';
 import GradingGuide from './components/GradingGuide';
-import CommunityTournaments from './components/CommunityTournaments';
 import ContactPage from './components/ContactPage';
 import FaqPage from './components/FaqPage';
 import CheckoutFlow from './components/CheckoutFlow';
@@ -69,8 +68,6 @@ const parseUrlToState = () => {
     page = FEATURE_FLAGS.showGrading ? 'grading' : 'home';
   } else if (path === '/grading-guide') {
     page = FEATURE_FLAGS.showGrading ? 'grading-guide' : 'home';
-  } else if (path === '/community') {
-    page = 'community';
   } else if (path === '/support') {
     page = 'support';
   } else if (path === '/faq') {
@@ -130,8 +127,6 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
     path = FEATURE_FLAGS.showGrading ? '/grading/' : '/';
   } else if (page === 'grading-guide') {
     path = FEATURE_FLAGS.showGrading ? '/grading-guide/' : '/';
-  } else if (page === 'community') {
-    path = '/community/';
   } else if (page === 'support') {
     path = '/support/';
   } else if (page === 'faq') {
@@ -867,10 +862,6 @@ function AppContent() {
       case 'grading-guide':
         pageTitle = t('GradingGuide.title');
         metaDescription = 'Průvodce gradingem karet. Jak připravit karty pro grading, jaké zvolit služby a na co si dát pozor.';
-        break;
-      case 'community':
-        pageTitle = t('Community.title');
-        metaDescription = 'Turnaje a komunitní akce Northvale TCG. Připojte se k lokálním hráčům a poměřte své síly.';
         break;
       case 'support':
         pageTitle = t('ContactPage.title');
@@ -1811,10 +1802,6 @@ function AppContent() {
           <GradingGuide 
             setActivePage={navigateToPage}
           />
-        )}
-
-        {activePage === 'community' && (
-          <CommunityTournaments />
         )}
 
         {activePage === 'support' && (

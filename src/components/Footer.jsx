@@ -149,18 +149,6 @@ export default function Footer({ setActivePage, activePage }) {
             </li>
             <li>
               <a 
-                href="/community/" 
-                className="footer-link" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActivePage('community');
-                }}
-              >
-                {lang === 'CZ' ? 'Komunita' : 'Community'}
-              </a>
-            </li>
-            <li>
-              <a 
                 href="/faq/" 
                 className="footer-link" 
                 onClick={(e) => {
@@ -220,18 +208,6 @@ export default function Footer({ setActivePage, activePage }) {
                 }}
               >
                 {t('Footer.cookies')}
-              </a>
-            </li>
-            <li>
-              <a 
-                href="/gdpr-vop/" 
-                className="footer-link" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActivePage('gdpr-vop');
-                }}
-              >
-                {lang === 'CZ' ? 'Obchodní & GDPR dokumentace' : 'Terms & Privacy'}
               </a>
             </li>
             <li>

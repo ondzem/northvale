@@ -46,7 +46,7 @@ export const translations = {
       customerService: "Vše o nákupu",
       paymentShipping: "Doprava a platba",
       terms: "Obchodní podmínky (VOP)",
-      privacy: "Ochrana osobních údajů",
+      privacy: "Ochrana osobních údajů (GDPR)",
       cookies: "Nastavení cookies",
       faq: "Časté dotazy (FAQ)",
       socials: "Sledujte nás",
