@@ -24,6 +24,18 @@
   }
 }
 
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1780px !important;
+  }
+}
+
+@media (min-width: 2560px) {
+  .container {
+    max-width: 2360px !important;
+  }
+}
+
 
 .flex {
   display: flex;
