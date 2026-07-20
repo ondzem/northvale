@@ -326,9 +326,9 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   <br />• <strong>Personal Pickup:</strong> FREE. Available at Bratří Čapků 1095, 534 01 Holice, or at our pickup location in Pardubice (by agreement).
                 </p>
 
-                <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>2. INTERNATIONAL SHIPPING (EU)</h3>
+                <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>2. INTERNATIONAL SHIPPING (SLOVAKIA AND EU)</h3>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  We ship to all member countries of the European Union using DPD and GLS international services. The exact shipping fee depends on the destination country and total parcel weight. The final shipping rate will be calculated automatically and displayed directly in the shopping cart and checkout process before you submit your order. Delivery times to other EU countries typically range from 2 to 7 business days depending on location.
+                  Standard checkout and delivery through our e-shop are currently limited to the Czech Republic (using DPD, GLS, or personal pickup in Holice). Delivery to Slovakia and other European Union countries is currently in preparation. If you would like to ship goods to Slovakia or another EU country, we can arrange shipping individually by email agreement at <a href="mailto:info@northvaletcg.eu" style={{ color: 'var(--color-gold)', textDecoration: 'none' }}>info@northvaletcg.eu</a>.
                 </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>3. COLLECTOR PACKAGING STANDARD (PACK SAFETY)</h3>
@@ -407,11 +407,11 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>
-                  2. DORUČENÍ DO ZAHRANIČÍ (EU)
+                  2. DORUČENÍ DO ZAHRANIČÍ (SLOVENSKO A EU)
                 </h3>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  Zboží doručujeme do všech členských států Evropské unie prostřednictvím služeb DPD a GLS. Cena dopravy se liší podle země doručení a hmotnosti zásilky; její přesná výše se vám vždy zobrazí v košíku a v objednávkovém procesu před odesláním objednávky (před kliknutím na tlačítko „Objednat a zaplatit“). Dodací lhůta do zahraničí činí obvykle 2–7 pracovních dnů od expedice podle země doručení.
+                  Standardní doručení přes e-shop je aktuálně možné pouze v rámci České republiky (službami DPD, GLS a pro osobní odběr v Holicích). Doručení na Slovensko a do dalších zemí Evropské unie momentálně připravujeme. Pokud máte zájem o zaslání zboží na Slovensko nebo do jiné země EU, je možné doručení sjednat individuálně po předchozí domluvě e-mailem na <a href="mailto:info@northvaletcg.eu" style={{ color: 'var(--color-gold)', textDecoration: 'none' }}>info@northvaletcg.eu</a>.
                 </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>
