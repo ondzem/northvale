@@ -132,6 +132,113 @@ const parseFormattedText = (text, isMini = false) => {
   return elements;
 };
 
+const getCategorySpecificDescription = (prod, lang) => {
+  if (!prod || !prod.name) return null;
+  const nameLower = prod.name.toLowerCase();
+  const game = prod.game || '';
+  
+  // Detect packaging/type
+  const isBoosterBox = nameLower.includes('booster box') || nameLower.includes('display');
+  const isEtb = nameLower.includes('elite trainer box') || nameLower.includes('etb');
+  const isTrove = nameLower.includes('trove') || nameLower.includes('gift box') || nameLower.includes('gift set');
+
+  if (game === 'Pokémon') {
+    if (isBoosterBox) {
+      return {
+        title: lang === 'CZ' ? 'Co je Pokémon booster box a pro koho se hodí?' : 'What is a Pokémon Booster Box & who is it for?',
+        text: lang === 'CZ'
+          ? 'Pokémon Booster Box (nebo též displej) obsahuje obvykle 36 samostatných balíčků (boosterů) vybrané edice. Jedná se o finančně nejvýhodnější způsob, jak nasbírat velké množství karet z konkrétního setu. Rozbalování booster boxu přináší garanci určitého počtu vzácných a tajných (secret rare) karet, což jej činí ideálním dárkem pro náročné sběratele i hráče, kteří chtějí sestavit turnajový balíček.'
+          : 'A Pokémon Booster Box (also known as a display) typically contains 36 individual booster packs of a selected expansion. It is the most cost-effective way to collect a large number of cards from a specific set. Opening a booster box guarantees a certain number of rare and secret rare cards, making it an ideal gift for serious collectors and players looking to build competitive TCG decks.'
+      };
+    }
+    if (isEtb) {
+      return {
+        title: lang === 'CZ' ? 'Co je Elite Trainer Box (ETB)?' : 'What is an Elite Trainer Box (ETB)?',
+        text: lang === 'CZ'
+          ? 'Elite Trainer Box (ETB) je speciální sběratelská krabice, která kromě 8 až 10 boosterů obsahuje kompletní příslušenství ke hraní: obaly na karty s ilustrací edice, kostky, žetony poškození, energetické karty a stručného průvodce setem. Krabice sama slouží jako stylový pořadač. ETB je skvělým dárkem pro začátečníky i pokročilé sběratele, kteří ocení exkluzivní promo karty a designové obaly.'
+          : 'An Elite Trainer Box (ETB) is a special collector\'s box that, in addition to 8 to 10 boosters, contains complete gaming accessories: card sleeves featuring set illustrations, dice, condition markers, energy cards, and a player\'s guide. The box itself serves as a stylish card organizer. ETBs are a great gift for beginners and advanced collectors who appreciate exclusive promo cards and custom sleeves.'
+      };
+    }
+  }
+
+  if (game === 'Disney Lorcana' || game === 'Lorcana') {
+    if (isBoosterBox) {
+      return {
+        title: lang === 'CZ' ? 'Co je Disney Lorcana Booster Box?' : 'What is a Disney Lorcana Booster Box?',
+        text: lang === 'CZ'
+          ? 'Disney Lorcana Booster Box obsahuje 24 boosterů z vybrané edice. Každý booster obsahuje 12 karet. Jedná se o nejlepší možnost, jak rychle rozšířit svou sbírku o karty všech vzácností, včetně foilových a vzácných legendárních či enchanted karet. Booster box je ideální volbou pro vášnivé hráče Lorcany a sběratele Disney motivů.'
+          : 'A Disney Lorcana Booster Box contains 24 booster packs from a selected set, with each pack containing 12 cards. It is the best option to quickly expand your collection with cards of all rarities, including foil, legendary, and elusive enchanted cards. A booster box is the ideal choice for passionate Lorcana players and Disney collectors.'
+      };
+    }
+    if (isTrove) {
+      return {
+        title: lang === 'CZ' ? 'Co je Illumineer\'s Trove?' : 'What is an Illumineer\'s Trove?',
+        text: lang === 'CZ'
+          ? 'Illumineer\'s Trove je prémiový dárkový box pro hráče Disney Lorcana. Obsahuje 8 booster packů, 6 kostek na počítání poškození, 2 počítadla loru, stylové pořadače a pevnou úložnou krabici s ilustrací edice. Je to vynikající způsob, jak uchovávat své karty a zároveň získat exkluzivní herní příslušenství.'
+          : 'The Illumineer\'s Trove is the ultimate treasure for both collectors and players of Disney Lorcana. It includes 8 booster packs, 6 damage-counter dice, 2 lore counters, card dividers, and a sturdy storage box themed with the expansion\'s artwork. It\'s an excellent way to organize your collection while acquiring exclusive gaming gear.'
+      };
+    }
+  }
+
+  if (game === 'One Piece' || game === 'One Piece TCG') {
+    if (isBoosterBox) {
+      return {
+        title: lang === 'CZ' ? 'Co je One Piece TCG Booster Box?' : 'What is a One Piece TCG Booster Box?',
+        text: lang === 'CZ'
+          ? 'One Piece Card Game Booster Box obsahuje obvykle 24 boosterů vybraného setu. Rozbalování booster boxu poskytuje nejlepší šanci na získání populárních karet postav z anime One Piece, včetně vzácných Alternate Art a vysoce ceněných manga karet. Skvělý produkt pro hráče i sběratele této dynamické karetní hry.'
+          : 'A One Piece Card Game Booster Box typically contains 24 booster packs of the selected set. Unboxing a booster box offers the best chance of pulling popular character cards from the One Piece anime, including rare Alternate Art and highly prized Manga cards. It\'s a stellar product for both active players and collectors of this dynamic card game.'
+      };
+    }
+  }
+
+  return null;
+};
+
+const getUsefulGuides = (prod, lang) => {
+  const game = prod.game || '';
+  if (game === 'Pokémon') {
+    return [
+      {
+        id: 'jak-rozpoznat-falesnou-pokemon-kartu',
+        title: lang === 'CZ' ? 'Jak rozpoznat falešnou Pokémon kartu: 9 rychlých testů' : 'How to spot a fake Pokémon card: 9 quick tests'
+      },
+      {
+        id: 'jak-zacit-s-pokemon-kartami',
+        title: lang === 'CZ' ? 'Jak začít s Pokémon kartami: průvodce pro začátečníky' : 'How to start with Pokémon cards: beginners guide'
+      },
+      {
+        id: 'vybava-sberatele-pokemon-karet',
+        title: lang === 'CZ' ? 'Výbava sběratele Pokémon karet: co by ti nemělo chybět' : 'Collector essentials: Pokémon card accessories gear'
+      }
+    ];
+  }
+  
+  if (game === 'Disney Lorcana' || game === 'Lorcana') {
+    return [
+      {
+        id: 'disney-lorcana-pro-zacatecniky-kompletni-pruvodce-2026',
+        title: lang === 'CZ' ? 'Disney Lorcana pro začátečníky: kompletní průvodce (2026)' : 'Disney Lorcana for beginners: complete guide (2026)'
+      },
+      {
+        id: 'kolik-stoji-grading-karet-v-cr-psa-vs-beckett-ceny-a-postup',
+        title: lang === 'CZ' ? 'Kolik stojí grading karet v ČR: PSA vs. Beckett' : 'Card grading costs in CZ: PSA vs. Beckett process guide'
+      }
+    ];
+  }
+  
+  // Fallback for One Piece and other games
+  return [
+    {
+      id: 'kolik-stoji-grading-karet-v-cr-psa-vs-beckett-ceny-a-postup',
+      title: lang === 'CZ' ? 'Kolik stojí grading karet v ČR: PSA vs. Beckett' : 'Card grading costs in CZ: PSA vs. Beckett process guide'
+    },
+    {
+      id: 'prislusenstvi-pro-karty',
+      title: lang === 'CZ' ? 'Příslušenství pro karty: jak chránit svou sbírku' : 'Card accessories: how to protect your collection'
+    }
+  ];
+};
+
 export default function SealedDetail({ productId, products, addToCart, setSelectedProductId, setActivePage, setFilters, alert, user, onOpenLogin }) {
   const { lang, t } = useTranslation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -1455,39 +1562,51 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                   </div>
                 </div>
 
-                <div className="detail-guides-section" style={{ marginTop: '32px', padding: '20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px' }}>
-                  <h4 style={{ color: '#fff', marginBottom: '12px', marginTop: 0, fontFamily: 'Outfit, sans-serif', fontSize: '15px' }}>
-                    {lang === 'CZ' ? '💡 Užitečné návody pro sběratele' : '💡 Useful collector guides'}
-                  </h4>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '14px' }}>
-                    <li style={{ marginBottom: '8px' }}>
-                      <a 
-                        href="/blog/jak-rozpoznat-falesnou-pokemon-kartu/" 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setActivePage('blog');
-                          setSelectedProductId('jak-rozpoznat-falesnou-pokemon-kartu');
-                        }}
-                        style={{ color: '#fdbd16', textDecoration: 'underline', fontWeight: 500 }}
-                      >
-                        {lang === 'CZ' ? 'Jak rozpoznat falešnou Pokémon kartu: 9 rychlých testů' : 'How to spot a fake Pokémon card: 9 quick tests'}
-                      </a>
-                    </li>
-                    <li>
-                      <a 
-                        href="/blog/jak-zacit-s-pokemon-kartami/" 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setActivePage('blog');
-                          setSelectedProductId('jak-zacit-s-pokemon-kartami');
-                        }}
-                        style={{ color: '#fdbd16', textDecoration: 'underline', fontWeight: 500 }}
-                      >
-                        {lang === 'CZ' ? 'Jak začít s Pokémon kartami: průvodce pro začátečníky' : 'How to start with Pokémon cards: beginners guide'}
-                      </a>
-                    </li>
-                  </ul>
-                </div>
+                {/* Category-Specific Description Block */}
+                {(() => {
+                  const desc = getCategorySpecificDescription(product, lang);
+                  if (!desc) return null;
+                  return (
+                    <div className="detail-category-description" style={{ marginTop: '32px', padding: '20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', textAlign: 'left' }}>
+                      <h4 style={{ color: '#fff', marginBottom: '12px', marginTop: 0, fontFamily: 'Outfit, sans-serif', fontSize: '15px', fontWeight: '700' }}>
+                        {desc.title}
+                      </h4>
+                      <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '13.5px', lineHeight: '1.6', margin: 0 }}>
+                        {desc.text}
+                      </p>
+                    </div>
+                  );
+                })()}
+
+                {/* Franchise-Specific Useful Guides */}
+                {(() => {
+                  const guides = getUsefulGuides(product, lang);
+                  if (!guides || guides.length === 0) return null;
+                  return (
+                    <div className="detail-guides-section" style={{ marginTop: '32px', padding: '20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', textAlign: 'left' }}>
+                      <h4 style={{ color: '#fff', marginBottom: '12px', marginTop: 0, fontFamily: 'Outfit, sans-serif', fontSize: '15px' }}>
+                        {lang === 'CZ' ? '💡 Užitečné návody pro sběratele' : '💡 Useful collector guides'}
+                      </h4>
+                      <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '14px' }}>
+                        {guides.map((guide, idx) => (
+                          <li key={guide.id} style={{ marginBottom: idx === guides.length - 1 ? '0' : '8px' }}>
+                            <a 
+                              href={`/blog/${guide.id}/`} 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setActivePage('blog');
+                                setSelectedProductId(guide.id);
+                              }}
+                              style={{ color: '#fdbd16', textDecoration: 'underline', fontWeight: 500 }}
+                            >
+                              {guide.title}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })()}
 
               </div>
               
