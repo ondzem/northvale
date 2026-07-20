@@ -744,14 +744,14 @@ async function prerender() {
     },
     {
       path: 'grading',
-      title: 'Profesionální grading a ověření stavu karet | Northvale TCG',
+      title: 'Profesionální grading a ověření karet | Northvale TCG',
       description: 'Zprostředkujeme pro vás ověření stavu a pravosti vašich karet u předních světových autorit (PSA, Beckett, APGrading). Bezpečné odeslání a pojištění.',
       h1: 'Grading Servis Karet',
       body: 'Nechte si své nejlepší a nejhodnotnější TCG karty certifikovat. Spolupracujeme s předními gradingovými institucemi. Vaše karty bezpečně zabalíme, pojistíme a postaráme se o kompletní proces odeslání, cla a návratu zpět do vašich rukou.'
     },
     {
       path: 'grading-guide',
-      title: 'Průvodce gradingem karet PSA, APG a Beckett | Northvale TCG',
+      title: 'Průvodce gradingem PSA, APG a Beckett | Northvale TCG',
       description: 'Průvodce gradingem sběratelských karet. Jak připravit karty pro grading, jaké zvolit služby, na co se zaměřit a jak vypočítat stav.',
       h1: 'Gradingový Průvodce Karet',
       body: 'Chystáte se odeslat své první karty na grading? Přečtěte si náš podrobný návod o tom, jak karty správně posoudit (centrování, rohy, hrany, povrch), jak je připravit pro bezpečné odeslání a jaké standardy splňují jednotlivé gradingové firmy.'
@@ -818,7 +818,7 @@ async function prerender() {
 
     routes.push({
       path: 'kalendar-vydani',
-      title: 'Kalendář vydání Pokémon, Lorcana a One Piece setů 2026 | Northvale TCG',
+      title: 'Kalendář vydání TCG setů 2026 | Northvale TCG',
       description: 'Aktuální přehled plánovaných setů Pokémon, Disney Lorcana, One Piece TCG a Riftbound pro rok 2026. Sledujte data vydání a stav předobjednávek na Northvale TCG.',
       canonicalUrl: 'https://northvaletcg.eu/kalendar-vydani/',
       schema: {

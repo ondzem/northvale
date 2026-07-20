@@ -189,6 +189,10 @@ async function run() {
       deliveryDate = '30'; // Out of stock
     }
 
+    const ean = p.custom_params?.ean || p.custom_params?.gtin || '';
+    const brand = getBrand(p.game);
+    const heurekaCpc = p.custom_params?.heureka_cpc || '5';
+
     heurekaXml += '  <SHOPITEM>\n';
     heurekaXml += `    <ITEM_ID>${escapeXml(p.id.substring(0, 36))}</ITEM_ID>\n`;
     heurekaXml += `    <PRODUCTNAME>${escapeXml(title)}</PRODUCTNAME>\n`;
@@ -197,6 +201,11 @@ async function run() {
     heurekaXml += `    <IMGURL>${escapeXml(imageLink)}</IMGURL>\n`;
     heurekaXml += `    <PRICE_VAT>${price}</PRICE_VAT>\n`;
     heurekaXml += `    <DELIVERY_DATE>${escapeXml(deliveryDate)}</DELIVERY_DATE>\n`;
+    heurekaXml += `    <MANUFACTURER>${escapeXml(brand)}</MANUFACTURER>\n`;
+    if (ean) {
+      heurekaXml += `    <EAN>${escapeXml(ean)}</EAN>\n`;
+    }
+    heurekaXml += `    <HEUREKA_CPC>${escapeXml(heurekaCpc)}</HEUREKA_CPC>\n`;
     heurekaXml += '    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>\n';
     heurekaXml += '  </SHOPITEM>\n';
   }
@@ -225,6 +234,10 @@ async function run() {
       deliveryDate = '-1';
     }
 
+    const ean = p.custom_params?.ean || p.custom_params?.gtin || '';
+    const brand = getBrand(p.game);
+    const zboziCpc = p.custom_params?.zbozi_cpc || p.custom_params?.heureka_cpc || '5';
+
     zboziXml += '  <SHOPITEM>\n';
     zboziXml += `    <ITEM_ID>${escapeXml(p.id.substring(0, 36))}</ITEM_ID>\n`;
     zboziXml += `    <PRODUCTNAME>${escapeXml(title)}</PRODUCTNAME>\n`;
@@ -233,6 +246,11 @@ async function run() {
     zboziXml += `    <IMGURL>${escapeXml(imageLink)}</IMGURL>\n`;
     zboziXml += `    <PRICE_VAT>${price}</PRICE_VAT>\n`;
     zboziXml += `    <DELIVERY_DATE>${escapeXml(deliveryDate)}</DELIVERY_DATE>\n`;
+    zboziXml += `    <MANUFACTURER>${escapeXml(brand)}</MANUFACTURER>\n`;
+    if (ean) {
+      zboziXml += `    <EAN>${escapeXml(ean)}</EAN>\n`;
+    }
+    zboziXml += `    <MAX_CPC>${escapeXml(zboziCpc)}</MAX_CPC>\n`;
     zboziXml += '    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>\n';
     zboziXml += '  </SHOPITEM>\n';
   }

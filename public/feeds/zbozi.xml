@@ -8,6 +8,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/wilds-unknown-booster-box.webp</IMGURL>
     <PRICE_VAT>5999</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -18,6 +20,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/reign-of-jafar-illuminers-trove-box.webp</IMGURL>
     <PRICE_VAT>1299</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -28,6 +32,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/archazia-s-island-booster-box.webp</IMGURL>
     <PRICE_VAT>2949</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -38,6 +44,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/azurite-sea-booster-box.webp</IMGURL>
     <PRICE_VAT>2949</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -48,6 +56,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/wilds-unknown-illuminer-s-trove-box.webp</IMGURL>
     <PRICE_VAT>2999</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -58,6 +68,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/into-the-inklands-booster-box.webp</IMGURL>
     <PRICE_VAT>2849</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -68,6 +80,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/shimmering-skies-booster-box.webp</IMGURL>
     <PRICE_VAT>2949</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -78,6 +92,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/ursula-s-return-booster-box.webp</IMGURL>
     <PRICE_VAT>2949</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -88,6 +104,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/winterspell-booster-box.webp</IMGURL>
     <PRICE_VAT>5549</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -98,6 +116,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/shimmering-skies-illuminers-trove-box.webp</IMGURL>
     <PRICE_VAT>1249</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -108,6 +128,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/winterspell-illuminer-s-trove-box.webp</IMGURL>
     <PRICE_VAT>2999</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -118,6 +140,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/charizard-ex-super-premium-collection.webp</IMGURL>
     <PRICE_VAT>3049</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -128,6 +152,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/destined-rivals-booster-bundle.webp</IMGURL>
     <PRICE_VAT>1999</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -138,6 +164,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/tohoku-pokemon-center-box.webp</IMGURL>
     <PRICE_VAT>4199</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -148,6 +176,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/fukuoka-pokemon-center-box.webp</IMGURL>
     <PRICE_VAT>4999</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -158,6 +188,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/hiroshima-pokemon-center-box.webp</IMGURL>
     <PRICE_VAT>5499</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -168,6 +200,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/abyss-eye-booster-pack.webp</IMGURL>
     <PRICE_VAT>89</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -178,6 +212,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/abyss-eye-booster-box.webp</IMGURL>
     <PRICE_VAT>2699</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
@@ -188,6 +224,8 @@
     <IMGURL>https://northvaletcg.eu/product-images/pokemon-go-elite-trainer-box.webp</IMGURL>
     <PRICE_VAT>3799</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
 </SHOP>

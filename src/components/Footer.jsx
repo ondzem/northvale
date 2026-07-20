@@ -149,6 +149,18 @@ export default function Footer({ setActivePage, activePage }) {
             </li>
             <li>
               <a 
+                href="/community/" 
+                className="footer-link" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActivePage('community');
+                }}
+              >
+                {lang === 'CZ' ? 'Komunita' : 'Community'}
+              </a>
+            </li>
+            <li>
+              <a 
                 href="/faq/" 
                 className="footer-link" 
                 onClick={(e) => {
