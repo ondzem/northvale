@@ -2152,47 +2152,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                       />
                     ))}
                   </div>
-                  {lang === 'CZ' && (() => {
-                    if (selectedGame === 'Pokémon' || selectedGame === 'all') {
-                      return (
-                        <div className="catalog-seo-text-block" style={{ marginTop: '64px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '32px', textAlign: 'left' }}>
-                          <h2 style={{ color: '#fff', fontSize: '20px', marginBottom: '12px', fontFamily: 'Outfit, sans-serif' }}>Co je Pokémon booster box a pro koho se hodí?</h2>
-                          <p style={{ color: '#8a8a92', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px' }}>
-                            Pokémon Booster Box (nebo též displej) obsahuje obvykle 36 samostatných balíčků (boosterů) vybrané edice. Jedná se o finančně nejvýhodnější způsob, jak nasbírat velké množství karet z konkrétního setu. Rozbalování booster boxu přináší garanci určitého počtu vzácných a tajných (secret rare) karet, což jej činí ideálním dárkem pro náročné sběratele i hráče, kteří chtějí sestavit turnajový balíček.
-                          </p>
-                          <h2 style={{ color: '#fff', fontSize: '20px', marginBottom: '12px', fontFamily: 'Outfit, sans-serif' }}>Co je Elite Trainer Box (ETB)?</h2>
-                          <p style={{ color: '#8a8a92', fontSize: '14px', lineHeight: '1.6' }}>
-                            Elite Trainer Box (ETB) je speciální sběratelská krabice, která kromě 8 až 10 boosterů obsahuje kompletní příslušenství ke hraní: obaly na karty s ilustrací edice, kostky, žetony poškození, energetické karty a stručného průvodce setem. Krabice sama slouží jako stylový pořadač. ETB je skvěým dárkem pro začátečníky i pokročilé sběratele, kteří ocení exkluzivní promo karty a designové obaly.
-                          </p>
-                        </div>
-                      );
-                    }
-                    if (selectedGame === 'Lorcana') {
-                      return (
-                        <div className="catalog-seo-text-block" style={{ marginTop: '64px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '32px', textAlign: 'left' }}>
-                          <h2 style={{ color: '#fff', fontSize: '20px', marginBottom: '12px', fontFamily: 'Outfit, sans-serif' }}>Co je Disney Lorcana Booster Box?</h2>
-                          <p style={{ color: '#8a8a92', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px' }}>
-                            Disney Lorcana Booster Box obsahuje 24 boosterů z vybrané edice. Každý booster obsahuje 12 karet. Jedná se o nejlepší možnost, jak rychle rozšířit svou sbírku o karty všech vzácností, včetně foilových a vzácných legendárních či enchanted karet. Booster box je ideální volbou pro vášnivé hráče Lorcany a sběratele Disney motivů.
-                          </p>
-                          <h2 style={{ color: '#fff', fontSize: '20px', marginBottom: '12px', fontFamily: 'Outfit, sans-serif' }}>Co je Illumineer's Trove?</h2>
-                          <p style={{ color: '#8a8a92', fontSize: '14px', lineHeight: '1.6' }}>
-                            Illumineer's Trove je prémiový dárkový box pro hráče Disney Lorcana. Obsahuje 8 booster packů, 6 kostek na počítání poškození, 2 počítadla loru, stylové pořadače a pevnou úložnou krabici s ilustrací edice. Je to vynikající způsob, jak uchovávat své karty a zároveň získat exkluzivní herní příslušenství.
-                          </p>
-                        </div>
-                      );
-                    }
-                    if (selectedGame === 'One Piece') {
-                      return (
-                        <div className="catalog-seo-text-block" style={{ marginTop: '64px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '32px', textAlign: 'left' }}>
-                          <h2 style={{ color: '#fff', fontSize: '20px', marginBottom: '12px', fontFamily: 'Outfit, sans-serif' }}>Co je One Piece TCG Booster Box?</h2>
-                          <p style={{ color: '#8a8a92', fontSize: '14px', lineHeight: '1.6' }}>
-                            One Piece Card Game Booster Box obsahuje obvykle 24 boosterů vybraného setu. Rozbalování booster boxu poskytuje nejlepší šanci na získání populárních karet postav z anime One Piece, včetně vzácných Alternate Art a vysoce ceněných manga karet. Skvělý produkt pro hráče i sběratele této dynamické karetní hry.
-                          </p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })()}
+
                 </div>
               );
             })()

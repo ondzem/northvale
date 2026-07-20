@@ -1567,11 +1567,11 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                   const desc = getCategorySpecificDescription(product, lang);
                   if (!desc) return null;
                   return (
-                    <div className="detail-category-description" style={{ marginTop: '32px', padding: '20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', textAlign: 'left' }}>
-                      <h4 style={{ color: '#fff', marginBottom: '12px', marginTop: 0, fontFamily: 'Outfit, sans-serif', fontSize: '15px', fontWeight: '700' }}>
+                    <div className="detail-category-description" style={{ marginTop: '32px', textAlign: 'left' }}>
+                      <h4 style={{ color: '#fff', marginBottom: '8px', marginTop: 0, fontFamily: 'Outfit, sans-serif', fontSize: '16px', fontWeight: '700' }}>
                         {desc.title}
                       </h4>
-                      <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '13.5px', lineHeight: '1.6', margin: 0 }}>
+                      <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
                         {desc.text}
                       </p>
                     </div>
@@ -1582,8 +1582,9 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                 {(() => {
                   const guides = getUsefulGuides(product, lang);
                   if (!guides || guides.length === 0) return null;
+                  const hasCategoryDesc = !!getCategorySpecificDescription(product, lang);
                   return (
-                    <div className="detail-guides-section" style={{ marginTop: '32px', padding: '20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', textAlign: 'left' }}>
+                    <div className="detail-guides-section" style={{ marginTop: hasCategoryDesc ? '20px' : '32px', padding: '20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', textAlign: 'left' }}>
                       <h4 style={{ color: '#fff', marginBottom: '12px', marginTop: 0, fontFamily: 'Outfit, sans-serif', fontSize: '15px' }}>
                         {lang === 'CZ' ? '💡 Užitečné návody pro sběratele' : '💡 Useful collector guides'}
                       </h4>
