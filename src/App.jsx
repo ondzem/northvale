@@ -1550,7 +1550,8 @@ function AppContent() {
         const { data, error } = await supabase.functions.invoke('finalize-order', {
           body: {
             action: 'mark_paid',
-            orderId: options.orderId
+            orderId: options.orderId,
+            gpWebpayParams: options.gpWebpayParams
           }
         });
 

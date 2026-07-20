@@ -7,6 +7,29 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+// Helpers for Base64 and ArrayBuffer conversion
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binaryString = atob(base64.replace(/\s/g, ""));
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+// Convert PEM format key (with header/footer) to clean DER buffer
+function pemToDerBuffer(pem: string, type: "private" | "public"): ArrayBuffer {
+  const header = type === "private" ? "-----BEGIN PRIVATE KEY-----" : "-----BEGIN PUBLIC KEY-----";
+  const footer = type === "private" ? "-----END PRIVATE KEY-----" : "-----END PUBLIC KEY-----";
+  
+  const cleanPem = pem
+    .replace(header, "")
+    .replace(footer, "")
+    .replace(/\s/g, "");
+  return base64ToArrayBuffer(cleanPem);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -247,6 +270,77 @@ serve(async (req) => {
     if (action === "mark_paid") {
       if (!orderId) {
         return new Response(JSON.stringify({ error: "Missing orderId." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { gpWebpayParams } = body;
+      if (!gpWebpayParams) {
+        return new Response(JSON.stringify({ error: "Missing GP Webpay payment verification parameters." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Verify GP Webpay signature
+      const gpePublicKeyPem = Deno.env.get("GP_WEBPAY_GPE_PUBLIC_KEY");
+      if (!gpePublicKeyPem) {
+        throw new Error("Missing GP_WEBPAY_GPE_PUBLIC_KEY environment variable.");
+      }
+
+      const { 
+        MERCHANTNUMBER, 
+        OPERATION, 
+        ORDERNUMBER, 
+        MERORDERNUM, 
+        PRCODE, 
+        SRCODE, 
+        RESULTTEXT, 
+        DIGEST 
+      } = gpWebpayParams;
+
+      if (!ORDERNUMBER || !PRCODE || !DIGEST || String(ORDERNUMBER) !== String(orderId)) {
+        return new Response(JSON.stringify({ error: "Invalid payment parameters or order ID mismatch." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Reconstruct signature verification string (strict order)
+      let verifyString = `${OPERATION}|${ORDERNUMBER}`;
+      if (MERORDERNUM) {
+        verifyString += `|${MERORDERNUM}`;
+      }
+      verifyString += `|${PRCODE}|${SRCODE}`;
+      if (RESULTTEXT) {
+        verifyString += `|${RESULTTEXT}`;
+      }
+
+      // Import GPE Public Key
+      const publicKeyDer = pemToDerBuffer(gpePublicKeyPem, "public");
+      const publicKey = await crypto.subtle.importKey(
+        "spki",
+        publicKeyDer,
+        {
+          name: "RSASSA-PKCS1-v1_5",
+          hash: "SHA-1",
+        },
+        false,
+        ["verify"]
+      );
+
+      // Verify the signature
+      const encoder = new TextEncoder();
+      const isVerified = await crypto.subtle.verify(
+        "RSASSA-PKCS1-v1_5",
+        publicKey,
+        base64ToArrayBuffer(DIGEST),
+        encoder.encode(verifyString)
+      );
+
+      if (!isVerified || PRCODE !== "0") {
+        return new Response(JSON.stringify({ error: "GP Webpay payment verification failed or declined." }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });

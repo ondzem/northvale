@@ -377,7 +377,20 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               pickupPointDetails: pending.pickupPointDetails || null
             };
 
-            await submitOrder(order, creditUsed, { isCardPaid: true, orderId: orderNumber });
+            await submitOrder(order, creditUsed, { 
+              isCardPaid: true, 
+              orderId: orderNumber,
+              gpWebpayParams: {
+                MERCHANTNUMBER: merchantNumber,
+                OPERATION: operation,
+                ORDERNUMBER: orderNumber,
+                MERORDERNUM: merOrderNum,
+                PRCODE: prCode,
+                SRCODE: srCode,
+                RESULTTEXT: resultText,
+                DIGEST: digest
+              }
+            });
             alert(lang === 'CZ'
               ? `Platba pro objednávku ${orderNumber} byla úspěšně ověřena! Objednávka byla vytvořena.`
               : `Payment for order ${orderNumber} has been successfully verified! Order created.`,
