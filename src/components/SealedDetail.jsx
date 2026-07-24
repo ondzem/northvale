@@ -1629,10 +1629,10 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                             <td>{product.edition}</td>
                           </tr>
                         )}
-                        {(product.packagingType || getPackagingType(product)) && (
+                        {product.packagingType && product.packagingType.trim() && (
                           <tr>
                             <td>{lang === 'CZ' ? 'Typ balení' : 'Packaging Type'}</td>
-                            <td>{product.packagingType || getPackagingType(product)}</td>
+                            <td>{product.packagingType}</td>
                           </tr>
                         )}
                         {product.lang && (
@@ -1641,7 +1641,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                             <td>{langFull}</td>
                           </tr>
                         )}
-                        {product.boosterCount !== undefined && product.boosterCount !== null && (
+                        {product.boosterCount !== undefined && product.boosterCount !== null && product.boosterCount !== '' && (
                           <tr>
                             <td>{lang === 'CZ' ? 'Počet boosterů' : 'Booster Count'}</td>
                             <td>{product.boosterCount} {lang === 'CZ' ? 'ks' : 'pcs'}</td>
@@ -1695,6 +1695,24 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                             <td>{product.illustrator}</td>
                           </tr>
                         )}
+                        {product.company && (
+                          <tr>
+                            <td>{lang === 'CZ' ? 'Gradingová firma' : 'Grading Company'}</td>
+                            <td>{product.company}</td>
+                          </tr>
+                        )}
+                        {product.grade !== undefined && product.grade !== null && product.grade !== '' && (
+                          <tr>
+                            <td>{lang === 'CZ' ? 'Známka (Grade)' : 'Grade'}</td>
+                            <td>{product.grade}</td>
+                          </tr>
+                        )}
+                        {product.certNumber && (
+                          <tr>
+                            <td>{lang === 'CZ' ? 'Certifikační číslo' : 'Certificate Number'}</td>
+                            <td>{product.certNumber}</td>
+                          </tr>
+                        )}
                         {product.customParams && Array.isArray(product.customParams) && product.customParams.map((cp, idx) => (
                           <tr key={idx}>
                             <td>{cp.label}</td>
@@ -1714,40 +1732,34 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                             <td>{product.name}</td>
                           </tr>
                         )}
-                        {accType && (
-                          <tr>
-                            <td>{lang === 'CZ' ? 'Typ příslušenství' : 'Accessory Type'}</td>
-                            <td>{accType}</td>
-                          </tr>
-                        )}
-                        {accBrand && accBrand !== 'Other' && accBrand !== 'Ostatní' && (
+                        {product.brand && (
                           <tr>
                             <td>{lang === 'CZ' ? 'Výrobce / Značka' : 'Manufacturer / Brand'}</td>
-                            <td><strong>{accBrand}</strong></td>
+                            <td><strong>{product.brand}</strong></td>
                           </tr>
                         )}
-                        {accSize && (
+                        {product.acrylicThickness && (
                           <tr>
-                            <td>{lang === 'CZ' ? 'Velikost / Rozměr' : 'Size / Dimensions'}</td>
-                            <td>{accSize}</td>
+                            <td>{lang === 'CZ' ? 'Tloušťka akrylu' : 'Acrylic Thickness'}</td>
+                            <td>{product.acrylicThickness} mm</td>
                           </tr>
                         )}
-                        {accCount && (
+                        {product.uvProtection !== undefined && product.uvProtection !== null && product.uvProtection && (
                           <tr>
-                            <td>{lang === 'CZ' ? 'Počet kusů v balení' : 'Quantity in Package'}</td>
-                            <td>{accCount}</td>
+                            <td>{lang === 'CZ' ? 'UV Ochrana' : 'UV Protection'}</td>
+                            <td>{lang === 'CZ' ? 'Ano' : 'Yes'}</td>
                           </tr>
                         )}
-                        {accMaterial && (
+                        {product.closingType && (
                           <tr>
-                            <td>{lang === 'CZ' ? 'Materiál / Povrch' : 'Material / Surface'}</td>
-                            <td>{accMaterial}</td>
+                            <td>{lang === 'CZ' ? 'Typ zavírání' : 'Closing Type'}</td>
+                            <td>{product.closingType}</td>
                           </tr>
                         )}
-                        {accColor && (
+                        {product.innerDimensions && (
                           <tr>
-                            <td>{lang === 'CZ' ? 'Barva' : 'Color'}</td>
-                            <td>{accColor}</td>
+                            <td>{lang === 'CZ' ? 'Vnitřní rozměry' : 'Inner Dimensions'}</td>
+                            <td>{product.innerDimensions}</td>
                           </tr>
                         )}
                         {product.customParams && Array.isArray(product.customParams) && product.customParams.map((cp, idx) => (
@@ -1772,7 +1784,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                         {product.game && (
                           <tr>
                             <td>{lang === 'CZ' ? 'Kompatibilita' : 'Compatibility'}</td>
-                            <td>{product.game} Booster Box / ETB / Slab</td>
+                            <td>{product.game}</td>
                           </tr>
                         )}
                         {product.acrylicThickness && (
@@ -1781,10 +1793,10 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                             <td>{product.acrylicThickness} mm</td>
                           </tr>
                         )}
-                        {product.uvProtection !== undefined && product.uvProtection !== null && (
+                        {product.uvProtection !== undefined && product.uvProtection !== null && product.uvProtection && (
                           <tr>
                             <td>{lang === 'CZ' ? 'UV Ochrana' : 'UV Protection'}</td>
-                            <td>{product.uvProtection ? (lang === 'CZ' ? 'Ano (99% ochrana)' : 'Yes (99% protection)') : (lang === 'CZ' ? 'Ne' : 'No')}</td>
+                            <td>{lang === 'CZ' ? 'Ano' : 'Yes'}</td>
                           </tr>
                         )}
                         {product.closingType && (

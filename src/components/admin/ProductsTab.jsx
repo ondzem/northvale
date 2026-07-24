@@ -375,20 +375,20 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [formCategoryId, setFormCategoryId] = useState('');
 
   // Sealed fields
-  const [formPackagingType, setFormPackagingType] = useState('Booster Box');
+  const [formPackagingType, setFormPackagingType] = useState('');
   const [formBoosterCount, setFormBoosterCount] = useState('');
   const [formYear, setFormYear] = useState('');
-  const [formFoilCondition, setFormFoilCondition] = useState('100% stav');
+  const [formFoilCondition, setFormFoilCondition] = useState('');
 
   // Slab fields
-  const [formCompany, setFormCompany] = useState('PSA');
-  const [formGrade, setFormGrade] = useState('10');
+  const [formCompany, setFormCompany] = useState('');
+  const [formGrade, setFormGrade] = useState('');
   const [formCertNumber, setFormCertNumber] = useState('');
 
   // Acrylic fields
-  const [formAcrylicThickness, setFormAcrylicThickness] = useState('4');
-  const [formUvProtection, setFormUvProtection] = useState(true);
-  const [formClosingType, setFormClosingType] = useState('Magnetické víko');
+  const [formAcrylicThickness, setFormAcrylicThickness] = useState('');
+  const [formUvProtection, setFormUvProtection] = useState(false);
+  const [formClosingType, setFormClosingType] = useState('');
   const [formInnerDimensions, setFormInnerDimensions] = useState('');
 
   // Variants state for Singles
@@ -568,16 +568,16 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormNoVat(false);
     setFormCategoryId('');
     setFormEan('');
-    setFormPackagingType('Booster Box');
+    setFormPackagingType('');
     setFormBoosterCount('');
     setFormYear('');
-    setFormFoilCondition('100% stav');
-    setFormCompany('PSA');
-    setFormGrade('10');
+    setFormFoilCondition('');
+    setFormCompany('');
+    setFormGrade('');
     setFormCertNumber('');
-    setFormAcrylicThickness('4');
-    setFormUvProtection(true);
-    setFormClosingType('Magnetické víko');
+    setFormAcrylicThickness('');
+    setFormUvProtection(false);
+    setFormClosingType('');
     setFormInnerDimensions('');
     setFormVariants([
       { id: 'v-' + Math.random().toString(36).substr(2, 5), condition: 'NM', lang: 'EN', foil: true, price: 100, stock: 1 }
@@ -601,7 +601,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
   const handleOpenEditModal = async (prod) => {
     let p = prod;
-    if (!prod.desc && prod.id) {
+    if (prod && prod.id) {
       try {
         const fetched = await fetchProductByIdFromDB(prod.id);
         if (fetched) {
@@ -665,20 +665,20 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormEan(p.ean || '');
 
     // Sealed fields
-    setFormPackagingType(p.packagingType || p.packaging_type || 'Booster Box');
+    setFormPackagingType(p.packagingType || p.packaging_type || '');
     setFormBoosterCount(p.boosterCount !== null && p.boosterCount !== undefined ? p.boosterCount.toString() : '');
     setFormYear(p.year !== null && p.year !== undefined ? p.year.toString() : '');
-    setFormFoilCondition(p.foilCondition || p.foil_condition || '100% stav');
+    setFormFoilCondition(p.foilCondition || p.foil_condition || '');
 
     // Slab fields
-    setFormCompany(p.company || 'PSA');
-    setFormGrade(p.grade !== null && p.grade !== undefined ? p.grade.toString() : '10');
+    setFormCompany(p.company || p.company_name || '');
+    setFormGrade(p.grade !== null && p.grade !== undefined ? p.grade.toString() : '');
     setFormCertNumber(p.certNumber || p.cert_number || '');
 
     // Acrylic fields
-    setFormAcrylicThickness(p.acrylicThickness !== null && p.acrylicThickness !== undefined ? p.acrylicThickness.toString() : '4');
+    setFormAcrylicThickness(p.acrylicThickness !== null && p.acrylicThickness !== undefined ? p.acrylicThickness.toString() : '');
     setFormUvProtection(!!(p.uvProtection || p.uv_protection));
-    setFormClosingType(p.closingType || p.closing_type || 'Magnetické víko');
+    setFormClosingType(p.closingType || p.closing_type || '');
     setFormInnerDimensions(p.innerDimensions || p.inner_dimensions || '');
 
     // Variants
@@ -716,7 +716,17 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
     // Load new split-form and preview states
     setFormShortDesc(!isHtmlEmpty(savedShortDesc) ? savedShortDesc : fallbackShortDesc);
-    setFormAdditionalImages(p.additionalImages || []);
+
+    let addImgs = p.additionalImages || p.additional_images || p.images || [];
+    if (typeof addImgs === 'string') {
+      try {
+        addImgs = JSON.parse(addImgs);
+      } catch {
+        addImgs = [];
+      }
+    }
+    if (!Array.isArray(addImgs)) addImgs = [];
+    setFormAdditionalImages(addImgs);
 
     setCropTarget({ type: 'front' });
     setFormSetCode(p.setCode || '');
@@ -1133,22 +1143,22 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     }
 
     if (formType === 'sealed') {
-      productPayload.packagingType = formPackagingType;
+      productPayload.packagingType = formPackagingType && formPackagingType.trim() ? formPackagingType.trim() : null;
       productPayload.boosterCount = formBoosterCount ? Number(formBoosterCount) : null;
-      productPayload.foilCondition = formFoilCondition;
+      productPayload.foilCondition = formFoilCondition && formFoilCondition.trim() ? formFoilCondition.trim() : null;
     }
 
     if (formType === 'slab') {
-      productPayload.company = formCompany;
+      productPayload.company = formCompany && formCompany.trim() ? formCompany.trim() : null;
       productPayload.grade = formGrade ? Number(formGrade) : null;
-      productPayload.certNumber = formCertNumber;
+      productPayload.certNumber = formCertNumber && formCertNumber.trim() ? formCertNumber.trim() : null;
     }
 
     if (formType === 'accessory') {
       productPayload.acrylicThickness = formAcrylicThickness ? Number(formAcrylicThickness) : null;
-      productPayload.uvProtection = formUvProtection;
-      productPayload.closingType = formClosingType;
-      productPayload.innerDimensions = formInnerDimensions;
+      productPayload.uvProtection = formUvProtection ? true : false;
+      productPayload.closingType = formClosingType && formClosingType.trim() ? formClosingType.trim() : null;
+      productPayload.innerDimensions = formInnerDimensions && formInnerDimensions.trim() ? formInnerDimensions.trim() : null;
     }
 
     const { data, error, isMockFallback, dbError } = await saveProductToDB(productPayload);
@@ -3802,7 +3812,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                 <td style={{ padding: '6px 0', textAlign: 'right', color: '#fff', fontWeight: '600' }}><code>{formCertNumber}</code></td>
                               </tr>
                             )}
-                            {formType === 'accessory' && isAcrylic && (
+                            {formType === 'accessory' && (
                               <>
                                 {formAcrylicThickness && (
                                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
@@ -3810,10 +3820,12 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                     <td style={{ padding: '6px 0', textAlign: 'right', color: '#fff', fontWeight: '600' }}>{formAcrylicThickness} mm</td>
                                   </tr>
                                 )}
-                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                                  <td style={{ padding: '6px 0', color: 'rgba(255,255,255,0.4)', textAlign: 'left' }}>{lang === 'CZ' ? 'UV Ochrana' : 'UV Protection'}</td>
-                                  <td style={{ padding: '6px 0', textAlign: 'right', color: '#fdbd16', fontWeight: '600' }}>{formUvProtection ? 'Ano (99%)' : 'Ne'}</td>
-                                </tr>
+                                {formUvProtection && (
+                                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                                    <td style={{ padding: '6px 0', color: 'rgba(255,255,255,0.4)', textAlign: 'left' }}>{lang === 'CZ' ? 'UV Ochrana' : 'UV Protection'}</td>
+                                    <td style={{ padding: '6px 0', textAlign: 'right', color: '#fdbd16', fontWeight: '600' }}>{lang === 'CZ' ? 'Ano' : 'Yes'}</td>
+                                  </tr>
+                                )}
                                 {formClosingType && (
                                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                                     <td style={{ padding: '6px 0', color: 'rgba(255,255,255,0.4)', textAlign: 'left' }}>{lang === 'CZ' ? 'Typ zavírání' : 'Closing Type'}</td>
@@ -3826,36 +3838,6 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                     <td style={{ padding: '6px 0', textAlign: 'right', color: '#fff', fontWeight: '600' }}>{formInnerDimensions}</td>
                                   </tr>
                                 )}
-                              </>
-                            )}
-                            {isAccessory && (
-                              <>
-                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                                  <td style={{ padding: '6px 0', color: 'rgba(255,255,255,0.4)', textAlign: 'left' }}>{lang === 'CZ' ? 'Typ příslušenství' : 'Accessory Type'}</td>
-                                  <td style={{ padding: '6px 0', textAlign: 'right', color: '#fff', fontWeight: '600' }}>{getPreviewAccType()}</td>
-                                </tr>
-                                {previewAccBrand && previewAccBrand !== 'Other' && previewAccBrand !== 'Ostatní' && (
-                                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                                    <td style={{ padding: '6px 0', color: 'rgba(255,255,255,0.4)', textAlign: 'left' }}>{lang === 'CZ' ? 'Značka' : 'Brand'}</td>
-                                    <td style={{ padding: '6px 0', textAlign: 'right', color: '#fff', fontWeight: '600' }}>{previewAccBrand}</td>
-                                  </tr>
-                                )}
-                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                                  <td style={{ padding: '6px 0', color: 'rgba(255,255,255,0.4)', textAlign: 'left' }}>{lang === 'CZ' ? 'Rozměr' : 'Size'}</td>
-                                  <td style={{ padding: '6px 0', textAlign: 'right', color: '#fff', fontWeight: '600' }}>{previewAccSize}</td>
-                                </tr>
-                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                                  <td style={{ padding: '6px 0', color: 'rgba(255,255,255,0.4)', textAlign: 'left' }}>{lang === 'CZ' ? 'Balení' : 'Package'}</td>
-                                  <td style={{ padding: '6px 0', textAlign: 'right', color: '#fff', fontWeight: '600' }}>{previewAccCount}</td>
-                                </tr>
-                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                                  <td style={{ padding: '6px 0', color: 'rgba(255,255,255,0.4)', textAlign: 'left' }}>{lang === 'CZ' ? 'Materiál' : 'Material'}</td>
-                                  <td style={{ padding: '6px 0', textAlign: 'right', color: '#fff', fontWeight: '600' }}>{previewAccMaterial}</td>
-                                </tr>
-                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                                  <td style={{ padding: '6px 0', color: 'rgba(255,255,255,0.4)', textAlign: 'left' }}>{lang === 'CZ' ? 'Barva' : 'Color'}</td>
-                                  <td style={{ padding: '6px 0', textAlign: 'right', color: '#fff', fontWeight: '600' }}>{previewAccColor}</td>
-                                </tr>
                               </>
                             )}
                             {formCustomParams && formCustomParams.map((cp, idx) => (
@@ -4737,7 +4719,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                       )}
                                     </>
                                   )}
-                                  {formType === 'accessory' && isAcrylic && (
+                                  {formType === 'accessory' && (
                                     <>
                                       {formAcrylicThickness && (
                                         <tr>
@@ -4745,10 +4727,12 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                           <td>{formAcrylicThickness} mm</td>
                                         </tr>
                                       )}
-                                      <tr>
-                                        <td>{lang === 'CZ' ? 'UV Ochrana' : 'UV Protection'}</td>
-                                        <td style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: '600' }}>{formUvProtection ? (lang === 'CZ' ? 'Ano (99% ochrana)' : 'Yes (99% protection)') : (lang === 'CZ' ? 'Ne' : 'No')}</td>
-                                      </tr>
+                                      {formUvProtection && (
+                                        <tr>
+                                          <td>{lang === 'CZ' ? 'UV Ochrana' : 'UV Protection'}</td>
+                                          <td style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: '600' }}>{lang === 'CZ' ? 'Ano' : 'Yes'}</td>
+                                        </tr>
+                                      )}
                                       {formClosingType && (
                                         <tr>
                                           <td>{lang === 'CZ' ? 'Typ zavírání' : 'Closing Type'}</td>

@@ -228,4 +228,208 @@
     <HEUREKA_CPC>5</HEUREKA_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>toploader-3x4-clear-regular-25ks</ITEM_ID>
+    <PRODUCTNAME>Toploader 3x4 Clear Regular</PRODUCTNAME>
+    <DESCRIPTION>Toploadery jsou tvrdé plastové obaly, které poskytují maximální ochranu vašim nejcennějším kartám před ohnutím, poškrábáním a nárazem. Dostupné v různých velikostech pro standardní i oversized karty, jsou ideální pro dlouhodobé uchovávání i bezpečné zasílání. Nezbytný doplněk pro každého sběratele.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/toploader-3x4-clear-regular-25ks/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/toploader-3x4-clear-regular-25ks.webp</IMGURL>
+    <PRICE_VAT>75</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>gem-pack-vol-4-booster-pack</ITEM_ID>
+    <PRODUCTNAME>Gem pack vol. 4 Booster pack</PRODUCTNAME>
+    <DESCRIPTION>Čtvrtý díl oblíbené čínské série Gem Pack přichází s tématem Roku ohnivého koně a hlavní hvězdou setu – Ponytou. Každá karta v balíčku je holografická, takže žádný &quot;bulk&quot; – jen samé lesklé karty.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/gem-pack-vol-4-booster-pack/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/gem-pack-vol-4-booster-pack.webp</IMGURL>
+    <PRICE_VAT>75</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>just-sleeves-100ks</ITEM_ID>
+    <PRODUCTNAME>Just Sleeves</PRODUCTNAME>
+    <DESCRIPTION>Sleevy jsou tenké ochranné obaly, které chrání karty před poškrábáním, otisky prstů a běžným opotřebením. Dostupné ve standardních i speciálních velikostech, často i s motivy oblíbených postav. Základní a cenově dostupný způsob ochrany karet pro hráče i sběratele.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/just-sleeves-100ks/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/just-sleeves-100ks.webp</IMGURL>
+    <PRICE_VAT>25</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>sleeved-binder-360-pocket-3x3-grey</ITEM_ID>
+    <PRODUCTNAME>360 Pocket Gray</PRODUCTNAME>
+    <DESCRIPTION>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/sleeved-binder-360-pocket-3x3-grey/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/sleeved-binder-360-pocket-3x3-grey.webp</IMGURL>
+    <PRICE_VAT>899</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>gem-pack-vol-4-booster-box</ITEM_ID>
+    <PRODUCTNAME>Gem pack vol. 4 Booster box</PRODUCTNAME>
+    <DESCRIPTION>Čtvrtý díl oblíbené čínské série Gem Pack přichází s tématem Roku ohnivého koně a hlavní hvězdou setu – Ponytou. Stejně jako předchozí díly staví celý set na naprosté eliminaci &quot;bulku&quot;: každá karta v balíčku je holografická.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/gem-pack-vol-4-booster-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/gem-pack-vol-4-booster-box.webp</IMGURL>
+    <PRICE_VAT>949</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>op-16-the-time-of-battle-booster-box</ITEM_ID>
+    <PRODUCTNAME>OP-16 The Time of Battle Booster Box</PRODUCTNAME>
+    <DESCRIPTION>Booster box OP-16 The Time of Battle je zasazen do tématu Paramount War a přináší postavy jako Luffy, Ace nebo admirálové Sakazuki a Kuzan poprvé jako Leader karty. Obsahuje 24 boosterových balíčků po 12 kartách (celkem 288 karet) s novou klíčovou kartou Prisoner of Impel Down. Skvělá volba pro hráče i sběratele.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/op-16-the-time-of-battle-booster-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/op-16-the-time-of-battle-booster-box.webp</IMGURL>
+    <PRICE_VAT>4399</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>One Piece</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>natsucomi-2026-metakira-luffy</ITEM_ID>
+    <PRODUCTNAME>NatsuComi 2026 MetaKira</PRODUCTNAME>
+    <DESCRIPTION>Exkluzivní japonská promo karta z letní kampaně Shueishy &quot;NatsuComi 2026&quot; – nová letní ilustrace Luffyho s meloury od Eiichira Ody, v třpytivém MetaKira provedení s potištěným podpisem autora. Limitovaná distribuce jen v Japonsku dělá z této karty vyhledávaný sběratelský kousek, odlišný od běžných karet z One Piece Card Game.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/natsucomi-2026-metakira-luffy/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/natsucomi-2026-metakira-luffy.webp</IMGURL>
+    <PRICE_VAT>1349</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>One Piece</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>op-16</ITEM_ID>
+    <PRODUCTNAME>OP-16 The Time of Battle Booster</PRODUCTNAME>
+    <DESCRIPTION>Booster box OP-16 The Time of Battle je zasazen do tématu Paramount War a přináší postavy jako Luffy, Ace nebo admirálové Sakazuki a Kuzan poprvé jako Leader karty. Obsahuje 24 boosterových balíčků po 12 kartách (celkem 288 karet) s novou klíčovou kartou Prisoner of Impel Down. Skvělá volba pro hráče i sběratele.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/op-16/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/op-16.webp</IMGURL>
+    <PRICE_VAT>189</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>One Piece</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>precise-fit-sleeves-standard-size-10</ITEM_ID>
+    <PRODUCTNAME>Precise-Fit Sleeves Standard Size</PRODUCTNAME>
+    <DESCRIPTION>Precise-Fit Sleeves od Ultimate Guard jsou extra čiré vnitřní sleevy z polypropylenu bez PVC a kyselin, navržené pro dokonalé &quot;sleeve in sleeve&quot; padnutí do sleevů Ultimate Guard. Vhodné pro standardní karty (MTG, Pokémon, Lorcana, One Piece a další), 100 kusů v balení o rozměru 64 x 89 mm.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/precise-fit-sleeves-standard-size-100/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/precise-fit-sleeves-standard-size-100.webp</IMGURL>
+    <PRICE_VAT>69</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>monkey-d-luffy-p-159-shonen-jump-pro</ITEM_ID>
+    <PRODUCTNAME>Monkey D. Luffy P-159 – Shonen Jump Promo</PRODUCTNAME>
+    <DESCRIPTION>Vzácná japonská promo karta vydaná u příležitosti 29. výročí seriálového vydávání mangy One Piece! Karta byla distribuována jako fyzický bonus přímo v čísle #33 japonského magazínu Weekly Shonen Jump v roce 2026.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/monkey-d-luffy-p-159-shonen-jump-promo/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/monkey-d-luffy-p-159-shonen-jump-promo.webp</IMGURL>
+    <PRICE_VAT>999</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>One Piece</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>sleeved-360-pocket-3x3-black</ITEM_ID>
+    <PRODUCTNAME>360 Pocket Black</PRODUCTNAME>
+    <DESCRIPTION>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/sleeved-360-pocket-3x3-black/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/sleeved-360-pocket-3x3-black.webp</IMGURL>
+    <PRICE_VAT>899</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>360-pocket-white</ITEM_ID>
+    <PRODUCTNAME>360 Pocket White</PRODUCTNAME>
+    <DESCRIPTION>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/360-pocket-white/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/360-pocket-white.webp</IMGURL>
+    <PRICE_VAT>899</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>360-pocket-red</ITEM_ID>
+    <PRODUCTNAME>360 Pocket Red</PRODUCTNAME>
+    <DESCRIPTION>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/360-pocket-red/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/360-pocket-red.webp</IMGURL>
+    <PRICE_VAT>899</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>480-pocket-black</ITEM_ID>
+    <PRODUCTNAME>480 Pocket Black</PRODUCTNAME>
+    <DESCRIPTION>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/480-pocket-black/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/480-pocket-black.webp</IMGURL>
+    <PRICE_VAT>989</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>480-pocket-red</ITEM_ID>
+    <PRODUCTNAME>480 Pocket Red</PRODUCTNAME>
+    <DESCRIPTION>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/480-pocket-red/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/480-pocket-red.webp</IMGURL>
+    <PRICE_VAT>989</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>480-pocket-hazel</ITEM_ID>
+    <PRODUCTNAME>480 Pocket Hazel</PRODUCTNAME>
+    <DESCRIPTION>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/480-pocket-hazel/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/480-pocket-hazel.webp</IMGURL>
+    <PRICE_VAT>989</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>480-pocket-white</ITEM_ID>
+    <PRODUCTNAME>480 Pocket White</PRODUCTNAME>
+    <DESCRIPTION>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/480-pocket-white/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/480-pocket-white.webp</IMGURL>
+    <PRICE_VAT>989</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
 </SHOP>
