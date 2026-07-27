@@ -38,28 +38,6 @@
       <g:brand>Disney Lorcana</g:brand>
     </item>
     <item>
-      <g:id>azurite-sea-booster-box</g:id>
-      <g:title>Azurite Sea Booster Box</g:title>
-      <g:description>Zvedněte kotvy a vydejte se s glimmery na dobrodružnou plavbu po Azurite Sea podle staré pirátské mapy!</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/azurite-sea-booster-box/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/azurite-sea-booster-box.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>2949.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Disney Lorcana</g:brand>
-    </item>
-    <item>
-      <g:id>wilds-unknown-illuminer-s-trove-box</g:id>
-      <g:title>Wilds Unknown Illuminer&apos;s Trove box</g:title>
-      <g:description>Pixar poprvé dorazil do Lorcany! Dvanáctá edice zavede vaše glimmery za hranice Winterspellu do drsných krajin jako Wilderknot, Torchlight Peaks nebo The Great Empty Sea, kde bez odvahy a týmové práce nepřežijete.</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/wilds-unknown-illuminer-s-trove-box/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/wilds-unknown-illuminer-s-trove-box.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>2999.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Disney Lorcana</g:brand>
-    </item>
-    <item>
       <g:id>into-the-inklands-booster-box</g:id>
       <g:title>Into the Inklands Booster box</g:title>
       <g:description>Booster box k edici Into the Inklands obsahuje 24 boosterových balíčků po 12 kartách (celkem 288 karet). Přináší nový typ karet – lokace, a postavy z DuckTales, TaleSpinu i Pokladu z ostrova Treasure Planet. Ideální pro hráče i sběratele toužící po vzácných a foilových kartách.</g:description>
@@ -67,17 +45,6 @@
       <g:image_link>https://northvaletcg.eu/product-images/into-the-inklands-booster-box.webp</g:image_link>
       <g:availability>in_stock</g:availability>
       <g:price>2849.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Disney Lorcana</g:brand>
-    </item>
-    <item>
-      <g:id>shimmering-skies-booster-box</g:id>
-      <g:title>Shimmering Skies Booster Box</g:title>
-      <g:description>Celá Lorcana slaví! Pátá edice přináší velký festival na oslavu vítězství nad Ursulou, zatímco se v pozadí rozplétá nové tajemství kolem Velké Iluminárie.</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/shimmering-skies-booster-box/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/shimmering-skies-booster-box.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>2949.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Disney Lorcana</g:brand>
     </item>
@@ -93,6 +60,28 @@
       <g:brand>Disney Lorcana</g:brand>
     </item>
     <item>
+      <g:id>shimmering-skies-booster-box</g:id>
+      <g:title>Shimmering Skies Booster Box</g:title>
+      <g:description>Celá Lorcana slaví! Pátá edice přináší velký festival na oslavu vítězství nad Ursulou, zatímco se v pozadí rozplétá nové tajemství kolem Velké Iluminárie.</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/shimmering-skies-booster-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/shimmering-skies-booster-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>2949.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Disney Lorcana</g:brand>
+    </item>
+    <item>
+      <g:id>azurite-sea-booster-box</g:id>
+      <g:title>Azurite Sea Booster Box</g:title>
+      <g:description>Zvedněte kotvy a vydejte se s glimmery na dobrodružnou plavbu po Azurite Sea podle staré pirátské mapy!</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/azurite-sea-booster-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/azurite-sea-booster-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>2949.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Disney Lorcana</g:brand>
+    </item>
+    <item>
       <g:id>winterspell-booster-box</g:id>
       <g:title>Winterspell Booster Box</g:title>
       <g:description>Zima dorazila do Lorcany! Jedenáctá edice zahaluje celou říši do sněhu a přináší mrazivé dobrodružství pro vaše oblíbené glimmery.</g:description>
@@ -100,6 +89,17 @@
       <g:image_link>https://northvaletcg.eu/product-images/winterspell-booster-box.webp</g:image_link>
       <g:availability>in_stock</g:availability>
       <g:price>5549.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Disney Lorcana</g:brand>
+    </item>
+    <item>
+      <g:id>wilds-unknown-illuminer-s-trove-box</g:id>
+      <g:title>Wilds Unknown Illuminer&apos;s Trove box</g:title>
+      <g:description>Pixar poprvé dorazil do Lorcany! Dvanáctá edice zavede vaše glimmery za hranice Winterspellu do drsných krajin jako Wilderknot, Torchlight Peaks nebo The Great Empty Sea, kde bez odvahy a týmové práce nepřežijete.</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/wilds-unknown-illuminer-s-trove-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/wilds-unknown-illuminer-s-trove-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>2649.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Disney Lorcana</g:brand>
     </item>
@@ -121,7 +121,7 @@
       <g:link>https://northvaletcg.eu/sealed-detail/winterspell-illuminer-s-trove-box/</g:link>
       <g:image_link>https://northvaletcg.eu/product-images/winterspell-illuminer-s-trove-box.webp</g:image_link>
       <g:availability>in_stock</g:availability>
-      <g:price>2999.00 CZK</g:price>
+      <g:price>2649.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Disney Lorcana</g:brand>
     </item>
@@ -258,17 +258,6 @@
       <g:brand>Northvale</g:brand>
     </item>
     <item>
-      <g:id>gem-pack-vol-4-booster-box</g:id>
-      <g:title>Gem pack vol. 4 Booster box</g:title>
-      <g:description>Čtvrtý díl oblíbené čínské série Gem Pack přichází s tématem Roku ohnivého koně a hlavní hvězdou setu – Ponytou. Stejně jako předchozí díly staví celý set na naprosté eliminaci &quot;bulku&quot;: každá karta v balíčku je holografická.</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/gem-pack-vol-4-booster-box/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/gem-pack-vol-4-booster-box.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>949.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Pokémon</g:brand>
-    </item>
-    <item>
       <g:id>op-16-the-time-of-battle-booster-box</g:id>
       <g:title>OP-16 The Time of Battle Booster Box</g:title>
       <g:description>Booster box OP-16 The Time of Battle je zasazen do tématu Paramount War a přináší postavy jako Luffy, Ace nebo admirálové Sakazuki a Kuzan poprvé jako Leader karty. Obsahuje 24 boosterových balíčků po 12 kartách (celkem 288 karet) s novou klíčovou kartou Prisoner of Impel Down. Skvělá volba pro hráče i sběratele.</g:description>
@@ -319,7 +308,7 @@
       <g:link>https://northvaletcg.eu/sealed-detail/monkey-d-luffy-p-159-shonen-jump-promo/</g:link>
       <g:image_link>https://northvaletcg.eu/product-images/monkey-d-luffy-p-159-shonen-jump-promo.webp</g:image_link>
       <g:availability>in_stock</g:availability>
-      <g:price>999.00 CZK</g:price>
+      <g:price>1249.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>One Piece</g:brand>
     </item>
@@ -346,6 +335,17 @@
       <g:brand>Northvale</g:brand>
     </item>
     <item>
+      <g:id>480-pocket-hazel</g:id>
+      <g:title>480 Pocket Hazel</g:title>
+      <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/480-pocket-hazel/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/480-pocket-hazel.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>989.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
       <g:id>360-pocket-red</g:id>
       <g:title>360 Pocket Red</g:title>
       <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
@@ -353,17 +353,6 @@
       <g:image_link>https://northvaletcg.eu/product-images/360-pocket-red.webp</g:image_link>
       <g:availability>in_stock</g:availability>
       <g:price>899.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Northvale</g:brand>
-    </item>
-    <item>
-      <g:id>480-pocket-black</g:id>
-      <g:title>480 Pocket Black</g:title>
-      <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/480-pocket-black/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/480-pocket-black.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>989.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
     </item>
@@ -379,13 +368,68 @@
       <g:brand>Northvale</g:brand>
     </item>
     <item>
-      <g:id>480-pocket-hazel</g:id>
-      <g:title>480 Pocket Hazel</g:title>
+      <g:id>vendetta-pre-rift-kit</g:id>
+      <g:title>Vendetta Pre Rift Kit</g:title>
+      <g:description>Buďte mezi prvními, kdo si zahraje čtvrtou edici Riftbound: Vendetta! Pre-Rift Kit je připravený balíček pro hráče, díky kterému se zapojíte do prerelease akce ještě před oficiálním vydáním</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/vendetta-pre-rift-kit/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/vendetta-pre-rift-kit.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>949.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>gem-pack-vol-4-booster-box</g:id>
+      <g:title>Gem pack vol. 4 Booster box</g:title>
+      <g:description>Čtvrtý díl oblíbené čínské série Gem Pack přichází s tématem Roku ohnivého koně a hlavní hvězdou setu – Ponytou. Stejně jako předchozí díly staví celý set na naprosté eliminaci &quot;bulku&quot;: každá karta v balíčku je holografická.</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/gem-pack-vol-4-booster-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/gem-pack-vol-4-booster-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>949.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
+      <g:id>unleashed-booster</g:id>
+      <g:title>Unleashed booster</g:title>
+      <g:description>Třetí edice Riftbound zachycuje jádro League of Legends – vyčkávání, napětí a moment, kdy vypustíte vše najednou. Booster pack přináší 14 karet z více než 220 karet a přes 30 alternativních artů, plus zbrusu novou mechaniku, která odměňuje trpělivé hráče čekající na ten správný okamžik k úderu</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/unleashed-booster/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/unleashed-booster.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>149.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>480-pocket-black</g:id>
+      <g:title>480 Pocket Black</g:title>
       <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/480-pocket-hazel/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/480-pocket-hazel.webp</g:image_link>
+      <g:link>https://northvaletcg.eu/sealed-detail/480-pocket-black/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/480-pocket-black.webp</g:image_link>
       <g:availability>in_stock</g:availability>
       <g:price>989.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>1024-pocket-gray</g:id>
+      <g:title>1024 Pocket Gray</g:title>
+      <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/1024-pocket-gray/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/1024-pocket-gray.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>1299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>1024-pocket-red</g:id>
+      <g:title>1024 Pocket Red</g:title>
+      <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/1024-pocket-red/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/1024-pocket-red.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>1299.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
     </item>
@@ -397,6 +441,61 @@
       <g:image_link>https://northvaletcg.eu/product-images/480-pocket-white.webp</g:image_link>
       <g:availability>in_stock</g:availability>
       <g:price>989.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>1024-pocket-black</g:id>
+      <g:title>1024 Pocket Black</g:title>
+      <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/1024-pocket-black/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/1024-pocket-black.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>1299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>1024-pocket-white</g:id>
+      <g:title>1024 Pocket White</g:title>
+      <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/1024-pocket-white/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/1024-pocket-white.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>1299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>24-slots-psa-bgs-cerveny</g:id>
+      <g:title>24 Slots PSA/BGS Červený</g:title>
+      <g:description>Prémiové album Gemloader je speciálně navrženo pro slabované karty PSA, Beckett a další slaby stejných rozměrů (CGC, M3, AP, PGS, GetGraded, UGS a další), díky patentovanému systému kliknutí, do kterého karta bezpečně zapadne</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/24-slots-psa-bgs-cerveny/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/24-slots-psa-bgs-cerveny.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>1299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>24-slots-psa-bgs-blue</g:id>
+      <g:title>24 Slots PSA/BGS Blue</g:title>
+      <g:description>Prémiové album Gemloader je speciálně navrženo pro slabované karty PSA, Beckett a další slaby stejných rozměrů (CGC, M3, AP, PGS, GetGraded, UGS a další), díky patentovanému systému kliknutí, do kterého karta bezpečně zapadne</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/24-slots-psa-bgs-blue/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/24-slots-psa-bgs-blue.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>1299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>24-slots-psa-bgs-sedy</g:id>
+      <g:title>24 Slots PSA/BGS Šedý</g:title>
+      <g:description>Prémiové album Gemloader je speciálně navrženo pro slabované karty PSA, Beckett a další slaby stejných rozměrů (CGC, M3, AP, PGS, GetGraded, UGS a další), díky patentovanému systému kliknutí, do kterého karta bezpečně zapadne</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/24-slots-psa-bgs-sedy/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/24-slots-psa-bgs-sedy.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>1299.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
     </item>

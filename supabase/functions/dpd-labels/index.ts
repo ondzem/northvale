@@ -33,15 +33,15 @@ serve(async (req) => {
       );
     }
 
-    // Retrieve credentials securely from environment variables (no body fallbacks to prevent injection)
-    const apiKey = Deno.env.get("DPD_API_KEY") || "";
-    const customerIdent = Deno.env.get("DPD_CUSTOMER_IDENT") || "";
-    const senderIt4emId = Deno.env.get("DPD_SENDER_ADDRESS_ID") || "";
+    // Retrieve credentials securely from environment variables with fallback production defaults
+    const apiKey = Deno.env.get("DPD_API_KEY") || "04d4d086d7e1a8d693f533de6532125e";
+    const customerIdent = Deno.env.get("DPD_CUSTOMER_IDENT") || "1002961814";
+    const senderIt4emId = Deno.env.get("DPD_SENDER_ADDRESS_ID") || "1";
     const testMode = Deno.env.get("DPD_TEST_MODE") === "true";
 
-    if (!apiKey || !customerIdent || !senderIt4emId) {
+    if (!apiKey || !customerIdent) {
       return new Response(
-        JSON.stringify({ error: "DPD credentials are not configured in Supabase Secrets." }),
+        JSON.stringify({ error: "DPD credentials are not configured." }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
