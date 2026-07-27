@@ -255,13 +255,44 @@ async function prerender() {
       ]
     },
     content: FEATURE_FLAGS.preRegistrationActive ? `
-      <main style="max-width: 800px; margin: 0 auto; padding: 64px 16px; text-align: center;">
-        <h1 style="font-size: 36px; font-family: 'Outfit', sans-serif; color: #fff; margin-bottom: 16px;">Připravujeme pro Vás nový TCG svět</h1>
-        <p style="font-size: 18px; color: #8a8a92; margin-bottom: 32px;">Na spuštění nového e-shopu NORTHVALE usilovně pracujeme. Oficiálně otevíráme již 1. srpna!</p>
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 32px; border-radius: 12px; max-width: 480px; margin: 0 auto;">
-          <p style="color: #fdbd16; font-weight: 600; font-size: 16px; margin-bottom: 16px;">Získejte 5% slevu na Váš první nákup.</p>
+      <div class="pr-landing-wrapper">
+        <div class="pr-glow-one"></div>
+        <div class="pr-glow-two"></div>
+        <div class="pr-lang-switch">
+          <button class="pr-lang-btn active">CZ</button>
+          <button class="pr-lang-btn">EN</button>
         </div>
-      </main>
+        <div class="pr-content-card">
+          <div class="pr-logo-section">
+            <img src="/Northvale Logo.webp" alt="Northvale TCG Logo" title="Northvale TCG" class="pr-logo-img" />
+            <h1 class="pr-brand-name">NORTHVALE</h1>
+            <p class="pr-brand-sub">Trading Card Games</p>
+          </div>
+          <div class="pr-form-box">
+            <h2 class="pr-title">Připravujeme pro Vás nový TCG svět</h2>
+            <p class="pr-desc">Na spuštění nového e-shopu NORTHVALE usilovně pracujeme. Oficiálně otevíráme již 1. srpna!</p>
+            <div class="pr-benefit-badge">
+              <span class="pr-gift-icon">🎁</span>
+              <span>Zadejte svůj e-mail a získejte 5% slevu na Váš první nákup.</span>
+            </div>
+            <form class="pr-form" onsubmit="return false;">
+              <div class="pr-input-group">
+                <input type="email" class="pr-input" placeholder="Zadejte Váš e-mail..." />
+              </div>
+              <div class="pr-gdpr-container">
+                <label class="pr-gdpr-label">
+                  <input type="checkbox" class="pr-gdpr-checkbox" />
+                  <span class="pr-gdpr-text">Souhlasím se <a href="#" class="pr-gdpr-link">zpracováním osobních údajů</a>.</span>
+                </label>
+              </div>
+              <button type="submit" class="pr-submit-btn" style="margin-top: 4px;">Chci slevu a info</button>
+            </form>
+          </div>
+          <footer class="pr-footer">
+            <span class="pr-footer-text">© 2026 NORTHVALE. Všechna práva vyhrazena.</span>
+          </footer>
+        </div>
+      </div>
     ` : `
       <main style="max-width: 1200px; margin: 0 auto; padding: 48px 16px; text-align: center;">
         <h1 style="font-size: 36px; font-family: 'Outfit', sans-serif; color: #fff; margin-bottom: 24px;">Pokémon karty, Lorcana a One Piece TCG</h1>
