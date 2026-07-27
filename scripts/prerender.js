@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
 import { blogArticles } from '../src/blogData.js';
 import { mockProducts } from '../src/mockData.js';
+import { FEATURE_FLAGS } from '../src/config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -209,8 +210,12 @@ async function prerender() {
   // 1. Homepage Spec
   routes.push({
     path: '',
-    title: 'Pokémon karty, Lorcana a One Piece TCG | Northvale TCG',
-    description: 'Originální Pokémon karty, Disney Lorcana a One Piece TCG produkty. Booster boxy, ETB, kusovky i grading. Bezpečné sběratelské balení a rychlá doprava po ČR.',
+    title: FEATURE_FLAGS.preRegistrationActive 
+      ? 'NORTHVALE TCG - Připravujeme pro Vás nový TCG svět' 
+      : 'Pokémon karty, Lorcana a One Piece TCG | Northvale TCG',
+    description: FEATURE_FLAGS.preRegistrationActive 
+      ? 'Na spuštění nového e-shopu NORTHVALE usilovně pracujeme. Získejte 5% slevu na Váš první nákup od 1. srpna.' 
+      : 'Originální Pokémon karty, Disney Lorcana a One Piece TCG produkty. Booster boxy, ETB, kusovky i příslušenství. Bezpečné sběratelské balení a rychlá doprava po ČR.',
     canonicalUrl: 'https://northvaletcg.eu/',
     schema: {
       "@context": "https://schema.org",
@@ -249,28 +254,18 @@ async function prerender() {
         }
       ]
     },
-    content: `
+    content: FEATURE_FLAGS.preRegistrationActive ? `
+      <main style="max-width: 800px; margin: 0 auto; padding: 64px 16px; text-align: center;">
+        <h1 style="font-size: 36px; font-family: 'Outfit', sans-serif; color: #fff; margin-bottom: 16px;">Připravujeme pro Vás nový TCG svět</h1>
+        <p style="font-size: 18px; color: #8a8a92; margin-bottom: 32px;">Na spuštění nového e-shopu NORTHVALE usilovně pracujeme. Oficiálně otevíráme již 1. srpna!</p>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 32px; border-radius: 12px; max-width: 480px; margin: 0 auto;">
+          <p style="color: #fdbd16; font-weight: 600; font-size: 16px; margin-bottom: 16px;">Získejte 5% slevu na Váš první nákup.</p>
+        </div>
+      </main>
+    ` : `
       <main style="max-width: 1200px; margin: 0 auto; padding: 48px 16px; text-align: center;">
         <h1 style="font-size: 36px; font-family: 'Outfit', sans-serif; color: #fff; margin-bottom: 24px;">Pokémon karty, Lorcana a One Piece TCG</h1>
         <p style="font-size: 18px; color: #8a8a92; max-width: 800px; margin: 0 auto 48px auto; line-height: 1.6;">Vítejte na Northvale TCG, prémiovém portálu pro sběratele. Zaručujeme 100% originální sealed produkty, spolehlivé doručení a perfektní sběratelské balení.</p>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 48px;">
-          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 32px; border-radius: 8px;">
-            <h2 style="color: #fff; margin-bottom: 16px;">Sealed Produkty</h2>
-            <p style="color: #8a8a92; font-size: 14px; margin-bottom: 24px;">Booster boxy, Elite Trainer Boxy (ETB), speciální edice a dárkové kufříky.</p>
-            <a href="/sealed-catalog/" style="color: #fdbd16; text-decoration: none; font-weight: 600;">Prozkoumat katalog →</a>
-          </div>
-          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 32px; border-radius: 8px;">
-            <h2 style="color: #fff; margin-bottom: 16px;">Grading Karet</h2>
-            <p style="color: #8a8a92; font-size: 14px; margin-bottom: 24px;">Profesionální ověření pravosti a stavu vašich nejvzácnějších TCG karet.</p>
-            <a href="/grading/" style="color: #fdbd16; text-decoration: none; font-weight: 600;">Více o gradingu →</a>
-          </div>
-          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 32px; border-radius: 8px;">
-            <h2 style="color: #fff; margin-bottom: 16px;">Sběratelský Blog</h2>
-            <p style="color: #8a8a92; font-size: 14px; margin-bottom: 24px;">Návody jak poznat falešné karty, investiční tipy a produktové recenze.</p>
-            <a href="/blog/" style="color: #fdbd16; text-decoration: none; font-weight: 600;">Číst články →</a>
-          </div>
-        </div>
       </main>
     `
   });
@@ -870,7 +865,14 @@ async function prerender() {
 
   // Write files
   for (const r of routes) {
-    const fullContent = `
+    const isPreReg = FEATURE_FLAGS.preRegistrationActive && r.path === '';
+    const fullContent = isPreReg ? `
+      <div id="nv-ssr-container">
+        <div id="nv-ssr-content">
+          ${r.content}
+        </div>
+      </div>
+    ` : `
       <div id="nv-ssr-container">
         ${headerHtml}
         <div id="nv-ssr-content">

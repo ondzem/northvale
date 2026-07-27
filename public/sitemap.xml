@@ -111,22 +111,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/azurite-sea-booster-box/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://northvaletcg.eu/sealed-detail/wilds-unknown-illuminer-s-trove-box/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://northvaletcg.eu/sealed-detail/into-the-inklands-booster-box/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://northvaletcg.eu/sealed-detail/shimmering-skies-booster-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -136,7 +121,22 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://northvaletcg.eu/sealed-detail/shimmering-skies-booster-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/azurite-sea-booster-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://northvaletcg.eu/sealed-detail/winterspell-booster-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/wilds-unknown-illuminer-s-trove-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -211,11 +211,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/gem-pack-vol-4-booster-box/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://northvaletcg.eu/sealed-detail/op-16-the-time-of-battle-booster-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -251,12 +246,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/360-pocket-red/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/480-pocket-hazel/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/480-pocket-black/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/360-pocket-red/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -266,12 +261,62 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/480-pocket-hazel/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/vendetta-pre-rift-kit/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/gem-pack-vol-4-booster-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/unleashed-booster/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/480-pocket-black/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/1024-pocket-gray/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/1024-pocket-red/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://northvaletcg.eu/sealed-detail/480-pocket-white/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/1024-pocket-black/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/1024-pocket-white/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/24-slots-psa-bgs-cerveny/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/24-slots-psa-bgs-blue/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/24-slots-psa-bgs-sedy/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
