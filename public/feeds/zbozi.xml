@@ -217,18 +217,6 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>akryl-booster-bundle-pokemon</ITEM_ID>
-    <PRODUCTNAME>Akryl Booster Bundle Pokémon</PRODUCTNAME>
-    <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Bundle patří k nejžádanějším kouskům ve světě sběratelství, a proto by jejich ochrana měla odpovídat jejich skutečné hodnotě</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/akryl-booster-bundle-pokemon/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/akryl-booster-bundle-pokemon.webp</IMGURL>
-    <PRICE_VAT>429</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Northvale</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
     <ITEM_ID>tohoku-pokemon-center-box</ITEM_ID>
     <PRODUCTNAME>Tohoku Pokémon Center Box</PRODUCTNAME>
     <DESCRIPTION>Vzácný sběratelský kousek přímo z Japonska! Tento speciální box byl vydán u příležitosti oslav Pokémon Centra v oblasti Tohoku a je limitovanou edicí, kterou si nenechá ujít žádný opravdový sběratel.</DESCRIPTION>
@@ -237,6 +225,18 @@
     <PRICE_VAT>4199</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>akryl-booster-bundle-pokemon</ITEM_ID>
+    <PRODUCTNAME>Akryl Booster Bundle Pokémon</PRODUCTNAME>
+    <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Bundle patří k nejžádanějším kouskům ve světě sběratelství, a proto by jejich ochrana měla odpovídat jejich skutečné hodnotě</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/akryl-booster-bundle-pokemon/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/akryl-booster-bundle-pokemon.webp</IMGURL>
+    <PRICE_VAT>429</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>

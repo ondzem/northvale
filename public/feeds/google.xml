@@ -203,17 +203,6 @@
       <g:brand>Northvale</g:brand>
     </item>
     <item>
-      <g:id>akryl-booster-bundle-pokemon</g:id>
-      <g:title>Akryl Booster Bundle Pokémon</g:title>
-      <g:description>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Bundle patří k nejžádanějším kouskům ve světě sběratelství, a proto by jejich ochrana měla odpovídat jejich skutečné hodnotě</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/akryl-booster-bundle-pokemon/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/akryl-booster-bundle-pokemon.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>429.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Northvale</g:brand>
-    </item>
-    <item>
       <g:id>tohoku-pokemon-center-box</g:id>
       <g:title>Tohoku Pokémon Center Box</g:title>
       <g:description>Vzácný sběratelský kousek přímo z Japonska! Tento speciální box byl vydán u příležitosti oslav Pokémon Centra v oblasti Tohoku a je limitovanou edicí, kterou si nenechá ujít žádný opravdový sběratel.</g:description>
@@ -223,6 +212,17 @@
       <g:price>4199.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
+      <g:id>akryl-booster-bundle-pokemon</g:id>
+      <g:title>Akryl Booster Bundle Pokémon</g:title>
+      <g:description>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Bundle patří k nejžádanějším kouskům ve světě sběratelství, a proto by jejich ochrana měla odpovídat jejich skutečné hodnotě</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/akryl-booster-bundle-pokemon/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/akryl-booster-bundle-pokemon.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>429.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
     </item>
     <item>
       <g:id>fukuoka-pokemon-center-box</g:id>

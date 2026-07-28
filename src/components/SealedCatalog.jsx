@@ -90,27 +90,35 @@ export function matchesHistoricalCategory(product, catId) {
     return true;
   }
   
+  const isAcrylic = product.category === 'Acrylics' || product.game === 'Acrylics' || product.type === 'acrylic' || product.type === 'acrylics';
+  if (catId === 'game-acrylics' || catId === 'all-acrylics' || catId === 'acrylics' || catId === 'all') {
+    if (isAcrylic) return true;
+  }
+
   const hist = getHistoricalFilterForCategory(catId);
   if (!hist) {
     const nameLower = product.name?.toLowerCase() || '';
-    const isAcrylic = product.category === 'Acrylics' || product.game === 'Acrylics' || product.type === 'acrylic' || product.type === 'acrylics';
     switch (catId) {
       case 'cat-acrylics-booster':
-        return isAcrylic && nameLower.includes('booster box');
+        return isAcrylic && (nameLower.includes('booster box') || nameLower.includes('boosterbox'));
       case 'cat-acrylics-etb':
-        return isAcrylic && (nameLower.includes('elite trainer') || nameLower.includes('etb') || nameLower.includes('bundle') || nameLower.includes('diplay'));
+        return isAcrylic && (nameLower.includes('elite trainer') || nameLower.includes('etb') || nameLower.includes('bundle') || nameLower.includes('diplay') || nameLower.includes('display'));
       case 'cat-acrylics-trove':
         return isAcrylic && nameLower.includes('trove');
       case 'cat-acrylics-slabs':
         return isAcrylic && (nameLower.includes('slab') || nameLower.includes('graded') || nameLower.includes('stojánky'));
       case 'acrylic-pokemon-booster':
-        return isAcrylic && nameLower.includes('booster box');
+        return isAcrylic && (nameLower.includes('booster box') || nameLower.includes('boosterbox'));
       case 'acrylic-pokemon-etb':
-        return isAcrylic && (nameLower.includes('elite trainer') || nameLower.includes('etb') || nameLower.includes('bundle') || nameLower.includes('diplay'));
+      case 'acrylics-pokemon':
+      case 'Pokémon':
+        return isAcrylic && (nameLower.includes('elite trainer') || nameLower.includes('etb') || nameLower.includes('bundle') || nameLower.includes('diplay') || nameLower.includes('display') || nameLower.includes('pokémon') || nameLower.includes('pokemon') || product.game === 'Pokémon' || product.game === 'Acrylics');
       case 'acrylic-lorcana-trove':
-        return isAcrylic && nameLower.includes('trove');
+      case 'acrylics-lorcana':
+      case 'Lorcana':
+        return isAcrylic && (nameLower.includes('trove') || nameLower.includes('lorcana') || product.game === 'Lorcana');
       default:
-        return false;
+        return isAcrylic;
     }
   }
   
@@ -1184,12 +1192,16 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       const targetCatId = activeSubsubcategory !== 'all' ? activeSubsubcategory : activeSubcategory;
       const matchedCatIds = getCategoryAndDescendantIds(targetCatId, dbCategories);
       
+      const isAcrylic = product.category === 'Acrylics' || product.game === 'Acrylics' || product.type === 'acrylic' || product.type === 'acrylics';
       let catMatch = false;
-      if (product.category_id) {
-        catMatch = matchedCatIds.includes(product.category_id);
+      
+      if (selectedGame === 'Acrylics' && (targetCatId === 'game-acrylics' || targetCatId === 'all')) {
+        catMatch = isAcrylic;
+      } else if (product.category_id && matchedCatIds.includes(product.category_id)) {
+        catMatch = true;
       } else {
         // Fallback using historical fields
-        catMatch = matchedCatIds.some(catId => matchesHistoricalCategory(product, catId));
+        catMatch = matchedCatIds.some(catId => matchesHistoricalCategory(product, catId)) || matchesHistoricalCategory(product, targetCatId);
       }
       
       if (!catMatch) return false;
