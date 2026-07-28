@@ -5,6 +5,17 @@
     <link>https://northvaletcg.eu</link>
     <description>Originální Pokémon karty, Disney Lorcana a One Piece TCG produkty.</description>
     <item>
+      <g:id>espeon-terastal-gathering-binder-box</g:id>
+      <g:title>Espeon Terastal Gathering Binder Box</g:title>
+      <g:description>Prémiová sběratelská sada zaměřená na konkrétní Eeveelution z čínské edice Terastal Gathering – čínské obdoby japonského Terastal Festival ex a západních Prismatic Evolutions. Skvělá volba pro fanoušky Eevee, kteří chtějí kombinaci nových karet i praktického vybavení pro organizaci sbírky</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/espeon-terastal-gathering-binder-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/espeon-terastal-gathering-binder-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>3299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
       <g:id>wilds-unknown-booster-box</g:id>
       <g:title>Wilds Unknown Booster Box</g:title>
       <g:description>Pixar konečně dorazil do Lorcany! Dvanáctá edice zavede vaše glimmery za hranice Winterspellu do drsných krajin jako Wilderknot, Torchlight Peaks nebo The Great Empty Sea, kde přežití závisí na týmové práci a odvaze.</g:description>
@@ -25,6 +36,17 @@
       <g:price>1299.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Disney Lorcana</g:brand>
+    </item>
+    <item>
+      <g:id>flareon-terastal-gathering-binder-box</g:id>
+      <g:title>Flareon Terastal Gathering Binder Box</g:title>
+      <g:description>Prémiová sběratelská sada zaměřená na konkrétní Eeveelution z čínské edice Terastal Gathering – čínské obdoby japonského Terastal Festival ex a západních Prismatic Evolutions. Skvělá volba pro fanoušky Eevee, kteří chtějí kombinaci nových karet i praktického vybavení pro organizaci sbírky</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/flareon-terastal-gathering-binder-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/flareon-terastal-gathering-binder-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>3299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
     </item>
     <item>
       <g:id>archazia-s-island-booster-box</g:id>
@@ -104,6 +126,17 @@
       <g:brand>Disney Lorcana</g:brand>
     </item>
     <item>
+      <g:id>vaporeon-terastal-gathering-binder-box</g:id>
+      <g:title>Vaporeon Terastal Gathering Binder Box</g:title>
+      <g:description>Prémiová sběratelská sada zaměřená na konkrétní Eeveelution z čínské edice Terastal Gathering – čínské obdoby japonského Terastal Festival ex a západních Prismatic Evolutions. Skvělá volba pro fanoušky Eevee, kteří chtějí kombinaci nových karet i praktického vybavení pro organizaci sbírky</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/vaporeon-terastal-gathering-binder-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/vaporeon-terastal-gathering-binder-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>3299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
       <g:id>shimmering-skies-illuminers-trove-box</g:id>
       <g:title>Shimmering Skies Illuminers Trove Box</g:title>
       <g:description>Celá Lorcana slaví! Po vítězství nad Ursulou se u Velké Iluminárie koná velký festival plný her, hudby, tance a dobrého jídla. Na oslavu dorazí i nové tváře – Wreck-It Ralph se svými pixelovými kamarády z Litwak&apos;s Arcade i Anna, Elsa a Olaf čerství ze Začarovaného lesa.</g:description>
@@ -148,6 +181,39 @@
       <g:brand>Pokémon</g:brand>
     </item>
     <item>
+      <g:id>jolteon-terastal-gathering-binder-box</g:id>
+      <g:title>Jolteon Terastal Gathering Binder Box</g:title>
+      <g:description>Prémiová sběratelská sada zaměřená na konkrétní Eeveelution z čínské edice Terastal Gathering – čínské obdoby japonského Terastal Festival ex a západních Prismatic Evolutions. Skvělá volba pro fanoušky Eevee, kteří chtějí kombinaci nových karet i praktického vybavení pro organizaci sbírky</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/jolteon-terastal-gathering-binder-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/jolteon-terastal-gathering-binder-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>3299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
+      <g:id>akryl-booster-box-pokemon</g:id>
+      <g:title>Akryl Booster Box Pokémon</g:title>
+      <g:description>Vaše sbírka je víc než jen soubor předmětů – je to investice, vášeň a příběh. Booster boxy patří mezi nejžádanější klenoty pro sběratele i investory, a zaslouží si ochranu, která odpovídá jejich skutečné hodnotě</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/akryl-booster-box-pokemon/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/akryl-booster-box-pokemon.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>499.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>akryl-booster-bundle-pokemon</g:id>
+      <g:title>Akryl Booster Bundle Pokémon</g:title>
+      <g:description>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Bundle patří k nejžádanějším kouskům ve světě sběratelství, a proto by jejich ochrana měla odpovídat jejich skutečné hodnotě</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/akryl-booster-bundle-pokemon/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/akryl-booster-bundle-pokemon.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>429.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
       <g:id>tohoku-pokemon-center-box</g:id>
       <g:title>Tohoku Pokémon Center Box</g:title>
       <g:description>Vzácný sběratelský kousek přímo z Japonska! Tento speciální box byl vydán u příležitosti oslav Pokémon Centra v oblasti Tohoku a je limitovanou edicí, kterou si nenechá ujít žádný opravdový sběratel.</g:description>
@@ -181,6 +247,17 @@
       <g:brand>Pokémon</g:brand>
     </item>
     <item>
+      <g:id>akryl-booster-bundle-diplay</g:id>
+      <g:title>Akryl Booster Bundle Diplay</g:title>
+      <g:description>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Bundle Displej patří k nejžádanějším kouskům ve světě sběratelství, a proto by jejich ochrana měla odpovídat jejich skutečné hodnotě</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/akryl-booster-bundle-diplay/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/akryl-booster-bundle-diplay.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>799.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
       <g:id>abyss-eye-booster-pack</g:id>
       <g:title>Abyss Eye booster pack</g:title>
       <g:description>Temnota se šíří říší! Japonská edice Abyss Eye přivádí do hry Mega Darkraie ex – hvězdu setu s masivním HP 280 a útokem &quot;Abyss Eye&quot;, který okamžitě vyřadí soupeřova aktivního Pokémona postiženého jakoukoli speciální podmínkou.</g:description>
@@ -204,7 +281,7 @@
     </item>
     <item>
       <g:id>pokemon-go-elite-trainer-box</g:id>
-      <g:title>Pokémon Go Elite Trainer Box</g:title>
+      <g:title>ETB Pokémon GO</g:title>
       <g:description>Pokémon GO potkává Pokémon TCG! Připravte se na souboj s legendárními a shiny Pokémony, kteří vzešli přímo z oblíbené mobilní hry.</g:description>
       <g:link>https://northvaletcg.eu/sealed-detail/pokemon-go-elite-trainer-box/</g:link>
       <g:image_link>https://northvaletcg.eu/product-images/pokemon-go-elite-trainer-box.webp</g:image_link>
@@ -236,17 +313,6 @@
       <g:brand>Pokémon</g:brand>
     </item>
     <item>
-      <g:id>just-sleeves-100ks</g:id>
-      <g:title>Just Sleeves</g:title>
-      <g:description>Sleevy jsou tenké ochranné obaly, které chrání karty před poškrábáním, otisky prstů a běžným opotřebením. Dostupné ve standardních i speciálních velikostech, často i s motivy oblíbených postav. Základní a cenově dostupný způsob ochrany karet pro hráče i sběratele.</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/just-sleeves-100ks/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/just-sleeves-100ks.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>25.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Northvale</g:brand>
-    </item>
-    <item>
       <g:id>sleeved-binder-360-pocket-3x3-grey</g:id>
       <g:title>360 Pocket Gray</g:title>
       <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
@@ -254,6 +320,17 @@
       <g:image_link>https://northvaletcg.eu/product-images/sleeved-binder-360-pocket-3x3-grey.webp</g:image_link>
       <g:availability>in_stock</g:availability>
       <g:price>899.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>just-sleeves-100ks</g:id>
+      <g:title>Just Sleeves</g:title>
+      <g:description>Sleevy jsou tenké ochranné obaly, které chrání karty před poškrábáním, otisky prstů a běžným opotřebením. Dostupné ve standardních i speciálních velikostech, často i s motivy oblíbených postav. Základní a cenově dostupný způsob ochrany karet pro hráče i sběratele.</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/just-sleeves-100ks/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/just-sleeves-100ks.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>25.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
     </item>
@@ -313,6 +390,17 @@
       <g:brand>One Piece</g:brand>
     </item>
     <item>
+      <g:id>360-pocket-white</g:id>
+      <g:title>360 Pocket White</g:title>
+      <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/360-pocket-white/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/360-pocket-white.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>899.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
       <g:id>sleeved-360-pocket-3x3-black</g:id>
       <g:title>360 Pocket Black</g:title>
       <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
@@ -324,13 +412,13 @@
       <g:brand>Northvale</g:brand>
     </item>
     <item>
-      <g:id>360-pocket-white</g:id>
-      <g:title>360 Pocket White</g:title>
+      <g:id>480-pocket-red</g:id>
+      <g:title>480 Pocket Red</g:title>
       <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/360-pocket-white/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/360-pocket-white.webp</g:image_link>
+      <g:link>https://northvaletcg.eu/sealed-detail/480-pocket-red/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/480-pocket-red.webp</g:image_link>
       <g:availability>in_stock</g:availability>
-      <g:price>899.00 CZK</g:price>
+      <g:price>989.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
     </item>
@@ -353,17 +441,6 @@
       <g:image_link>https://northvaletcg.eu/product-images/360-pocket-red.webp</g:image_link>
       <g:availability>in_stock</g:availability>
       <g:price>899.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Northvale</g:brand>
-    </item>
-    <item>
-      <g:id>480-pocket-red</g:id>
-      <g:title>480 Pocket Red</g:title>
-      <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/480-pocket-red/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/480-pocket-red.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>989.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
     </item>
@@ -423,11 +500,11 @@
       <g:brand>Northvale</g:brand>
     </item>
     <item>
-      <g:id>1024-pocket-red</g:id>
-      <g:title>1024 Pocket Red</g:title>
+      <g:id>1024-pocket-white</g:id>
+      <g:title>1024 Pocket White</g:title>
       <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/1024-pocket-red/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/1024-pocket-red.webp</g:image_link>
+      <g:link>https://northvaletcg.eu/sealed-detail/1024-pocket-white/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/1024-pocket-white.webp</g:image_link>
       <g:availability>in_stock</g:availability>
       <g:price>1299.00 CZK</g:price>
       <g:condition>new</g:condition>
@@ -456,17 +533,6 @@
       <g:brand>Northvale</g:brand>
     </item>
     <item>
-      <g:id>1024-pocket-white</g:id>
-      <g:title>1024 Pocket White</g:title>
-      <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/1024-pocket-white/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/1024-pocket-white.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>1299.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Northvale</g:brand>
-    </item>
-    <item>
       <g:id>24-slots-psa-bgs-cerveny</g:id>
       <g:title>24 Slots PSA/BGS Červený</g:title>
       <g:description>Prémiové album Gemloader je speciálně navrženo pro slabované karty PSA, Beckett a další slaby stejných rozměrů (CGC, M3, AP, PGS, GetGraded, UGS a další), díky patentovanému systému kliknutí, do kterého karta bezpečně zapadne</g:description>
@@ -476,6 +542,39 @@
       <g:price>1299.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>etb-mega-evolution-lucario</g:id>
+      <g:title>ETB Mega Evolution Lucario</g:title>
+      <g:description>Návrat legendární mechaniky Mega Evolution do Pokémon TCG! Trenéři se dočkali historického momentu – Mega Pokémon ex nabízí obří HP a devastující útoky, ovšem za cenu tří prize karet při vyřazení. Tato edice zavádí i zbrusu novou raritu Mega Ultra Rare (MUR) se zlatě zdobenými, zcela originálními ilustracemi</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/etb-mega-evolution-lucario/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/etb-mega-evolution-lucario.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>2999.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
+      <g:id>etb-mega-evolution-gardevoir</g:id>
+      <g:title>ETB Mega Evolution Gardevoir</g:title>
+      <g:description>Návrat legendární mechaniky Mega Evolution do Pokémon TCG! Trenéři se dočkali historického momentu – Mega Pokémon ex nabízí obří HP a devastující útoky, ovšem za cenu tří prize karet při vyřazení. Tato edice zavádí i zbrusu novou raritu Mega Ultra Rare (MUR) se zlatě zdobenými, zcela originálními ilustracemi</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/etb-mega-evolution-gardevoir/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/etb-mega-evolution-gardevoir.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>2999.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
+      <g:id>prismatic-mini-tin-display</g:id>
+      <g:title>Prismatic Mini Tin Display</g:title>
+      <g:description>Eevee a jeho evoluce v úžasně malém balení! Mini tiny zachycují osm oblíbených Pokémonů – Vaporeon, Jolteon, Flareon, Espeon, Umbreon, Leafeon, Glaceon a Sylveon – v jedinečných ilustracích, které po naskládání vedle sebe vytvoří jeden velký obrázek</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/prismatic-mini-tin-display/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/prismatic-mini-tin-display.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>7949.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
     </item>
     <item>
       <g:id>24-slots-psa-bgs-blue</g:id>
@@ -498,6 +597,138 @@
       <g:price>1299.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>1024-pocket-red</g:id>
+      <g:title>1024 Pocket Red</g:title>
+      <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/1024-pocket-red/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/1024-pocket-red.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>1299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>216-pocet-toploader-black</g:id>
+      <g:title>216 Pocet Toploader Black</g:title>
+      <g:description>Prémiová alba Gemloader jsou navržena přímo pro karty ve standardních 3&apos;&apos;x4&apos;&apos; toploaderech, takže vaše vzácné kousky budou v naprostém bezpečí a zároveň krásně vystavené k prohlížení</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/216-pocet-toploader-black/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/216-pocet-toploader-black.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>1299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>216-pocket-toploader-hazel</g:id>
+      <g:title>216 Pocket Toploader Hazel</g:title>
+      <g:description>Prémiová alba Gemloader jsou navržena přímo pro karty ve standardních 3&apos;&apos;x4&apos;&apos; toploaderech, takže vaše vzácné kousky budou v naprostém bezpečí a zároveň krásně vystavené k prohlížení</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/216-pocket-toploader-hazel/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/216-pocket-toploader-hazel.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>1299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>216-pocket-toploader-grey</g:id>
+      <g:title>216 Pocket Toploader Grey</g:title>
+      <g:description>Prémiová alba Gemloader jsou navržena přímo pro karty ve standardních 3&apos;&apos;x4&apos;&apos; toploaderech, takže vaše vzácné kousky budou v naprostém bezpečí a zároveň krásně vystavené k prohlížení</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/216-pocket-toploader-grey/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/216-pocket-toploader-grey.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>1299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>216-pocket-toploader-green</g:id>
+      <g:title>216 Pocket Toploader Green</g:title>
+      <g:description>Prémiová alba Gemloader jsou navržena přímo pro karty ve standardních 3&apos;&apos;x4&apos;&apos; toploaderech, takže vaše vzácné kousky budou v naprostém bezpečí a zároveň krásně vystavené k prohlížení</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/216-pocket-toploader-green/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/216-pocket-toploader-green.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>1299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>216-pocket-toploader-red</g:id>
+      <g:title>216 Pocket Toploader Red</g:title>
+      <g:description>Prémiová alba Gemloader jsou navržena přímo pro karty ve standardních 3&apos;&apos;x4&apos;&apos; toploaderech, takže vaše vzácné kousky budou v naprostém bezpečí a zároveň krásně vystavené k prohlížení</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/216-pocket-toploader-red/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/216-pocket-toploader-red.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>1299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>flareon-advanced-gift-box</g:id>
+      <g:title>Flareon Advanced Gift Box</g:title>
+      <g:description>Oslavte ohnivou eleganci Flareona v jednom prémiovém balení! Advanced Gift Box věnovaný Flareonovi přináší kombinaci vzácných karet, boosterů i praktického vybavení pro vaši sbírku</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/flareon-advanced-gift-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/flareon-advanced-gift-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>3399.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
+      <g:id>eevee-terastal-gathering-binder-box</g:id>
+      <g:title>Eevee Terastal Gathering Binder Box</g:title>
+      <g:description>Prémiová sběratelská sada zaměřená na konkrétní Eeveelution z čínské edice Terastal Gathering – čínské obdoby japonského Terastal Festival ex a západních Prismatic Evolutions. Skvělá volba pro fanoušky Eevee, kteří chtějí kombinaci nových karet i praktického vybavení pro organizaci sbírky</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/eevee-terastal-gathering-binder-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/eevee-terastal-gathering-binder-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>3299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
+      <g:id>mid-autumn-festival-gift-box</g:id>
+      <g:title>Mid-Autumn Festival Gift Box</g:title>
+      <g:description>Oslavte měsíc, světlo a sounáležitost společně s Pokémony! Tento speciální sběratelský box byl vydán exkluzivně v Číně u příležitosti Svátku středu podzimu a spojuje tradiční čínskou slavnostní atmosféru s kouzlem Pokémonů</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/mid-autumn-festival-gift-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/mid-autumn-festival-gift-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>1689.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
+      <g:id>vaporeon-advanced-gift-box</g:id>
+      <g:title>Vaporeon Advanced Gift Box</g:title>
+      <g:description>Oslavte vodní eleganci Vaporeona v jednom prémiovém balení! Advanced Gift Box věnovaný Vaporeonovi přináší kombinaci vzácných karet, boosterů i praktického vybavení pro vaši sbírku</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/vaporeon-advanced-gift-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/vaporeon-advanced-gift-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>3799.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
+      <g:id>glaceon-terastal-gathering-binder-box</g:id>
+      <g:title>Glaceon Terastal Gathering Binder Box</g:title>
+      <g:description>Prémiová sběratelská sada zaměřená na konkrétní Eeveelution z čínské edice Terastal Gathering – čínské obdoby japonského Terastal Festival ex a západních Prismatic Evolutions. Skvělá volba pro fanoušky Eevee, kteří chtějí kombinaci nových karet i praktického vybavení pro organizaci sbírky</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/glaceon-terastal-gathering-binder-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/glaceon-terastal-gathering-binder-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>3299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
+      <g:id>jolteon-advanced-gift-box</g:id>
+      <g:title>Jolteon Advanced Gift Box</g:title>
+      <g:description>Oslavte elektrizující rychlost Jolteona v jednom prémiovém balení! Advanced Gift Box věnovaný Jolteonovi přináší kombinaci vzácných karet, boosterů i praktického vybavení pro vaši sbírku</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/jolteon-advanced-gift-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/jolteon-advanced-gift-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>3399.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
     </item>
   </channel>
 </rss>

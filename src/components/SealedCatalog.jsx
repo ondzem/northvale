@@ -93,21 +93,22 @@ export function matchesHistoricalCategory(product, catId) {
   const hist = getHistoricalFilterForCategory(catId);
   if (!hist) {
     const nameLower = product.name?.toLowerCase() || '';
+    const isAcrylic = product.category === 'Acrylics' || product.game === 'Acrylics' || product.type === 'acrylic' || product.type === 'acrylics';
     switch (catId) {
       case 'cat-acrylics-booster':
-        return product.category === 'Acrylics' && nameLower.includes('booster box');
+        return isAcrylic && nameLower.includes('booster box');
       case 'cat-acrylics-etb':
-        return product.category === 'Acrylics' && (nameLower.includes('elite trainer') || nameLower.includes('etb'));
+        return isAcrylic && (nameLower.includes('elite trainer') || nameLower.includes('etb') || nameLower.includes('bundle') || nameLower.includes('diplay'));
       case 'cat-acrylics-trove':
-        return product.category === 'Acrylics' && nameLower.includes('trove');
+        return isAcrylic && nameLower.includes('trove');
       case 'cat-acrylics-slabs':
-        return product.category === 'Acrylics' && (nameLower.includes('slab') || nameLower.includes('graded') || nameLower.includes('stojánky'));
+        return isAcrylic && (nameLower.includes('slab') || nameLower.includes('graded') || nameLower.includes('stojánky'));
       case 'acrylic-pokemon-booster':
-        return product.category === 'Acrylics' && product.game === 'Pokémon' && nameLower.includes('booster box');
+        return isAcrylic && nameLower.includes('booster box');
       case 'acrylic-pokemon-etb':
-        return product.category === 'Acrylics' && product.game === 'Pokémon' && (nameLower.includes('elite trainer') || nameLower.includes('etb'));
+        return isAcrylic && (nameLower.includes('elite trainer') || nameLower.includes('etb') || nameLower.includes('bundle') || nameLower.includes('diplay'));
       case 'acrylic-lorcana-trove':
-        return product.category === 'Acrylics' && product.game === 'Lorcana' && nameLower.includes('trove');
+        return isAcrylic && nameLower.includes('trove');
       default:
         return false;
     }
@@ -1049,9 +1050,10 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
   // Base list for active game / type
   const baseSealed = sealedProducts.filter(p => {
     if (selectedGame === 'all') return true;
-    if (selectedGame === 'Accessories') return p.type === 'accessory' && p.category !== 'Acrylics';
-    if (selectedGame === 'Acrylics') return p.category === 'Acrylics';
-    return p.game === selectedGame && p.category !== 'Acrylics';
+    const isAcrylic = p.category === 'Acrylics' || p.game === 'Acrylics' || p.type === 'acrylic' || p.type === 'acrylics';
+    if (selectedGame === 'Accessories') return p.type === 'accessory' && !isAcrylic;
+    if (selectedGame === 'Acrylics') return isAcrylic;
+    return p.game === selectedGame && !isAcrylic;
   });
 
 
@@ -1152,12 +1154,13 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
 
     // Game selection
     if (selectedGame !== 'all') {
+      const isAcrylic = product.category === 'Acrylics' || product.game === 'Acrylics' || product.type === 'acrylic' || product.type === 'acrylics';
       if (selectedGame === 'Accessories') {
-        if (product.type !== 'accessory' || product.category === 'Acrylics') return false;
+        if ((product.type !== 'accessory' && product.game !== 'Accessories') || isAcrylic) return false;
       } else if (selectedGame === 'Acrylics') {
-        if (product.category !== 'Acrylics') return false;
+        if (!isAcrylic) return false;
       } else {
-        if (product.game !== selectedGame || product.category === 'Acrylics') return false;
+        if (product.game !== selectedGame || isAcrylic) return false;
       }
     }
 

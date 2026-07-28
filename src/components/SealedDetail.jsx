@@ -6,7 +6,7 @@ import { supabase } from '../supabase';
 import { fetchProductByIdFromDB, getProductFromCache } from '../services/products';
 
 const getGameImage = (product) => {
-  if (product.category === 'Acrylics') return '/acrylic-etb-box.webp';
+  if (product && (product.category === 'Acrylics' || product.game === 'Acrylics' || product.type === 'acrylic')) return '/acrylic-etb-box.webp';
   const game = product.game || '';
   const g = game.toLowerCase();
   if (g.includes('pokémon') || g.includes('pokemon')) return '/Pokemon.webp';
@@ -614,7 +614,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
         let score = 0;
         
         // 1. Acrylic cases are related to sealed products
-        if (p.category === 'Acrylics') {
+        if (p && (p.category === 'Acrylics' || p.game === 'Acrylics' || p.type === 'acrylic')) {
           score += 20;
           // Check if case is specific for this type of box (e.g. ETB case for ETB product)
           const pNameLower = (p.name || '').toLowerCase();
@@ -1488,8 +1488,8 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
     <div className="container">
       {/* Popis Section */}
       {activeTab === 'popis' && (() => {
-        const isAcrylic = product.category === 'Acrylics';
-        const isAccessory = product.type === 'accessory' && !isAcrylic;
+        const isAcrylic = product.category === 'Acrylics' || product.game === 'Acrylics' || product.type === 'acrylic';
+        const isAccessory = (product.type === 'accessory' || product.game === 'Accessories') && !isAcrylic;
         const isSealed = !isAccessory && !isAcrylic;
 
         const cleanName = product.name || '';
