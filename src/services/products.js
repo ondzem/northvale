@@ -173,11 +173,11 @@ export function getCachedProducts(options = {}) {
 
   if (game && game !== 'all' && game !== 'all-games') {
     if (game === 'Accessories') {
-      filtered = filtered.filter(p => p.type === 'accessory' && (!p.category || p.category !== 'Acrylics'));
+      filtered = filtered.filter(p => p.type === 'accessory' && p.category !== 'Acrylics' && p.game !== 'Acrylics' && p.type !== 'acrylic');
     } else if (game === 'Acrylics') {
-      filtered = filtered.filter(p => p.category === 'Acrylics');
+      filtered = filtered.filter(p => p.category === 'Acrylics' || p.game === 'Acrylics' || p.type === 'acrylic' || p.type === 'acrylics');
     } else {
-      filtered = filtered.filter(p => p.game === game && (!p.category || p.category !== 'Acrylics'));
+      filtered = filtered.filter(p => p.game === game && p.category !== 'Acrylics' && p.game !== 'Acrylics' && p.type !== 'acrylic');
     }
   }
 
@@ -265,11 +265,11 @@ export async function fetchProductsFromDB(options = {}) {
 
     if (game && game !== 'all' && game !== 'all-games') {
       if (game === 'Accessories') {
-        filtered = filtered.filter(p => p.type === 'accessory' && (!p.category || p.category !== 'Acrylics'));
+        filtered = filtered.filter(p => p.type === 'accessory' && p.category !== 'Acrylics' && p.game !== 'Acrylics' && p.type !== 'acrylic');
       } else if (game === 'Acrylics') {
-        filtered = filtered.filter(p => p.category === 'Acrylics');
+        filtered = filtered.filter(p => p.category === 'Acrylics' || p.game === 'Acrylics' || p.type === 'acrylic' || p.type === 'acrylics');
       } else {
-        filtered = filtered.filter(p => p.game === game && (!p.category || p.category !== 'Acrylics'));
+        filtered = filtered.filter(p => p.game === game && p.category !== 'Acrylics' && p.game !== 'Acrylics' && p.type !== 'acrylic');
       }
     }
 
@@ -316,11 +316,11 @@ export async function fetchProductsFromDB(options = {}) {
 
     if (game && game !== 'all' && game !== 'all-games') {
       if (game === 'Accessories') {
-        filtered = filtered.filter(p => p.type === 'accessory' && p.category !== 'Acrylics');
+        filtered = filtered.filter(p => p.type === 'accessory' && p.category !== 'Acrylics' && p.game !== 'Acrylics' && p.type !== 'acrylic');
       } else if (game === 'Acrylics') {
-        filtered = filtered.filter(p => p.category === 'Acrylics');
+        filtered = filtered.filter(p => p.category === 'Acrylics' || p.game === 'Acrylics' || p.type === 'acrylic' || p.type === 'acrylics');
       } else {
-        filtered = filtered.filter(p => p.game === game && p.category !== 'Acrylics');
+        filtered = filtered.filter(p => p.game === game && p.category !== 'Acrylics' && p.game !== 'Acrylics' && p.type !== 'acrylic');
       }
     }
 

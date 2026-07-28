@@ -1109,6 +1109,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       name: combinedName,
       type: formType,
       game: formGame,
+      category: (formGame === 'Acrylics' || formType === 'acrylic' || formCategoryId === 'game-acrylics') ? 'Acrylics' : (formGame === 'Accessories' ? 'Accessories' : null),
       edition: formEdition,
       rarity: formRarity,
       image: formImage,
