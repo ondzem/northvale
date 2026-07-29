@@ -87,18 +87,52 @@ export function getHistoricalFilterForCategory(catId) {
 }
 
 export function matchesHistoricalCategory(product, catId) {
+  if (!product) return false;
   if (product.category_id === catId) {
     return true;
   }
-  
+
   const isAcrylic = product.category === 'Acrylics' || product.game === 'Acrylics' || product.type === 'acrylic' || product.type === 'acrylics';
+
+  // Language subcategory tabs (ENG / JPN / CHN)
+  if (catId === 'eng') {
+    return product.lang === 'EN' || (product.category_id && String(product.category_id).toLowerCase().includes('eng'));
+  }
+  if (catId === 'jpn') {
+    return product.lang === 'JP' || (product.category_id && String(product.category_id).toLowerCase().includes('jpn'));
+  }
+  if (catId === 'chn') {
+    return product.lang === 'CN' || (product.category_id && String(product.category_id).toLowerCase().includes('chn'));
+  }
+
   if (catId === 'game-acrylics' || catId === 'all-acrylics' || catId === 'acrylics' || catId === 'all') {
     if (isAcrylic) return true;
   }
 
+  const nameLower = product.name?.toLowerCase() || '';
+  const catIdLower = String(catId).toLowerCase();
+
+  // Match by category_id prefix (e.g. jpn-other-products matching jpn)
+  if (product.category_id && String(product.category_id).toLowerCase().startsWith(catIdLower)) {
+    return true;
+  }
+
+  // Common subcategory keywords
+  if (catIdLower.includes('booster-box') || catIdLower.includes('boosterbox')) {
+    return nameLower.includes('booster box') || nameLower.includes('boosterbox');
+  }
+  if (catIdLower.includes('etb') || catIdLower.includes('elite-trainer')) {
+    return nameLower.includes('elite trainer') || nameLower.includes('etb');
+  }
+  if (catIdLower.includes('bundle')) {
+    return nameLower.includes('bundle');
+  }
+  if (catIdLower.includes('pack')) {
+    return nameLower.includes('pack');
+  }
+
   const hist = getHistoricalFilterForCategory(catId);
   if (!hist) {
-    const nameLower = product.name?.toLowerCase() || '';
     switch (catId) {
       case 'cat-acrylics-booster':
         return isAcrylic && (nameLower.includes('booster box') || nameLower.includes('boosterbox'));
@@ -119,7 +153,7 @@ export function matchesHistoricalCategory(product, catId) {
       case 'Lorcana':
         return isAcrylic && (nameLower.includes('trove') || nameLower.includes('lorcana') || product.game === 'Lorcana');
       default:
-        return isAcrylic;
+        return false;
     }
   }
   

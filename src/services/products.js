@@ -52,11 +52,34 @@ function safeLocalStorageSetItem(key, value) {
 
 export function hasProductImage(p) {
   if (!p) return false;
-  const img = p.image || p.image_url;
-  if (!img || typeof img !== 'string') return false;
-  const trimmed = img.trim();
-  if (!trimmed || trimmed === 'data:' || trimmed === 'null' || trimmed === 'undefined') return false;
-  return true;
+  if (p.has_image_data === true || p.hasImage === true) return true;
+
+  const checkValidStr = (str) => {
+    if (!str || typeof str !== 'string') return false;
+    const trimmed = str.trim();
+    if (!trimmed || trimmed === 'data:' || trimmed === 'null' || trimmed === 'undefined') return false;
+    return true;
+  };
+
+  // 1. Main image
+  if (checkValidStr(p.image) || checkValidStr(p.image_url)) return true;
+
+  // 2. Back image
+  if (checkValidStr(p.backImage) || checkValidStr(p.back_image)) return true;
+
+  // 3. Gallery / Additional images
+  const addImgs = p.additionalImages || p.additional_images;
+  if (Array.isArray(addImgs) && addImgs.length > 0) {
+    if (addImgs.some(checkValidStr)) return true;
+  }
+
+  // 4. Local storage image fallback
+  try {
+    const cachedLocal = localStorage.getItem(`nv-img-${p.id}`);
+    if (checkValidStr(cachedLocal)) return true;
+  } catch {}
+
+  return false;
 }
 
 /**
@@ -64,8 +87,11 @@ export function hasProductImage(p) {
  */
 function mapDbProduct(p) {
   if (!p) return null;
+  const checkStr = (s) => s && typeof s === 'string' && s.trim() !== '' && s.trim() !== 'data:' && s.trim() !== 'null';
+  const hasImg = checkStr(p.image) || checkStr(p.back_image) || (Array.isArray(p.additional_images) && p.additional_images.some(checkStr));
   return {
     ...p,
+    has_image_data: hasImg,
     desc: p.description,
     backImage: p.back_image,
     imageAlt: p.image_alt || null,
@@ -93,6 +119,7 @@ function cleanProductsForCache(products) {
   return products.map(p => {
     if (!p) return p;
     const clean = { ...p };
+    clean.has_image_data = hasProductImage(clean);
     if (clean.image && clean.image.startsWith('data:')) {
       clean.image = '';
     }
@@ -228,7 +255,7 @@ export async function fetchProductsFromDB(options = {}) {
     } else {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, description, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, illustrator, set_code, stage, element, custom_params, no_vat, image_alt, image_title, additional_images');
+        .select('id, name, image, back_image, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, description, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, illustrator, set_code, stage, element, custom_params, no_vat, image_alt, image_title, additional_images');
 
       if (error) {
         throw error;
