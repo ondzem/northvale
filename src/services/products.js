@@ -91,7 +91,8 @@ function mapDbProduct(p) {
   const hasImg = checkStr(p.image) || checkStr(p.back_image) || (Array.isArray(p.additional_images) && p.additional_images.some(checkStr));
   return {
     ...p,
-    has_image_data: hasImg,
+    no_vat: !!p.no_vat,
+    noVat: !!p.no_vat,
     desc: p.description,
     backImage: p.back_image,
     imageAlt: p.image_alt || null,

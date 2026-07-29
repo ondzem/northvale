@@ -3852,9 +3852,11 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--nv-gold, #fdbd16)' }}>
                           {`${(previewPrice).toLocaleString('cs-CZ')} Kč`}
                         </div>
-                        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
-                          {lang === 'CZ' ? 'Včetně DPH' : 'Incl. VAT'}
-                        </div>
+                        {!formNoVat && (
+                          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
+                            {lang === 'CZ' ? 'Včetně DPH' : 'Incl. VAT'}
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -4566,11 +4568,13 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               <div style={{ fontSize: '32px', fontWeight: '900', color: 'var(--nv-gold, #fdbd16)', fontFamily: "'Outfit', sans-serif" }}>
                                 {`${(previewPrice).toLocaleString('cs-CZ')} Kč`}
                               </div>
-                              <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
-                                {lang === 'CZ'
-                                  ? `Bez DPH: ${Math.round(previewPrice / 1.21).toLocaleString('cs-CZ')} Kč`
-                                  : `Excl. VAT: ${Math.round(previewPrice / 1.21).toLocaleString('cs-CZ')} CZK`}
-                              </div>
+                              {!formNoVat && (
+                                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
+                                  {lang === 'CZ'
+                                    ? `Bez DPH: ${Math.round(previewPrice / 1.21).toLocaleString('cs-CZ')} Kč`
+                                    : `Excl. VAT: ${Math.round(previewPrice / 1.21).toLocaleString('cs-CZ')} CZK`}
+                                </div>
+                              )}
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>

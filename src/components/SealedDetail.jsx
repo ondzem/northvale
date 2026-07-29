@@ -1243,9 +1243,11 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                 <div className="product-price-vat">
                   {price.toLocaleString('cs-CZ')} Kč
                 </div>
-                <div className="product-price-ex-vat">
-                  {lang === 'CZ' ? 'Bez DPH:' : 'Excl. VAT:'} {Math.round(price / 1.21).toLocaleString('cs-CZ')} Kč
-                </div>
+                {!product?.no_vat && !product?.noVat && (
+                  <div className="product-price-ex-vat">
+                    {lang === 'CZ' ? 'Bez DPH:' : 'Excl. VAT:'} {Math.round(price / 1.21).toLocaleString('cs-CZ')} Kč
+                  </div>
+                )}
               </div>
 
               {/* Stock status */}
