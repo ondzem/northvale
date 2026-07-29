@@ -2778,92 +2778,113 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         <label className="pmf-label">
                           {lang === 'CZ' ? 'Fotogalerie produktu (Oříznutelné fotky)' : 'Product Gallery (Croppable Photos)'}
                         </label>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '16px', marginTop: '8px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(175px, 1fr))', gap: '20px', marginTop: '12px' }}>
                           {/* Front Photo Card */}
                           <div className="image-slot-card" style={styles.imageSlotCard}>
-                            <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--nv-gold, #fdbd16)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? 'Přední strana (Hlavní)' : 'Front side (Main)'}</span>
+                            <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--nv-gold, #fdbd16)', fontWeight: '800', letterSpacing: '0.6px', marginBottom: '2px' }}>
+                              {lang === 'CZ' ? 'Přední strana (Hlavní)' : 'Front side (Main)'}
+                            </span>
                             {formImage ? (
-                              <div style={styles.slotPreviewWrap}>
-                                <img src={formImage} alt="Front preview" style={styles.slotPreviewImg} />
-                                <div style={{
-                                  display: 'flex',
-                                  flexWrap: 'wrap',
-                                  justifyContent: 'center',
-                                  gap: '4px',
-                                  marginTop: '8px',
-                                  paddingTop: '6px',
-                                  width: '100%',
-                                  borderTop: '1px solid rgba(255, 255, 255, 0.08)'
-                                }}>
-                                  <button type="button" style={{
-                                    flex: '1 1 30%',
-                                    padding: '5px 2px',
-                                    fontSize: '10px',
-                                    fontWeight: '600',
-                                    borderRadius: '5px',
-                                    border: '1px solid rgba(255,255,255,0.15)',
-                                    background: 'rgba(255,255,255,0.06)',
-                                    color: '#fff',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '2px'
-                                  }} title={lang === 'CZ' ? 'Upravit ořez' : 'Edit crop'} onClick={() => {
-                                    const target = { type: 'front' };
-                                    setCropTarget(target);
-                                    setCropImageSrc(formImage);
-                                    setCropImageFormat('image/webp');
-                                    setIsCropping(true);
-                                    cropRefX.current = 0;
-                                    cropRefY.current = 0;
-                                    cropRefScale.current = 1;
-                                  }}>✂️ {lang === 'CZ' ? 'Ořez' : 'Crop'}</button>
-                                  <button type="button" style={{
-                                    flex: '1 1 30%',
-                                    padding: '5px 2px',
-                                    fontSize: '10px',
-                                    fontWeight: '700',
-                                    borderRadius: '5px',
-                                    border: 'none',
-                                    background: 'var(--nv-gold, #fdbd16)',
-                                    color: '#000',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '2px'
-                                  }} title={lang === 'CZ' ? 'Vyměnit fotku' : 'Replace photo'} onClick={() => {
-                                    const input = document.createElement('input');
-                                    input.type = 'file';
-                                    input.accept = 'image/*';
-                                    input.onchange = (e) => {
-                                      const file = e.target.files[0];
-                                      if (file) {
+                              <>
+                                <div style={styles.slotPreviewWrap}>
+                                  <img src={formImage} alt="Front preview" style={styles.slotPreviewImg} />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', marginTop: '4px' }}>
+                                  <button
+                                    type="button"
+                                    style={{
+                                      width: '100%',
+                                      padding: '7px 8px',
+                                      fontSize: '11px',
+                                      fontWeight: '800',
+                                      borderRadius: '6px',
+                                      border: 'none',
+                                      background: 'var(--nv-gold, #fdbd16)',
+                                      color: '#000',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      gap: '6px',
+                                      boxShadow: '0 2px 8px rgba(253, 189, 22, 0.2)'
+                                    }}
+                                    title={lang === 'CZ' ? 'Vyměnit fotku za novou' : 'Replace photo'}
+                                    onClick={() => {
+                                      const input = document.createElement('input');
+                                      input.type = 'file';
+                                      input.accept = 'image/*';
+                                      input.onchange = (e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                          const target = { type: 'front' };
+                                          setCropTarget(target);
+                                          loadImageFile(file, target);
+                                        }
+                                      };
+                                      input.click();
+                                    }}
+                                  >
+                                    🔄 {lang === 'CZ' ? 'Vyměnit fotku' : 'Change Photo'}
+                                  </button>
+
+                                  <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
+                                    <button
+                                      type="button"
+                                      style={{
+                                        flex: 1,
+                                        padding: '6px 4px',
+                                        fontSize: '11px',
+                                        fontWeight: '600',
+                                        borderRadius: '6px',
+                                        border: '1px solid rgba(255,255,255,0.15)',
+                                        background: 'rgba(255,255,255,0.06)',
+                                        color: '#fff',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '4px'
+                                      }}
+                                      title={lang === 'CZ' ? 'Upravit výřez fotky' : 'Edit crop'}
+                                      onClick={() => {
                                         const target = { type: 'front' };
                                         setCropTarget(target);
-                                        loadImageFile(file, target);
-                                      }
-                                    };
-                                    input.click();
-                                  }}>🔄 {lang === 'CZ' ? 'Změnit' : 'Change'}</button>
-                                  <button type="button" style={{
-                                    flex: '1 1 30%',
-                                    padding: '5px 2px',
-                                    fontSize: '10px',
-                                    fontWeight: '700',
-                                    borderRadius: '5px',
-                                    border: 'none',
-                                    background: '#ef4444',
-                                    color: '#fff',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '2px'
-                                  }} title={lang === 'CZ' ? 'Odstranit fotku' : 'Delete photo'} onClick={() => setFormImage('')}>🗑️ {lang === 'CZ' ? 'Smazat' : 'Delete'}</button>
+                                        setCropImageSrc(formImage);
+                                        setCropImageFormat('image/webp');
+                                        setIsCropping(true);
+                                        cropRefX.current = 0;
+                                        cropRefY.current = 0;
+                                        cropRefScale.current = 1;
+                                      }}
+                                    >
+                                      ✂️ {lang === 'CZ' ? 'Ořez' : 'Crop'}
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      style={{
+                                        flex: 1,
+                                        padding: '6px 4px',
+                                        fontSize: '11px',
+                                        fontWeight: '700',
+                                        borderRadius: '6px',
+                                        border: '1px solid rgba(239,68,68,0.35)',
+                                        background: 'rgba(239,68,68,0.15)',
+                                        color: '#f87171',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '4px'
+                                      }}
+                                      title={lang === 'CZ' ? 'Odstranit fotku' : 'Delete photo'}
+                                      onClick={() => setFormImage('')}
+                                    >
+                                      🗑️ {lang === 'CZ' ? 'Smazat' : 'Delete'}
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
+                              </>
                             ) : (
                               <div className="slot-empty" style={styles.slotEmpty} onClick={() => {
                                 const input = document.createElement('input');
@@ -2879,96 +2900,117 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                 };
                                 input.click();
                               }}>
-                                <span>➕ {lang === 'CZ' ? 'Přední' : 'Front'}</span>
+                                <span>➕ {lang === 'CZ' ? 'Přední strana' : 'Front photo'}</span>
                               </div>
                             )}
                           </div>
 
                           {/* Back Photo Card */}
                           <div className="image-slot-card" style={styles.imageSlotCard}>
-                            <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? 'Zadní strana' : 'Back side'}</span>
+                            <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.6px', marginBottom: '2px' }}>
+                              {lang === 'CZ' ? 'Zadní strana' : 'Back side'}
+                            </span>
                             {formBackImage ? (
-                              <div style={styles.slotPreviewWrap}>
-                                <img src={formBackImage} alt="Back preview" style={styles.slotPreviewImg} />
-                                <div style={{
-                                  display: 'flex',
-                                  flexWrap: 'wrap',
-                                  justifyContent: 'center',
-                                  gap: '4px',
-                                  marginTop: '8px',
-                                  paddingTop: '6px',
-                                  width: '100%',
-                                  borderTop: '1px solid rgba(255, 255, 255, 0.08)'
-                                }}>
-                                  <button type="button" style={{
-                                    flex: '1 1 30%',
-                                    padding: '5px 2px',
-                                    fontSize: '10px',
-                                    fontWeight: '600',
-                                    borderRadius: '5px',
-                                    border: '1px solid rgba(255,255,255,0.15)',
-                                    background: 'rgba(255,255,255,0.06)',
-                                    color: '#fff',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '2px'
-                                  }} title={lang === 'CZ' ? 'Upravit ořez' : 'Edit crop'} onClick={() => {
-                                    const target = { type: 'back' };
-                                    setCropTarget(target);
-                                    setCropImageSrc(formBackImage);
-                                    setCropImageFormat('image/webp');
-                                    setIsCropping(true);
-                                    cropRefX.current = 0;
-                                    cropRefY.current = 0;
-                                    cropRefScale.current = 1;
-                                  }}>✂️ {lang === 'CZ' ? 'Ořez' : 'Crop'}</button>
-                                  <button type="button" style={{
-                                    flex: '1 1 30%',
-                                    padding: '5px 2px',
-                                    fontSize: '10px',
-                                    fontWeight: '700',
-                                    borderRadius: '5px',
-                                    border: 'none',
-                                    background: 'var(--nv-gold, #fdbd16)',
-                                    color: '#000',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '2px'
-                                  }} title={lang === 'CZ' ? 'Vyměnit fotku' : 'Replace photo'} onClick={() => {
-                                    const input = document.createElement('input');
-                                    input.type = 'file';
-                                    input.accept = 'image/*';
-                                    input.onchange = (e) => {
-                                      const file = e.target.files[0];
-                                      if (file) {
+                              <>
+                                <div style={styles.slotPreviewWrap}>
+                                  <img src={formBackImage} alt="Back preview" style={styles.slotPreviewImg} />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', marginTop: '4px' }}>
+                                  <button
+                                    type="button"
+                                    style={{
+                                      width: '100%',
+                                      padding: '7px 8px',
+                                      fontSize: '11px',
+                                      fontWeight: '800',
+                                      borderRadius: '6px',
+                                      border: 'none',
+                                      background: 'var(--nv-gold, #fdbd16)',
+                                      color: '#000',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      gap: '6px',
+                                      boxShadow: '0 2px 8px rgba(253, 189, 22, 0.2)'
+                                    }}
+                                    title={lang === 'CZ' ? 'Vyměnit fotku za novou' : 'Replace photo'}
+                                    onClick={() => {
+                                      const input = document.createElement('input');
+                                      input.type = 'file';
+                                      input.accept = 'image/*';
+                                      input.onchange = (e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                          const target = { type: 'back' };
+                                          setCropTarget(target);
+                                          loadImageFile(file, target);
+                                        }
+                                      };
+                                      input.click();
+                                    }}
+                                  >
+                                    🔄 {lang === 'CZ' ? 'Vyměnit fotku' : 'Change Photo'}
+                                  </button>
+
+                                  <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
+                                    <button
+                                      type="button"
+                                      style={{
+                                        flex: 1,
+                                        padding: '6px 4px',
+                                        fontSize: '11px',
+                                        fontWeight: '600',
+                                        borderRadius: '6px',
+                                        border: '1px solid rgba(255,255,255,0.15)',
+                                        background: 'rgba(255,255,255,0.06)',
+                                        color: '#fff',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '4px'
+                                      }}
+                                      title={lang === 'CZ' ? 'Upravit výřez fotky' : 'Edit crop'}
+                                      onClick={() => {
                                         const target = { type: 'back' };
                                         setCropTarget(target);
-                                        loadImageFile(file, target);
-                                      }
-                                    };
-                                    input.click();
-                                  }}>🔄 {lang === 'CZ' ? 'Změnit' : 'Change'}</button>
-                                  <button type="button" style={{
-                                    flex: '1 1 30%',
-                                    padding: '5px 2px',
-                                    fontSize: '10px',
-                                    fontWeight: '700',
-                                    borderRadius: '5px',
-                                    border: 'none',
-                                    background: '#ef4444',
-                                    color: '#fff',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '2px'
-                                  }} title={lang === 'CZ' ? 'Odstranit fotku' : 'Delete photo'} onClick={() => setFormBackImage('')}>🗑️ {lang === 'CZ' ? 'Smazat' : 'Delete'}</button>
+                                        setCropImageSrc(formBackImage);
+                                        setCropImageFormat('image/webp');
+                                        setIsCropping(true);
+                                        cropRefX.current = 0;
+                                        cropRefY.current = 0;
+                                        cropRefScale.current = 1;
+                                      }}
+                                    >
+                                      ✂️ {lang === 'CZ' ? 'Ořez' : 'Crop'}
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      style={{
+                                        flex: 1,
+                                        padding: '6px 4px',
+                                        fontSize: '11px',
+                                        fontWeight: '700',
+                                        borderRadius: '6px',
+                                        border: '1px solid rgba(239,68,68,0.35)',
+                                        background: 'rgba(239,68,68,0.15)',
+                                        color: '#f87171',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '4px'
+                                      }}
+                                      title={lang === 'CZ' ? 'Odstranit fotku' : 'Delete photo'}
+                                      onClick={() => setFormBackImage('')}
+                                    >
+                                      🗑️ {lang === 'CZ' ? 'Smazat' : 'Delete'}
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
+                              </>
                             ) : (
                               <div className="slot-empty" style={styles.slotEmpty} onClick={() => {
                                 const input = document.createElement('input');
@@ -2984,57 +3026,29 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                 };
                                 input.click();
                               }}>
-                                <span>➕ {lang === 'CZ' ? 'Zadní' : 'Back'}</span>
+                                <span>➕ {lang === 'CZ' ? 'Zadní strana' : 'Back photo'}</span>
                               </div>
                             )}
                           </div>
 
-                           {/* Additional Photo Cards */}
+                          {/* Additional Photo Cards */}
                           {formAdditionalImages.map((imgUrl, index) => (
                             <div key={index} className="image-slot-card" style={styles.imageSlotCard}>
-                              <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? `Další #${index + 1}` : `Extra #${index + 1}`}</span>
+                              <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.6px', marginBottom: '2px' }}>
+                                {lang === 'CZ' ? `Další #${index + 1}` : `Extra #${index + 1}`}
+                              </span>
                               <div style={styles.slotPreviewWrap}>
                                 <img src={imgUrl} alt="Extra preview" style={styles.slotPreviewImg} />
-                                <div style={{
-                                  display: 'flex',
-                                  flexWrap: 'wrap',
-                                  justifyContent: 'center',
-                                  gap: '4px',
-                                  marginTop: '8px',
-                                  paddingTop: '6px',
-                                  width: '100%',
-                                  borderTop: '1px solid rgba(255, 255, 255, 0.08)'
-                                }}>
-                                  <button type="button" style={{
-                                    flex: '1 1 30%',
-                                    padding: '5px 2px',
-                                    fontSize: '10px',
-                                    fontWeight: '600',
-                                    borderRadius: '5px',
-                                    border: '1px solid rgba(255,255,255,0.15)',
-                                    background: 'rgba(255,255,255,0.06)',
-                                    color: '#fff',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '2px'
-                                  }} title={lang === 'CZ' ? 'Upravit ořez' : 'Edit crop'} onClick={() => {
-                                    const target = { type: 'additional', index };
-                                    setCropTarget(target);
-                                    setCropImageSrc(imgUrl);
-                                    setCropImageFormat('image/webp');
-                                    setIsCropping(true);
-                                    cropRefX.current = 0;
-                                    cropRefY.current = 0;
-                                    cropRefScale.current = 1;
-                                  }}>✂️ {lang === 'CZ' ? 'Ořez' : 'Crop'}</button>
-                                  <button type="button" style={{
-                                    flex: '1 1 30%',
-                                    padding: '5px 2px',
-                                    fontSize: '10px',
-                                    fontWeight: '700',
-                                    borderRadius: '5px',
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', marginTop: '4px' }}>
+                                <button
+                                  type="button"
+                                  style={{
+                                    width: '100%',
+                                    padding: '7px 8px',
+                                    fontSize: '11px',
+                                    fontWeight: '800',
+                                    borderRadius: '6px',
                                     border: 'none',
                                     background: 'var(--nv-gold, #fdbd16)',
                                     color: '#000',
@@ -3042,8 +3056,11 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    gap: '2px'
-                                  }} title={lang === 'CZ' ? 'Vyměnit fotku' : 'Replace photo'} onClick={() => {
+                                    gap: '6px',
+                                    boxShadow: '0 2px 8px rgba(253, 189, 22, 0.2)'
+                                  }}
+                                  title={lang === 'CZ' ? 'Vyměnit fotku za novou' : 'Replace photo'}
+                                  onClick={() => {
                                     const input = document.createElement('input');
                                     input.type = 'file';
                                     input.accept = 'image/*';
@@ -3056,24 +3073,68 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                       }
                                     };
                                     input.click();
-                                  }}>🔄 {lang === 'CZ' ? 'Změnit' : 'Change'}</button>
-                                  <button type="button" style={{
-                                    flex: '1 1 30%',
-                                    padding: '5px 2px',
-                                    fontSize: '10px',
-                                    fontWeight: '700',
-                                    borderRadius: '5px',
-                                    border: 'none',
-                                    background: '#ef4444',
-                                    color: '#fff',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '2px'
-                                  }} title={lang === 'CZ' ? 'Odstranit fotku' : 'Delete photo'} onClick={() => {
-                                    setFormAdditionalImages(formAdditionalImages.filter((_, i) => i !== index));
-                                  }}>🗑️ {lang === 'CZ' ? 'Smazat' : 'Delete'}</button>
+                                  }}
+                                >
+                                  🔄 {lang === 'CZ' ? 'Vyměnit fotku' : 'Change Photo'}
+                                </button>
+
+                                <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
+                                  <button
+                                    type="button"
+                                    style={{
+                                      flex: 1,
+                                      padding: '6px 4px',
+                                      fontSize: '11px',
+                                      fontWeight: '600',
+                                      borderRadius: '6px',
+                                      border: '1px solid rgba(255,255,255,0.15)',
+                                      background: 'rgba(255,255,255,0.06)',
+                                      color: '#fff',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      gap: '4px'
+                                    }}
+                                    title={lang === 'CZ' ? 'Upravit výřez fotky' : 'Edit crop'}
+                                    onClick={() => {
+                                      const target = { type: 'additional', index };
+                                      setCropTarget(target);
+                                      setCropImageSrc(imgUrl);
+                                      setCropImageFormat('image/webp');
+                                      setIsCropping(true);
+                                      cropRefX.current = 0;
+                                      cropRefY.current = 0;
+                                      cropRefScale.current = 1;
+                                    }}
+                                  >
+                                    ✂️ {lang === 'CZ' ? 'Ořez' : 'Crop'}
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    style={{
+                                      flex: 1,
+                                      padding: '6px 4px',
+                                      fontSize: '11px',
+                                      fontWeight: '700',
+                                      borderRadius: '6px',
+                                      border: '1px solid rgba(239,68,68,0.35)',
+                                      background: 'rgba(239,68,68,0.15)',
+                                      color: '#f87171',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      gap: '4px'
+                                    }}
+                                    title={lang === 'CZ' ? 'Odstranit fotku' : 'Delete photo'}
+                                    onClick={() => {
+                                      setFormAdditionalImages(formAdditionalImages.filter((_, i) => i !== index));
+                                    }}
+                                  >
+                                    🗑️ {lang === 'CZ' ? 'Smazat' : 'Delete'}
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -6039,30 +6100,30 @@ const styles = {
     textAlign: 'left',
   },
   imageSlotCard: {
-    background: 'rgba(255,255,255,0.02)',
-    border: '1px solid rgba(255,255,255,0.06)',
-    borderRadius: '8px',
-    padding: '12px',
+    background: 'rgba(255, 255, 255, 0.03)',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    borderRadius: '10px',
+    padding: '14px',
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px',
+    gap: '10px',
     alignItems: 'center',
     position: 'relative',
-    minHeight: '140px',
-    justifyContent: 'center',
+    minHeight: '230px',
+    justifyContent: 'flex-start',
     boxSizing: 'border-box',
   },
   slotPreviewWrap: {
     width: '100%',
-    height: '110px',
+    height: '125px',
     position: 'relative',
-    borderRadius: '6px',
+    borderRadius: '8px',
     overflow: 'hidden',
-    border: '1px solid rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#000',
+    backgroundColor: '#0a0b0e',
   },
   slotPreviewImg: {
     maxHeight: '100%',
@@ -6070,29 +6131,22 @@ const styles = {
     objectFit: 'contain',
   },
   slotActions: {
-    position: 'absolute',
-    bottom: '4px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    display: 'flex',
-    gap: '4px',
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    padding: '4px 8px',
-    borderRadius: '20px',
-    backdropFilter: 'blur(2px)',
+    display: 'none',
   },
   slotEmpty: {
     width: '100%',
-    height: '110px',
-    border: '1px dashed rgba(255,255,255,0.15)',
-    borderRadius: '6px',
+    height: '180px',
+    border: '2px dashed rgba(255, 255, 255, 0.15)',
+    borderRadius: '8px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
-    fontSize: '11px',
+    fontSize: '13px',
+    fontWeight: '700',
     color: 'var(--text-muted, #8a8a92)',
     transition: 'all 0.2s ease',
+    backgroundColor: 'rgba(255, 255, 255, 0.01)',
   },
   mockPageContainer: {
     width: '100%',
