@@ -1669,7 +1669,26 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       {/* Breadcrumbs Navigation */}
       {(selectedGame !== 'all' || activeSubcategory !== 'all') && (
         <nav className="breadcrumbs-nav" aria-label="Drobečková navigace">
-          <span className="breadcrumb-item" onClick={() => setActivePage('home')}>{t('common.home')}</span>
+          <span 
+            className="breadcrumb-item" 
+            onClick={() => {
+              if (setFilters) setFilters({});
+              setSelectedGame('all');
+              setActiveSubcategory('all');
+              setActiveSubsubcategory('all');
+              setSelectedLangs([]);
+              setSelectedPackagingTypes([]);
+              setSelectedEditions([]);
+              setSelectedBrands([]);
+              setSelectedCompatibilities([]);
+              setSelectedColors([]);
+              setSelectedThicknesses([]);
+              setSelectedClosingTypes([]);
+              setActivePage('home');
+            }}
+          >
+            {t('common.home')}
+          </span>
           
           {selectedGame !== 'all' && (
             <>
@@ -1682,7 +1701,15 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                   onClick={() => { 
                     setActiveSubcategory('all'); 
                     setActiveSubsubcategory('all'); 
-                    setFilters(prev => ({ ...prev, type: undefined, subcat: undefined, subsubcat: undefined, gameFilter: undefined })); 
+                    setSelectedLangs([]);
+                    setSelectedPackagingTypes([]);
+                    setSelectedEditions([]);
+                    setSelectedBrands([]);
+                    setSelectedCompatibilities([]);
+                    setSelectedColors([]);
+                    setSelectedThicknesses([]);
+                    setSelectedClosingTypes([]);
+                    if (setFilters) setFilters({ game: selectedGame }); 
                   }}
                 >
                   {selectedGame === 'Accessories' ? 'Příslušenství' : selectedGame === 'Acrylics' ? 'Akryly' : selectedGame}
@@ -1703,7 +1730,15 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                   className="breadcrumb-item" 
                   onClick={() => { 
                     setActiveSubsubcategory('all'); 
-                    setFilters(prev => ({ ...prev, subsubcat: undefined })); 
+                    if (setFilters) {
+                      const next = { game: selectedGame };
+                      if (activeSubcategory === 'ENG' || activeSubcategory === 'jpn' || activeSubcategory === 'chn') {
+                        next.lang = activeSubcategory === 'jpn' ? 'JP' : activeSubcategory === 'chn' ? 'CN' : 'ENG';
+                      } else {
+                        next.subcat = activeSubcategory;
+                      }
+                      setFilters(next);
+                    }
                   }}
                 >
                   {subcategories.find(s => s.id === activeSubcategory)?.name || activeSubcategory}

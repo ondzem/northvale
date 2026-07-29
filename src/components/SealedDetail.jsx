@@ -1105,24 +1105,62 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
       {/* Breadcrumbs Navigation */}
       <div className="container">
         <nav className="breadcrumbs-nav" style={isMobile ? { marginBottom: '28px' } : undefined}>
-        <span className="breadcrumb-item" onClick={() => { setActivePage('home'); }}>
-          {t('common.home')}
-        </span>
-        <span className="breadcrumb-separator">/</span>
-        <span 
-          className="breadcrumb-item" 
-          onClick={() => { 
-            if (setFilters) setFilters({ game: product.game }); 
-            setActivePage('sealed-catalog'); 
-          }}
-        >
-          {product.game}
-        </span>
-        <span className="breadcrumb-separator">/</span>
-        <span className="breadcrumb-item active">
-          {product.name}
-        </span>
-      </nav>
+          <span className="breadcrumb-item" onClick={() => { if (setFilters) setFilters({}); setActivePage('home'); }}>
+            {t('common.home')}
+          </span>
+
+          {product.game && (
+            <>
+              <span className="breadcrumb-separator">/</span>
+              <span 
+                className="breadcrumb-item" 
+                onClick={() => { 
+                  if (setFilters) setFilters({ game: product.game }); 
+                  setActivePage('sealed-catalog'); 
+                }}
+              >
+                {product.game === 'Accessories' ? 'Příslušenství' : product.game === 'Acrylics' ? 'Akryly' : product.game}
+              </span>
+            </>
+          )}
+
+          {product.lang && (
+            <>
+              <span className="breadcrumb-separator">/</span>
+              <span 
+                className="breadcrumb-item" 
+                onClick={() => { 
+                  const langCode = product.lang === 'JP' ? 'JP' : product.lang === 'CN' ? 'CN' : 'ENG';
+                  if (setFilters) setFilters({ game: product.game, lang: langCode }); 
+                  setActivePage('sealed-catalog'); 
+                }}
+              >
+                {product.lang === 'JP' ? 'JPN' : product.lang === 'CN' ? 'CHN' : product.lang}
+              </span>
+            </>
+          )}
+
+          {product.packagingType && (
+            <>
+              <span className="breadcrumb-separator">/</span>
+              <span 
+                className="breadcrumb-item" 
+                onClick={() => { 
+                  const langCode = product.lang ? (product.lang === 'JP' ? 'JP' : product.lang === 'CN' ? 'CN' : 'ENG') : undefined;
+                  if (setFilters) setFilters({ game: product.game, lang: langCode, type: product.packagingType }); 
+                  setActivePage('sealed-catalog'); 
+                }}
+              >
+                {product.packagingType}
+              </span>
+            </>
+          )}
+
+          <span className="breadcrumb-separator">/</span>
+          <span className="breadcrumb-item active">
+            {product.name}
+          </span>
+        </nav>
       </div>
 
       <div className="container">

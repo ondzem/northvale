@@ -289,18 +289,6 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>abyss-eye-booster-box</ITEM_ID>
-    <PRODUCTNAME>Abyss Eye Booster Box</PRODUCTNAME>
-    <DESCRIPTION>Temnota se šíří říší! Japonská edice Abyss Eye přivádí do hry Mega Darkraie ex – hvězdu setu s masivním HP 280 a útokem &quot;Abyss Eye&quot;, který okamžitě vyřadí soupeřova aktivního Pokémona postiženého jakoukoli speciální podmínkou.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-box/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/abyss-eye-booster-box.webp</IMGURL>
-    <PRICE_VAT>2699</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Pokémon</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
     <ITEM_ID>akryl-etb-pokemon</ITEM_ID>
     <PRODUCTNAME>Akryl ETB Pokémon</PRODUCTNAME>
     <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Elite Trainer Box patří k nejžádanějším produktům u sběratelů i investorů, a proto by jejich ochrana měla odpovídat jejich skutečné hodnotě</DESCRIPTION>
@@ -481,6 +469,18 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
+    <ITEM_ID>abyss-eye-booster-box</ITEM_ID>
+    <PRODUCTNAME>Abyss Eye Booster Box</PRODUCTNAME>
+    <DESCRIPTION>Temnota se šíří říší! Japonská edice Abyss Eye přivádí do hry Mega Darkraie ex – hvězdu setu s masivním HP 280 a útokem &quot;Abyss Eye&quot;, který okamžitě vyřadí soupeřova aktivního Pokémona postiženého jakoukoli speciální podmínkou.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/abyss-eye-booster-box.webp</IMGURL>
+    <PRICE_VAT>2699</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
     <ITEM_ID>360-pocket-white</ITEM_ID>
     <PRODUCTNAME>360 Pocket White</PRODUCTNAME>
     <DESCRIPTION>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</DESCRIPTION>
@@ -501,6 +501,18 @@
     <PRICE_VAT>899</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>mega-dream-ex-booster-pack</ITEM_ID>
+    <PRODUCTNAME>Mega Dream Ex booster Pack</PRODUCTNAME>
+    <DESCRIPTION>Poslední japonská edice roku 2025 slaví návrat Mega Evoluce! MEGA Dream ex je tzv. &quot;High Class Pack&quot; set, tedy prémiová sběratelská edice plná reprintů oblíbených karet z minulého roku, doplněná o zbrusu nové Mega Pokémony inspirované hrou Pokémon Legends: Z-A</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/mega-dream-ex-booster-pack/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/mega-dream-ex-booster-pack.webp</IMGURL>
+    <PRICE_VAT>239</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
@@ -537,6 +549,18 @@
     <PRICE_VAT>899</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>151-journey-booster-pack</ITEM_ID>
+    <PRODUCTNAME>151 Journey Booster pack</PRODUCTNAME>
+    <DESCRIPTION>První ze čtyř čínských setů v sérii Collect 151, zasazené do éry Scarlet &amp;amp; Violet! Edice se vrací ke kořenům a slaví originálních 151 Pokémonů z Kanto regionu – najdete tu Pikachu, Bulbasaura, Charmandera, Squirtla, Mew a mnoho dalších</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/151-journey-booster-pack/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/151-journey-booster-pack.webp</IMGURL>
+    <PRICE_VAT>139</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>

@@ -269,17 +269,6 @@
       <g:brand>Pokémon</g:brand>
     </item>
     <item>
-      <g:id>abyss-eye-booster-box</g:id>
-      <g:title>Abyss Eye Booster Box</g:title>
-      <g:description>Temnota se šíří říší! Japonská edice Abyss Eye přivádí do hry Mega Darkraie ex – hvězdu setu s masivním HP 280 a útokem &quot;Abyss Eye&quot;, který okamžitě vyřadí soupeřova aktivního Pokémona postiženého jakoukoli speciální podmínkou.</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-box/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/abyss-eye-booster-box.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>2699.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Pokémon</g:brand>
-    </item>
-    <item>
       <g:id>akryl-etb-pokemon</g:id>
       <g:title>Akryl ETB Pokémon</g:title>
       <g:description>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Elite Trainer Box patří k nejžádanějším produktům u sběratelů i investorů, a proto by jejich ochrana měla odpovídat jejich skutečné hodnotě</g:description>
@@ -445,6 +434,17 @@
       <g:brand>One Piece</g:brand>
     </item>
     <item>
+      <g:id>abyss-eye-booster-box</g:id>
+      <g:title>Abyss Eye Booster Box</g:title>
+      <g:description>Temnota se šíří říší! Japonská edice Abyss Eye přivádí do hry Mega Darkraie ex – hvězdu setu s masivním HP 280 a útokem &quot;Abyss Eye&quot;, který okamžitě vyřadí soupeřova aktivního Pokémona postiženého jakoukoli speciální podmínkou.</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/abyss-eye-booster-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>2699.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
       <g:id>360-pocket-white</g:id>
       <g:title>360 Pocket White</g:title>
       <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
@@ -465,6 +465,17 @@
       <g:price>899.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>mega-dream-ex-booster-pack</g:id>
+      <g:title>Mega Dream Ex booster Pack</g:title>
+      <g:description>Poslední japonská edice roku 2025 slaví návrat Mega Evoluce! MEGA Dream ex je tzv. &quot;High Class Pack&quot; set, tedy prémiová sběratelská edice plná reprintů oblíbených karet z minulého roku, doplněná o zbrusu nové Mega Pokémony inspirované hrou Pokémon Legends: Z-A</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/mega-dream-ex-booster-pack/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/mega-dream-ex-booster-pack.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>239.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
     </item>
     <item>
       <g:id>480-pocket-red</g:id>
@@ -498,6 +509,17 @@
       <g:price>899.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>151-journey-booster-pack</g:id>
+      <g:title>151 Journey Booster pack</g:title>
+      <g:description>První ze čtyř čínských setů v sérii Collect 151, zasazené do éry Scarlet &amp;amp; Violet! Edice se vrací ke kořenům a slaví originálních 151 Pokémonů z Kanto regionu – najdete tu Pikachu, Bulbasaura, Charmandera, Squirtla, Mew a mnoho dalších</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/151-journey-booster-pack/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/151-journey-booster-pack.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>139.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
     </item>
     <item>
       <g:id>vendetta-pre-rift-kit</g:id>
