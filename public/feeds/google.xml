@@ -423,17 +423,6 @@
       <g:brand>Northvale</g:brand>
     </item>
     <item>
-      <g:id>akryl-psa-graded-kartu</g:id>
-      <g:title>Akryl PSA Graded kartu</g:title>
-      <g:description>Nejde jen o ochranu, ale i o prezentaci. Krystalicky čirý a esteticky dokonalý obal podtrhne hodnotu vaší PSA karty a promění ji ve skutečnou výstavní záležitost, hodnou místa na vaší polici</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/akryl-psa-graded-kartu/</g:link>
-      <g:image_link></g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>399.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Northvale</g:brand>
-    </item>
-    <item>
       <g:id>monkey-d-luffy-p-159-shonen-jump-promo</g:id>
       <g:title>Monkey D. Luffy P-159 – Shonen Jump Promo</g:title>
       <g:description>Vzácná japonská promo karta vydaná u příležitosti 29. výročí seriálového vydávání mangy One Piece! Karta byla distribuována jako fyzický bonus přímo v čísle #33 japonského magazínu Weekly Shonen Jump v roce 2026.</g:description>
@@ -443,6 +432,17 @@
       <g:price>1249.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>One Piece</g:brand>
+    </item>
+    <item>
+      <g:id>akryl-psa-graded-kartu</g:id>
+      <g:title>Akryl PSA Graded kartu</g:title>
+      <g:description>Nejde jen o ochranu, ale i o prezentaci. Krystalicky čirý a esteticky dokonalý obal podtrhne hodnotu vaší PSA karty a promění ji ve skutečnou výstavní záležitost, hodnou místa na vaší polici</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/akryl-psa-graded-kartu/</g:link>
+      <g:image_link></g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>399.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Northvale</g:brand>
     </item>
     <item>
       <g:id>360-pocket-white</g:id>

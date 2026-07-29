@@ -595,14 +595,24 @@ export async function saveProductToDB(product) {
       throw error;
     }
 
-    // Invalidate products cache
+    // Invalidate products cache completely
     cachedRawProducts = null;
+    isCachedDataFull = false;
     productsCacheTime = 0;
+    if (product && product.id) {
+      delete singleProductCache[product.id];
+      delete productImageInMemoryCache[product.id];
+      delete productBackImageInMemoryCache[product.id];
+    }
     try {
-      localStorage.removeItem(`nv-img-${product.id}`);
-      localStorage.removeItem(`nv-img-time-${product.id}`);
-      localStorage.removeItem(`nv-back-img-${product.id}`);
-      localStorage.removeItem(`nv-back-img-time-${product.id}`);
+      localStorage.removeItem('northvale-cached-raw-products');
+      localStorage.removeItem('northvale-cached-products-time');
+      if (product && product.id) {
+        localStorage.removeItem(`nv-img-${product.id}`);
+        localStorage.removeItem(`nv-img-time-${product.id}`);
+        localStorage.removeItem(`nv-back-img-${product.id}`);
+        localStorage.removeItem(`nv-back-img-time-${product.id}`);
+      }
     } catch {}
 
     const mappedProduct = mapDbProduct(data);

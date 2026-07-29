@@ -457,18 +457,6 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>akryl-psa-graded-kartu</ITEM_ID>
-    <PRODUCTNAME>Akryl PSA Graded kartu</PRODUCTNAME>
-    <DESCRIPTION>Nejde jen o ochranu, ale i o prezentaci. Krystalicky čirý a esteticky dokonalý obal podtrhne hodnotu vaší PSA karty a promění ji ve skutečnou výstavní záležitost, hodnou místa na vaší polici</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/akryl-psa-graded-kartu/</URL>
-    <IMGURL></IMGURL>
-    <PRICE_VAT>399</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Northvale</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
     <ITEM_ID>monkey-d-luffy-p-159-shonen-jump-pro</ITEM_ID>
     <PRODUCTNAME>Monkey D. Luffy P-159 – Shonen Jump Promo</PRODUCTNAME>
     <DESCRIPTION>Vzácná japonská promo karta vydaná u příležitosti 29. výročí seriálového vydávání mangy One Piece! Karta byla distribuována jako fyzický bonus přímo v čísle #33 japonského magazínu Weekly Shonen Jump v roce 2026.</DESCRIPTION>
@@ -477,6 +465,18 @@
     <PRICE_VAT>1249</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>One Piece</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>akryl-psa-graded-kartu</ITEM_ID>
+    <PRODUCTNAME>Akryl PSA Graded kartu</PRODUCTNAME>
+    <DESCRIPTION>Nejde jen o ochranu, ale i o prezentaci. Krystalicky čirý a esteticky dokonalý obal podtrhne hodnotu vaší PSA karty a promění ji ve skutečnou výstavní záležitost, hodnou místa na vaší polici</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/akryl-psa-graded-kartu/</URL>
+    <IMGURL></IMGURL>
+    <PRICE_VAT>399</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>

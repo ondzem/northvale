@@ -2779,14 +2779,37 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           {lang === 'CZ' ? 'Fotogalerie produktu (Oříznutelné fotky)' : 'Product Gallery (Croppable Photos)'}
                         </label>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '16px', marginTop: '8px' }}>
-                          {/* Front Photo Card (Mirrored) */}
+                          {/* Front Photo Card */}
                           <div className="image-slot-card" style={styles.imageSlotCard}>
-                            <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--nv-gold, #fdbd16)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? 'Přední strana' : 'Front side'}</span>
+                            <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--nv-gold, #fdbd16)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? 'Přední strana (Hlavní)' : 'Front side (Main)'}</span>
                             {formImage ? (
                               <div style={styles.slotPreviewWrap}>
                                 <img src={formImage} alt="Front preview" style={styles.slotPreviewImg} />
-                                <div style={styles.slotActions}>
-                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px', marginRight: '6px' }} title={lang === 'CZ' ? 'Upravit ořez' : 'Edit crop'} onClick={() => {
+                                <div style={{
+                                  display: 'flex',
+                                  flexWrap: 'wrap',
+                                  justifyContent: 'center',
+                                  gap: '4px',
+                                  marginTop: '8px',
+                                  paddingTop: '6px',
+                                  width: '100%',
+                                  borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+                                }}>
+                                  <button type="button" style={{
+                                    flex: '1 1 30%',
+                                    padding: '5px 2px',
+                                    fontSize: '10px',
+                                    fontWeight: '600',
+                                    borderRadius: '5px',
+                                    border: '1px solid rgba(255,255,255,0.15)',
+                                    background: 'rgba(255,255,255,0.06)',
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '2px'
+                                  }} title={lang === 'CZ' ? 'Upravit ořez' : 'Edit crop'} onClick={() => {
                                     const target = { type: 'front' };
                                     setCropTarget(target);
                                     setCropImageSrc(formImage);
@@ -2795,8 +2818,22 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                     cropRefX.current = 0;
                                     cropRefY.current = 0;
                                     cropRefScale.current = 1;
-                                  }}>✂️</button>
-                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
+                                  }}>✂️ {lang === 'CZ' ? 'Ořez' : 'Crop'}</button>
+                                  <button type="button" style={{
+                                    flex: '1 1 30%',
+                                    padding: '5px 2px',
+                                    fontSize: '10px',
+                                    fontWeight: '700',
+                                    borderRadius: '5px',
+                                    border: 'none',
+                                    background: 'var(--nv-gold, #fdbd16)',
+                                    color: '#000',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '2px'
+                                  }} title={lang === 'CZ' ? 'Vyměnit fotku' : 'Replace photo'} onClick={() => {
                                     const input = document.createElement('input');
                                     input.type = 'file';
                                     input.accept = 'image/*';
@@ -2809,7 +2846,22 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                       }
                                     };
                                     input.click();
-                                  }}>🔄</button>
+                                  }}>🔄 {lang === 'CZ' ? 'Změnit' : 'Change'}</button>
+                                  <button type="button" style={{
+                                    flex: '1 1 30%',
+                                    padding: '5px 2px',
+                                    fontSize: '10px',
+                                    fontWeight: '700',
+                                    borderRadius: '5px',
+                                    border: 'none',
+                                    background: '#ef4444',
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '2px'
+                                  }} title={lang === 'CZ' ? 'Odstranit fotku' : 'Delete photo'} onClick={() => setFormImage('')}>🗑️ {lang === 'CZ' ? 'Smazat' : 'Delete'}</button>
                                 </div>
                               </div>
                             ) : (
@@ -2838,8 +2890,31 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             {formBackImage ? (
                               <div style={styles.slotPreviewWrap}>
                                 <img src={formBackImage} alt="Back preview" style={styles.slotPreviewImg} />
-                                <div style={styles.slotActions}>
-                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px', marginRight: '6px' }} title={lang === 'CZ' ? 'Upravit ořez' : 'Edit crop'} onClick={() => {
+                                <div style={{
+                                  display: 'flex',
+                                  flexWrap: 'wrap',
+                                  justifyContent: 'center',
+                                  gap: '4px',
+                                  marginTop: '8px',
+                                  paddingTop: '6px',
+                                  width: '100%',
+                                  borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+                                }}>
+                                  <button type="button" style={{
+                                    flex: '1 1 30%',
+                                    padding: '5px 2px',
+                                    fontSize: '10px',
+                                    fontWeight: '600',
+                                    borderRadius: '5px',
+                                    border: '1px solid rgba(255,255,255,0.15)',
+                                    background: 'rgba(255,255,255,0.06)',
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '2px'
+                                  }} title={lang === 'CZ' ? 'Upravit ořez' : 'Edit crop'} onClick={() => {
                                     const target = { type: 'back' };
                                     setCropTarget(target);
                                     setCropImageSrc(formBackImage);
@@ -2848,8 +2923,22 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                     cropRefX.current = 0;
                                     cropRefY.current = 0;
                                     cropRefScale.current = 1;
-                                  }}>✂️</button>
-                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
+                                  }}>✂️ {lang === 'CZ' ? 'Ořez' : 'Crop'}</button>
+                                  <button type="button" style={{
+                                    flex: '1 1 30%',
+                                    padding: '5px 2px',
+                                    fontSize: '10px',
+                                    fontWeight: '700',
+                                    borderRadius: '5px',
+                                    border: 'none',
+                                    background: 'var(--nv-gold, #fdbd16)',
+                                    color: '#000',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '2px'
+                                  }} title={lang === 'CZ' ? 'Vyměnit fotku' : 'Replace photo'} onClick={() => {
                                     const input = document.createElement('input');
                                     input.type = 'file';
                                     input.accept = 'image/*';
@@ -2862,8 +2951,22 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                       }
                                     };
                                     input.click();
-                                  }}>🔄</button>
-                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '11px', marginLeft: '6px' }} onClick={() => setFormBackImage('')}>🗑️</button>
+                                  }}>🔄 {lang === 'CZ' ? 'Změnit' : 'Change'}</button>
+                                  <button type="button" style={{
+                                    flex: '1 1 30%',
+                                    padding: '5px 2px',
+                                    fontSize: '10px',
+                                    fontWeight: '700',
+                                    borderRadius: '5px',
+                                    border: 'none',
+                                    background: '#ef4444',
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '2px'
+                                  }} title={lang === 'CZ' ? 'Odstranit fotku' : 'Delete photo'} onClick={() => setFormBackImage('')}>🗑️ {lang === 'CZ' ? 'Smazat' : 'Delete'}</button>
                                 </div>
                               </div>
                             ) : (
@@ -2892,8 +2995,31 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.5px' }}>{lang === 'CZ' ? `Další #${index + 1}` : `Extra #${index + 1}`}</span>
                               <div style={styles.slotPreviewWrap}>
                                 <img src={imgUrl} alt="Extra preview" style={styles.slotPreviewImg} />
-                                <div style={styles.slotActions}>
-                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px', marginRight: '6px' }} title={lang === 'CZ' ? 'Upravit ořez' : 'Edit crop'} onClick={() => {
+                                <div style={{
+                                  display: 'flex',
+                                  flexWrap: 'wrap',
+                                  justifyContent: 'center',
+                                  gap: '4px',
+                                  marginTop: '8px',
+                                  paddingTop: '6px',
+                                  width: '100%',
+                                  borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+                                }}>
+                                  <button type="button" style={{
+                                    flex: '1 1 30%',
+                                    padding: '5px 2px',
+                                    fontSize: '10px',
+                                    fontWeight: '600',
+                                    borderRadius: '5px',
+                                    border: '1px solid rgba(255,255,255,0.15)',
+                                    background: 'rgba(255,255,255,0.06)',
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '2px'
+                                  }} title={lang === 'CZ' ? 'Upravit ořez' : 'Edit crop'} onClick={() => {
                                     const target = { type: 'additional', index };
                                     setCropTarget(target);
                                     setCropImageSrc(imgUrl);
@@ -2902,8 +3028,22 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                     cropRefX.current = 0;
                                     cropRefY.current = 0;
                                     cropRefScale.current = 1;
-                                  }}>✂️</button>
-                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '11px' }} onClick={() => {
+                                  }}>✂️ {lang === 'CZ' ? 'Ořez' : 'Crop'}</button>
+                                  <button type="button" style={{
+                                    flex: '1 1 30%',
+                                    padding: '5px 2px',
+                                    fontSize: '10px',
+                                    fontWeight: '700',
+                                    borderRadius: '5px',
+                                    border: 'none',
+                                    background: 'var(--nv-gold, #fdbd16)',
+                                    color: '#000',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '2px'
+                                  }} title={lang === 'CZ' ? 'Vyměnit fotku' : 'Replace photo'} onClick={() => {
                                     const input = document.createElement('input');
                                     input.type = 'file';
                                     input.accept = 'image/*';
@@ -2916,10 +3056,24 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                                       }
                                     };
                                     input.click();
-                                  }}>🔄</button>
-                                  <button type="button" className="slot-btn" style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '11px', marginLeft: '6px' }} onClick={() => {
+                                  }}>🔄 {lang === 'CZ' ? 'Změnit' : 'Change'}</button>
+                                  <button type="button" style={{
+                                    flex: '1 1 30%',
+                                    padding: '5px 2px',
+                                    fontSize: '10px',
+                                    fontWeight: '700',
+                                    borderRadius: '5px',
+                                    border: 'none',
+                                    background: '#ef4444',
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '2px'
+                                  }} title={lang === 'CZ' ? 'Odstranit fotku' : 'Delete photo'} onClick={() => {
                                     setFormAdditionalImages(formAdditionalImages.filter((_, i) => i !== index));
-                                  }}>🗑️</button>
+                                  }}>🗑️ {lang === 'CZ' ? 'Smazat' : 'Delete'}</button>
                                 </div>
                               </div>
                             </div>
