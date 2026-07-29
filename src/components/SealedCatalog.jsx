@@ -4,6 +4,7 @@ import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 import DealOfTheDay from './DealOfTheDay';
 import { fetchCategoriesFromDB, mockCategories, getCachedCategories, getCategoryIcon } from '../services/categories';
+import { hasProductImage } from '../services/products';
 
 function getGameFallbackLogo(game) {
   switch (game) {
@@ -1057,6 +1058,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
 
   // Base list for active game / type
   const baseSealed = sealedProducts.filter(p => {
+    if (!hasProductImage(p)) return false;
     if (selectedGame === 'all') return true;
     const isAcrylic = p.category === 'Acrylics' || p.game === 'Acrylics' || p.type === 'acrylic' || p.type === 'acrylics';
     if (selectedGame === 'Accessories') return p.type === 'accessory' && !isAcrylic;
@@ -1177,6 +1179,9 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
 
     // Price range
     if (product.price > priceRange) return false;
+
+    // Hiding products without an image from public storefront view
+    if (!hasProductImage(product)) return false;
 
     // Hiding out of stock products automatically
     if (product.type === 'single') {

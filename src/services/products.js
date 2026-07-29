@@ -50,6 +50,15 @@ function safeLocalStorageSetItem(key, value) {
   }
 }
 
+export function hasProductImage(p) {
+  if (!p) return false;
+  const img = p.image || p.image_url;
+  if (!img || typeof img !== 'string') return false;
+  const trimmed = img.trim();
+  if (!trimmed || trimmed === 'data:' || trimmed === 'null' || trimmed === 'undefined') return false;
+  return true;
+}
+
 /**
  * Maps database snake_case fields back to frontend camelCase properties.
  */
@@ -163,6 +172,9 @@ export function getCachedProducts(options = {}) {
         return (p.stock || 0) > 0;
       }
     });
+
+    // Always hide products without an image from public storefront view
+    filtered = filtered.filter(hasProductImage);
   }
 
   if (types && types.length > 0) {
@@ -306,6 +318,9 @@ export async function fetchProductsFromDB(options = {}) {
           return (p.stock || 0) > 0;
         }
       });
+
+      // Always hide products without an image from public storefront view
+      filtered = filtered.filter(hasProductImage);
     }
 
     if (types && types.length > 0) {

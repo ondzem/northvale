@@ -4,7 +4,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { fetchSlidesFromDB, DEFAULT_SLIDES } from '../services/slides';
 import { fetchDailyDealFromDB } from '../services/dailyDeal';
 import { fetchHomepageSectionsFromDB } from '../services/homepageSections';
-import { fetchProductByIdFromDB, fetchProductImage, generateDefaultSEOImageMetadata } from '../services/products';
+import { fetchProductByIdFromDB, fetchProductImage, generateDefaultSEOImageMetadata, hasProductImage } from '../services/products';
 
 const ProductImage = ({ productId, src, alt, title, className = '', onAspectRatioLoaded }) => {
   const [imgSrc, setImgSrc] = useState(() => {
@@ -411,9 +411,9 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     if (configuredIds.length > 0) {
       return configuredIds
         .map(id => products.find(p => p.id === id))
-        .filter(Boolean);
+        .filter(p => p && hasProductImage(p));
     }
-    return products.filter(defaultFilter).slice(0, 5);
+    return products.filter(p => defaultFilter(p) && hasProductImage(p)).slice(0, 5);
   };
 
   const getProductPrice = (product) => {

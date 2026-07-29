@@ -205,18 +205,6 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>akryl-booster-box-pokemon</ITEM_ID>
-    <PRODUCTNAME>Akryl Booster Box Pokémon</PRODUCTNAME>
-    <DESCRIPTION>Vaše sbírka je víc než jen soubor předmětů – je to investice, vášeň a příběh. Booster boxy patří mezi nejžádanější klenoty pro sběratele i investory, a zaslouží si ochranu, která odpovídá jejich skutečné hodnotě</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/akryl-booster-box-pokemon/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/akryl-booster-box-pokemon.webp</IMGURL>
-    <PRICE_VAT>499</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Northvale</MANUFACTURER>
-    <HEUREKA_CPC>5</HEUREKA_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
     <ITEM_ID>tohoku-pokemon-center-box</ITEM_ID>
     <PRODUCTNAME>Tohoku Pokémon Center Box</PRODUCTNAME>
     <DESCRIPTION>Vzácný sběratelský kousek přímo z Japonska! Tento speciální box byl vydán u příležitosti oslav Pokémon Centra v oblasti Tohoku a je limitovanou edicí, kterou si nenechá ujít žádný opravdový sběratel.</DESCRIPTION>
@@ -277,6 +265,18 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
+    <ITEM_ID>akryl-booster-box-pokemon</ITEM_ID>
+    <PRODUCTNAME>Akryl Booster Box Pokémon</PRODUCTNAME>
+    <DESCRIPTION>Vaše sbírka je víc než jen soubor předmětů – je to investice, vášeň a příběh. Booster boxy patří mezi nejžádanější klenoty pro sběratele i investory, a zaslouží si ochranu, která odpovídá jejich skutečné hodnotě</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/akryl-booster-box-pokemon/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/akryl-booster-box-pokemon.webp</IMGURL>
+    <PRICE_VAT>499</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
     <ITEM_ID>abyss-eye-booster-pack</ITEM_ID>
     <PRODUCTNAME>Abyss Eye booster pack</PRODUCTNAME>
     <DESCRIPTION>Temnota se šíří říší! Japonská edice Abyss Eye přivádí do hry Mega Darkraie ex – hvězdu setu s masivním HP 280 a útokem &quot;Abyss Eye&quot;, který okamžitě vyřadí soupeřova aktivního Pokémona postiženého jakoukoli speciální podmínkou.</DESCRIPTION>
@@ -301,6 +301,18 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
+    <ITEM_ID>akryl-etb-pokemon</ITEM_ID>
+    <PRODUCTNAME>Akryl ETB Pokémon</PRODUCTNAME>
+    <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Elite Trainer Box patří k nejžádanějším produktům u sběratelů i investorů, a proto by jejich ochrana měla odpovídat jejich skutečné hodnotě</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/akryl-etb-pokemon/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/akryl-etb-pokemon.webp</IMGURL>
+    <PRICE_VAT>549</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
     <ITEM_ID>pokemon-go-elite-trainer-box</ITEM_ID>
     <PRODUCTNAME>ETB Pokémon GO</PRODUCTNAME>
     <DESCRIPTION>Pokémon GO potkává Pokémon TCG! Připravte se na souboj s legendárními a shiny Pokémony, kteří vzešli přímo z oblíbené mobilní hry.</DESCRIPTION>
@@ -313,12 +325,36 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
+    <ITEM_ID>akryl-booster-box-lorcana</ITEM_ID>
+    <PRODUCTNAME>Akryl Booster box Lorcana</PRODUCTNAME>
+    <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Box Disney Lorcana patří k nejžádanějším kouskům ve světě sběratelství, a proto by jeho ochrana měla odpovídat jeho skutečné hodnotě</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/akryl-booster-box-lorcana/</URL>
+    <IMGURL></IMGURL>
+    <PRICE_VAT>499</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
     <ITEM_ID>toploader-3x4-clear-regular-25ks</ITEM_ID>
     <PRODUCTNAME>Toploader 3x4 Clear Regular</PRODUCTNAME>
     <DESCRIPTION>Toploadery jsou tvrdé plastové obaly, které poskytují maximální ochranu vašim nejcennějším kartám před ohnutím, poškrábáním a nárazem. Dostupné v různých velikostech pro standardní i oversized karty, jsou ideální pro dlouhodobé uchovávání i bezpečné zasílání. Nezbytný doplněk pro každého sběratele.</DESCRIPTION>
     <URL>https://northvaletcg.eu/sealed-detail/toploader-3x4-clear-regular-25ks/</URL>
     <IMGURL>https://northvaletcg.eu/product-images/toploader-3x4-clear-regular-25ks.webp</IMGURL>
     <PRICE_VAT>75</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>akry-trove-box-lorcana</ITEM_ID>
+    <PRODUCTNAME>Akry Trove Box Lorcana</PRODUCTNAME>
+    <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Illumineer&apos;s Trove patří k nejžádanějším kouskům ve světě sběratelství Disney Lorcana, a proto by jeho ochrana měla odpovídat jeho skutečné hodnotě</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/akry-trove-box-lorcana/</URL>
+    <IMGURL></IMGURL>
+    <PRICE_VAT>549</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
@@ -355,6 +391,18 @@
     <URL>https://northvaletcg.eu/sealed-detail/just-sleeves-100ks/</URL>
     <IMGURL>https://northvaletcg.eu/product-images/just-sleeves-100ks.webp</IMGURL>
     <PRICE_VAT>25</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>akryl-booster-box-riftbound</ITEM_ID>
+    <PRODUCTNAME>Akryl Booster Box Riftbound</PRODUCTNAME>
+    <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Box Riftbound patří k nejžádanějším kouskům ve světě sběratelství, a proto by jeho ochrana měla odpovídat jeho skutečné hodnotě</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/akryl-booster-box-riftbound/</URL>
+    <IMGURL></IMGURL>
+    <PRICE_VAT>499</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
@@ -403,6 +451,18 @@
     <URL>https://northvaletcg.eu/sealed-detail/precise-fit-sleeves-standard-size-100/</URL>
     <IMGURL>https://northvaletcg.eu/product-images/precise-fit-sleeves-standard-size-100.webp</IMGURL>
     <PRICE_VAT>69</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>akryl-psa-graded-kartu</ITEM_ID>
+    <PRODUCTNAME>Akryl PSA Graded kartu</PRODUCTNAME>
+    <DESCRIPTION>Nejde jen o ochranu, ale i o prezentaci. Krystalicky čirý a esteticky dokonalý obal podtrhne hodnotu vaší PSA karty a promění ji ve skutečnou výstavní záležitost, hodnou místa na vaší polici</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/akryl-psa-graded-kartu/</URL>
+    <IMGURL></IMGURL>
+    <PRICE_VAT>399</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
