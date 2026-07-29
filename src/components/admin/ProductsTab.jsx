@@ -4,7 +4,7 @@ import { useTranslation } from '../../context/LanguageContext';
 import { fetchProductsFromDB, saveProductToDB, deleteProductFromDB, fetchProductByIdFromDB, fetchProductImage, fetchProductBackImage } from '../../services/products';
 import { fetchCategoriesFromDB } from '../../services/categories';
 import ProductCard from '../ProductCard';
-import { FEATURE_FLAGS } from '../../config';
+import { FEATURE_FLAGS, calculatePriceExVat } from '../../config';
 
 const AdminImageThumbnail = ({ productId, fallbackSrc }) => {
   const [imgSrc, setImgSrc] = useState(() => {
@@ -4571,8 +4571,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                               {!formNoVat && (
                                 <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
                                   {lang === 'CZ'
-                                    ? `Bez DPH: ${Math.round(previewPrice / 1.21).toLocaleString('cs-CZ')} Kč`
-                                    : `Excl. VAT: ${Math.round(previewPrice / 1.21).toLocaleString('cs-CZ')} CZK`}
+                                    ? `Bez DPH: ${calculatePriceExVat(previewPrice).toLocaleString('cs-CZ')} Kč`
+                                    : `Excl. VAT: ${calculatePriceExVat(previewPrice).toLocaleString('cs-CZ')} CZK`}
                                 </div>
                               )}
                             </div>

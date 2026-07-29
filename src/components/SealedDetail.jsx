@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { FEATURE_FLAGS } from '../config';
+import { FEATURE_FLAGS, calculatePriceExVat } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 import { supabase } from '../supabase';
@@ -1245,7 +1245,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                 </div>
                 {!product?.no_vat && !product?.noVat && (
                   <div className="product-price-ex-vat">
-                    {lang === 'CZ' ? 'Bez DPH:' : 'Excl. VAT:'} {Math.round(price / 1.21).toLocaleString('cs-CZ')} Kč
+                    {lang === 'CZ' ? 'Bez DPH:' : 'Excl. VAT:'} {calculatePriceExVat(price).toLocaleString('cs-CZ')} Kč
                   </div>
                 )}
               </div>
