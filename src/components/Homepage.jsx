@@ -119,7 +119,14 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     try {
       const cached = localStorage.getItem('northvale-cached-slides');
       if (cached) {
-        return JSON.parse(cached);
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map(s => ({
+            ...s,
+            desktopImage: (!s.desktopImage || s.desktopImage.includes('pohoda-orders')) ? '/hero_slide_primary.webp' : s.desktopImage,
+            mobileImage: (!s.mobileImage || s.mobileImage.includes('pohoda-orders')) ? '/hero_slide_primary_mobile.webp' : s.mobileImage
+          }));
+        }
       }
     } catch (err) {
       console.warn('Failed to load cached slides:', err);

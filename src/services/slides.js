@@ -36,8 +36,26 @@ export async function fetchSlidesFromDB() {
       return DEFAULT_SLIDES;
     }
 
-    cachedSlides = data;
-    return data;
+    const cleaned = (data || []).map(slide => {
+      let dUrl = slide.desktop_image_url;
+      let mUrl = slide.mobile_image_url;
+
+      if (!dUrl || dUrl.includes('pohoda-orders')) {
+        dUrl = '/hero_slide_primary.webp';
+      }
+      if (!mUrl || mUrl.includes('pohoda-orders')) {
+        mUrl = '/hero_slide_primary_mobile.webp';
+      }
+
+      return {
+        ...slide,
+        desktop_image_url: dUrl,
+        mobile_image_url: mUrl
+      };
+    });
+
+    cachedSlides = cleaned;
+    return cleaned;
   } catch (err) {
     console.warn('Database hero_slides fetch failed, using defaults:', err.message || err);
     return DEFAULT_SLIDES;
