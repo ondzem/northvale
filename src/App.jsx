@@ -24,6 +24,7 @@ import CookieConsent from './components/CookieConsent';
 import ErrorPage from './components/ErrorPage';
 import PreRegistrationLanding from './components/PreRegistrationLanding';
 import { supabase } from './supabase';
+import { applyDiscountCodeUsage } from './services/discountService';
 import Blog from './components/Blog';
 import { blogArticles } from './blogData';
 
@@ -1628,6 +1629,10 @@ function AppContent() {
           };
         });
 
+        if (order && order.discountCode) {
+          applyDiscountCodeUsage(order.discountCode);
+        }
+
         setCart([]);
         setAppliedDiscount(null);
         invalidateProductsCache();
@@ -1647,6 +1652,10 @@ function AppContent() {
 
         const serverOrder = data.order;
         setLastCompletedOrder(serverOrder);
+
+        if (order && order.discountCode) {
+          applyDiscountCodeUsage(order.discountCode);
+        }
 
         let updatedOrders = [];
         let newCredit = 0;

@@ -1,12 +1,12 @@
 import { supabase } from '../supabase';
 
-// Static default slides for fallback if DB is empty or fails
+// Static default slides for instant initial render before DB query resolves
 export const DEFAULT_SLIDES = [
   {
-    id: 'default-slide-1',
-    desktop_image_url: '/Akce - NORTHVALE.webp',
-    mobile_image_url: '/Akce - NORTHVALE.webp',
-    redirect_page: 'sealed-catalog',
+    id: 'hero-slide-primary',
+    desktop_image_url: 'https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/pohoda-orders/hero_slide_1784496964724.webp',
+    mobile_image_url: 'https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/pohoda-orders/hero_slide_mobile_1784496964724.webp',
+    redirect_page: 'about',
     sort_order: 1
   }
 ];

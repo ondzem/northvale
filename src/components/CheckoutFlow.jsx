@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
 import { getProductImageCached } from '../services/products';
+import { validateDiscountCode, calculateDiscountAmount } from '../services/discountService';
 
 export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, alert, onOpenLogin, appliedDiscount, setAppliedDiscount, validateCart }) {
   const { lang, t } = useTranslation();
@@ -101,9 +102,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   // Calculate discount
-  const discountAmount = appliedDiscount 
-    ? Math.round(cartSubtotal * (appliedDiscount.discount_percent / 100)) 
-    : 0;
+  const discountAmount = calculateDiscountAmount(cartSubtotal, appliedDiscount);
   const subtotalAfterDiscount = Math.max(0, cartSubtotal - discountAmount);
 
   // Shipping cost
@@ -154,29 +153,29 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         .from('discount_codes')
         .select('*')
         .eq('code', codeClean)
-        .eq('active', true)
         .maybeSingle();
 
       if (error) throw error;
 
-      if (data) {
-        setAppliedDiscount(data);
+      const validation = validateDiscountCode(codeClean, data ? [data] : [], lang);
+
+      if (validation.isValid && validation.discountItem) {
+        setAppliedDiscount(validation.discountItem);
+        const typeLabel = validation.discountItem.discount_type === 'fixed'
+          ? `${validation.discountItem.discount_value || 0} Kč`
+          : `${validation.discountItem.discount_value || validation.discountItem.discount_percent || 0}%`;
+
         if (alert) {
           alert(
             lang === 'CZ' 
-              ? `Slevový kód "${data.code}" (${data.discount_percent}%) byl úspěšně uplatněn.` 
-              : `Discount code "${data.code}" (${data.discount_percent}%) has been successfully applied.`,
+              ? `Slevový kód "${validation.discountItem.code}" (${typeLabel}) byl úspěšně uplatněn.` 
+              : `Discount code "${validation.discountItem.code}" (${typeLabel}) has been successfully applied.`,
             'success'
           );
         }
       } else {
         if (alert) {
-          alert(
-            lang === 'CZ' 
-              ? 'Zadaný slevový kód je neplatný nebo neexistuje.' 
-              : 'The entered discount code is invalid or does not exist.',
-            'error'
-          );
+          alert(validation.error, 'error');
         }
       }
     } catch (err) {

@@ -214,7 +214,6 @@ serve(async (req) => {
               .select('stock')
               .eq('id', prodId)
               .single();
-            if (dbProd) {
               const newStock = Math.max(0, (dbProd.stock || 0) - item.quantity);
               await supabase
                 .from('products')
@@ -222,6 +221,36 @@ serve(async (req) => {
                 .eq('id', prodId);
             }
           }
+        }
+
+      // Increment discount_codes usage count if discountCode is present
+      if (order.discountCode) {
+        try {
+          const cleanCode = String(order.discountCode).trim().toUpperCase();
+          const { data: dbItem } = await supabase
+            .from('discount_codes')
+            .select('id, used_count, max_uses, is_active, active')
+            .eq('code', cleanCode)
+            .maybeSingle();
+
+          if (dbItem) {
+            const newUsedCount = Number(dbItem.used_count || 0) + 1;
+            const maxUsesNum = dbItem.max_uses !== null && dbItem.max_uses !== undefined && dbItem.max_uses !== '' ? Number(dbItem.max_uses) : null;
+            const isExhausted = maxUsesNum !== null ? (newUsedCount >= maxUsesNum) : false;
+
+            const updatePayload: any = { used_count: newUsedCount };
+            if (isExhausted) {
+              updatePayload.is_active = false;
+              updatePayload.active = false;
+            }
+
+            await supabase
+              .from('discount_codes')
+              .update(updatePayload)
+              .eq('id', dbItem.id);
+          }
+        } catch (discErr) {
+          console.error('Failed to increment discount code usage in finalize-order:', discErr);
         }
       }
 
@@ -541,7 +570,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
