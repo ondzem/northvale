@@ -559,16 +559,15 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           flexDirection: 'column',
           flex: !isMobile ? '7.3 1 66%' : '7 1 60%',
           minWidth: isMobile ? '100%' : '280px',
-          height: !isMobile ? '100%' : 'auto'
+          width: '100%'
         }}>
           <div
             style={{
               ...styles.slideshow,
-              flex: !isMobile ? '1 1 100%' : 'none',
               width: '100%',
-              height: !isMobile ? '100%' : 'auto',
-              minHeight: !isMobile ? '100%' : 'auto',
-              aspectRatio: isMobile ? (useMobileImage ? '800 / 1000' : '1920 / 840') : 'unset',
+              height: '100%',
+              minHeight: !isMobile ? '440px' : (useMobileImage ? '340px' : '260px'),
+              aspectRatio: useMobileImage ? '800 / 1000' : '1920 / 840',
               padding: '0',
               backgroundColor: '#0c0c10',
               background: 'radial-gradient(circle at center, #1a1a26 0%, #0a0a0e 100%)',
@@ -692,6 +691,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           ...styles.dealWidget,
           flex: !isMobile ? '2.7 1 22%' : '3 1 25%',
           height: !isMobile ? '100%' : 'auto',
+          minHeight: !isMobile ? '440px' : 'auto',
           padding: (!activeDeal || !isMobile || useMobileImage) ? '16px' : '0 16px 0 0',
           flexDirection: (!activeDeal || !isMobile || useMobileImage) ? 'column' : 'row',
           alignItems: 'stretch',
