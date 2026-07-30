@@ -1000,6 +1000,17 @@ export default function HomepageTab({ showToast, onEditProduct }) {
   };
 
   const handleDelete = async (id) => {
+    if (slides.length <= 1) {
+      showToast(
+        lang === 'CZ'
+          ? 'V úvodní slideshow musí zůstat alespoň jeden banner. Nemůžete smazat poslední banner. Pokud jej chcete vyměnit, upravte jej nebo přidejte nový.'
+          : 'At least one banner must remain in the hero slideshow. You cannot delete the last banner. Edit it or add a new banner to replace it.',
+        'error'
+      );
+      setDeleteConfirm({ isOpen: false, slideId: '' });
+      return;
+    }
+
     const { error } = await deleteSlideFromDB(id);
     if (error) {
       showToast(lang === 'CZ' ? 'Chyba při mazání snímku.' : 'Error deleting slide.', 'error');
@@ -1180,6 +1191,15 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                           }}
                           onClick={(e) => {
                             e.stopPropagation();
+                            if (slides.length <= 1) {
+                              showToast(
+                                lang === 'CZ'
+                                  ? 'V úvodní slideshow musí zůstat alespoň jeden banner. Nemůžete smazat poslední banner. Pokud jej chcete vyměnit, upravte jej nebo přidejte nový.'
+                                  : 'At least one banner must remain in the hero slideshow. You cannot delete the last banner. Edit it or add a new banner to replace it.',
+                                'error'
+                              );
+                              return;
+                            }
                             if (isDefault) {
                               showToast(lang === 'CZ' ? 'Výchozí snímky nelze smazat!' : 'Default slides cannot be deleted!', 'error');
                               return;
