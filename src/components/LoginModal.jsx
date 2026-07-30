@@ -3,6 +3,39 @@ import { useTranslation } from '../context/LanguageContext';
 import { FEATURE_FLAGS } from '../config';
 import { supabase } from '../supabase';
 
+function formatAuthErrorMessage(error, lang = 'CZ') {
+  if (!error) return '';
+  const msg = error.message || error.error_description || String(error);
+
+  if (msg.includes('Invalid login credentials')) {
+    return lang === 'CZ'
+      ? 'Nesprávné heslo nebo e-mailový účet. Zkontrolujte prosím zadané údaje a zkuste to znovu.'
+      : 'Invalid email or password. Please verify your credentials and try again.';
+  }
+  if (msg.includes('User not found')) {
+    return lang === 'CZ'
+      ? 'Uživatel s tímto e-mailem nebyl nalezen. Zkontrolujte prosím zadanou adresu.'
+      : 'User with this email was not found. Please verify your email address.';
+  }
+  if (msg.includes('Email not confirmed')) {
+    return lang === 'CZ'
+      ? 'E-mailová adresa ještě nebyla potvrzena. Zkontrolujte prosím příchozí poštu.'
+      : 'Email address has not been confirmed yet. Please check your inbox.';
+  }
+  if (msg.includes('User already registered') || msg.includes('already exists')) {
+    return lang === 'CZ'
+      ? 'Uživatel s tímto e-mailem již existuje. Přihlaste se prosím.'
+      : 'A user with this email address already exists. Please log in.';
+  }
+  if (msg.includes('Password should be at least')) {
+    return lang === 'CZ'
+      ? 'Heslo musí mít minimálně 6 znaků.'
+      : 'Password must contain at least 6 characters.';
+  }
+
+  return lang === 'CZ' ? `Chyba: ${msg}` : `Error: ${msg}`;
+}
+
 export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showToast }) {
   const { lang, t } = useTranslation();
 
@@ -65,9 +98,9 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
 
   if (!isOpen) return null;
 
-  const validateEmail = (val) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(val);
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
   };
 
   const parseJwt = (token) => {
@@ -116,7 +149,10 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
       }
 
       if (password !== confirmPassword) {
-        triggerAlert(t('LoginModal.passwordsDoNotMatch'), 'error');
+        const mismatchText = lang === 'CZ' ? 'Hesla se neshodují! Zkontrolujte prosím obě hesla.' : 'Passwords do not match! Please check both passwords.';
+        setLocalMessage({ type: 'error', text: mismatchText });
+        setPasswordError(true);
+        triggerAlert(mismatchText, 'error');
         return;
       }
     }
@@ -136,7 +172,11 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
       });
 
       if (error) {
-        triggerAlert(lang === 'CZ' ? `Chyba registrace: ${error.message}` : `Registration error: ${error.message}`, 'error');
+        const errorText = formatAuthErrorMessage(error, lang);
+        setLocalMessage({ type: 'error', text: errorText });
+        setEmailError(true);
+        setPasswordError(true);
+        triggerAlert(errorText, 'error');
         return;
       }
 
@@ -148,7 +188,11 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
       });
 
       if (error) {
-        triggerAlert(lang === 'CZ' ? `Chyba přihlášení: ${error.message}` : `Login error: ${error.message}`, 'error');
+        const errorText = formatAuthErrorMessage(error, lang);
+        setLocalMessage({ type: 'error', text: errorText });
+        setEmailError(true);
+        setPasswordError(true);
+        triggerAlert(errorText, 'error');
         return;
       }
 
