@@ -1731,13 +1731,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
                   onClick={() => { 
                     setActiveSubsubcategory('all'); 
                     if (setFilters) {
-                      const next = { game: selectedGame };
-                      if (activeSubcategory === 'ENG' || activeSubcategory === 'jpn' || activeSubcategory === 'chn') {
-                        next.lang = activeSubcategory === 'jpn' ? 'JP' : activeSubcategory === 'chn' ? 'CN' : 'ENG';
-                      } else {
-                        next.subcat = activeSubcategory;
-                      }
-                      setFilters(next);
+                      setFilters({ game: selectedGame, category_id: activeSubcategory });
                     }
                   }}
                 >

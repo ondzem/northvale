@@ -1485,30 +1485,35 @@ export default function NewsletterTab({ showToast }) {
             </div>
           </div>
 
-          {/* Email Container Scroll Area */}
-          <div style={{ padding: '16px', overflowY: 'auto', flex: 1, background: '#0b0b0c' }}>
+          {/* Email Container Scroll Area (Light background representing real inbox) */}
+          <div style={{ padding: '20px 12px', overflowY: 'auto', flex: 1, background: '#f5f6f8' }}>
 
-            {/* The Email Document */}
+            {/* The Email Document - Premium White Design */}
             <div style={{
               width: '100%',
-              maxWidth: '380px',
+              maxWidth: '420px',
               margin: '0 auto',
-              background: '#131316',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
-              borderRadius: '8px',
-              overflow: 'hidden'
+              background: '#ffffff',
+              border: '1px solid #e1e4e8',
+              borderRadius: '12px',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
+              overflow: 'hidden',
+              boxSizing: 'border-box'
             }}>
-              {/* Header Logo */}
-              <div style={{ padding: '16px', textAlign: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', background: '#131316' }}>
-                <img
-                  src="/logo s popisem.webp"
-                  alt="NORTHVALE Logo"
-                  style={{ maxHeight: '52px', height: 'auto', margin: '0 auto', display: 'block' }}
-                />
+              {/* Header Brand Logo */}
+              <div style={{ padding: '28px 20px 20px 20px', textAlign: 'center', background: '#ffffff' }}>
+                <h1 style={{ color: '#fdbd16', fontSize: '22px', fontWeight: '800', margin: '0', letterSpacing: '2px', textTransform: 'uppercase', fontFamily: "'Outfit', 'Inter', sans-serif" }}>
+                  NORTHVALE
+                </h1>
+                <p style={{ color: '#8a8a92', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '3px', margin: '3px 0 0 0', fontFamily: "'Inter', sans-serif" }}>
+                  Trading Card Games
+                </p>
               </div>
 
+              <div style={{ borderTop: '1px solid #e1e4e8', margin: '0 20px' }}></div>
+
               {/* Render Blocks */}
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', padding: '16px 20px' }}>
                 {blocks.map((block) => {
                   if (block.type === 'text') {
                     const textValue = previewLang === 'EN' ? block.contentEN : block.content;
@@ -1516,17 +1521,17 @@ export default function NewsletterTab({ showToast }) {
                       <div
                         key={block.id}
                         style={{
-                          padding: '12px 18px 6px 18px',
-                          fontSize: '11px',
-                          lineHeight: '1.5',
-                          color: '#d1d1d6',
+                          padding: '10px 0',
+                          fontSize: '12.5px',
+                          lineHeight: '1.6',
+                          color: '#222222',
                           wordBreak: 'break-word',
-                          fontFamily: 'sans-serif'
+                          fontFamily: "'Inter', -apple-system, sans-serif"
                         }}
                         dangerouslySetInnerHTML={{
                           __html: textValue
                             ? textValue.replace(/\n/g, '<br />')
-                            : `<span style="font-style: italic; color: #6e6e73;">${previewLang === 'EN' ? '[Empty English text block]' : '[Prázdný textový blok]'}</span>`
+                            : `<span style="font-style: italic; color: #8a8a92;">${previewLang === 'EN' ? '[Empty English text block]' : '[Prázdný textový blok]'}</span>`
                         }}
                       />
                     );
@@ -1543,9 +1548,9 @@ export default function NewsletterTab({ showToast }) {
                     const currentStyle = block.ratio !== 'original' ? aspectStyles[block.ratio || 'landscape'] : {};
 
                     return (
-                      <div key={block.id} style={{ width: '100%', padding: '0 0 10px 0', position: 'relative' }}>
+                      <div key={block.id} style={{ width: '100%', padding: '8px 0', position: 'relative' }}>
                         {imgValue ? (
-                          <div style={{ position: 'relative', width: '100%' }}>
+                          <div style={{ position: 'relative', width: '100%', borderRadius: '8px', overflow: 'hidden' }}>
                             <img
                               src={imgValue}
                               alt="Banner"
@@ -1558,7 +1563,7 @@ export default function NewsletterTab({ showToast }) {
                               }}
                             />
                             {hasLink && (
-                              <span style={{ position: 'absolute', top: '6px', right: '6px', background: 'rgba(226, 186, 94, 0.95)', color: '#000', fontSize: '8px', padding: '2px 4px', borderRadius: '3px', fontWeight: 'bold', fontFamily: 'sans-serif' }}>
+                              <span style={{ position: 'absolute', top: '8px', right: '8px', background: '#fdbd16', color: '#000', fontSize: '9px', padding: '3px 6px', borderRadius: '4px', fontWeight: 'bold', fontFamily: "'Inter', sans-serif", boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
                                 🔗 {lang === 'CZ' ? 'PROKLIK' : 'LINK'}
                               </span>
                             )}
@@ -1566,16 +1571,17 @@ export default function NewsletterTab({ showToast }) {
                         ) : (
                           <div style={{
                             width: '100%',
-                            background: 'rgba(255,255,255,0.02)',
-                            border: '1px dashed rgba(255,255,255,0.06)',
+                            background: '#f8f9fa',
+                            border: '1px dashed #d0d5dd',
+                            borderRadius: '8px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            color: '#555',
-                            fontSize: '9px',
+                            color: '#8a8a92',
+                            fontSize: '10px',
                             fontWeight: 'bold',
-                            fontFamily: 'sans-serif',
-                            padding: '24px 0',
+                            fontFamily: "'Inter', sans-serif",
+                            padding: '28px 0',
                             ...aspectStyles[block.ratio === 'original' ? 'landscape' : (block.ratio || 'landscape')]
                           }}>
                             {previewLang === 'EN' ? '[Empty English image]' : '[Prázdný obrázek]'}
@@ -1588,21 +1594,22 @@ export default function NewsletterTab({ showToast }) {
                   if (block.type === 'button') {
                     const btnText = previewLang === 'EN' ? block.textEN : block.text;
                     return (
-                      <div key={block.id} style={{ textAlign: 'center', padding: '8px 18px 12px 18px' }}>
+                      <div key={block.id} style={{ textAlign: 'center', padding: '14px 0' }}>
                         <span style={{
                           display: 'inline-block',
-                          backgroundColor: btnText ? '#E2BA5E' : 'rgba(255,255,255,0.05)',
-                          color: btnText ? '#0b0b0c' : '#666',
-                          border: btnText ? 'none' : '1px dashed rgba(255,255,255,0.1)',
-                          padding: '8px 20px',
-                          borderRadius: '4px',
-                          fontWeight: 'bold',
-                          fontSize: '10px',
+                          backgroundColor: btnText ? '#fdbd16' : '#f0f2f5',
+                          color: btnText ? '#000000' : '#8a8a92',
+                          border: btnText ? 'none' : '1px dashed #d0d5dd',
+                          padding: '10px 24px',
+                          borderRadius: '6px',
+                          fontWeight: '800',
+                          fontSize: '11px',
                           textTransform: 'uppercase',
-                          letterSpacing: '0.5px',
-                          fontFamily: 'sans-serif'
+                          letterSpacing: '1px',
+                          fontFamily: "'Inter', sans-serif",
+                          boxShadow: btnText ? '0 2px 6px rgba(253, 189, 22, 0.3)' : 'none'
                         }}>
-                          {btnText || (previewLang === 'EN' ? '[Empty English button]' : 'CTA BUTTON')}
+                          {btnText || (previewLang === 'EN' ? '[Empty English button]' : 'TLAČÍTKO AKCE')}
                         </span>
                       </div>
                     );
@@ -1612,27 +1619,28 @@ export default function NewsletterTab({ showToast }) {
                 })}
               </div>
 
-              {/* Email Footer */}
+              <div style={{ borderTop: '1px solid #e1e4e8', margin: '0 20px' }}></div>
+
+              {/* Email Footer - Premium Light Footer */}
               <div style={{
-                padding: '16px',
+                padding: '24px 20px',
                 textAlign: 'center',
-                borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-                fontSize: '9px',
-                color: '#8a8a93',
-                backgroundColor: '#0b0b0c',
-                lineHeight: '1.5',
-                fontFamily: 'sans-serif'
+                fontSize: '10px',
+                color: '#8a8a92',
+                backgroundColor: '#ffffff',
+                lineHeight: '1.6',
+                fontFamily: "'Inter', -apple-system, sans-serif"
               }}>
-                <p style={{ margin: '0 0 4px 0', fontWeight: 'bold', color: '#fff' }}>
+                <p style={{ margin: '0 0 4px 0', fontWeight: 'bold', color: '#222222' }}>
                   {previewLang === 'EN' ? 'NORTHVALE s.r.o. | All rights reserved.' : 'NORTHVALE s.r.o. | Všechna práva vyhrazena.'}
                 </p>
-                <p style={{ margin: '0 0 10px 0' }}>info@northvaletcg.eu | +420 739 666 779</p>
-                <p style={{ margin: '0 0 10px 0', fontSize: '8px', color: '#555' }}>
+                <p style={{ margin: '0 0 8px 0', color: '#666666' }}>info@northvaletcg.eu | +420 739 666 779</p>
+                <p style={{ margin: '0 0 10px 0', fontSize: '9px', color: '#8a8a92' }}>
                   {previewLang === 'EN'
                     ? 'This email was sent based on newsletter subscription on our website northvaletcg.eu.'
                     : 'Tento e-mail byl odeslán na základě přihlášení k odběru newsletteru na našem webu northvaletcg.eu.'}
                 </p>
-                <span style={{ color: '#55555c', textDecoration: 'underline', fontSize: '9px', cursor: 'default' }}>
+                <span style={{ color: '#8a8a92', textDecoration: 'underline', fontSize: '10px', cursor: 'default' }}>
                   {previewLang === 'EN' ? 'Unsubscribe' : 'Odhlásit se z odběru'}
                 </span>
               </div>

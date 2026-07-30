@@ -219,7 +219,7 @@ export default function Footer({ setActivePage, activePage }) {
                   setActivePage('gdpr-vop', 'doprava');
                 }}
               >
-                {lang === 'CZ' ? 'Doprava a osobní odběr' : 'Shipping & Pickup'}
+                {lang === 'CZ' ? 'Doprava a doručení' : 'Shipping & Delivery'}
               </a>
             </li>
             <li>
@@ -336,7 +336,7 @@ export default function Footer({ setActivePage, activePage }) {
           </div>
           
           <div className="footer-contact-row">
-            <span className="contact-key">{lang === 'CZ' ? 'Odběr' : 'Pickup'}</span>
+            <span className="contact-key">{lang === 'CZ' ? 'Adresa' : 'Address'}</span>
             <span className="contact-value" style={{ lineHeight: '1.4' }}>
               Bratří Čapků 1095, Holice
             </span>

@@ -149,7 +149,7 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
     setCart(prev => prev.filter(item => item.id !== itemId));
   };
 
-  const freeShippingThreshold = 2000;
+  const freeShippingThreshold = 1750;
   const isFreeShipping = finalTotal >= freeShippingThreshold;
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - finalTotal);
   const shippingPercent = Math.min(100, Math.round((finalTotal / freeShippingThreshold) * 100));
@@ -406,7 +406,8 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
                         setAppliedDiscount(null);
                         setPromoCode('');
                       }}
-                      style={{ background: '#ef4444', color: '#fff' }}
+                      className="ckf-promo-remove-btn"
+                      style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', cursor: 'pointer', padding: '4px 8px' }}
                     >
                       {lang === 'CZ' ? 'Odebrat' : 'Remove'}
                     </button>

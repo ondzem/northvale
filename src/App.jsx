@@ -191,7 +191,13 @@ function AppContent() {
   const [lastCompletedOrder, setLastCompletedOrder] = useState(null);
 
   // User and Session State (Declared at top to avoid hoisting reference issues)
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    try {
+      return localStorage.getItem('northvale_is_logged_in') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
@@ -230,29 +236,42 @@ function AppContent() {
   });
 
   // User State
-  const [user, setUser] = useState({
-    id: '',
-    orderHistory: [],
-    gradingSubmissions: [],
-    buylistHistory: [],
-    storeCredit: 0,
-    name: '',
-    email: '',
-    phone: '',
-    role: 'customer',
-    avatar: '/user.png',
-    billingCompany: '',
-    billingName: '',
-    billingStreet: '',
-    billingCity: '',
-    billingZip: '',
-    billingCountry: '',
-    billingIco: '',
-    billingDic: '',
-    billingBankAccount: '',
-    shippingAddresses: [],
-    newsletter: false,
-    twoFactorEnabled: false
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('northvale_user_session');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed && parsed.email) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to parse saved user session:', e);
+    }
+    return {
+      id: '',
+      orderHistory: [],
+      gradingSubmissions: [],
+      buylistHistory: [],
+      storeCredit: 0,
+      name: '',
+      email: '',
+      phone: '',
+      role: 'customer',
+      avatar: '/user.png',
+      billingCompany: '',
+      billingName: '',
+      billingStreet: '',
+      billingCity: '',
+      billingZip: '',
+      billingCountry: '',
+      billingIco: '',
+      billingDic: '',
+      billingBankAccount: '',
+      shippingAddresses: [],
+      newsletter: false,
+      twoFactorEnabled: false
+    };
   });
 
   const [dbProducts, setDbProducts] = useState(() => {
@@ -305,48 +324,53 @@ function AppContent() {
     setIsAuthChecking(true);
     if (session) {
       const authUser = session.user;
+      const emailLower = (authUser.email || '').toLowerCase().trim();
+      const isAdminEmail = emailLower === 'info@northvaletcg.eu';
+
       setIsLoggedIn(true);
+      try {
+        localStorage.setItem('northvale_is_logged_in', 'true');
+      } catch {}
 
       // Fetch user profile from database
-      let { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authUser.id)
-        .single();
-
-      if (error && error.code === 'PGRST116') {
-        // Profile row does not exist! Create it dynamically to avoid database trigger dependency.
-        const defaultProfile = {
-          id: authUser.id,
-          full_name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || '',
-          role: authUser.email === 'info@northvaletcg.eu' ? 'admin' : 'customer',
-          store_credit: 0,
-          cart: cart || [],
-          favorites: favorites || []
-        };
-        const { data: insertedData, error: insertErr } = await supabase
+      let profile = null;
+      try {
+        const { data, error } = await supabase
           .from('profiles')
-          .upsert(defaultProfile)
-          .select()
+          .select('*')
+          .eq('id', authUser.id)
           .single();
 
-        if (insertErr) {
-          console.error('Failed to create missing profile row:', insertErr.message);
-        } else if (insertedData) {
-          profile = insertedData;
-          error = null;
+        if (error && error.code === 'PGRST116') {
+          const defaultProfile = {
+            id: authUser.id,
+            full_name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || '',
+            role: isAdminEmail ? 'admin' : 'customer',
+            store_credit: 0,
+            cart: cart || [],
+            favorites: favorites || []
+          };
+          const { data: insertedData } = await supabase
+            .from('profiles')
+            .upsert(defaultProfile)
+            .select()
+            .single();
+          if (insertedData) profile = insertedData;
+        } else if (data) {
+          profile = data;
         }
-      } else if (error) {
-        console.error('Error fetching user profile:', error.message);
+      } catch (err) {
+        console.warn('Profile fetch error in handleAuthSession:', err);
       }
 
-      setUser(prev => ({
-        ...prev,
+      const assignedRole = (profile?.role === 'admin' || isAdminEmail) ? 'admin' : (profile?.role || 'customer');
+
+      const updatedUser = {
         id: authUser.id,
         email: authUser.email || '',
         name: profile?.full_name || authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || '',
         phone: profile?.phone || authUser.user_metadata?.phone || '',
-        role: profile?.role || (authUser.email === 'info@northvaletcg.eu' ? 'admin' : 'customer'),
+        role: assignedRole,
         storeCredit: profile?.store_credit || 0,
         avatar: authUser.user_metadata?.avatar_url || '/user.png',
         billingCompany: profile?.billing_company || '',
@@ -364,14 +388,17 @@ function AppContent() {
         orderHistory: profile?.order_history || [],
         buylistHistory: profile?.buylist_history || [],
         gradingSubmissions: profile?.grading_submissions || []
-      }));
+      };
 
-      // Load user's cart from database profile
+      setUser(updatedUser);
+      try {
+        localStorage.setItem('northvale_user_session', JSON.stringify(updatedUser));
+      } catch {}
+
       if (profile?.cart) {
         setCart(profile.cart);
       }
 
-      // Load user's favorites from database profile and sync to local storage
       const dbFavorites = profile?.favorites || [];
       try {
         for (let i = localStorage.length - 1; i >= 0; i--) {
@@ -393,8 +420,12 @@ function AppContent() {
         console.warn(err);
       }
 
-    } else {
+    } else if (event === 'SIGNED_OUT') {
       setIsLoggedIn(false);
+      try {
+        localStorage.removeItem('northvale_is_logged_in');
+        localStorage.removeItem('northvale_user_session');
+      } catch {}
       setUser({
         id: '',
         orderHistory: [],
@@ -420,26 +451,23 @@ function AppContent() {
         twoFactorEnabled: false
       });
 
-      // Clear cart and favorites from localStorage and state on sign out
-      if (event === 'SIGNED_OUT') {
-        try {
-          localStorage.removeItem('northvale-cart');
-          for (let i = localStorage.length - 1; i >= 0; i--) {
-            const key = localStorage.key(i);
-            if (key && key.startsWith('fav-')) {
-              localStorage.removeItem(key);
-            }
+      try {
+        localStorage.removeItem('northvale-cart');
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('fav-')) {
+            localStorage.removeItem(key);
           }
-        } catch (err) {
-          console.warn(err);
         }
-        setCart([]);
-        setFavorites([]);
-        try {
-          window.dispatchEvent(new Event('local-favorites-changed'));
-        } catch (err) {
-          console.warn(err);
-        }
+      } catch (err) {
+        console.warn(err);
+      }
+      setCart([]);
+      setFavorites([]);
+      try {
+        window.dispatchEvent(new Event('local-favorites-changed'));
+      } catch (err) {
+        console.warn(err);
       }
     }
     setIsAuthChecking(false);
@@ -489,8 +517,8 @@ function AppContent() {
       page = 'home';
     }
     if (page === 'admin') {
-      const isAdmin = isLoggedIn && user && (user.role === 'admin' || user.email === 'info@northvaletcg.eu');
-      if (!isLoggedIn || !isAdmin) {
+      const isUserAdmin = isLoggedIn && user && (user.role === 'admin' || (user.email || '').toLowerCase().trim() === 'info@northvaletcg.eu');
+      if (!isLoggedIn || !isUserAdmin) {
         showToast(
           lang === 'CZ' 
             ? 'Přístup odepřen. Tuto stránku mohou navštěvovat pouze administrátoři.' 
@@ -511,8 +539,8 @@ function AppContent() {
     if (activePage === 'admin') {
       if (isAuthChecking) return;
 
-      const isAdmin = isLoggedIn && user && (user.role === 'admin' || user.email === 'info@northvaletcg.eu');
-      if (isLoggedIn && !isAdmin) {
+      const isUserAdmin = isLoggedIn && user && (user.role === 'admin' || (user.email || '').toLowerCase().trim() === 'info@northvaletcg.eu');
+      if (isLoggedIn && !isUserAdmin) {
         setActivePage('home');
         showToast(
           lang === 'CZ' 
@@ -597,11 +625,35 @@ function AppContent() {
 
 
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [activePage, selectedProductId]);
+
   // selectedProductId is declared at the top
 
   const handleLogin = (email, name = '') => {
     setIsLoggedIn(true);
-    setActivePage('profile');
+    setIsLoginModalOpen(false);
+    const em = (email || '').toLowerCase().trim();
+    const isAdminEmail = em === 'info@northvaletcg.eu' || (user && user.role === 'admin');
+    
+    const newUser = {
+      ...user,
+      email: email || user.email,
+      name: name || user.name || (email ? email.split('@')[0] : ''),
+      role: isAdminEmail ? 'admin' : user.role
+    };
+    setUser(newUser);
+    try {
+      localStorage.setItem('northvale_is_logged_in', 'true');
+      localStorage.setItem('northvale_user_session', JSON.stringify(newUser));
+    } catch {}
+
+    if (isAdminEmail) {
+      setActivePage('admin');
+    } else {
+      setActivePage('profile');
+    }
     showToast(
       lang === 'CZ'
         ? `Byl(a) jste úspěšně přihlášen(a) jako ${name || email}`
@@ -611,6 +663,10 @@ function AppContent() {
   };
 
   const handleLogout = async () => {
+    try {
+      localStorage.removeItem('northvale_is_logged_in');
+      localStorage.removeItem('northvale_user_session');
+    } catch {}
     const { error } = await supabase.auth.signOut();
     if (error) {
       showToast(
@@ -1537,24 +1593,27 @@ function AppContent() {
   const submitOrder = async (order, creditApplied = 0, options = {}) => {
     try {
       if (options.isCardPaid) {
-        // Case B: Mark paid
+        // Case B: Create paid order in DB after GP webpay payment verification
+        const cardOrderPayload = {
+          ...order,
+          id: options.orderId,
+          paymentStatus: 'paid',
+          platba: 'uhrazeno'
+        };
+
         const { data, error } = await supabase.functions.invoke('finalize-order', {
           body: {
-            action: 'mark_paid',
+            action: 'create',
             orderId: options.orderId,
-            gpWebpayParams: options.gpWebpayParams
+            orderDetails: cardOrderPayload
           }
         });
 
         if (error || !data || !data.success) {
-          throw new Error(error?.message || 'Failed to mark order as paid on server');
+          throw new Error(error?.message || 'Failed to create paid order on server');
         }
 
-        const serverOrder = {
-          ...order,
-          id: options.orderId,
-          paymentStatus: 'paid'
-        };
+        const serverOrder = data.order || cardOrderPayload;
 
         setLastCompletedOrder(serverOrder);
 
@@ -1562,7 +1621,7 @@ function AppContent() {
         setUser(prev => {
           if (!prev) return null;
           const history = prev.orderHistory || [];
-          const updatedHistory = history.map(o => o.id === options.orderId ? { ...o, paymentStatus: 'paid' } : o);
+          const updatedHistory = [serverOrder, ...history];
           return {
             ...prev,
             orderHistory: updatedHistory
@@ -1701,8 +1760,8 @@ function AppContent() {
     }));
   };
 
-  const isAdmin = isLoggedIn && user && (user.role === 'admin' || user.email === 'info@northvaletcg.eu');
-  const showPreRegistration = FEATURE_FLAGS.preRegistrationActive && !isAdmin;
+  const isAdmin = isLoggedIn && user && (user.role === 'admin' || (user.email || '').toLowerCase().trim() === 'info@northvaletcg.eu');
+  const showPreRegistration = FEATURE_FLAGS.preRegistrationActive && !isLoggedIn && !isAdmin;
 
   if (showPreRegistration) {
     return (

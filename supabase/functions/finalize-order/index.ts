@@ -30,6 +30,40 @@ function pemToDerBuffer(pem: string, type: "private" | "public"): ArrayBuffer {
   return base64ToArrayBuffer(cleanPem);
 }
 
+async function getNextInvoiceNumber(supabase: any): Promise<string> {
+  const START_NUMBER = 260100009;
+  const fileName = "invoice_counter.json";
+
+  try {
+    const { data: fileData, error: downloadError } = await supabase.storage
+      .from("pohoda-orders")
+      .download(fileName);
+
+    let currentNum = START_NUMBER;
+
+    if (!downloadError && fileData) {
+      const text = await fileData.text();
+      const parsed = JSON.parse(text);
+      if (parsed && typeof parsed.next_number === "number" && !isNaN(parsed.next_number)) {
+        currentNum = Math.max(START_NUMBER, parsed.next_number);
+      }
+    }
+
+    const nextNum = currentNum + 1;
+    const encoder = new TextEncoder();
+    const saveBytes = encoder.encode(JSON.stringify({ next_number: nextNum }, null, 2));
+
+    await supabase.storage
+      .from("pohoda-orders")
+      .upload(fileName, saveBytes, { contentType: "application/json", upsert: true });
+
+    return String(currentNum);
+  } catch (err) {
+    console.error("Error in getNextInvoiceNumber:", err);
+    return String(START_NUMBER);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -51,6 +85,65 @@ serve(async (req) => {
       await supabase.storage.updateBucket("pohoda-orders", { public: false });
     } catch (_uErr) {}
 
+    // Action: Reset Invoice Counter
+    if (action === "reset-invoice-counter") {
+      const startNum = body.startNumber || 260100009;
+      const encoder = new TextEncoder();
+      const saveBytes = encoder.encode(JSON.stringify({ next_number: startNum }, null, 2));
+      await supabase.storage
+        .from("pohoda-orders")
+        .upload("invoice_counter.json", saveBytes, { contentType: "application/json", upsert: true });
+      return new Response(JSON.stringify({ success: true, message: `Invoice counter set to ${startNum}` }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Action: Save Daily Deal Config (starts_at, ends_at, timing)
+    if (action === "save-daily-deal-config") {
+      const slotId = body.slotId || "active-deal";
+      const configData = body.config || {};
+      const encoder = new TextEncoder();
+      let existingConfig: Record<string, any> = {};
+      try {
+        const { data: file } = await supabase.storage.from("pohoda-orders").download("daily_deals_config.json");
+        if (file) {
+          existingConfig = JSON.parse(await file.text());
+        }
+      } catch (_e) {}
+      existingConfig[slotId] = { ...(existingConfig[slotId] || {}), ...configData };
+      const saveBytes = encoder.encode(JSON.stringify(existingConfig, null, 2));
+      await supabase.storage
+        .from("pohoda-orders")
+        .upload("daily_deals_config.json", saveBytes, { contentType: "application/json", upsert: true });
+      return new Response(JSON.stringify({ success: true, config: existingConfig }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Action: Get Daily Deal Config
+    if (action === "get-daily-deal-config") {
+      try {
+        const { data: file } = await supabase.storage.from("pohoda-orders").download("daily_deals_config.json");
+        if (file) {
+          const text = await file.text();
+          return new Response(JSON.stringify({ success: true, config: JSON.parse(text) }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      } catch (_e) {}
+      return new Response(JSON.stringify({ success: true, config: {} }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Action 0: Get Reserved Order ID
+    if (action === "get-order-id") {
+      const seqData = await getNextInvoiceNumber(supabase);
+      return new Response(JSON.stringify({ success: true, orderId: seqData }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Action 1: Create Order
     if (action === "create") {
       if (!orderDetails || !orderDetails.items) {
@@ -60,12 +153,11 @@ serve(async (req) => {
         });
       }
 
-      // Generate sequence number from database sequence
-      const { data: seqData, error: seqError } = await supabase.rpc("get_next_order_number");
-      if (seqError || !seqData) {
-        throw new Error(seqError?.message || "Failed to generate sequence order number.");
+      // Generate sequence number or use passed orderId
+      let generatedOrderId = orderId || orderDetails.id;
+      if (!generatedOrderId) {
+        generatedOrderId = await getNextInvoiceNumber(supabase);
       }
-      const generatedOrderId = seqData;
 
       const order = {
         ...orderDetails,
@@ -204,15 +296,22 @@ serve(async (req) => {
       // 4. Trigger invoice generation and email immediately if not card payment
       if (order.paymentMethod !== "card" && order.paymentMethod !== "online platba") {
         try {
-          // Trigger generate-invoice-pdf
-          await fetch(`${supabaseUrl}/functions/v1/generate-invoice-pdf`, {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${supabaseServiceKey}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ order })
-          });
+          const hasNoVat = !!(
+            order.hasNoVat || order.noVat || order.isNoVat ||
+            (order.items && order.items.some((it: any) => it.no_vat || it.noVat || (it.product && (it.product.no_vat || it.product.noVat))))
+          );
+
+          // ONLY generate automated invoice PDF if the order does NOT contain non-VAT items!
+          if (!hasNoVat) {
+            await fetch(`${supabaseUrl}/functions/v1/generate-invoice-pdf`, {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${supabaseServiceKey}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ order })
+            });
+          }
 
           // Trigger send-order-email
           await fetch(`${supabaseUrl}/functions/v1/send-order-email`, {
@@ -221,7 +320,7 @@ serve(async (req) => {
               "Authorization": `Bearer ${supabaseServiceKey}`,
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({ order })
+            body: JSON.stringify({ order, items: order.items })
           });
         } catch (subErr) {
           console.error("Failed to run post-order actions:", subErr);
@@ -402,7 +501,7 @@ serve(async (req) => {
             "Authorization": `Bearer ${supabaseServiceKey}`,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ order })
+          body: JSON.stringify({ order, items: order.items })
         });
       } catch (postErr) {
         console.error("Failed to trigger post-order actions for mark_paid:", postErr);

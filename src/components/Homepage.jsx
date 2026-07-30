@@ -149,7 +149,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         desktopImage: slide.desktop_image_url,
         page: slide.redirect_page || null
       }));
-      
+
       if (mapped.length > 0) {
         try {
           localStorage.setItem('northvale-cached-slides', JSON.stringify(mapped));
@@ -227,8 +227,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   // USP slideshow ref & data
   const uspScrollRef = useRef(null);
   const uspItems = [
-    { icon: '/truck-moving.png', title: lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping', desc: lang === 'CZ' ? 'při objednávce nad 1 000 Kč' : 'on orders over 1,000 Kč' },
-    { icon: '/tachometer-fast.png', title: lang === 'CZ' ? 'Rychlost doručení' : 'Fast Shipping', desc: lang === 'CZ' ? 'Odesíláme do 24 hodin' : 'Dispatched within 24 hours' },
+    { icon: '/truck-moving.png', title: lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping', desc: lang === 'CZ' ? 'při objednávce nad 1 750 Kč' : 'on orders over 1,750 Kč' },
+    { icon: '/tachometer-fast.png', title: lang === 'CZ' ? 'Rychlost doručení' : 'Fast Shipping', desc: lang === 'CZ' ? 'Doručení do 48 hodin' : 'Delivery within 48 hours' },
     { icon: '/badget-check-alt.png', title: lang === 'CZ' ? '100% Originální' : '100% Authentic', desc: lang === 'CZ' ? 'Pouze od ověřených distributorů' : 'Only from verified distributors' },
     { icon: '/credit-card.png', title: lang === 'CZ' ? 'Bezpečná platba' : 'Secure Payment', desc: lang === 'CZ' ? 'Karta, bankovní převod, dobírka' : 'Cards, bank transfer, COD' }
   ];
@@ -315,7 +315,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
   // Deal of the day countdown timer
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  
+
   // Deal Button micro-animation state
   const [dealAdded, setDealAdded] = useState(false);
   const [isBtnHoveredVertical, setIsBtnHoveredVertical] = useState(false);
@@ -448,8 +448,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       name: 'Monika R.',
       desc: lang === 'CZ' ? 'UPCE student' : 'UPCE Student',
       text: lang === 'CZ'
-        ? `„Oceňuji možnost doručení kusovek na odběrné místo v kavárně v centru Pardubic. Neplatím žádné poštovné pro malé objednávky a k tomu dostanu výbornou kávu. ${FEATURE_FLAGS.showBuylist ? 'Výkup proběhl' : 'Nákup proběhl'} naprosto hladce.“`
-        : `“I appreciate the option to pick up my singles at the pickup point in a cafe in Pardubice city center. I don't pay any shipping for small orders and I get a delicious coffee to boot. The ${FEATURE_FLAGS.showBuylist ? 'buylist trade' : 'purchase'} went incredibly smoothly.”`
+        ? `„Doručení bylo neskutečně rychlé a produkty přišly zabalené s maximální péčí. ${FEATURE_FLAGS.showBuylist ? 'Výkup i nákup proběhly' : 'Nákup proběhl'} naprosto hladce a bez jediného problému.“`
+        : `“Delivery was incredibly fast and the products arrived packaged with maximum care. The ${FEATURE_FLAGS.showBuylist ? 'buylist trade and purchase' : 'purchase'} went smoothly without a single issue.”`
     },
     FEATURE_FLAGS.showGrading && {
       initials: 'PS',
@@ -496,7 +496,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   const dealProductStock = activeDeal ? getDealStock() : 0;
   const dealProductPrice = activeDeal ? Number(activeDeal.price || 0) : 0;
   const dealProductOriginalPrice = activeDeal && activeDeal.original_price ? Number(activeDeal.original_price) : null;
-  const discountPercent = (activeDeal && dealProductOriginalPrice) 
+  const discountPercent = (activeDeal && dealProductOriginalPrice)
     ? Math.round(((dealProductOriginalPrice - dealProductPrice) / dealProductOriginalPrice) * 100)
     : 0;
 
@@ -532,14 +532,14 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       stock: dealProductStock
     };
 
-    const cartVariant = productToBuy.variants && productToBuy.variants.length > 0 
-      ? { 
-          ...productToBuy.variants[0], 
-          isDailyDeal: true,
-          dealSlotId: activeDeal.id,
-          price: dealProductPrice, 
-          stock: dealProductStock 
-        } 
+    const cartVariant = productToBuy.variants && productToBuy.variants.length > 0
+      ? {
+        ...productToBuy.variants[0],
+        isDailyDeal: true,
+        dealSlotId: activeDeal.id,
+        price: dealProductPrice,
+        stock: dealProductStock
+      }
       : cartProduct;
 
     addToCart(cartVariant, cartProduct);
@@ -563,21 +563,21 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       {/* Hero Section */}
       <section style={{ ...styles.heroSection, marginTop: isMobile ? '12px' : '64px', gap: isMobile ? '16px' : '24px' }} className="container">
         {/* Slideshow Wrapper (70% width) */}
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          flex: !isMobile ? '7.3 1 66%' : '7 1 60%', 
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: !isMobile ? '7.3 1 66%' : '7 1 60%',
           minWidth: isMobile ? '100%' : '280px'
         }}>
-          <div 
-            style={{ 
-              ...styles.slideshow, 
-              flex: 'none', 
-              width: '100%', 
+          <div
+            style={{
+              ...styles.slideshow,
+              flex: 'none',
+              width: '100%',
               height: 'auto',
               aspectRatio: useMobileImage ? '800 / 1000' : '1920 / 840',
               padding: '0',
-              backgroundColor: 'var(--bg-secondary)', 
+              backgroundColor: 'var(--bg-secondary)',
               cursor: (slides && slides[currentSlide]?.page) ? 'pointer' : 'default',
               borderRadius: 'var(--radius-lg)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -586,7 +586,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               WebkitBackdropFilter: 'none',
               position: 'relative',
               overflow: 'hidden'
-            }} 
+            }}
             onClick={() => {
               if (slides && slides[currentSlide]?.page) {
                 const path = slides[currentSlide].page;
@@ -623,7 +623,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             onTouchEnd={onTouchEnd}
           >
             {currentImageUrl && (
-              <img 
+              <img
                 src={currentImageUrl}
                 alt={lang === 'CZ' ? 'Akční nabídka a novinky - Northvale TCG' : 'Special offer and news - Northvale TCG'}
                 title={lang === 'CZ' ? 'Akční nabídka a novinky' : 'Special offer and news'}
@@ -648,9 +648,9 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             )}
 
             {slides && slides.length > 1 && (
-              <button 
-                type="button" 
-                onClick={(e) => { e.stopPropagation(); prevSlide(); }} 
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); prevSlide(); }}
                 style={{ ...styles.slideArrow, left: '20px', zIndex: 2 }}
                 aria-label="Předchozí snímek"
               >
@@ -658,9 +658,9 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               </button>
             )}
             {slides && slides.length > 1 && (
-              <button 
-                type="button" 
-                onClick={(e) => { e.stopPropagation(); nextSlide(); }} 
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); nextSlide(); }}
                 style={{ ...styles.slideArrow, right: '20px', zIndex: 2 }}
                 aria-label="Další snímek"
               >
@@ -668,23 +668,23 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               </button>
             )}
             {slides && slides.length > 1 && (
-              <div 
-                style={{ 
-                  ...styles.indicators, 
-                  position: 'absolute', 
-                  bottom: '16px', 
-                  left: '50%', 
-                  transform: 'translateX(-50%)', 
+              <div
+                style={{
+                  ...styles.indicators,
+                  position: 'absolute',
+                  bottom: '16px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
                   zIndex: 10,
                   margin: 0
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
                 {slides.map((_, idx) => (
-                  <span 
-                    key={idx} 
+                  <span
+                    key={idx}
                     style={{
-                      ...styles.dot, 
+                      ...styles.dot,
                       width: currentSlide === idx ? '32px' : '16px',
                       backgroundColor: currentSlide === idx ? 'var(--color-gold)' : 'rgba(255,255,255,0.2)'
                     }}
@@ -697,10 +697,10 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         </div>
 
         {/* Deal of the Day */}
-        <div style={{ 
-          ...styles.dealWidget, 
+        <div style={{
+          ...styles.dealWidget,
           flex: !isMobile ? '2.7 1 22%' : '3 1 25%',
-          height: !isMobile ? 'auto' : (useMobileImage ? '410px' : '380px'), 
+          height: !isMobile ? 'auto' : (useMobileImage ? '410px' : '380px'),
           padding: (!activeDeal || !isMobile || useMobileImage) ? '16px' : '0 16px 0 0',
           flexDirection: (!activeDeal || !isMobile || useMobileImage) ? 'column' : 'row',
           alignItems: 'stretch',
@@ -721,16 +721,16 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               width: '100%',
               padding: '24px 8px'
             }}>
-              <img 
-                src="/logo s popisem.webp" 
-                alt="" 
-                style={{ 
-                  width: '120px', 
-                  height: 'auto', 
-                  objectFit: 'contain', 
+              <img
+                src="/logo s popisem.webp"
+                alt=""
+                style={{
+                  width: '120px',
+                  height: 'auto',
+                  objectFit: 'contain',
                   marginBottom: '24px',
                   filter: 'brightness(1.15)'
-                }} 
+                }}
               />
               <h3 style={{
                 fontSize: '18px',
@@ -748,8 +748,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 lineHeight: '1.6',
                 maxWidth: '240px'
               }}>
-                {lang === 'CZ' 
-                  ? 'Již brzy zde naleznete další skvělou nabídku za výjimečnou cenu. Sledujte nás, ať vám nic neuteče!' 
+                {lang === 'CZ'
+                  ? 'Již brzy zde naleznete další skvělou nabídku za výjimečnou cenu. Sledujte nás, ať vám nic neuteče!'
                   : 'Check back soon for our next exclusive deal at an exceptional price. Stay tuned!'}
               </p>
             </div>
@@ -757,21 +757,21 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             // --- VERTICAL LAYOUT (DESKTOP & MOBILE) ---
             <>
               {/* Product link wrapping title and image */}
-              <a 
-                href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? `/sealed-detail/${dealProduct.id}` : '#'} 
-                style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', flex: '1 1 auto', width: '100%' }} 
-                onClick={(e) => { 
-                  if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && dealProduct.id && dealProduct.id !== 'deal-of-the-day') { 
-                    e.preventDefault(); 
-                    handleCardClick(dealProduct); 
-                  } 
+              <a
+                href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? `/sealed-detail/${dealProduct.id}` : '#'}
+                style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', flex: '1 1 auto', width: '100%' }}
+                onClick={(e) => {
+                  if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && dealProduct.id && dealProduct.id !== 'deal-of-the-day') {
+                    e.preventDefault();
+                    handleCardClick(dealProduct);
+                  }
                 }}
               >
                 {/* Top: Title */}
-                <h3 style={{ 
-                  fontSize: '17px', 
-                  fontWeight: '700', 
-                  color: 'var(--text-main)', 
+                <h3 style={{
+                  fontSize: '17px',
+                  fontWeight: '700',
+                  color: 'var(--text-main)',
                   margin: '4px 0 0 0',
                   textAlign: 'left',
                   lineHeight: '1.4',
@@ -802,19 +802,19 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   marginBottom: '8px',
                   width: '100%'
                 }}>
-                  <img 
-                    src={activeDeal.image_url || '/logo s popisem.webp'} 
-                    alt={activeDeal.name || 'Akční nabídka - Northvale TCG'} 
-                    title={activeDeal.name || 'Akční nabídka'} 
+                  <img
+                    src={activeDeal.image_url || '/logo s popisem.webp'}
+                    alt={activeDeal.name || 'Akční nabídka - Northvale TCG'}
+                    title={activeDeal.name || 'Akční nabídka'}
                     width={!isMobile ? "164" : "125"}
                     height={!isMobile ? "230" : "175"}
-                    style={{ 
-                      maxHeight: '100%', 
-                      maxWidth: '100%', 
+                    style={{
+                      maxHeight: '100%',
+                      maxWidth: '100%',
                       objectFit: 'contain',
                       transform: 'scale(1) translateY(4px)',
                       transition: 'transform 0.3s ease'
-                    }} 
+                    }}
                   />
                   {/* Floating stock badge */}
                   <span style={{
@@ -865,13 +865,13 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   </span>
                 </div>
 
-                <button 
-                  className="btn btn-primary" 
+                <button
+                  className="btn btn-primary"
                   onMouseEnter={() => setIsBtnHoveredVertical(true)}
                   onMouseLeave={() => setIsBtnHoveredVertical(false)}
                   style={{
-                    backgroundColor: dealAdded 
-                      ? 'var(--color-gold-hover)' 
+                    backgroundColor: dealAdded
+                      ? 'var(--color-gold-hover)'
                       : (isBtnHoveredVertical ? 'var(--color-gold-hover)' : 'var(--color-gold)'),
                     color: '#000',
                     fontWeight: '700',
@@ -889,23 +889,23 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     minWidth: '110px',
                     transform: dealAdded ? 'scale(0.95)' : (isBtnHoveredVertical ? 'scale(1.05)' : 'scale(1)'),
                     transition: 'all 0.15s ease',
-                    boxShadow: isBtnHoveredVertical 
-                      ? '0 6px 16px rgba(253, 189, 22, 0.3)' 
+                    boxShadow: isBtnHoveredVertical
+                      ? '0 6px 16px rgba(253, 189, 22, 0.3)'
                       : '0 4px 12px rgba(253, 189, 22, 0.15)'
                   }}
                   disabled={dealProductStock === 0}
                   onClick={handleBuyDealClick}
                 >
-                  <img 
-                    src="/shopping-cart.png" 
-                    alt="" 
+                  <img
+                    src="/shopping-cart.png"
+                    alt=""
                     width="14"
                     height="14"
-                    style={{ 
-                      width: '14px', 
-                      height: '14px', 
-                      filter: 'brightness(0)' 
-                     }} 
+                    style={{
+                      width: '14px',
+                      height: '14px',
+                      filter: 'brightness(0)'
+                    }}
                   />
                   {dealAdded ? (lang === 'CZ' ? 'Přidáno' : 'Added') : (lang === 'CZ' ? 'Do košíku' : 'Add to Cart')}
                 </button>
@@ -913,7 +913,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
               {/* Bottom: Floating gold Countdown Banner */}
               <div style={{
-                background: 'var(--color-gold)', 
+                background: 'var(--color-gold)',
                 borderRadius: 'var(--radius-md)',
                 padding: '16px 12px',
                 display: 'flex',
@@ -925,10 +925,10 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 boxSizing: 'border-box',
                 boxShadow: '0 4px 12px rgba(253, 189, 22, 0.2)'
               }}>
-                <span style={{ 
-                  fontSize: '10px', 
-                  fontWeight: '800', 
-                  color: '#000', 
+                <span style={{
+                  fontSize: '10px',
+                  fontWeight: '800',
+                  color: '#000',
                   textTransform: 'uppercase',
                   letterSpacing: '1px',
                   marginBottom: '6px'
@@ -977,7 +977,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             <>
               {/* Left Column: Vertical Countdown Banner */}
               <div style={{
-                background: 'var(--color-gold)', 
+                background: 'var(--color-gold)',
                 borderRadius: 'var(--radius-md)',
                 padding: '24px 12px',
                 display: 'flex',
@@ -990,10 +990,10 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 boxSizing: 'border-box',
                 boxShadow: '0 4px 12px rgba(253, 189, 22, 0.2)'
               }}>
-                <span style={{ 
-                  fontSize: '10px', 
-                  fontWeight: '800', 
-                  color: '#000', 
+                <span style={{
+                  fontSize: '10px',
+                  fontWeight: '800',
+                  color: '#000',
                   textTransform: 'uppercase',
                   letterSpacing: '1px',
                   marginBottom: '16px',
@@ -1049,20 +1049,20 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 boxSizing: 'border-box'
               }}>
                 {/* Title (Enlarged) */}
-                <a 
-                  href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? `/sealed-detail/${dealProduct.id}` : '#'} 
-                  style={{ textDecoration: 'none', color: 'inherit' }} 
-                  onClick={(e) => { 
-                    if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && dealProduct.id && dealProduct.id !== 'deal-of-the-day') { 
-                      e.preventDefault(); 
-                      handleCardClick(dealProduct); 
-                    } 
+                <a
+                  href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? `/sealed-detail/${dealProduct.id}` : '#'}
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                  onClick={(e) => {
+                    if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && dealProduct.id && dealProduct.id !== 'deal-of-the-day') {
+                      e.preventDefault();
+                      handleCardClick(dealProduct);
+                    }
                   }}
                 >
-                  <h3 style={{ 
-                    fontSize: '18px', 
-                    fontWeight: '800', 
-                    color: 'var(--text-main)', 
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '800',
+                    color: 'var(--text-main)',
                     margin: '0 0 8px 0',
                     textAlign: 'left',
                     lineHeight: '1.3',
@@ -1088,14 +1088,14 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   minHeight: '180px'
                 }}>
                   {/* Left part: Image Container (shifted all the way to left, enlarged) */}
-                  <a 
-                    href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? `/sealed-detail/${dealProduct.id}` : '#'} 
-                    style={{ flex: '1.2 1 0%', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', position: 'relative', textDecoration: 'none' }} 
-                    onClick={(e) => { 
-                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && dealProduct.id && dealProduct.id !== 'deal-of-the-day') { 
-                        e.preventDefault(); 
-                        handleCardClick(dealProduct); 
-                      } 
+                  <a
+                    href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? `/sealed-detail/${dealProduct.id}` : '#'}
+                    style={{ flex: '1.2 1 0%', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', position: 'relative', textDecoration: 'none' }}
+                    onClick={(e) => {
+                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && dealProduct.id && dealProduct.id !== 'deal-of-the-day') {
+                        e.preventDefault();
+                        handleCardClick(dealProduct);
+                      }
                     }}
                   >
                     <div style={{
@@ -1106,19 +1106,19 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                       justifyContent: 'flex-start',
                       cursor: catalogProduct ? 'pointer' : 'default'
                     }}>
-                       <img 
-                        src={activeDeal.image_url || '/logo s popisem.webp'} 
-                        alt={activeDeal.name || 'Akční nabídka - Northvale TCG'} 
-                        title={activeDeal.name || 'Akční nabídka'} 
+                      <img
+                        src={activeDeal.image_url || '/logo s popisem.webp'}
+                        alt={activeDeal.name || 'Akční nabídka - Northvale TCG'}
+                        title={activeDeal.name || 'Akční nabídka'}
                         width="185"
                         height="185"
-                        style={{ 
-                          maxHeight: '100%', 
-                          maxWidth: '100%', 
+                        style={{
+                          maxHeight: '100%',
+                          maxWidth: '100%',
                           objectFit: 'contain',
                           transform: 'scale(1.25) translate(-28px, 16px)',
                           transformOrigin: 'left center'
-                        }} 
+                        }}
                       />
                     </div>
                   </a>
@@ -1167,13 +1167,13 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     </div>
 
                     {/* Buy Button */}
-                    <button 
-                      className="btn btn-primary" 
+                    <button
+                      className="btn btn-primary"
                       onMouseEnter={() => setIsBtnHoveredHorizontal(true)}
                       onMouseLeave={() => setIsBtnHoveredHorizontal(false)}
                       style={{
-                        backgroundColor: dealAdded 
-                          ? 'var(--color-gold-hover)' 
+                        backgroundColor: dealAdded
+                          ? 'var(--color-gold-hover)'
                           : (isBtnHoveredHorizontal ? 'var(--color-gold-hover)' : 'var(--color-gold)'),
                         color: '#000',
                         fontWeight: '700',
@@ -1190,23 +1190,23 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                         width: '120px',
                         transform: dealAdded ? 'scale(0.95)' : (isBtnHoveredHorizontal ? 'scale(1.05)' : 'scale(1)'),
                         transition: 'all 0.15s ease',
-                        boxShadow: isBtnHoveredHorizontal 
-                          ? '0 6px 16px rgba(253, 189, 22, 0.3)' 
+                        boxShadow: isBtnHoveredHorizontal
+                          ? '0 6px 16px rgba(253, 189, 22, 0.3)'
                           : '0 4px 12px rgba(253, 189, 22, 0.15)'
                       }}
                       disabled={dealProductStock === 0}
                       onClick={handleBuyDealClick}
                     >
-                      <img 
-                        src="/shopping-cart.png" 
-                        alt="" 
+                      <img
+                        src="/shopping-cart.png"
+                        alt=""
                         width="14"
                         height="14"
-                        style={{ 
-                          width: '14px', 
-                          height: '14px', 
-                          filter: 'brightness(0)' 
-                        }} 
+                        style={{
+                          width: '14px',
+                          height: '14px',
+                          filter: 'brightness(0)'
+                        }}
                       />
                       {dealAdded ? (lang === 'CZ' ? 'Přidáno' : 'Added') : (lang === 'CZ' ? 'Do košíku' : 'Add to Cart')}
                     </button>
@@ -1220,10 +1220,10 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
       {/* USP Bar */}
       {isUspMobile ? (
-        <section 
-          style={{ 
-            ...styles.uspBar, 
-            display: 'flex', 
+        <section
+          style={{
+            ...styles.uspBar,
+            display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: '12px 16px',
@@ -1231,15 +1231,15 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
           }}
           className="container"
         >
-          <button 
-            className="usp-arrow-btn" 
+          <button
+            className="usp-arrow-btn"
             onClick={() => handleUspScroll('left')}
             aria-label="Předchozí výhoda"
           >
             ‹
           </button>
-          
-          <div 
+
+          <div
             ref={uspScrollRef}
             className="usp-scroll-container"
             style={{
@@ -1256,7 +1256,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             }}
           >
             {uspItems.map((item, idx) => (
-              <div 
+              <div
                 key={idx}
                 style={{
                   display: 'flex',
@@ -1269,13 +1269,13 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   padding: '4px 0'
                 }}
               >
-                <img 
-                  src={item.icon} 
-                  alt={item.title || 'Northvale TCG'} 
-                  title={item.title || 'Northvale TCG'} 
+                <img
+                  src={item.icon}
+                  alt={item.title || 'Northvale TCG'}
+                  title={item.title || 'Northvale TCG'}
                   width="36"
                   height="36"
-                  style={styles.uspIcon} 
+                  style={styles.uspIcon}
                 />
                 <div style={styles.uspText}>
                   <h4 style={{ ...styles.uspTitle, margin: 0 }}>{item.title}</h4>
@@ -1285,8 +1285,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             ))}
           </div>
 
-          <button 
-            className="usp-arrow-btn" 
+          <button
+            className="usp-arrow-btn"
             onClick={() => handleUspScroll('right')}
             aria-label="Další výhoda"
           >
@@ -1299,14 +1299,14 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             <img src="/truck-moving.png" alt={lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'} title={lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'} width="36" height="36" style={styles.uspIcon} />
             <div style={styles.uspText}>
               <h4 style={styles.uspTitle}>{lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'}</h4>
-              <p style={styles.uspDesc}>{lang === 'CZ' ? 'při objednávce nad 1 000 Kč' : 'on orders over 1,000 Kč'}</p>
+              <p style={styles.uspDesc}>{lang === 'CZ' ? 'při objednávce nad 1 750 Kč' : 'on orders over 1,750 Kč'}</p>
             </div>
           </div>
           <div style={{ ...styles.uspBox, borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
             <img src="/tachometer-fast.png" alt={lang === 'CZ' ? 'Rychlost doručení' : 'Fast Delivery'} title={lang === 'CZ' ? 'Rychlost doručení' : 'Fast Delivery'} width="36" height="36" style={styles.uspIcon} />
             <div style={styles.uspText}>
               <h4 style={styles.uspTitle}>{lang === 'CZ' ? 'Rychlost doručení' : 'Fast Shipping'}</h4>
-              <p style={styles.uspDesc}>{lang === 'CZ' ? 'Odesíláme do 24 hodin' : 'Dispatched within 24 hours'}</p>
+              <p style={styles.uspDesc}>{lang === 'CZ' ? 'Doručení do 48 hodin' : 'Delivery within 48 hours'}</p>
             </div>
           </div>
           <div style={{ ...styles.uspBox, borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
@@ -1383,8 +1383,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             }}>
               {lang === 'CZ' ? 'Zakládáme si především na kvalitě a dostupnosti zboží.' : 'We pride ourselves above all on the quality and availability of our inventory.'}
             </p>
-            <button 
-              className="btn btn-primary" 
+            <button
+              className="btn btn-primary"
               style={{ marginTop: '8px', alignSelf: 'flex-start' }}
               onClick={() => setActivePage('about')}
             >
@@ -1420,10 +1420,10 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             }} className="about-us-img-container">
               <picture style={{ width: '100%', height: '100%', display: 'block' }}>
                 <source media="(max-width: 500px)" srcSet="/O nas.webp" />
-                <img 
-                  src="/O nas Desktop.webp" 
-                  alt={lang === 'CZ' ? 'O nás - Příběh a tým e-shopu Northvale TCG' : 'About Us - Northvale TCG E-shop Story and Team'} 
-                  title={lang === 'CZ' ? 'Příběh Northvale TCG' : 'Northvale TCG Story'} 
+                <img
+                  src="/O nas Desktop.webp"
+                  alt={lang === 'CZ' ? 'O nás - Příběh a tým e-shopu Northvale TCG' : 'About Us - Northvale TCG E-shop Story and Team'}
+                  title={lang === 'CZ' ? 'Příběh Northvale TCG' : 'Northvale TCG Story'}
                   width="1254"
                   height="1254"
                   style={{
@@ -1439,8 +1439,8 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         </section>
       </div>
 
-        {/* Category Tiles */}
-        <section id="popular-categories" className="category-section container">
+      {/* Category Tiles */}
+      <section id="popular-categories" className="category-section container">
         <h2 style={styles.sectionHeading} className="section-title">{lang === 'CZ' ? 'Oblíbené kategorie' : 'Popular Categories'}</h2>
         <div className="category-tiles-grid">
           <a href="/sealed-catalog/?game=Pok%C3%A9mon" style={{ ...styles.categoryTile, textDecoration: 'none', color: 'inherit' }} className="glass-card" onClick={(e) => { if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { e.preventDefault(); setFilters({ game: 'Pokémon' }); setActivePage('sealed-catalog'); } }}>
@@ -1471,7 +1471,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
       {/* Product Grids */}
       {/* 1. {lang === 'CZ' ? 'Novinky' : 'New Releases'} (New arrivals) */}
-      <section style={{ ...styles.sectionContainer, paddingBottom: isMobile ? '12px' : '0' }} className="container">
+      <section style={{ ...styles.sectionContainer, marginBottom: isMobile ? '32px' : '56px', paddingBottom: isMobile ? '12px' : '0' }} className="container">
         <header className="nv-header">
           <div className="nv-header-left">
             <div className="nv-eyebrow">{lang === 'CZ' ? 'Nové přírůstky' : 'New Additions'}</div>
@@ -1512,16 +1512,16 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             return (
               <div ref={newArrivalsRef} className="homepage-product-grid" style={gridStyle}>
                 {newArrivals.map(product => (
-                  <a 
-                    key={product.id} 
-                    href={`/sealed-detail/${product.id}`} 
-                    className={`vf-card type-${product.type}`} 
+                  <a
+                    key={product.id}
+                    href={`/sealed-detail/${product.id}`}
+                    className={`vf-card type-${product.type}`}
                     style={{ textDecoration: 'none', color: 'inherit' }}
-                    onClick={(e) => { 
-                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
-                        e.preventDefault(); 
-                        handleCardClick(product); 
-                      } 
+                    onClick={(e) => {
+                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                        e.preventDefault();
+                        handleCardClick(product);
+                      }
                     }}
                   >
                     <div className="vf-art">
@@ -1553,19 +1553,21 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       </section>
 
       {/* 2. & 3. Propojené sekce s pozadím na celou šířku (full-bleed) */}
-      <div style={{
-        backgroundColor: 'var(--bg-secondary)',
-        borderTop: '1px solid rgba(255, 255, 255, 0.04)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-        width: '100%',
-        paddingTop: isMobile ? '48px' : '88px',
-        paddingBottom: isMobile ? '24px' : '88px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: isMobile ? '36px' : '88px',
-        boxSizing: 'border-box'
-      }}>
-        {/* 2. {lang === 'CZ' ? 'Předobjednávky' : 'Pre-orders'} (Preorders) */}
+      {(FEATURE_FLAGS.showGrading || FEATURE_FLAGS.showSlabs) && (
+        <div style={{
+          backgroundColor: 'var(--bg-secondary)',
+          borderTop: '1px solid rgba(255, 255, 255, 0.04)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+          width: '100%',
+          paddingTop: isMobile ? '48px' : '88px',
+          paddingBottom: isMobile ? '24px' : '88px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: isMobile ? '36px' : '88px',
+          boxSizing: 'border-box'
+        }}>
+          {/* SLEEP MODE: PREORDERS SECTION (Re-activate by uncommenting this block) */}
+          {/*
         <section style={{ ...styles.sectionContainer, marginBottom: isMobile ? '8px' : '40px' }} className="container">
           <header className="nv-header">
             <div className="nv-header-left">
@@ -1646,121 +1648,123 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
               <button onClick={() => handleScroll(preordersRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
             </div>
         </section>
+        */}
 
-        {/* Grading Banner */}
-        {FEATURE_FLAGS.showGrading && (
-          <section style={{ marginBottom: isMobile ? '24px' : '40px' }} className="container">
-            <div className="grading-banner-card">
-              <div className="grading-banner-content">
-                <h2 className="grading-banner-title">{lang === 'CZ' ? 'Nechte si ohodnotit vaši kartu' : 'Have Your Cards Professionally Graded'}</h2>
-                <p className="grading-banner-description">
-                  Zprostředkujeme pro Vás odeslání karet do USA (PSA, Beckett, TAG). Vaše karty vyčistíme, bezpečně zabalíme a kompletně pojistíme. Sledujte průběh své zakázky online.
-                </p>
-                <button className="btn btn-primary" onClick={() => { setFilters({}); setActivePage('grading'); }}>{lang === 'CZ' ? 'Chci ohodnotit kartu' : 'Submit Cards for Grading'}</button>
+          {/* Grading Banner */}
+          {FEATURE_FLAGS.showGrading && (
+            <section style={{ marginBottom: isMobile ? '24px' : '40px' }} className="container">
+              <div className="grading-banner-card">
+                <div className="grading-banner-content">
+                  <h2 className="grading-banner-title">{lang === 'CZ' ? 'Nechte si ohodnotit vaši kartu' : 'Have Your Cards Professionally Graded'}</h2>
+                  <p className="grading-banner-description">
+                    Zprostředkujeme pro Vás odeslání karet do USA (PSA, Beckett, TAG). Vaše karty vyčistíme, bezpečně zabalíme a kompletně pojistíme. Sledujte průběh své zakázky online.
+                  </p>
+                  <button className="btn btn-primary" onClick={() => { setFilters({}); setActivePage('grading'); }}>{lang === 'CZ' ? 'Chci ohodnotit kartu' : 'Submit Cards for Grading'}</button>
+                </div>
+                <div className="grading-banner-img-wrapper">
+                  <img
+                    src="/grading sekce.webp"
+                    alt={lang === 'CZ' ? 'Profesionální grading a hodnocení karet PSA, Beckett, TAG' : 'Professional TCG card grading services PSA, Beckett, TAG'}
+                    title={lang === 'CZ' ? 'Grading sběratelských karet' : 'TCG card grading services'}
+                    className="grading-banner-image"
+                    width="1672"
+                    height="941"
+                  />
+                </div>
               </div>
-              <div className="grading-banner-img-wrapper">
-                 <img 
-                  src="/grading sekce.webp" 
-                  alt={lang === 'CZ' ? 'Profesionální grading a hodnocení karet PSA, Beckett, TAG' : 'Professional TCG card grading services PSA, Beckett, TAG'} 
-                  title={lang === 'CZ' ? 'Grading sběratelských karet' : 'TCG card grading services'} 
-                  className="grading-banner-image" 
-                  width="1672" 
-                  height="941" 
-                />
-              </div>
-            </div>
-          </section>
-        )}
+            </section>
+          )}
 
-        {/* 3. {lang === 'CZ' ? 'Ohodnocené karty' : 'Graded Cards'} (Slabs) */}
-        {FEATURE_FLAGS.showSlabs && (
-          <section style={{ ...styles.sectionContainer, paddingBottom: isMobile ? '48px' : '0' }} className="container">
-            <header className="nv-header">
-              <div className="nv-header-left">
-                <div className="nv-eyebrow">{lang === 'CZ' ? 'Certifikovaná kvalita' : 'Certified Quality'}</div>
-                <h2 className="nv-title">{lang === 'CZ' ? 'Ohodnocené karty' : 'Graded Cards'}</h2>
-              </div>
-              <span className="nv-link more-link-desktop" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
-                {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
-              </span>
-            </header>
-            <div className="slider-container-wrapper">
-              <button onClick={() => handleScroll(gradedCardsRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
-              {(() => {
-                const visibleRatios = gradedCards
-                  .map(p => loadedRatios[p.id])
-                  .filter(Boolean);
+          {/* 3. {lang === 'CZ' ? 'Ohodnocené karty' : 'Graded Cards'} (Slabs) */}
+          {FEATURE_FLAGS.showSlabs && (
+            <section style={{ ...styles.sectionContainer, paddingBottom: isMobile ? '48px' : '0' }} className="container">
+              <header className="nv-header">
+                <div className="nv-header-left">
+                  <div className="nv-eyebrow">{lang === 'CZ' ? 'Certifikovaná kvalita' : 'Certified Quality'}</div>
+                  <h2 className="nv-title">{lang === 'CZ' ? 'Ohodnocené karty' : 'Graded Cards'}</h2>
+                </div>
+                <span className="nv-link more-link-desktop" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
+                  {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
+                </span>
+              </header>
+              <div className="slider-container-wrapper">
+                <button onClick={() => handleScroll(gradedCardsRef, 'left')} className="scroll-arrow-btn left-arrow" aria-label="Předchozí">‹</button>
+                {(() => {
+                  const visibleRatios = gradedCards
+                    .map(p => loadedRatios[p.id])
+                    .filter(Boolean);
 
-                let artHDesktop = 300;
-                let artHMobile = 250;
-                let infoMt = 12;
+                  let artHDesktop = 300;
+                  let artHMobile = 250;
+                  let infoMt = 12;
 
-                if (visibleRatios.length > 0) {
-                  const minRatio = Math.min(...visibleRatios);
-                  if (minRatio < 0.72) {
-                    artHDesktop = Math.min(420, Math.round(240 / minRatio));
-                    artHMobile = Math.min(350, Math.round(200 / minRatio));
-                    infoMt = 20;
+                  if (visibleRatios.length > 0) {
+                    const minRatio = Math.min(...visibleRatios);
+                    if (minRatio < 0.72) {
+                      artHDesktop = Math.min(420, Math.round(240 / minRatio));
+                      artHMobile = Math.min(350, Math.round(200 / minRatio));
+                      infoMt = 20;
+                    }
                   }
-                }
 
-                const cardHDesktop = artHDesktop + 130 + infoMt;
-                const cardHMobile = artHMobile + 120 + (infoMt - 2);
+                  const cardHDesktop = artHDesktop + 130 + infoMt;
+                  const cardHMobile = artHMobile + 120 + (infoMt - 2);
 
-                const gridStyle = {
-                  '--art-h-desktop': `${artHDesktop}px`,
-                  '--art-h-mobile': `${artHMobile}px`,
-                  '--card-h-desktop': `${cardHDesktop}px`,
-                  '--card-h-mobile': `${cardHMobile}px`,
-                  '--info-mt': `${infoMt}px`
-                };
+                  const gridStyle = {
+                    '--art-h-desktop': `${artHDesktop}px`,
+                    '--art-h-mobile': `${artHMobile}px`,
+                    '--card-h-desktop': `${cardHDesktop}px`,
+                    '--card-h-mobile': `${cardHMobile}px`,
+                    '--info-mt': `${infoMt}px`
+                  };
 
-                return (
-                  <div ref={gradedCardsRef} className="homepage-product-grid" style={gridStyle}>
-                    {gradedCards.map(product => (
-                      <a 
-                        key={product.id} 
-                        href={`/sealed-detail/${product.id}`} 
-                        className={`vf-card type-${product.type}`} 
-                        style={{ textDecoration: 'none', color: 'inherit' }}
-                        onClick={(e) => { 
-                          if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
-                            e.preventDefault(); 
-                            handleCardClick(product); 
-                          } 
-                        }}
-                      >
-                        <div className="vf-art">
-                          <div className="card-art">
-                            <ProductImage productId={product.id} src={product.image} alt={product.imageAlt || product.image_alt || generateDefaultSEOImageMetadata(product, 'alt') || product.name} title={product.imageTitle || product.image_title || generateDefaultSEOImageMetadata(product, 'title') || product.name} className="ca-card-img" onAspectRatioLoaded={handleAspectRatioLoaded} />
-                            <div className="ca-holo"></div>
-                            <div className="ca-shine"></div>
-                            <div className="ca-grain"></div>
+                  return (
+                    <div ref={gradedCardsRef} className="homepage-product-grid" style={gridStyle}>
+                      {gradedCards.map(product => (
+                        <a
+                          key={product.id}
+                          href={`/sealed-detail/${product.id}`}
+                          className={`vf-card type-${product.type}`}
+                          style={{ textDecoration: 'none', color: 'inherit' }}
+                          onClick={(e) => {
+                            if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                              e.preventDefault();
+                              handleCardClick(product);
+                            }
+                          }}
+                        >
+                          <div className="vf-art">
+                            <div className="card-art">
+                              <ProductImage productId={product.id} src={product.image} alt={product.imageAlt || product.image_alt || generateDefaultSEOImageMetadata(product, 'alt') || product.name} title={product.imageTitle || product.image_title || generateDefaultSEOImageMetadata(product, 'title') || product.name} className="ca-card-img" onAspectRatioLoaded={handleAspectRatioLoaded} />
+                              <div className="ca-holo"></div>
+                              <div className="ca-shine"></div>
+                              <div className="ca-grain"></div>
+                            </div>
                           </div>
-                        </div>
-                        <div className="vf-info">
-                          <div className="vf-name">{product.name}</div>
-                          <div className="vf-rule"></div>
-                          <div className="vf-meta">
-                            <span className="slab-badge">{product.company} {product.grade}</span>
-                            <span className="vf-price">{getProductPrice(product).toLocaleString('cs-CZ')} Kč</span>
+                          <div className="vf-info">
+                            <div className="vf-name">{product.name}</div>
+                            <div className="vf-rule"></div>
+                            <div className="vf-meta">
+                              <span className="slab-badge">{product.company} {product.grade}</span>
+                              <span className="vf-price">{getProductPrice(product).toLocaleString('cs-CZ')} Kč</span>
+                            </div>
                           </div>
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                );
-              })()}
-              <button onClick={() => handleScroll(gradedCardsRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
-            </div>
-            <div className="more-link-mobile-wrapper">
-              <span className="nv-link more-link-mobile" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
-                {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
-              </span>
-            </div>
-          </section>
-        )}
-      </div>
+                        </a>
+                      ))}
+                    </div>
+                  );
+                })()}
+                <button onClick={() => handleScroll(gradedCardsRef, 'right')} className="scroll-arrow-btn right-arrow" aria-label="Další">›</button>
+              </div>
+              <div className="more-link-mobile-wrapper">
+                <span className="nv-link more-link-mobile" onClick={() => { setFilters({}); setActivePage('slabs-catalog'); }}>
+                  {lang === 'CZ' ? 'Zobrazit více' : 'Show More'} &rarr;
+                </span>
+              </div>
+            </section>
+          )}
+        </div>
+      )}
 
       {/* 4. {lang === 'CZ' ? 'Příslušenství' : 'Accessories'} (Accessories) */}
       <section style={{ ...styles.sectionContainer, marginBottom: isMobile ? '8px' : '40px', paddingBottom: isMobile ? '27px' : '0' }} className="container">
@@ -1807,16 +1811,16 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             return (
               <div ref={accessoriesRef} className="homepage-product-grid" style={gridStyle}>
                 {accessories.map(product => (
-                  <a 
-                    key={product.id} 
-                    href={`/sealed-detail/${product.id}`} 
-                    className={`vf-card type-${product.type}`} 
+                  <a
+                    key={product.id}
+                    href={`/sealed-detail/${product.id}`}
+                    className={`vf-card type-${product.type}`}
                     style={{ textDecoration: 'none', color: 'inherit' }}
-                    onClick={(e) => { 
-                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) { 
-                        e.preventDefault(); 
-                        handleCardClick(product); 
-                      } 
+                    onClick={(e) => {
+                      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                        e.preventDefault();
+                        handleCardClick(product);
+                      }
                     }}
                   >
                     <div className="vf-art">

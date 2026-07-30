@@ -5,7 +5,8 @@ import { fetchProductImage, generateDefaultSEOImageMetadata } from '../services/
 const ProductImage = ({ productId, fallbackSrc, alt, title, className = '', onAspectRatioLoaded }) => {
   const [imgSrc, setImgSrc] = useState(() => {
     try {
-      return localStorage.getItem(`nv-img-${productId}`) || fallbackSrc || '';
+      const cached = localStorage.getItem(`nv-img-${productId}`);
+      return cached || fallbackSrc || '';
     } catch {
       return fallbackSrc || '';
     }
@@ -16,9 +17,8 @@ const ProductImage = ({ productId, fallbackSrc, alt, title, className = '', onAs
   const imgRef = useRef(null);
 
   useEffect(() => {
-    // If fallbackSrc changes (e.g. from cropping or quick fill), update imgSrc instantly
-    if (fallbackSrc) {
-      setImgSrc(fallbackSrc);
+    if (fallbackSrc !== imgSrc) {
+      setImgSrc(fallbackSrc || '');
       setLoaded(false);
     }
   }, [fallbackSrc]);
@@ -235,7 +235,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
           {/* Actual Card Image */}
           <ProductImage 
             productId={product.id} 
-            fallbackSrc={product.image} 
+            fallbackSrc={product.image || product.image_url || product.img || (product.additionalImages && product.additionalImages[0]) || ''} 
             alt={product.imageAlt || product.image_alt || generateDefaultSEOImageMetadata(product, 'alt') || product.name} 
             title={product.imageTitle || product.image_title || generateDefaultSEOImageMetadata(product, 'title') || product.name} 
             className="ca-card-img" 

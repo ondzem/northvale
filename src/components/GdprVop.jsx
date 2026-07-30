@@ -317,13 +317,12 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>1. SHIPPING METHODS & RATES – CZECH REPUBLIC</h3>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  For orders with a total value exceeding 2,000 CZK, shipping is completely FREE (applies to DPD and GLS services).
+                  For orders with a total value exceeding 1,750 CZK, shipping is completely FREE (applies to DPD and GLS services).
                   <br /><br />
                   • <strong>DPD – Pickup Point (DPD Pickup):</strong> 79 CZK. Pickup at any DPD parcel locker or store, usually within 1 business day of dispatch.
                   <br />• <strong>DPD – Home Delivery:</strong> 109 CZK. Courier delivery to your address within 1 business day of dispatch, with delivery time slot notifications.
                   <br />• <strong>GLS – Pickup Point (Parcel Shop):</strong> 89 CZK. Pickup at any GLS parcel locker or store, usually within 1 business day of dispatch.
                   <br />• <strong>GLS – Home Delivery:</strong> 129 CZK. Courier delivery to your address within 1 business day of dispatch.
-                  <br />• <strong>Personal Pickup:</strong> FREE. Available at Bratří Čapků 1095, 534 01 Holice, or at our pickup location in Pardubice (by agreement).
                 </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>2. INTERNATIONAL SHIPPING (SLOVAKIA AND EU)</h3>
@@ -349,6 +348,8 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   <br />• <strong>Store Credit – Customer Balance (FREE):</strong> If you have a Store Credit balance on your user account (e.g., from buylist trade-ins), you can apply it as a discount on all or part of your purchase.
                 </p>
 
+                {/* SLEEP MODE: PREORDERS EN INFO SECTION (Re-activate by uncommenting this block) */}
+                {/*
                 <div id="preorder-info-section" className="preorder-info-section-container" style={{
                   marginTop: '40px',
                   padding: '16px 12px 16px 16px',
@@ -367,6 +368,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                     <li><strong>Expected Release Date:</strong> Expected release dates are based on publisher/distributor information. Rare release delays by the publisher may occur, in which case we will notify you immediately.</li>
                   </ul>
                 </div>
+                */}
               </div>
             ) : (
               <div>
@@ -383,7 +385,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 </h3>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  U objednávek v hodnotě nad 2 000 Kč je doprava ZDARMA (platí pro DPD a GLS).
+                  U objednávek v hodnotě nad 1 750 Kč je doprava ZDARMA (platí pro DPD a GLS).
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
@@ -402,16 +404,12 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   GLS – doručení na adresu: 129 Kč. Do druhého pracovního dne od expedice, kurýrem domů nebo do zaměstnání.
                 </p>
 
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  Osobní odběr: ZDARMA. Bratří Čapků 1095, 534 01 Holice, případně dle domluvy na určeném odběrném místě v Pardubicích.
-                </p>
-
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>
                   2. DORUČENÍ DO ZAHRANIČÍ (SLOVENSKO A EU)
                 </h3>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  Standardní doručení přes e-shop je aktuálně možné pouze v rámci České republiky (službami DPD, GLS a pro osobní odběr v Holicích). Doručení na Slovensko a do dalších zemí Evropské unie momentálně připravujeme. Pokud máte zájem o zaslání zboží na Slovensko nebo do jiné země EU, je možné doručení sjednat individuálně po předchozí domluvě e-mailem na <a href="mailto:info@northvaletcg.eu" style={{ color: 'var(--color-gold)', textDecoration: 'none' }}>info@northvaletcg.eu</a>.
+                  Standardní doručení přes e-shop je aktuálně možné pouze v rámci České republiky (službami DPD a GLS). Doručení na Slovensko a do dalších zemí Evropské unie momentálně připravujeme. Pokud máte zájem o zaslání zboží na Slovensko nebo do jiné země EU, je možné doručení sjednat individuálně po předchozí domluvě e-mailem na <a href="mailto:info@northvaletcg.eu" style={{ color: 'var(--color-gold)', textDecoration: 'none' }}>info@northvaletcg.eu</a>.
                 </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>
@@ -475,13 +473,11 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  Hotově nebo kartou při osobním odběru (zdarma).
-                </p>
-
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
                   Store Credit – zákaznický kredit (zdarma): zůstatek Store Creditu na vašem uživatelském účtu (např. z výkupu) můžete uplatnit jako slevu na celou objednávku nebo její část.
                 </p>
 
+                {/* SLEEP MODE: PREORDERS INFO SECTION (Re-activate by uncommenting this block) */}
+                {/*
                 <div id="preorder-info-section" className="preorder-info-section-container" style={{
                   marginTop: '40px',
                   padding: '16px 12px 16px 16px',
@@ -511,6 +507,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   Odstoupení a storno: i u předobjednávek můžete objednávku kdykoli do expedice bezplatně stornovat a jako spotřebitel máte právo odstoupit od smlouvy do 14 dnů od převzetí zboží.
                 </p>
                 </div>
+                */}
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>
                   6. KONTROLA ZÁSILKY PŘI PŘEVZETÍ
@@ -752,7 +749,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 </h3>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  4.1. Cenu zboží a případné náklady spojené s dodáním zboží dle kupní smlouvy může kupující uhradit prodávajícímu následujícími způsoby: v hotovosti nebo kartou při osobním odběru; bezhotovostně prostřednictvím platební brány GP webpay (provozovatel Global Payments s.r.o.); bezhotovostně převodem na bankovní účet prodávajícího; na dobírku při převzetí zboží; uplatněním Store Creditu.
+                  4.1. Cenu zboží a případné náklady spojené s dodáním zboží dle kupní smlouvy může kupující uhradit prodávajícímu následujícími způsoby: bezhotovostně prostřednictvím platební brány GP webpay (provozovatel Global Payments s.r.o.); bezhotovostně převodem na bankovní účet prodávajícího; na dobírku při převzetí zboží; uplatněním Store Creditu.
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
@@ -792,7 +789,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 </h3>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  5.1. Zboží doručujeme do České republiky a do dalších členských států Evropské unie. Způsoby doručení: DPD (na výdejní místo nebo na adresu), GLS (na výdejní místo nebo na adresu) a osobní odběr na adrese Bratří Čapků 1095, 534 01 Holice, případně dle domluvy na určeném odběrném místě v Pardubicích. Aktuální ceny dopravy a dodací lhůty pro jednotlivé země jsou uvedeny v sekci „Doprava a platba“ a vždy se zobrazí v objednávkovém procesu před odesláním objednávky.
+                  5.1. Zboží doručujeme do České republiky a do dalších členských států Evropské unie. Způsoby doručení: DPD (na výdejní místo nebo na adresu) a GLS (na výdejní místo nebo na adresu). Aktuální ceny dopravy a dodací lhůty pro jednotlivé země jsou uvedeny v sekci „Doprava a platba“ a vždy se zobrazí v objednávkovém procesu před odesláním objednávky.
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>

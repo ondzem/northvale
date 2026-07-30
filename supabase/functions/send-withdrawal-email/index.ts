@@ -9,6 +9,34 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+function wrapInHtmlDocument(innerContent: string): string {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <style>
+    :root {
+      color-scheme: light;
+      supported-color-schemes: light;
+    }
+    body {
+      background-color: #f5f6f8 !important;
+      margin: 0;
+      padding: 0;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+  </style>
+</head>
+<body style="background-color: #f5f6f8; margin: 0; padding: 0;">
+  ${innerContent}
+</body>
+</html>`;
+}
+
 serve(async (req) => {
   // Handle CORS preflight request
   if (req.method === "OPTIONS") {
@@ -37,7 +65,6 @@ serve(async (req) => {
 
     const isCzech = lang === "CZ";
 
-    // 1. Construct Customer Confirmation Email HTML
     const refundMethodLabel = refundMethod === "bank" 
       ? (isCzech ? `Bankovní převod (na účet: ${bankAccount || '—'})` : `Bank Transfer (to account: ${bankAccount || '—'})`)
       : (isCzech ? "Původní platební karta (přes GP webpay)" : "Original payment card (via GP webpay)");
@@ -46,113 +73,143 @@ serve(async (req) => {
       ? (isCzech ? "Celá objednávka" : "Entire order")
       : (isCzech ? `Část objednávky (položky: ${partialItemsText || '—'})` : `Partial return (items: ${partialItemsText || '—'})`);
 
-    const customerHtmlContent = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 5px; color: #333333;">
-         <div style="text-align: center; margin-bottom: 20px;">
-          <h2 style="color: #fdbd16; margin: 0;">NORTHVALE</h2>
-          <p style="font-size: 14px; color: #666; margin: 5px 0 0 0;">${isCzech ? "Potvrzení o odstoupení od smlouvy" : "Order Withdrawal Confirmation"}</p>
+    // 1. Customer Confirmation Email HTML (White card theme matching send-order-email)
+    const customerHtmlInner = `
+      <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 40px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: #222222;">
+          
+          <!-- Logo Header -->
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #fdbd16; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: 2px; text-transform: uppercase;">NORTHVALE</h1>
+            <p style="color: #8a8a92; font-size: 11px; text-transform: uppercase; letter-spacing: 4px; margin: 3px 0 0 0;">Trading Card Games</p>
+          </div>
+          
+          <div style="text-align: center; margin-bottom: 24px; font-size: 54px;">
+            📄
+          </div>
+
+          <!-- Header Title -->
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: #111111; font-size: 24px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">${isCzech ? "Potvrzení o odstoupení od smlouvy" : "Order Withdrawal Confirmation"}</h2>
+            <p style="font-size: 14px; color: #888888; margin: 8px 0 0 0;">${isCzech ? "Číslo objednávky:" : "Order Number:"} <strong style="color: #fdbd16;">#${orderNumber}</strong></p>
+          </div>
+
+          <p style="font-size: 14.5px; color: #222222; line-height: 1.6; margin: 0 0 24px 0;">
+            ${isCzech 
+              ? `Vážený/á <strong>${fullName || 'zákazníku'}</strong>,<br/><br/>potvrzujeme přijetí Vašeho elektronického oznámení o odstoupení od kupní smlouvy pro objednávku <strong>#${orderNumber}</strong>. Níže naleznete rekapitulaci zadaných údajů:` 
+              : `Dear <strong>${fullName || 'Customer'}</strong>,<br/><br/>we confirm receipt of your electronic request to withdraw from the purchase agreement for order <strong>#${orderNumber}</strong>. Here is a summary of the details you submitted:`}
+          </p>
+
+          <div style="background-color: #fdfdfd; border: 1px solid #e1e4e8; border-left: 4px solid #fdbd16; padding: 20px; margin-bottom: 24px; border-radius: 8px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13.5px; line-height: 1.6;">
+              <tr style="border-bottom: 1px solid #f0f0f0;">
+                <td style="padding: 8px 0; font-weight: bold; color: #666666;">${isCzech ? "Jméno a příjmení" : "Name"}:</td>
+                <td style="padding: 8px 0; text-align: right; color: #111111; font-weight: 600;">${fullName || '—'}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #f0f0f0;">
+                <td style="padding: 8px 0; font-weight: bold; color: #666666;">${isCzech ? "Číslo objednávky" : "Order Number"}:</td>
+                <td style="padding: 8px 0; text-align: right; color: #fdbd16; font-weight: bold;">#${orderNumber}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #f0f0f0;">
+                <td style="padding: 8px 0; font-weight: bold; color: #666666;">${isCzech ? "E-mailová adresa" : "Email"}:</td>
+                <td style="padding: 8px 0; text-align: right; color: #111111;">${email}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #f0f0f0;">
+                <td style="padding: 8px 0; font-weight: bold; color: #666666;">${isCzech ? "Rozsah vrácení" : "Scope of Return"}:</td>
+                <td style="padding: 8px 0; text-align: right; color: #111111;">${returnTypeLabel}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #666666;">${isCzech ? "Způsob vrácení peněz" : "Refund Method"}:</td>
+                <td style="padding: 8px 0; text-align: right; color: #111111; font-weight: 600;">${refundMethodLabel}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background-color: #f8f9fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: 22px; margin-bottom: 24px;">
+            <h4 style="margin: 0 0 12px 0; color: #111111; font-size: 14px; font-weight: 700;">${isCzech ? "Co dělat nyní? (Následující kroky)" : "What to do next?"}</h4>
+            <ol style="margin: 0; padding-left: 20px; color: #444444; font-size: 13.5px; line-height: 1.7;">
+              <li style="margin-bottom: 10px;">
+                <strong>${isCzech ? "Bezpečně zabalte vrácené produkty." : "Pack the returned products securely."}</strong><br/>
+                ${isCzech 
+                  ? "Doporučujeme pro kusové karty použít soft sleeve a toploader a pro balené produkty pevnou krabici s výplní." 
+                  : "For singles, use soft sleeves and toploaders; for boxed products, use a sturdy box with filler."}
+              </li>
+              <li style="margin-bottom: 10px;">
+                <strong>${isCzech ? "Odešlete zboží k nám." : "Ship the goods to us."}</strong><br/>
+                ${isCzech ? "Zboží odešlete bez zbytečného odkladu (nejpozději do 14 dnů) na adresu:" : "Ship without delay (within 14 days) to:"}<br/>
+                <div style="background-color: #ffffff; border: 1px solid #e1e4e8; padding: 10px 14px; border-radius: 6px; margin-top: 6px; font-weight: 600; color: #111111; font-size: 13px; line-height: 1.5;">
+                  NORTHVALE s.r.o.<br/>
+                  Bratří Čapků 1095<br/>
+                  534 01 Holice, Česká republika
+                </div>
+              </li>
+              <li>
+                <strong>${isCzech ? "Kontrola a vrácení prostředků." : "Inspection and Payout."}</strong><br/>
+                ${isCzech 
+                  ? "Jakmile balíček převezmeme, zkontrolujeme stav zboží. Do 14 dnů od převzetí Vám vrátíme peníze zvolenou metodou." 
+                  : "Once received, we will inspect the items and refund your money within 14 days."}
+              </li>
+            </ol>
+          </div>
+
+          <!-- Footer Details -->
+          <div style="text-align: center; border-top: 1px solid #e1e4e8; padding-top: 24px; margin-top: 30px;">
+            <p style="font-size: 11px; color: #999999; margin: 0; line-height: 1.5;">
+              NORTHVALE s.r.o., Bratří Čapků 1095, 534 01 Holice | IČO: 29618142, DIČ: CZ29618142<br/>
+              Společnost zapsaná u Krajského soudu v Hradci Králové, oddíl C, vložka 56872.
+            </p>
+          </div>
         </div>
-        
-        <p style="font-size: 15px; line-height: 1.5;">
-          ${isCzech 
-            ? `Vážený/á ${fullName || 'zákazníku'},<br><br>potvrzujeme přijetí Vašeho elektronického oznámení o odstoupení od kupní smlouvy. Níže naleznete rekapitulaci zadaných údajů:` 
-            : `Dear ${fullName || 'Customer'},<br><br>we confirm receipt of your electronic request to withdraw from the purchase agreement. Here is a summary of the details you submitted:`}
-        </p>
-
-        <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px;">
-          <tr style="border-bottom: 1px solid #eaeaea;">
-            <td style="padding: 10px 0; font-weight: bold; color: #555;">${isCzech ? "Jméno a příjmení" : "Name and Surname"}:</td>
-            <td style="padding: 10px 0; text-align: right;">${fullName || '—'}</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #eaeaea;">
-            <td style="padding: 10px 0; font-weight: bold; color: #555;">${isCzech ? "Číslo objednávky" : "Order Number"}:</td>
-            <td style="padding: 10px 0; text-align: right;">#${orderNumber}</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #eaeaea;">
-            <td style="padding: 10px 0; font-weight: bold; color: #555;">${isCzech ? "E-mailová adresa" : "Email Address"}:</td>
-            <td style="padding: 10px 0; text-align: right;">${email}</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #eaeaea;">
-            <td style="padding: 10px 0; font-weight: bold; color: #555;">${isCzech ? "Rozsah vrácení" : "Scope of Return"}:</td>
-            <td style="padding: 10px 0; text-align: right;">${returnTypeLabel}</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #eaeaea;">
-            <td style="padding: 10px 0; font-weight: bold; color: #555;">${isCzech ? "Způsob vrácení peněz" : "Refund Method"}:</td>
-            <td style="padding: 10px 0; text-align: right;">${refundMethodLabel}</td>
-          </tr>
-        </table>
-
-        <div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #fdbd16; border-radius: 4px; margin-bottom: 20px; font-size: 13.5px; line-height: 1.5;">
-          <h4 style="margin: 0 0 8px 0; color: #222;">${isCzech ? "Co dělat nyní? (Následující kroky)" : "What to do next? (Required steps)"}</h4>
-          <ol style="margin: 0; padding-left: 20px; color: #555;">
-            <li style="margin-bottom: 8px;">
-              <strong>${isCzech ? "Bezpečně zabalte vrácené produkty." : "Pack the returned products securely."}</strong><br>
-              ${isCzech 
-                ? "Doporučujeme pro kusové karty použít soft sleeve a toploader (sendvičové balení) a pro balené produkty pevnou krabici s výplní, aby nedošlo k poškození." 
-                : "For singles, we recommend using a soft sleeve and toploader; for boxed products, a sturdy cardboard box with filler to prevent physical damage during transit."}
-            </li>
-            <li style="margin-bottom: 8px;">
-              <strong>${isCzech ? "Odešlete zboží k nám." : "Ship the goods back to us."}</strong><br>
-              ${isCzech ? "Zboží odešlete bez zbytečného odkladu (nejpozději do 14 dnů) na adresu:" : "Ship the products without delay (no later than 14 days) to the following address:"}<br>
-              <span style="display: block; font-family: monospace; padding: 8px 0; font-weight: bold; color: #222;">
-                NORTHVALE s.r.o.<br>
-                Bratří Čapků 1095<br>
-                534 01 Holice<br>
-                Czech Republic
-              </span>
-            </li>
-            <li>
-              <strong>${isCzech ? "Kontrola a vrácení prostředků." : "Inspection and Payout."}</strong><br>
-              ${isCzech 
-                ? "Jakmile balíček převezmeme, zkontrolujeme stav karet a neporušenost fólií u balených produktů. Do 14 dnů od převzetí Vám vrátíme peníze zvolenou metodou." 
-                : "Once received, we will inspect the condition of the cards and original packaging. We will return your money via the selected method within 14 days of receipt."}
-            </li>
-          </ol>
-        </div>
-
-        <p style="font-size: 11px; color: #888; margin-top: 30px; border-top: 1px solid #eaeaea; padding-top: 10px; text-align: center;">
-          ${isCzech 
-            ? "Tento e-mail byl odeslán automaticky z internetového obchodu northvaletcg.eu." 
-            : "This email was sent automatically from the northvaletcg.eu e-shop."}
-        </p>
       </div>
     `;
 
-    // 2. Construct Admin Notification Email HTML
-    const adminHtmlContent = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 5px;">
-        <h2 style="color: #fdbd16; border-bottom: 2px solid #fdbd16; padding-bottom: 10px; margin-top: 0;">Nové odstoupení od smlouvy</h2>
-        <p style="font-size: 14.5px;">Zákazník odeslal online formulář pro odstoupení od kupní smlouvy:</p>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">
-          <tr>
-            <td style="padding: 8px 0; font-weight: bold; width: 150px;">Jméno zákazníka:</td>
-            <td style="padding: 8px 0;">${fullName || '—'}</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; font-weight: bold; width: 150px;">Číslo objednávky:</td>
-            <td style="padding: 8px 0;">#${orderNumber}</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; font-weight: bold;">E-mail zákazníka:</td>
-            <td style="padding: 8px 0;"><a href="mailto:${email}">${email}</a></td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; font-weight: bold;">Rozsah vrácení:</td>
-            <td style="padding: 8px 0;">${returnTypeLabel}</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; font-weight: bold;">Způsob vrácení peněz:</td>
-            <td style="padding: 8px 0;">${refundMethodLabel}</td>
-          </tr>
-        </table>
-        <p style="font-size: 11px; color: #888; margin-top: 30px; border-top: 1px solid #eaeaea; padding-top: 10px;">
-          Tento e-mail byl odeslán automaticky z backendu e-shopu NORTHVALE.
-        </p>
+    // 2. Admin Notification Email HTML
+    const adminHtmlInner = `
+      <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 40px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: #222222;">
+          
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #fdbd16; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: 2px; text-transform: uppercase;">NORTHVALE Admin</h1>
+            <p style="color: #8a8a92; font-size: 11px; text-transform: uppercase; letter-spacing: 4px; margin: 3px 0 0 0;">Odstoupení od smlouvy</p>
+          </div>
+
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: #dc2626; font-size: 24px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">↩️ Žádost o odstoupení</h2>
+            <p style="font-size: 14px; color: #888888; margin: 8px 0 0 0;">Číslo objednávky: <strong style="color: #fdbd16;">#${orderNumber}</strong></p>
+          </div>
+
+          <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13.5px; line-height: 1.6;">
+            <tr style="border-bottom: 1px solid #e1e4e8;">
+              <td style="padding: 10px 0; font-weight: bold; width: 150px; color: #666666;">Jméno zákazníka:</td>
+              <td style="padding: 10px 0; color: #111111; font-weight: 600;">${fullName || '—'}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e1e4e8;">
+              <td style="padding: 10px 0; font-weight: bold; width: 150px; color: #666666;">Číslo objednávky:</td>
+              <td style="padding: 10px 0; color: #fdbd16; font-weight: bold;">#${orderNumber}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e1e4e8;">
+              <td style="padding: 10px 0; font-weight: bold; color: #666666;">E-mail zákazníka:</td>
+              <td style="padding: 10px 0;"><a href="mailto:${email}" style="color: #fdbd16; font-weight: bold;">${email}</a></td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e1e4e8;">
+              <td style="padding: 10px 0; font-weight: bold; color: #666666;">Rozsah vrácení:</td>
+              <td style="padding: 10px 0; color: #111111;">${returnTypeLabel}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 0; font-weight: bold; color: #666666;">Způsob vrácení peněz:</td>
+              <td style="padding: 10px 0; color: #111111; font-weight: 600;">${refundMethodLabel}</td>
+            </tr>
+          </table>
+
+          <div style="text-align: center; border-top: 1px solid #e1e4e8; padding-top: 24px; margin-top: 30px;">
+            <p style="font-size: 11px; color: #999999; margin: 0;">Automatické oznámení z e-shopu NORTHVALE TCG</p>
+          </div>
+        </div>
       </div>
     `;
 
     // 3. Dispatch Email to Customer
-    const customerResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
+    await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         "api-key": brevoApiKey,
@@ -160,30 +217,15 @@ serve(async (req) => {
         "accept": "application/json"
       },
       body: JSON.stringify({
-        sender: {
-          name: senderName,
-          email: senderEmail
-        },
-        to: [
-          {
-            email: email,
-            name: email
-          }
-        ],
-        subject: isCzech 
-          ? `Potvrzení přijetí: Odstoupení od smlouvy k objednávce #${orderNumber}`
-          : `Receipt Confirmation: Order Withdrawal #${orderNumber}`,
-        htmlContent: customerHtmlContent
+        sender: { name: senderName, email: senderEmail },
+        to: [{ email: email, name: fullName || email }],
+        subject: isCzech ? `Potvrzení přijetí: Odstoupení od smlouvy k objednávce #${orderNumber}` : `Receipt Confirmation: Order Withdrawal #${orderNumber}`,
+        htmlContent: wrapInHtmlDocument(customerHtmlInner)
       })
     });
-
-    if (!customerResponse.ok) {
-      const errorText = await customerResponse.text();
-      console.error(`Brevo Customer Email API responded with error: ${errorText}`);
-    }
 
     // 4. Dispatch Email to Admin
-    const adminResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
+    await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         "api-key": brevoApiKey,
@@ -191,36 +233,20 @@ serve(async (req) => {
         "accept": "application/json"
       },
       body: JSON.stringify({
-        sender: {
-          name: senderName,
-          email: senderEmail
-        },
-        to: [
-          {
-            email: recipientEmail,
-            name: "NORTHVALE Administrace"
-          }
-        ],
-        replyTo: {
-          email: email,
-          name: email
-        },
+        sender: { name: senderName, email: senderEmail },
+        to: [{ email: recipientEmail, name: "NORTHVALE Administrace" }],
+        replyTo: { email: email, name: fullName || email },
         subject: `[Odstoupení] Nová žádost - Objednávka #${orderNumber}`,
-        htmlContent: adminHtmlContent
+        htmlContent: wrapInHtmlDocument(adminHtmlInner)
       })
     });
-
-    if (!adminResponse.ok) {
-      const errorText = await adminResponse.text();
-      console.error(`Brevo Admin Email API responded with error: ${errorText}`);
-    }
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

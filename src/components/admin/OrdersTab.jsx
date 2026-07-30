@@ -412,11 +412,79 @@ export default function OrdersTab({ showToast }) {
     };
   };
 
+  const restoreOrderStock = async (orderData) => {
+    if (!orderData) return 0;
+    
+    // Check status & DPD parcel: Only restore stock if order was NOT sent to DPD and is NOT shipped/completed!
+    const status = (orderData.status || orderData.orderStatus || orderData.rawJson?.order?.status || '').toLowerCase();
+    const hasDpdParcel = !!(orderData.dpd_parcel_number || orderData.rawJson?.order?.dpd_parcel_number);
+
+    if (hasDpdParcel || status === 'shipped' || status === 'delivered' || status === 'completed' || status === 'odesláno' || status === 'doručeno') {
+      return 0;
+    }
+
+    const items = orderData.items || orderData.cart || orderData.rawJson?.items || [];
+    if (!Array.isArray(items) || items.length === 0) return 0;
+
+    let restoredCount = 0;
+    for (const item of items) {
+      if (item.isService) continue;
+      const productId = item.code || item.id || item.product_id;
+      const qty = Number(item.quantity || 1);
+
+      if (!productId || qty <= 0) continue;
+
+      try {
+        const { data: product } = await supabase
+          .from('products')
+          .select('id, stock, variants')
+          .eq('id', productId)
+          .maybeSingle();
+
+        if (product) {
+          if (product.stock !== null && product.stock !== undefined) {
+            const newStock = Number(product.stock || 0) + qty;
+            await supabase
+              .from('products')
+              .update({ stock: newStock })
+              .eq('id', productId);
+            restoredCount += qty;
+          } else if (Array.isArray(product.variants)) {
+            let variantUpdated = false;
+            const updatedVariants = product.variants.map(v => {
+              if (item.variant_id && v.id === item.variant_id) {
+                variantUpdated = true;
+                return { ...v, stock: Number(v.stock || 0) + qty };
+              }
+              return v;
+            });
+
+            if (!variantUpdated && updatedVariants.length > 0) {
+              updatedVariants[0] = {
+                ...updatedVariants[0],
+                stock: Number(updatedVariants[0].stock || 0) + qty
+              };
+            }
+
+            await supabase
+              .from('products')
+              .update({ variants: updatedVariants })
+              .eq('id', productId);
+            restoredCount += qty;
+          }
+        }
+      } catch (err) {
+        console.error(`Error restoring stock for product ${productId}:`, err);
+      }
+    }
+    return restoredCount;
+  };
+
   const handleDeleteOrder = (orderId, filename) => {
     const title = lang === 'CZ' ? 'Smazat objednávku?' : 'Delete Order?';
     const message = lang === 'CZ' 
-      ? `Opravdu chcete smazat objednávku #${orderId}? Dojde k vymazání souborů XML i JSON z databáze e-shopu.`
-      : `Are you sure you want to delete order #${orderId}? This will remove both XML and JSON files from the e-shop database.`;
+      ? `Opravdu chcete smazat objednávku #${orderId}? Pokud nebyla odeslána, zboží bude navráceno zpět na sklad.`
+      : `Are you sure you want to delete order #${orderId}? Unfulfilled items will be restored to stock.`;
 
     setConfirmModal({
       isOpen: true,
@@ -425,23 +493,29 @@ export default function OrdersTab({ showToast }) {
       confirmText: lang === 'CZ' ? 'Smazat' : 'Delete',
       onConfirm: async () => {
         try {
-          const { data, error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
+          const orderObj = loadedOrders[filename] || (detailOrder && detailOrder.id === orderId ? detailOrder : null);
+          let restoredCount = 0;
+          if (orderObj) {
+            restoredCount = await restoreOrderStock(orderObj);
+          }
+
+          const { error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
             method: 'DELETE'
           });
 
           if (error) throw error;
 
-          showToast(lang === 'CZ' ? `Objednávka #${orderId} byla úspěšně smazána.` : `Order #${orderId} deleted successfully.`, 'success');
+          const toastMsg = restoredCount > 0
+            ? (lang === 'CZ' ? `Objednávka #${orderId} byla smazána. Navráceno ${restoredCount} ks na sklad.` : `Order #${orderId} deleted and ${restoredCount} pcs restored to stock.`)
+            : (lang === 'CZ' ? `Objednávka #${orderId} byla úspěšně smazána.` : `Order #${orderId} deleted successfully.`);
+
+          showToast(toastMsg, 'success');
           
-          // Close detail view if it was the deleted order
           if (detailOrder && detailOrder.id === orderId) {
             setDetailOrder(null);
           }
 
-          // Remove from selected list
           setSelectedOrderIds(prev => prev.filter(id => id !== orderId));
-          
-          // Refresh the list
           fetchOrdersList();
         } catch (err) {
           console.error('Failed to delete order:', err);
@@ -454,8 +528,8 @@ export default function OrdersTab({ showToast }) {
   const handleDeleteSelectedOrders = () => {
     const title = lang === 'CZ' ? 'Smazat vybrané?' : 'Delete Selected?';
     const message = lang === 'CZ'
-      ? `Opravdu chcete smazat ${selectedOrderIds.length} vybraných objednávek?`
-      : `Are you sure you want to delete ${selectedOrderIds.length} selected orders?`;
+      ? `Opravdu chcete smazat ${selectedOrderIds.length} vybraných objednávek? Neodeslané zboží bude navráceno zpět na sklad.`
+      : `Are you sure you want to delete ${selectedOrderIds.length} selected orders? Stock for unfulfilled orders will be restored.`;
 
     setConfirmModal({
       isOpen: true,
@@ -464,10 +538,17 @@ export default function OrdersTab({ showToast }) {
       onConfirm: async () => {
         let successCount = 0;
         let failCount = 0;
+        let totalRestored = 0;
 
         for (const orderId of selectedOrderIds) {
           try {
             const filename = `order_${orderId}.json`;
+            const orderObj = loadedOrders[filename] || loadedOrders[`order_${orderId}.xml`];
+            if (orderObj) {
+              const restored = await restoreOrderStock(orderObj);
+              totalRestored += Number(restored || 0);
+            }
+
             const { error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
               method: 'DELETE'
             });
@@ -480,18 +561,15 @@ export default function OrdersTab({ showToast }) {
         }
 
         if (successCount > 0) {
-          showToast(
-            lang === 'CZ' 
-              ? `Úspěšně smazáno ${successCount} objednávek.${failCount > 0 ? ` Se selháním u ${failCount} objednávek.` : ''}`
-              : `Successfully deleted ${successCount} orders.${failCount > 0 ? ` Failed for ${failCount} orders.` : ''}`,
-            'success'
-          );
+          const msg = totalRestored > 0
+            ? (lang === 'CZ' ? `Smazáno ${successCount} objednávek, navráceno ${totalRestored} ks na sklad.` : `Deleted ${successCount} orders, restored ${totalRestored} pcs to stock.`)
+            : (lang === 'CZ' ? `Úspěšně smazáno ${successCount} objednávek.${failCount > 0 ? ` Se selháním u ${failCount} objednávek.` : ''}` : `Successfully deleted ${successCount} orders.`);
+          showToast(msg, 'success');
         } else if (failCount > 0) {
           showToast(lang === 'CZ' ? 'Všechna mazání selhala.' : 'All deletions failed.', 'error');
         }
 
         setSelectedOrderIds([]);
-        setDetailOrder(null);
         fetchOrdersList();
       }
     });
@@ -605,6 +683,7 @@ export default function OrdersTab({ showToast }) {
         ? `Opravdu chcete potvrdit přijetí platby pro objednávku #${order.id}? Zákazníkovi bude odeslán potvrzovací e-mail.`
         : `Are you sure you want to confirm payment for order #${order.id}? A confirmation email will be sent to the customer.`,
       confirmText: lang === 'CZ' ? 'Potvrdit platbu' : 'Confirm Payment',
+      btnColor: '#10b981',
       onConfirm: () => executeConfirmPayment(order)
     });
   };
@@ -615,17 +694,17 @@ export default function OrdersTab({ showToast }) {
       if (!updatedRaw.order) {
         updatedRaw.order = {
           id: order.id,
-          customer_name: order.customerName,
-          customer_email: order.email,
-          customer_phone: order.phone,
-          customer_street: order.street,
-          customer_city: order.city,
-          customer_zip: order.zip,
-          payment_method: order.paymentMethod,
-          shipping_method: order.shippingMethod,
-          shipping_cost: order.shippingCost.toString(),
-          payment_surcharge: order.paymentSurcharge.toString(),
-          final_total: order.totalPrice.toString(),
+          customer_name: order.customerName || order.customer_name || 'Zákazník',
+          customer_email: order.email || order.customerEmail || order.customer_email || '',
+          customer_phone: order.phone || order.customer_phone || '',
+          customer_street: order.street || order.customer_street || '',
+          customer_city: order.city || order.customer_city || '',
+          customer_zip: order.zip || order.customer_zip || '',
+          payment_method: order.paymentMethod || 'Bankovní převod',
+          shipping_method: order.shippingMethod || 'DPD',
+          shipping_cost: (order.shippingCost || 0).toString(),
+          payment_surcharge: (order.paymentSurcharge || 0).toString(),
+          final_total: (order.totalPrice || 0).toString(),
           userId: order.rawJson?.order?.userId || null
         };
       }
@@ -641,15 +720,27 @@ export default function OrdersTab({ showToast }) {
       });
       if (saveError) throw saveError;
 
+      // 1.5 Generate PDF invoice now that payment is confirmed
+      try {
+        await supabase.functions.invoke('generate-invoice-pdf', {
+          body: { order: updatedRaw.order }
+        });
+      } catch (pdfErr) {
+        console.error('Failed to generate invoice PDF after payment confirmation:', pdfErr);
+      }
+
       // 2. Trigger Brevo email to customer
       try {
+        const targetEmail = order.email || order.customerEmail || order.customer_email || updatedRaw.order.customer_email;
+        const targetName = order.customerName || order.name || updatedRaw.order.customer_name;
+
         await supabase.functions.invoke('send-order-email', {
           body: {
             order: {
               id: order.id,
-              customerName: order.customerName,
-              customerEmail: order.email,
-              paymentMethod: order.paymentMethod,
+              customerName: targetName,
+              customerEmail: targetEmail,
+              paymentMethod: order.paymentMethod || 'Bankovní převod',
               finalTotal: order.totalPrice
             },
             emailType: 'payment_received'
@@ -1774,7 +1865,6 @@ export default function OrdersTab({ showToast }) {
               <option value="all">{lang === 'CZ' ? 'Všichni dopravci' : 'All Carriers'}</option>
               <option value="gls">GLS</option>
               <option value="dpd">DPD</option>
-              <option value="pickup">{lang === 'CZ' ? 'Osobní odběr' : 'Local Pickup'}</option>
             </select>
             <select value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)} onDoubleClick={(e) => e.stopPropagation()}>
               <option value="all">{lang === 'CZ' ? 'Všechna období' : 'All Time'}</option>
@@ -1933,38 +2023,62 @@ export default function OrdersTab({ showToast }) {
                       </td>
                       <td data-label={lang === 'CZ' ? 'Akce' : 'Actions'} style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
-                          {isGls && (
-                            <button 
-                              className="orders-action-btn orders-action-btn-primary"
-                              disabled={generatingLabelId === details.id}
-                              onClick={() => generateGlsLabelApi(details)}
-                              title={lang === 'CZ' ? 'Vygenerovat štítek a odeslat zásilku do GLS' : 'Generate label and send to GLS'}
-                            >
-                              {generatingLabelId === details.id ? (
-                                <div className="spinner-loader co-spinner" style={{ width: '12px', height: '12px', borderWidth: '1.5px' }}></div>
-                              ) : (
-                                details.rawJson?.order?.gls_parcel_number
-                                  ? (lang === 'CZ' ? '🔄 Tisk štítku GLS' : '🔄 Print GLS Label')
-                                  : (lang === 'CZ' ? '📦 Odeslat do GLS' : '📦 Send to GLS')
-                              )}
-                            </button>
-                          )}
-                          {isDpd && (
-                            <button 
-                              className="orders-action-btn orders-action-btn-primary"
-                              disabled={generatingLabelId === details.id}
-                              onClick={() => generateDpdLabelApi(details)}
-                              title={lang === 'CZ' ? 'Vygenerovat štítek a odeslat zásilku do DPD' : 'Generate label and send to DPD'}
-                            >
-                              {generatingLabelId === details.id ? (
-                                <div className="spinner-loader co-spinner" style={{ width: '12px', height: '12px', borderWidth: '1.5px' }}></div>
-                              ) : (
-                                details.rawJson?.order?.dpd_parcel_number
-                                  ? (lang === 'CZ' ? '🔄 Tisk štítku DPD' : '🔄 Print DPD Label')
-                                  : (lang === 'CZ' ? '📦 Odeslat do DPD' : '📦 Send to DPD')
-                              )}
-                            </button>
-                          )}
+                          {(() => {
+                            const pmLower = (details?.paymentMethod || '').toLowerCase();
+                            const isBankTransferOrder = pmLower.includes('převod') || pmLower.includes('transfer');
+                            const isPaid = (details?.rawJson?.order?.paymentStatus === 'paid') || (details?.rawJson?.order?.platba === 'uhrazeno');
+                            const isNeedsPaymentConfirmation = isBankTransferOrder && !isPaid;
+
+                            if (isNeedsPaymentConfirmation) {
+                              return (
+                                <button 
+                                  className="orders-action-btn"
+                                  style={{ backgroundColor: '#fdbd16', color: '#111111', fontWeight: 'bold' }}
+                                  onClick={() => handleConfirmPayment(details)}
+                                  title={lang === 'CZ' ? 'Potvrdit přijetí platby převodem' : 'Confirm bank transfer payment'}
+                                >
+                                  💳 {lang === 'CZ' ? 'Potvrdit platbu' : 'Confirm Payment'}
+                                </button>
+                              );
+                            }
+
+                            return (
+                              <>
+                                {isGls && (
+                                  <button 
+                                    className="orders-action-btn orders-action-btn-primary"
+                                    disabled={generatingLabelId === details.id}
+                                    onClick={() => generateGlsLabelApi(details)}
+                                    title={lang === 'CZ' ? 'Vygenerovat štítek a odeslat zásilku do GLS' : 'Generate label and send to GLS'}
+                                  >
+                                    {generatingLabelId === details.id ? (
+                                      <div className="spinner-loader co-spinner" style={{ width: '12px', height: '12px', borderWidth: '1.5px' }}></div>
+                                    ) : (
+                                      details.rawJson?.order?.gls_parcel_number
+                                        ? (lang === 'CZ' ? '🔄 Tisk štítku GLS' : '🔄 Print GLS Label')
+                                        : (lang === 'CZ' ? '📦 Odeslat do GLS' : '📦 Send to GLS')
+                                    )}
+                                  </button>
+                                )}
+                                {isDpd && (
+                                  <button 
+                                    className="orders-action-btn orders-action-btn-primary"
+                                    disabled={generatingLabelId === details.id}
+                                    onClick={() => generateDpdLabelApi(details)}
+                                    title={lang === 'CZ' ? 'Vygenerovat štítek a odeslat zásilku do DPD' : 'Generate label and send to DPD'}
+                                  >
+                                    {generatingLabelId === details.id ? (
+                                      <div className="spinner-loader co-spinner" style={{ width: '12px', height: '12px', borderWidth: '1.5px' }}></div>
+                                    ) : (
+                                      details.rawJson?.order?.dpd_parcel_number
+                                        ? (lang === 'CZ' ? '🔄 Tisk štítku DPD' : '🔄 Print DPD Label')
+                                        : (lang === 'CZ' ? '📦 Odeslat do DPD' : '📦 Send to DPD')
+                                    )}
+                                  </button>
+                                )}
+                              </>
+                            );
+                          })()}
                           <button 
                             className="orders-action-btn"
                             style={detailOrder && detailOrder.id === (details?.id || orderId) ? { background: 'var(--nv-gold, #fdbd16)', color: '#0b0c10', fontWeight: 'bold' } : {}}
@@ -2289,8 +2403,8 @@ export default function OrdersTab({ showToast }) {
               <button
                 type="button"
                 style={{
-                  background: '#ef4444',
-                  border: '1px solid #ef4444',
+                  background: confirmModal.btnColor || '#ef4444',
+                  border: `1px solid ${confirmModal.btnColor || '#ef4444'}`,
                   color: '#fff',
                   padding: '10px 16px',
                   borderRadius: '6px',

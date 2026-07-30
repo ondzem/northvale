@@ -4685,7 +4685,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             </svg>
                             <div style={{ textAlign: 'left', lineHeight: '1.2' }}>
                               <div style={{ fontSize: '10px', color: '#fff', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'}</div>
-                              <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>{lang === 'CZ' ? 'nad 1 500 Kč' : 'over 1,500 CZK'}</div>
+                              <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>{lang === 'CZ' ? 'nad 1 750 Kč' : 'over 1,750 CZK'}</div>
                             </div>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -4694,7 +4694,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             </svg>
                             <div style={{ textAlign: 'left', lineHeight: '1.2' }}>
                               <div style={{ fontSize: '10px', color: '#fff', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Rychlost' : 'Fast Delivery'}</div>
-                              <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>{lang === 'CZ' ? 'Odesíláme do 24h' : 'Within 24h'}</div>
+                              <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>{lang === 'CZ' ? 'Doručení do 48h' : 'Delivery within 48h'}</div>
                             </div>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -5227,7 +5227,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       </h4>
                       <ul className="footer-list" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>
                         <li style={{ cursor: 'pointer' }}>{lang === 'CZ' ? 'Nastavení cookies' : 'Cookie Settings'}</li>
-                        <li style={{ cursor: 'pointer' }}>{lang === 'CZ' ? 'Doprava a osobní odběr' : 'Shipping & Pickup'}</li>
+                        <li style={{ cursor: 'pointer' }}>{lang === 'CZ' ? 'Doprava a doručení' : 'Shipping & Delivery'}</li>
                         <li style={{ cursor: 'pointer' }}>{lang === 'CZ' ? 'Obchodní podmínky (VOP)' : 'Terms & Conditions'}</li>
                         <li style={{ cursor: 'pointer' }}>{lang === 'CZ' ? 'Ochrana osobních údajů (GDPR)' : 'Privacy Policy (GDPR)'}</li>
                         <li style={{ cursor: 'pointer' }}>{lang === 'CZ' ? 'Odstoupení od smlouvy' : 'Order Withdrawal'}</li>
@@ -5253,8 +5253,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           <span style={{ color: '#fff', fontWeight: '600' }}>+420 739 666 779</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ opacity: 0.6 }}>{lang === 'CZ' ? 'Odběr:' : 'Pickup:'}</span>
-                          <span style={{ color: '#fff', fontWeight: '600' }}>Pardubice / Holice</span>
+                          <span style={{ opacity: 0.6 }}>{lang === 'CZ' ? 'Adresa:' : 'Address:'}</span>
+                          <span style={{ color: '#fff', fontWeight: '600' }}>Bratří Čapků 1095, Holice</span>
                         </div>
                       </div>
                     </div>

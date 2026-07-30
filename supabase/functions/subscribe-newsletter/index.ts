@@ -292,7 +292,7 @@ serve(async (req) => {
                 </p>
                 
                 <!-- Action Button -->
-                <div style="margin: 30px 0; text-align: center;">
+                <div style="margin: 30px 0; text-align: left;">
                   <a href="{{ doubleoptin }}" target="_blank" style="background-color: #fdbd16; color: #111111; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px; display: inline-block; border: 1px solid #e2a80f; box-shadow: 0 2px 4px rgba(253, 189, 22, 0.15);">
                     ${lang === 'EN' ? 'Confirm subscription' : 'Potvrdit přihlášení k odběru'}
                   </a>

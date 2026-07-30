@@ -12,8 +12,8 @@ export const DEFAULT_FAQ = [
         category_id: '11111111-1111-1111-1111-111111111111',
         question_cz: 'Jaké jsou způsoby dopravy a kolik stojí?',
         question_en: 'What shipping methods do you offer and how much do they cost?',
-        answer_cz: 'Nabízíme Zásilkovnu (79 Kč na výdejní místo), GLS (99 Kč doručení na adresu) a DPD (109 Kč doručení na adresu). Osobní odběr je zdarma na adrese Bratří Čapků 1095, Holice (případně dle domluvy v Pardubicích). Při nákupu nad 2 000 Kč máte dopravu zcela zdarma.',
-        answer_en: 'We offer Packeta (79 CZK to pick-up points), GLS (99 CZK home delivery), and DPD (109 CZK home delivery). Local pickup is free at Bratří Čapků 1095, Holice (or by agreement in Pardubice). We offer free shipping on all orders over 2,000 CZK.',
+        answer_cz: 'Nabízíme DPD (79 Kč na výdejní místo / 109 Kč doručení na adresu) a GLS (89 Kč na výdejní místo / 129 Kč doručení na adresu). Při nákupu nad 1 750 Kč máte dopravu zcela zdarma.',
+        answer_en: 'We offer DPD (79 CZK pickup points / 109 CZK home delivery) and GLS (89 CZK pickup points / 129 CZK home delivery). We offer free shipping on all orders over 1,750 CZK.',
         position: 0
       },
       {
@@ -30,8 +30,8 @@ export const DEFAULT_FAQ = [
         category_id: '11111111-1111-1111-1111-111111111111',
         question_cz: 'Kdy obdržím svou objednávku?',
         question_en: 'When will I receive my order?',
-        answer_cz: 'Zásilky odesíláme do 24 hodin od zaplacení (v pracovní dny). Doručení obvykle trvá 24-48 hodin od expedice.',
-        answer_en: 'We dispatch orders within 24 hours of payment (on business days). Delivery typically takes 24–48 hours after dispatch.',
+        answer_cz: 'Garantujeme doručení do 48 hodin od zaplacení (v pracovní dny).',
+        answer_en: 'We guarantee delivery within 48 hours of payment (on business days).',
         position: 2
       }
     ]

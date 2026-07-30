@@ -2,7 +2,16 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from '../../context/LanguageContext';
 import { fetchSlidesFromDB, saveSlideToDB, deleteSlideFromDB } from '../../services/slides';
-import { fetchDailyDealFromDB, saveDailyDealToDB, fetchDailyDealsFromDB, deleteDailyDealFromDB } from '../../services/dailyDeal';
+import { 
+  fetchDailyDealFromDB, 
+  saveDailyDealToDB, 
+  fetchDailyDealsFromDB, 
+  deleteDailyDealFromDB,
+  parsePragueDateTimeToISO,
+  formatPragueDateTime,
+  getPragueDateAndTimeString,
+  getDealStatus 
+} from '../../services/dailyDeal';
 import { fetchProductsFromDB, fetchProductImage } from '../../services/products';
 import { fetchHomepageSectionsFromDB, saveHomepageSectionToDB } from '../../services/homepageSections';
 
@@ -41,9 +50,11 @@ export default function HomepageTab({ showToast, onEditProduct }) {
   const [dealStock, setDealStock] = useState('0');
   const [dealPrice, setDealPrice] = useState('0');
   const [dealOriginalPrice, setDealOriginalPrice] = useState('');
-  const [dealDays, setDealDays] = useState('0');
-  const [dealHours, setDealHours] = useState('14');
-  const [dealMinutes, setDealMinutes] = useState('35');
+  const [dealStartDate, setDealStartDate] = useState('');
+  const [dealStartTime, setDealStartTime] = useState('06:00');
+  const [dealDays, setDealDays] = useState('1');
+  const [dealHours, setDealHours] = useState('0');
+  const [dealMinutes, setDealMinutes] = useState('0');
   const [dealSeconds, setDealSeconds] = useState('0');
   const [dealImageUrl, setDealImageUrl] = useState('');
 
@@ -522,20 +533,13 @@ export default function HomepageTab({ showToast, onEditProduct }) {
         setDealOriginalPrice(slotDeal.original_price ? String(slotDeal.original_price) : '');
         setDealImageUrl(slotDeal.image_url || '');
 
-        let durationMs = 0;
-        if (slotId === 'active-deal') {
-          const endsAt = new Date(slotDeal.ends_at).getTime();
-          durationMs = Math.max(0, endsAt - Date.now());
-        } else if (slotId === 'deal-2') {
-          const deal1 = dealsList.find(d => d.id === 'active-deal');
-          const parentEndsAt = deal1 ? new Date(deal1.ends_at).getTime() : Date.now();
-          durationMs = Math.max(0, new Date(slotDeal.ends_at).getTime() - parentEndsAt);
-        } else { // deal-3
-          const deal2 = dealsList.find(d => d.id === 'deal-2');
-          const deal1 = dealsList.find(d => d.id === 'active-deal');
-          const parentEndsAt = deal2 ? new Date(deal2.ends_at).getTime() : (deal1 ? new Date(deal1.ends_at).getTime() : Date.now());
-          durationMs = Math.max(0, new Date(slotDeal.ends_at).getTime() - parentEndsAt);
-        }
+        const { startDate, startTime } = getPragueDateAndTimeString(slotDeal.starts_at);
+        setDealStartDate(startDate);
+        setDealStartTime(startTime || '06:00');
+
+        const startsAtMs = slotDeal.starts_at ? new Date(slotDeal.starts_at).getTime() : Date.now();
+        const endsAtMs = slotDeal.ends_at ? new Date(slotDeal.ends_at).getTime() : (startsAtMs + 24 * 3600 * 1000);
+        const durationMs = Math.max(0, endsAtMs - startsAtMs);
 
         const totalSecs = Math.floor(durationMs / 1000);
         setDealDays(String(Math.floor(totalSecs / (3600 * 24))));
@@ -543,15 +547,17 @@ export default function HomepageTab({ showToast, onEditProduct }) {
         setDealMinutes(String(Math.floor((totalSecs % 3600) / 60)));
         setDealSeconds(String(totalSecs % 60));
       } else {
-        // Clear forms if slot is new/empty
         setDealName('');
         setDealProductId('');
         setDealStock('0');
         setDealPrice('0');
         setDealOriginalPrice('');
         setDealImageUrl('');
-        setDealDays('0');
-        setDealHours('24');
+        const nowPrague = getPragueDateAndTimeString(null);
+        setDealStartDate(nowPrague.startDate);
+        setDealStartTime('06:00');
+        setDealDays('1');
+        setDealHours('0');
         setDealMinutes('0');
         setDealSeconds('0');
       }
@@ -592,7 +598,6 @@ export default function HomepageTab({ showToast, onEditProduct }) {
       const { error } = await deleteDailyDealFromDB(selectedSlotId);
       if (error) throw error;
       showToast(lang === 'CZ' ? 'Akce dne byla úspěšně smazána!' : 'Deal of the Day successfully deleted!', 'success');
-      // Reload form states
       await loadDailyDeal();
     } catch (err) {
       console.error('Failed to delete daily deal:', err);
@@ -604,6 +609,9 @@ export default function HomepageTab({ showToast, onEditProduct }) {
   const handleSaveDailyDeal = async (e) => {
     e.preventDefault();
 
+    const startsAtIso = parsePragueDateTimeToISO(dealStartDate, dealStartTime);
+    const startsAtMs = new Date(startsAtIso).getTime();
+
     const daysOffset = Number(dealDays || 0) * 24 * 3600 * 1000;
     const hoursOffset = Number(dealHours || 0) * 3600 * 1000;
     const minsOffset = Number(dealMinutes || 0) * 60 * 1000;
@@ -613,32 +621,18 @@ export default function HomepageTab({ showToast, onEditProduct }) {
     if (durationMs <= 0) {
       showToast(
         lang === 'CZ' 
-          ? 'Chyba: Musíte nastavit platný odpočet času do konce akce (dny, hodiny, minuty nebo sekundy)!' 
-          : 'Error: You must set a valid countdown duration for the deal!', 
+          ? 'Chyba: Musíte nastavit platnou dobu trvání akce (dny, hodiny nebo minuty)!' 
+          : 'Error: You must set a valid duration for the deal!', 
         'error'
       );
       return;
     }
 
+    const endsAtIso = new Date(startsAtMs + durationMs).toISOString();
+
     setDealSaving(true);
 
     try {
-      const dealsList = await fetchDailyDealsFromDB();
-      const deal1 = dealsList.find(d => d.id === 'active-deal');
-      const deal2 = dealsList.find(d => d.id === 'deal-2');
-      const deal3 = dealsList.find(d => d.id === 'deal-3');
-
-      let endsAtIso = '';
-      if (selectedSlotId === 'active-deal') {
-        endsAtIso = new Date(Date.now() + durationMs).toISOString();
-      } else if (selectedSlotId === 'deal-2') {
-        const parentEndsAt = deal1 ? new Date(deal1.ends_at).getTime() : Date.now();
-        endsAtIso = new Date(parentEndsAt + durationMs).toISOString();
-      } else { // deal-3
-        const parentEndsAt = deal2 ? new Date(deal2.ends_at).getTime() : (deal1 ? new Date(deal1.ends_at).getTime() : Date.now());
-        endsAtIso = new Date(parentEndsAt + durationMs).toISOString();
-      }
-
       const payload = {
         name: dealName,
         product_id: dealProductId || null,
@@ -646,6 +640,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
         price: Number(dealPrice || 0),
         original_price: dealOriginalPrice ? Number(dealOriginalPrice) : null,
         image_url: dealImageUrl || null,
+        starts_at: startsAtIso,
         ends_at: endsAtIso,
         expiry_notified: false
       };
@@ -656,48 +651,13 @@ export default function HomepageTab({ showToast, onEditProduct }) {
         throw error;
       }
 
-      const newT_saved = new Date(endsAtIso).getTime();
-
-      // Cascade shifts
-      if (selectedSlotId === 'active-deal') {
-        if (deal2 && deal1) {
-          const oldT1 = new Date(deal1.ends_at).getTime();
-          const oldT2 = new Date(deal2.ends_at).getTime();
-          const durationSlot2 = Math.max(0, oldT2 - oldT1);
-          const newT2 = newT_saved + durationSlot2;
-          const newT2Iso = new Date(newT2).toISOString();
-          
-          await saveDailyDealToDB({ ...deal2, ends_at: newT2Iso }, 'deal-2');
-
-          if (deal3) {
-            const oldT3 = new Date(deal3.ends_at).getTime();
-            const durationSlot3 = Math.max(0, oldT3 - oldT2);
-            const newT3 = newT2 + durationSlot3;
-            const newT3Iso = new Date(newT3).toISOString();
-
-            await saveDailyDealToDB({ ...deal3, ends_at: newT3Iso }, 'deal-3');
-          }
-        }
-      } else if (selectedSlotId === 'deal-2') {
-        if (deal3 && deal2) {
-          const oldT2 = new Date(deal2.ends_at).getTime();
-          const oldT3 = new Date(deal3.ends_at).getTime();
-          const durationSlot3 = Math.max(0, oldT3 - oldT2);
-          const newT3 = newT_saved + durationSlot3;
-          const newT3Iso = new Date(newT3).toISOString();
-
-          await saveDailyDealToDB({ ...deal3, ends_at: newT3Iso }, 'deal-3');
-        }
-      }
-
       showToast(
         isMockFallback
           ? (lang === 'CZ' ? 'Akce dne uložena pouze lokálně (Chyba DB)!' : 'Daily deal saved locally only (DB error)!')
-          : (lang === 'CZ' ? 'Akce dne úspěšně uložena!' : 'Deal of the Day successfully saved!'),
+          : (lang === 'CZ' ? 'Akce dne úspěšně uložena a naplánována!' : 'Deal of the Day successfully saved and scheduled!'),
         isMockFallback ? 'warning' : 'success'
       );
 
-      // Reload form states
       await loadDailyDeal();
     } catch (err) {
       console.error('Failed to save daily deal:', err);
@@ -1718,37 +1678,174 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                 />
               </div>
 
-              {/* Countdown Fields */}
-              <div className="ctf-field" style={{ marginTop: '20px' }}>
-                <label className="ctf-label">{lang === 'CZ' ? 'Odpočet času do konce akce' : 'Countdown Duration'}</label>
-                <div style={{ display: 'flex', gap: '12px' }} className="countdown-inputs-row">
-                  <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '4px' }}>{lang === 'CZ' ? 'Dny' : 'Days'}</span>
-                    <input type="number" min="0" className="ctf-input" value={dealDays} onChange={e => setDealDays(e.target.value)} placeholder="0" />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '4px' }}>{lang === 'CZ' ? 'Hodiny' : 'Hours'}</span>
-                    <input type="number" min="0" max="23" className="ctf-input" value={dealHours} onChange={e => setDealHours(e.target.value)} placeholder="14" />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '4px' }}>{lang === 'CZ' ? 'Minuty' : 'Minutes'}</span>
-                    <input type="number" min="0" max="59" className="ctf-input" value={dealMinutes} onChange={e => setDealMinutes(e.target.value)} placeholder="35" />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '4px' }}>{lang === 'CZ' ? 'Sekundy' : 'Seconds'}</span>
-                    <input type="number" min="0" max="59" className="ctf-input" value={dealSeconds} onChange={e => setDealSeconds(e.target.value)} placeholder="0" />
-                  </div>
-                </div>
-                <p className="ctf-hint">
-                  {lang === 'CZ'
-                    ? selectedSlotId === 'active-deal'
-                      ? 'Zadejte čas zbývající do konce akce. Odpočet se po uložení začne odpočítávat v reálném čase.'
-                      : 'Zadejte dobu trvání této akce. Spustí se automaticky ihned po skončení předchozí akce.'
-                    : selectedSlotId === 'active-deal'
-                      ? 'Enter the remaining duration for the deal. The live timer will compute the deadline relative to saving moment.'
-                      : 'Enter the duration for this deal. It will start automatically after the previous scheduled deal ends.'}
-                </p>
-              </div>
+              {/* Status Badge */}
+              {(() => {
+                const currentStartsAtIso = parsePragueDateTimeToISO(dealStartDate, dealStartTime);
+                const durationMs = (Number(dealDays || 0) * 24 + Number(dealHours || 0)) * 3600 * 1000 + Number(dealMinutes || 0) * 60000 + Number(dealSeconds || 0) * 1000;
+                const currentEndsAtIso = currentStartsAtIso ? new Date(new Date(currentStartsAtIso).getTime() + durationMs).toISOString() : '';
+                const currentDealStatus = getDealStatus({ starts_at: currentStartsAtIso, ends_at: currentEndsAtIso });
+
+                return (
+                  <>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: isMobile ? 'column' : 'row',
+                      alignItems: isMobile ? 'flex-start' : 'center',
+                      justifyContent: 'space-between',
+                      padding: '12px 16px',
+                      borderRadius: '10px',
+                      background: currentDealStatus === 'active' ? 'rgba(34, 197, 94, 0.08)' : currentDealStatus === 'scheduled' ? 'rgba(234, 179, 8, 0.08)' : 'rgba(239, 68, 68, 0.08)',
+                      border: `1px solid ${currentDealStatus === 'active' ? 'rgba(34, 197, 94, 0.25)' : currentDealStatus === 'scheduled' ? 'rgba(234, 179, 8, 0.25)' : 'rgba(239, 68, 68, 0.25)'}`,
+                      gap: '10px',
+                      marginTop: '20px',
+                      marginBottom: '8px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{
+                          width: '10px',
+                          height: '10px',
+                          borderRadius: '50%',
+                          background: currentDealStatus === 'active' ? '#22c55e' : currentDealStatus === 'scheduled' ? '#eab308' : '#ef4444',
+                          boxShadow: currentDealStatus === 'active' ? '0 0 10px #22c55e' : 'none'
+                        }}></span>
+                        <span style={{ fontWeight: '700', fontSize: '13px', color: currentDealStatus === 'active' ? '#22c55e' : currentDealStatus === 'scheduled' ? '#eab308' : '#ef4444' }}>
+                          {currentDealStatus === 'active' 
+                            ? (lang === 'CZ' ? '🟢 AKTIVNÍ AKCE (Právě probíhá)' : '🟢 ACTIVE DEAL (Currently live)') 
+                            : currentDealStatus === 'scheduled' 
+                            ? (lang === 'CZ' ? '🟡 NAPLÁNOVANÁ AKCE (Čeká na spuštění)' : '🟡 SCHEDULED DEAL (Pending start)') 
+                            : (lang === 'CZ' ? '🔴 VYPRŠELÁ AKCE (Ukončeno)' : '🔴 EXPIRED DEAL')}
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', fontWeight: '500' }}>
+                        {currentStartsAtIso && currentEndsAtIso && (
+                          lang === 'CZ' 
+                            ? `${formatPragueDateTime(currentStartsAtIso)} ➔ ${formatPragueDateTime(currentEndsAtIso)}` 
+                            : `${formatPragueDateTime(currentStartsAtIso)} ➔ ${formatPragueDateTime(currentEndsAtIso)}`
+                        )}
+                      </span>
+                    </div>
+
+                    {/* Plánování spuštění a časování (Česká časová zóna) */}
+                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '18px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', marginTop: '16px' }}>
+                      <h4 style={{ margin: '0 0 14px 0', fontSize: '14px', fontWeight: '700', color: 'var(--color-gold)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span>⏰</span>
+                        <span>{lang === 'CZ' ? 'Plánování spuštění a časování (Česká časová zóna)' : 'Scheduling & Timing (Czech Timezone)'}</span>
+                      </h4>
+
+                      {/* Datum a čas spuštění */}
+                      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }} className="slide-list-split">
+                        <div className="ctf-field" style={{ flex: 1, minWidth: '150px' }}>
+                          <label className="ctf-label">{lang === 'CZ' ? 'Datum spuštění' : 'Start Date'}<span style={{ color: '#ef4444' }}> *</span></label>
+                          <input 
+                            type="date" 
+                            className="ctf-input" 
+                            value={dealStartDate} 
+                            onChange={e => setDealStartDate(e.target.value)} 
+                            required 
+                          />
+                        </div>
+                        <div className="ctf-field" style={{ flex: 1, minWidth: '130px' }}>
+                          <label className="ctf-label">{lang === 'CZ' ? 'Čas spuštění' : 'Start Time'}<span style={{ color: '#ef4444' }}> *</span></label>
+                          <input 
+                            type="time" 
+                            className="ctf-input" 
+                            value={dealStartTime} 
+                            onChange={e => setDealStartTime(e.target.value)} 
+                            required 
+                          />
+                        </div>
+                      </div>
+
+                      {/* Rychlé předvolby spuštění */}
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', alignSelf: 'center' }}>{lang === 'CZ' ? 'Rychlé spuštění:' : 'Quick start:'}</span>
+                        <button 
+                          type="button" 
+                          className="btn btn-secondary" 
+                          style={{ padding: '4px 10px', fontSize: '11px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                          onClick={() => {
+                            const nowPrague = getPragueDateAndTimeString(null);
+                            setDealStartDate(nowPrague.startDate);
+                            setDealStartTime('06:00');
+                          }}
+                        >
+                          {lang === 'CZ' ? 'Dnes v 06:00' : 'Today 06:00'}
+                        </button>
+                        <button 
+                          type="button" 
+                          className="btn btn-secondary" 
+                          style={{ padding: '4px 10px', fontSize: '11px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                          onClick={() => {
+                            const tomorrow = new Date(Date.now() + 24 * 3600 * 1000);
+                            const tomorrowPrague = getPragueDateAndTimeString(tomorrow.toISOString());
+                            setDealStartDate(tomorrowPrague.startDate);
+                            setDealStartTime('06:00');
+                          }}
+                        >
+                          {lang === 'CZ' ? 'Zítra v 06:00' : 'Tomorrow 06:00'}
+                        </button>
+                        <button 
+                          type="button" 
+                          className="btn btn-secondary" 
+                          style={{ padding: '4px 10px', fontSize: '11px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                          onClick={() => {
+                            const nowPrague = getPragueDateAndTimeString(null);
+                            setDealStartDate(nowPrague.startDate);
+                            setDealStartTime(nowPrague.startTime);
+                          }}
+                        >
+                          {lang === 'CZ' ? 'Spustit ihned' : 'Start now'}
+                        </button>
+                      </div>
+
+                      {/* Doba trvání akce */}
+                      <div className="ctf-field" style={{ marginTop: '16px' }}>
+                        <label className="ctf-label">{lang === 'CZ' ? 'Doba trvání akce' : 'Deal Duration'}</label>
+                        <div style={{ display: 'flex', gap: '12px' }} className="countdown-inputs-row">
+                          <div style={{ flex: 1 }}>
+                            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '4px' }}>{lang === 'CZ' ? 'Dny' : 'Days'}</span>
+                            <input type="number" min="0" className="ctf-input" value={dealDays} onChange={e => setDealDays(e.target.value)} placeholder="1" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '4px' }}>{lang === 'CZ' ? 'Hodiny' : 'Hours'}</span>
+                            <input type="number" min="0" max="23" className="ctf-input" value={dealHours} onChange={e => setDealHours(e.target.value)} placeholder="0" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '4px' }}>{lang === 'CZ' ? 'Minuty' : 'Minutes'}</span>
+                            <input type="number" min="0" max="59" className="ctf-input" value={dealMinutes} onChange={e => setDealMinutes(e.target.value)} placeholder="0" />
+                          </div>
+                        </div>
+
+                        {/* Rychlé předvolby trvání */}
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', alignSelf: 'center' }}>{lang === 'CZ' ? 'Rychlé trvání:' : 'Quick duration:'}</span>
+                          <button type="button" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '11px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} onClick={() => { setDealDays('1'); setDealHours('0'); setDealMinutes('0'); }}>
+                            {lang === 'CZ' ? '24 hodin (1 den)' : '24 hours (1 day)'}
+                          </button>
+                          <button type="button" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '11px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} onClick={() => { setDealDays('2'); setDealHours('0'); setDealMinutes('0'); }}>
+                            {lang === 'CZ' ? '48 hodin (2 dny)' : '48 hours (2 days)'}
+                          </button>
+                          <button type="button" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '11px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} onClick={() => { setDealDays('3'); setDealHours('0'); setDealMinutes('0'); }}>
+                            {lang === 'CZ' ? '3 dny' : '3 days'}
+                          </button>
+                          <button type="button" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '11px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} onClick={() => { setDealDays('7'); setDealHours('0'); setDealMinutes('0'); }}>
+                            {lang === 'CZ' ? '7 dní' : '7 days'}
+                          </button>
+                        </div>
+
+                        {/* Vypočítaný konec akce */}
+                        {currentEndsAtIso && (
+                          <p className="ctf-hint" style={{ marginTop: '12px', color: '#38bdf8', fontWeight: '600' }}>
+                            {lang === 'CZ'
+                              ? `🗓️ Akce poběží od ${formatPragueDateTime(currentStartsAtIso)} do ${formatPragueDateTime(currentEndsAtIso)}`
+                              : `🗓️ Deal will run from ${formatPragueDateTime(currentStartsAtIso)} to ${formatPragueDateTime(currentEndsAtIso)}`}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
 
               {/* Submit & Delete Actions */}
               <div style={{ display: 'flex', gap: '12px', marginTop: '28px' }}>
@@ -2030,7 +2127,8 @@ export default function HomepageTab({ showToast, onEditProduct }) {
         )}
       </div>
 
-      {/* SECTION 4: PREORDERS SECTION */}
+      {/* SLEEP MODE: PREORDERS CMS SECTION (Re-activate by uncommenting this block) */}
+      {/*
       <div className="admin-accordion-item">
         <div 
           className={`admin-accordion-header ${preordersExpanded ? 'is-open' : ''}`}
@@ -2058,6 +2156,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
           </div>
         )}
       </div>
+      */}
 
       {/* SECTION 5: ACCESSORIES SECTION */}
       <div className="admin-accordion-item">

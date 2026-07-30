@@ -341,13 +341,13 @@ export default function BuylistPortal({ products, submitBuylist, setActivePage }
             <ul style={styles.infoList}>
               {lang === 'CZ' ? (
                 <>
-                  <li>Karty k výkupu nám zašlete poštou nebo odevzdejte osobně v kavárně v Pardubicích.</li>
+                  <li>Karty k výkupu nám zašlete poštou nebo pojištěnou zásilkou na naši adresu.</li>
                   <li>Fyzickou kontrolu stavu a pravosti karet provedeme do 48 hodin od přijetí.</li>
                   <li>Po schválení Vám ihned zašleme peníze na bankovní účet.</li>
                 </>
               ) : (
                 <>
-                  <li>Send your buylist cards to our address or hand them in person at the cafe in Pardubice.</li>
+                  <li>Send your buylist cards to our address via insured post/courier.</li>
                   <li>We will perform a physical check of the condition and authenticity within 48 hours of receipt.</li>
                   <li>Once approved, we will send the payout to your bank account immediately.</li>
                 </>

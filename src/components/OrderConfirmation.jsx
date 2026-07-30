@@ -48,13 +48,6 @@ export default function OrderConfirmation({ order, setActivePage }) {
     );
   }
 
-  const isPersonalPickup = order.shippingMethod && (
-    order.shippingMethod.includes('Osobní') || 
-    order.shippingMethod.includes('Local Pickup') ||
-    order.shippingMethod.includes('Pardubice') ||
-    order.shippingMethod.includes('Holice')
-  );
-
   const isBankTransfer = order.paymentMethod && (
     order.paymentMethod.toLowerCase().includes('převod') ||
     order.paymentMethod.toLowerCase().includes('transfer')
@@ -85,24 +78,12 @@ export default function OrderConfirmation({ order, setActivePage }) {
         {/* Shipping details container */}
         <div className="ocf-ship">
           <div className="ocf-ship-head">
-            {isPersonalPickup ? (
-              <>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                <span>{lang === 'CZ' ? 'Osobní odběr — Holice' : 'Personal Pickup — Holice'}</span>
-              </>
-            ) : (
-              <>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                  <line x1="12" y1="22.08" x2="12" y2="12" />
-                </svg>
-                <span>{lang === 'CZ' ? 'Doručení zásilky' : 'Shipping Delivery'}</span>
-              </>
-            )}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+              <line x1="12" y1="22.08" x2="12" y2="12" />
+            </svg>
+            <span>{lang === 'CZ' ? 'Doručení zásilky' : 'Shipping Delivery'}</span>
           </div>
           
           <p className="ocf-ship-method">
@@ -111,18 +92,14 @@ export default function OrderConfirmation({ order, setActivePage }) {
           </p>
 
           <p className="ocf-ship-note">
-            {isPersonalPickup ? (
-              lang === 'CZ' 
-                ? 'Zboží pro Vás začínáme připravovat. Jakmile bude objednávka připravena k vyzvednutí na naší kontaktní adrese Bratří Čapků 1095, 534 01 Holice, zašleme Vám e-mail a SMS.'
-                : 'We are preparing your items. As soon as your order is ready for pickup at our contact address Bratří Čapků 1095, 534 01 Holice, we will send you an email and SMS.'
-            ) : isBankTransfer ? (
+            {isBankTransfer ? (
               lang === 'CZ'
                 ? 'Objednávku jsme úspěšně přijali a nyní čeká na zaplacení. Jakmile obdržíme Vaši platbu na náš účet, zboží okamžitě zabalíme a předáme dopravci.'
                 : 'Your order has been successfully received and is now pending payment. Once the payment is cleared on our account, we will immediately pack and ship your items.'
             ) : (
               lang === 'CZ'
-                ? 'Vaše platba byla úspěšně přijata. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. Sledujte prosím svůj e-mail pro sledovací číslo zásilky.'
-                : 'Your payment was successfully received. We will process your order and hand it over to the carrier as soon as possible. Please check your email for the shipment tracking number.'
+                ? 'Vaše platba byla úspěšně přijata. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. O odeslání Vás budeme informovat e-mailem.'
+                : 'Your payment was successfully received. We will process your order and hand it over to the carrier as soon as possible. We will inform you via email upon dispatch.'
             )}
           </p>
         </div>
@@ -221,7 +198,13 @@ export default function OrderConfirmation({ order, setActivePage }) {
           )}
 
           <div className="ocf-total">
-            <span>{lang === 'CZ' ? 'Celkem zaplaceno:' : 'Total Paid:'}</span>
+            <span>
+              {isBankTransfer 
+                ? (lang === 'CZ' ? 'Celkem k úhradě:' : 'Total Amount to Pay:') 
+                : (order.paymentMethod && (order.paymentMethod.toLowerCase().includes('dobírk') || order.paymentMethod.toLowerCase().includes('cod')))
+                  ? (lang === 'CZ' ? 'Celkem k úhradě při převzetí:' : 'Total Payable on Delivery:')
+                  : (lang === 'CZ' ? 'Celkem zaplaceno:' : 'Total Paid:')}
+            </span>
             <span className="ocf-total-val">
               {order.finalTotal.toLocaleString('cs-CZ')} <span style={{ fontSize: '18px', fontWeight: '700' }}>Kč</span>
             </span>
@@ -230,9 +213,17 @@ export default function OrderConfirmation({ order, setActivePage }) {
 
         {/* Disclaimer */}
         <p className="ocf-email">
-          {lang === 'CZ' 
-            ? 'Potvrzení objednávky a daňový doklad (faktura) Vám byly zaslány na e-mail.' 
-            : 'Order confirmation and tax invoice have been sent to your email.'}
+          {isBankTransfer 
+            ? (lang === 'CZ' 
+                ? 'Potvrzení objednávky a podklady k platbě Vám byly zaslány na e-mail.' 
+                : 'Order confirmation and payment instructions have been sent to your email.')
+            : (order.paymentMethod && (order.paymentMethod.toLowerCase().includes('dobírk') || order.paymentMethod.toLowerCase().includes('cod')))
+              ? (lang === 'CZ' 
+                  ? 'Potvrzení objednávky a daňový doklad Vám byly zaslány na e-mail.' 
+                  : 'Order confirmation and tax invoice have been sent to your email.')
+              : (lang === 'CZ' 
+                  ? 'Potvrzení objednávky a daňový doklad (faktura) Vám byly zaslány na e-mail.' 
+                  : 'Order confirmation and tax invoice have been sent to your email.')}
         </p>
 
         {/* Actions */}

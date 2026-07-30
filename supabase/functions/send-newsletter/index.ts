@@ -62,86 +62,52 @@ function compileHtml(subject: string, blocksHtml: string, isEnglish: boolean): s
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
   <title>${subject}</title>
   <style>
+    :root { color-scheme: light; supported-color-schemes: light; }
     body {
       margin: 0;
       padding: 0;
-      background-color: #0b0b0c;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      color: #ffffff;
+      background-color: #f5f6f8 !important;
+      font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #222222;
       -webkit-font-smoothing: antialiased;
-    }
-    table {
-      border-collapse: collapse;
-    }
-    img {
-      display: block;
-      max-width: 100%;
-      height: auto;
-      border: 0;
-    }
-    .wrapper {
-      width: 100%;
-      background-color: #0b0b0c;
-      padding: 40px 0;
-    }
-    .container {
-      max-width: 660px;
-      margin: 0 auto;
-      background-color: #131316;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .header {
-      padding: 30px;
-      text-align: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      background-color: #131316;
-    }
-    .content {
-      padding: 0;
-    }
-    .footer {
-      padding: 30px;
-      text-align: center;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      font-size: 11px;
-      color: #8a8a93;
-      background-color: #0b0b0c;
-      line-height: 1.5;
     }
   </style>
 </head>
-<body>
-  <div class="wrapper" style="width: 100%; background-color: #0b0b0c; padding: 40px 0;">
+<body style="background-color: #f5f6f8; margin: 0; padding: 0;">
+  <div style="background-color: #f5f6f8; padding: 40px 10px; min-height: 100%;">
     <table cellpadding="0" cellspacing="0" border="0" width="100%">
       <tr>
         <td align="center">
-          <div class="container" style="max-width: 660px; width: 100%; background-color: #131316; border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; overflow: hidden; text-align: left;">
+          <div style="max-width: 600px; width: 100%; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 40px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: #222222; text-align: left;">
             
             <!-- Header Logo -->
-            <div class="header" style="padding: 24px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); background-color: #131316;">
-              <a href="https://northvaletcg.eu" target="_blank" style="text-decoration: none; display: inline-block;">
-                <img src="https://northvaletcg.eu/logo%20s%20popisem.webp" alt="NORTHVALE" style="max-height: 65px; margin: 0 auto; display: block; border: 0;" />
-              </a>
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #fdbd16; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: 2px; text-transform: uppercase;">NORTHVALE</h1>
+              <p style="color: #8a8a92; font-size: 11px; text-transform: uppercase; letter-spacing: 4px; margin: 3px 0 0 0;">Trading Card Games</p>
             </div>
+
+            <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 24px 0;" />
             
             <!-- Email Body Blocks -->
             <div class="content" style="padding: 0;">
               ${blocksHtml}
             </div>
             
+            <hr style="border: 0; border-top: 1px solid #e1e4e8; margin: 30px 0;" />
+
             <!-- Footer -->
-            <div class="footer" style="padding: 28px 24px; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.06); font-size: 11px; color: #8a8a93; background-color: #0b0b0c; line-height: 1.6; font-family: sans-serif;">
-              <p style="margin: 0 0 6px 0; color: #fff; font-weight: bold;">${copyrightText}</p>
-              <p style="margin: 0 0 16px 0;">E-mail: <a href="mailto:info@northvaletcg.eu" style="color: #E2BA5E; text-decoration: none;">info@northvaletcg.eu</a> | Tel: +420 739 666 779</p>
-              <p style="margin: 0 0 12px 0; font-size: 10px; color: #6e6e73;">
+            <div style="text-align: center; font-size: 11px; color: #8a8a92; line-height: 1.6; font-family: sans-serif;">
+              <p style="margin: 0 0 6px 0; color: #111111; font-weight: bold;">${copyrightText}</p>
+              <p style="margin: 0 0 12px 0;">E-mail: <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; text-decoration: none; font-weight: bold;">info@northvaletcg.eu</a> | Tel: +420 739 666 779</p>
+              <p style="margin: 0 0 12px 0; font-size: 10px; color: #8a8a92;">
                 ${emailFooterInfo}
               </p>
               <p style="margin: 16px 0 0 0;">
-                <a href="{{ unsubscribe }}" style="color: #55555c; text-decoration: underline; font-size: 11px; font-weight: normal; display: inline-block; font-family: sans-serif;">${unsubscribeText}</a>
+                <a href="{{ unsubscribe }}" style="color: #666666; text-decoration: underline; font-size: 11px;">${unsubscribeText}</a>
               </p>
             </div>
 
@@ -425,7 +391,7 @@ serve(async (req) => {
             ? block.content 
             : block.content.replace(/\n/g, '<br />');
           blocksHtmlCZ += `
-            <div class="block-text" style="font-size: 16px; line-height: 1.6; color: #d1d1d6; padding: 20px 30px 10px 30px; font-family: sans-serif; word-break: break-word;">
+            <div class="block-text" style="font-size: 16px; line-height: 1.6; color: #222222; padding: 20px 30px 10px 30px; font-family: sans-serif; word-break: break-word;">
               ${formattedContent}
             </div>
           `;
@@ -444,7 +410,7 @@ serve(async (req) => {
           if (!block.text || !block.url) continue;
           blocksHtmlCZ += `
             <div class="block-button" style="text-align: center; padding: 12px 30px 20px 30px;">
-              <a href="${block.url}" class="btn" target="_blank" style="display: inline-block; background-color: #E2BA5E; color: #0b0b0c !important; padding: 13px 32px; border-radius: 6px; font-weight: bold; text-decoration: none; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; font-family: sans-serif;">
+              <a href="${block.url}" class="btn" target="_blank" style="display: inline-block; background-color: #fdbd16; color: #111111 !important; padding: 14px 36px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 15px; border: 1px solid #e2a80f; box-shadow: 0 2px 4px rgba(253, 189, 22, 0.18); font-family: sans-serif;">
                 ${block.text}
               </a>
             </div>
@@ -462,7 +428,7 @@ serve(async (req) => {
             ? rawContent 
             : rawContent.replace(/\n/g, '<br />');
           blocksHtmlEN += `
-            <div class="block-text" style="font-size: 16px; line-height: 1.6; color: #d1d1d6; padding: 20px 30px 10px 30px; font-family: sans-serif; word-break: break-word;">
+            <div class="block-text" style="font-size: 16px; line-height: 1.6; color: #222222; padding: 20px 30px 10px 30px; font-family: sans-serif; word-break: break-word;">
               ${formattedContent}
             </div>
           `;

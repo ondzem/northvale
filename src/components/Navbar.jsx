@@ -189,14 +189,14 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
       'Výkup karet (Buylist)': 'Card Buylist',
       'Grading servis': 'Grading Service',
       'Nejčastější dotazy (FAQ)': 'FAQ',
-      'Doprava a osobní odběr': 'Shipping & Pickup',
+      'Doprava a doručení': 'Shipping & Delivery',
       'Obchodní podmínky (VOP)': 'Terms & Conditions',
       'Ochrana osobních údajů (GDPR)': 'Privacy Policy (GDPR)',
       'Odstoupení od smlouvy': 'Contract Withdrawal',
       'Kontakty': 'Contacts',
       'Provozovatel': 'Operator',
       'Sídlo': 'Registered Address',
-      'Odběr': 'Pickup Address',
+      'Adresa': 'Address',
       'Jazyk': 'Language',
       'Potřebujete poradit?': 'Need assistance?',
       'Nejčastější dotazy': 'Frequently Asked Questions',
@@ -1205,7 +1205,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                         className="drawer-link-item"
                         onClick={() => { setActivePage('gdpr-vop', 'doprava'); setDrawerOpen(false); }}
                       >
-                        {translateSubcat('Doprava a osobní odběr')}
+                        {translateSubcat('Doprava a doručení')}
                       </li>
                       <li 
                         style={styles.drawerLinkItem} 
@@ -1238,7 +1238,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       <strong>{lang === 'CZ' ? 'DIČ' : 'VAT ID'}:</strong> CZ29618142<br />
                       <strong>E-mail:</strong> info@northvaletcg.eu<br />
                       <strong>{lang === 'CZ' ? 'Telefon' : 'Phone'}:</strong> +420 739 666 779<br />
-                      <strong>{lang === 'CZ' ? 'Odběr' : 'Pickup'}:</strong> Bratří Čapků 1095, Holice
+                      <strong>{lang === 'CZ' ? 'Adresa' : 'Address'}:</strong> Bratří Čapků 1095, Holice
                     </p>
                   </div>
                 </>

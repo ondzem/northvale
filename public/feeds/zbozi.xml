@@ -145,6 +145,18 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
+    <ITEM_ID>151-journey-booster-pack</ITEM_ID>
+    <PRODUCTNAME>151 Journey Booster pack</PRODUCTNAME>
+    <DESCRIPTION>První ze čtyř čínských setů v sérii Collect 151, zasazené do éry Scarlet &amp;amp; Violet! Edice se vrací ke kořenům a slaví originálních 151 Pokémonů z Kanto regionu – najdete tu Pikachu, Bulbasaura, Charmandera, Squirtla, Mew a mnoho dalších</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/151-journey-booster-pack/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/151-journey-booster-pack.webp</IMGURL>
+    <PRICE_VAT>139</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
     <ITEM_ID>shimmering-skies-illuminers-trove-bo</ITEM_ID>
     <PRODUCTNAME>Shimmering Skies Illuminers Trove Box</PRODUCTNAME>
     <DESCRIPTION>Celá Lorcana slaví! Po vítězství nad Ursulou se u Velké Iluminárie koná velký festival plný her, hudby, tance a dobrého jídla. Na oslavu dorazí i nové tváře – Wreck-It Ralph se svými pixelovými kamarády z Litwak&apos;s Arcade i Anna, Elsa a Olaf čerství ze Začarovaného lesa.</DESCRIPTION>
@@ -201,6 +213,18 @@
     <PRICE_VAT>3299</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>akryl-booster-box-riftbound</ITEM_ID>
+    <PRODUCTNAME>Akryl Booster Box Riftbound</PRODUCTNAME>
+    <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Box Riftbound patří k nejžádanějším kouskům ve světě sběratelství, a proto by jeho ochrana měla odpovídat jeho skutečné hodnotě</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/akryl-booster-box-riftbound/</URL>
+    <IMGURL></IMGURL>
+    <PRICE_VAT>499</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
@@ -313,18 +337,6 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>akryl-booster-box-lorcana</ITEM_ID>
-    <PRODUCTNAME>Akryl Booster box Lorcana</PRODUCTNAME>
-    <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Box Disney Lorcana patří k nejžádanějším kouskům ve světě sběratelství, a proto by jeho ochrana měla odpovídat jeho skutečné hodnotě</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/akryl-booster-box-lorcana/</URL>
-    <IMGURL></IMGURL>
-    <PRICE_VAT>499</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Northvale</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
     <ITEM_ID>toploader-3x4-clear-regular-25ks</ITEM_ID>
     <PRODUCTNAME>Toploader 3x4 Clear Regular</PRODUCTNAME>
     <DESCRIPTION>Toploadery jsou tvrdé plastové obaly, které poskytují maximální ochranu vašim nejcennějším kartám před ohnutím, poškrábáním a nárazem. Dostupné v různých velikostech pro standardní i oversized karty, jsou ideální pro dlouhodobé uchovávání i bezpečné zasílání. Nezbytný doplněk pro každého sběratele.</DESCRIPTION>
@@ -337,12 +349,12 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>akry-trove-box-lorcana</ITEM_ID>
-    <PRODUCTNAME>Akry Trove Box Lorcana</PRODUCTNAME>
-    <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Illumineer&apos;s Trove patří k nejžádanějším kouskům ve světě sběratelství Disney Lorcana, a proto by jeho ochrana měla odpovídat jeho skutečné hodnotě</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/akry-trove-box-lorcana/</URL>
+    <ITEM_ID>akryl-booster-box-lorcana</ITEM_ID>
+    <PRODUCTNAME>Akryl Booster box Lorcana</PRODUCTNAME>
+    <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Box Disney Lorcana patří k nejžádanějším kouskům ve světě sběratelství, a proto by jeho ochrana měla odpovídat jeho skutečné hodnotě</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/akryl-booster-box-lorcana/</URL>
     <IMGURL></IMGURL>
-    <PRICE_VAT>549</PRICE_VAT>
+    <PRICE_VAT>499</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
@@ -385,12 +397,12 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>akryl-booster-box-riftbound</ITEM_ID>
-    <PRODUCTNAME>Akryl Booster Box Riftbound</PRODUCTNAME>
-    <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Box Riftbound patří k nejžádanějším kouskům ve světě sběratelství, a proto by jeho ochrana měla odpovídat jeho skutečné hodnotě</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/akryl-booster-box-riftbound/</URL>
+    <ITEM_ID>akry-trove-box-lorcana</ITEM_ID>
+    <PRODUCTNAME>Akry Trove Box Lorcana</PRODUCTNAME>
+    <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Illumineer&apos;s Trove patří k nejžádanějším kouskům ve světě sběratelství Disney Lorcana, a proto by jeho ochrana měla odpovídat jeho skutečné hodnotě</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/akry-trove-box-lorcana/</URL>
     <IMGURL></IMGURL>
-    <PRICE_VAT>499</PRICE_VAT>
+    <PRICE_VAT>549</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
@@ -469,18 +481,6 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>abyss-eye-booster-box</ITEM_ID>
-    <PRODUCTNAME>Abyss Eye Booster Box</PRODUCTNAME>
-    <DESCRIPTION>Temnota se šíří říší! Japonská edice Abyss Eye přivádí do hry Mega Darkraie ex – hvězdu setu s masivním HP 280 a útokem &quot;Abyss Eye&quot;, který okamžitě vyřadí soupeřova aktivního Pokémona postiženého jakoukoli speciální podmínkou.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-box/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/abyss-eye-booster-box.webp</IMGURL>
-    <PRICE_VAT>2699</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Pokémon</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
     <ITEM_ID>360-pocket-white</ITEM_ID>
     <PRODUCTNAME>360 Pocket White</PRODUCTNAME>
     <DESCRIPTION>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</DESCRIPTION>
@@ -501,6 +501,18 @@
     <PRICE_VAT>899</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>abyss-eye-booster-box</ITEM_ID>
+    <PRODUCTNAME>Abyss Eye Booster Box</PRODUCTNAME>
+    <DESCRIPTION>Temnota se šíří říší! Japonská edice Abyss Eye přivádí do hry Mega Darkraie ex – hvězdu setu s masivním HP 280 a útokem &quot;Abyss Eye&quot;, který okamžitě vyřadí soupeřova aktivního Pokémona postiženého jakoukoli speciální podmínkou.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/abyss-eye-booster-box.webp</IMGURL>
+    <PRICE_VAT>2699</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
@@ -549,18 +561,6 @@
     <PRICE_VAT>899</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
-    <ITEM_ID>151-journey-booster-pack</ITEM_ID>
-    <PRODUCTNAME>151 Journey Booster pack</PRODUCTNAME>
-    <DESCRIPTION>První ze čtyř čínských setů v sérii Collect 151, zasazené do éry Scarlet &amp;amp; Violet! Edice se vrací ke kořenům a slaví originálních 151 Pokémonů z Kanto regionu – najdete tu Pikachu, Bulbasaura, Charmandera, Squirtla, Mew a mnoho dalších</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/151-journey-booster-pack/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/151-journey-booster-pack.webp</IMGURL>
-    <PRICE_VAT>139</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Pokémon</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>

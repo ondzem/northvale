@@ -1,22 +1,18 @@
 import { supabase } from '../supabase';
 import { mockProducts } from '../mockData';
 
-// Image cache version check - force invalidation of old base64 strings to clear space & fix stale JPEGs
+// Purge all heavy base64 image strings from localStorage at startup to prevent QuotaExceededError and keep Auth tokens safe
 try {
-  const IMAGE_CACHE_VERSION = 'v3'; // Increment to force clear all clients
-  if (localStorage.getItem('nv-img-cache-version') !== IMAGE_CACHE_VERSION) {
-    const keysToRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && (k.startsWith('nv-img-') || k.startsWith('nv-back-img-'))) {
-        keysToRemove.push(k);
-      }
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && (k.startsWith('nv-img-') || k.startsWith('nv-back-img-') || k.startsWith('fav-img-'))) {
+      keysToRemove.push(k);
     }
-    keysToRemove.forEach(k => localStorage.removeItem(k));
-    localStorage.setItem('nv-img-cache-version', IMAGE_CACHE_VERSION);
   }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
 } catch (e) {
-  console.warn('LocalStorage error on image cache version invalidation:', e);
+  console.warn('LocalStorage image purge error:', e);
 }
 
 // In-memory cache for product images during session

@@ -11,7 +11,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
   const [zip, setZip] = useState('');
-  const [shipping, setShipping] = useState('pardubice');
+  const [shipping, setShipping] = useState('dpd-pickup');
   const [payment, setPayment] = useState('card');
   
   // Store Credit applied state
@@ -34,6 +34,69 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const [promoLoading, setPromoLoading] = useState(false);
 
   const [isPaying, setIsPaying] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+
+  const renderErrorTooltip = (msg) => {
+    if (!msg) return null;
+    return (
+      <div 
+        className="error-tooltip-bubble" 
+        style={{
+          position: 'absolute',
+          top: 'calc(100% + 6px)',
+          left: '4px',
+          zIndex: 100,
+          background: 'rgba(18, 18, 22, 0.96)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid rgba(239, 68, 68, 0.45)',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
+          borderRadius: '6px',
+          padding: '0 12px',
+          height: '32px',
+          boxSizing: 'border-box',
+          fontSize: '12.5px',
+          fontWeight: '500',
+          color: '#f8fafc',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          whiteSpace: 'nowrap',
+          animation: 'tooltipPopIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+          pointerEvents: 'none'
+        }}
+      >
+        <div style={{
+          position: 'absolute',
+          top: '-5px',
+          left: '16px',
+          width: '8px',
+          height: '8px',
+          background: 'rgba(18, 18, 22, 0.96)',
+          borderLeft: '1px solid rgba(239, 68, 68, 0.45)',
+          borderTop: '1px solid rgba(239, 68, 68, 0.45)',
+          transform: 'rotate(45deg)'
+        }} />
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, display: 'block', margin: '0 !important' }}>
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <p style={{ 
+          margin: '0 !important',
+          padding: '0 !important',
+          letterSpacing: '0.1px', 
+          textTransform: 'none', 
+          lineHeight: '1',
+          display: 'inline-flex',
+          alignItems: 'center'
+        }}>
+          {msg}
+        </p>
+      </div>
+    );
+  };
 
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
@@ -51,8 +114,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   else if (shipping === 'gls-address') shippingCost = 129;
   else if (shipping === 'pardubice') shippingCost = 0;
 
-  // Free shipping above 2000 CZK (checked on total after discount)
-  if (subtotalAfterDiscount > 2000 && (
+  // Free shipping at or above 1750 CZK (checked on total after discount)
+  if (subtotalAfterDiscount >= 1750 && (
     shipping === 'dpd-pickup' || 
     shipping === 'dpd-address' || 
     shipping === 'gls-pickup' || 
@@ -70,7 +133,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const finalTotal = Math.max(0, totalBeforeCredit - actualAppliedCredit);
 
   const getShippingPriceDisplay = (method, basePrice) => {
-    const isFree = subtotalAfterDiscount > 2000 && (
+    const isFree = subtotalAfterDiscount >= 1750 && (
       method === 'dpd-pickup' ||
       method === 'dpd-address' ||
       method === 'gls-pickup' ||
@@ -356,10 +419,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                     ? (lang === 'CZ' ? `GLS - Výdejní místo: ${pending.pickupPoint || ''}` : `GLS - Pickup Point: ${pending.pickupPoint || ''}`)
                     : shipMethod === 'gls-address' || shipMethod === 'gls'
                       ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
-                      : shipMethod === 'pardubice' 
-                        ? (lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)') 
-                        : (lang === 'CZ' ? 'Doprava' : 'Shipping'),
-              carrier: (shipMethod || '').startsWith('dpd') ? 'DPD' : (shipMethod || '').startsWith('gls') ? 'GLS' : 'OSOBNÍ ODBĚR',
+                      : (lang === 'CZ' ? 'Doprava' : 'Shipping'),
+              carrier: (shipMethod || '').startsWith('dpd') ? 'DPD' : 'GLS',
               paymentMethod: lang === 'CZ' ? 'Online platební karta' : 'Online Credit/Debit Card',
               date: new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
               invoiceUrl: '#',
@@ -399,8 +460,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
             setActivePage('order-confirmation');
           } else {
             alert(lang === 'CZ'
-              ? `Platba pro objednávku ${orderNumber} byla zamítnuta (Kód: ${prCode}/${srCode}). Zkuste to prosím znovu.`
-              : `Payment for order ${orderNumber} was declined (Code: ${prCode}/${srCode}). Please try again.`,
+              ? 'Platba nebyla dokončena. Zvolte prosím jiný způsob platby nebo to zkuste znovu.'
+              : 'Payment was not completed. Please choose another payment method or try again.',
               'error'
             );
           }
@@ -619,57 +680,97 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       }
     }
 
-    // General details presence check
-    if (!name.trim() || !email.trim() || !phone.trim() || !street.trim() || !city.trim() || !zip.trim()) {
-      alert(lang === 'CZ'
-        ? 'Vyplňte prosím všechny povinné osobní a doručovací údaje.'
-        : 'Please fill in all required personal and shipping details.',
-        'error'
-      );
-      return;
+    // Reset form errors
+    setFormErrors({});
+
+    const errors = {};
+    let firstErrorFieldId = null;
+
+    const addErr = (fieldId, key, msgCz, msgEn) => {
+      const msg = lang === 'CZ' ? msgCz : msgEn;
+      errors[key] = msg;
+      if (!firstErrorFieldId) {
+        firstErrorFieldId = fieldId;
+      }
+    };
+
+    // Validate Name
+    if (!name.trim()) {
+      addErr('input-name', 'name', 'Vyplňte prosím vaše jméno a příjmení.', 'Please enter your full name.');
     }
 
-    // Email format validation
+    // Validate Email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      alert(lang === 'CZ'
-        ? 'Zadejte prosím platnou e-mailovou adresu.'
-        : 'Please enter a valid email address.',
-        'error'
-      );
-      return;
+    if (!email.trim()) {
+      addErr('input-email', 'email', 'Vyplňte prosím e-mailovou adresu.', 'Please enter your email address.');
+    } else if (!emailRegex.test(email.trim())) {
+      addErr('input-email', 'email', 'Zadejte prosím platnou e-mailovou adresu (např. jan@novak.cz).', 'Please enter a valid email address.');
     }
 
-    // Format and validate phone
+    // Validate Phone
     let cleanedPhone = phone.trim().replace(/\s+/g, '');
     if (/^\d{9}$/.test(cleanedPhone)) {
       cleanedPhone = '+420' + cleanedPhone;
     }
     const phoneRegex = /^\+\d{9,15}$/;
-    if (!phoneRegex.test(cleanedPhone)) {
-      alert(lang === 'CZ'
-        ? 'Zadejte prosím platné telefonní číslo s předvolbou (např. +420 123 456 789).'
-        : 'Please enter a valid phone number with country code (e.g. +420 123 456 789).',
-        'error'
-      );
-      return;
+    if (!phone.trim()) {
+      addErr('input-phone', 'phone', 'Vyplňte prosím telefonní číslo.', 'Please enter your phone number.');
+    } else if (!phoneRegex.test(cleanedPhone)) {
+      addErr('input-phone', 'phone', 'Zadejte prosím platné telefonní číslo s předvolbou (např. +420 123 456 789).', 'Please enter a valid phone number with country code.');
     }
 
-    // Format and validate ZIP (only if not personal pickup)
-    let cleanedZip = zip.trim().replace(/\s+/g, '');
-    if (shipping !== 'pardubice') {
-      const zipRegex = /^\d{5}$/;
-      if (!zipRegex.test(cleanedZip)) {
-        alert(lang === 'CZ'
-          ? 'Zadejte prosím platné pětimístné PSČ (např. 534 01).'
-          : 'Please enter a valid 5-digit postal code (e.g. 534 01).',
-          'error'
-        );
-        return;
+    // Validate Company details if checked
+    if (isCompany) {
+      if (!companyName.trim()) {
+        addErr('input-company-name', 'companyName', 'Vyplňte prosím obchodní název firmy.', 'Please enter your company name.');
       }
+      if (!ico.trim()) {
+        addErr('input-ico', 'ico', 'Vyplňte prosím IČO firmy.', 'Please enter company ID (IČO).');
+      }
+    }
+
+    // Validate Street
+    if (!street.trim()) {
+      addErr('input-street', 'street', 'Vyplňte prosím ulici a číslo popisné.', 'Please enter your street and house number.');
+    }
+
+    // Validate City
+    if (!city.trim()) {
+      addErr('input-city', 'city', 'Vyplňte prosím město.', 'Please enter your city.');
+    }
+
+    // Validate ZIP
+    let cleanedZip = zip.trim().replace(/\s+/g, '');
+    const zipRegex = /^\d{5}$/;
+    if (!zip.trim()) {
+      addErr('input-zip', 'zip', 'Vyplňte prosím pětimístné PSČ.', 'Please enter your 5-digit postal code.');
+    } else if (!zipRegex.test(cleanedZip)) {
+      addErr('input-zip', 'zip', 'Zadejte prosím platné pětimístné PSČ (např. 534 01).', 'Please enter a valid 5-digit postal code.');
+    } else {
       cleanedZip = `${cleanedZip.slice(0, 3)} ${cleanedZip.slice(3)}`;
     }
 
+    // If any personal or address errors exist, STOP here! Do not open pickup map modal!
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      const firstMsg = Object.values(errors)[0];
+      alert(firstMsg, 'error');
+
+      if (firstErrorFieldId) {
+        setTimeout(() => {
+          const el = document.getElementById(firstErrorFieldId);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+              el.focus();
+            }
+          }
+        }, 120);
+      }
+      return;
+    }
+
+    // Only if personal info & address are valid: check pickup point selection on map
     if ((shipping === 'dpd-pickup' || shipping === 'gls-pickup') && !pickupPoint.trim()) {
       alert(lang === 'CZ' 
         ? 'Vyberte prosím výdejní místo na mapě.' 
@@ -711,10 +812,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                 ? (lang === 'CZ' ? `GLS - Výdejní místo: ${pickupPoint}` : `GLS - Pickup Point: ${pickupPoint}`)
                 : shipping === 'gls-address' || shipping === 'gls'
                   ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
-                  : shipping === 'pardubice' 
-                    ? (lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)') 
                     : (lang === 'CZ' ? 'Doprava' : 'Shipping'),
-          carrier: shipping.startsWith('dpd') ? 'DPD' : shipping.startsWith('gls') ? 'GLS' : 'OSOBNÍ ODBĚR',
+          carrier: shipping.startsWith('dpd') ? 'DPD' : 'GLS',
           paymentMethod: lang === 'CZ' ? 'Online platební karta' : 'Online Credit/Debit Card',
           date: new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
           invoiceUrl: '#',
@@ -732,19 +831,20 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           pickupPointDetails: shipping.includes('pickup') ? pickupPointDetails : null
         };
 
-        // 1. Invoke finalize-order to create order and reserve stock
+        // 1. Reserve Order ID from sequence without creating order in DB yet
         const { data: createData, error: createError } = await supabase.functions.invoke('finalize-order', {
           body: {
-            action: 'create',
-            orderDetails: order
+            action: 'get-order-id'
           }
         });
 
-        if (createError || !createData || !createData.success) {
-          throw new Error(createError?.message || 'Server failed to initialize card order');
+        if (createError || !createData || !createData.orderId) {
+          throw new Error(createError?.message || 'Server failed to reserve order ID');
         }
 
         const orderId = createData.orderId;
+        order.id = orderId;
+
         const amountCents = Math.round(finalTotal * 100);
         const returnUrl = window.location.origin + '/checkout?status=callback';
 
@@ -797,11 +897,16 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         form.method = 'POST';
         form.action = 'https://3dsecure.gpwebpay.com/pgw/order.do';
 
-        Object.keys(signData).forEach(key => {
+        const formPayload = {
+          ...signData,
+          LANG: lang === 'CZ' ? 'cs' : 'en'
+        };
+
+        Object.keys(formPayload).forEach(key => {
           const input = document.createElement('input');
           input.type = 'hidden';
           input.name = key;
-          input.value = signData[key];
+          input.value = formPayload[key];
           form.appendChild(input);
         });
 
@@ -831,13 +936,16 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     if (shipping !== 'pardubice') {
       cleanedZip = `${cleanedZip.slice(0, 3)} ${cleanedZip.slice(3)}`;
     }
+    const hasNoVatInCart = cart.some(item => !!(item.no_vat || item.product?.no_vat));
     const order = {
+      hasNoVat: hasNoVatInCart,
       items: cart.map(item => ({
         id: item.id,
         product_id: item.product?.id || item.id,
         name: item.name || item.productName,
         price: item.price,
         quantity: item.quantity,
+        no_vat: !!(item.no_vat || item.product?.no_vat),
         product: item.product || item
       })),
       subtotal: cartSubtotal,
@@ -860,10 +968,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
             ? (lang === 'CZ' ? `GLS - Výdejní místo: ${pickupPoint}` : `GLS - Pickup Point: ${pickupPoint}`)
             : shipping === 'gls-address' || shipping === 'gls'
               ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
-              : shipping === 'pardubice' 
-                ? (lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)') 
                 : (lang === 'CZ' ? 'Doprava' : 'Shipping'),
-      carrier: shipping.startsWith('dpd') ? 'DPD' : shipping.startsWith('gls') ? 'GLS' : 'OSOBNÍ ODBĚR',
+      carrier: shipping.startsWith('dpd') ? 'DPD' : 'GLS',
       paymentMethod: payment === 'card'
         ? (lang === 'CZ' ? 'Online platební karta' : 'Online Credit/Debit Card')
         : payment === 'transfer'
@@ -1653,7 +1759,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
             </button>
           </div>
         ) : (
-        <form onSubmit={handlePlaceOrder}>
+        <form onSubmit={handlePlaceOrder} noValidate>
           <header className="ckf-head">
             <div className="title-group">
               <div className="nv-eyebrow">
@@ -1722,39 +1828,45 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   <h3><span className="__om-t">{lang === 'CZ' ? 'Osobní údaje' : 'Personal Information'}</span></h3>
                 </div>
                 <div className="pof-2col">
-                  <label className="pof-field">
-                    <span><span className="__om-t">{lang === 'CZ' ? 'Jméno a příjmení' : 'Full Name'}</span></span>
+                  <label className="pof-field" style={{ position: 'relative' }}>
+                    <span><span className="__om-t">{lang === 'CZ' ? 'Jméno a příjmení *' : 'Full Name *'}</span></span>
                     <input 
+                      id="input-name"
                       type="text" 
-                      required 
                       value={name} 
-                      onChange={e => setName(e.target.value)} 
+                      onChange={e => { setName(e.target.value); if (formErrors.name) setFormErrors(prev => ({ ...prev, name: null })); }} 
                       placeholder="Jan Novák"
                       autoComplete="name"
+                      style={{ borderColor: formErrors.name ? 'rgba(239, 68, 68, 0.65)' : undefined }}
                     />
+                    {renderErrorTooltip(formErrors.name)}
                   </label>
-                  <label className="pof-field">
-                    <span><span className="__om-t">{lang === 'CZ' ? 'E-mail' : 'Email'}</span></span>
+                  <label className="pof-field" style={{ position: 'relative' }}>
+                    <span><span className="__om-t">{lang === 'CZ' ? 'E-mail *' : 'Email *'}</span></span>
                     <input 
+                      id="input-email"
                       type="email" 
-                      required 
                       value={email} 
-                      onChange={e => setEmail(e.target.value)} 
+                      onChange={e => { setEmail(e.target.value); if (formErrors.email) setFormErrors(prev => ({ ...prev, email: null })); }} 
                       placeholder="jan@example.cz"
                       autoComplete="email"
+                      style={{ borderColor: formErrors.email ? 'rgba(239, 68, 68, 0.65)' : undefined }}
                     />
+                    {renderErrorTooltip(formErrors.email)}
                   </label>
                 </div>
-                <label className="pof-field">
-                  <span><span className="__om-t">{lang === 'CZ' ? 'Telefon' : 'Phone'}</span></span>
+                <label className="pof-field" style={{ position: 'relative' }}>
+                  <span><span className="__om-t">{lang === 'CZ' ? 'Telefon *' : 'Phone *'}</span></span>
                   <input 
+                    id="input-phone"
                     type="tel" 
-                    required 
                     value={phone} 
-                    onChange={e => setPhone(e.target.value)} 
+                    onChange={e => { setPhone(e.target.value); if (formErrors.phone) setFormErrors(prev => ({ ...prev, phone: null })); }} 
                     placeholder={lang === 'CZ' ? '+420 123 456 789' : '+44 20 7946 0958'}
                     autoComplete="tel"
+                    style={{ borderColor: formErrors.phone ? 'rgba(239, 68, 68, 0.65)' : undefined }}
                   />
+                  {renderErrorTooltip(formErrors.phone)}
                 </label>
               </section>
 
@@ -1786,27 +1898,31 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
 
                 {isCompany && (
                   <div className="fade-in">
-                    <label className="pof-field">
-                      <span><span className="__om-t">{lang === 'CZ' ? 'Obchodní jméno / Název firmy' : 'Company Name'}</span></span>
+                    <label className="pof-field" style={{ position: 'relative' }}>
+                      <span><span className="__om-t">{lang === 'CZ' ? 'Obchodní jméno / Název firmy *' : 'Company Name *'}</span></span>
                       <input 
+                        id="input-company-name"
                         type="text" 
-                        required={isCompany}
                         value={companyName} 
-                        onChange={e => setCompanyName(e.target.value)} 
+                        onChange={e => { setCompanyName(e.target.value); if (formErrors.companyName) setFormErrors(prev => ({ ...prev, companyName: null })); }} 
                         placeholder={lang === 'CZ' ? 'Moje Firma s.r.o.' : 'My Company Ltd.'}
                         autoComplete="organization"
+                        style={{ borderColor: formErrors.companyName ? 'rgba(239, 68, 68, 0.65)' : undefined }}
                       />
+                      {renderErrorTooltip(formErrors.companyName)}
                     </label>
                     <div className="pof-2col">
-                      <label className="pof-field">
-                        <span><span className="__om-t">{lang === 'CZ' ? 'IČO' : 'Company ID (IČO)'}</span></span>
+                      <label className="pof-field" style={{ position: 'relative' }}>
+                        <span><span className="__om-t">{lang === 'CZ' ? 'IČO *' : 'Company ID (IČO) *'}</span></span>
                         <input 
+                          id="input-ico"
                           type="text" 
-                          required={isCompany}
                           value={ico} 
-                          onChange={e => setIco(e.target.value)} 
+                          onChange={e => { setIco(e.target.value); if (formErrors.ico) setFormErrors(prev => ({ ...prev, ico: null })); }} 
                           placeholder="12345678"
+                          style={{ borderColor: formErrors.ico ? 'rgba(239, 68, 68, 0.65)' : undefined }}
                         />
+                        {renderErrorTooltip(formErrors.ico)}
                       </label>
                       <label className="pof-field">
                         <span><span className="__om-t">{lang === 'CZ' ? 'DIČ (volitelné)' : 'Tax ID (DIČ - optional)'}</span></span>
@@ -1821,39 +1937,45 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   </div>
                 )}
 
-                <label className="pof-field">
-                  <span><span className="__om-t">{lang === 'CZ' ? 'Ulice a číslo popisné' : 'Street & house number'}</span></span>
+                <label className="pof-field" style={{ position: 'relative' }}>
+                  <span><span className="__om-t">{lang === 'CZ' ? 'Ulice a číslo popisné *' : 'Street & house number *'}</span></span>
                   <input 
+                    id="input-street"
                     type="text" 
-                    required 
                     value={street} 
-                    onChange={e => setStreet(e.target.value)} 
+                    onChange={e => { setStreet(e.target.value); if (formErrors.street) setFormErrors(prev => ({ ...prev, street: null })); }} 
                     placeholder={lang === 'CZ' ? 'Bratří Čapků 1095' : '10 Downing Street'}
                     autoComplete="address-line1"
+                    style={{ borderColor: formErrors.street ? 'rgba(239, 68, 68, 0.65)' : undefined }}
                   />
+                  {renderErrorTooltip(formErrors.street)}
                 </label>
                 <div className="pof-2col">
-                  <label className="pof-field">
-                    <span><span className="__om-t">{lang === 'CZ' ? 'Město' : 'City'}</span></span>
+                  <label className="pof-field" style={{ position: 'relative' }}>
+                    <span><span className="__om-t">{lang === 'CZ' ? 'Město *' : 'City *'}</span></span>
                     <input 
+                      id="input-city"
                       type="text" 
-                      required 
                       value={city} 
-                      onChange={e => setCity(e.target.value)} 
+                      onChange={e => { setCity(e.target.value); if (formErrors.city) setFormErrors(prev => ({ ...prev, city: null })); }} 
                       placeholder={lang === 'CZ' ? 'Holice' : 'London'}
                       autoComplete="address-level2"
+                      style={{ borderColor: formErrors.city ? 'rgba(239, 68, 68, 0.65)' : undefined }}
                     />
+                    {renderErrorTooltip(formErrors.city)}
                   </label>
-                  <label className="pof-field">
-                    <span><span className="__om-t">{lang === 'CZ' ? 'PSČ' : 'ZIP / Postal Code'}</span></span>
+                  <label className="pof-field" style={{ position: 'relative' }}>
+                    <span><span className="__om-t">{lang === 'CZ' ? 'PSČ *' : 'ZIP / Postal Code *'}</span></span>
                     <input 
+                      id="input-zip"
                       type="text" 
-                      required 
                       value={zip} 
-                      onChange={e => setZip(e.target.value)} 
+                      onChange={e => { setZip(e.target.value); if (formErrors.zip) setFormErrors(prev => ({ ...prev, zip: null })); }} 
                       placeholder={lang === 'CZ' ? '534 01' : 'SW1A 2AA'}
                       autoComplete="postal-code"
+                      style={{ borderColor: formErrors.zip ? 'rgba(239, 68, 68, 0.65)' : undefined }}
                     />
+                    {renderErrorTooltip(formErrors.zip)}
                   </label>
                 </div>
               </section>
@@ -1889,30 +2011,12 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               </section>
 
               {/* Step 4: Způsob dopravy */}
-              <section className="pof-step">
+              <section className="pof-step" id="section-shipping">
                 <div className="pof-step-head">
                   <span className="pof-step-num"><span className="__om-t">04</span></span>
                   <h3><span className="__om-t">{lang === 'CZ' ? 'Způsob dopravy' : 'Shipping Method'}</span></h3>
                 </div>
                 <div className="pof-radios" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {/* Osobní odběr */}
-                  <button 
-                    type="button"
-                    className={`pof-radio ${shipping === 'pardubice' ? 'is-active' : ''}`}
-                    onClick={() => setShipping('pardubice')}
-                  >
-                    <span className="pof-radio-dot" aria-hidden="true"></span>
-                    <span className="pof-radio-body">
-                      <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'Osobní odběr (Bratří Čapků 1095, Holice)' : 'Personal Pickup (Bratří Čapků 1095, Holice)'}
-                      </span>
-                      <span className="pof-radio-desc">
-                        {lang === 'CZ' ? 'Vyzvednutí na naší provozovně. Zdarma.' : 'Pickup at our premises. Free.'}
-                      </span>
-                    </span>
-                    <span className={`pof-price ${shipping === 'pardubice' ? 'is-free' : ''}`}>{lang === 'CZ' ? 'Zdarma' : 'Free'}</span>
-                  </button>
-
                   {/* DPD - Výdejní místo */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <button 
@@ -1933,7 +2037,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                           {lang === 'CZ' ? 'Doručení na výdejní místo DPD nebo do boxu.' : 'Delivery to a DPD pickup point or box.'}
                         </span>
                       </span>
-                      <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
+                      <span className={`pof-price ${subtotalAfterDiscount >= 1750 ? 'is-free' : ''}`}>
                         {getShippingPriceDisplay('dpd-pickup', 79)}
                       </span>
                     </button>
@@ -1969,7 +2073,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                         {lang === 'CZ' ? 'Doručení kurýrem DPD na Vaši adresu.' : 'Courier delivery to your address.'}
                       </span>
                     </span>
-                    <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
+                    <span className={`pof-price ${subtotalAfterDiscount >= 1750 ? 'is-free' : ''}`}>
                       {getShippingPriceDisplay('dpd-address', 109)}
                     </span>
                   </button>
@@ -1994,7 +2098,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                           {lang === 'CZ' ? 'Doručení na výdejní místo GLS nebo do boxu.' : 'Delivery to a GLS pickup point or box.'}
                         </span>
                       </span>
-                      <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
+                      <span className={`pof-price ${subtotalAfterDiscount >= 1750 ? 'is-free' : ''}`}>
                         {getShippingPriceDisplay('gls-pickup', 89)}
                       </span>
                     </button>
@@ -2030,7 +2134,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                         {lang === 'CZ' ? 'Doručení kurýrem GLS na Vaši adresu.' : 'Courier delivery to your address.'}
                       </span>
                     </span>
-                    <span className={`pof-price ${subtotalAfterDiscount > 2000 ? 'is-free' : ''}`}>
+                    <span className={`pof-price ${subtotalAfterDiscount >= 1750 ? 'is-free' : ''}`}>
                       {getShippingPriceDisplay('gls-address', 129)}
                     </span>
                   </button>
@@ -2255,16 +2359,17 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                        style={{ background: 'transparent', border: 'none', outline: 'none', color: '#fff', fontSize: '14px', flexGrow: 1 }}
                      />
                      {appliedDiscount ? (
-                       <button 
-                         type="button"
-                         onClick={() => {
-                           setAppliedDiscount(null);
-                           setPromoInput('');
-                         }}
-                         style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', cursor: 'pointer' }}
-                       >
-                         <span className="__om-t">{lang === 'CZ' ? 'Odstranit' : 'Remove'}</span>
-                       </button>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setAppliedDiscount(null);
+                            setPromoInput('');
+                          }}
+                          className="ckf-promo-remove-btn"
+                          style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', cursor: 'pointer', padding: '4px 8px' }}
+                        >
+                          <span className="__om-t">{lang === 'CZ' ? 'Odebrat' : 'Remove'}</span>
+                        </button>
                      ) : (
                        <button 
                          type="button"
@@ -2321,13 +2426,42 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   <span className="pof-total-val">{finalTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} <span className="__om-t">{lang === 'CZ' ? 'Kč' : 'CZK'}</span></span>
                 </div>
 
-                <button type="submit" className="pof-submit">
-                  <span className="__om-t">
-                    {payment === 'card' 
-                      ? (lang === 'CZ' ? 'Objednat a zaplatit' : 'Place Order & Pay') 
-                      : (lang === 'CZ' ? 'Dokončit objednávku' : 'Complete Order')}
-                  </span>
-                  <span><span className="__om-t">→</span></span>
+                <button 
+                  type="submit" 
+                  className="pof-submit" 
+                  disabled={isPaying}
+                  style={{
+                    opacity: isPaying ? 0.75 : 1,
+                    cursor: isPaying ? 'not-allowed' : 'pointer',
+                    gap: '10px'
+                  }}
+                >
+                  {isPaying ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+                      <svg 
+                        style={{ animation: 'spin 0.8s linear infinite', width: '18px', height: '18px' }} 
+                        viewBox="0 0 24 24" 
+                        fill="none"
+                      >
+                        <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path style={{ opacity: 0.85 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      <span>
+                        {payment === 'card' 
+                          ? (lang === 'CZ' ? 'Přesměrovávám na platbu...' : 'Redirecting to payment...') 
+                          : (lang === 'CZ' ? 'Zpracovávám objednávku...' : 'Processing order...')}
+                      </span>
+                    </span>
+                  ) : (
+                    <>
+                      <span className="__om-t">
+                        {payment === 'card' 
+                          ? (lang === 'CZ' ? 'Objednat a zaplatit' : 'Place Order & Pay') 
+                          : (lang === 'CZ' ? 'Dokončit objednávku' : 'Complete Order')}
+                      </span>
+                      <span><span className="__om-t">→</span></span>
+                    </>
+                  )}
                 </button>
 
                 <div style={{ fontSize: '11px', color: 'var(--text-muted, #8a8a92)', lineHeight: '1.5', marginTop: '14px', textAlign: 'center' }}>
@@ -2380,8 +2514,49 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           </div>
         </form>
       )}
+
+      {/* Full-screen order processing backdrop overlay */}
+      {isPaying && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(10, 10, 15, 0.85)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          zIndex: 99999,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#fff',
+          gap: '20px',
+          padding: '24px',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            width: '56px',
+            height: '56px',
+            border: '4px solid rgba(253, 189, 22, 0.15)',
+            borderTopColor: 'var(--color-gold, #fdbd16)',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite'
+          }} />
+          <h3 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--color-gold, #fdbd16)', margin: 0, fontFamily: 'var(--font-heading)' }}>
+            {payment === 'card' 
+              ? (lang === 'CZ' ? 'Připravujeme přesměrování na platební bránu GP webpay...' : 'Preparing payment gateway redirect...')
+              : (lang === 'CZ' ? 'Vytváříme vaši objednávku...' : 'Creating your order...')}
+          </h3>
+          <p style={{ fontSize: '13.5px', color: 'rgba(255, 255, 255, 0.7)', margin: 0, maxWidth: '440px', lineHeight: '1.5' }}>
+            {lang === 'CZ'
+              ? 'Prosíme o strpení, nepřepínejte ani nezatvárejte tuto stránku.'
+              : 'Please hold on, do not refresh or leave this page.'}
+          </p>
+        </div>
+      )}
       </div>
     </div>
   );
 }
-

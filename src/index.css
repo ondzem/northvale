@@ -1,4 +1,6 @@
 :root {
+  color-scheme: dark;
+
   /* Barevné tokeny (Client Dark Mode) */
   --bg-page: #18181C;
   --bg-secondary: #222228;
@@ -77,6 +79,28 @@ button, input, select, textarea {
   color: inherit;
   background: none;
   border: none;
+}
+
+/* Universal Cross-Platform Dark Mode Dropdown Menu Styling (Windows, Android, Lenovo, Linux, Mac, iOS) */
+select {
+  color-scheme: dark !important;
+}
+
+select option,
+select optgroup {
+  background-color: #1e1e28 !important;
+  color: #f0f0f0 !important;
+  padding: 10px 14px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px !important;
+}
+
+select option:hover,
+select option:focus,
+select option:active,
+select option:checked {
+  background-color: #2e2e40 !important;
+  color: #fdbd16 !important;
 }
 
 input:-webkit-autofill,
@@ -7388,6 +7412,20 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   cursor: pointer !important;
   transition: border-color 0.2s ease !important;
   outline: none !important;
+  color-scheme: dark !important;
+}
+
+.pmf-select option {
+  background-color: #1e1e28 !important;
+  color: #f0f0f0 !important;
+  padding: 10px 14px !important;
+}
+
+.pmf-select option:hover,
+.pmf-select option:focus,
+.pmf-select option:checked {
+  background-color: #2e2e40 !important;
+  color: #fdbd16 !important;
 }
 
 .pmf-select:focus {
@@ -10775,3 +10813,23 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
     height: 680px !important;
   }
 }
+
+@keyframes tooltipPopIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.error-tooltip-bubble p,
+.error-tooltip-bubble span {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+

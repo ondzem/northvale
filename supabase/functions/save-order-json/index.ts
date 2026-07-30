@@ -20,36 +20,75 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Authenticate and verify admin role
+    const url = new URL(req.url);
+    const customerEmail = url.searchParams.get("customerEmail");
+
+    // Public Customer Order Lookup (filtered strictly by customer's email)
+    if (req.method === "GET" && customerEmail) {
+      const { data: fileList, error: listErr } = await supabase.storage.from("pohoda-orders").list("", {
+        limit: 200,
+        sortBy: { column: "name", order: "desc" }
+      });
+
+      if (listErr) throw listErr;
+
+      const matchingOrders: any[] = [];
+      const jsonFiles = (fileList || []).filter(f => f.name.startsWith("order_") && f.name.endsWith(".json"));
+
+      for (const file of jsonFiles) {
+        try {
+          const { data: fileBlob } = await supabase.storage.from("pohoda-orders").download(file.name);
+          if (fileBlob) {
+            const text = await fileBlob.text();
+            const jsonObj = JSON.parse(text);
+            const o = jsonObj.order || {};
+            const itemEmail = (o.customer_email || o.email || '').toLowerCase();
+            
+            if (itemEmail === customerEmail.toLowerCase()) {
+              matchingOrders.push({
+                ...jsonObj,
+                fileName: file.name
+              });
+            }
+          }
+        } catch (_e) {}
+      }
+
+      return new Response(JSON.stringify({ orders: matchingOrders }), {
+        status: 200,
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate"
+        },
+      });
+    }
+
+    // Authenticate and verify admin role for admin operations (DELETE, full list)
     const authHeader = req.headers.get("authorization");
-    if (!authHeader) {
+    if (!authHeader && req.method !== "POST") {
       return new Response(JSON.stringify({ error: "Missing authorization header." }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized user." }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError || !profile || profile.role !== "admin") {
-      return new Response(JSON.stringify({ error: "Forbidden. Admin access required." }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user } } = await supabase.auth.getUser(token);
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+        if (profile && profile.role !== "admin" && req.method === "DELETE") {
+          return new Response(JSON.stringify({ error: "Forbidden. Admin access required." }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
     }
 
     if (req.method === "DELETE") {
@@ -63,14 +102,61 @@ serve(async (req) => {
         });
       }
 
-      // Delete both json and xml representations
       const baseName = filename.replace(/\.(json|xml)$/, "");
       const filesToDelete = [`${baseName}.json`, `${baseName}.xml`];
+
+      // Download JSON first to check order status & restore product stock if unfulfilled
+      let restoredCount = 0;
+      try {
+        const { data: fileBlob } = await supabase.storage.from("pohoda-orders").download(`${baseName}.json`);
+        if (fileBlob) {
+          const text = await fileBlob.text();
+          const jsonObj = JSON.parse(text);
+          const orderObj = jsonObj.order || {};
+          const itemsObj = jsonObj.items || [];
+          
+          const status = (orderObj.status || '').toLowerCase();
+          const hasDpdParcel = !!orderObj.dpd_parcel_number;
+
+          // Only restore stock if package was NOT shipped / dispatched via DPD!
+          if (!hasDpdParcel && status !== 'shipped' && status !== 'delivered' && status !== 'completed' && status !== 'odesláno' && status !== 'doručeno') {
+            for (const item of itemsObj) {
+              const productId = item.product_id || item.id || item.code;
+              const qty = Number(item.quantity || 1);
+              if (productId && qty > 0) {
+                const { data: prod } = await supabase.from("products").select("id, stock, variants").eq("id", productId).maybeSingle();
+                if (prod) {
+                  if (prod.stock !== null && prod.stock !== undefined) {
+                    await supabase.from("products").update({ stock: Number(prod.stock || 0) + qty }).eq("id", productId);
+                    restoredCount += qty;
+                  } else if (Array.isArray(prod.variants) && prod.variants.length > 0) {
+                    let variantMatched = false;
+                    const updatedVariants = prod.variants.map((v: any) => {
+                      if (item.variant_id && v.id === item.variant_id) {
+                        variantMatched = true;
+                        return { ...v, stock: Number(v.stock || 0) + qty };
+                      }
+                      return v;
+                    });
+                    if (!variantMatched && updatedVariants.length > 0) {
+                      updatedVariants[0] = { ...updatedVariants[0], stock: Number(updatedVariants[0].stock || 0) + qty };
+                    }
+                    await supabase.from("products").update({ variants: updatedVariants }).eq("id", productId);
+                    restoredCount += qty;
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch (stockErr) {
+        console.error("[save-order-json] Stock restoration check failed:", stockErr);
+      }
 
       const { data, error } = await supabase.storage.from("pohoda-orders").remove(filesToDelete);
       if (error) throw error;
 
-      return new Response(JSON.stringify({ success: true, message: `Files deleted: ${filesToDelete.join(", ")}`, deleted: data }), {
+      return new Response(JSON.stringify({ success: true, message: `Files deleted: ${filesToDelete.join(", ")}`, restoredCount, deleted: data }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

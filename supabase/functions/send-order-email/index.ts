@@ -64,7 +64,36 @@ serve(async (req) => {
       });
     }
 
+    const orderItems = Array.isArray(items) && items.length > 0 ? items : (Array.isArray(order.items) ? order.items : []);
+
     if (emailType === "payment_received") {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+      let base64Invoice = "";
+      try {
+        const fileName = `invoice_${order.id}.pdf`;
+        const { data: fileData, error: downloadError } = await supabase.storage
+          .from("invoices")
+          .download(fileName);
+
+        if (!downloadError && fileData) {
+          const arrayBuffer = await fileData.arrayBuffer();
+          const uint8Array = new Uint8Array(arrayBuffer);
+          base64Invoice = base64Encode(uint8Array);
+        }
+      } catch (storageErr) {
+        console.error("Payment confirmed invoice storage download failed:", storageErr);
+      }
+
+      const attachments = base64Invoice ? [
+        {
+          name: `faktura_${order.id}.pdf`,
+          content: base64Invoice
+        }
+      ] : [];
+
       const htmlPaymentConfirmedContent = `
         <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%;">
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 40px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: #222222;">
@@ -98,8 +127,21 @@ serve(async (req) => {
               </p>
             </div>
 
+            <!-- Invoice Download Container -->
+            <div style="background-color: #fdfdfd; border: 1px solid #e1e4e8; border-top: 4px solid #fdbd16; padding: 22px; margin-bottom: 24px; border-radius: 8px; text-align: center;">
+              <div style="color: #666666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">
+                Daňový doklad ke stažení:
+              </div>
+              <div style="font-size: 17px; font-weight: 800; color: #111111; margin-bottom: 14px;">
+                Faktura č. ${order.id}
+              </div>
+              <a href="https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${order.id}.pdf" target="_blank" style="background-color: #fdbd16; color: #111111; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; border: 1px solid #e2a80f; box-shadow: 0 2px 4px rgba(253, 189, 22, 0.15);">
+                Stáhnout fakturu (PDF)
+              </a>
+            </div>
+
             <p style="font-size: 14px; color: #666666; line-height: 1.6; margin: 0 0 24px 0;">
-              Jakmile zásilku předáme dopravci, zašleme Vám další e-mail se sledovacím číslem.
+              V příloze tohoto e-mailu naleznete Váš daňový doklad (fakturu). Jakmile zásilku předáme dopravci, zašleme Vám potvrzovací e-mail o expedici.
             </p>
 
             <!-- Help / System Info -->
@@ -123,12 +165,13 @@ serve(async (req) => {
         body: JSON.stringify({
           sender: { name: senderName, email: senderEmail },
           to: [{ email: order.customerEmail, name: order.customerName }],
-          subject: `Platba přijata - Objednávka #${order.id}`,
-          htmlContent: wrapInHtmlDocument(htmlPaymentConfirmedContent)
+          subject: `Platba přijata a daňový doklad - Objednávka #${order.id}`,
+          htmlContent: wrapInHtmlDocument(htmlPaymentConfirmedContent),
+          attachment: attachments.length > 0 ? attachments : undefined
         })
       });
 
-      return new Response(JSON.stringify({ success: true, message: "Payment confirmed email sent." }), {
+      return new Response(JSON.stringify({ success: true, message: "Payment confirmed email sent with invoice attachment." }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -136,11 +179,6 @@ serve(async (req) => {
 
     if (emailType === "expedited") {
       const activeCarrier = carrier || ((order.shippingMethod || "").toLowerCase().includes("gls") ? "GLS" : "DPD");
-      const activeTrackingNo = trackingNumber || order.dpd_parcel_number || order.gls_parcel_number || "";
-      const trackingUrl = activeCarrier === "GLS"
-        ? `https://tracking.gls-group.eu/status/cs_CZ/parcel/${activeTrackingNo}`
-        : `https://tracking.dpd.de/status/cs_CZ/parcel/${activeTrackingNo}`;
-
       const isCod = (order.paymentMethod || "").toLowerCase().includes("dobírk") || 
                     (order.paymentMethod || "").toLowerCase().includes("cod");
       const pickupDetails = order.pickupPointDetails || null;
@@ -170,31 +208,23 @@ serve(async (req) => {
 
             <p style="font-size: 14.5px; color: #222222; line-height: 1.6; margin: 0 0 24px 0;">
               Dobrý den,<br/><br/>
-              máme pro Vás skvělou zprávu! Vaši objednávku jsme zabalili a předali přepravní službě <strong>${activeCarrier}</strong>.
+              máme pro Vás skvělou zprávu! Vaši objednávku jsme v pořádku zabalili a předali přepravní službě <strong>${activeCarrier}</strong>.
             </p>
 
-            <!-- Tracking details container -->
-            <div style="background-color: #fdfdfd; border: 1px solid #e1e4e8; border-left: 4px solid #fdbd16; padding: 22px; margin-bottom: 24px; border-radius: 8px;">
+            <!-- Shipping details container -->
+            <div style="background-color: #fdfdfd; border: 1px solid #e1e4e8; border-top: 4px solid #fdbd16; padding: 22px; margin-bottom: 24px; border-radius: 8px; text-align: center;">
               <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em;">
-                🚚 Sledování zásilky
+                🚚 Expedice zásilky
               </div>
-              <p style="font-size: 14.5px; color: #111111; margin: 0 0 16px 0; line-height: 1.6;">
-                Přepravce: <strong>${activeCarrier}</strong><br/>
-                Číslo zásilky: <strong>${activeTrackingNo}</strong>
-                ${isPickup && pickupDetails ? `<br/>Výdejní místo: <strong>${pickupDetails.name || 'Pickup Point'}</strong><br/>Adresa: <strong>${pickupDetails.street || ''}, ${pickupDetails.zip || ''} ${pickupDetails.city || ''}</strong>` : ''}
-                ${isCod ? `<br/>Částka k úhradě (dobírka): <strong style="color: #fdbd16;">${(order.totalPrice || order.finalTotal || 0).toLocaleString()} Kč</strong>` : ''}
+              <p style="font-size: 14.5px; color: #111111; margin: 0; line-height: 1.6;">
+                Dopravce: <strong>${activeCarrier}</strong><br/>
+                ${isPickup && pickupDetails ? `Výdejní místo: <strong>${pickupDetails.name || 'Pickup Point'}</strong><br/>Adresa: <strong>${pickupDetails.street || ''}, ${pickupDetails.zip || ''} ${pickupDetails.city || ''}</strong><br/>` : ''}
+                ${isCod ? `Částka k úhradě při převzetí (dobírka): <strong style="color: #fdbd16;">${(order.totalPrice || order.finalTotal || 0).toLocaleString('cs-CZ')} Kč</strong>` : 'Stav platby: <strong style="color: #10b981;">Uhrazeno</strong>'}
               </p>
-              ${activeTrackingNo ? `
-              <div style="text-align: left; margin-top: 10px;">
-                <a href="${trackingUrl}" target="_blank" style="background-color: #fdbd16; color: #111111; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; border: 1px solid #e2a80f; box-shadow: 0 2px 4px rgba(253, 189, 22, 0.15);">
-                  Sledovat zásilku online ↗
-                </a>
-              </div>
-              ` : ''}
             </div>
 
             <p style="font-size: 14px; color: #666666; line-height: 1.6; margin: 0 0 24px 0;">
-              Zásilka by měla být doručena do 1-2 pracovních dnů. Přepravce Vás bude kontaktovat prostřednictvím SMS nebo e-mailu s podrobnějšími informacemi o čase doručení.
+              Zásilka byla předána přepravci a přepravní služba <strong>${activeCarrier}</strong> Vás bude přímo kontaktovat prostřednictvím SMS a e-mailu s přesnými informacemi o doručení.
             </p>
 
             <!-- Help / System Info -->
@@ -234,40 +264,45 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Download generated PDF invoice from Storage and encode to base64
-    let base64Invoice = "";
-    try {
-      const fileName = `invoice_${order.id}.pdf`;
-      const { data: fileData, error: downloadError } = await supabase.storage
-        .from("invoices")
-        .download(fileName);
 
-      if (downloadError) {
-        console.error(`Error downloading invoice ${fileName}:`, downloadError);
-      } else if (fileData) {
-        const arrayBuffer = await fileData.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-        base64Invoice = base64Encode(uint8Array);
-        console.log(`Successfully loaded and base64-encoded invoice. Length: ${base64Invoice.length}`);
+
+    // Check if order contains no-VAT items
+    const hasNoVatItems = !!(
+      order.hasNoVat || order.noVat || order.isNoVat ||
+      (orderItems && orderItems.some((it: any) => it.no_vat || it.noVat || (it.product && (it.product.no_vat || it.product.noVat))))
+    );
+
+    // Download generated PDF invoice from Storage if available and order is NOT no-VAT
+    let base64Invoice = "";
+    if (!hasNoVatItems) {
+      try {
+        const fileName = `invoice_${order.id}.pdf`;
+        const { data: fileData, error: downloadError } = await supabase.storage
+          .from("invoices")
+          .download(fileName);
+
+        if (downloadError) {
+          console.error(`Error downloading invoice ${fileName}:`, downloadError);
+        } else if (fileData) {
+          const arrayBuffer = await fileData.arrayBuffer();
+          const uint8Array = new Uint8Array(arrayBuffer);
+          base64Invoice = base64Encode(uint8Array);
+          console.log(`Successfully loaded and base64-encoded invoice. Length: ${base64Invoice.length}`);
+        }
+      } catch (storageErr) {
+        console.error("Storage download or encode failed:", storageErr);
       }
-    } catch (storageErr) {
-      console.error("Storage download or encode failed:", storageErr);
     }
 
-    // Download universal Terms & Conditions and encode to base64
+    // Download universal Terms & Conditions from web server and encode to base64
     let base64Terms = "";
     try {
-      const { data: fileData, error: downloadError } = await supabase.storage
-        .from("invoices")
-        .download("UniverzalniObchodniPodminky.pdf");
-
-      if (downloadError) {
-        console.error("Error downloading Terms PDF:", downloadError);
-      } else if (fileData) {
-        const arrayBuffer = await fileData.arrayBuffer();
+      const termsRes = await fetch("https://northvaletcg.eu/UniverzalniObchodniPodminky.pdf");
+      if (termsRes.ok) {
+        const arrayBuffer = await termsRes.arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
         base64Terms = base64Encode(uint8Array);
-        console.log(`Successfully loaded and base64-encoded Terms PDF. Length: ${base64Terms.length}`);
+        console.log(`Successfully loaded live Terms PDF. Length: ${base64Terms.length}`);
       }
     } catch (storageErr) {
       console.error("Terms download failed:", storageErr);
@@ -287,23 +322,45 @@ serve(async (req) => {
     );
 
     const isBankTransfer = pm.toLowerCase().includes("převod") || pm.toLowerCase().includes("transfer");
+    const isCod = pm.toLowerCase().includes("dobírk") || pm.toLowerCase().includes("cod");
 
     // Generate a signed URL for download (expires in 1 year)
     let downloadInvoiceUrl = `https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${order.id}.pdf`; // default fallback
-    try {
-      const { data: signedData, error: signedError } = await supabase.storage
-        .from("invoices")
-        .createSignedUrl(`invoice_${order.id}.pdf`, 60 * 60 * 24 * 365); // 1 year expiry
-      if (signedError) {
-        console.error("Error creating signed URL for email:", signedError);
-      } else if (signedData?.signedUrl) {
-        downloadInvoiceUrl = signedData.signedUrl;
+    if (!hasNoVatItems) {
+      try {
+        const { data: signedData, error: signedError } = await supabase.storage
+          .from("invoices")
+          .createSignedUrl(`invoice_${order.id}.pdf`, 60 * 60 * 24 * 365); // 1 year expiry
+        if (signedError) {
+          console.error("Error creating signed URL for email:", signedError);
+        } else if (signedData?.signedUrl) {
+          downloadInvoiceUrl = signedData.signedUrl;
+        }
+      } catch (urlErr) {
+        console.error("Error creating signed URL in try-catch:", urlErr);
       }
-    } catch (urlErr) {
-      console.error("Error creating signed URL in try-catch:", urlErr);
     }
 
-    // 1. Customer Order Confirmation Email Content (Email-safe, responsive, transparent with dark text and checkmark)
+    let confirmationIntroText = '';
+    if (hasNoVatItems) {
+      if (isBankTransfer) {
+        confirmationIntroText = 'děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí a podklady k úhradě platby převodem.<br/><br/><strong>Upozornění k faktuře:</strong> Jelikož tato objednávka obsahuje zboží bez DPH / v osobitém režimu, daňový doklad (fakturu) Vám zašleme v samostatném e-mailu po zpracování.';
+      } else if (isCod) {
+        confirmationIntroText = 'děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. Objednávku zpracujeme a předáme dopravci. Částku uhradíte při převzetí zásilky u kurýra.<br/><br/><strong>Upozornění k faktuře:</strong> Jelikož tato objednávka obsahuje zboží bez DPH / v osobitém režimu, daňový doklad (fakturu) Vám zašleme v samostatném e-mailu po vyřízení zásilky.';
+      } else {
+        confirmationIntroText = 'děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. Vaše platba kartou proběhla úspěšně a objednávku připravujeme k odeslání.<br/><br/><strong>Upozornění k faktuře:</strong> Jelikož tato objednávka obsahuje zboží bez DPH / v osobitém režimu, daňový doklad (fakturu) Vám zašleme v samostatném e-mailu přímo od našeho týmu.';
+      }
+    } else {
+      if (isBankTransfer) {
+        confirmationIntroText = 'děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí a podklady k úhradě platby převodem. Jakmile obdržíme Vaši platbu na náš účet, zašleme Vám potvrzení s daňovým dokladem (fakturou) a zboží ihned zabalíme.';
+      } else if (isCod) {
+        confirmationIntroText = 'děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. Částku uhradíte při převzetí zásilky u kurýra.';
+      } else {
+        confirmationIntroText = 'děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. V samostatném e-mailu Vám zasíláme také daňový doklad (fakturu).';
+      }
+    }
+
+    // 1. Customer Order Confirmation Email Content
     const htmlConfirmContent = `
       <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 40px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: #222222;">
@@ -330,7 +387,7 @@ serve(async (req) => {
 
           <p style="font-size: 14.5px; color: #222222; line-height: 1.6; margin: 0 0 24px 0;">
             Dobrý den,<br/><br/>
-            děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. V samostatném e-mailu Vám zasíláme také daňový doklad (fakturu).
+            ${confirmationIntroText}
           </p>
 
           <!-- Shipping details container -->
@@ -346,7 +403,9 @@ serve(async (req) => {
                 ? 'Zboží pro Vás začínáme připravovat. Jakmile bude objednávka připravena k vyzvednutí na naší kontaktní adrese <strong>Bratří Čapků 1095, 534 01 Holice</strong>, zašleme Vám e-mail a SMS.'
                 : isBankTransfer
                   ? 'Jakmile obdržíme Vaši platbu na náš účet, objednávku zpracujeme a předáme dopravci. O odeslání Vás budeme informovat.'
-                  : 'Vaše platba byla úspěšně přijata. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. Sledujte prosím svůj e-mail pro sledovací číslo zásilky.'
+                  : isCod
+                    ? 'Objednávku zabalíme a předáme dopravci v nejbližším možném termínu. Připravte si prosím hotovost nebo kartu pro úhradu dobírky při převzetí.'
+                    : 'Vaše platba byla úspěšně přijata. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. O odeslání Vás budeme informovat e-mailem.'
               }
             </p>
           </div>
@@ -396,14 +455,16 @@ serve(async (req) => {
           <!-- Items Table -->
           <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px;">
             <tbody>
-              ${items.map((item: any) => {
+              ${orderItems.map((item: any) => {
                 const itemTotal = parseFloat(item.price) * parseInt(item.quantity);
+                const isNoVatItem = !!(item.no_vat || item.noVat || (item.product && (item.product.no_vat || item.product.noVat)));
                 return `
                   <tr>
                     <td style="padding: 8px 0; border-bottom: 1px solid #e1e4e8; color: #222222; font-weight: 600;">
                       ${item.name} <span style="color: #888888; font-weight: 400; font-size: 12.5px;">(${item.quantity}x)</span>
+                      ${isNoVatItem ? '<span style="font-size: 10px; color: #fdbd16; background: rgba(253, 189, 22, 0.1); padding: 2px 6px; borderRadius: 4px; font-weight: 700; margin-left: 6px;">BEZ DPH</span>' : ''}
                     </td>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: #222222; font-weight: 600; font-family: monospace;">
+                    <td style="padding: 8px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: #222222; font-weight: 600; font-family: monospace; white-space: nowrap;">
                       ${itemTotal.toLocaleString('cs-CZ')} Kč
                     </td>
                   </tr>
@@ -415,7 +476,7 @@ serve(async (req) => {
                   <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; color: #666666;">
                     Dopravné
                   </td>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: #666666; font-family: monospace;">
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: #666666; font-family: monospace; white-space: nowrap;">
                     ${parseFloat(order.shippingCost).toLocaleString('cs-CZ')} Kč
                   </td>
                 </tr>
@@ -426,7 +487,7 @@ serve(async (req) => {
                   <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; color: #666666;">
                     Dobírkový příplatek
                   </td>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: #666666; font-family: monospace;">
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: #666666; font-family: monospace; white-space: nowrap;">
                     ${parseFloat(order.paymentSurcharge).toLocaleString('cs-CZ')} Kč
                   </td>
                 </tr>
@@ -437,7 +498,7 @@ serve(async (req) => {
                   <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; color: #10B981;">
                     Uplatněný kredit
                   </td>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: #10B981; font-family: monospace;">
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: #10B981; font-family: monospace; white-space: nowrap;">
                     -${parseFloat(order.creditApplied).toLocaleString('cs-CZ')} Kč
                   </td>
                 </tr>
@@ -445,27 +506,25 @@ serve(async (req) => {
 
               <tr>
                 <td style="padding: 16px 0 0 0; color: #111111; font-weight: 700; font-size: 15px;">
-                  Celkem zaplaceno
+                  ${isBankTransfer ? 'Celkem k úhradě' : isCod ? 'Celkem k úhradě při převzetí' : 'Celkem zaplaceno'}
                 </td>
-                <td style="padding: 16px 0 0 0; text-align: right; color: #fdbd16; font-weight: 800; font-size: 22px; font-family: monospace;">
+                <td style="padding: 16px 0 0 0; text-align: right; color: #fdbd16; font-weight: 800; font-size: 20px; font-family: monospace; white-space: nowrap;">
                   ${total.toLocaleString('cs-CZ')} Kč
                 </td>
               </tr>
             </tbody>
           </table>
 
-          <!-- Help / System Info -->
-          <div style="border-top: 1px solid #e1e4e8; padding-top: 24px; margin-top: 30px; text-align: center;">
-            <p style="font-size: 12px; color: #888888; margin: 0; line-height: 1.6;">
-              Tento e-mail byl odeslán automaticky. V případě jakýchkoli dotazů nás kontaktujte na
-              <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; text-decoration: underline; font-weight: bold;">info@northvaletcg.eu</a>.
-            </p>
-          </div>
+          <!-- Footer Note -->
+          <p style="font-size: 12px; color: #888888; margin: 0; text-align: center; line-height: 1.5;">
+            Tento e-mail byl odeslán automaticky. V případě jakýchkoli dotazů nás kontaktujte na
+            <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; text-decoration: underline; font-weight: bold;">info@northvaletcg.eu</a>.
+          </p>
         </div>
       </div>
     `;
 
-    // 2. Customer Tax Invoice Email Content (Fakturoid-style layout, fully transparent, minimal, no double details)
+    // 2. Customer Tax Invoice Email Content (Fakturoid-style layout)
     const htmlInvoiceContent = `
       <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 40px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: #222222;">
@@ -528,6 +587,14 @@ serve(async (req) => {
             <p style="color: #8a8a92; font-size: 11px; text-transform: uppercase; letter-spacing: 4px; margin: 3px 0 0 0;">Nová objednávka v systému</p>
           </div>
 
+          ${hasNoVatItems ? `
+          <!-- No-VAT Warning Banner for Admin -->
+          <div style="background-color: #fff8e1; border: 1px solid #ffe082; border-left: 4px solid #fdbd16; padding: 14px 18px; margin-bottom: 20px; border-radius: 6px; font-size: 13px; color: #856404; font-weight: bold;">
+            ⚠️ TATO OBJEDNÁVKA OBSAHUJE POLOŽKY BEZ DPH / V OSOBITÉM REŽIMU.<br/>
+            AUTOMATICKÁ FAKTURA NEBYLA ODESLÁNA — FAKTURU VYSTAVUJE A ODESÍLÁ ADMIN MANUÁLNĚ!
+          </div>
+          ` : ''}
+
           <!-- Header -->
           <div style="text-align: center; margin-bottom: 30px;">
             <h2 style="color: #2e7d32; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">🚀 Nová objednávka</h2>
@@ -554,13 +621,19 @@ serve(async (req) => {
               </tr>
             </thead>
             <tbody>
-              ${items.map((item: any) => `
-                <tr>
-                  <td style="padding: 10px 8px; border-bottom: 1px solid #e1e4e8; color: #222222;">${item.name}</td>
-                  <td style="padding: 10px 8px; border-bottom: 1px solid #e1e4e8; text-align: center; color: #222222;">${item.quantity} ks</td>
-                  <td style="padding: 10px 8px; border-bottom: 1px solid #e1e4e8; text-align: right; font-weight: bold; color: #222222;">${(parseFloat(item.price) * parseInt(item.quantity)).toLocaleString('cs-CZ')} Kč</td>
-                </tr>
-              `).join('')}
+              ${orderItems.map((item: any) => {
+                const isNoVatItem = !!(item.no_vat || item.noVat || (item.product && (item.product.no_vat || item.product.noVat)));
+                return `
+                  <tr>
+                    <td style="padding: 10px 8px; border-bottom: 1px solid #e1e4e8; color: #222222;">
+                      ${item.name}
+                      ${isNoVatItem ? '<span style="font-size: 10px; color: #856404; background: #fff8e1; padding: 2px 6px; borderRadius: 4px; font-weight: bold; margin-left: 6px;">BEZ DPH</span>' : ''}
+                    </td>
+                    <td style="padding: 10px 8px; border-bottom: 1px solid #e1e4e8; text-align: center; color: #222222;">${item.quantity} ks</td>
+                    <td style="padding: 10px 8px; border-bottom: 1px solid #e1e4e8; text-align: right; font-weight: bold; color: #222222;">${(parseFloat(item.price) * parseInt(item.quantity)).toLocaleString('cs-CZ')} Kč</td>
+                  </tr>
+                `;
+              }).join('')}
             </tbody>
           </table>
 
@@ -580,13 +653,11 @@ serve(async (req) => {
       }
     ] : [];
 
-    // Construct terms attachment for the order confirmation email
-    const confirmAttachments = base64Terms ? [
-      {
-        name: "obchodni_podminky.pdf",
-        content: base64Terms
-      }
-    ] : [];
+    // Construct terms & invoice attachments for the order confirmation email (NO INVOICE ATTACHED IF NO-VAT)
+    const confirmAttachments = [
+      ...(base64Terms ? [{ name: "obchodni_podminky.pdf", content: base64Terms }] : []),
+      ...(!hasNoVatItems && isCod && base64Invoice ? [{ name: `faktura_${order.id}.pdf`, content: base64Invoice }] : [])
+    ];
 
     // Custom Subject format for Tax Invoice
     const invoiceEmailSubject = `Faktura - daňový doklad č. ${order.id} ze dne ${orderDate}`;
@@ -610,24 +681,26 @@ serve(async (req) => {
     const txtConfirm = await resConfirm.text();
     console.log(`[send-order-email] Confirm email response status: ${resConfirm.status}, body: ${txtConfirm}`);
 
-    // 2. Send Invoice Email to Customer (Custom Subject and Fakturoid-style layout)
-    const resInvoice = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: {
-        "api-key": brevoApiKey,
-        "content-type": "application/json",
-        "accept": "application/json"
-      },
-      body: JSON.stringify({
-        sender: { name: senderName, email: senderEmail },
-        to: [{ email: order.customerEmail, name: order.customerName }],
-        subject: invoiceEmailSubject,
-        htmlContent: wrapInHtmlDocument(htmlInvoiceContent),
-        attachment: attachments.length > 0 ? attachments : undefined
-      })
-    });
-    const txtInvoice = await resInvoice.text();
-    console.log(`[send-order-email] Invoice email response status: ${resInvoice.status}, body: ${txtInvoice}`);
+    // 2. Send Invoice Email to Customer - ONLY IF ONLINE CARD PAYMENT AND NOT A NO-VAT ORDER!
+    if (!isBankTransfer && !isCod && !hasNoVatItems) {
+      const resInvoice = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "api-key": brevoApiKey,
+          "content-type": "application/json",
+          "accept": "application/json"
+        },
+        body: JSON.stringify({
+          sender: { name: senderName, email: senderEmail },
+          to: [{ email: order.customerEmail, name: order.customerName }],
+          subject: invoiceEmailSubject,
+          htmlContent: wrapInHtmlDocument(htmlInvoiceContent),
+          attachment: attachments.length > 0 ? attachments : undefined
+        })
+      });
+      const txtInvoice = await resInvoice.text();
+      console.log(`[send-order-email] Invoice email response status: ${resInvoice.status}, body: ${txtInvoice}`);
+    }
 
     // 3. Send Admin Alert Email
     const resAdmin = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -655,7 +728,7 @@ serve(async (req) => {
 
   } catch (error: any) {
     console.error("Error in send-order-email:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error.message || String(error), stack: error.stack }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
