@@ -599,127 +599,50 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
-            {/* If no custom slides uploaded in Admin CMS, render permanent Northvale Hero Banner */}
-            {(!slides || slides.length === 0 || !currentImageUrl) ? (
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: isMobile ? '24px 16px' : '40px 32px',
-                background: 'radial-gradient(circle at center, rgba(30, 30, 44, 0.95) 0%, rgba(10, 10, 14, 0.98) 100%)',
-                zIndex: 1,
-                textAlign: 'center',
-                gap: isMobile ? '12px' : '16px'
-              }}>
-                <img 
-                  src="/logo s popisem.webp" 
-                  alt="Northvale TCG Logo" 
-                  style={{ height: isMobile ? '36px' : '52px', width: 'auto', opacity: 0.95, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.6))' }} 
-                />
-                <div style={{
-                  fontSize: isMobile ? '18px' : '26px',
-                  fontWeight: '800',
-                  color: 'var(--text-main, #ffffff)',
-                  letterSpacing: '-0.5px',
-                  maxWidth: '520px',
-                  lineHeight: '1.2'
-                }}>
-                  {lang === 'CZ' ? 'Připravujeme pro Vás nové akční nabídky' : 'Preparing New Special Offers For You'}
-                </div>
-                <div style={{
-                  fontSize: isMobile ? '12px' : '14px',
-                  color: 'var(--text-muted, rgba(255, 255, 255, 0.65))',
-                  maxWidth: '460px',
-                  lineHeight: '1.5'
-                }}>
-                  {lang === 'CZ' 
-                    ? 'Již brzy zde naleznete exkluzivní TCG kolekce, booster boxy a výhodné slevy. Sledujte nás!' 
-                    : 'Exclusive TCG collections, booster boxes, and special discounts coming soon!'}
-                </div>
-                <div style={{
-                  marginTop: '4px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '6px 16px',
-                  borderRadius: '20px',
-                  background: 'rgba(253, 189, 22, 0.08)',
-                  border: '1px solid rgba(253, 189, 22, 0.25)',
-                  color: 'var(--color-gold, #fdbd16)',
-                  fontSize: '12px',
-                  fontWeight: '700'
-                }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-gold, #fdbd16)', boxShadow: '0 0 8px #fdbd16' }}></span>
-                  <span>{lang === 'CZ' ? 'NORTHVALE TCG E-SHOP' : 'NORTHVALE TCG STORE'}</span>
-                </div>
-              </div>
-            ) : (
-              <>
-                {/* Loading state spinner while image is fetching */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '12px',
-                  padding: '24px',
-                  background: 'radial-gradient(circle at center, rgba(26, 26, 38, 0.95) 0%, rgba(10, 10, 14, 0.98) 100%)',
-                  zIndex: 0,
-                  textAlign: 'center'
-                }}>
-                  <div className="spinner" style={{
-                    width: '36px',
-                    height: '36px',
-                    border: '3px solid rgba(253, 189, 22, 0.15)',
-                    borderTopColor: 'var(--color-gold)',
-                    borderRadius: '50%',
-                    animation: 'spin 0.8s linear infinite'
-                  }} />
-                  <div style={{
-                    fontSize: '15px',
-                    fontWeight: '700',
-                    color: 'var(--color-gold)',
-                    letterSpacing: '0.5px'
-                  }}>
-                    {lang === 'CZ' ? 'Načítání novinek a akcí...' : 'Loading news & offers...'}
-                  </div>
-                  <div style={{
-                    fontSize: '12px',
-                    color: 'rgba(255, 255, 255, 0.45)'
-                  }}>
-                    {lang === 'CZ' ? 'Připravujeme pro Vás aktuální banner' : 'Preparing current banner'}
-                  </div>
-                </div>
+            {/* Background luxury container while image streams in */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '24px',
+              background: 'radial-gradient(circle at center, rgba(26, 26, 38, 0.98) 0%, rgba(10, 10, 14, 1) 100%)',
+              zIndex: 0
+            }}>
+              <div className="spinner" style={{
+                width: '32px',
+                height: '32px',
+                border: '3px solid rgba(253, 189, 22, 0.15)',
+                borderTopColor: 'var(--color-gold)',
+                borderRadius: '50%',
+                animation: 'spin 0.8s linear infinite'
+              }} />
+            </div>
 
-                <img
-                  key={currentImageUrl}
-                  src={currentImageUrl}
-                  alt={lang === 'CZ' ? 'Akční nabídka a novinky - Northvale TCG' : 'Special offer and news - Northvale TCG'}
-                  title={lang === 'CZ' ? 'Akční nabídka a novinky' : 'Special offer and news'}
-                  loading="eager"
-                  fetchPriority="high"
-                  onLoad={() => {
-                    setLoadedImages(prev => ({ ...prev, [currentImageUrl]: true }));
-                  }}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    display: 'block',
-                    opacity: isCurrentLoaded ? 1 : 0,
-                    transition: 'opacity 0.4s ease-in-out',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    zIndex: 1
-                  }}
-                />
-              </>
+            {/* Instant Hero Banner Image (always rendered directly with opacity: 1) */}
+            {currentImageUrl && (
+              <img
+                key={currentImageUrl}
+                src={currentImageUrl}
+                alt={lang === 'CZ' ? 'Akční nabídka a novinky - Northvale TCG' : 'Special offer and news - Northvale TCG'}
+                title={lang === 'CZ' ? 'Akční nabídka a novinky' : 'Special offer and news'}
+                loading="eager"
+                fetchPriority="high"
+                decoding="sync"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
+                  opacity: 1,
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  zIndex: 1
+                }}
+              />
             )}
 
             {slides && slides.length > 1 && (
