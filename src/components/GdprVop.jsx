@@ -1411,45 +1411,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   Vrácení peněz: Všechny peněžní prostředky, které jsme od vás přijali, včetně nákladů na dodání (kromě dodatečných nákladů vzniklých volbou jiného než nejlevnějšího námi nabízeného způsobu dodání), vám vrátíme bez zbytečného odkladu, nejpozději do 14 dnů od odstoupení, a to stejným způsobem, jakým jsme je přijali – při platbě kartou zpětnou transakcí na kartu, jinak převodem na vámi určený bankovní účet. Peníze nejsme povinni vrátit dříve, než obdržíme vrácené zboží zpět, nebo než prokážete, že jste nám zboží odeslali.
                 </p>
 
-                <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>
-                  ELEKTRONICKÝ FORMULÁŘ PRO ODSTOUPENÍ
-                </h3>
 
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  (Tento formulář slouží pro rychlé elektronické odeslání oznámení o odstoupení od kupní smlouvy. Po odeslání vám náš systém okamžitě zašle automatické potvrzení o přijetí odstoupení s časovým razítkem.)
-                </p>
-
-                <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>
-                  JMÉNO A PŘÍJMENÍ *
-                </h3>
-
-                <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>
-                  ČÍSLO OBJEDNÁVKY *
-                </h3>
-
-                <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>
-                  E-MAILOVÁ ADRESA *
-                </h3>
-
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  ROZSAH VRÁCENÍ * – Chci vrátit celou objednávku / Chci vrátit pouze část objednávky (vyberte položky)
-                </p>
-
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  ZPŮSOB VRÁCENÍ PROSTŘEDKŮ * – Původní platební kartou (přes bránu GP webpay): prostředky budou vráceny zpět na kartu, kterou byla provedena platba / Bankovní převod: standardní převod na zadaný účet
-                </p>
-
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  ČÍSLO BANKOVNÍHO ÚČTU PRO VRÁCENÍ PENĚZ (vyplňte pouze při volbě vrácení bankovním převodem) *
-                </p>
-
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  [Tlačítko: ODSTOUPIT OD SMLOUVY]
-                </p>
-
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  (Kliknutím na tlačítko odešlete vyplněné oznámení o odstoupení od smlouvy prodávajícímu. Odesláním oznámení začíná běžet 14denní lhůta pro vrácení zboží.)
-                </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>
                   CO SE STANE PO ODESLÁNÍ FORMULÁŘE?
