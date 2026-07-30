@@ -552,21 +552,23 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       <h1 className="sr-only">{lang === 'CZ' ? 'NORTHVALE TCG - Váš specializovaný e-shop pro Pokémon, Lorcana, One Piece a grading karet' : 'NORTHVALE TCG - Your specialized store for Pokémon, Lorcana, One Piece and card grading'}</h1>
 
       {/* Hero Section */}
-      <section style={{ ...styles.heroSection, marginTop: isMobile ? '12px' : '64px', gap: isMobile ? '16px' : '24px' }} className="container">
+      <section style={{ ...styles.heroSection, marginTop: isMobile ? '12px' : '64px', gap: isMobile ? '16px' : '24px', alignItems: 'stretch', flexWrap: isMobile ? 'wrap' : 'nowrap' }} className="container">
         {/* Slideshow Wrapper (70% width) */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
           flex: !isMobile ? '7.3 1 66%' : '7 1 60%',
-          minWidth: isMobile ? '100%' : '280px'
+          minWidth: isMobile ? '100%' : '280px',
+          height: !isMobile ? '100%' : 'auto'
         }}>
           <div
             style={{
               ...styles.slideshow,
-              flex: 'none',
+              flex: !isMobile ? '1 1 100%' : 'none',
               width: '100%',
-              height: 'auto',
-              aspectRatio: useMobileImage ? '800 / 1000' : '1920 / 840',
+              height: !isMobile ? '100%' : 'auto',
+              minHeight: !isMobile ? '100%' : 'auto',
+              aspectRatio: isMobile ? (useMobileImage ? '800 / 1000' : '1920 / 840') : 'unset',
               padding: '0',
               backgroundColor: '#0c0c10',
               background: 'radial-gradient(circle at center, #1a1a26 0%, #0a0a0e 100%)',
@@ -664,7 +666,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   bottom: '16px',
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  zIndex: 10,
+                  zIndex: 2,
                   margin: 0
                 }}
                 onClick={(e) => e.stopPropagation()}
@@ -689,7 +691,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
         <div style={{
           ...styles.dealWidget,
           flex: !isMobile ? '2.7 1 22%' : '3 1 25%',
-          height: !isMobile ? 'auto' : (useMobileImage ? '410px' : '380px'),
+          height: !isMobile ? '100%' : 'auto',
           padding: (!activeDeal || !isMobile || useMobileImage) ? '16px' : '0 16px 0 0',
           flexDirection: (!activeDeal || !isMobile || useMobileImage) ? 'column' : 'row',
           alignItems: 'stretch',
