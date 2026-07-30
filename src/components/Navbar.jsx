@@ -1237,8 +1237,7 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                       <strong>{lang === 'CZ' ? 'IČO' : 'Company ID'}:</strong> 29618142<br />
                       <strong>{lang === 'CZ' ? 'DIČ' : 'VAT ID'}:</strong> CZ29618142<br />
                       <strong>E-mail:</strong> info@northvaletcg.eu<br />
-                      <strong>{lang === 'CZ' ? 'Telefon' : 'Phone'}:</strong> +420 739 666 779<br />
-                      <strong>{lang === 'CZ' ? 'Adresa' : 'Address'}:</strong> Bratří Čapků 1095, Holice
+                      <strong>{lang === 'CZ' ? 'Telefon' : 'Phone'}:</strong> +420 739 666 779
                     </p>
                   </div>
                 </>
