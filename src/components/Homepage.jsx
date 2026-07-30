@@ -605,7 +605,6 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             {/* Pure Instant Hero Banner Image */}
             {currentImageUrl && (
               <img
-                key={currentImageUrl}
                 src={currentImageUrl}
                 alt={lang === 'CZ' ? 'Akční nabídka a novinky - Northvale TCG' : 'Special offer and news - Northvale TCG'}
                 title={lang === 'CZ' ? 'Akční nabídka a novinky' : 'Special offer and news'}
