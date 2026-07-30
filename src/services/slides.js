@@ -4,9 +4,9 @@ import { supabase } from '../supabase';
 export const DEFAULT_SLIDES = [
   {
     id: 'hero-slide-primary',
-    desktop_image_url: 'https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/pohoda-orders/hero_slide_1784496964724.webp',
-    mobile_image_url: 'https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/pohoda-orders/hero_slide_mobile_1784496964724.webp',
-    redirect_page: 'about',
+    desktop_image_url: '/hero_slide_primary.webp',
+    mobile_image_url: '/hero_slide_primary_mobile.webp',
+    redirect_page: 'sealed-catalog',
     sort_order: 1
   }
 ];
