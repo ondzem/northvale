@@ -155,7 +155,10 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       }));
 
       if (mapped.length > 0) {
-        setSlides(mapped);
+        setSlides(prev => {
+          if (JSON.stringify(prev) === JSON.stringify(mapped)) return prev;
+          return mapped;
+        });
         try {
           const cleanMapped = mapped.map(s => ({
             ...s,
