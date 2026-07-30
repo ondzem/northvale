@@ -1300,24 +1300,6 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                 placeholder={lang === 'CZ' ? 'Zadejte URL nebo cestu k obrázku...' : 'Enter URL or image path...'}
               />
             </div>
-
-            {formDesktopUrl && formDesktopUrl.startsWith('data:image') && formDesktopUrl.length > 150000 && (
-              <div style={{
-                marginTop: '8px',
-                padding: '10px 12px',
-                background: 'rgba(239, 68, 68, 0.08)',
-                border: '1px solid rgba(239, 68, 68, 0.15)',
-                borderRadius: '6px',
-                color: '#f87171',
-                fontSize: '11px',
-                lineHeight: '1.4'
-              }}>
-                <strong>{lang === 'CZ' ? 'Upozornění na výkon:' : 'Performance Warning:'}</strong>{' '}
-                {lang === 'CZ'
-                  ? 'Tento obrázek je uložen jako velký textový řetězec (Base64). Pro lepší rychlost načítání stránek doporučujeme nahrát soubor do Supabase Storage a vložit jeho veřejný odkaz výše.'
-                  : 'This image is stored as a large Base64 string. To prevent page load delays, we recommend uploading the image to Supabase Storage and pasting its public link above.'}
-              </div>
-            )}
           </div>
 
           {/* Mobile Banner Upload & Crop */}
@@ -1388,24 +1370,6 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                 placeholder={lang === 'CZ' ? 'Zadejte URL nebo cestu k obrázku...' : 'Enter URL or image path...'}
               />
             </div>
-
-            {formMobileUrl && formMobileUrl.startsWith('data:image') && formMobileUrl.length > 150000 && (
-              <div style={{
-                marginTop: '8px',
-                padding: '10px 12px',
-                background: 'rgba(239, 68, 68, 0.08)',
-                border: '1px solid rgba(239, 68, 68, 0.15)',
-                borderRadius: '6px',
-                color: '#f87171',
-                fontSize: '11px',
-                lineHeight: '1.4'
-              }}>
-                <strong>{lang === 'CZ' ? 'Upozornění na výkon:' : 'Performance Warning:'}</strong>{' '}
-                {lang === 'CZ'
-                  ? 'Tento obrázek je uložen jako velký textový řetězec (Base64). Pro lepší rychlost načítání stránek doporučujeme nahrát soubor do Supabase Storage a vložit jeho veřejný odkaz výše.'
-                  : 'This image is stored as a large Base64 string. To prevent page load delays, we recommend uploading the image to Supabase Storage and pasting its public link above.'}
-              </div>
-            )}
           </div>
 
           {/* Cíl přesměrování */}

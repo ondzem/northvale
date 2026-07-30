@@ -44,6 +44,39 @@ export async function fetchSlidesFromDB() {
   }
 }
 
+export async function uploadSlideImageToStorage(dataUrl, fileNamePrefix = 'hero_slide') {
+  if (!dataUrl || !dataUrl.startsWith('data:')) {
+    return dataUrl;
+  }
+
+  try {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    const fileName = `${fileNamePrefix}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.webp`;
+
+    const { error: uploadErr } = await supabase.storage
+      .from('hero-slides')
+      .upload(fileName, blob, {
+        contentType: 'image/webp',
+        upsert: true
+      });
+
+    if (uploadErr) {
+      console.warn('Storage upload warning:', uploadErr);
+      return dataUrl;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from('hero-slides')
+      .getPublicUrl(fileName);
+
+    return publicUrlData?.publicUrl || dataUrl;
+  } catch (err) {
+    console.error('Failed to upload slide image to storage:', err);
+    return dataUrl;
+  }
+}
+
 /**
  * Save or update a slide in Supabase.
  */
@@ -53,10 +86,20 @@ export async function saveSlideToDB(slide) {
       throw new Error('Supabase client is not initialized');
     }
 
+    let finalDesktopUrl = slide.desktop_image_url;
+    let finalMobileUrl = slide.mobile_image_url;
+
+    if (finalDesktopUrl && finalDesktopUrl.startsWith('data:')) {
+      finalDesktopUrl = await uploadSlideImageToStorage(finalDesktopUrl, 'hero_desktop');
+    }
+    if (finalMobileUrl && finalMobileUrl.startsWith('data:')) {
+      finalMobileUrl = await uploadSlideImageToStorage(finalMobileUrl, 'hero_mobile');
+    }
+
     // Map clean entity to database fields
     const payload = {
-      desktop_image_url: slide.desktop_image_url,
-      mobile_image_url: slide.mobile_image_url,
+      desktop_image_url: finalDesktopUrl,
+      mobile_image_url: finalMobileUrl,
       redirect_page: slide.redirect_page || null,
       sort_order: slide.sort_order !== undefined ? Number(slide.sort_order) : 0
     };
