@@ -5,12 +5,15 @@ import { getDiscountCodeStatus, formatCzechDate } from '../../services/discountS
 
 export default function DiscountCodesTab({ showToast }) {
   const { lang } = useTranslation();
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
+      setIsMobile(window.innerWidth < 1024);
+      setIsSmallScreen(window.innerWidth < 768);
     };
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('resize', handleResize);
@@ -178,7 +181,8 @@ export default function DiscountCodesTab({ showToast }) {
         border: '1px solid rgba(255,255,255,0.08)', 
         padding: isMobile ? '16px' : '24px', 
         minWidth: isMobile ? '100%' : '320px',
-        boxShadow: '0 12px 32px rgba(0,0,0,0.3)'
+        boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+        boxSizing: 'border-box'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div>
@@ -198,7 +202,82 @@ export default function DiscountCodesTab({ showToast }) {
           <p style={styles.textMuted}>{lang === 'CZ' ? 'Načítání kódů...' : 'Loading codes...'}</p>
         ) : codes.length === 0 ? (
           <p style={styles.emptyText}>{lang === 'CZ' ? 'Žádné slevové kódy nebyly nalezeny.' : 'No discount codes found.'}</p>
+        ) : isSmallScreen ? (
+          /* Mobile / Small Screen Card Layout */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {codes.map(c => {
+              const statusInfo = getDiscountCodeStatus(c, lang);
+              const displayValue = c.discount_type === 'fixed'
+                ? `${c.discount_value || 0} Kč`
+                : `${c.discount_value || c.discount_percent || 0} %`;
+              const maxUsesDisplay = c.max_uses !== null && c.max_uses !== undefined && c.max_uses !== ''
+                ? `${c.used_count || 0} / ${c.max_uses}`
+                : `${c.used_count || 0} / ∞`;
+              const validFromText = c.valid_from ? formatCzechDate(c.valid_from) : '—';
+              const validUntilText = c.valid_until ? formatCzechDate(c.valid_until) : '—';
+              const isActive = c.is_active !== undefined ? c.is_active : c.active;
+
+              return (
+                <div 
+                  key={c.id} 
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.3)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '12px',
+                    padding: '14px 16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-gold, #fdbd16)', letterSpacing: '0.5px' }}>
+                      {c.code}
+                    </span>
+                    <span style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff' }}>
+                      {displayValue}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleActive(c.id, isActive)}
+                      style={{
+                        ...styles.badge,
+                        backgroundColor: statusInfo.bg,
+                        color: statusInfo.color,
+                        cursor: 'pointer'
+                      }}
+                      title={lang === 'CZ' ? 'Kliknutím změníte aktivitu' : 'Click to toggle activity'}
+                    >
+                      {statusInfo.label}
+                    </button>
+                    <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)' }}>
+                      {lang === 'CZ' ? 'Čerpání: ' : 'Usage: '}
+                      <strong style={{ color: 'var(--color-gold, #fdbd16)' }}>{maxUsesDisplay}</strong>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>
+                      📅 {c.valid_from || c.valid_until ? `${validFromText} ➔ ${validUntilText}` : (lang === 'CZ' ? 'Neomezená platnost' : 'Unlimited validity')}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => requestDeleteCode(c.id, c.code)}
+                      style={styles.deleteBtn}
+                      title={lang === 'CZ' ? 'Smazat kód' : 'Delete Code'}
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         ) : (
+          /* Desktop / Tablet Table Layout */
           <div style={{ overflowX: 'auto', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
             <table style={styles.table}>
               <thead>
@@ -207,7 +286,7 @@ export default function DiscountCodesTab({ showToast }) {
                   <th style={styles.thAlignRight}>{lang === 'CZ' ? 'Sleva' : 'Discount'}</th>
                   <th style={styles.thCenter}>{lang === 'CZ' ? 'Stav platnosti' : 'Status'}</th>
                   <th style={styles.thCenter}>{lang === 'CZ' ? 'Čerpání' : 'Usage'}</th>
-                  {!isMobile && <th style={styles.thCenter}>{lang === 'CZ' ? 'Platnost (Od – Do)' : 'Validity Period'}</th>}
+                  <th style={styles.thCenter}>{lang === 'CZ' ? 'Platnost (Od – Do)' : 'Validity Period'}</th>
                   <th style={styles.thAction}></th>
                 </tr>
               </thead>
@@ -248,13 +327,11 @@ export default function DiscountCodesTab({ showToast }) {
                           {maxUsesDisplay}
                         </span>
                       </td>
-                      {!isMobile && (
-                        <td style={styles.tdCenter}>
-                          <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>
-                            {c.valid_from || c.valid_until ? `${validFromText} ➔ ${validUntilText}` : (lang === 'CZ' ? 'Neomezeně' : 'Unlimited')}
-                          </span>
-                        </td>
-                      )}
+                      <td style={styles.tdCenter}>
+                        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>
+                          {c.valid_from || c.valid_until ? `${validFromText} ➔ ${validUntilText}` : (lang === 'CZ' ? 'Neomezeně' : 'Unlimited')}
+                        </span>
+                      </td>
                       <td style={styles.tdAction}>
                         <button
                           type="button"
