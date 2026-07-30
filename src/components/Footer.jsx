@@ -334,13 +334,6 @@ export default function Footer({ setActivePage, activePage }) {
             <span className="contact-key">{lang === 'CZ' ? 'Telefon' : 'Phone'}</span>
             <span className="contact-value">+420 739 666 779</span>
           </div>
-          
-          <div className="footer-contact-row">
-            <span className="contact-key">{lang === 'CZ' ? 'Adresa' : 'Address'}</span>
-            <span className="contact-value" style={{ lineHeight: '1.4' }}>
-              Bratří Čapků 1095, Holice
-            </span>
-          </div>
         </div>
       </div>
 
