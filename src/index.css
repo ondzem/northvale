@@ -2756,44 +2756,35 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   box-shadow: 0 4px 12px rgba(253, 189, 22, 0.1);
 }
 
-/* Responsive mobile split layout for catalog cards under 575px */
+/* Responsive mobile vertical card layout under 575px matching desktop/tablet structure */
 @media (max-width: 575px) {
   .catalog-product-grid {
-    grid-template-columns: 1fr !important;
-    row-gap: 56px !important;
-    column-gap: 0 !important;
-    padding: 0 16px !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    row-gap: 28px !important;
+    column-gap: 12px !important;
+    padding: 0 10px !important;
+    justify-items: center !important;
   }
 
   .catalog-product-grid .vf-card {
-    display: grid !important;
-    grid-template-columns: 110px 1fr !important;
-    grid-template-rows: auto auto auto auto !important;
-    column-gap: 16px !important;
-    row-gap: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
     width: 100% !important;
+    max-width: 220px !important;
     height: auto !important;
-    flex: none !important;
+    flex: 1 1 auto !important;
     padding: 0 !important;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
   }
 
-  .catalog-product-grid .vf-card:hover {
-    transform: none !important;
-  }
-
-  .catalog-product-grid .vf-card:hover .card-art {
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.5) !important;
-  }
-
   .catalog-product-grid .vf-art {
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-    width: 110px !important;
-    height: 154px !important;
-    margin: 0 !important;
+    width: 100% !important;
+    height: 220px !important;
+    max-height: 230px !important;
+    margin: 0 0 10px 0 !important;
   }
 
   .catalog-product-grid .vf-card .vf-art .card-art {
@@ -2802,112 +2793,84 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
     border-radius: 8px !important;
   }
 
-  .catalog-product-grid .vf-card .vf-shadow {
-    display: none !important;
-  }
-
   .catalog-product-grid .vf-info {
-    display: contents !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    flex-grow: 1 !important;
   }
 
   .catalog-product-grid .vf-name {
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    align-self: start !important;
-    margin: 0 !important;
-    font-size: 16px !important;
-    font-weight: 700 !important;
-    color: #fff !important;
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: clip !important;
     display: -webkit-box !important;
-    -webkit-line-clamp: 3 !important;
-    line-clamp: 3 !important;
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
+    width: 100% !important;
+    margin: 0 0 10px 0 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--text-main, #ffffff) !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
     line-height: 1.3 !important;
     text-align: left !important;
   }
 
   .catalog-product-grid .vf-rule {
-    display: none !important;
+    display: block !important;
+    width: 100% !important;
+    height: 1px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    margin: 0 0 10px 0 !important;
   }
 
   .catalog-product-grid .vf-meta {
-    grid-column: 1 / -1 !important;
-    grid-row: 2 !important;
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    margin: 0 !important;
-    padding: 6px 0 !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    margin: 0 0 10px 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    width: 100% !important;
   }
 
   .catalog-product-grid .vf-stock {
-    font-size: 11px !important;
+    font-size: 10px !important;
     margin: 0 !important;
   }
 
   .catalog-product-grid .vf-price {
-    font-size: 16px !important;
-    font-weight: 700 !important;
-  }
-
-  .catalog-product-grid .card-specs-table {
-    grid-column: 1 / -1 !important;
-    grid-row: 3 !important;
-    margin: 0 !important;
-    width: 100% !important;
-    border-collapse: collapse !important;
-  }
-
-  .catalog-product-grid .card-specs-table td {
-    padding: 6px 0 !important;
-    font-size: 12px !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    color: var(--color-gold, #fdbd16) !important;
   }
 
   .catalog-product-grid .card-buy-container {
-    grid-column: 1 / -1 !important;
-    grid-row: 4 !important;
-    margin: 0 !important;
-    padding: 8px 0 0 0 !important;
     display: flex !important;
-    gap: 8px !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    gap: 6px !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    margin-top: auto !important;
   }
 
   .catalog-product-grid .card-favorite-btn {
-    width: 44px !important;
-    height: 44px !important;
+    width: 38px !important;
+    height: 38px !important;
     flex-shrink: 0 !important;
   }
 
   .catalog-product-grid .do-kosiku-btn {
     flex-grow: 1 !important;
-    height: 44px !important;
-    font-size: 14px !important;
-    padding: 0 !important;
+    height: 38px !important;
+    font-size: 12px !important;
+    padding: 0 8px !important;
   }
 
   .catalog-product-grid .slab-badge-overlay {
     font-size: 8px !important;
     padding: 1px 4px !important;
     top: 4px !important;
-    left: 4px !important;
-  }
-
-  .catalog-product-grid .slab-badge-overlay span:last-child {
-    width: 10px !important;
-    height: 10px !important;
-    font-size: 6px !important;
-  }
-
-  .catalog-product-grid .card-tag {
-    font-size: 7px !important;
-    padding: 1px 4px !important;
-    bottom: 4px !important;
     left: 4px !important;
   }
 }
