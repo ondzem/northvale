@@ -207,10 +207,11 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 900);
+      setIsMobile(window.innerWidth < 1024);
       setUseMobileImage(window.innerWidth <= 650);
       setIsUspMobile(window.innerWidth < 970);
     };
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -1030,19 +1031,20 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 </div>
               </div>
 
-              {/* Right Column: Product Details & Layout */}
+              {/* Right Column: Split into Product Image (left) and Details (right) */}
               <div style={{
                 flex: 1,
                 display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                padding: '16px 0 16px 16px',
+                flexDirection: 'row',
+                alignItems: 'stretch',
+                padding: '16px 20px',
+                gap: '20px',
                 boxSizing: 'border-box'
               }}>
-                {/* Title (Enlarged) */}
+                {/* Left Part: Product Image Container (centered, unclipped) */}
                 <a
                   href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? `/sealed-detail/${dealProduct.id}` : '#'}
-                  style={{ textDecoration: 'none', color: 'inherit' }}
+                  style={{ flex: '1 1 45%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', textDecoration: 'none' }}
                   onClick={(e) => {
                     if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && dealProduct.id && dealProduct.id !== 'deal-of-the-day') {
                       e.preventDefault();
@@ -1050,38 +1052,41 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     }
                   }}
                 >
-                  <h3 style={{
-                    fontSize: '18px',
-                    fontWeight: '800',
-                    color: 'var(--text-main)',
-                    margin: '0 0 8px 0',
-                    textAlign: 'left',
-                    lineHeight: '1.3',
-                    cursor: catalogProduct ? 'pointer' : 'default',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    fontFamily: 'var(--font-heading)'
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    maxHeight: '220px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: catalogProduct ? 'pointer' : 'default'
                   }}>
-                    {activeDeal.name}
-                  </h3>
+                    <img
+                      src={activeDeal.image_url || '/logo s popisem.webp'}
+                      alt={activeDeal.name || 'Akční nabídka - Northvale TCG'}
+                      title={activeDeal.name || 'Akční nabídka'}
+                      style={{
+                        maxHeight: '100%',
+                        maxWidth: '100%',
+                        objectFit: 'contain'
+                      }}
+                    />
+                  </div>
                 </a>
 
-                {/* Split row: Left (enlarged image shifted left) & Right (stacked details) */}
+                {/* Right Part: Title, Stock badge, Prices, and Buy Button vertically stacked */}
                 <div style={{
+                  flex: '1 1 55%',
                   display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'stretch',
-                  gap: '12px',
-                  flex: 1,
-                  minHeight: '180px'
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'flex-start',
+                  gap: '10px'
                 }}>
-                  {/* Left part: Image Container (shifted all the way to left, enlarged) */}
+                  {/* Title moved to right column */}
                   <a
                     href={dealProduct.id && dealProduct.id !== 'deal-of-the-day' ? `/sealed-detail/${dealProduct.id}` : '#'}
-                    style={{ flex: '1.2 1 0%', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', position: 'relative', textDecoration: 'none' }}
+                    style={{ textDecoration: 'none', color: 'inherit' }}
                     onClick={(e) => {
                       if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && dealProduct.id && dealProduct.id !== 'deal-of-the-day') {
                         e.preventDefault();
@@ -1089,94 +1094,78 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                       }
                     }}
                   >
-                    <div style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'flex-start',
-                      cursor: catalogProduct ? 'pointer' : 'default'
+                    <h3 style={{
+                      fontSize: '18px',
+                      fontWeight: '800',
+                      color: 'var(--text-main)',
+                      margin: '0',
+                      textAlign: 'left',
+                      lineHeight: '1.3',
+                      cursor: catalogProduct ? 'pointer' : 'default',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      fontFamily: 'var(--font-heading)'
                     }}>
-                      <img
-                        src={activeDeal.image_url || '/logo s popisem.webp'}
-                        alt={activeDeal.name || 'Akční nabídka - Northvale TCG'}
-                        title={activeDeal.name || 'Akční nabídka'}
-                        width="185"
-                        height="185"
-                        style={{
-                          maxHeight: '100%',
-                          maxWidth: '100%',
-                          objectFit: 'contain',
-                          transform: 'scale(1.25) translate(-28px, 16px)',
-                          transformOrigin: 'left center'
-                        }}
-                      />
-                    </div>
+                      {activeDeal.name}
+                    </h3>
                   </a>
 
-                  {/* Right part: Prices, Stock badge, and Buy Button vertically stacked */}
-                  <div style={{
-                    flex: '1 1 0%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'flex-start',
-                    gap: '10px',
-                    paddingLeft: '4px'
+                  {/* Stock badge */}
+                  <span style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    color: 'var(--text-main)',
+                    fontWeight: '700',
+                    fontSize: '10px',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    marginBottom: '2px'
                   }}>
-                    {/* Stock badge */}
-                    <span style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                      color: 'var(--text-main)',
-                      fontWeight: '700',
-                      fontSize: '10px',
-                      padding: '3px 8px',
-                      borderRadius: '4px',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      marginBottom: '2px'
-                    }}>
-                      {lang === 'CZ' ? `Zbývá ${dealProductStock} kusů` : `${dealProductStock} pcs left`}
-                    </span>
+                    {lang === 'CZ' ? `Zbývá ${dealProductStock} kusů` : `${dealProductStock} pcs left`}
+                  </span>
 
-                    {/* Pricing */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        {discountPercent > 0 && (
-                          <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-red)' }}>
-                            -{discountPercent} %
-                          </span>
-                        )}
-                        {dealProductOriginalPrice && (
-                          <span style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                            {dealProductOriginalPrice.toLocaleString()} Kč
-                          </span>
-                        )}
-                      </div>
-                      <span style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-gold)', marginTop: '1px' }}>
-                        {dealProductPrice.toLocaleString()} Kč
-                      </span>
+                  {/* Pricing */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {discountPercent > 0 && (
+                        <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-red)' }}>
+                          -{discountPercent} %
+                        </span>
+                      )}
+                      {dealProductOriginalPrice && (
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                          {dealProductOriginalPrice.toLocaleString()} Kč
+                        </span>
+                      )}
                     </div>
+                    <span style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-gold)', marginTop: '1px' }}>
+                      {dealProductPrice.toLocaleString()} Kč
+                    </span>
+                  </div>
 
-                    {/* Buy Button */}
-                    <button
-                      className="btn btn-primary"
-                      onMouseEnter={() => setIsBtnHoveredHorizontal(true)}
-                      onMouseLeave={() => setIsBtnHoveredHorizontal(false)}
-                      style={{
-                        backgroundColor: dealAdded
-                          ? 'var(--color-gold-hover)'
-                          : (isBtnHoveredHorizontal ? 'var(--color-gold-hover)' : 'var(--color-gold)'),
-                        color: '#000',
-                        fontWeight: '700',
-                        padding: '10px 14px',
-                        borderRadius: 'var(--radius-md)',
-                        fontSize: '13px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        border: 'none',
-                        cursor: (dealProductStock > 0) ? 'pointer' : 'not-allowed',
+                  {/* Buy Button */}
+                  <button
+                    className="btn btn-primary"
+                    onMouseEnter={() => setIsBtnHoveredHorizontal(true)}
+                    onMouseLeave={() => setIsBtnHoveredHorizontal(false)}
+                    style={{
+                      backgroundColor: dealAdded
+                        ? 'var(--color-gold-hover)'
+                        : (isBtnHoveredHorizontal ? 'var(--color-gold-hover)' : 'var(--color-gold)'),
+                      color: '#000',
+                      fontWeight: '700',
+                      padding: '10px 14px',
+                      borderRadius: 'var(--radius-md)',
+                      fontSize: '13px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      border: 'none',
+                      cursor: (dealProductStock > 0) ? 'pointer' : 'not-allowed',
                         opacity: 1,
                         width: '120px',
                         transform: dealAdded ? 'scale(0.95)' : (isBtnHoveredHorizontal ? 'scale(1.05)' : 'scale(1)'),
@@ -1203,7 +1192,6 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                     </button>
                   </div>
                 </div>
-              </div>
             </>
           )}
         </div>
