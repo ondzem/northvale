@@ -179,8 +179,13 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
       }
     }
     loadSlides();
+
+    const handleCustomEvent = () => loadSlides();
+    window.addEventListener('northvale-slides-updated', handleCustomEvent);
+
     return () => {
       active = false;
+      window.removeEventListener('northvale-slides-updated', handleCustomEvent);
     };
   }, []);
 

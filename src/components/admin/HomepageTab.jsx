@@ -995,6 +995,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
       showToast(lang === 'CZ' ? 'Snímek byl úspěšně uložen!' : 'Slide saved successfully!', 'success');
       loadSlides();
       handleResetForm();
+      window.dispatchEvent(new Event('northvale-slides-updated'));
     }
   };
 
@@ -1006,6 +1007,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
       showToast(lang === 'CZ' ? 'Snímek byl úspěšně smazán.' : 'Slide deleted successfully.', 'success');
       loadSlides();
       handleResetForm();
+      window.dispatchEvent(new Event('northvale-slides-updated'));
     }
     setDeleteConfirm({ isOpen: false, slideId: '' });
   };
