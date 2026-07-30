@@ -599,29 +599,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
-            {/* Background luxury container while image streams in */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '24px',
-              background: 'radial-gradient(circle at center, rgba(26, 26, 38, 0.98) 0%, rgba(10, 10, 14, 1) 100%)',
-              zIndex: 0
-            }}>
-              <div className="spinner" style={{
-                width: '32px',
-                height: '32px',
-                border: '3px solid rgba(253, 189, 22, 0.15)',
-                borderTopColor: 'var(--color-gold)',
-                borderRadius: '50%',
-                animation: 'spin 0.8s linear infinite'
-              }} />
-            </div>
-
-            {/* Instant Hero Banner Image (always rendered directly with opacity: 1) */}
+            {/* Pure Instant Hero Banner Image */}
             {currentImageUrl && (
               <img
                 key={currentImageUrl}
@@ -636,7 +614,6 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   height: '100%',
                   objectFit: 'cover',
                   display: 'block',
-                  opacity: 1,
                   position: 'absolute',
                   top: 0,
                   left: 0,
