@@ -174,8 +174,6 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
       if (error) {
         const errorText = formatAuthErrorMessage(error, lang);
         setLocalMessage({ type: 'error', text: errorText });
-        setEmailError(true);
-        setPasswordError(true);
         triggerAlert(errorText, 'error');
         return;
       }
@@ -190,8 +188,6 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
       if (error) {
         const errorText = formatAuthErrorMessage(error, lang);
         setLocalMessage({ type: 'error', text: errorText });
-        setEmailError(true);
-        setPasswordError(true);
         triggerAlert(errorText, 'error');
         return;
       }
