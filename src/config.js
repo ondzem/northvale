@@ -4,7 +4,7 @@ export const FEATURE_FLAGS = {
   showSlabs: false,
   showTestimonials: false, // Set to true to show "Co o nás říkají" testimonials on homepage
   showNewsletter: true,   // Set to true to show newsletter forms on storefront pages
-  preRegistrationActive: true, // If true, redirects normal users to pre-registration landing page
+  preRegistrationActive: false, // OFFICIALLY LAUNCHED: Storefront is live for all public visitors
   showCalendar: false,    // Set to true to enable and show TCG Release Calendar 2026
 };
 
