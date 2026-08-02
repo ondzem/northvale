@@ -2154,7 +2154,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                     </span>
                   </button>
 
-                  {/* Osobní odběr - ELEKTROOBCHOD Škrba (Holice) */}
+                  {/* Osobní odběr - ELEKTROOBCHOD Škrba */}
                   <button 
                     type="button"
                     className={`pof-radio ${shipping === 'personal' || shipping === 'pardubice' ? 'is-active' : ''}`}
@@ -2162,13 +2162,13 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   >
                     <span className="pof-radio-dot" aria-hidden="true"></span>
                     <span className="pof-radio-body">
-                      <span className="pof-radio-name" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        📍 {lang === 'CZ' ? 'Osobní odběr – ELEKTROOBCHOD Škrba (Holice)' : 'Personal Pickup – ELEKTROOBCHOD Škrba (Holice)'}
+                      <span className="pof-radio-name">
+                        {lang === 'CZ' ? 'Osobní odběr – ELEKTROOBCHOD Škrba' : 'Personal Pickup – ELEKTROOBCHOD Škrba'}
                       </span>
                       <span className="pof-radio-desc" style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '2px' }}>
                         <span>Bratří Čapků 1095, 534 01 Holice</span>
                         <span style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: '600', fontSize: '11.5px', marginTop: '2px' }}>
-                          🕒 {lang === 'CZ' ? 'Otevírací doba: Po–Pá 7:00–12:00, 13:00–16:00' : 'Opening Hours: Mon–Fri 7:00–12:00, 13:00–16:00'}
+                          {lang === 'CZ' ? 'Otevírací doba: Po–Pá 7:00–12:00, 13:00–16:00' : 'Opening Hours: Mon–Fri 7:00–12:00, 13:00–16:00'}
                         </span>
                       </span>
                     </span>

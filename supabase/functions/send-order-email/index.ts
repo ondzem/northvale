@@ -393,14 +393,14 @@ serve(async (req) => {
           <!-- Shipping details container -->
           <div style="border-top: 1px solid #e1e4e8; border-bottom: 1px solid #e1e4e8; padding: 20px 0; margin-bottom: 24px;">
             <div style="color: #fdbd16; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em;">
-              ${isPersonalPickup ? '📍 Osobní odběr — ELEKTROOBCHOD Škrba (Holice)' : '📦 Doručení zásilky'}
+              ${isPersonalPickup ? 'Osobní odběr — ELEKTROOBCHOD Škrba' : '📦 Doručení zásilky'}
             </div>
             <p style="font-size: 15px; color: #111111; margin: 0 0 8px 0;">
               Způsob doručení: <strong>${order.shippingMethod}</strong>
             </p>
             <p style="font-size: 13.5px; line-height: 1.5; color: #666666; margin: 0;">
               ${isPersonalPickup 
-                ? 'Zboží pro Vás začínáme připravovat. Vyzvednout si ho můžete v naší prodejně:<br/><strong style="color: #111111;">ELEKTROOBCHOD Škrba, Bratří Čapků 1095, 534 01 Holice</strong>.<br/><span style="color: #fdbd16; font-weight: bold;">🕒 Otevírací doba: Po–Pá 7:00–12:00 a 13:00–16:00.</span>'
+                ? 'Zboží pro Vás začínáme připravovat. Vyzvednout si ho můžete v naší prodejně:<br/><strong style="color: #111111;">ELEKTROOBCHOD Škrba, Bratří Čapků 1095, 534 01 Holice</strong>.<br/><span style="color: #fdbd16; font-weight: bold;">Otevírací doba: Po–Pá 7:00–12:00 a 13:00–16:00.</span>'
                 : isBankTransfer
                   ? 'Jakmile obdržíme Vaši platbu na náš účet, objednávku zpracujeme a předáme dopravci. O odeslání Vás budeme informovat.'
                   : isCod
