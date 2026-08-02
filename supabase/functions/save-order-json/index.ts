@@ -25,26 +25,59 @@ serve(async (req) => {
 
     // Public Customer Order Lookup (filtered strictly by customer's email)
     if (req.method === "GET" && customerEmail) {
-      const { data: fileList, error: listErr } = await supabase.storage.from("pohoda-orders").list("", {
+      const { data: rootList } = await supabase.storage.from("pohoda-orders").list("", {
+        limit: 200,
+        sortBy: { column: "name", order: "desc" }
+      });
+      const { data: processedList } = await supabase.storage.from("pohoda-orders").list("processed", {
         limit: 200,
         sortBy: { column: "name", order: "desc" }
       });
 
-      if (listErr) throw listErr;
+      const rootFiles = (rootList || []).map((f: any) => ({ name: f.name, path: f.name }));
+      const subFiles = (processedList || []).map((f: any) => ({ name: f.name, path: `processed/${f.name}` }));
+      const allFiles = [...rootFiles, ...subFiles];
 
       const matchingOrders: any[] = [];
-      const jsonFiles = (fileList || []).filter(f => f.name.startsWith("order_") && f.name.endsWith(".json"));
+      const jsonFiles = allFiles.filter(f => f.name.startsWith("order_") && (f.name.endsWith(".json") || f.name.endsWith(".xml")));
 
       for (const file of jsonFiles) {
         try {
-          const { data: fileBlob } = await supabase.storage.from("pohoda-orders").download(file.name);
+          const { data: fileBlob } = await supabase.storage.from("pohoda-orders").download(file.path);
           if (fileBlob) {
             const text = await fileBlob.text();
-            const jsonObj = JSON.parse(text);
+            let jsonObj: any;
+            if (file.name.endsWith(".xml")) {
+              const idMatch = text.match(/<ord:number>([^<]+)<\/ord:number>/) || text.match(/<number>([^<]+)<\/number>/);
+              const emailMatch = text.match(/<typ:email>([^<]+)<\/typ:email>/) || text.match(/<email>([^<]+)<\/email>/);
+              const nameMatch = text.match(/<typ:company>([^<]+)<\/typ:company>/) || text.match(/<typ:name>([^<]+)<\/typ:name>/);
+              jsonObj = {
+                order: {
+                  id: idMatch ? idMatch[1] : file.name.replace("order_", "").replace(".xml", ""),
+                  customer_email: emailMatch ? emailMatch[1] : "",
+                  customer_name: nameMatch ? nameMatch[1] : "",
+                  shipping_method: "Doprava",
+                  payment_method: "Platba"
+                },
+                items: []
+              };
+            } else {
+              jsonObj = JSON.parse(text);
+            }
             const o = jsonObj.order || {};
-            const itemEmail = (o.customer_email || o.email || '').toLowerCase();
+            const itemEmail = (
+              o.customer_email || 
+              o.customerEmail || 
+              o.email || 
+              jsonObj.customer_email || 
+              jsonObj.customerEmail || 
+              jsonObj.email || 
+              ''
+            ).toLowerCase().trim();
+
+            const queryEmail = customerEmail.toLowerCase().trim();
             
-            if (itemEmail === customerEmail.toLowerCase()) {
+            if (itemEmail === queryEmail || (queryEmail && itemEmail.includes(queryEmail))) {
               matchingOrders.push({
                 ...jsonObj,
                 fileName: file.name

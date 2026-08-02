@@ -167,8 +167,9 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
         method: 'GET'
       });
 
+      let storageMapped = [];
       if (!error && data && Array.isArray(data.orders)) {
-        const mapped = data.orders.map(jsonObj => {
+        storageMapped = data.orders.map(jsonObj => {
           const o = jsonObj.order || {};
           const items = Array.isArray(jsonObj.items) ? jsonObj.items : (o.items || []);
           const rawDate = o.date || jsonObj.created_at || new Date().toISOString();
@@ -179,39 +180,93 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
           const pStatus = (o.payment_status || o.platba || 'awaiting_payment').toLowerCase();
           const fStatus = (o.fulfillment_status || o.stav || 'pending').toLowerCase();
 
+          const mappedItems = items.map(it => ({
+            name: it.name || it.productName,
+            quantity: parseFloat(it.quantity || 1),
+            price: parseFloat(it.price || 0)
+          }));
+
+          const itemsTotalSum = mappedItems.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+          const explicitTotal = parseFloat(o.final_total || o.finalTotal || o.total_price || o.totalPrice || 0);
+          const computedTotal = explicitTotal > 0 ? explicitTotal : Math.max(0, itemsTotalSum + parseFloat(o.shipping_cost || o.shippingCost || 0) + parseFloat(o.payment_surcharge || o.paymentSurcharge || 0) - parseFloat(o.discount_amount || o.discountAmount || 0));
+
           return {
             id: o.id,
             created_at: jsonObj.created_at,
             date: orderDate,
             paymentStatus: pStatus === 'uhrazeno' || pStatus === 'paid' ? 'paid' : (pStatus === 'cod' || pStatus === 'na dobírku' ? 'cod' : 'awaiting_payment'),
             fulfillmentStatus: fStatus === 'odesláno' || fStatus === 'shipped' ? 'shipped' : (fStatus === 'stornováno' || fStatus === 'cancelled' ? 'cancelled' : 'pending'),
-            shippingMethod: o.shipping_method || 'Doprava',
-            paymentMethod: o.payment_method || 'Platba',
-            finalTotal: parseFloat(o.final_total || o.total_price || o.totalPrice || 0),
-            subtotal: parseFloat(o.subtotal || 0),
+            shippingMethod: o.shipping_method || o.shippingMethod || 'Doprava',
+            paymentMethod: o.payment_method || o.paymentMethod || 'Platba',
+            finalTotal: computedTotal,
+            subtotal: parseFloat(o.subtotal || itemsTotalSum),
             shippingCost: parseFloat(o.shipping_cost || o.shippingCost || 0),
             paymentSurcharge: parseFloat(o.payment_surcharge || o.paymentSurcharge || 0),
-            items: items.map(it => ({
-              name: it.name || it.productName,
-              quantity: parseFloat(it.quantity || 1),
-              price: parseFloat(it.price || 0)
-            })),
-            customerName: o.customer_name || user.name,
-            customerEmail: o.customer_email || user.email,
-            customerPhone: o.customer_phone || user.phone,
-            shippingStreet: o.customer_street || o.street,
-            shippingCity: o.customer_city || o.city,
-            shippingZip: o.customer_zip || o.zip,
+            items: mappedItems,
+            customerName: o.customer_name || o.customerName || user.name,
+            customerEmail: o.customer_email || o.customerEmail || user.email,
+            customerPhone: o.customer_phone || o.customerPhone || user.phone,
+            shippingStreet: o.customer_street || o.shippingStreet || o.street,
+            shippingCity: o.customer_city || o.shippingCity || o.city,
+            shippingZip: o.customer_zip || o.shippingZip || o.zip,
             isCompany: o.is_company || o.isCompany,
             companyName: o.company_name || o.companyName,
             ico: o.ico,
             dic: o.dic
           };
         });
-        setLiveOrders(mapped);
-      } else {
-        setLiveOrders([]);
       }
+
+      // Merge with user.order_history array if present
+      const profileHistory = Array.isArray(user.order_history) ? user.order_history : [];
+      const historyMapped = profileHistory.map(o => {
+        const items = Array.isArray(o.items) ? o.items : [];
+        const mappedItems = items.map(it => ({
+          name: it.name || it.productName,
+          quantity: parseFloat(it.quantity || 1),
+          price: parseFloat(it.price || 0)
+        }));
+        const itemsTotalSum = mappedItems.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+        const explicitTotal = parseFloat(o.finalTotal || o.final_total || o.totalPrice || o.total_price || 0);
+        const computedTotal = explicitTotal > 0 ? explicitTotal : Math.max(0, itemsTotalSum + parseFloat(o.shippingCost || o.shipping_cost || 0) + parseFloat(o.paymentSurcharge || o.payment_surcharge || 0) - parseFloat(o.discountAmount || o.discount_amount || 0));
+
+        return {
+          id: o.id,
+          created_at: o.created_at || new Date().toISOString(),
+          date: o.date || new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
+          paymentStatus: o.paymentStatus || 'awaiting_payment',
+          fulfillmentStatus: o.fulfillmentStatus || 'pending',
+          shippingMethod: o.shippingMethod || o.shipping_method || 'Doprava',
+          paymentMethod: o.paymentMethod || o.payment_method || 'Platba',
+          finalTotal: computedTotal,
+          subtotal: parseFloat(o.subtotal || itemsTotalSum),
+          shippingCost: parseFloat(o.shippingCost || o.shipping_cost || 0),
+          paymentSurcharge: parseFloat(o.paymentSurcharge || o.payment_surcharge || 0),
+          items: mappedItems,
+          customerName: o.customerName || user.name,
+          customerEmail: o.customerEmail || user.email,
+          customerPhone: o.customerPhone || user.phone,
+          shippingStreet: o.shippingStreet || o.street,
+          shippingCity: o.shippingCity || o.city,
+          shippingZip: o.shippingZip || o.zip,
+          isCompany: o.isCompany,
+          companyName: o.companyName,
+          ico: o.ico,
+          dic: o.dic
+        };
+      });
+
+      // Combine storage and profile history, deduplicating by ID
+      const combinedMap = new Map();
+      storageMapped.forEach(o => combinedMap.set(o.id, o));
+      historyMapped.forEach(o => {
+        if (!combinedMap.has(o.id)) {
+          combinedMap.set(o.id, o);
+        }
+      });
+
+      const finalOrders = Array.from(combinedMap.values()).sort((a, b) => (b.id || '').localeCompare(a.id || ''));
+      setLiveOrders(finalOrders);
     } catch (err) {
       console.error('Error fetching live orders:', err);
       setLiveOrders([]);
