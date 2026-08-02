@@ -237,37 +237,48 @@ export default function OrdersTab({ showToast }) {
             
             if (filename.endsWith('.json')) {
               const jsonObj = typeof data === 'string' ? JSON.parse(data) : data;
-              const o = jsonObj.order;
-              parsed = {
-                id: o.id,
-                date: o.date || new Date(jsonObj.created_at || Date.now()).toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
-                customerName: o.customer_name || '',
-                email: o.customer_email || '',
-                phone: o.customer_phone || '',
-                street: o.customer_street || '',
-                city: o.customer_city || '',
-                zip: o.customer_zip || '',
-                paymentMethod: o.payment_method || '',
-                carrier: o.carrier || 'GLS',
-                shippingMethod: o.shipping_method || '',
-                shippingCost: parseFloat(o.shipping_cost || '0'),
-                paymentSurcharge: parseFloat(o.payment_surcharge || '0'),
-                items: (jsonObj.items || []).map(item => ({
-                  name: item.name,
-                  code: item.product_id || '',
-                  quantity: parseFloat(item.quantity || '1'),
-                  price: parseFloat(item.price || '0'),
-                  total: parseFloat(item.quantity || '1') * parseFloat(item.price || '0'),
-                  isService: false
-                })),
-                totalPrice: parseFloat(o.final_total || jsonObj.subtotal || '0'),
-                isCompany: o.is_company || false,
-                companyName: o.company_name || '',
-                ico: o.ico || '',
-                dic: o.dic || '',
-                notes: o.notes || '',
-                rawJson: jsonObj
-              };
+              const o = jsonObj.order || {};
+              const itemsSubtotal = (jsonObj.items || []).reduce((sum, item) => sum + (parseFloat(item.quantity || '1') * parseFloat(item.price || '0')), 0);
+              const explicitTotal = (o.final_total !== undefined && o.final_total !== null && o.final_total !== '' && parseFloat(o.final_total) > 0)
+                ? parseFloat(o.final_total)
+                : (jsonObj.subtotal !== undefined && jsonObj.subtotal !== null && jsonObj.subtotal !== '' && parseFloat(jsonObj.subtotal) > 0 ? parseFloat(jsonObj.subtotal) : 0);
+              const discountAmt = parseFloat(o.discount_amount || '0');
+              const computedTotal = explicitTotal > 0 ? explicitTotal : Math.max(0, itemsSubtotal + parseFloat(o.shipping_cost || '0') + parseFloat(o.payment_surcharge || '0') - discountAmt);
+
+                parsed = {
+                  id: o.id,
+                  date: o.date || new Date(jsonObj.created_at || Date.now()).toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
+                  customerName: o.customer_name || '',
+                  email: o.customer_email || '',
+                  phone: o.customer_phone || '',
+                  street: o.customer_street || '',
+                  city: o.customer_city || '',
+                  zip: o.customer_zip || '',
+                  paymentMethod: o.payment_method || '',
+                  carrier: o.carrier || 'GLS',
+                  shippingMethod: o.shipping_method || '',
+                  shippingCost: parseFloat(o.shipping_cost || '0'),
+                  paymentSurcharge: parseFloat(o.payment_surcharge || '0'),
+                  subtotal: itemsSubtotal,
+                  discountCode: o.discount_code || null,
+                  discountAmount: discountAmt,
+                  creditApplied: parseFloat(o.credit_applied || '0'),
+                  items: (jsonObj.items || []).map(item => ({
+                    name: item.name,
+                    code: item.product_id || '',
+                    quantity: parseFloat(item.quantity || '1'),
+                    price: parseFloat(item.price || '0'),
+                    total: parseFloat(item.quantity || '1') * parseFloat(item.price || '0'),
+                    isService: false
+                  })),
+                  totalPrice: computedTotal,
+                  isCompany: o.is_company || false,
+                  companyName: o.company_name || '',
+                  ico: o.ico || '',
+                  dic: o.dic || '',
+                  notes: o.notes || '',
+                  rawJson: jsonObj
+                };
 
               // Append shipping and payment surcharge as service items if present
               if (parsed.shippingCost > 0) {
