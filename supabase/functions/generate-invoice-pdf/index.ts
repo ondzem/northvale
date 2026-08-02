@@ -211,6 +211,18 @@ serve(async (req) => {
       page.drawLine({ start: { x: 45, y: currentY + 10 }, end: { x: 550, y: currentY + 10 }, thickness: 0.2, color: cBorder });
     }
 
+    // Draw Discount Code line if discount exists
+    const discountCode = order.discountCode || order.discount_code || order.discountName || order.discount_name || "";
+    const discountAmt = parseFloat(order.discountAmount || order.discount_amount || "0");
+
+    if (discountAmt > 0) {
+      const discountLabel = discountCode ? `Sleva (slevový kód: ${discountCode})` : "Sleva na objednávku";
+      drawText(discountLabel, 45, currentY, 9, regularFont, cCharcoal);
+      drawTextRight(`-${formatKcs(discountAmt)}`, 550, currentY, 9, regularFont, cCharcoal);
+      currentY -= 20;
+      page.drawLine({ start: { x: 45, y: currentY + 10 }, end: { x: 550, y: currentY + 10 }, thickness: 0.2, color: cBorder });
+    }
+
     // Summary line
     currentY += 5;
     page.drawLine({ start: { x: 300, y: currentY }, end: { x: 550, y: currentY }, thickness: 1.5, color: cCharcoal });
@@ -234,7 +246,7 @@ serve(async (req) => {
 
     const shippingCost = parseFloat(order.shippingCost || "0");
     const paymentSurcharge = parseFloat(order.paymentSurcharge || "0");
-    regularSubtotal += shippingCost + paymentSurcharge;
+    regularSubtotal += shippingCost + paymentSurcharge - discountAmt;
 
     const total = parseFloat(order.finalTotal || "0");
 
