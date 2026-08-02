@@ -404,6 +404,10 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   GLS – doručení na adresu: 129 Kč. Do druhého pracovního dne od expedice, kurýrem domů nebo do zaměstnání.
                 </p>
 
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                  <strong>Osobní odběr – ELEKTROOBCHOD Škrba (Holice): ZDARMA.</strong> Vyzvednutí v prodejně na adrese Bratří Čapků 1095, 534 01 Holice. Otevírací doba: Po–Pá 7:00–12:00 a 13:00–16:00.
+                </p>
+
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>
                   2. DORUČENÍ DO ZAHRANIČÍ (SLOVENSKO A EU)
                 </h3>

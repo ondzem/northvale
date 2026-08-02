@@ -410,16 +410,18 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
               isicApplied: false,
               isicDiscount: 0,
               finalTotal: orderFinalTotal,
-              shippingMethod: shipMethod === 'dpd-pickup'
-                ? (lang === 'CZ' ? `DPD - Výdejní místo: ${pending.pickupPoint || ''}` : `DPD - Pickup Point: ${pending.pickupPoint || ''}`)
-                : shipMethod === 'dpd-address' || shipMethod === 'dpd'
-                  ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
-                  : shipMethod === 'gls-pickup'
-                    ? (lang === 'CZ' ? `GLS - Výdejní místo: ${pending.pickupPoint || ''}` : `GLS - Pickup Point: ${pending.pickupPoint || ''}`)
-                    : shipMethod === 'gls-address' || shipMethod === 'gls'
-                      ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
-                      : (lang === 'CZ' ? 'Doprava' : 'Shipping'),
-              carrier: (shipMethod || '').startsWith('dpd') ? 'DPD' : 'GLS',
+              shippingMethod: shipMethod === 'personal' || shipMethod === 'pardubice'
+                ? (lang === 'CZ' ? 'Osobní odběr – ELEKTROOBCHOD Škrba (Bratří Čapků 1095, Holice)' : 'Personal Pickup – ELEKTROOBCHOD Škrba (Bratří Čapků 1095, Holice)')
+                : shipMethod === 'dpd-pickup'
+                  ? (lang === 'CZ' ? `DPD - Výdejní místo: ${pending.pickupPoint || ''}` : `DPD - Pickup Point: ${pending.pickupPoint || ''}`)
+                  : shipMethod === 'dpd-address' || shipMethod === 'dpd'
+                    ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
+                    : shipMethod === 'gls-pickup'
+                      ? (lang === 'CZ' ? `GLS - Výdejní místo: ${pending.pickupPoint || ''}` : `GLS - Pickup Point: ${pending.pickupPoint || ''}`)
+                      : shipMethod === 'gls-address' || shipMethod === 'gls'
+                        ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
+                        : (lang === 'CZ' ? 'Doprava' : 'Shipping'),
+              carrier: (shipMethod === 'personal' || shipMethod === 'pardubice') ? 'Osobní odběr' : (shipMethod || '').startsWith('dpd') ? 'DPD' : 'GLS',
               paymentMethod: lang === 'CZ' ? 'Online platební karta' : 'Online Credit/Debit Card',
               date: new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
               invoiceUrl: '#',
@@ -803,16 +805,18 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           paymentStatus: 'awaiting_payment',
           fulfillmentStatus: 'pending',
           userId: user?.id || null,
-          shippingMethod: shipping === 'dpd-pickup'
-            ? (lang === 'CZ' ? `DPD - Výdejní místo: ${pickupPoint}` : `DPD - Pickup Point: ${pickupPoint}`)
-            : shipping === 'dpd-address' || shipping === 'dpd'
-              ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
-              : shipping === 'gls-pickup'
-                ? (lang === 'CZ' ? `GLS - Výdejní místo: ${pickupPoint}` : `GLS - Pickup Point: ${pickupPoint}`)
-                : shipping === 'gls-address' || shipping === 'gls'
-                  ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
+          shippingMethod: shipping === 'personal' || shipping === 'pardubice'
+            ? (lang === 'CZ' ? 'Osobní odběr – ELEKTROOBCHOD Škrba (Bratří Čapků 1095, Holice)' : 'Personal Pickup – ELEKTROOBCHOD Škrba (Bratří Čapků 1095, Holice)')
+            : shipping === 'dpd-pickup'
+              ? (lang === 'CZ' ? `DPD - Výdejní místo: ${pickupPoint}` : `DPD - Pickup Point: ${pickupPoint}`)
+              : shipping === 'dpd-address' || shipping === 'dpd'
+                ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
+                : shipping === 'gls-pickup'
+                  ? (lang === 'CZ' ? `GLS - Výdejní místo: ${pickupPoint}` : `GLS - Pickup Point: ${pickupPoint}`)
+                  : shipping === 'gls-address' || shipping === 'gls'
+                    ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
                     : (lang === 'CZ' ? 'Doprava' : 'Shipping'),
-          carrier: shipping.startsWith('dpd') ? 'DPD' : 'GLS',
+          carrier: (shipping === 'personal' || shipping === 'pardubice') ? 'Osobní odběr' : shipping.startsWith('dpd') ? 'DPD' : 'GLS',
           paymentMethod: lang === 'CZ' ? 'Online platební karta' : 'Online Credit/Debit Card',
           date: new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
           invoiceUrl: '#',
@@ -959,16 +963,18 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       paymentStatus: payment === 'card' ? 'paid' : payment === 'transfer' ? 'awaiting_payment' : 'cod',
       fulfillmentStatus: 'pending',
       userId: user?.id || null,
-      shippingMethod: shipping === 'dpd-pickup'
-        ? (lang === 'CZ' ? `DPD - Výdejní místo: ${pickupPoint}` : `DPD - Pickup Point: ${pickupPoint}`)
-        : shipping === 'dpd-address' || shipping === 'dpd'
-          ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
-          : shipping === 'gls-pickup'
-            ? (lang === 'CZ' ? `GLS - Výdejní místo: ${pickupPoint}` : `GLS - Pickup Point: ${pickupPoint}`)
-            : shipping === 'gls-address' || shipping === 'gls'
-              ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
+      shippingMethod: shipping === 'personal' || shipping === 'pardubice'
+        ? (lang === 'CZ' ? 'Osobní odběr – ELEKTROOBCHOD Škrba (Bratří Čapků 1095, Holice)' : 'Personal Pickup – ELEKTROOBCHOD Škrba (Bratří Čapků 1095, Holice)')
+        : shipping === 'dpd-pickup'
+          ? (lang === 'CZ' ? `DPD - Výdejní místo: ${pickupPoint}` : `DPD - Pickup Point: ${pickupPoint}`)
+          : shipping === 'dpd-address' || shipping === 'dpd'
+            ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
+            : shipping === 'gls-pickup'
+              ? (lang === 'CZ' ? `GLS - Výdejní místo: ${pickupPoint}` : `GLS - Pickup Point: ${pickupPoint}`)
+              : shipping === 'gls-address' || shipping === 'gls'
+                ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
                 : (lang === 'CZ' ? 'Doprava' : 'Shipping'),
-      carrier: shipping.startsWith('dpd') ? 'DPD' : 'GLS',
+      carrier: (shipping === 'personal' || shipping === 'pardubice') ? 'Osobní odběr' : shipping.startsWith('dpd') ? 'DPD' : 'GLS',
       paymentMethod: payment === 'card'
         ? (lang === 'CZ' ? 'Online platební karta' : 'Online Credit/Debit Card')
         : payment === 'transfer'
@@ -2135,6 +2141,29 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                     </span>
                     <span className={`pof-price ${subtotalAfterDiscount >= 1750 ? 'is-free' : ''}`}>
                       {getShippingPriceDisplay('gls-address', 129)}
+                    </span>
+                  </button>
+
+                  {/* Osobní odběr - ELEKTROOBCHOD Škrba (Holice) */}
+                  <button 
+                    type="button"
+                    className={`pof-radio ${shipping === 'personal' || shipping === 'pardubice' ? 'is-active' : ''}`}
+                    onClick={() => setShipping('personal')}
+                  >
+                    <span className="pof-radio-dot" aria-hidden="true"></span>
+                    <span className="pof-radio-body">
+                      <span className="pof-radio-name" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        📍 {lang === 'CZ' ? 'Osobní odběr – ELEKTROOBCHOD Škrba (Holice)' : 'Personal Pickup – ELEKTROOBCHOD Škrba (Holice)'}
+                      </span>
+                      <span className="pof-radio-desc" style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '2px' }}>
+                        <span>Bratří Čapků 1095, 534 01 Holice</span>
+                        <span style={{ color: 'var(--nv-gold, #fdbd16)', fontWeight: '600', fontSize: '11.5px', marginTop: '2px' }}>
+                          🕒 {lang === 'CZ' ? 'Otevírací doba: Po–Pá 7:00–12:00, 13:00–16:00' : 'Opening Hours: Mon–Fri 7:00–12:00, 13:00–16:00'}
+                        </span>
+                      </span>
+                    </span>
+                    <span className="pof-price is-free">
+                      {lang === 'CZ' ? 'Zdarma' : 'Free'}
                     </span>
                   </button>
                 </div>
