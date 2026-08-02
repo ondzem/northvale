@@ -777,6 +777,67 @@ export default function OrdersTab({ showToast }) {
     }
   };
 
+  // Mark Order as Completed / Expedited Flow
+  const handleMarkCompleted = (order) => {
+    setConfirmModal({
+      isOpen: true,
+      title: lang === 'CZ' ? 'Označit jako vyřízeno?' : 'Mark as Completed?',
+      message: lang === 'CZ'
+        ? `Opravdu chcete objednávku #${order.id} označit jako vyřízenou?`
+        : `Are you sure you want to mark order #${order.id} as completed?`,
+      confirmText: lang === 'CZ' ? 'Označit jako vyřízeno' : 'Mark Completed',
+      btnColor: '#10b981',
+      onConfirm: () => executeMarkCompleted(order)
+    });
+  };
+
+  const executeMarkCompleted = async (order) => {
+    try {
+      const updatedRaw = { ...order.rawJson };
+      if (!updatedRaw.order) {
+        updatedRaw.order = {
+          id: order.id,
+          customer_name: order.customerName || order.customer_name || 'Zákazník',
+          customer_email: order.email || order.customerEmail || order.customer_email || '',
+          customer_phone: order.phone || order.customer_phone || '',
+          customer_street: order.street || order.customer_street || '',
+          customer_city: order.city || order.customer_city || '',
+          customer_zip: order.zip || order.customer_zip || '',
+          payment_method: order.paymentMethod || 'Dobírka',
+          shipping_method: order.shippingMethod || 'DPD',
+          shipping_cost: (order.shippingCost || 0).toString(),
+          payment_surcharge: (order.paymentSurcharge || 0).toString(),
+          final_total: (order.totalPrice || 0).toString(),
+          userId: order.rawJson?.order?.userId || null
+        };
+      }
+      updatedRaw.order.fulfillmentStatus = 'completed';
+      updatedRaw.order.fulfillment_status = 'completed';
+      updatedRaw.order.stav = 'vyřízeno';
+
+      const { error: saveError } = await supabase.functions.invoke('save-order-json', {
+        body: {
+          order: updatedRaw.order,
+          items: updatedRaw.items || []
+        }
+      });
+      if (saveError) throw saveError;
+
+      showToast(
+        lang === 'CZ'
+          ? `Objednávka #${order.id} byla označena jako vyřízená.`
+          : `Order #${order.id} marked as completed.`,
+        'success'
+      );
+
+      fetchOrdersList(`order_${order.id}.json`);
+      setDetailOrder(null);
+    } catch (err) {
+      console.error('Failed to mark order as completed:', err);
+      showToast(lang === 'CZ' ? 'Chyba při aktualizaci stavu objednávky.' : 'Error updating order status.', 'error');
+    }
+  };
+
   // Cancel GLS Shipment API call
   const cancelGlsShipmentApi = async (order) => {
     const parcelId = order.rawJson?.order?.gls_parcel_id;
@@ -2040,26 +2101,34 @@ export default function OrdersTab({ showToast }) {
                       <td data-label={lang === 'CZ' ? 'Akce' : 'Actions'} style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
                           {(() => {
-                            const pmLower = (details?.paymentMethod || '').toLowerCase();
-                            const isBankTransferOrder = pmLower.includes('převod') || pmLower.includes('transfer');
                             const isPaid = (details?.rawJson?.order?.paymentStatus === 'paid') || (details?.rawJson?.order?.platba === 'uhrazeno');
-                            const isNeedsPaymentConfirmation = isBankTransferOrder && !isPaid;
-
-                            if (isNeedsPaymentConfirmation) {
-                              return (
-                                <button 
-                                  className="orders-action-btn"
-                                  style={{ backgroundColor: '#fdbd16', color: '#111111', fontWeight: 'bold' }}
-                                  onClick={() => handleConfirmPayment(details)}
-                                  title={lang === 'CZ' ? 'Potvrdit přijetí platby převodem' : 'Confirm bank transfer payment'}
-                                >
-                                  💳 {lang === 'CZ' ? 'Potvrdit platbu' : 'Confirm Payment'}
-                                </button>
-                              );
-                            }
+                            const fStatus = (details?.rawJson?.order?.fulfillmentStatus || details?.rawJson?.order?.fulfillment_status || details?.rawJson?.order?.stav || '').toLowerCase();
+                            const isCompleted = fStatus === 'completed' || fStatus === 'vyřízeno' || fStatus === 'doručeno' || fStatus === 'shipped' || fStatus === 'odesláno';
 
                             return (
                               <>
+                                {!isPaid && (
+                                  <button 
+                                    className="orders-action-btn"
+                                    style={{ backgroundColor: '#fdbd16', color: '#111111', fontWeight: 'bold' }}
+                                    onClick={() => handleConfirmPayment(details)}
+                                    title={lang === 'CZ' ? 'Potvrdit přijetí platby (dobírkou nebo převodem)' : 'Confirm payment received'}
+                                  >
+                                    💳 {lang === 'CZ' ? 'Potvrdit platbu' : 'Confirm Payment'}
+                                  </button>
+                                )}
+
+                                {!isCompleted && (
+                                  <button 
+                                    className="orders-action-btn"
+                                    style={{ backgroundColor: '#10b981', color: '#ffffff', fontWeight: 'bold' }}
+                                    onClick={() => handleMarkCompleted(details)}
+                                    title={lang === 'CZ' ? 'Označit objednávku jako vyřízenou' : 'Mark order as completed'}
+                                  >
+                                    ✅ {lang === 'CZ' ? 'Vyřídit' : 'Complete'}
+                                  </button>
+                                )}
+
                                 {isGls && (
                                   <button 
                                     className="orders-action-btn orders-action-btn-primary"
@@ -2265,6 +2334,33 @@ export default function OrdersTab({ showToast }) {
                             </div>
 
                             <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px', flexWrap: 'wrap' }}>
+                              {((detailOrder.rawJson?.order?.paymentStatus !== 'paid') && (detailOrder.rawJson?.order?.platba !== 'uhrazeno')) && (
+                                <button 
+                                  type="button"
+                                  onClick={() => handleConfirmPayment(detailOrder)}
+                                  className="orders-action-btn"
+                                  style={{ backgroundColor: '#fdbd16', color: '#111111', fontWeight: 'bold' }}
+                                >
+                                  💳 {lang === 'CZ' ? 'Potvrdit platbu' : 'Confirm Payment'}
+                                </button>
+                              )}
+                              {(() => {
+                                const fSt = (detailOrder.rawJson?.order?.fulfillmentStatus || detailOrder.rawJson?.order?.fulfillment_status || detailOrder.rawJson?.order?.stav || '').toLowerCase();
+                                const isDone = fSt === 'completed' || fSt === 'vyřízeno' || fSt === 'doručeno' || fSt === 'shipped' || fSt === 'odesláno';
+                                if (!isDone) {
+                                  return (
+                                    <button 
+                                      type="button"
+                                      onClick={() => handleMarkCompleted(detailOrder)}
+                                      className="orders-action-btn"
+                                      style={{ backgroundColor: '#10b981', color: '#ffffff', fontWeight: 'bold' }}
+                                    >
+                                      ✅ {lang === 'CZ' ? 'Označit jako vyřízeno' : 'Mark Completed'}
+                                    </button>
+                                  );
+                                }
+                                return null;
+                              })()}
                               <button 
                                 onClick={() => handleDownloadPdf(detailOrder.id)}
                                 className="orders-action-btn orders-action-btn-primary"
