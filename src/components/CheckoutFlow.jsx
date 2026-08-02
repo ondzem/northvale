@@ -730,25 +730,35 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       }
     }
 
-    // Validate Street
-    if (!street.trim()) {
+    const isPersonal = shipping === 'personal' || shipping === 'pardubice';
+
+    // Validate Street (only required for courier shipping)
+    if (!isPersonal && !street.trim()) {
       addErr('input-street', 'street', 'Vyplňte prosím ulici a číslo popisné.', 'Please enter your street and house number.');
     }
 
-    // Validate City
-    if (!city.trim()) {
+    // Validate City (only required for courier shipping)
+    if (!isPersonal && !city.trim()) {
       addErr('input-city', 'city', 'Vyplňte prosím město.', 'Please enter your city.');
     }
 
-    // Validate ZIP
+    // Validate ZIP (only required for courier shipping)
     let cleanedZip = zip.trim().replace(/\s+/g, '');
     const zipRegex = /^\d{5}$/;
-    if (!zip.trim()) {
-      addErr('input-zip', 'zip', 'Vyplňte prosím pětimístné PSČ.', 'Please enter your 5-digit postal code.');
-    } else if (!zipRegex.test(cleanedZip)) {
-      addErr('input-zip', 'zip', 'Zadejte prosím platné pětimístné PSČ (např. 534 01).', 'Please enter a valid 5-digit postal code.');
+    if (!isPersonal) {
+      if (!zip.trim()) {
+        addErr('input-zip', 'zip', 'Vyplňte prosím pětimístné PSČ.', 'Please enter your 5-digit postal code.');
+      } else if (!zipRegex.test(cleanedZip)) {
+        addErr('input-zip', 'zip', 'Zadejte prosím platné pětimístné PSČ (např. 534 01).', 'Please enter a valid 5-digit postal code.');
+      } else {
+        cleanedZip = `${cleanedZip.slice(0, 3)} ${cleanedZip.slice(3)}`;
+      }
     } else {
-      cleanedZip = `${cleanedZip.slice(0, 3)} ${cleanedZip.slice(3)}`;
+      if (zip.trim() && zipRegex.test(cleanedZip)) {
+        cleanedZip = `${cleanedZip.slice(0, 3)} ${cleanedZip.slice(3)}`;
+      } else {
+        cleanedZip = '534 01';
+      }
     }
 
     // If any personal or address errors exist, STOP here! Do not open pickup map modal!
@@ -985,9 +995,9 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       customerName: name,
       customerEmail: email,
       customerPhone: cleanedPhone,
-      shippingStreet: street,
-      shippingCity: city,
-      shippingZip: cleanedZip,
+      shippingStreet: street.trim() || ((shipping === 'personal' || shipping === 'pardubice') ? 'Bratří Čapků 1095' : ''),
+      shippingCity: city.trim() || ((shipping === 'personal' || shipping === 'pardubice') ? 'Holice' : ''),
+      shippingZip: cleanedZip || ((shipping === 'personal' || shipping === 'pardubice') ? '534 01' : ''),
       isCompany: isCompany,
       companyName: isCompany ? companyName : '',
       ico: isCompany ? ico : '',

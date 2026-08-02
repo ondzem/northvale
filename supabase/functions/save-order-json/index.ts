@@ -212,9 +212,26 @@ serve(async (req) => {
       });
     }
 
+    const normalizedOrder = {
+      ...order,
+      customer_name: order.customer_name || order.customerName || '',
+      customer_email: order.customer_email || order.customerEmail || '',
+      customer_phone: order.customer_phone || order.customerPhone || '',
+      customer_street: order.customer_street || order.shippingStreet || '',
+      customer_city: order.customer_city || order.shippingCity || '',
+      customer_zip: order.customer_zip || order.shippingZip || '',
+      shipping_method: order.shipping_method || order.shippingMethod || '',
+      payment_method: order.payment_method || order.paymentMethod || '',
+      shipping_cost: order.shipping_cost !== undefined ? order.shipping_cost : (order.shippingCost || 0),
+      payment_surcharge: order.payment_surcharge !== undefined ? order.payment_surcharge : (order.paymentSurcharge || 0),
+      subtotal: order.subtotal !== undefined ? order.subtotal : (order.cartSubtotal || 0),
+      final_total: order.final_total !== undefined ? order.final_total : (order.finalTotal || order.totalPrice || 0),
+      carrier: order.carrier || ((order.shipping_method || order.shippingMethod || '').includes('GLS') ? 'GLS' : (order.shipping_method || order.shippingMethod || '').includes('DPD') ? 'DPD' : 'Osobní odběr')
+    };
+
     const orderData = {
-      order,
-      items: items || [],
+      order: normalizedOrder,
+      items: items || order.items || [],
       created_at: new Date().toISOString()
     };
 

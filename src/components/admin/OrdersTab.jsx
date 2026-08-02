@@ -1291,9 +1291,13 @@ export default function OrdersTab({ showToast }) {
 
       if (carrierFilter !== 'all') {
         const detailsCarrier = (details?.carrier || 'GLS').toLowerCase();
-        if (carrierFilter === 'gls' && !detailsCarrier.includes('gls')) return false;
-        if (carrierFilter === 'dpd' && !detailsCarrier.includes('dpd')) return false;
-        if (carrierFilter === 'pickup' && !detailsCarrier.includes('odběr')) return false;
+        const detailsShipping = (details?.shippingMethod || '').toLowerCase();
+        if (carrierFilter === 'gls' && !detailsCarrier.includes('gls') && !detailsShipping.includes('gls')) return false;
+        if (carrierFilter === 'dpd' && !detailsCarrier.includes('dpd') && !detailsShipping.includes('dpd')) return false;
+        if (carrierFilter === 'osobni' || carrierFilter === 'pickup') {
+          const isPickup = detailsCarrier.includes('osobní') || detailsCarrier.includes('odběr') || detailsCarrier.includes('pickup') || detailsShipping.includes('osobní') || detailsShipping.includes('holice') || detailsShipping.includes('škrba');
+          if (!isPickup) return false;
+        }
       }
 
       if (timeFilter !== 'all') {
@@ -1876,6 +1880,7 @@ export default function OrdersTab({ showToast }) {
               <option value="all">{lang === 'CZ' ? 'Všichni dopravci' : 'All Carriers'}</option>
               <option value="gls">GLS</option>
               <option value="dpd">DPD</option>
+              <option value="osobni">{lang === 'CZ' ? 'Osobní odběr' : 'Personal Pickup'}</option>
             </select>
             <select value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)} onDoubleClick={(e) => e.stopPropagation()}>
               <option value="all">{lang === 'CZ' ? 'Všechna období' : 'All Time'}</option>
