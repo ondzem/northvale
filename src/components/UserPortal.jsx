@@ -1556,7 +1556,27 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                             {(order.finalTotal || order.total || 0).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč
                           </span>
                           <div style={{ textAlign: 'right' }}>
-                            </button>
+                            {canDownload ? (
+                              <button 
+                                className="prf-edit"
+                                style={{ 
+                                  background: 'rgba(253, 189, 22, 0.1)', 
+                                  color: 'var(--color-gold, #fdbd16)', 
+                                  border: '1px solid rgba(253, 189, 22, 0.2)',
+                                  padding: '8px 14px',
+                                  borderRadius: '6px',
+                                  fontSize: '12.5px',
+                                  fontWeight: '600'
+                                }}
+                                onClick={() => handleOpenInvoicePdf(order)}
+                              >
+                                📄 {lang === 'CZ' ? 'Stáhnout fakturu (PDF)' : 'Download PDF'}
+                              </button>
+                            ) : (
+                              <span style={{ fontSize: '12px', color: '#8a8a92' }}>
+                                {lang === 'CZ' ? 'Faktura bude vystavena po uhrazení' : 'Invoice will be issued after payment'}
+                              </span>
+                            )}
                           </div>
                         </div>
                       );

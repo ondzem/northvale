@@ -193,18 +193,6 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>destined-rivals-booster-bundle</ITEM_ID>
-    <PRODUCTNAME>Destined Rivals Booster Bundle</PRODUCTNAME>
-    <DESCRIPTION>Na čí straně stojíte? Team Rocket opět chystá svůj plán a stateční trenéři se ho snaží zastavit – rozhodnutí je na vás!</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/destined-rivals-booster-bundle/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/destined-rivals-booster-bundle.webp</IMGURL>
-    <PRICE_VAT>1999</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Pokémon</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
     <ITEM_ID>jolteon-terastal-gathering-binder-bo</ITEM_ID>
     <PRODUCTNAME>Jolteon Terastal Gathering Binder Box</PRODUCTNAME>
     <DESCRIPTION>Prémiová sběratelská sada zaměřená na konkrétní Eeveelution z čínské edice Terastal Gathering – čínské obdoby japonského Terastal Festival ex a západních Prismatic Evolutions. Skvělá volba pro fanoušky Eevee, kteří chtějí kombinaci nových karet i praktického vybavení pro organizaci sbírky</DESCRIPTION>
@@ -249,6 +237,18 @@
     <PRICE_VAT>429</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>destined-rivals-booster-bundle</ITEM_ID>
+    <PRODUCTNAME>Destined Rivals Booster Bundle</PRODUCTNAME>
+    <DESCRIPTION>Na čí straně stojíte? Team Rocket opět chystá svůj plán a stateční trenéři se ho snaží zastavit – rozhodnutí je na vás!</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/destined-rivals-booster-bundle/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/destined-rivals-booster-bundle.webp</IMGURL>
+    <PRICE_VAT>2099</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
@@ -333,6 +333,18 @@
     <PRICE_VAT>3799</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>base-shop-limited-collection-vol-1</ITEM_ID>
+    <PRODUCTNAME>Base Shop limited Collection Vol. 1</PRODUCTNAME>
+    <DESCRIPTION>Exkluzivní sběratelský set přímo z japonského BASE SHOP! Kolekce představuje Leader karty s detailními portréty Luffyho a jeho posádky, zachycující jejich typicky překvapené a výrazné výrazy tváře</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/base-shop-limited-collection-vol-1/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/base-shop-limited-collection-vol-1.webp</IMGURL>
+    <PRICE_VAT>2499</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>One Piece</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
