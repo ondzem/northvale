@@ -1358,9 +1358,13 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           width: 48px;
           height: 67px;
           flex-shrink: 0;
-          border-radius: 4px;
-          overflow: hidden;
-          background: rgba(0, 0, 0, 0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: transparent;
+          border: none;
+          border-radius: 0;
+          overflow: visible;
           position: relative;
         }
         .pof-li-name {
@@ -2212,9 +2216,12 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                           item={item} 
                           alt={item.name || (item.product && item.product.name) || 'Northvale TCG produkt'} 
                           style={{
-                            width: '100%',
+                            width: 'auto',
                             height: '100%',
-                            objectFit: 'cover'
+                            maxWidth: '100%',
+                            maxHeight: '100%',
+                            objectFit: 'contain',
+                            background: 'transparent'
                           }}
                         />
                       </div>
