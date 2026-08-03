@@ -539,7 +539,7 @@ serve(async (req) => {
               "Authorization": `Bearer ${supabaseServiceKey}`,
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({ order: normalizedPaidOrder })
+            body: JSON.stringify({ order: normalizedPaidOrder, overwrite: true })
           });
         }
 

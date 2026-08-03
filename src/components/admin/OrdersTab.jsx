@@ -793,7 +793,10 @@ export default function OrdersTab({ showToast }) {
       // 1.5 Generate PDF invoice now that payment is confirmed
       try {
         await supabase.functions.invoke('generate-invoice-pdf', {
-          body: { order: updatedRaw.order }
+          body: { 
+            order: { ...updatedRaw.order, items: updatedRaw.items || updatedRaw.order.items || [] }, 
+            overwrite: true 
+          }
         });
       } catch (pdfErr) {
         console.error('Failed to generate invoice PDF after payment confirmation:', pdfErr);
