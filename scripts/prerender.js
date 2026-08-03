@@ -892,27 +892,8 @@ async function prerender() {
   // Write files
   for (const r of routes) {
     const isPreReg = FEATURE_FLAGS.preRegistrationActive && r.path === '';
-    const fullContent = isPreReg ? `
-      <div id="nv-ssr-container">
-        <div id="nv-ssr-content">
-          ${r.content}
-        </div>
-      </div>
-    ` : `
-      <div id="nv-ssr-container">
-        ${headerHtml}
-        <div id="nv-ssr-content">
-          ${r.content}
-        </div>
-        ${footerHtml}
-      </div>
-    `;
-
     let rendered = baseHtml;
-    rendered = rendered.replace(
-      '<div id="root"></div>', 
-      `<div id="root">${fullContent}</div>`
-    );
+    // Keep <div id="root"></div> clean so no fake SSR HTML flashes before React mounts
 
     rendered = rendered.replace(
       /<title>[^]*?<\/title>/gi, 
