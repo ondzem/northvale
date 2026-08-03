@@ -42,12 +42,26 @@ export function normalizeItems(itemsInput: any): any[] {
 export function normalizeOrder(input: any): Record<string, any> {
   const obj = (input && typeof input === 'object') ? input : {};
 
-  // Extract raw values for status normalization
-  const rawPaymentStatus = String(obj.payment_status || obj.paymentStatus || obj.platba || '').toLowerCase().trim();
+  // Extract raw values for status normalization (check all status fields, preventing 'neuhrazeno' substring false positive)
+  const rawStatus = String(obj.payment_status || '').toLowerCase().trim();
+  const rawStatusCamel = String(obj.paymentStatus || '').toLowerCase().trim();
+  const rawPlatba = String(obj.platba || '').toLowerCase().trim();
   let payment_status: 'awaiting_payment' | 'paid' | 'cod' = 'awaiting_payment';
-  if (rawPaymentStatus.includes('paid') || rawPaymentStatus.includes('uhrazeno') || rawPaymentStatus.includes('zaplaceno')) {
+
+  const isPaidStr = (s: string) => {
+    if (!s) return false;
+    if (s.includes('neuhrazeno') || s.includes('unpaid') || s.includes('awaiting')) return false;
+    return s === 'paid' || s === 'uhrazeno' || s === 'zaplaceno' || s.includes('uhrazeno') || s.includes('zaplaceno') || s.includes('paid');
+  };
+
+  const isCodStr = (s: string) => {
+    if (!s) return false;
+    return s === 'cod' || s.includes('dobírk') || s.includes('na dobírku');
+  };
+
+  if (isPaidStr(rawStatus) || isPaidStr(rawStatusCamel) || isPaidStr(rawPlatba)) {
     payment_status = 'paid';
-  } else if (rawPaymentStatus.includes('cod') || rawPaymentStatus.includes('dobírk') || rawPaymentStatus.includes('na dobírku')) {
+  } else if (isCodStr(rawStatus) || isCodStr(rawStatusCamel) || isCodStr(rawPlatba)) {
     payment_status = 'cod';
   } else {
     payment_status = 'awaiting_payment';

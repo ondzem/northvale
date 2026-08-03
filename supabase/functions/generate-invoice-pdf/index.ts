@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
-import { PDFDocument, rgb } from "https://esm.sh/pdf-lib@1.17.1";
+import { PDFDocument, rgb, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
 import fontkit from "https://esm.sh/@pdf-lib/fontkit@1.1.1";
 import { normalizeOrder } from "../_shared/order-schema.ts";
 
@@ -16,14 +16,32 @@ let boldFontBytes: Uint8Array | null = null;
 
 async function loadFonts() {
   if (!regularFontBytes) {
-    regularFontBytes = await Deno.readFile(new URL("./Roboto-Regular.ttf", import.meta.url));
+    try {
+      const res = await fetch("https://cdn.jsdelivr.net/fontsource/fonts/roboto@latest/latin-400-normal.ttf");
+      if (res.ok) {
+        regularFontBytes = new Uint8Array(await res.arrayBuffer());
+      }
+    } catch (_e) {}
+    if (!regularFontBytes) {
+      const res = await fetch("https://github.com/google/fonts/raw/main/apache/roboto/static/Roboto-Regular.ttf");
+      regularFontBytes = new Uint8Array(await res.arrayBuffer());
+    }
   }
   if (!boldFontBytes) {
-    boldFontBytes = await Deno.readFile(new URL("./Roboto-Bold.ttf", import.meta.url));
+    try {
+      const res = await fetch("https://cdn.jsdelivr.net/fontsource/fonts/roboto@latest/latin-700-normal.ttf");
+      if (res.ok) {
+        boldFontBytes = new Uint8Array(await res.arrayBuffer());
+      }
+    } catch (_e) {}
+    if (!boldFontBytes) {
+      const res = await fetch("https://github.com/google/fonts/raw/main/apache/roboto/static/Roboto-Bold.ttf");
+      boldFontBytes = new Uint8Array(await res.arrayBuffer());
+    }
   }
   return {
-    regular: regularFontBytes,
-    bold: boldFontBytes
+    regular: regularFontBytes!,
+    bold: boldFontBytes!
   };
 }
 
@@ -72,10 +90,18 @@ serve(async (req) => {
     const pdfDoc = await PDFDocument.create();
     pdfDoc.registerFontkit(fontkit);
 
-    // 2. Load custom Roboto fonts from local filesystem
-    const fonts = await loadFonts();
-    const regularFont = await pdfDoc.embedFont(fonts.regular);
-    const boldFont = await pdfDoc.embedFont(fonts.bold);
+    // 2. Load custom Roboto fonts from local/CDN with fallback to StandardFonts.Helvetica
+    let regularFont: any;
+    let boldFont: any;
+    try {
+      const fonts = await loadFonts();
+      regularFont = await pdfDoc.embedFont(fonts.regular);
+      boldFont = await pdfDoc.embedFont(fonts.bold);
+    } catch (fontErr) {
+      console.warn("Failed to embed custom TTF fonts, falling back to StandardFonts.Helvetica:", fontErr);
+      regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    }
 
     // 3. Create a page (A4: 595.28 x 841.89)
     const page = pdfDoc.addPage([595.28, 841.89]);
