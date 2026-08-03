@@ -1367,6 +1367,14 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           overflow: visible;
           position: relative;
         }
+        .pof-li-thumb img {
+          max-width: 100%;
+          max-height: 100%;
+          width: auto;
+          height: auto;
+          object-fit: contain;
+          background: transparent;
+        }
         .pof-li-name {
           font-size: 14px;
           font-weight: 600;

@@ -248,7 +248,7 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
                         <CartItemImage 
                           item={item} 
                           alt={item.name || 'Northvale TCG produkt'} 
-                          style={{ width: '72px', height: '100px', objectFit: 'contain' }}
+                          style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain' }}
                         />
                       </div>
 
