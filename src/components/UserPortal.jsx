@@ -167,7 +167,7 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
       // 1. Fetch orders stored as JSON files in Pohoda storage bucket
       let storageMapped = [];
       if (emailToQuery) {
-        const { data, error } = await supabase.functions.invoke(`save-order-json?customerEmail=${encodeURIComponent(emailToQuery)}&t=${Date.now()}`, {
+        const { data, error } = await supabase.functions.invoke(`save-order-json?t=${Date.now()}`, {
           method: 'GET'
         });
 
@@ -286,14 +286,33 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
         };
       });
 
-      // Combine storage and profile history, deduplicating by ID
+      // Combine storage and profile history, deduplicating by ID key-by-key (non-empty wins)
       const combinedMap = new Map();
+      const mergeOrderProps = (existing, incoming) => {
+        if (!existing) return incoming;
+        const merged = { ...existing };
+        Object.keys(incoming).forEach(k => {
+          const val = incoming[k];
+          if (val !== undefined && val !== null && val !== '' && val !== 'Doprava' && val !== 'Platba') {
+            if (k === 'paymentStatus' || k === 'fulfillmentStatus') {
+              if (val !== 'awaiting_payment' && val !== 'pending') {
+                merged[k] = val;
+              }
+            } else {
+              merged[k] = val;
+            }
+          }
+        });
+        return merged;
+      };
+
       storageMapped.forEach(o => {
         if (o.id) combinedMap.set(o.id, o);
       });
       historyMapped.forEach(o => {
-        if (o.id && !combinedMap.has(o.id)) {
-          combinedMap.set(o.id, o);
+        if (o.id) {
+          const existing = combinedMap.get(o.id);
+          combinedMap.set(o.id, mergeOrderProps(existing, o));
         }
       });
 
@@ -324,24 +343,6 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
         return;
       }
 
-      // If PDF doesn't exist in storage yet, generate on-the-fly via Edge Function
-      showToast(lang === 'CZ' ? 'Načítám daňový doklad (PDF)...' : 'Loading PDF invoice...', 'info');
-      const genRes = await supabase.functions.invoke('generate-invoice-pdf', {
-        body: { order }
-      });
-
-      if (genRes.data) {
-        const { data: newUrlData } = await supabase.storage
-          .from('invoices')
-          .createSignedUrl(fileName, 3600);
-        if (newUrlData?.signedUrl) {
-          window.open(newUrlData.signedUrl, '_blank');
-          return;
-        }
-      }
-
-      // Fallback direct public URL
-      const publicUrl = `https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/${fileName}`;
       window.open(publicUrl, '_blank');
     } catch (err) {
       console.error('Error opening invoice PDF:', err);
@@ -1476,27 +1477,33 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
 
                             {/* PDF Invoice Button */}
                             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                              <button 
-                                style={{ 
-                                  background: 'rgba(253, 189, 22, 0.1)', 
-                                  color: 'var(--color-gold, #fdbd16)', 
-                                  border: '1px solid rgba(253, 189, 22, 0.2)',
-                                  padding: '8px 16px',
-                                  fontSize: '12.5px',
-                                  fontWeight: '600',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  borderRadius: '6px',
-                                  cursor: 'pointer'
-                                }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenInvoicePdf(order);
-                                }}
-                              >
-                                📄 {lang === 'CZ' ? 'Stáhnout fakturu (PDF)' : 'Download Invoice (PDF)'}
-                              </button>
+                              {order.paymentStatus === 'paid' || order.paymentStatus === 'cod' ? (
+                                <button 
+                                  style={{ 
+                                    background: 'rgba(253, 189, 22, 0.1)', 
+                                    color: 'var(--color-gold, #fdbd16)', 
+                                    border: '1px solid rgba(253, 189, 22, 0.2)',
+                                    padding: '8px 16px',
+                                    fontSize: '12.5px',
+                                    fontWeight: '600',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer'
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenInvoicePdf(order);
+                                  }}
+                                >
+                                  📄 {lang === 'CZ' ? 'Stáhnout fakturu (PDF)' : 'Download Invoice (PDF)'}
+                                </button>
+                              ) : (
+                                <span style={{ fontSize: '12px', color: '#8a8a92' }}>
+                                  {lang === 'CZ' ? 'Faktura bude vystavena po uhrazení' : 'Invoice will be issued after payment'}
+                                </span>
+                              )}
                             </div>
                           </div>
                         )}
@@ -1540,6 +1547,7 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                     </div>
                     {liveOrders.map((order, idx) => {
                       const invoiceNum = `Faktura č. ${order.id}`;
+                      const canDownload = order.paymentStatus === 'paid' || order.paymentStatus === 'cod';
                       return (
                         <div key={order.id || idx} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1.2fr 1fr 1fr' : '1.5fr 1fr 1fr 1.5fr', padding: '16px 20px', borderBottom: '1px solid rgba(240, 240, 240, 0.04)', fontSize: '13px', alignItems: 'center' }}>
                           <span style={{ fontWeight: 'bold', color: '#f0f0f0' }}>{invoiceNum}</span>
@@ -1548,20 +1556,6 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                             {(order.finalTotal || order.total || 0).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč
                           </span>
                           <div style={{ textAlign: 'right' }}>
-                            <button 
-                              className="prf-edit"
-                              style={{ 
-                                background: 'rgba(253, 189, 22, 0.1)', 
-                                color: 'var(--color-gold, #fdbd16)', 
-                                border: '1px solid rgba(253, 189, 22, 0.2)',
-                                padding: '8px 14px',
-                                borderRadius: '6px',
-                                fontSize: '12.5px',
-                                fontWeight: '600'
-                              }}
-                              onClick={() => handleOpenInvoicePdf(order)}
-                            >
-                              📄 {lang === 'CZ' ? 'Stáhnout fakturu (PDF)' : 'Download PDF'}
                             </button>
                           </div>
                         </div>
