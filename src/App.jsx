@@ -724,11 +724,26 @@ function AppContent() {
   useEffect(() => {
     try {
       const sanitizedCart = cart.map(item => {
-        if (!item.product) return { ...item, productId: item.productId || item.product?.id || item.id };
+        const prodId = item.productId || item.product?.id || item.id;
+        const img = item.product?.image || item.image || item.productImage;
+        if (prodId && img && typeof img === 'string' && img.length > 5) {
+          try {
+            localStorage.setItem(`nv-img-${prodId}`, img);
+            localStorage.setItem(`nv-img-time-${prodId}`, String(Date.now()));
+          } catch (_e) {}
+        }
+        if (item.id && item.id !== prodId && img && typeof img === 'string' && img.length > 5) {
+          try {
+            localStorage.setItem(`nv-img-${item.id}`, img);
+            localStorage.setItem(`nv-img-time-${item.id}`, String(Date.now()));
+          } catch (_e) {}
+        }
+
+        if (!item.product) return { ...item, productId: prodId };
         const { image, back_image, backImage, additional_images, ...cleanProduct } = item.product;
         return {
           ...item,
-          productId: item.productId || item.product?.id || item.id,
+          productId: prodId,
           product: cleanProduct
         };
       });
@@ -1548,6 +1563,18 @@ function AppContent() {
     const itemId = isSingle ? variant.id : product.id;
     const itemName = isSingle ? `${product.name} (${variant.condition})` : product.name;
     const itemPrice = isSingle ? variant.price : product.price;
+
+    const prodImg = product.image || product.back_image || (variant && variant.image) || null;
+    if (prodImg && typeof prodImg === 'string' && prodImg.length > 5) {
+      try {
+        localStorage.setItem(`nv-img-${product.id}`, prodImg);
+        localStorage.setItem(`nv-img-time-${product.id}`, String(Date.now()));
+        if (itemId && itemId !== product.id) {
+          localStorage.setItem(`nv-img-${itemId}`, prodImg);
+          localStorage.setItem(`nv-img-time-${itemId}`, String(Date.now()));
+        }
+      } catch (_e) {}
+    }
 
     try {
       window.dataLayer = window.dataLayer || [];

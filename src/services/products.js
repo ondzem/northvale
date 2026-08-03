@@ -123,6 +123,16 @@ function cleanProductsForCache(products) {
     if (!p) return p;
     const clean = { ...p };
     clean.has_image_data = hasProductImage(clean);
+
+    if (clean.id && clean.image) {
+      productImageInMemoryCache[clean.id] = clean.image;
+      safeLocalStorageSetItem(`nv-img-${clean.id}`, clean.image);
+    }
+    if (clean.id && clean.back_image) {
+      productBackImageInMemoryCache[clean.id] = clean.back_image;
+      safeLocalStorageSetItem(`nv-back-img-${clean.id}`, clean.back_image);
+    }
+
     if (clean.image && clean.image.startsWith('data:')) {
       clean.image = '';
     }
@@ -707,8 +717,7 @@ export async function fetchProductImage(productId) {
   
   try {
     const cached = localStorage.getItem(`nv-img-${productId}`);
-    const cachedTime = localStorage.getItem(`nv-img-time-${productId}`);
-    if (cached && cachedTime && (now - Number(cachedTime) < 900000)) { // 15 minutes TTL
+    if (cached) {
       productImageInMemoryCache[productId] = cached;
       return cached;
     }
