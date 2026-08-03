@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
 import { getProductImageCached } from '../services/products';
+import CartItemImage from './CartItemImage';
 import { validateDiscountCode, calculateDiscountAmount } from '../services/discountService';
 
 export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, alert, onOpenLogin, appliedDiscount, setAppliedDiscount, validateCart }) {
@@ -2207,8 +2208,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   {cart.map((item, idx) => (
                     <div key={idx} className="pof-line-item">
                       <div className="pof-li-thumb">
-                        <img 
-                          src={getProductImageCached(item.product?.id || item.id, item.product?.image || item.image || '/Akce - NORTHVALE.webp')} 
+                        <CartItemImage 
+                          item={item} 
                           alt={item.name || (item.product && item.product.name) || 'Northvale TCG produkt'} 
                           style={{
                             width: '100%',

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
-import { getProductImageCached } from '../services/products';
+import CartItemImage from './CartItemImage';
 import { validateDiscountCode, calculateDiscountAmount } from '../services/discountService';
 
 export default function Cart({ cart, setCart, setActivePage, appliedDiscount, setAppliedDiscount, alert }) {
@@ -245,11 +245,10 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
                     <div key={item.id} className="ckf-item">
                       {/* Product Image Wrapper */}
                       <div className="ckf-thumb">
-                        <img 
-                          src={getProductImageCached(item.product?.id || item.id, item.product?.image || item.image || '/Akce - NORTHVALE.webp')} 
+                        <CartItemImage 
+                          item={item} 
                           alt={item.name || 'Northvale TCG produkt'} 
-                          width="72"
-                          height="100"
+                          style={{ width: '72px', height: '100px', objectFit: 'contain' }}
                         />
                       </div>
 

@@ -723,9 +723,18 @@ function AppContent() {
   // Sync cart to localStorage and Supabase (if logged in)
   useEffect(() => {
     try {
-      localStorage.setItem('northvale-cart', JSON.stringify(cart));
+      const sanitizedCart = cart.map(item => {
+        if (!item.product) return { ...item, productId: item.productId || item.product?.id || item.id };
+        const { image, back_image, backImage, additional_images, ...cleanProduct } = item.product;
+        return {
+          ...item,
+          productId: item.productId || item.product?.id || item.id,
+          product: cleanProduct
+        };
+      });
+      localStorage.setItem('northvale-cart', JSON.stringify(sanitizedCart));
     } catch (err) {
-      console.warn(err);
+      console.warn('Cart localStorage save failed:', err);
     }
 
     const syncCart = async () => {
@@ -1571,6 +1580,7 @@ function AppContent() {
       } else {
         return [...prevCart, {
           id: itemId,
+          productId: product.id,
           name: itemName,
           price: itemPrice,
           quantity: quantityToAdd,
