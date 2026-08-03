@@ -1,18 +1,24 @@
 import { supabase } from '../supabase';
 import { mockProducts } from '../mockData';
 
-// Purge all heavy base64 image strings from localStorage at startup to prevent QuotaExceededError and keep Auth tokens safe
 try {
+  const now = Date.now();
+  const MAX_AGE = 24 * 60 * 60 * 1000;
   const keysToRemove = [];
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i);
-    if (k && (k.startsWith('nv-img-') || k.startsWith('nv-back-img-') || k.startsWith('fav-img-'))) {
-      keysToRemove.push(k);
+    if (!k) continue;
+    if (k.startsWith('nv-img-') && !k.startsWith('nv-img-time-')) {
+      const t = Number(localStorage.getItem(`nv-img-time-${k.replace('nv-img-', '')}`) || 0);
+      if (!t || (now - t) > MAX_AGE) keysToRemove.push(k);
     }
   }
-  keysToRemove.forEach(k => localStorage.removeItem(k));
+  keysToRemove.forEach(k => {
+    localStorage.removeItem(k);
+    localStorage.removeItem(`nv-img-time-${k.replace('nv-img-', '')}`);
+  });
 } catch (e) {
-  console.warn('LocalStorage image purge error:', e);
+  console.warn('LocalStorage image cleanup error:', e);
 }
 
 // In-memory cache for product images during session
@@ -715,18 +721,23 @@ export async function fetchProductImage(productId) {
     if (!supabase.from) return null;
     const { data, error } = await supabase
       .from('products')
-      .select('image')
+      .select('image, back_image, additional_images')
       .eq('id', productId)
-      .single();
+      .maybeSingle();
 
-    if (!error && data && data.image) {
-      productImageInMemoryCache[productId] = data.image;
-      safeLocalStorageSetItem(`nv-img-${productId}`, data.image);
+    const resolved = data?.image
+      || data?.back_image
+      || (Array.isArray(data?.additional_images) ? data.additional_images.find(Boolean) : null)
+      || null;
+
+    if (!error && resolved) {
+      productImageInMemoryCache[productId] = resolved;
+      safeLocalStorageSetItem(`nv-img-${productId}`, resolved);
       safeLocalStorageSetItem(`nv-img-time-${productId}`, String(now));
-      return data.image;
+      return resolved;
     }
   } catch (err) {
-    console.error('Failed to fetch image for product:', productId, err);
+    console.error('Error fetching product image:', err);
   }
 
   // Fallback to older cached value if database query failed

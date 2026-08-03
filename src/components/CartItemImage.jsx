@@ -1,35 +1,55 @@
 import { useState, useEffect } from 'react';
 import { getProductImageCached, fetchProductImage } from '../services/products';
 
-const FALLBACK = '/Akce - NORTHVALE.webp';
+const FALLBACK = '/placeholder-product.webp';
 
 export default function CartItemImage({ item, alt = '', className = '', style = {} }) {
   const productId = item?.product?.id || item?.productId || item?.product_id || item?.id || null;
-  const initial = getProductImageCached(productId, item?.product?.image || item?.image || '');
-  const [src, setSrc] = useState(initial || FALLBACK);
+  const direct = item?.product?.image || item?.image || '';
+  const [src, setSrc] = useState(() => getProductImageCached(productId, direct) || '');
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    const cached = getProductImageCached(productId, item?.product?.image || item?.image || '');
+    setFailed(false);
+
+    const cached = getProductImageCached(productId, direct);
     if (cached) {
       setSrc(cached);
       return;
     }
-    if (!productId) return;
+    if (!productId) {
+      setFailed(true);
+      return;
+    }
+
     fetchProductImage(productId)
-      .then(dbImage => { if (!cancelled && dbImage) setSrc(dbImage); })
-      .catch(err => console.error('Nepodařilo se načíst obrázek produktu:', productId, err));
+      .then(dbImage => {
+        if (cancelled) return;
+        if (dbImage) setSrc(dbImage);
+        else setFailed(true);
+      })
+      .catch(err => {
+        console.error('Nepodařilo se načíst obrázek produktu:', productId, err);
+        if (!cancelled) setFailed(true);
+      });
+
     return () => { cancelled = true; };
-  }, [productId]);
+  }, [productId, direct]);
+
+  // Dokud obrázek neznáme, zobraz prázdné průhledné místo — NIKDY ne zástupnou fotku.
+  if (!src && !failed) {
+    return <div className={className} style={{ ...style, background: 'transparent' }} aria-hidden="true" />;
+  }
 
   return (
     <img
-      src={src}
+      src={src || FALLBACK}
       alt={alt || item?.name || item?.productName || ''}
       className={className}
-      style={style}
+      style={{ background: 'transparent', ...style }}
       loading="lazy"
-      onError={(e) => { if (e.target.src !== window.location.origin + FALLBACK) e.target.src = FALLBACK; }}
+      onError={() => { if (src !== FALLBACK) setSrc(FALLBACK); }}
     />
   );
 }
