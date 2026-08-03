@@ -1,14 +1,45 @@
-// Supabase Edge Function to save order details as JSON in storage
-// Deploy via Supabase CLI: supabase functions deploy save-order-json
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
+import { normalizeOrder } from "../_shared/order-schema.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
 };
+
+async function listAllStorageFiles(supabase: any): Promise<Array<{ name: string; path: string }>> {
+  const allFiles: Array<{ name: string; path: string }> = [];
+
+  const fetchFolder = async (folderPath: string) => {
+    let offset = 0;
+    const limit = 1000;
+    while (true) {
+      const { data, error } = await supabase.storage
+        .from("pohoda-orders")
+        .list(folderPath, {
+          limit,
+          offset,
+          sortBy: { column: "name", order: "desc" }
+        });
+
+      if (error || !data || data.length === 0) break;
+
+      for (const item of data) {
+        if (item.name === ".emptyFolderPlaceholder") continue;
+        const fullPath = folderPath ? `${folderPath}/${item.name}` : item.name;
+        allFiles.push({ name: item.name, path: fullPath });
+      }
+
+      if (data.length < limit) break;
+      offset += limit;
+    }
+  };
+
+  await fetchFolder("");
+  await fetchFolder("processed");
+  return allFiles;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -20,24 +51,141 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    const authHeader = req.headers.get("authorization") || "";
+    const token = authHeader.replace("Bearer ", "").trim();
+
+    let authUser: any = null;
+    let isServiceRole = false;
+    let isAdmin = false;
+
+    if (token) {
+      if (token === supabaseServiceKey) {
+        isServiceRole = true;
+        isAdmin = true;
+      } else {
+        const { data: { user } } = await supabase.auth.getUser(token);
+        if (user) {
+          authUser = user;
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .maybeSingle();
+
+          if (profile && profile.role === "admin") {
+            isAdmin = true;
+          }
+        }
+      }
+    }
+
     const url = new URL(req.url);
-    const customerEmail = url.searchParams.get("customerEmail");
 
-    // Public Customer Order Lookup (filtered strictly by customer's email)
-    if (req.method === "GET" && customerEmail) {
-      const { data: rootList } = await supabase.storage.from("pohoda-orders").list("", {
-        limit: 200,
-        sortBy: { column: "name", order: "desc" }
-      });
-      const { data: processedList } = await supabase.storage.from("pohoda-orders").list("processed", {
-        limit: 200,
-        sortBy: { column: "name", order: "desc" }
-      });
+    // GET requests
+    if (req.method === "GET") {
+      const filename = url.searchParams.get("filename");
+      const withDetails = url.searchParams.get("withDetails") === "true";
 
-      const rootFiles = (rootList || []).map((f: any) => ({ name: f.name, path: f.name }));
-      const subFiles = (processedList || []).map((f: any) => ({ name: f.name, path: `processed/${f.name}` }));
-      const allFiles = [...rootFiles, ...subFiles];
+      // 1. Single File download by filename
+      if (filename) {
+        // Downloading specific order requires auth
+        if (!authUser && !isServiceRole) {
+          return new Response(JSON.stringify({ error: "Unauthorized. Authentication required." }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
 
+        const { data, error } = await supabase.storage.from("pohoda-orders").download(filename);
+        if (error || !data) {
+          return new Response(JSON.stringify({ error: "File not found." }), {
+            status: 404,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const text = await data.text();
+        let parsed: any = {};
+        try {
+          parsed = JSON.parse(text);
+        } catch (_e) {}
+
+        // Non-admin can only download their own order
+        if (!isAdmin && authUser) {
+          const norm = normalizeOrder(parsed.order || parsed);
+          const ownerEmail = String(norm.customer_email || '').toLowerCase().trim();
+          const userEmail = String(authUser.email || '').toLowerCase().trim();
+          if (ownerEmail !== userEmail) {
+            return new Response(JSON.stringify({ error: "Forbidden." }), {
+              status: 403,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        }
+
+        return new Response(text, {
+          status: 200,
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json",
+            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"
+          },
+        });
+      }
+
+      // 2. Customer or Admin List lookup
+      if (!authUser && !isServiceRole) {
+        return new Response(JSON.stringify({ error: "Unauthorized. Valid authentication required." }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const allFiles = await listAllStorageFiles(supabase);
+
+      // Admin or Service Role full list or batch withDetails
+      if (isAdmin || isServiceRole) {
+        if (withDetails) {
+          const detailedOrders: any[] = [];
+          const jsonFiles = allFiles.filter(f => f.name.startsWith("order_") && f.name.endsWith(".json"));
+
+          for (const file of jsonFiles) {
+            try {
+              const { data: fileBlob } = await supabase.storage.from("pohoda-orders").download(file.path);
+              if (fileBlob) {
+                const text = await fileBlob.text();
+                const jsonObj = JSON.parse(text);
+                detailedOrders.push({
+                  ...jsonObj,
+                  order: normalizeOrder(jsonObj.order || jsonObj),
+                  fileName: file.name
+                });
+              }
+            } catch (_e) {}
+          }
+
+          return new Response(JSON.stringify({ orders: detailedOrders }), {
+            status: 200,
+            headers: { 
+              ...corsHeaders, 
+              "Content-Type": "application/json",
+              "Cache-Control": "no-store, no-cache, must-revalidate"
+            },
+          });
+        }
+
+        return new Response(JSON.stringify({ files: allFiles }), {
+          status: 200,
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json",
+            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"
+          },
+        });
+      }
+
+      // Regular customer list lookup strictly by verified user's token email
+      const userEmail = String(authUser.email || '').toLowerCase().trim();
       const matchingOrders: any[] = [];
       const jsonFiles = allFiles.filter(f => f.name.startsWith("order_") && (f.name.endsWith(".json") || f.name.endsWith(".xml")));
 
@@ -64,22 +212,14 @@ serve(async (req) => {
             } else {
               jsonObj = JSON.parse(text);
             }
-            const o = jsonObj.order || {};
-            const itemEmail = (
-              o.customer_email || 
-              o.customerEmail || 
-              o.email || 
-              jsonObj.customer_email || 
-              jsonObj.customerEmail || 
-              jsonObj.email || 
-              ''
-            ).toLowerCase().trim();
 
-            const queryEmail = customerEmail.toLowerCase().trim();
-            
-            if (itemEmail === queryEmail || (queryEmail && itemEmail.includes(queryEmail))) {
+            const normalizedObj = normalizeOrder(jsonObj.order || jsonObj);
+            const itemEmail = String(normalizedObj.customer_email || '').toLowerCase().trim();
+
+            if (itemEmail === userEmail) {
               matchingOrders.push({
                 ...jsonObj,
+                order: normalizedObj,
                 fileName: file.name
               });
             }
@@ -97,37 +237,23 @@ serve(async (req) => {
       });
     }
 
-    // Authenticate and verify admin role for admin operations (DELETE, full list)
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader && req.method !== "POST") {
-      return new Response(JSON.stringify({ error: "Missing authorization header." }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    if (authHeader) {
-      const token = authHeader.replace("Bearer ", "");
-      const { data: { user } } = await supabase.auth.getUser(token);
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
-        if (profile && profile.role !== "admin" && req.method === "DELETE") {
-          return new Response(JSON.stringify({ error: "Forbidden. Admin access required." }), {
-            status: 403,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-      }
-    }
-
+    // DELETE Method: Requires authenticated admin
     if (req.method === "DELETE") {
-      const url = new URL(req.url);
-      const filename = url.searchParams.get("filename");
+      if (!authUser && !isServiceRole) {
+        return new Response(JSON.stringify({ error: "Unauthorized. Login required." }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: "Forbidden. Admin access required." }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const filename = url.searchParams.get("filename");
       if (!filename) {
         return new Response(JSON.stringify({ error: "Missing filename parameter." }), {
           status: 400,
@@ -138,23 +264,17 @@ serve(async (req) => {
       const baseName = filename.replace(/\.(json|xml)$/, "");
       const filesToDelete = [`${baseName}.json`, `${baseName}.xml`];
 
-      // Download JSON first to check order status & restore product stock if unfulfilled
       let restoredCount = 0;
       try {
         const { data: fileBlob } = await supabase.storage.from("pohoda-orders").download(`${baseName}.json`);
         if (fileBlob) {
           const text = await fileBlob.text();
           const jsonObj = JSON.parse(text);
-          const orderObj = jsonObj.order || {};
-          const itemsObj = jsonObj.items || [];
+          const normalized = normalizeOrder(jsonObj.order || jsonObj);
           
-          const status = (orderObj.status || '').toLowerCase();
-          const hasDpdParcel = !!orderObj.dpd_parcel_number;
-
-          // Only restore stock if package was NOT shipped / dispatched via DPD!
-          if (!hasDpdParcel && status !== 'shipped' && status !== 'delivered' && status !== 'completed' && status !== 'odesláno' && status !== 'doručeno') {
-            for (const item of itemsObj) {
-              const productId = item.product_id || item.id || item.code;
+          if (normalized.fulfillment_status !== 'shipped' && normalized.fulfillment_status !== 'completed') {
+            for (const item of (normalized.items || [])) {
+              const productId = item.product_id || item.id;
               const qty = Number(item.quantity || 1);
               if (productId && qty > 0) {
                 const { data: prod } = await supabase.from("products").select("id, stock, variants").eq("id", productId).maybeSingle();
@@ -195,139 +315,88 @@ serve(async (req) => {
       });
     }
 
-    if (req.method === "GET") {
-      const url = new URL(req.url);
-      const filename = url.searchParams.get("filename");
-
-      if (filename) {
-        const { data, error } = await supabase.storage.from("pohoda-orders").download(filename);
-        if (error) throw error;
-        const text = await data.text();
-        return new Response(text, {
-          status: 200,
-          headers: { 
-            ...corsHeaders, 
-            "Content-Type": "application/json",
-            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"
-          },
-        });
-      } else {
-        const { data, error } = await supabase.storage.from("pohoda-orders").list("", {
-          limit: 100,
-          sortBy: { column: "name", order: "desc" }
-        });
-        if (error) throw error;
-        return new Response(JSON.stringify({ files: data }), {
-          status: 200,
-          headers: { 
-            ...corsHeaders, 
-            "Content-Type": "application/json",
-            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"
-          },
+    // POST Method: Requires Admin or Service Role
+    if (req.method === "POST") {
+      if (!authUser && !isServiceRole) {
+        return new Response(JSON.stringify({ error: "Unauthorized. Authentication required." }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-    }
 
-    if (req.method !== "POST") {
-      return new Response(JSON.stringify({ error: "Method not allowed. Use POST or GET." }), {
-        status: 405,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+      if (!isAdmin && !isServiceRole) {
+        return new Response(JSON.stringify({ error: "Forbidden. Admin or internal key required." }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-    const body = await req.json();
-    const { order, items } = body;
+      const body = await req.json();
+      const rawOrder = body.order || body;
+      const rawItems = body.items || rawOrder.items || [];
 
-    if (!order || !order.id) {
-      return new Response(JSON.stringify({ error: "Missing required order details." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+      if (!rawOrder || !rawOrder.id) {
+        return new Response(JSON.stringify({ error: "Missing required order details or order id." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-    const normalizedOrder = {
-      ...order,
-      customer_name: order.customer_name || order.customerName || '',
-      customer_email: order.customer_email || order.customerEmail || '',
-      customer_phone: order.customer_phone || order.customerPhone || '',
-      customer_street: order.customer_street || order.shippingStreet || '',
-      customer_city: order.customer_city || order.shippingCity || '',
-      customer_zip: order.customer_zip || order.shippingZip || '',
-      shipping_method: order.shipping_method || order.shippingMethod || '',
-      payment_method: order.payment_method || order.paymentMethod || '',
-      shipping_cost: order.shipping_cost !== undefined ? order.shipping_cost : (order.shippingCost || 0),
-      payment_surcharge: order.payment_surcharge !== undefined ? order.payment_surcharge : (order.paymentSurcharge || 0),
-      subtotal: order.subtotal !== undefined ? order.subtotal : (order.cartSubtotal || 0),
-      final_total: order.final_total !== undefined ? order.final_total : (order.finalTotal || order.totalPrice || 0),
-      carrier: order.carrier || ((order.shipping_method || order.shippingMethod || '').includes('GLS') ? 'GLS' : (order.shipping_method || order.shippingMethod || '').includes('DPD') ? 'DPD' : 'Osobní odběr')
-    };
+      const normalizedOrder = normalizeOrder({ ...rawOrder, items: rawItems });
+      const orderData = {
+        ...body,
+        order: normalizedOrder,
+        items: normalizedOrder.items,
+        created_at: normalizedOrder.created_at || new Date().toISOString()
+      };
 
-    const orderData = {
-      order: normalizedOrder,
-      items: items || order.items || [],
-      created_at: new Date().toISOString()
-    };
+      const encoder = new TextEncoder();
+      const fileData = encoder.encode(JSON.stringify(orderData, null, 2));
 
-    const encoder = new TextEncoder();
-    const fileData = encoder.encode(JSON.stringify(orderData, null, 2));
+      const { error: uploadError } = await supabase.storage
+        .from("pohoda-orders")
+        .upload(`order_${normalizedOrder.id}.json`, fileData, {
+          contentType: "application/json",
+          upsert: true
+        });
 
-    const { error: uploadError } = await supabase.storage
-      .from("pohoda-orders")
-      .upload(`order_${order.id}.json`, fileData, {
-        contentType: "application/json",
-        upsert: true
-      });
+      if (uploadError) throw uploadError;
 
-    if (uploadError) {
-      throw uploadError;
-    }
-
-    // Also update order_history array inside user profile if userId is present
-    if (order.userId) {
-      try {
-        console.log(`[save-order-json] Syncing order history for userId: ${order.userId}`);
-        const { data: profile, error: fetchError } = await supabase
-          .from("profiles")
-          .select("order_history")
-          .eq("id", order.userId)
-          .single();
-
-        if (fetchError) {
-          console.error(`[save-order-json] Failed to fetch profile for userId ${order.userId}:`, fetchError.message);
-        } else {
-          const history = profile?.order_history || [];
-          const orderIdx = history.findIndex((o: any) => o.id === order.id);
-          let updatedHistory;
-          
-          if (orderIdx >= 0) {
-            updatedHistory = [...history];
-            updatedHistory[orderIdx] = { ...updatedHistory[orderIdx], ...order, items: items || [] };
-          } else {
-            updatedHistory = [{ ...order, items: items || [] }, ...history];
-          }
-
-          const { error: updateError } = await supabase
+      // Update profiles order_history if user_id is present
+      if (normalizedOrder.user_id) {
+        try {
+          const { data: profile } = await supabase
             .from("profiles")
-            .update({ order_history: updatedHistory })
-            .eq("id", order.userId);
+            .select("order_history")
+            .eq("id", normalizedOrder.user_id)
+            .maybeSingle();
 
-          if (updateError) {
-            console.error(`[save-order-json] Failed to update order_history for userId ${order.userId}:`, updateError.message);
-          } else {
-            console.log(`[save-order-json] Successfully updated order_history in profiles.`);
+          if (profile) {
+            const history = profile.order_history || [];
+            const updatedHistory = [normalizedOrder, ...history.filter((h: any) => h.id !== normalizedOrder.id)];
+
+            await supabase
+              .from("profiles")
+              .update({ order_history: updatedHistory })
+              .eq("id", normalizedOrder.user_id);
           }
+        } catch (err) {
+          console.error("[save-order-json] Unexpected error updating profile order_history:", err);
         }
-      } catch (err) {
-        console.error("[save-order-json] Unexpected error updating profile order_history:", err);
       }
+
+      return new Response(JSON.stringify({ success: true, message: `Order ${normalizedOrder.id} saved successfully.`, order: normalizedOrder }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    return new Response(JSON.stringify({ success: true, message: `Order ${order.id} saved successfully.` }), {
-      status: 200,
+    return new Response(JSON.stringify({ error: "Method not allowed." }), {
+      status: 405,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
