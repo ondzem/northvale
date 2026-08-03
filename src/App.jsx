@@ -1594,27 +1594,20 @@ function AppContent() {
   const submitOrder = async (order, creditApplied = 0, options = {}) => {
     try {
       if (options.isCardPaid) {
-        // Case B: Create paid order in DB after GP webpay payment verification
-        const cardOrderPayload = {
-          ...order,
-          id: options.orderId,
-          paymentStatus: 'paid',
-          platba: 'uhrazeno'
-        };
-
+        // Case B: Mark paid order in storage & DB via server-side verification of GP webpay
         const { data, error } = await supabase.functions.invoke('finalize-order', {
           body: {
-            action: 'create',
+            action: 'mark_paid',
             orderId: options.orderId,
-            orderDetails: cardOrderPayload
+            gpWebpayParams: options.gpWebpayParams
           }
         });
 
         if (error || !data || !data.success) {
-          throw new Error(error?.message || 'Failed to create paid order on server');
+          throw new Error(error?.message || data?.error || 'Failed to mark paid order on server');
         }
 
-        const serverOrder = data.order || cardOrderPayload;
+        const serverOrder = data.order || order;
 
         setLastCompletedOrder(serverOrder);
 
@@ -1622,7 +1615,7 @@ function AppContent() {
         setUser(prev => {
           if (!prev) return null;
           const history = prev.orderHistory || [];
-          const updatedHistory = [serverOrder, ...history];
+          const updatedHistory = [serverOrder, ...history.filter(h => String(h.id) !== String(options.orderId))];
           return {
             ...prev,
             orderHistory: updatedHistory
