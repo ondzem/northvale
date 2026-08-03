@@ -105,21 +105,21 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const discountAmount = calculateDiscountAmount(cartSubtotal, appliedDiscount);
   const subtotalAfterDiscount = Math.max(0, cartSubtotal - discountAmount);
 
-  // Shipping cost
+  // Free shipping threshold at or above 1750 CZK (checked on cart subtotal or subtotal after discount)
+  const isPersonalShipping = shipping === 'personal' || shipping === 'pardubice';
+  const isFreeShippingThreshold = (cartSubtotal >= 1750 || subtotalAfterDiscount >= 1750);
+
+  // Base shipping cost calculation
   let shippingCost = 0;
   if (shipping === 'dpd-pickup') shippingCost = 79;
-  else if (shipping === 'dpd-address') shippingCost = 109;
+  else if (shipping === 'dpd-address' || shipping === 'dpd') shippingCost = 109;
   else if (shipping === 'gls-pickup') shippingCost = 89;
-  else if (shipping === 'gls-address') shippingCost = 129;
-  else if (shipping === 'pardubice') shippingCost = 0;
+  else if (shipping === 'gls-address' || shipping === 'gls') shippingCost = 129;
+  else if (isPersonalShipping) shippingCost = 0;
+  else shippingCost = 109;
 
-  // Free shipping at or above 1750 CZK (checked on total after discount)
-  if (subtotalAfterDiscount >= 1750 && (
-    shipping === 'dpd-pickup' || 
-    shipping === 'dpd-address' || 
-    shipping === 'gls-pickup' || 
-    shipping === 'gls-address'
-  )) {
+  // Free shipping override for all paid delivery methods if order >= 1750 CZK
+  if (!isPersonalShipping && isFreeShippingThreshold) {
     shippingCost = 0;
   }
 
@@ -132,13 +132,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const finalTotal = Math.max(0, totalBeforeCredit - actualAppliedCredit);
 
   const getShippingPriceDisplay = (method, basePrice) => {
-    const isFree = subtotalAfterDiscount >= 1750 && (
-      method === 'dpd-pickup' ||
-      method === 'dpd-address' ||
-      method === 'gls-pickup' ||
-      method === 'gls-address'
-    );
-    if (isFree || basePrice === 0) {
+    const isPersonal = method === 'personal' || method === 'pardubice';
+    if (isPersonal || isFreeShippingThreshold || basePrice === 0) {
       return lang === 'CZ' ? 'Zdarma' : 'Free';
     }
     return `${basePrice} Kč`;
@@ -2052,7 +2047,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                           {lang === 'CZ' ? 'Doručení na výdejní místo DPD nebo do boxu.' : 'Delivery to a DPD pickup point or box.'}
                         </span>
                       </span>
-                      <span className={`pof-price ${subtotalAfterDiscount >= 1750 ? 'is-free' : ''}`}>
+                      <span className={`pof-price ${isFreeShippingThreshold ? 'is-free' : ''}`}>
                         {getShippingPriceDisplay('dpd-pickup', 79)}
                       </span>
                     </button>
@@ -2088,7 +2083,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                         {lang === 'CZ' ? 'Doručení kurýrem DPD na Vaši adresu.' : 'Courier delivery to your address.'}
                       </span>
                     </span>
-                    <span className={`pof-price ${subtotalAfterDiscount >= 1750 ? 'is-free' : ''}`}>
+                    <span className={`pof-price ${isFreeShippingThreshold ? 'is-free' : ''}`}>
                       {getShippingPriceDisplay('dpd-address', 109)}
                     </span>
                   </button>
@@ -2113,7 +2108,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                           {lang === 'CZ' ? 'Doručení na výdejní místo GLS nebo do boxu.' : 'Delivery to a GLS pickup point or box.'}
                         </span>
                       </span>
-                      <span className={`pof-price ${subtotalAfterDiscount >= 1750 ? 'is-free' : ''}`}>
+                      <span className={`pof-price ${isFreeShippingThreshold ? 'is-free' : ''}`}>
                         {getShippingPriceDisplay('gls-pickup', 89)}
                       </span>
                     </button>
@@ -2149,7 +2144,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                         {lang === 'CZ' ? 'Doručení kurýrem GLS na Vaši adresu.' : 'Courier delivery to your address.'}
                       </span>
                     </span>
-                    <span className={`pof-price ${subtotalAfterDiscount >= 1750 ? 'is-free' : ''}`}>
+                    <span className={`pof-price ${isFreeShippingThreshold ? 'is-free' : ''}`}>
                       {getShippingPriceDisplay('gls-address', 129)}
                     </span>
                   </button>

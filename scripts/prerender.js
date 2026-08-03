@@ -293,12 +293,7 @@ async function prerender() {
           </footer>
         </div>
       </div>
-    ` : `
-      <main style="max-width: 1200px; margin: 0 auto; padding: 48px 16px; text-align: center;">
-        <h1 style="font-size: 36px; font-family: 'Outfit', sans-serif; color: #fff; margin-bottom: 24px;">Pokémon karty, Lorcana a One Piece TCG</h1>
-        <p style="font-size: 18px; color: #8a8a92; max-width: 800px; margin: 0 auto 48px auto; line-height: 1.6;">Vítejte na Northvale TCG, prémiovém portálu pro sběratele. Zaručujeme 100% originální sealed produkty, spolehlivé doručení a perfektní sběratelské balení.</p>
-      </main>
-    `
+    ` : ``
   });
 
   // 2. Sealed Catalog Spec
