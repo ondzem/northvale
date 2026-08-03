@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
+import { normalizeOrder, normalizeItems } from "../_shared/order-schema.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,7 +19,7 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
   return bytes.buffer;
 }
 
-// Convert PEM format key (with header/footer) to clean DER buffer
+// Convert PEM format key to clean DER buffer
 function pemToDerBuffer(pem: string, type: "private" | "public"): ArrayBuffer {
   const header = type === "private" ? "-----BEGIN PRIVATE KEY-----" : "-----BEGIN PUBLIC KEY-----";
   const footer = type === "private" ? "-----END PRIVATE KEY-----" : "-----END PUBLIC KEY-----";
@@ -31,16 +32,27 @@ function pemToDerBuffer(pem: string, type: "private" | "public"): ArrayBuffer {
 }
 
 async function getNextInvoiceNumber(supabase: any): Promise<string> {
-  const START_NUMBER = 260100009;
+  try {
+    const { data, error } = await supabase.rpc("next_order_number");
+    if (!error && data !== null && data !== undefined) {
+      return String(data);
+    }
+    if (error) {
+      console.error("rpc next_order_number error:", error);
+    }
+  } catch (err) {
+    console.error("Error in getNextInvoiceNumber RPC:", err);
+  }
+  
+  // Fallback to storage sequence if RPC is not yet migrated
+  const START_NUMBER = 260100010;
   const fileName = "invoice_counter.json";
-
   try {
     const { data: fileData, error: downloadError } = await supabase.storage
       .from("pohoda-orders")
       .download(fileName);
 
     let currentNum = START_NUMBER;
-
     if (!downloadError && fileData) {
       const text = await fileData.text();
       const parsed = JSON.parse(text);
@@ -59,7 +71,7 @@ async function getNextInvoiceNumber(supabase: any): Promise<string> {
 
     return String(currentNum);
   } catch (err) {
-    console.error("Error in getNextInvoiceNumber:", err);
+    console.error("Error in fallback getNextInvoiceNumber:", err);
     return String(START_NUMBER);
   }
 }
@@ -87,7 +99,7 @@ serve(async (req) => {
 
     // Action: Reset Invoice Counter
     if (action === "reset-invoice-counter") {
-      const startNum = body.startNumber || 260100009;
+      const startNum = body.startNumber || 260100010;
       const encoder = new TextEncoder();
       const saveBytes = encoder.encode(JSON.stringify({ next_number: startNum }, null, 2));
       await supabase.storage
@@ -98,7 +110,7 @@ serve(async (req) => {
       });
     }
 
-    // Action: Save Daily Deal Config (starts_at, ends_at, timing)
+    // Action: Save Daily Deal Config
     if (action === "save-daily-deal-config") {
       const slotId = body.slotId || "active-deal";
       const configData = body.config || {};
@@ -146,8 +158,8 @@ serve(async (req) => {
 
     // Action 1: Create Order
     if (action === "create") {
-      if (!orderDetails || !orderDetails.items) {
-        return new Response(JSON.stringify({ error: "Missing orderDetails or items." }), {
+      if (!orderDetails) {
+        return new Response(JSON.stringify({ error: "Missing orderDetails." }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -159,74 +171,97 @@ serve(async (req) => {
         generatedOrderId = await getNextInvoiceNumber(supabase);
       }
 
-      const order = {
+      const rawOrderObj = {
         ...orderDetails,
         id: generatedOrderId,
-        created_at: new Date().toISOString()
+        created_at: orderDetails.created_at || new Date().toISOString()
       };
 
-      // 1. Decrement Stock atomically on server
-      for (const item of order.items) {
-        const prodId = item.product_id || item.id;
-        if (!prodId) continue;
+      const normalizedOrderData = normalizeOrder(rawOrderObj);
 
-        // Decrement daily deal stock if applicable
-        if (item.product?.isDailyDeal) {
-          const slotId = item.product.dealSlotId || 'active-deal';
-          const { data: dbDeal } = await supabase
-            .from('daily_deal')
-            .select('stock')
-            .eq('id', slotId)
-            .single();
-          if (dbDeal) {
-            const newDealStock = Math.max(0, (dbDeal.stock || 0) - item.quantity);
-            await supabase
+      // Check if order already exists in storage for overwrite protection
+      const filename = `order_${generatedOrderId}.json`;
+      try {
+        const { data: existingFile } = await supabase.storage
+          .from("pohoda-orders")
+          .download(filename);
+        if (existingFile) {
+          if (!normalizedOrderData.items || normalizedOrderData.items.length === 0) {
+            return new Response(JSON.stringify({ error: "Order already exists" }), {
+              status: 409,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        }
+      } catch (_eExist) {}
+
+      // 1. Decrement Stock safely on server (wrapped per item in try/catch)
+      for (const item of (normalizedOrderData.items || [])) {
+        try {
+          const prodId = item.product_id || item.id;
+          if (!prodId) continue;
+
+          // Decrement daily deal stock if applicable
+          if (item.product?.isDailyDeal) {
+            const slotId = item.product.dealSlotId || 'active-deal';
+            const { data: dbDeal } = await supabase
               .from('daily_deal')
-              .update({ stock: newDealStock })
-              .eq('id', slotId);
-          }
-        }
-
-        // Decrement main product stock
-        if (prodId !== 'deal-of-the-day') {
-          // If it is a variant
-          if (item.id && item.id !== prodId) {
-            const { data: dbProd } = await supabase
-              .from('products')
-              .select('variants')
-              .eq('id', prodId)
-              .single();
-            if (dbProd && dbProd.variants) {
-              const updatedVariants = dbProd.variants.map((v: any) => {
-                if (v.id === item.id) {
-                  return { ...v, stock: Math.max(0, (v.stock || 0) - item.quantity) };
-                }
-                return v;
-              });
-              await supabase
-                .from('products')
-                .update({ variants: updatedVariants })
-                .eq('id', prodId);
-            }
-          } else {
-            const { data: dbProd } = await supabase
-              .from('products')
               .select('stock')
-              .eq('id', prodId)
-              .single();
-              const newStock = Math.max(0, (dbProd.stock || 0) - item.quantity);
+              .eq('id', slotId)
+              .maybeSingle();
+            if (dbDeal) {
+              const newDealStock = Math.max(0, (dbDeal.stock || 0) - item.quantity);
               await supabase
-                .from('products')
-                .update({ stock: newStock })
-                .eq('id', prodId);
+                .from('daily_deal')
+                .update({ stock: newDealStock })
+                .eq('id', slotId);
             }
           }
+
+          // Decrement main product stock
+          if (prodId !== 'deal-of-the-day') {
+            if (item.id && item.id !== prodId) {
+              const { data: dbProd } = await supabase
+                .from('products')
+                .select('variants')
+                .eq('id', prodId)
+                .maybeSingle();
+              if (dbProd && dbProd.variants) {
+                const updatedVariants = dbProd.variants.map((v: any) => {
+                  if (v.id === item.id) {
+                    return { ...v, stock: Math.max(0, (v.stock || 0) - item.quantity) };
+                  }
+                  return v;
+                });
+                await supabase
+                  .from('products')
+                  .update({ variants: updatedVariants })
+                  .eq('id', prodId);
+              }
+            } else {
+              const { data: dbProd } = await supabase
+                .from('products')
+                .select('stock')
+                .eq('id', prodId)
+                .maybeSingle();
+              if (dbProd) {
+                const newStock = Math.max(0, (dbProd.stock || 0) - item.quantity);
+                await supabase
+                  .from('products')
+                  .update({ stock: newStock })
+                  .eq('id', prodId);
+              }
+            }
+          }
+        } catch (stockErr) {
+          console.error(`Stock deduction error for item ${item.product_id || item.name}:`, stockErr);
         }
+      }
 
       // Increment discount_codes usage count if discountCode is present
-      if (order.discountCode) {
+      if (normalizedOrderData.discount_code) {
         try {
-          const cleanCode = String(order.discountCode).trim().toUpperCase();
+          const cleanCode = String(normalizedOrderData.discount_code).trim().toUpperCase();
           const { data: dbItem } = await supabase
             .from('discount_codes')
             .select('id, used_count, max_uses, is_active, active')
@@ -254,54 +289,18 @@ serve(async (req) => {
         }
       }
 
-      // 2. Save order json to storage
+      // 2. Save canonical order json to storage
       const encoder = new TextEncoder();
       const storageData = {
-        order: {
-          id: order.id,
-          created_at: order.created_at,
-          customer_name: order.customerName,
-          customer_city: order.shippingCity,
-          customer_street: order.shippingStreet,
-          customer_zip: order.shippingZip,
-          customer_email: order.customerEmail,
-          customer_phone: order.customerPhone,
-          payment_method: order.paymentMethod,
-          shipping_method: order.shippingMethod,
-          shipping_cost: order.shippingCost,
-          payment_surcharge: order.paymentSurcharge,
-          subtotal: order.subtotal,
-          discount_code: order.discountCode || null,
-          discount_amount: order.discountAmount || 0,
-          credit_applied: order.creditApplied || 0,
-          final_total: order.finalTotal,
-          is_company: order.isCompany || false,
-          company_name: order.companyName || '',
-          ico: order.ico || '',
-          dic: order.dic || '',
-          notes: order.notes || '',
-          pickup_point_details: order.pickupPointDetails || null,
-          carrier: order.shippingMethod ? (
-            order.shippingMethod.includes('GLS') ? 'GLS' :
-            order.shippingMethod.includes('DPD') ? 'DPD' :
-            (order.shippingMethod.includes('Zásilkovna') || order.shippingMethod.includes('Packeta')) ? 'Zásilkovna' :
-            order.shippingMethod.includes('Pošta') ? 'Česká pošta' :
-            'Osobní odběr'
-          ) : 'GLS'
-        },
-        items: order.items.map((item: any) => ({
-          name: item.name,
-          product_id: item.id || item.product_id || item.name,
-          quantity: item.quantity,
-          price: item.price
-        })),
-        created_at: order.created_at
+        order: normalizedOrderData,
+        items: normalizedOrderData.items,
+        created_at: normalizedOrderData.created_at
       };
 
       const fileBytes = encoder.encode(JSON.stringify(storageData, null, 2));
       const { error: uploadError } = await supabase.storage
         .from("pohoda-orders")
-        .upload(`order_${order.id}.json`, fileBytes, {
+        .upload(filename, fileBytes, {
           contentType: "application/json",
           upsert: true
         });
@@ -309,17 +308,17 @@ serve(async (req) => {
       if (uploadError) throw uploadError;
 
       // 3. Update profiles table if logged in
-      if (order.userId) {
+      if (normalizedOrderData.user_id) {
         const { data: profile } = await supabase
           .from("profiles")
           .select("order_history, store_credit")
-          .eq("id", order.userId)
-          .single();
+          .eq("id", normalizedOrderData.user_id)
+          .maybeSingle();
 
         if (profile) {
           const history = profile.order_history || [];
-          const updatedHistory = [order, ...history];
-          const newCredit = Math.max(0, (profile.store_credit || 0) - (order.creditApplied || 0));
+          const updatedHistory = [normalizedOrderData, ...history.filter((h: any) => h.id !== normalizedOrderData.id)];
+          const newCredit = Math.max(0, (profile.store_credit || 0) - (normalizedOrderData.credit_applied || 0));
 
           await supabase
             .from("profiles")
@@ -327,27 +326,25 @@ serve(async (req) => {
               order_history: updatedHistory,
               store_credit: newCredit
             })
-            .eq("id", order.userId);
+            .eq("id", normalizedOrderData.user_id);
         }
       }
 
       // 4. Trigger invoice generation and email immediately if not card payment
-      if (order.paymentMethod !== "card" && order.paymentMethod !== "online platba") {
-        try {
-          const hasNoVat = !!(
-            order.hasNoVat || order.noVat || order.isNoVat ||
-            (order.items && order.items.some((it: any) => it.no_vat || it.noVat || (it.product && (it.product.no_vat || it.product.noVat))))
-          );
+      const isCardPayment = String(normalizedOrderData.payment_method || '').toLowerCase().includes('kart')
+        || String(normalizedOrderData.payment_method || '').toLowerCase().includes('card')
+        || String(normalizedOrderData.payment_method || '').toLowerCase().includes('webpay');
 
-          // ONLY generate automated invoice PDF if the order does NOT contain non-VAT items!
-          if (!hasNoVat) {
+      if (!isCardPayment) {
+        try {
+          if (!normalizedOrderData.has_no_vat) {
             await fetch(`${supabaseUrl}/functions/v1/generate-invoice-pdf`, {
               method: "POST",
               headers: {
                 "Authorization": `Bearer ${supabaseServiceKey}`,
                 "Content-Type": "application/json"
               },
-              body: JSON.stringify({ order })
+              body: JSON.stringify({ order: normalizedOrderData })
             });
           }
 
@@ -358,7 +355,7 @@ serve(async (req) => {
               "Authorization": `Bearer ${supabaseServiceKey}`,
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({ order, items: order.items })
+            body: JSON.stringify({ order: normalizedOrderData, items: normalizedOrderData.items })
           });
         } catch (subErr) {
           console.error("Failed to run post-order actions:", subErr);
@@ -367,11 +364,11 @@ serve(async (req) => {
 
       // 5. Trigger Heureka "Ověřeno zákazníky" if enabled
       const heurekaOzEnabled = Deno.env.get("HEUREKA_OZ_ENABLED");
-      if (heurekaOzEnabled !== "false" && order.customerEmail) {
+      if (heurekaOzEnabled !== "false" && normalizedOrderData.customer_email) {
         const heurekaOzKey = Deno.env.get("HEUREKA_OZ_KEY");
         if (heurekaOzKey) {
           try {
-            const productItemIds = (order.items || []).map((item: any) => item.product_id || item.id);
+            const productItemIds = (normalizedOrderData.items || []).map((item: any) => item.product_id || item.id);
             const response = await fetch("https://api.heureka.cz/shop-certification/v2/order/log", {
               method: "POST",
               headers: {
@@ -379,25 +376,19 @@ serve(async (req) => {
               },
               body: JSON.stringify({
                 apiKey: heurekaOzKey,
-                email: order.customerEmail,
-                orderId: String(order.id),
+                email: normalizedOrderData.customer_email,
+                orderId: String(normalizedOrderData.id),
                 productItemIds,
               }),
             });
             console.log(`Heureka OZ response status: ${response.status}`);
-            if (!response.ok) {
-              const resText = await response.text();
-              console.error(`Heureka OZ error response: ${resText}`);
-            }
           } catch (heurekaErr) {
             console.error("Failed to trigger Heureka OZ:", heurekaErr);
           }
-        } else {
-          console.warn("HEUREKA_OZ_ENABLED is set, but HEUREKA_OZ_KEY is missing.");
         }
       }
 
-      return new Response(JSON.stringify({ success: true, orderId: order.id, order }), {
+      return new Response(JSON.stringify({ success: true, orderId: normalizedOrderData.id, order: normalizedOrderData }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -476,7 +467,7 @@ serve(async (req) => {
         encoder.encode(verifyString)
       );
 
-      if (!isVerified || PRCODE !== "0") {
+      if (!isVerified || String(PRCODE) !== "0") {
         return new Response(JSON.stringify({ error: "GP Webpay payment verification failed or declined." }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -495,43 +486,44 @@ serve(async (req) => {
 
       const text = await fileData.text();
       const storageObj = JSON.parse(text);
+      const existingOrder = storageObj.order || storageObj;
 
-      // Reconstruct order details for finalization
-      const order = {
+      // Reconstruct & normalize order details with paid status while preserving all fields
+      const updatedOrderObj = {
+        ...existingOrder,
         id: orderId,
-        customerName: storageObj.order.customer_name,
-        customerEmail: storageObj.order.customer_email,
-        customerPhone: storageObj.order.customer_phone,
-        shippingStreet: storageObj.order.customer_street,
-        shippingCity: storageObj.order.customer_city,
-        shippingZip: storageObj.order.customer_zip,
-        paymentMethod: "card",
-        paymentStatus: "paid",
-        shippingMethod: storageObj.order.shipping_method,
-        shippingCost: storageObj.order.shipping_cost,
-        paymentSurcharge: storageObj.order.payment_surcharge,
-        finalTotal: storageObj.order.final_total || (storageObj.items || []).reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0) + (storageObj.order.shipping_cost || 0) + (storageObj.order.payment_surcharge || 0),
-        notes: storageObj.order.notes,
-        items: storageObj.items.map((item: any) => ({
-          id: item.product_id,
-          product_id: item.product_id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity
-        })),
-        userId: storageObj.order.userId || null
+        payment_status: 'paid',
+        paymentStatus: 'paid',
+        platba: 'uhrazeno',
+        items: storageObj.items || existingOrder.items || []
       };
+
+      const normalizedPaidOrder = normalizeOrder(updatedOrderObj);
+
+      // Save updated order back to storage
+      const storageData = {
+        order: normalizedPaidOrder,
+        items: normalizedPaidOrder.items,
+        created_at: normalizedPaidOrder.created_at
+      };
+
+      const saveBytes = encoder.encode(JSON.stringify(storageData, null, 2));
+      await supabase.storage
+        .from("pohoda-orders")
+        .upload(filename, saveBytes, { contentType: "application/json", upsert: true });
 
       // Trigger invoice generation and email
       try {
-        await fetch(`${supabaseUrl}/functions/v1/generate-invoice-pdf`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${supabaseServiceKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ order })
-        });
+        if (!normalizedPaidOrder.has_no_vat) {
+          await fetch(`${supabaseUrl}/functions/v1/generate-invoice-pdf`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${supabaseServiceKey}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ order: normalizedPaidOrder })
+          });
+        }
 
         await fetch(`${supabaseUrl}/functions/v1/send-order-email`, {
           method: "POST",
@@ -539,36 +531,41 @@ serve(async (req) => {
             "Authorization": `Bearer ${supabaseServiceKey}`,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ order, items: order.items })
+          body: JSON.stringify({ order: normalizedPaidOrder, items: normalizedPaidOrder.items })
         });
       } catch (postErr) {
         console.error("Failed to trigger post-order actions for mark_paid:", postErr);
       }
 
-      // Update order status inside profiles if userId is present
-      if (order.userId) {
+      // Update order status inside profiles if user_id is present
+      if (normalizedPaidOrder.user_id) {
         const { data: profile } = await supabase
           .from("profiles")
           .select("order_history")
-          .eq("id", order.userId)
-          .single();
+          .eq("id", normalizedPaidOrder.user_id)
+          .maybeSingle();
 
-        if (profile && profile.order_history) {
-          const updatedHistory = profile.order_history.map((o: any) => {
-            if (o.id === orderId) {
-              return { ...o, paymentStatus: "paid" };
+        if (profile) {
+          const history = profile.order_history || [];
+          const updatedHistory = history.map((o: any) => {
+            if (String(o.id) === String(orderId)) {
+              return { ...o, payment_status: "paid", paymentStatus: "paid", platba: "uhrazeno" };
             }
             return o;
           });
 
+          if (!updatedHistory.some((h: any) => String(h.id) === String(orderId))) {
+            updatedHistory.unshift(normalizedPaidOrder);
+          }
+
           await supabase
             .from("profiles")
             .update({ order_history: updatedHistory })
-            .eq("id", order.userId);
+            .eq("id", normalizedPaidOrder.user_id);
         }
       }
 
-      return new Response(JSON.stringify({ success: true, message: `Order ${orderId} marked as paid successfully.` }), {
+      return new Response(JSON.stringify({ success: true, message: `Order ${orderId} marked as paid successfully.`, order: normalizedPaidOrder }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
