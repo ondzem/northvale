@@ -291,13 +291,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           }
         });
       } catch (gaErr) {
-        console.error('GA4 add_payment_info failed:', gaErr);
-      }
-    }
-  }, [payment, cart]);
-
   const [isVerifying, setIsVerifying] = useState(false);
-  const callbackProcessedRef = useRef(false);
 
   // Zpracování callbacku z GP webpay po návratu zákazníka
   useEffect(() => {
@@ -306,9 +300,6 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       const status = params.get('status');
       
       if (status === 'callback') {
-        if (callbackProcessedRef.current) return;
-        callbackProcessedRef.current = true;
-
         const orderNumber = params.get('ORDERNUMBER');
         const prCode = params.get('PRCODE');
         const srCode = params.get('SRCODE');
@@ -320,146 +311,45 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
 
         if (!orderNumber || !prCode || !digest) return;
 
+        const lockKey = `gp-callback-${orderNumber}`;
+        if (localStorage.getItem(lockKey) || sessionStorage.getItem(lockKey)) {
+          return;
+        }
+        localStorage.setItem(lockKey, Date.now().toString());
+        sessionStorage.setItem(lockKey, Date.now().toString());
+
         setIsVerifying(true);
         try {
-          // Ověřit podpis platby přes Supabase Edge Function
-          const { data, error } = await supabase.functions.invoke('gp-webpay/verify', {
-            body: {
-              MERCHANTNUMBER: merchantNumber,
-              OPERATION: operation,
-              ORDERNUMBER: orderNumber,
-              MERORDERNUM: merOrderNum,
-              PRCODE: prCode,
-              SRCODE: srCode,
-              RESULTTEXT: resultText,
-              DIGEST: digest
-            }
-          });
+          const gpWebpayParams = {
+            MERCHANTNUMBER: merchantNumber,
+            OPERATION: operation,
+            ORDERNUMBER: orderNumber,
+            MERORDERNUM: merOrderNum,
+            PRCODE: prCode,
+            SRCODE: srCode,
+            RESULTTEXT: resultText,
+            DIGEST: digest
+          };
 
-          if (error || !data) {
-            throw new Error(error?.message || 'Chyba při verifikaci platby');
+          const pendingStr = localStorage.getItem('pending-order-data');
+          let pending: any = {};
+          if (pendingStr) {
+            try {
+              pending = JSON.parse(pendingStr);
+            } catch (_e) {}
           }
 
-          if (data.success) {
-            // Platba byla úspěšně ověřena!
-            // Načíst zbylé parametry z rozpracované objednávky v localStorage
-            const pendingStr = localStorage.getItem('pending-order-data');
-            let orderItems = cart;
-            let orderSubtotal = cartSubtotal;
-            let orderDiscountCode = appliedDiscount ? appliedDiscount.code : null;
-            let orderDiscountAmount = discountAmount;
-            let orderShippingCost = shippingCost;
-            let orderPaymentSurcharge = paymentSurcharge;
-            let creditUsed = actualAppliedCredit;
-            let orderFinalTotal = finalTotal;
-            let shipMethod = shipping;
-            let customerDetails = {
-              name: name,
-              email: email,
-              phone: phone,
-              street: street,
-              city: city,
-              zip: zip,
-              isCompany: isCompany,
-              companyName: isCompany ? companyName : '',
-              ico: isCompany ? ico : '',
-              dic: isCompany ? dic : '',
-              notes: notes
-            };
-            let pending = {};
-
-            if (pendingStr) {
-              pending = JSON.parse(pendingStr);
-              orderItems = pending.cart || [];
-              orderSubtotal = pending.cartSubtotal || 0;
-              orderDiscountCode = pending.discountCode || null;
-              orderDiscountAmount = pending.discountAmount || 0;
-              orderShippingCost = pending.shippingCost || 0;
-              orderPaymentSurcharge = pending.paymentSurcharge || 0;
-              creditUsed = pending.creditApplied || 0;
-              orderFinalTotal = pending.finalTotal || 0;
-              shipMethod = pending.shippingMethod;
-              if (pending.customerDetails) {
-                customerDetails = pending.customerDetails;
-              }
-              localStorage.removeItem('pending-order-data');
-            }
-
-            const order = {
-              id: orderNumber,
-              items: orderItems.map(item => ({
-                id: item.id,
-                product_id: item.product?.id || item.id,
-                name: item.name || item.productName,
-                price: item.price,
-                quantity: item.quantity,
-                no_vat: !!(item.no_vat || item.product?.no_vat),
-                product: item.product || item
-              })),
-              subtotal: orderSubtotal,
-              discountCode: orderDiscountCode,
-              discountAmount: orderDiscountAmount,
-              shippingCost: orderShippingCost,
-              paymentSurcharge: orderPaymentSurcharge,
-              creditApplied: creditUsed,
-              isicApplied: false,
-              isicDiscount: 0,
-              finalTotal: orderFinalTotal,
-              shippingMethod: shipMethod === 'personal' || shipMethod === 'pardubice'
-                ? (lang === 'CZ' ? 'Osobní odběr – ELEKTROOBCHOD Škrba (Bratří Čapků 1095, Holice)' : 'Personal Pickup – ELEKTROOBCHOD Škrba (Bratří Čapků 1095, Holice)')
-                : shipMethod === 'dpd-pickup'
-                  ? (lang === 'CZ' ? `DPD - Výdejní místo: ${pending.pickupPoint || ''}` : `DPD - Pickup Point: ${pending.pickupPoint || ''}`)
-                  : shipMethod === 'dpd-address' || shipMethod === 'dpd'
-                    ? (lang === 'CZ' ? 'DPD - Doručení na adresu' : 'DPD - Home Delivery')
-                    : shipMethod === 'gls-pickup'
-                      ? (lang === 'CZ' ? `GLS - Výdejní místo: ${pending.pickupPoint || ''}` : `GLS - Pickup Point: ${pending.pickupPoint || ''}`)
-                      : shipMethod === 'gls-address' || shipMethod === 'gls'
-                        ? (lang === 'CZ' ? 'GLS - Doručení na adresu' : 'GLS - Home Delivery')
-                        : (lang === 'CZ' ? 'Doprava' : 'Shipping'),
-              carrier: (shipMethod === 'personal' || shipMethod === 'pardubice') ? 'Osobní odběr' : (shipMethod || '').startsWith('dpd') ? 'DPD' : 'GLS',
-              paymentMethod: lang === 'CZ' ? 'Online platební karta' : 'Online Credit/Debit Card',
-              date: new Date().toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
-              invoiceUrl: '#',
-              customerName: customerDetails.name,
-              customerEmail: customerDetails.email,
-              customerPhone: customerDetails.phone,
-              shippingStreet: customerDetails.street,
-              shippingCity: customerDetails.city,
-              shippingZip: customerDetails.zip,
-              isCompany: customerDetails.isCompany,
-              companyName: customerDetails.companyName,
-              ico: customerDetails.ico,
-              dic: customerDetails.dic,
-              notes: customerDetails.notes,
-              pickupPointDetails: pending.pickupPointDetails || null
-            };
-
-            await submitOrder(order, creditUsed, { 
-              isCardPaid: true, 
-              orderId: orderNumber,
-              gpWebpayParams: {
-                MERCHANTNUMBER: merchantNumber,
-                OPERATION: operation,
-                ORDERNUMBER: orderNumber,
-                MERORDERNUM: merOrderNum,
-                PRCODE: prCode,
-                SRCODE: srCode,
-                RESULTTEXT: resultText,
-                DIGEST: digest
-              }
-            });
-            alert(lang === 'CZ'
-              ? `Platba pro objednávku ${orderNumber} byla úspěšně ověřena! Objednávka byla vytvořena.`
-              : `Payment for order ${orderNumber} has been successfully verified! Order created.`,
-              'success'
+          const orderItems = pending.cart || cart || [];
+          if (!pendingStr || orderItems.length === 0) {
+            // Missing local cart state - trigger server-side mark_paid directly
+            showToast?.(lang === 'CZ' ? 'Platba proběhla, objednávku dokončujeme...' : 'Payment received, finalizing order...', 'info');
+            await submitOrder(
+              { id: orderNumber, userId: pending.userId || user?.id || null }, 
+              0, 
+              { isCardPaid: true, orderId: orderNumber, gpWebpayParams }
             );
+            setIsVerifying(false);
             setActivePage('order-confirmation');
-          } else {
-            alert(lang === 'CZ'
-              ? 'Platba nebyla dokončena. Zvolte prosím jiný způsob platby nebo to zkuste znovu.'
-              : 'Payment was not completed. Please choose another payment method or try again.',
-              'error'
-            );
           }
         } catch (err) {
           console.error('Verifikace platby selhala:', err);
@@ -839,7 +729,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           pickupPointDetails: shipping.includes('pickup') ? pickupPointDetails : null
         };
 
-        // 1. Reserve Order ID from sequence without creating order in DB yet
+        // 1. Reserve Order ID from sequence
         const { data: createData, error: createError } = await supabase.functions.invoke('finalize-order', {
           body: {
             action: 'get-order-id'
@@ -853,10 +743,23 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         const orderId = createData.orderId;
         order.id = orderId;
 
+        // 2. Create order in storage/DB with awaiting_payment status prior to redirect
+        try {
+          await supabase.functions.invoke('finalize-order', {
+            body: {
+              action: 'create',
+              orderId,
+              orderDetails: order
+            }
+          });
+        } catch (createOrderErr) {
+          console.warn('Failed to pre-create card order on server:', createOrderErr);
+        }
+
         const amountCents = Math.round(finalTotal * 100);
         const returnUrl = window.location.origin + '/checkout?status=callback';
 
-        // 2. Sign payment
+        // 3. Sign payment
         const { data: signData, error: signError } = await supabase.functions.invoke('gp-webpay/sign', {
           body: {
             orderId,
@@ -870,9 +773,10 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           throw new Error(signError?.message || 'Neplatná data podpisu');
         }
 
-        // 3. Save pending details in localStorage
+        // 4. Save pending details in localStorage
         localStorage.setItem('pending-order-data', JSON.stringify({
           orderId,
+          userId: user?.id || null,
           cart,
           cartSubtotal,
           discountCode: appliedDiscount ? appliedDiscount.code : null,
