@@ -145,15 +145,36 @@ export default function OrdersTab({ showToast }) {
     });
   }, []);
 
-  const handleDownloadPdf = async (orderId) => {
+  const handleDownloadPdf = async (orderId, targetOrder = null) => {
     try {
+      const fileName = `invoice_${orderId}.pdf`;
       const { data, error } = await supabase.storage
         .from('invoices')
-        .createSignedUrl(`invoice_${orderId}.pdf`, 120);
-      if (error) throw error;
-      if (data && data.signedUrl) {
+        .createSignedUrl(fileName, 120);
+
+      if (!error && data?.signedUrl) {
         window.open(data.signedUrl, '_blank');
+        return;
       }
+
+      if (targetOrder) {
+        showToast(lang === 'CZ' ? 'Generuji daňový doklad (PDF)...' : 'Generating PDF invoice...', 'info');
+        const res = await supabase.functions.invoke('generate-invoice-pdf', {
+          body: { order: targetOrder, overwrite: true }
+        });
+
+        if (res.data) {
+          const { data: newUrlData } = await supabase.storage
+            .from('invoices')
+            .createSignedUrl(fileName, 120);
+          if (newUrlData?.signedUrl) {
+            window.open(newUrlData.signedUrl, '_blank');
+            return;
+          }
+        }
+      }
+
+      showToast(lang === 'CZ' ? 'Chyba při stahování faktury.' : 'Error downloading invoice.', 'error');
     } catch (err) {
       console.error('Error generating signed URL:', err.message);
       showToast(lang === 'CZ' ? 'Chyba při stahování faktury.' : 'Error downloading invoice.', 'error');
@@ -180,32 +201,70 @@ export default function OrdersTab({ showToast }) {
   const fetchOrdersList = async (filenameToClear = null) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke(`save-order-json?t=${Date.now()}`, {
+      const { data, error } = await supabase.functions.invoke(`save-order-json?withDetails=true&t=${Date.now()}`, {
         method: 'GET'
       });
 
       if (error) throw error;
 
-      // Filter files matching order_*.xml or order_*.json format
-      const orderFiles = ((data && data.files) || []).filter(f => f.name.startsWith('order_') && (f.name.endsWith('.xml') || f.name.endsWith('.json')));
-      setFiles(orderFiles);
-      
-      if (filenameToClear) {
-        setLoadedOrders(prev => {
-          const next = { ...prev };
-          delete next[filenameToClear];
-          return next;
-        });
-      }
+      if (data && Array.isArray(data.orders)) {
+        const fileList = [];
+        const ordersMap = {};
 
-      // Start background loading for missing details
-      const missingIds = orderFiles
-        .map(f => f.name)
-        .filter(name => !loadedOrders[name] || name === filenameToClear);
-      
-      if (missingIds.length > 0) {
-        setLoadingDetailsProgress({ current: 0, total: missingIds.length });
-        loadDetailsBatch(missingIds);
+        data.orders.forEach(jsonObj => {
+          const fileName = jsonObj.fileName || `order_${jsonObj.order?.id || jsonObj.id}.json`;
+          fileList.push({ name: fileName });
+
+          const o = jsonObj.order || jsonObj;
+          const rawItems = Array.isArray(jsonObj.items) ? jsonObj.items : (o.items || []);
+          const itemsSubtotal = rawItems.reduce((sum, item) => sum + (parseFloat(item.quantity || '1') * parseFloat(item.price || '0')), 0);
+          const explicitTotal = parseFloat(o.final_total || o.finalTotal || 0);
+          const discountAmt = parseFloat(o.discount_amount || o.discountAmount || '0');
+          const computedTotal = explicitTotal > 0 ? explicitTotal : Math.max(0, itemsSubtotal + parseFloat(o.shipping_cost || o.shippingCost || '0') + parseFloat(o.payment_surcharge || o.paymentSurcharge || '0') - discountAmt);
+
+          ordersMap[fileName] = {
+            id: o.id,
+            date: o.date || new Date(jsonObj.created_at || Date.now()).toLocaleDateString(lang === 'CZ' ? 'cs-CZ' : 'en-US'),
+            customerName: o.customer_name || o.customerName || '',
+            email: o.customer_email || o.customerEmail || '',
+            phone: o.customer_phone || o.customerPhone || '',
+            street: o.customer_street || o.shippingStreet || '',
+            city: o.customer_city || o.shippingCity || '',
+            zip: o.customer_zip || o.shippingZip || '',
+            paymentMethod: o.payment_method || o.paymentMethod || '',
+            paymentStatus: o.payment_status || o.paymentStatus || o.platba || 'awaiting_payment',
+            fulfillmentStatus: o.fulfillment_status || o.fulfillmentStatus || o.stav || 'pending',
+            carrier: o.carrier || 'GLS',
+            shippingMethod: o.shipping_method || o.shippingMethod || '',
+            shippingCost: parseFloat(o.shipping_cost || o.shippingCost || '0'),
+            paymentSurcharge: parseFloat(o.payment_surcharge || o.paymentSurcharge || '0'),
+            subtotal: itemsSubtotal,
+            discountCode: o.discount_code || o.discountCode || null,
+            discountAmount: discountAmt,
+            creditApplied: parseFloat(o.credit_applied || o.creditApplied || '0'),
+            items: rawItems.map(item => ({
+              name: item.name,
+              code: item.product_id || item.id || '',
+              quantity: parseFloat(item.quantity || '1'),
+              price: parseFloat(item.price || '0'),
+              total: parseFloat(item.quantity || '1') * parseFloat(item.price || '0'),
+              isService: false
+            })),
+            totalPrice: computedTotal,
+            isCompany: o.is_company || o.isCompany || false,
+            companyName: o.company_name || o.companyName || '',
+            ico: o.ico || '',
+            dic: o.dic || '',
+            notes: o.notes || '',
+            rawJson: jsonObj
+          };
+        });
+
+        setFiles(fileList);
+        setLoadedOrders(ordersMap);
+      } else {
+        const orderFiles = ((data && data.files) || []).filter(f => f.name.startsWith('order_') && (f.name.endsWith('.xml') || f.name.endsWith('.json')));
+        setFiles(orderFiles);
       }
     } catch (err) {
       console.error('Failed to load orders list:', err);
