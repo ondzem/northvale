@@ -291,7 +291,28 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           }
         });
       } catch (gaErr) {
+        console.error('GA4 add_payment_info failed:', gaErr);
+      }
+    }
+  }, [payment, cart]);
+
   const [isVerifying, setIsVerifying] = useState(false);
+
+  // Clean up old GP callback locks (> 24 hours) on component mount
+  useEffect(() => {
+    try {
+      const now = Date.now();
+      const cutoff = 24 * 60 * 60 * 1000;
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('gp-callback-')) {
+          const timestamp = parseInt(localStorage.getItem(key) || '0', 10);
+          if (isNaN(timestamp) || (now - timestamp > cutoff)) {
+            localStorage.removeItem(key);
+          }
+        }
+      });
+    } catch (_e) {}
+  }, []);
 
   // Zpracování callbacku z GP webpay po návratu zákazníka
   useEffect(() => {
@@ -312,62 +333,53 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         if (!orderNumber || !prCode || !digest) return;
 
         const lockKey = `gp-callback-${orderNumber}`;
-        if (localStorage.getItem(lockKey) || sessionStorage.getItem(lockKey)) {
+        if (localStorage.getItem(lockKey)) {
+          window.history.replaceState({}, document.title, window.location.pathname);
           return;
         }
         localStorage.setItem(lockKey, Date.now().toString());
-        sessionStorage.setItem(lockKey, Date.now().toString());
+
+        const gpWebpayParams = { MERCHANTNUMBER: merchantNumber, OPERATION: operation, ORDERNUMBER: orderNumber, MERORDERNUM: merOrderNum, PRCODE: prCode, SRCODE: srCode, RESULTTEXT: resultText, DIGEST: digest };
+
+        // Platba zamítnuta -> objednávku nechat v awaiting_payment, uvolnit zámek, informovat
+        if (String(prCode) !== '0') {
+          localStorage.removeItem(lockKey);
+          alert(lang === 'CZ'
+            ? 'Platba nebyla dokončena. Zvolte prosím jiný způsob platby nebo to zkuste znovu.'
+            : 'Payment was not completed. Please choose another payment method or try again.', 'error');
+          window.history.replaceState({}, document.title, window.location.pathname);
+          return;
+        }
 
         setIsVerifying(true);
         try {
-          const gpWebpayParams = {
-            MERCHANTNUMBER: merchantNumber,
-            OPERATION: operation,
-            ORDERNUMBER: orderNumber,
-            MERORDERNUM: merOrderNum,
-            PRCODE: prCode,
-            SRCODE: srCode,
-            RESULTTEXT: resultText,
-            DIGEST: digest
-          };
+          let pending = {};
+          try { pending = JSON.parse(localStorage.getItem('pending-order-data') || '{}'); } catch (_e) {}
 
-          const pendingStr = localStorage.getItem('pending-order-data');
-          let pending: any = {};
-          if (pendingStr) {
-            try {
-              pending = JSON.parse(pendingStr);
-            } catch (_e) {}
-          }
+          // VŽDY jdeme přes server. Server si objednávku načte ze storage,
+          // ověří podpis GP webpay a označí ji jako uhrazenou.
+          await submitOrder(
+            { id: orderNumber, userId: pending.userId || user?.id || null },
+            0,
+            { isCardPaid: true, orderId: orderNumber, gpWebpayParams }
+          );
 
-          const orderItems = pending.cart || cart || [];
-          if (!pendingStr || orderItems.length === 0) {
-            // Missing local cart state - trigger server-side mark_paid directly
-            showToast?.(lang === 'CZ' ? 'Platba proběhla, objednávku dokončujeme...' : 'Payment received, finalizing order...', 'info');
-            await submitOrder(
-              { id: orderNumber, userId: pending.userId || user?.id || null }, 
-              0, 
-              { isCardPaid: true, orderId: orderNumber, gpWebpayParams }
-            );
-            setIsVerifying(false);
-            setActivePage('order-confirmation');
-          }
+          localStorage.removeItem('pending-order-data');
+          setActivePage('order-confirmation');
         } catch (err) {
           console.error('Verifikace platby selhala:', err);
-          callbackProcessedRef.current = false;
-          alert(lang === 'CZ' 
-            ? 'Nepodařilo se ověřit platbu přes GP webpay.' 
-            : 'Could not verify payment via GP webpay.',
-            'error'
-          );
+          localStorage.removeItem(lockKey);
+          alert(lang === 'CZ'
+            ? 'Nepodařilo se ověřit platbu přes GP webpay. Kontaktujte nás prosím na info@northvaletcg.eu.'
+            : 'Could not verify payment via GP webpay. Please contact us at info@northvaletcg.eu.', 'error');
         } finally {
           setIsVerifying(false);
-          // Vyčistit parametry z URL adresy, aby se verifikace neopakovala při obnovení
           window.history.replaceState({}, document.title, window.location.pathname);
         }
       }
     };
     handleCallback();
-  }, [cart, cartSubtotal, shippingCost, paymentSurcharge, finalTotal, actualAppliedCredit, shipping, lang, appliedDiscount, discountAmount]);
+  }, []);
   useEffect(() => {
     const handleWidgetMessage = (event) => {
       // 1. DPD Widget Message handler
