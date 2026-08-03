@@ -178,6 +178,72 @@ async function applyStockAndDiscount(supabase: any, orderData: any) {
   orderData.stock_applied = true;
 }
 
+async function triggerPostOrderActions(supabase: any, supabaseUrl: string, supabaseServiceKey: string, orderData: any, isMarkPaid = false) {
+  if (!orderData.has_no_vat) {
+    try {
+      const r = await fetch(`${supabaseUrl}/functions/v1/generate-invoice-pdf`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${supabaseServiceKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ order: orderData, overwrite: isMarkPaid })
+      });
+      const t = await r.text();
+      if (!r.ok) {
+        const errDesc = `generate-invoice-pdf HTTP ${r.status}: ${t}`;
+        console.error(errDesc);
+        orderData.invoice_error = errDesc;
+        const errBytes = new TextEncoder().encode(errDesc);
+        await supabase.storage
+          .from("pohoda-orders")
+          .upload(`errors/invoice_${orderData.id}.txt`, errBytes, { contentType: "text/plain", upsert: true });
+      }
+    } catch (pdfFetchErr: any) {
+      const errDesc = `generate-invoice-pdf fetch error: ${pdfFetchErr?.message || String(pdfFetchErr)}`;
+      console.error(errDesc);
+      orderData.invoice_error = errDesc;
+      try {
+        const errBytes = new TextEncoder().encode(errDesc);
+        await supabase.storage
+          .from("pohoda-orders")
+          .upload(`errors/invoice_${orderData.id}.txt`, errBytes, { contentType: "text/plain", upsert: true });
+      } catch (_e) {}
+    }
+  }
+
+  try {
+    const r = await fetch(`${supabaseUrl}/functions/v1/send-order-email`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${supabaseServiceKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ order: orderData, items: orderData.items })
+    });
+    const t = await r.text();
+    if (!r.ok) {
+      const errDesc = `send-order-email HTTP ${r.status}: ${t}`;
+      console.error(errDesc);
+      orderData.email_error = errDesc;
+      const errBytes = new TextEncoder().encode(errDesc);
+      await supabase.storage
+        .from("pohoda-orders")
+        .upload(`errors/email_${orderData.id}.txt`, errBytes, { contentType: "text/plain", upsert: true });
+    }
+  } catch (emailFetchErr: any) {
+    const errDesc = `send-order-email fetch error: ${emailFetchErr?.message || String(emailFetchErr)}`;
+    console.error(errDesc);
+    orderData.email_error = errDesc;
+    try {
+      const errBytes = new TextEncoder().encode(errDesc);
+      await supabase.storage
+        .from("pohoda-orders")
+        .upload(`errors/email_${orderData.id}.txt`, errBytes, { contentType: "text/plain", upsert: true });
+    } catch (_e) {}
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -281,13 +347,16 @@ serve(async (req) => {
 
       const normalizedOrderData = normalizeOrder(rawOrderObj);
 
-      // Check if order already exists in storage for overwrite protection
+      // Check if order already exists in storage for overwrite protection & stock deduction status
       const filename = `order_${generatedOrderId}.json`;
+      let existingStored: any = null;
       try {
         const { data: existingFile } = await supabase.storage
           .from("pohoda-orders")
           .download(filename);
         if (existingFile) {
+          const text = await existingFile.text();
+          existingStored = JSON.parse(text);
           if (!normalizedOrderData.items || normalizedOrderData.items.length === 0) {
             return new Response(JSON.stringify({ error: "Order already exists" }), {
               status: 409,
@@ -297,14 +366,26 @@ serve(async (req) => {
         }
       } catch (_eExist) {}
 
-      // Apply stock and discount code unless reserveOnly === true
-      if (!reserveOnly) {
+      // CHYBA 2 FIX: Sklad se odečítá jen tehdy, když u TÉTO objednávky ještě nikdy odečten nebyl.
+      const alreadyApplied = existingStored?.order?.stock_applied === true || existingStored?.stock_applied === true;
+      if (alreadyApplied) {
+        normalizedOrderData.stock_applied = true;
+      } else if (!reserveOnly) {
         await applyStockAndDiscount(supabase, normalizedOrderData);
       } else {
         normalizedOrderData.stock_applied = false;
       }
 
-      // 2. Save canonical order json to storage
+      // Trigger invoice generation and email immediately if not card payment
+      const isCardPayment = String(normalizedOrderData.payment_method || '').toLowerCase().includes('kart')
+        || String(normalizedOrderData.payment_method || '').toLowerCase().includes('card')
+        || String(normalizedOrderData.payment_method || '').toLowerCase().includes('webpay');
+
+      if (!isCardPayment) {
+        await triggerPostOrderActions(supabase, supabaseUrl, supabaseServiceKey, normalizedOrderData, false);
+      }
+
+      // 2. Save canonical order json to storage (including any invoice_error / email_error flags)
       const encoder = new TextEncoder();
       const storageData = {
         order: normalizedOrderData,
@@ -342,38 +423,6 @@ serve(async (req) => {
               store_credit: newCredit
             })
             .eq("id", normalizedOrderData.user_id);
-        }
-      }
-
-      // 4. Trigger invoice generation and email immediately if not card payment
-      const isCardPayment = String(normalizedOrderData.payment_method || '').toLowerCase().includes('kart')
-        || String(normalizedOrderData.payment_method || '').toLowerCase().includes('card')
-        || String(normalizedOrderData.payment_method || '').toLowerCase().includes('webpay');
-
-      if (!isCardPayment) {
-        try {
-          if (!normalizedOrderData.has_no_vat) {
-            await fetch(`${supabaseUrl}/functions/v1/generate-invoice-pdf`, {
-              method: "POST",
-              headers: {
-                "Authorization": `Bearer ${supabaseServiceKey}`,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({ order: normalizedOrderData })
-            });
-          }
-
-          // Trigger send-order-email
-          await fetch(`${supabaseUrl}/functions/v1/send-order-email`, {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${supabaseServiceKey}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ order: normalizedOrderData, items: normalizedOrderData.items })
-          });
-        } catch (subErr) {
-          console.error("Failed to run post-order actions:", subErr);
         }
       }
 
@@ -510,6 +559,7 @@ serve(async (req) => {
         payment_status: 'paid',
         paymentStatus: 'paid',
         platba: 'uhrazeno',
+        stock_applied: existingOrder.stock_applied === true || storageObj.stock_applied === true,
         items: storageObj.items || existingOrder.items || []
       };
 
@@ -517,6 +567,9 @@ serve(async (req) => {
 
       // Apply stock deduction and discount code increment on payment confirmation
       await applyStockAndDiscount(supabase, normalizedPaidOrder);
+
+      // Trigger invoice generation and email
+      await triggerPostOrderActions(supabase, supabaseUrl, supabaseServiceKey, normalizedPaidOrder, true);
 
       // Save updated order back to storage
       const storageData = {
@@ -529,31 +582,6 @@ serve(async (req) => {
       await supabase.storage
         .from("pohoda-orders")
         .upload(filename, saveBytes, { contentType: "application/json", upsert: true });
-
-      // Trigger invoice generation and email
-      try {
-        if (!normalizedPaidOrder.has_no_vat) {
-          await fetch(`${supabaseUrl}/functions/v1/generate-invoice-pdf`, {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${supabaseServiceKey}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ order: normalizedPaidOrder, overwrite: true })
-          });
-        }
-
-        await fetch(`${supabaseUrl}/functions/v1/send-order-email`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${supabaseServiceKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ order: normalizedPaidOrder, items: normalizedPaidOrder.items })
-        });
-      } catch (postErr) {
-        console.error("Failed to trigger post-order actions for mark_paid:", postErr);
-      }
 
       // Update order status inside profiles if user_id is present
       if (normalizedPaidOrder.user_id) {

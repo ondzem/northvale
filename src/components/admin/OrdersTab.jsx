@@ -2148,6 +2148,20 @@ export default function OrdersTab({ showToast }) {
                             }}>
                               {getPaymentStatusText(details.rawJson?.order?.paymentStatus || details.rawJson?.order?.platba, lang)}
                             </span>
+                            {details.rawJson?.order?.invoice_error && (
+                              <span style={{
+                                backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                                color: '#ef4444',
+                                fontSize: '10px',
+                                marginTop: '2px',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                fontWeight: 'bold',
+                                display: 'inline-block'
+                              }}>
+                                ⚠️ {lang === 'CZ' ? 'Faktura se nevygenerovala' : 'Invoice error'}
+                              </span>
+                            )}
                           </div>
                         ) : (
                           <span style={{ color: '#8a8a92', fontSize: '12px' }}>-</span>
@@ -2166,9 +2180,20 @@ export default function OrdersTab({ showToast }) {
                             const isPaid = (details?.rawJson?.order?.paymentStatus === 'paid') || (details?.rawJson?.order?.platba === 'uhrazeno');
                             const fStatus = (details?.rawJson?.order?.fulfillmentStatus || details?.rawJson?.order?.fulfillment_status || details?.rawJson?.order?.stav || '').toLowerCase();
                             const isCompleted = fStatus === 'completed' || fStatus === 'vyřízeno' || fStatus === 'doručeno' || fStatus === 'shipped' || fStatus === 'odesláno';
+                            const hasInvoiceError = !!details?.rawJson?.order?.invoice_error;
 
                             return (
                               <>
+                                {hasInvoiceError && (
+                                  <button 
+                                    className="orders-action-btn"
+                                    style={{ backgroundColor: '#ef4444', color: '#ffffff', fontWeight: 'bold' }}
+                                    onClick={() => handleDownloadInvoice(details)}
+                                    title={lang === 'CZ' ? 'Vygenerovat daňový doklad po chybě' : 'Generate invoice after error'}
+                                  >
+                                    📄 {lang === 'CZ' ? 'Vygenerovat fakturu' : 'Generate Invoice'}
+                                  </button>
+                                )}
                                 {!isPaid && (
                                   <button 
                                     className="orders-action-btn"
