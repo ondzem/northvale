@@ -82,7 +82,7 @@ export function normalizeOrder(input: any): Record<string, any> {
     if (shipping_method.includes('GLS')) carrier = 'GLS';
     else if (shipping_method.includes('DPD')) carrier = 'DPD';
     else if (shipping_method.toLowerCase().includes('osobní') || shipping_method.toLowerCase().includes('skrba') || shipping_method.toLowerCase().includes('škrba')) carrier = 'Osobní odběr';
-    else carrier = 'DPD';
+    else carrier = 'Osobní odběr';
   }
 
   const id = String(obj.id || obj.orderId || obj.order_id || '').trim();

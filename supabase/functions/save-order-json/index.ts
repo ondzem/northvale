@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
-import { normalizeOrder } from "../_shared/order-schema.ts";
+import { normalizeOrder, normalizeItems } from "../_shared/order-schema.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -85,10 +85,11 @@ serve(async (req) => {
     if (req.method === "GET") {
       const filename = url.searchParams.get("filename");
       const withDetails = url.searchParams.get("withDetails") === "true";
+      const limit = Math.max(1, parseInt(url.searchParams.get("limit") || "200", 10));
+      const offset = Math.max(0, parseInt(url.searchParams.get("offset") || "0", 10));
 
       // 1. Single File download by filename
       if (filename) {
-        // Downloading specific order requires auth
         if (!authUser && !isServiceRole) {
           return new Response(JSON.stringify({ error: "Unauthorized. Authentication required." }), {
             status: 401,
@@ -110,7 +111,6 @@ serve(async (req) => {
           parsed = JSON.parse(text);
         } catch (_e) {}
 
-        // Non-admin can only download their own order
         if (!isAdmin && authUser) {
           const norm = normalizeOrder(parsed.order || parsed);
           const ownerEmail = String(norm.customer_email || '').toLowerCase().trim();
@@ -143,28 +143,34 @@ serve(async (req) => {
 
       const allFiles = await listAllStorageFiles(supabase);
 
-      // Admin or Service Role full list or batch withDetails
+      // 6b: Admin or Service Role full list or batch withDetails (with limit, offset & parallel chunking)
       if (isAdmin || isServiceRole) {
         if (withDetails) {
           const detailedOrders: any[] = [];
-          const jsonFiles = allFiles.filter(f => f.name.startsWith("order_") && f.name.endsWith(".json"));
+          const jsonFiles = allFiles
+            .filter(f => f.name.startsWith("order_") && f.name.endsWith(".json"))
+            .slice(offset, offset + limit);
 
-          for (const file of jsonFiles) {
-            try {
-              const { data: fileBlob } = await supabase.storage.from("pohoda-orders").download(file.path);
-              if (fileBlob) {
-                const text = await fileBlob.text();
-                const jsonObj = JSON.parse(text);
-                detailedOrders.push({
-                  ...jsonObj,
-                  order: normalizeOrder(jsonObj.order || jsonObj),
-                  fileName: file.name
-                });
-              }
-            } catch (_e) {}
+          const chunkSize = 10;
+          for (let i = 0; i < jsonFiles.length; i += chunkSize) {
+            const chunk = jsonFiles.slice(i, i + chunkSize);
+            await Promise.all(chunk.map(async (file) => {
+              try {
+                const { data: fileBlob } = await supabase.storage.from("pohoda-orders").download(file.path);
+                if (fileBlob) {
+                  const text = await fileBlob.text();
+                  const jsonObj = JSON.parse(text);
+                  detailedOrders.push({
+                    ...jsonObj,
+                    order: normalizeOrder(jsonObj.order || jsonObj),
+                    fileName: file.name
+                  });
+                }
+              } catch (_e) {}
+            }));
           }
 
-          return new Response(JSON.stringify({ orders: detailedOrders }), {
+          return new Response(JSON.stringify({ orders: detailedOrders, total: allFiles.filter(f => f.name.startsWith("order_") && f.name.endsWith(".json")).length }), {
             status: 200,
             headers: { 
               ...corsHeaders, 
@@ -174,7 +180,7 @@ serve(async (req) => {
           });
         }
 
-        return new Response(JSON.stringify({ files: allFiles }), {
+        return new Response(JSON.stringify({ files: allFiles.slice(offset, offset + limit), total: allFiles.length }), {
           status: 200,
           headers: { 
             ...corsHeaders, 
@@ -272,8 +278,11 @@ serve(async (req) => {
           const jsonObj = JSON.parse(text);
           const normalized = normalizeOrder(jsonObj.order || jsonObj);
           
+          // 6a: Support items in jsonObj.items || normalized.items
+          const itemsToRestore = normalizeItems(jsonObj.items || normalized.items || []);
+
           if (normalized.fulfillment_status !== 'shipped' && normalized.fulfillment_status !== 'completed') {
-            for (const item of (normalized.items || [])) {
+            for (const item of itemsToRestore) {
               const productId = item.product_id || item.id;
               const qty = Number(item.quantity || 1);
               if (productId && qty > 0) {
@@ -373,7 +382,8 @@ serve(async (req) => {
 
           if (profile) {
             const history = profile.order_history || [];
-            const updatedHistory = [normalizedOrder, ...history.filter((h: any) => h.id !== normalizedOrder.id)];
+            // 6c: Convert to string for strict comparison
+            const updatedHistory = [normalizedOrder, ...history.filter((h: any) => String(h.id) !== String(normalizedOrder.id))];
 
             await supabase
               .from("profiles")
