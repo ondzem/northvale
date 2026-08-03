@@ -761,7 +761,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
             body: {
               action: 'create',
               orderId,
-              orderDetails: order
+              orderDetails: order,
+              reserveOnly: true
             }
           });
         } catch (createOrderErr) {

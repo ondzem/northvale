@@ -76,6 +76,108 @@ async function getNextInvoiceNumber(supabase: any): Promise<string> {
   }
 }
 
+async function applyStockAndDiscount(supabase: any, orderData: any) {
+  if (orderData.stock_applied === true) {
+    return;
+  }
+
+  // 1. Decrement Stock safely on server (wrapped per item in try/catch)
+  for (const item of (orderData.items || [])) {
+    try {
+      const prodId = item.product_id || item.id;
+      if (!prodId) continue;
+
+      // Decrement daily deal stock if applicable
+      if (item.product?.isDailyDeal) {
+        const slotId = item.product.dealSlotId || 'active-deal';
+        const { data: dbDeal } = await supabase
+          .from('daily_deal')
+          .select('stock')
+          .eq('id', slotId)
+          .maybeSingle();
+        if (dbDeal) {
+          const newDealStock = Math.max(0, (dbDeal.stock || 0) - item.quantity);
+          await supabase
+            .from('daily_deal')
+            .update({ stock: newDealStock })
+            .eq('id', slotId);
+        }
+      }
+
+      // Decrement main product stock
+      if (prodId !== 'deal-of-the-day') {
+        if (item.id && item.id !== prodId) {
+          const { data: dbProd } = await supabase
+            .from('products')
+            .select('variants')
+            .eq('id', prodId)
+            .maybeSingle();
+          if (dbProd && dbProd.variants) {
+            const updatedVariants = dbProd.variants.map((v: any) => {
+              if (v.id === item.id) {
+                return { ...v, stock: Math.max(0, (v.stock || 0) - item.quantity) };
+              }
+              return v;
+            });
+            await supabase
+              .from('products')
+              .update({ variants: updatedVariants })
+              .eq('id', prodId);
+          }
+        } else {
+          const { data: dbProd } = await supabase
+            .from('products')
+            .select('stock')
+            .eq('id', prodId)
+            .maybeSingle();
+          if (dbProd) {
+            const newStock = Math.max(0, (dbProd.stock || 0) - item.quantity);
+            await supabase
+              .from('products')
+              .update({ stock: newStock })
+              .eq('id', prodId);
+          }
+        }
+      }
+    } catch (stockErr) {
+      console.error(`Stock deduction error for item ${item.product_id || item.name}:`, stockErr);
+    }
+  }
+
+  // Increment discount_codes usage count if discountCode is present
+  if (orderData.discount_code) {
+    try {
+      const cleanCode = String(orderData.discount_code).trim().toUpperCase();
+      const { data: dbItem } = await supabase
+        .from('discount_codes')
+        .select('id, used_count, max_uses, is_active, active')
+        .eq('code', cleanCode)
+        .maybeSingle();
+
+      if (dbItem) {
+        const newUsedCount = Number(dbItem.used_count || 0) + 1;
+        const maxUsesNum = dbItem.max_uses !== null && dbItem.max_uses !== undefined && dbItem.max_uses !== '' ? Number(dbItem.max_uses) : null;
+        const isExhausted = maxUsesNum !== null ? (newUsedCount >= maxUsesNum) : false;
+
+        const updatePayload: any = { used_count: newUsedCount };
+        if (isExhausted) {
+          updatePayload.is_active = false;
+          updatePayload.active = false;
+        }
+
+        await supabase
+          .from('discount_codes')
+          .update(updatePayload)
+          .eq('id', dbItem.id);
+      }
+    } catch (discErr) {
+      console.error('Failed to increment discount code usage in finalize-order:', discErr);
+    }
+  }
+
+  orderData.stock_applied = true;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -87,7 +189,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const body = await req.json();
-    const { action = "create", orderId, orderDetails } = body;
+    const { action = "create", orderId, orderDetails, reserveOnly = false } = body;
 
     // Ensure pohoda-orders bucket is private
     try {
@@ -195,98 +297,11 @@ serve(async (req) => {
         }
       } catch (_eExist) {}
 
-      // 1. Decrement Stock safely on server (wrapped per item in try/catch)
-      for (const item of (normalizedOrderData.items || [])) {
-        try {
-          const prodId = item.product_id || item.id;
-          if (!prodId) continue;
-
-          // Decrement daily deal stock if applicable
-          if (item.product?.isDailyDeal) {
-            const slotId = item.product.dealSlotId || 'active-deal';
-            const { data: dbDeal } = await supabase
-              .from('daily_deal')
-              .select('stock')
-              .eq('id', slotId)
-              .maybeSingle();
-            if (dbDeal) {
-              const newDealStock = Math.max(0, (dbDeal.stock || 0) - item.quantity);
-              await supabase
-                .from('daily_deal')
-                .update({ stock: newDealStock })
-                .eq('id', slotId);
-            }
-          }
-
-          // Decrement main product stock
-          if (prodId !== 'deal-of-the-day') {
-            if (item.id && item.id !== prodId) {
-              const { data: dbProd } = await supabase
-                .from('products')
-                .select('variants')
-                .eq('id', prodId)
-                .maybeSingle();
-              if (dbProd && dbProd.variants) {
-                const updatedVariants = dbProd.variants.map((v: any) => {
-                  if (v.id === item.id) {
-                    return { ...v, stock: Math.max(0, (v.stock || 0) - item.quantity) };
-                  }
-                  return v;
-                });
-                await supabase
-                  .from('products')
-                  .update({ variants: updatedVariants })
-                  .eq('id', prodId);
-              }
-            } else {
-              const { data: dbProd } = await supabase
-                .from('products')
-                .select('stock')
-                .eq('id', prodId)
-                .maybeSingle();
-              if (dbProd) {
-                const newStock = Math.max(0, (dbProd.stock || 0) - item.quantity);
-                await supabase
-                  .from('products')
-                  .update({ stock: newStock })
-                  .eq('id', prodId);
-              }
-            }
-          }
-        } catch (stockErr) {
-          console.error(`Stock deduction error for item ${item.product_id || item.name}:`, stockErr);
-        }
-      }
-
-      // Increment discount_codes usage count if discountCode is present
-      if (normalizedOrderData.discount_code) {
-        try {
-          const cleanCode = String(normalizedOrderData.discount_code).trim().toUpperCase();
-          const { data: dbItem } = await supabase
-            .from('discount_codes')
-            .select('id, used_count, max_uses, is_active, active')
-            .eq('code', cleanCode)
-            .maybeSingle();
-
-          if (dbItem) {
-            const newUsedCount = Number(dbItem.used_count || 0) + 1;
-            const maxUsesNum = dbItem.max_uses !== null && dbItem.max_uses !== undefined && dbItem.max_uses !== '' ? Number(dbItem.max_uses) : null;
-            const isExhausted = maxUsesNum !== null ? (newUsedCount >= maxUsesNum) : false;
-
-            const updatePayload: any = { used_count: newUsedCount };
-            if (isExhausted) {
-              updatePayload.is_active = false;
-              updatePayload.active = false;
-            }
-
-            await supabase
-              .from('discount_codes')
-              .update(updatePayload)
-              .eq('id', dbItem.id);
-          }
-        } catch (discErr) {
-          console.error('Failed to increment discount code usage in finalize-order:', discErr);
-        }
+      // Apply stock and discount code unless reserveOnly === true
+      if (!reserveOnly) {
+        await applyStockAndDiscount(supabase, normalizedOrderData);
+      } else {
+        normalizedOrderData.stock_applied = false;
       }
 
       // 2. Save canonical order json to storage
@@ -499,6 +514,9 @@ serve(async (req) => {
       };
 
       const normalizedPaidOrder = normalizeOrder(updatedOrderObj);
+
+      // Apply stock deduction and discount code increment on payment confirmation
+      await applyStockAndDiscount(supabase, normalizedPaidOrder);
 
       // Save updated order back to storage
       const storageData = {
