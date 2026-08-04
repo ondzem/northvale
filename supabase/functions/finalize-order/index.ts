@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 import { normalizeOrder, normalizeItems } from "../_shared/order-schema.ts";
+import { getAuthContext, requireAdmin } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -73,6 +74,168 @@ async function getNextInvoiceNumber(supabase: any): Promise<string> {
   } catch (err) {
     console.error("Error in fallback getNextInvoiceNumber:", err);
     return String(START_NUMBER);
+  }
+}
+
+/**
+ * Ceník dopravy — MUSÍ odpovídat výpočtu v src/components/CheckoutFlow.jsx.
+ * Klient posílá jen název dopravy, cenu si dopočítá server.
+ */
+function serverShippingCost(shippingMethod: string, subtotalAfterDiscount: number, cartSubtotal: number): number {
+  const m = String(shippingMethod || '').toLowerCase();
+
+  const isPersonal = m.includes('osobní') || m.includes('personal') || m.includes('škrba') || m.includes('skrba');
+  if (isPersonal) return 0;
+
+  // Doprava zdarma od 1750 Kč
+  if (cartSubtotal >= 1750 || subtotalAfterDiscount >= 1750) return 0;
+
+  const isPickup = m.includes('výdejní') || m.includes('pickup');
+  if (m.includes('dpd')) return isPickup ? 79 : 109;
+  if (m.includes('gls')) return isPickup ? 89 : 129;
+  return 109;
+}
+
+/**
+ * BEZPEČNOST — ověření cen na serveru.
+ *
+ * Klient posílá ceny položek i celkovou částku. Bez této kontroly si může
+ * kdokoli upravit požadavek a objednat zboží za 1 Kč. Přepočítáme objednávku
+ * z cen v databázi a nižší částku než serverovou odmítneme.
+ *
+ * Vrací { ok: true } nebo { ok: false, reason, expected, received }.
+ */
+async function verifyOrderPricing(supabase: any, orderData: any): Promise<any> {
+  try {
+    const items = orderData.items || [];
+    if (!items.length) return { ok: true, skipped: 'no-items' };
+
+    let serverSubtotal = 0;
+    let verifiedItems = 0;
+
+    for (const item of items) {
+      const qty = Math.max(1, Number(item.quantity) || 1);
+      const prodId = item.product_id || item.id;
+      const clientPrice = Number(item.price) || 0;
+
+      if (!prodId) {
+        serverSubtotal += clientPrice * qty;
+        continue;
+      }
+
+      // Položka denní nabídky — cena je v tabulce daily_deal
+      if (prodId === 'deal-of-the-day' || item.product?.isDailyDeal) {
+        const slotId = item.product?.dealSlotId || 'active-deal';
+        const { data: deal } = await supabase
+          .from('daily_deal')
+          .select('deal_price, price')
+          .eq('id', slotId)
+          .maybeSingle();
+        const dealPrice = Number(deal?.deal_price ?? deal?.price);
+        if (deal && !isNaN(dealPrice) && dealPrice > 0) {
+          serverSubtotal += dealPrice * qty;
+          verifiedItems++;
+        } else {
+          serverSubtotal += clientPrice * qty;
+        }
+        continue;
+      }
+
+      const { data: prod } = await supabase
+        .from('products')
+        .select('price, variants')
+        .eq('id', prodId)
+        .maybeSingle();
+
+      if (!prod) {
+        // Produkt v katalogu není (smazaný) — cenu ověřit nelze, necháme klientskou
+        serverSubtotal += clientPrice * qty;
+        continue;
+      }
+
+      // Varianta (singles) — cena může být na variantě
+      let serverPrice: number | null = null;
+      if (item.id && item.id !== prodId && Array.isArray(prod.variants)) {
+        const variant = prod.variants.find((v: any) => String(v.id) === String(item.id));
+        const vPrice = Number(variant?.price);
+        if (variant && !isNaN(vPrice) && vPrice > 0) serverPrice = vPrice;
+      }
+      if (serverPrice === null) {
+        const pPrice = Number(prod.price);
+        if (!isNaN(pPrice) && pPrice > 0) serverPrice = pPrice;
+      }
+
+      if (serverPrice === null) {
+        serverSubtotal += clientPrice * qty;
+      } else {
+        serverSubtotal += serverPrice * qty;
+        verifiedItems++;
+      }
+    }
+
+    // Nepodařilo se ověřit ani jednu položku — nemá smysl blokovat objednávku
+    if (verifiedItems === 0) return { ok: true, skipped: 'no-verifiable-items' };
+
+    // Sleva — ověřit proti databázi, ne věřit klientovi
+    let serverDiscount = 0;
+    if (orderData.discount_code) {
+      const cleanCode = String(orderData.discount_code).trim().toUpperCase();
+      const { data: code } = await supabase
+        .from('discount_codes')
+        .select('discount_type, discount_value, discount_percent, is_active, active, valid_from, valid_until, max_uses, used_count')
+        .eq('code', cleanCode)
+        .maybeSingle();
+
+      if (code) {
+        const today = new Date().toISOString().slice(0, 10);
+        const isActive = (code.is_active !== false) && (code.active !== false);
+        const fromOk = !code.valid_from || String(code.valid_from).slice(0, 10) <= today;
+        const untilOk = !code.valid_until || String(code.valid_until).slice(0, 10) >= today;
+        const usesOk = code.max_uses === null || code.max_uses === undefined || code.max_uses === ''
+          || Number(code.used_count || 0) < Number(code.max_uses);
+
+        if (isActive && fromOk && untilOk && usesOk) {
+          const type = code.discount_type || 'percent';
+          const val = Number(code.discount_value ?? code.discount_percent ?? 0);
+          serverDiscount = type === 'percent'
+            ? Math.round((serverSubtotal * val) / 100)
+            : val;
+          serverDiscount = Math.min(serverSubtotal, Math.max(0, serverDiscount));
+        }
+      }
+    }
+
+    const afterDiscount = Math.max(0, serverSubtotal - serverDiscount);
+    const serverShipping = serverShippingCost(orderData.shipping_method, afterDiscount, serverSubtotal);
+
+    // Dobírkový příplatek přebíráme od klienta, ale omezený, ať nejde zneužít
+    const surcharge = Math.min(200, Math.max(0, Number(orderData.payment_surcharge) || 0));
+
+    // Kredit může být nejvýše zůstatek na účtu zákazníka
+    let credit = Math.max(0, Number(orderData.credit_applied) || 0);
+    if (credit > 0 && orderData.user_id) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('store_credit')
+        .eq('id', orderData.user_id)
+        .maybeSingle();
+      credit = Math.min(credit, Math.max(0, Number(profile?.store_credit) || 0));
+    } else if (credit > 0) {
+      credit = 0; // nepřihlášený zákazník kredit uplatnit nemůže
+    }
+
+    const expected = Math.max(0, afterDiscount + serverShipping + surcharge - credit);
+    const received = Number(orderData.final_total) || 0;
+
+    // Tolerance 1 Kč na zaokrouhlení. Vyšší částka od klienta nevadí.
+    if (received < expected - 1) {
+      return { ok: false, reason: 'price-mismatch', expected, received };
+    }
+
+    return { ok: true, expected, received };
+  } catch (err) {
+    console.error('verifyOrderPricing failed, order allowed through:', err);
+    return { ok: true, skipped: 'verification-error' };
   }
 }
 
@@ -265,6 +428,15 @@ serve(async (req) => {
       await supabase.storage.updateBucket("pohoda-orders", { public: false });
     } catch (_uErr) {}
 
+    // BEZPEČNOST: akce, které mění nastavení obchodu, smí volat jen administrátor.
+    // Bez toho může kdokoli s veřejným anon klíčem přenastavit číselnou řadu faktur
+    // (a způsobit přepsání existujících objednávek) nebo změnit denní nabídku.
+    if (action === "reset-invoice-counter" || action === "save-daily-deal-config") {
+      const authCtx = await getAuthContext(req, supabase, supabaseServiceKey);
+      const denied = requireAdmin(authCtx, corsHeaders);
+      if (denied) return denied;
+    }
+
     // Action: Reset Invoice Counter
     if (action === "reset-invoice-counter") {
       const startNum = body.startNumber || 260100010;
@@ -365,6 +537,39 @@ serve(async (req) => {
           }
         }
       } catch (_eExist) {}
+
+      // BEZPEČNOST: přepočítat ceny z databáze. Klient posílá ceny i celkovou
+      // částku ve svém požadavku — bez této kontroly lze objednat cokoli za 1 Kč.
+      const priceCheck = await verifyOrderPricing(supabase, normalizedOrderData);
+      if (!priceCheck.ok) {
+        console.error(
+          `[SECURITY] Odmítnuta objednávka ${generatedOrderId}: klient poslal ${priceCheck.received} Kč, ` +
+          `server spočítal ${priceCheck.expected} Kč. E-mail: ${normalizedOrderData.customer_email}`
+        );
+        try {
+          const logBytes = new TextEncoder().encode(JSON.stringify({
+            at: new Date().toISOString(),
+            order_id: generatedOrderId,
+            customer_email: normalizedOrderData.customer_email,
+            expected: priceCheck.expected,
+            received: priceCheck.received,
+            items: normalizedOrderData.items
+          }, null, 2));
+          await supabase.storage
+            .from("pohoda-orders")
+            .upload(`security/price_mismatch_${generatedOrderId}_${Date.now()}.json`, logBytes, {
+              contentType: "application/json", upsert: true
+            });
+        } catch (_logErr) {}
+
+        return new Response(JSON.stringify({
+          error: "Cena objednávky neodpovídá aktuálnímu ceníku. Obnovte prosím stránku a zkuste to znovu.",
+          code: "PRICE_MISMATCH"
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
       // CHYBA 2 FIX: Sklad se odečítá jen tehdy, když u TÉTO objednávky ještě nikdy odečten nebyl.
       const alreadyApplied = existingStored?.order?.stock_applied === true || existingStored?.stock_applied === true;

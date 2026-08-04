@@ -2,6 +2,7 @@
 // Deploy via Supabase CLI: supabase functions deploy send-withdrawal-email
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { safeField, isValidEmail } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -54,14 +55,31 @@ serve(async (req) => {
       throw new Error("Missing BREVO_API_KEY environment variable in Supabase dashboard.");
     }
 
-    const { orderNumber, email, bankAccount, returnType, partialItemsText, refundMethod, lang, fullName } = await req.json();
+    const rawBody = await req.json();
 
-    if (!orderNumber || !email || !refundMethod || !returnType) {
+    if (!rawBody?.orderNumber || !rawBody?.email || !rawBody?.refundMethod || !rawBody?.returnType) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    if (!isValidEmail(rawBody.email)) {
+      return new Response(JSON.stringify({ error: "Neplatná e-mailová adresa." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // BEZPEČNOST: escapovat a omezit délku všeho, co jde od návštěvníka do e-mailu.
+    const orderNumber = safeField(rawBody.orderNumber, 60);
+    const email = safeField(rawBody.email, 254);
+    const bankAccount = safeField(rawBody.bankAccount, 60);
+    const returnType = safeField(rawBody.returnType, 40);
+    const partialItemsText = safeField(rawBody.partialItemsText, 3000);
+    const refundMethod = safeField(rawBody.refundMethod, 40);
+    const fullName = safeField(rawBody.fullName, 120);
+    const lang = rawBody.lang === 'CZ' ? 'CZ' : (rawBody.lang === 'EN' ? 'EN' : 'CZ');
 
     const isCzech = lang === "CZ";
 

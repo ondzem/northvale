@@ -2,6 +2,7 @@
 // Deploy via: npx supabase functions deploy subscribe-newsletter --project-ref bfxzhggjpiyqfolqpxzz
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { isValidEmail, clampText } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -93,7 +94,19 @@ serve(async (req) => {
       throw new Error("Missing BREVO_API_KEY environment variable in Supabase dashboard.");
     }
 
-    const { email, lang = 'CZ', isPreRegistration = false } = await req.json();
+    const subBody = await req.json();
+    const email = clampText(subBody?.email, 254).toLowerCase();
+    const lang = subBody?.lang === 'EN' ? 'EN' : 'CZ';
+    const isPreRegistration = subBody?.isPreRegistration === true;
+
+    // BEZPEČNOST: ověřit formát e-mailu, ať se do seznamu odběratelů
+    // nedostanou nesmyslné nebo přerostlé hodnoty.
+    if (!isValidEmail(email)) {
+      return new Response(JSON.stringify({ error: "Neplatná e-mailová adresa." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (!email) {
       return new Response(JSON.stringify({ error: "Missing required field (email)" }), {

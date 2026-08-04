@@ -2,6 +2,7 @@
 // Deploy via: npx supabase functions deploy send-newsletter --project-ref bfxzhggjpiyqfolqpxzz
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { getAuthContext, requireAdmin } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { decode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
@@ -142,6 +143,13 @@ serve(async (req) => {
 
     // Initialize Supabase Client with service key (bypasses RLS to write to storage)
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // BEZPEČNOST: newsletter smí odesílat a číst pouze administrátor.
+    // Bez této kontroly může kdokoli s veřejným anon klíčem rozeslat e-mail
+    // celé databázi odběratelů a číst historii kampaní.
+    const authCtx = await getAuthContext(req, supabase, supabaseServiceKey);
+    const denied = requireAdmin(authCtx, corsHeaders);
+    if (denied) return denied;
 
     // 1. GET Request: Fetch history of sent campaigns OR details of a single campaign
     if (req.method === "GET") {

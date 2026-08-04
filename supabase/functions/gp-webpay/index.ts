@@ -3,6 +3,7 @@
 // Deploy via Supabase CLI: supabase functions deploy gp-webpay
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -63,13 +64,56 @@ serve(async (req) => {
       }
 
       const body = await req.json();
-      const { orderId, amount, currency = "203", returnUrl } = body; // amount is in cents, currency 203 = CZK
+      const { orderId, amount: clientAmount, currency = "203", returnUrl } = body; // amount is in cents, currency 203 = CZK
 
-      if (!orderId || !amount || !returnUrl) {
-        return new Response(JSON.stringify({ error: "Missing required parameters (orderId, amount, returnUrl)" }), {
+      if (!orderId || !returnUrl) {
+        return new Response(JSON.stringify({ error: "Missing required parameters (orderId, returnUrl)" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
+      }
+
+      // BEZPEČNOST: částku k zaplacení NEBEREME od prohlížeče.
+      // Objednávka je na serveru založená ještě před přesměrováním na bránu,
+      // takže si částku načteme z ní. Jinak by si kdokoli mohl podepsat platbu
+      // na 1 Kč za zboží v libovolné hodnotě.
+      let amount: number | null = null;
+      try {
+        const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+        const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+        const { data: file } = await supabase.storage
+          .from("pohoda-orders")
+          .download(`order_${orderId}.json`);
+
+        if (file) {
+          const stored = JSON.parse(await file.text());
+          const total = Number(stored?.order?.final_total ?? stored?.order?.finalTotal);
+          if (!isNaN(total) && total >= 0) {
+            amount = Math.round(total * 100);
+          }
+        }
+      } catch (lookupErr) {
+        console.error("Failed to load order for amount verification:", lookupErr);
+      }
+
+      if (amount === null) {
+        console.error(`[SECURITY] Odmítnut podpis platby: objednávka ${orderId} nenalezena na serveru.`);
+        return new Response(JSON.stringify({
+          error: "Objednávku se nepodařilo ověřit. Obnovte prosím stránku a zkuste to znovu.",
+          code: "ORDER_NOT_FOUND"
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (clientAmount !== undefined && Number(clientAmount) !== amount) {
+        console.warn(
+          `[SECURITY] Objednávka ${orderId}: prohlížeč poslal ${clientAmount} h, ` +
+          `server použil ${amount} h podle uložené objednávky.`
+        );
       }
 
       const operation = "CREATE_ORDER";

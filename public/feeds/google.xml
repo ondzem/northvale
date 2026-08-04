@@ -203,6 +203,17 @@
       <g:brand>Northvale</g:brand>
     </item>
     <item>
+      <g:id>destined-rivals-booster-bundle</g:id>
+      <g:title>Destined Rivals Booster Bundle</g:title>
+      <g:description>Na čí straně stojíte? Team Rocket opět chystá svůj plán a stateční trenéři se ho snaží zastavit – rozhodnutí je na vás!</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/destined-rivals-booster-bundle/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/destined-rivals-booster-bundle.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>2099.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
       <g:id>tohoku-pokemon-center-box</g:id>
       <g:title>Tohoku Pokémon Center Box</g:title>
       <g:description>Vzácný sběratelský kousek přímo z Japonska! Tento speciální box byl vydán u příležitosti oslav Pokémon Centra v oblasti Tohoku a je limitovanou edicí, kterou si nenechá ujít žádný opravdový sběratel.</g:description>
@@ -223,17 +234,6 @@
       <g:price>429.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
-    </item>
-    <item>
-      <g:id>destined-rivals-booster-bundle</g:id>
-      <g:title>Destined Rivals Booster Bundle</g:title>
-      <g:description>Na čí straně stojíte? Team Rocket opět chystá svůj plán a stateční trenéři se ho snaží zastavit – rozhodnutí je na vás!</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/destined-rivals-booster-bundle/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/destined-rivals-booster-bundle.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>2099.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Pokémon</g:brand>
     </item>
     <item>
       <g:id>fukuoka-pokemon-center-box</g:id>
@@ -456,6 +456,17 @@
       <g:brand>One Piece</g:brand>
     </item>
     <item>
+      <g:id>abyss-eye-booster-box</g:id>
+      <g:title>Abyss Eye Booster Box</g:title>
+      <g:description>Temnota se šíří říší! Japonská edice Abyss Eye přivádí do hry Mega Darkraie ex – hvězdu setu s masivním HP 280 a útokem &quot;Abyss Eye&quot;, který okamžitě vyřadí soupeřova aktivního Pokémona postiženého jakoukoli speciální podmínkou.</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/abyss-eye-booster-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>2699.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
       <g:id>360-pocket-white</g:id>
       <g:title>360 Pocket White</g:title>
       <g:description>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</g:description>
@@ -476,17 +487,6 @@
       <g:price>899.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
-    </item>
-    <item>
-      <g:id>abyss-eye-booster-box</g:id>
-      <g:title>Abyss Eye Booster Box</g:title>
-      <g:description>Temnota se šíří říší! Japonská edice Abyss Eye přivádí do hry Mega Darkraie ex – hvězdu setu s masivním HP 280 a útokem &quot;Abyss Eye&quot;, který okamžitě vyřadí soupeřova aktivního Pokémona postiženého jakoukoli speciální podmínkou.</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-box/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/abyss-eye-booster-box.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>2699.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Pokémon</g:brand>
     </item>
     <item>
       <g:id>mega-dream-ex-booster-pack</g:id>

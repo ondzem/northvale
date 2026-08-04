@@ -3,6 +3,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
+import { getAuthContext, requireAdmin } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,6 +35,12 @@ serve(async (req) => {
 
     // Initialize Supabase Client with Service Role Key to bypass RLS
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // BEZPEČNOST: kontrolu expirace denní nabídky spouští cron (service klíč)
+    // nebo administrátor. Veřejné volání by umožnilo cizímu měnit stav nabídky.
+    const authCtx = await getAuthContext(req, supabase, supabaseServiceKey);
+    const denied = requireAdmin(authCtx, corsHeaders);
+    if (denied) return denied;
 
     // Fetch all active deals
     const { data: deals, error: dbError } = await supabase

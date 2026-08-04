@@ -186,17 +186,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://northvaletcg.eu/sealed-detail/destined-rivals-booster-bundle/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://northvaletcg.eu/sealed-detail/tohoku-pokemon-center-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://northvaletcg.eu/sealed-detail/akryl-booster-bundle-pokemon/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://northvaletcg.eu/sealed-detail/destined-rivals-booster-bundle/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -301,17 +301,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://northvaletcg.eu/sealed-detail/360-pocket-white/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://northvaletcg.eu/sealed-detail/sleeved-360-pocket-3x3-black/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

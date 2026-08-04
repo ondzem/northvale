@@ -2,6 +2,7 @@
 // Deploy via Supabase CLI: supabase functions deploy send-order-email
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { getAuthContext, requireAdmin } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
@@ -52,6 +53,19 @@ serve(async (req) => {
 
     if (!brevoApiKey) {
       throw new Error("Missing BREVO_API_KEY environment variable.");
+    }
+
+    // BEZPEČNOST: e-maily jménem obchodu smí odesílat jen interní volání
+    // (finalize-order se service klíčem) nebo přihlášený administrátor.
+    // Bez toho může kdokoli s veřejným anon klíčem rozesílat z vaší domény
+    // libovolné "potvrzení objednávky" na libovolnou adresu (phishing).
+    {
+      const authUrl = Deno.env.get("SUPABASE_URL") ?? "";
+      const authServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+      const authClient = createClient(authUrl, authServiceKey);
+      const authCtx = await getAuthContext(req, authClient, authServiceKey);
+      const denied = requireAdmin(authCtx, corsHeaders);
+      if (denied) return denied;
     }
 
     const body = await req.json();

@@ -192,10 +192,10 @@ function baseOrder(overrides = {}) {
     subtotal: 200,
     discountCode: null,
     discountAmount: 0,
-    shippingCost: 89,
+    shippingCost: 109,
     paymentSurcharge: 0,
     creditApplied: 0,
-    finalTotal: 289,
+    finalTotal: 309,
     paymentStatus: 'awaiting_payment',
     fulfillmentStatus: 'pending',
     userId: testUserId,
@@ -391,9 +391,9 @@ async function testBankTransferOrder() {
     : { data: null };
 
   const order = baseOrder(discountCodeReady
-    ? { discountCode: TEST_CODE, discountAmount: 50, finalTotal: 239 }
-    : { finalTotal: 289 });
-  const expectedTotal = discountCodeReady ? 239 : 289;
+    ? { discountCode: TEST_CODE, discountAmount: 50, finalTotal: 259 }
+    : { finalTotal: 309 });
+  const expectedTotal = discountCodeReady ? 259 : 309;
 
   const res = await callFn('finalize-order', { body: { action: 'create', orderDetails: order } });
   if (!check('Objednávka vytvořena (HTTP 200)', res.status === 200 && res.json?.success, `status ${res.status}: ${res.text.slice(0, 200)}`)) return null;
@@ -589,7 +589,7 @@ async function testCustomerPortal(orderId) {
   const mine = orders.find(x => String(x.order?.id) === String(orderId));
   if (mine) {
     check('V účtu je správný stav platby', mine.order.payment_status === 'awaiting_payment', `stav: ${mine.order.payment_status}`);
-    check('V účtu je správná částka', Number(mine.order.final_total) === (discountCodeReady ? 239 : 289), `částka: ${mine.order.final_total}`);
+    check('V účtu je správná částka', Number(mine.order.final_total) === (discountCodeReady ? 259 : 309), `částka: ${mine.order.final_total}`);
     check('V účtu jsou položky objednávky', (mine.items || []).length > 0);
   }
 }
@@ -664,7 +664,7 @@ async function testCodOrder() {
         paymentMethod: 'Dobírka',
         paymentStatus: 'cod',
         paymentSurcharge: 49,
-        finalTotal: 338,
+        finalTotal: 358,
         userId: null
       })
     }
@@ -689,7 +689,7 @@ async function testNoVatOrder() {
       orderDetails: baseOrder({
         items: [{ id: TEST_PRODUCT_NOVAT_ID, product_id: TEST_PRODUCT_NOVAT_ID, name: 'ZZ TEST Produkt bez DPH', price: 500, quantity: 1, no_vat: true }],
         subtotal: 500,
-        finalTotal: 589,
+        finalTotal: 609,
         hasNoVat: true,
         userId: null
       })
@@ -748,7 +748,7 @@ async function testReserveOnly() {
       orderDetails: baseOrder({
         id: orderId,
         paymentMethod: 'Online platební karta',
-        ...(discountCodeReady ? { discountCode: TEST_CODE, discountAmount: 50, finalTotal: 239 } : { finalTotal: 289 }),
+        ...(discountCodeReady ? { discountCode: TEST_CODE, discountAmount: 50, finalTotal: 259 } : { finalTotal: 309 }),
         userId: null
       })
     }
@@ -776,7 +776,7 @@ async function testReserveOnly() {
 async function testDoubleCreate() {
   section('13. Ochrana proti dvojímu odečtu skladu');
 
-  const order = baseOrder({ userId: null, discountCode: null, discountAmount: 0, finalTotal: 289 });
+  const order = baseOrder({ userId: null, discountCode: null, discountAmount: 0, finalTotal: 309 });
   const first = await callFn('finalize-order', { body: { action: 'create', orderDetails: order } });
   const orderId = first.json?.orderId;
   if (!check('První uložení objednávky', first.status === 200 && !!orderId)) return;

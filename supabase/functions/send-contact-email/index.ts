@@ -2,6 +2,7 @@
 // Deploy via Supabase CLI: supabase functions deploy send-contact-email
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { safeField, isValidEmail } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -52,14 +53,28 @@ serve(async (req) => {
       throw new Error("Missing BREVO_API_KEY environment variable in Supabase dashboard.");
     }
 
-    const { name, email, phone, message } = await req.json();
+    const raw = await req.json();
 
-    if (!name || !email || !message) {
+    if (!raw?.name || !raw?.email || !raw?.message) {
       return new Response(JSON.stringify({ error: "Missing required fields (name, email, message)" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    if (!isValidEmail(raw.email)) {
+      return new Response(JSON.stringify({ error: "Neplatná e-mailová adresa." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // BEZPEČNOST: vše od návštěvníka escapovat a omezit délku.
+    // Bez toho lze do e-mailu pro obchod propašovat vlastní HTML a odkazy.
+    const name = safeField(raw.name, 100);
+    const email = safeField(raw.email, 254);
+    const phone = safeField(raw.phone, 40);
+    const message = safeField(raw.message, 5000);
 
     const innerHtml = `
       <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%;">

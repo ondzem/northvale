@@ -2,6 +2,7 @@
 // Deploy via Supabase CLI: supabase functions deploy send-support-notification
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { safeField } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,7 +26,18 @@ serve(async (req) => {
       throw new Error("Missing BREVO_API_KEY environment variable in Supabase dashboard.");
     }
 
-    const { type, productName, authorName, authorEmail, text, rating, productId, productUrl } = await req.json();
+    const rawBody = await req.json();
+
+    // BEZPEČNOST: obsah od návštěvníka escapovat a omezit délku,
+    // jinak lze do notifikačního e-mailu vložit vlastní HTML a odkazy.
+    const type = safeField(rawBody?.type, 30);
+    const productName = safeField(rawBody?.productName, 200);
+    const authorName = safeField(rawBody?.authorName, 100);
+    const authorEmail = safeField(rawBody?.authorEmail, 254);
+    const text = safeField(rawBody?.text, 5000);
+    const rating = safeField(rawBody?.rating, 10);
+    const productId = safeField(rawBody?.productId, 120);
+    const productUrl = safeField(rawBody?.productUrl, 500);
 
     if (!type || !productName || !authorName || !text) {
       return new Response(JSON.stringify({ error: "Missing required fields (type, productName, authorName, text)" }), {

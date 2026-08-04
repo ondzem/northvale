@@ -724,7 +724,7 @@ export default function OrdersTab({ showToast }) {
                 }
               }
             });
-            console.log(`Expedition email sent to ${order.email} for order ${order.id}`);
+            console.log(`Expedition email sent for order ${order.id}`);
           } catch (emailErr) {
             console.error('Failed to send expedition email:', emailErr);
           }
@@ -1018,7 +1018,7 @@ export default function OrdersTab({ showToast }) {
                 }
               }
             });
-            console.log(`Expedition email sent to ${order.email} for order ${order.id}`);
+            console.log(`Expedition email sent for order ${order.id}`);
           } catch (emailErr) {
             console.error('Failed to send expedition email:', emailErr);
           }

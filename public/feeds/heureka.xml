@@ -217,6 +217,18 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
+    <ITEM_ID>destined-rivals-booster-bundle</ITEM_ID>
+    <PRODUCTNAME>Destined Rivals Booster Bundle</PRODUCTNAME>
+    <DESCRIPTION>Na čí straně stojíte? Team Rocket opět chystá svůj plán a stateční trenéři se ho snaží zastavit – rozhodnutí je na vás!</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/destined-rivals-booster-bundle/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/destined-rivals-booster-bundle.webp</IMGURL>
+    <PRICE_VAT>2099</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
     <ITEM_ID>tohoku-pokemon-center-box</ITEM_ID>
     <PRODUCTNAME>Tohoku Pokémon Center Box</PRODUCTNAME>
     <DESCRIPTION>Vzácný sběratelský kousek přímo z Japonska! Tento speciální box byl vydán u příležitosti oslav Pokémon Centra v oblasti Tohoku a je limitovanou edicí, kterou si nenechá ujít žádný opravdový sběratel.</DESCRIPTION>
@@ -237,18 +249,6 @@
     <PRICE_VAT>429</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
-    <HEUREKA_CPC>5</HEUREKA_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
-    <ITEM_ID>destined-rivals-booster-bundle</ITEM_ID>
-    <PRODUCTNAME>Destined Rivals Booster Bundle</PRODUCTNAME>
-    <DESCRIPTION>Na čí straně stojíte? Team Rocket opět chystá svůj plán a stateční trenéři se ho snaží zastavit – rozhodnutí je na vás!</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/destined-rivals-booster-bundle/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/destined-rivals-booster-bundle.webp</IMGURL>
-    <PRICE_VAT>2099</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Pokémon</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
@@ -493,6 +493,18 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
+    <ITEM_ID>abyss-eye-booster-box</ITEM_ID>
+    <PRODUCTNAME>Abyss Eye Booster Box</PRODUCTNAME>
+    <DESCRIPTION>Temnota se šíří říší! Japonská edice Abyss Eye přivádí do hry Mega Darkraie ex – hvězdu setu s masivním HP 280 a útokem &quot;Abyss Eye&quot;, který okamžitě vyřadí soupeřova aktivního Pokémona postiženého jakoukoli speciální podmínkou.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/abyss-eye-booster-box.webp</IMGURL>
+    <PRICE_VAT>2699</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
     <ITEM_ID>360-pocket-white</ITEM_ID>
     <PRODUCTNAME>360 Pocket White</PRODUCTNAME>
     <DESCRIPTION>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</DESCRIPTION>
@@ -513,18 +525,6 @@
     <PRICE_VAT>899</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
-    <HEUREKA_CPC>5</HEUREKA_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
-    <ITEM_ID>abyss-eye-booster-box</ITEM_ID>
-    <PRODUCTNAME>Abyss Eye Booster Box</PRODUCTNAME>
-    <DESCRIPTION>Temnota se šíří říší! Japonská edice Abyss Eye přivádí do hry Mega Darkraie ex – hvězdu setu s masivním HP 280 a útokem &quot;Abyss Eye&quot;, který okamžitě vyřadí soupeřova aktivního Pokémona postiženého jakoukoli speciální podmínkou.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-box/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/abyss-eye-booster-box.webp</IMGURL>
-    <PRICE_VAT>2699</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Pokémon</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>

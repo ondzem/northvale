@@ -671,20 +671,16 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
       // Check if we have a real Supabase session
       const { data: { session } } = await supabase.auth.getSession();
 
+      // BEZPEČNOST: dřívější "testovací režim" zde zapínal 2FA s pevně daným
+      // veřejně známým klíčem a jako platný bral jakýkoli šestimístný kód.
+      // Uživateli se pak v účtu zobrazovalo, že má 2FA aktivní, přestože
+      // ve skutečnosti nechránilo vůbec nic. Bez relace 2FA nezapínáme.
       if (!session) {
-        // Fallback to Mock mode
-        setEnrolledFactor({
-          id: 'mock-factor-id',
-          qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent('otpauth://totp/NORTHVALE:' + (user.email || 'test@example.com') + '?secret=JBSWY3DPEHPK3PXP&issuer=NORTHVALE')}`,
-          secret: 'JBSWY3DPEHPK3PXP',
-          isMock: true
-        });
-        setIsSettingUp2FA(true);
         showToast(
-          lang === 'CZ' 
-            ? 'Spuštěn testovací režim 2FA (bez aktivní relace Supabase).' 
-            : 'Started mock 2FA mode (no active Supabase session).', 
-          'warning'
+          lang === 'CZ'
+            ? 'Pro nastavení dvoufaktorového ověření se prosím znovu přihlaste.'
+            : 'Please sign in again to set up two-factor authentication.',
+          'error'
         );
         return;
       }
@@ -744,33 +740,21 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
       return;
     }
 
-    // Mock verification fallback
+    // BEZPEČNOST: zde bývalo "testovací ověření", které jako platný přijalo
+    // jakýkoli šestimístný kód a přesto zapsalo two_factor_enabled = true.
+    // Zákazník pak byl přesvědčený, že má účet chráněný, a přitom neměl.
+    // Ověřuje se výhradně proti Supabase MFA.
     if (enrolledFactor.isMock) {
-      let isSuccess = false;
-      if (user.id) {
-        try {
-          const { error } = await supabase
-            .from('profiles')
-            .update({ two_factor_enabled: true })
-            .eq('id', user.id);
-
-          if (!error) isSuccess = true;
-        } catch (err) {
-          console.warn(err);
-        }
-      }
-
-      setUser(prev => ({ ...prev, twoFactorEnabled: true }));
+      setAuthCodeError(true);
+      showToast(
+        lang === 'CZ'
+          ? 'Dvoufaktorové ověření se nepodařilo nastavit. Přihlaste se prosím znovu.'
+          : 'Two-factor authentication could not be set up. Please sign in again.',
+        'error'
+      );
       setIsSettingUp2FA(false);
       setEnrolledFactor(null);
       setAuthCode('');
-      setAuthCodeError(false);
-
-      if (isSuccess) {
-        showToast(lang === 'CZ' ? 'Dvoufaktorové ověření (2FA) bylo úspěšně aktivováno.' : 'Two-factor authentication (2FA) was successfully activated.', 'success');
-      } else {
-        showToast(lang === 'CZ' ? '2FA aktivováno v testovacím režimu.' : '2FA activated in test mode.', 'warning');
-      }
       return;
     }
 

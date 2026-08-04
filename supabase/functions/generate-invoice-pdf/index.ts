@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { getAuthContext, requireAdmin } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { PDFDocument, rgb, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
 import fontkit from "https://esm.sh/@pdf-lib/fontkit@1.1.1";
@@ -56,6 +57,13 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // BEZPEČNOST: fakturu smí vystavit jen interní volání nebo administrátor.
+    // Bez toho může kdokoli s veřejným anon klíčem uložit do bucketu "invoices"
+    // libovolné PDF pod libovolným číslem objednávky a přepsat skutečnou fakturu.
+    const authCtx = await getAuthContext(req, supabase, supabaseServiceKey);
+    const denied = requireAdmin(authCtx, corsHeaders);
+    if (denied) return denied;
 
     const reqBody = await req.json();
     const { order, overwrite = false } = reqBody || {};
