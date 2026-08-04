@@ -267,12 +267,20 @@ serve(async (req) => {
         });
       }
 
-      const baseName = filename.replace(/\.(json|xml)$/, "");
-      const filesToDelete = [`${baseName}.json`, `${baseName}.xml`];
+      const baseName = String(filename).replace(/^.*[\\\/]/, "").replace(/\.(json|xml)$/, "");
+      const filesToDelete = [
+        `${baseName}.json`,
+        `${baseName}.xml`,
+        `processed/${baseName}.json`,
+        `processed/${baseName}.xml`
+      ];
 
       let restoredCount = 0;
       try {
-        const { data: fileBlob } = await supabase.storage.from("pohoda-orders").download(`${baseName}.json`);
+        let fileBlob = (await supabase.storage.from("pohoda-orders").download(`${baseName}.json`)).data;
+        if (!fileBlob) {
+          fileBlob = (await supabase.storage.from("pohoda-orders").download(`processed/${baseName}.json`)).data;
+        }
         if (fileBlob) {
           const text = await fileBlob.text();
           const jsonObj = JSON.parse(text);
