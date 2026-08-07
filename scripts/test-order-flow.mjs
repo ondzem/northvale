@@ -663,8 +663,8 @@ async function testCodOrder() {
       orderDetails: baseOrder({
         paymentMethod: 'Dobírka',
         paymentStatus: 'cod',
-        paymentSurcharge: 49,
-        finalTotal: 358,
+        paymentSurcharge: 29,
+        finalTotal: 338,
         userId: null
       })
     }
@@ -676,8 +676,25 @@ async function testCodOrder() {
 
   const stored = await readOrderJson(orderId);
   check('Stav platby je "dobírka"', stored?.order?.payment_status === 'cod', `stav: ${stored?.order?.payment_status}`);
-  check('Uložen dobírkový příplatek', Number(stored?.order?.payment_surcharge) === 49);
+  check('Uložen dobírkový příplatek', Number(stored?.order?.payment_surcharge) === 29);
   check('Objednávka nepřihlášeného zákazníka funguje', !!stored?.order?.customer_email);
+
+  // Server si musí příplatek spočítat sám — nesmí věřit nule od klienta
+  const cheat = await callFn('finalize-order', {
+    body: {
+      action: 'create',
+      orderDetails: baseOrder({
+        paymentMethod: 'Dobírka',
+        paymentStatus: 'cod',
+        paymentSurcharge: 0,
+        finalTotal: 309,
+        userId: null
+      })
+    }
+  });
+  check('Dobírku bez příplatku server odmítne', cheat.status >= 400,
+    `HTTP ${cheat.status} — pokud projde, jde si příplatek odpustit`);
+  if (cheat.json?.orderId) createdOrderIds.push(cheat.json.orderId);
 }
 
 async function testNoVatOrder() {
