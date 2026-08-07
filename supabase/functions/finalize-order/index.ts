@@ -78,7 +78,8 @@ async function getNextInvoiceNumber(supabase: any): Promise<string> {
 }
 
 /**
- * Ceník dopravy — MUSÍ odpovídat výpočtu v src/components/CheckoutFlow.jsx.
+ * Ceník dopravy a dobírkového příplatku — MUSÍ odpovídat výpočtu v src/components/CheckoutFlow.jsx a src/config.js (COD_SURCHARGE).
+ * Při změně částky příplatku je potřeba upravit obě místa — tady i v src/config.js.
  * Klient posílá jen název dopravy, cenu si dopočítá server.
  */
 function serverShippingCost(shippingMethod: string, subtotalAfterDiscount: number, cartSubtotal: number): number {
@@ -208,8 +209,14 @@ async function verifyOrderPricing(supabase: any, orderData: any): Promise<any> {
     const afterDiscount = Math.max(0, serverSubtotal - serverDiscount);
     const serverShipping = serverShippingCost(orderData.shipping_method, afterDiscount, serverSubtotal);
 
-    // Dobírkový příplatek přebíráme od klienta, ale omezený, ať nejde zneužít
-    const surcharge = Math.min(200, Math.max(0, Number(orderData.payment_surcharge) || 0));
+    // Příplatek za dobírku si počítá server sám — klientovi se nevěří.
+    // MUSÍ odpovídat výpočtu v src/components/CheckoutFlow.jsx a hodnotě
+    // COD_SURCHARGE v src/config.js.
+    const pm = String(orderData.payment_method || '').toLowerCase();
+    const sm = String(orderData.shipping_method || '').toLowerCase();
+    const isCod = pm.includes('dobírk') || pm.includes('dobirk') || pm.includes('cash on delivery') || pm.includes('cod');
+    const isPersonalPickup = sm.includes('osobní') || sm.includes('personal') || sm.includes('škrba') || sm.includes('skrba');
+    const surcharge = (isCod && !isPersonalPickup) ? 29 : 0;
 
     // Kredit může být nejvýše zůstatek na účtu zákazníka
     let credit = Math.max(0, Number(orderData.credit_applied) || 0);
