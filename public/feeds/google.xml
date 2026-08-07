@@ -137,17 +137,6 @@
       <g:brand>Pokémon</g:brand>
     </item>
     <item>
-      <g:id>151-journey-booster-pack</g:id>
-      <g:title>151 Journey Booster pack</g:title>
-      <g:description>První ze čtyř čínských setů v sérii Collect 151, zasazené do éry Scarlet &amp;amp; Violet! Edice se vrací ke kořenům a slaví originálních 151 Pokémonů z Kanto regionu – najdete tu Pikachu, Bulbasaura, Charmandera, Squirtla, Mew a mnoho dalších</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/151-journey-booster-pack/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/151-journey-booster-pack.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>139.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Pokémon</g:brand>
-    </item>
-    <item>
       <g:id>shimmering-skies-illuminers-trove-box</g:id>
       <g:title>Shimmering Skies Illuminers Trove Box</g:title>
       <g:description>Celá Lorcana slaví! Po vítězství nad Ursulou se u Velké Iluminárie koná velký festival plný her, hudby, tance a dobrého jídla. Na oslavu dorazí i nové tváře – Wreck-It Ralph se svými pixelovými kamarády z Litwak&apos;s Arcade i Anna, Elsa a Olaf čerství ze Začarovaného lesa.</g:description>
@@ -170,17 +159,6 @@
       <g:brand>Disney Lorcana</g:brand>
     </item>
     <item>
-      <g:id>charizard-ex-super-premium-collection</g:id>
-      <g:title>Charizard EX Super Premium Collection</g:title>
-      <g:description>Zapalte hru s legendárním Charizardem! Tato prémiová kolekce je ideální volbou pro fanoušky ohnivého draka i pro sběratele, kteří chtějí svou sbírku posunout na další úroveň.</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/charizard-ex-super-premium-collection/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/charizard-ex-super-premium-collection.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>3049.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Pokémon</g:brand>
-    </item>
-    <item>
       <g:id>jolteon-terastal-gathering-binder-box</g:id>
       <g:title>Jolteon Terastal Gathering Binder Box</g:title>
       <g:description>Prémiová sběratelská sada zaměřená na konkrétní Eeveelution z čínské edice Terastal Gathering – čínské obdoby japonského Terastal Festival ex a západních Prismatic Evolutions. Skvělá volba pro fanoušky Eevee, kteří chtějí kombinaci nových karet i praktického vybavení pro organizaci sbírky</g:description>
@@ -188,6 +166,17 @@
       <g:image_link>https://northvaletcg.eu/product-images/jolteon-terastal-gathering-binder-box.webp</g:image_link>
       <g:availability>in_stock</g:availability>
       <g:price>3299.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
+      <g:id>charizard-ex-super-premium-collection</g:id>
+      <g:title>Charizard EX Super Premium Collection</g:title>
+      <g:description>Zapalte hru s legendárním Charizardem! Tato prémiová kolekce je ideální volbou pro fanoušky ohnivého draka i pro sběratele, kteří chtějí svou sbírku posunout na další úroveň.</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/charizard-ex-super-premium-collection/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/charizard-ex-super-premium-collection.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>3049.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Pokémon</g:brand>
     </item>
@@ -201,17 +190,6 @@
       <g:price>499.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
-    </item>
-    <item>
-      <g:id>destined-rivals-booster-bundle</g:id>
-      <g:title>Destined Rivals Booster Bundle</g:title>
-      <g:description>Na čí straně stojíte? Team Rocket opět chystá svůj plán a stateční trenéři se ho snaží zastavit – rozhodnutí je na vás!</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/destined-rivals-booster-bundle/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/destined-rivals-booster-bundle.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>2099.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Pokémon</g:brand>
     </item>
     <item>
       <g:id>tohoku-pokemon-center-box</g:id>
@@ -258,6 +236,17 @@
       <g:brand>Pokémon</g:brand>
     </item>
     <item>
+      <g:id>destined-rivals-booster-bundle</g:id>
+      <g:title>Destined Rivals Booster Bundle</g:title>
+      <g:description>Na čí straně stojíte? Team Rocket opět chystá svůj plán a stateční trenéři se ho snaží zastavit – rozhodnutí je na vás!</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/destined-rivals-booster-bundle/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/destined-rivals-booster-bundle.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>2099.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
       <g:id>akryl-booster-bundle-diplay</g:id>
       <g:title>Akryl Booster Bundle Diplay</g:title>
       <g:description>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Bundle Displej patří k nejžádanějším kouskům ve světě sběratelství, a proto by jejich ochrana měla odpovídat jejich skutečné hodnotě</g:description>
@@ -267,6 +256,17 @@
       <g:price>799.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>case-trove-box-wilds-unknown</g:id>
+      <g:title>CASE Trove box Wilds Unknown</g:title>
+      <g:description>Case Illumineer&apos;s Trove k dvanácté edici Wilds Unknown obsahuje více kusů trove boxů v jednom velkoobchodním balení – ideální volba pro obchodníky i vášnivé sběratele, kteří chtějí zásobu na sklad nebo si chtějí zajistit více kusů najednou</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/case-trove-box-wilds-unknown/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/case-trove-box-wilds-unknown.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>10499.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Disney Lorcana</g:brand>
     </item>
     <item>
       <g:id>akryl-booster-box-pokemon</g:id>
@@ -286,9 +286,20 @@
       <g:link>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-pack/</g:link>
       <g:image_link>https://northvaletcg.eu/product-images/abyss-eye-booster-pack.webp</g:image_link>
       <g:availability>in_stock</g:availability>
-      <g:price>89.00 CZK</g:price>
+      <g:price>99.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
+      <g:id>case-wilds-unknown-booster-box</g:id>
+      <g:title>CASE Wilds Unknown Booster Box</g:title>
+      <g:description>Case booster boxů k dvanácté edici Wilds Unknown obsahuje více kusů booster boxů v jednom velkoobchodním balení – ideální volba pro obchodníky i vášnivé sběratele, kteří chtějí zásobu na sklad nebo si chtějí zajistit více boxů najednou za výhodnějších podmínek</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/case-wilds-unknown-booster-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/case-wilds-unknown-booster-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>25999.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Disney Lorcana</g:brand>
     </item>
     <item>
       <g:id>akryl-etb-pokemon</g:id>
@@ -346,6 +357,17 @@
       <g:brand>Northvale</g:brand>
     </item>
     <item>
+      <g:id>mega-dream-ex-booster-pack</g:id>
+      <g:title>Mega Dream Ex booster Pack</g:title>
+      <g:description>Poslední japonská edice roku 2025 slaví návrat Mega Evoluce! MEGA Dream ex je tzv. &quot;High Class Pack&quot; set, tedy prémiová sběratelská edice plná reprintů oblíbených karet z minulého roku, doplněná o zbrusu nové Mega Pokémony inspirované hrou Pokémon Legends: Z-A</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/mega-dream-ex-booster-pack/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/mega-dream-ex-booster-pack.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>339.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
+    </item>
+    <item>
       <g:id>gem-pack-vol-4-booster-pack</g:id>
       <g:title>Gem pack vol. 4 Booster pack</g:title>
       <g:description>Čtvrtý díl oblíbené čínské série Gem Pack přichází s tématem Roku ohnivého koně a hlavní hvězdou setu – Ponytou. Každá karta v balíčku je holografická, takže žádný &quot;bulk&quot; – jen samé lesklé karty.</g:description>
@@ -388,6 +410,17 @@
       <g:price>549.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
+    </item>
+    <item>
+      <g:id>151-journey-booster-pack</g:id>
+      <g:title>151 Journey Booster pack</g:title>
+      <g:description>První ze čtyř čínských setů v sérii Collect 151, zasazené do éry Scarlet &amp;amp; Violet! Edice se vrací ke kořenům a slaví originálních 151 Pokémonů z Kanto regionu – najdete tu Pikachu, Bulbasaura, Charmandera, Squirtla, Mew a mnoho dalších</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/151-journey-booster-pack/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/151-journey-booster-pack.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>149.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Pokémon</g:brand>
     </item>
     <item>
       <g:id>op-16-the-time-of-battle-booster-box</g:id>
@@ -487,17 +520,6 @@
       <g:price>899.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Northvale</g:brand>
-    </item>
-    <item>
-      <g:id>mega-dream-ex-booster-pack</g:id>
-      <g:title>Mega Dream Ex booster Pack</g:title>
-      <g:description>Poslední japonská edice roku 2025 slaví návrat Mega Evoluce! MEGA Dream ex je tzv. &quot;High Class Pack&quot; set, tedy prémiová sběratelská edice plná reprintů oblíbených karet z minulého roku, doplněná o zbrusu nové Mega Pokémony inspirované hrou Pokémon Legends: Z-A</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/mega-dream-ex-booster-pack/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/mega-dream-ex-booster-pack.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>239.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Pokémon</g:brand>
     </item>
     <item>
       <g:id>480-pocket-red</g:id>
