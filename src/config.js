@@ -18,6 +18,16 @@ export const VAT_CONFIG = {
 };
 
 /**
+ * Příplatek za platbu na dobírku (v Kč).
+ * MUSÍ souhlasit s obchodními podmínkami v src/components/GdprVop.jsx.
+ * Neúčtuje se u osobního odběru — tam se platí přímo v prodejně.
+ */
+export const COD_SURCHARGE = 29;
+
+/** Hranice pro dopravu zdarma (v Kč). Příplatek za dobírku se jí neruší. */
+export const FREE_SHIPPING_THRESHOLD = 1750;
+
+/**
  * Calculates price without VAT using official CZ VAT coefficient.
  * Formula: Price / (1 + vatRate)
  */
