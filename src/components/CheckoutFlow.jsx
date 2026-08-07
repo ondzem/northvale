@@ -2166,7 +2166,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                       <span className="pof-radio-dot" aria-hidden="true"></span>
                       <span className="pof-radio-body">
                         <span className="pof-radio-name">
-                          {lang === 'CZ' ? `Dobírka (+${COD_SURCHARGE} Kč)` : `Cash on Delivery (+${COD_SURCHARGE} CZK)`}
+                          {lang === 'CZ' ? 'Dobírka' : 'Cash on Delivery'}
                         </span>
                         <span className="pof-radio-desc">
                           {lang === 'CZ' ? 'Platba hotově nebo kartou kurýrovi při převzetí zásilky.' : 'Pay by cash or card to the courier upon parcel arrival.'}
