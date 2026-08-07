@@ -9,29 +9,54 @@ import AddressAutocomplete from './AddressAutocomplete';
 
 export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, alert, onOpenLogin, appliedDiscount, setAppliedDiscount, validateCart }) {
   const { lang, t } = useTranslation();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [street, setStreet] = useState('');
-  const [city, setCity] = useState('');
-  const [zip, setZip] = useState('');
-  const [shipping, setShipping] = useState('dpd-pickup');
-  const [payment, setPayment] = useState('card');
+  const loadCheckoutDraft = () => {
+    try {
+      const raw = localStorage.getItem('northvale-checkout-draft');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.savedAt || !parsed.data) return null;
+
+      const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+      if (Date.now() - parsed.savedAt > SEVEN_DAYS) {
+        localStorage.removeItem('northvale-checkout-draft');
+        return null;
+      }
+      return parsed.data;
+    } catch (_e) {
+      return null;
+    }
+  };
+
+  const initialDraftRef = useRef(loadCheckoutDraft());
+  const draftData = initialDraftRef.current;
+
+  const [name, setName] = useState(() => draftData?.name ?? '');
+  const [email, setEmail] = useState(() => draftData?.email ?? '');
+  const [phone, setPhone] = useState(() => draftData?.phone ?? '');
+  const [street, setStreet] = useState(() => draftData?.street ?? '');
+  const [city, setCity] = useState(() => draftData?.city ?? '');
+  const [zip, setZip] = useState(() => draftData?.zip ?? '');
+  const [shipping, setShipping] = useState(() => draftData?.shipping ?? 'dpd-pickup');
+  const [payment, setPayment] = useState(() => draftData?.payment ?? 'card');
   
   // Store Credit applied state
   const [creditInput, setCreditInput] = useState('');
   const [appliedCredit, setAppliedCredit] = useState(0);
 
   // Company and notes states
-  const [isCompany, setIsCompany] = useState(false);
-  const [companyName, setCompanyName] = useState('');
-  const [ico, setIco] = useState('');
-  const [dic, setDic] = useState('');
-  const [pickupPoint, setPickupPoint] = useState('');
-  const [pickupPointDetails, setPickupPointDetails] = useState(null);
+  const [isCompany, setIsCompany] = useState(() => draftData?.isCompany ?? false);
+  const [companyName, setCompanyName] = useState(() => draftData?.companyName ?? '');
+  const [ico, setIco] = useState(() => draftData?.ico ?? '');
+  const [dic, setDic] = useState(() => draftData?.dic ?? '');
+  const [pickupPoint, setPickupPoint] = useState(() => draftData?.pickupPoint ?? '');
+  const [pickupPointDetails, setPickupPointDetails] = useState(() => draftData?.pickupPointDetails ?? null);
   const [showMapModal, setShowMapModal] = useState(false);
   const [mapType, setMapType] = useState('');
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState(() => draftData?.notes ?? '');
+
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(() => {
+    return !!(draftData && (draftData.name || draftData.email || draftData.street || draftData.phone));
+  });
 
   // Discount code states
   const [promoInput, setPromoInput] = useState(appliedDiscount ? appliedDiscount.code : '');
@@ -199,34 +224,83 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     }
   };
 
-  // Auto-fill form fields when logged in user details change
+  // Auto-fill form fields when logged in user details change (only fill empty fields)
   useEffect(() => {
     if (user && user.id) {
-      if (user.billingName) setName(user.billingName);
-      else if (user.name) setName(user.name);
-      
-      if (user.email) setEmail(user.email);
-      if (user.phone) setPhone(user.phone);
-      
-      // Auto-fill address (priority: shippingAddresses[0] -> billingStreet)
-      if (user.shippingAddresses && user.shippingAddresses.length > 0) {
-        const addr = user.shippingAddresses[0];
-        if (addr.street) setStreet(addr.street);
-        if (addr.city) setCity(addr.city);
-        if (addr.zip) setZip(addr.zip);
-      } else {
-        if (user.billingStreet) setStreet(user.billingStreet);
-        if (user.billingCity) setCity(user.billingCity);
-        if (user.billingZip) setZip(user.billingZip);
+      if (!name) {
+        if (user.billingName) setName(user.billingName);
+        else if (user.name) setName(user.name);
       }
       
-      // If user profile has saved company billing data, set them as fallback/default
-      if (user.billingCompany) setCompanyName(user.billingCompany);
-      if (user.billingIco) setIco(user.billingIco);
-      if (user.billingDic) setDic(user.billingDic);
-      if (user.billingCompany || user.billingIco) setIsCompany(true);
+      if (!email && user.email) setEmail(user.email);
+      if (!phone && user.phone) setPhone(user.phone);
+      
+      // Auto-fill address if street is empty
+      if (!street) {
+        if (user.shippingAddresses && user.shippingAddresses.length > 0) {
+          const addr = user.shippingAddresses[0];
+          if (addr.street) setStreet(addr.street);
+          if (addr.city && !city) setCity(addr.city);
+          if (addr.zip && !zip) setZip(addr.zip);
+        } else {
+          if (user.billingStreet) setStreet(user.billingStreet);
+          if (user.billingCity && !city) setCity(user.billingCity);
+          if (user.billingZip && !zip) setZip(user.billingZip);
+        }
+      }
+      
+      if (!companyName && user.billingCompany) setCompanyName(user.billingCompany);
+      if (!ico && user.billingIco) setIco(user.billingIco);
+      if (!dic && user.billingDic) setDic(user.billingDic);
+      if ((user.billingCompany || user.billingIco) && !isCompany) setIsCompany(true);
     }
   }, [user]);
+
+  // Debounced auto-save checkout draft to localStorage (500ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        const hasContent = !!(name || email || phone || street || city || zip || companyName || notes);
+        if (hasContent) {
+          const draftObj = {
+            savedAt: Date.now(),
+            data: {
+              name, email, phone, street, city, zip,
+              isCompany, companyName, ico, dic,
+              shipping, pickupPoint, pickupPointDetails, payment, notes
+            }
+          };
+          localStorage.setItem('northvale-checkout-draft', JSON.stringify(draftObj));
+        }
+      } catch (_e) {
+        // Silent catch for full/disabled localStorage
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [name, email, phone, street, city, zip, isCompany, companyName, ico, dic, shipping, pickupPoint, pickupPointDetails, payment, notes]);
+
+  const handleClearDraft = () => {
+    try {
+      localStorage.removeItem('northvale-checkout-draft');
+    } catch (_e) {}
+    setName('');
+    setEmail('');
+    setPhone('');
+    setStreet('');
+    setCity('');
+    setZip('');
+    setIsCompany(false);
+    setCompanyName('');
+    setIco('');
+    setDic('');
+    setShipping('dpd-pickup');
+    setPickupPoint('');
+    setPickupPointDetails(null);
+    setPayment('card');
+    setNotes('');
+    setHasRestoredDraft(false);
+  };
 
   // GA4 begin_checkout
   useEffect(() => {
@@ -1773,6 +1847,48 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           <div className="pof-grid">
             {/* Left Column: Form Steps */}
             <div className="pof-form">
+              {hasRestoredDraft && (
+                <div 
+                  className="draft-restored-banner"
+                  style={{
+                    marginBottom: '20px',
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    background: 'rgba(253, 189, 22, 0.08)',
+                    border: '1px solid rgba(253, 189, 22, 0.25)',
+                    color: 'var(--color-text, #f1f5f9)',
+                    fontSize: '13px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px'
+                  }}
+                >
+                  <span>
+                    💡 {lang === 'CZ' 
+                      ? 'Vyplnili jsme za vás údaje z rozepsané objednávky.' 
+                      : 'We filled in your details from your saved draft.'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleClearDraft}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--color-gold, #fdbd16)',
+                      fontWeight: '700',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      padding: '2px 6px',
+                      textDecoration: 'underline',
+                      flexShrink: 0
+                    }}
+                  >
+                    {lang === 'CZ' ? 'Vymazat' : 'Clear'}
+                  </button>
+                </div>
+              )}
+
               {/* Step 1: Osobní údaje */}
               <section className="pof-step">
                 <div className="pof-step-head">

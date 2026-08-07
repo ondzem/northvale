@@ -454,6 +454,7 @@ function AppContent() {
 
       try {
         localStorage.removeItem('northvale-cart');
+        localStorage.removeItem('northvale-checkout-draft');
         for (let i = localStorage.length - 1; i >= 0; i--) {
           const key = localStorage.key(i);
           if (key && key.startsWith('fav-')) {
@@ -1664,6 +1665,7 @@ function AppContent() {
         }
 
         setCart([]);
+        try { localStorage.removeItem('northvale-checkout-draft'); } catch (_e) {}
         setAppliedDiscount(null);
         invalidateProductsCache();
         return serverOrder;
@@ -1701,6 +1703,7 @@ function AppContent() {
         });
 
         setCart([]);
+        try { localStorage.removeItem('northvale-checkout-draft'); } catch (_e) {}
         setAppliedDiscount(null);
         invalidateProductsCache();
         return serverOrder;
