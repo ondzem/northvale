@@ -2172,6 +2172,10 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                           {lang === 'CZ' ? 'Platba hotově nebo kartou kurýrovi při převzetí zásilky.' : 'Pay by cash or card to the courier upon parcel arrival.'}
                         </span>
                       </span>
+                      {/* Příplatek musí být vidět už při výběru, ne až v souhrnu. */}
+                      <span className="pof-price">
+                        {`+${COD_SURCHARGE} ${lang === 'CZ' ? 'Kč' : 'CZK'}`}
+                      </span>
                     </button>
                   )}
                 </div>
