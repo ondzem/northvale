@@ -4,6 +4,7 @@ import { supabase } from '../supabase';
 import { getProductImageCached } from '../services/products';
 import CartItemImage from './CartItemImage';
 import { validateDiscountCode, calculateDiscountAmount } from '../services/discountService';
+import { COD_SURCHARGE } from '../config';
 
 export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, alert, onOpenLogin, appliedDiscount, setAppliedDiscount, validateCart }) {
   const { lang, t } = useTranslation();
@@ -124,8 +125,16 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     shippingCost = 0;
   }
 
-  // Payment surcharge for Cash on Delivery (Dobírka)
-  const paymentSurcharge = 0;
+  // Příplatek za dobírku. U osobního odběru se neúčtuje — platí se v prodejně.
+  // Dopravou zdarma se neruší, je to poplatek za způsob platby.
+  const paymentSurcharge = (payment === 'cod' && !isPersonalShipping) ? COD_SURCHARGE : 0;
+
+  // U osobního odběru nedává dobírka smysl — platí se přímo v prodejně.
+  useEffect(() => {
+    if (isPersonalShipping && payment === 'cod') {
+      setPayment('card');
+    }
+  }, [isPersonalShipping, payment]);
 
   // Store Credit capping calculations
   const totalBeforeCredit = Math.max(0, subtotalAfterDiscount + shippingCost + paymentSurcharge);
@@ -2148,21 +2157,23 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   </button>
 
                   {/* Dobírka */}
-                  <button 
-                    type="button" 
-                    className={`pof-radio ${payment === 'cod' ? 'is-active' : ''}`}
-                    onClick={() => setPayment('cod')}
-                  >
-                    <span className="pof-radio-dot" aria-hidden="true"></span>
-                    <span className="pof-radio-body">
-                      <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'Dobírka' : 'Cash on Delivery'}
+                  {!isPersonalShipping && (
+                    <button 
+                      type="button" 
+                      className={`pof-radio ${payment === 'cod' ? 'is-active' : ''}`}
+                      onClick={() => setPayment('cod')}
+                    >
+                      <span className="pof-radio-dot" aria-hidden="true"></span>
+                      <span className="pof-radio-body">
+                        <span className="pof-radio-name">
+                          {lang === 'CZ' ? `Dobírka (+${COD_SURCHARGE} Kč)` : `Cash on Delivery (+${COD_SURCHARGE} CZK)`}
+                        </span>
+                        <span className="pof-radio-desc">
+                          {lang === 'CZ' ? 'Platba hotově nebo kartou kurýrovi při převzetí zásilky.' : 'Pay by cash or card to the courier upon parcel arrival.'}
+                        </span>
                       </span>
-                      <span className="pof-radio-desc">
-                        {lang === 'CZ' ? 'Platba hotově nebo kartou kurýrovi při převzetí zásilky.' : 'Pay by cash or card to the courier upon parcel arrival.'}
-                      </span>
-                    </span>
-                  </button>
+                    </button>
+                  )}
                 </div>
 
                 {payment === 'transfer' && (
