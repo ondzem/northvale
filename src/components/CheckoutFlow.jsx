@@ -5,6 +5,7 @@ import { getProductImageCached } from '../services/products';
 import CartItemImage from './CartItemImage';
 import { validateDiscountCode, calculateDiscountAmount } from '../services/discountService';
 import { COD_SURCHARGE } from '../config';
+import AddressAutocomplete from './AddressAutocomplete';
 
 export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, alert, onOpenLogin, appliedDiscount, setAppliedDiscount, validateCart }) {
   const { lang, t } = useTranslation();
@@ -1890,14 +1891,26 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
 
                 <label className="pof-field" style={{ position: 'relative' }}>
                   <span><span className="__om-t">{lang === 'CZ' ? 'Ulice a číslo popisné *' : 'Street & house number *'}</span></span>
-                  <input 
+                  <AddressAutocomplete 
                     id="input-street"
-                    type="text" 
                     value={street} 
-                    onChange={e => { setStreet(e.target.value); if (formErrors.street) setFormErrors(prev => ({ ...prev, street: null })); }} 
+                    lang={lang}
+                    onChange={(val) => {
+                      setStreet(val);
+                      if (formErrors.street) setFormErrors(prev => ({ ...prev, street: null }));
+                    }}
+                    onSelect={({ street: s, city: c, zip: z }) => {
+                      if (s) setStreet(s);
+                      if (c) setCity(c);
+                      if (z) {
+                        const cleanZip = String(z || '').replace(/\s+/g, '');
+                        setZip(cleanZip);
+                      }
+                      setFormErrors(prev => ({ ...prev, street: null, city: null, zip: null }));
+                    }}
                     placeholder={lang === 'CZ' ? 'Bratří Čapků 1095' : '10 Downing Street'}
                     autoComplete="address-line1"
-                    style={{ borderColor: formErrors.street ? 'rgba(239, 68, 68, 0.65)' : undefined }}
+                    hasError={!!formErrors.street}
                   />
                   {renderErrorTooltip(formErrors.street)}
                 </label>
