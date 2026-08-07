@@ -344,7 +344,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   <br /><br />
                   • <strong>GP webpay – Online Card Payment (FREE):</strong> Fast, secure payment with Visa or Mastercard or via bank portals. Transactions are processed via Global Payments s.r.o. payment gateway and are encrypted using SSL/TLS. We do not store or access your credit card details.
                   <br />• <strong>Bank Transfer (FREE):</strong> Pay directly from your bank account. Upon completing the checkout, you will receive an automatic email containing payment instructions, our bank account details, and a QR code. Payment is due within 5 business days.
-                  <br />• <strong>Cash on Delivery (25 CZK surcharge):</strong> Pay in cash or by card directly to the courier upon receiving the parcel.
+                  <br />• <strong>Cash on Delivery (29 CZK surcharge):</strong> Pay in cash or by card directly to the courier upon receiving the parcel.
                   <br />• <strong>Store Credit – Customer Balance (FREE):</strong> If you have a Store Credit balance on your user account (e.g., from buylist trade-ins), you can apply it as a discount on all or part of your purchase.
                 </p>
 
@@ -473,7 +473,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  Platba na dobírku (příplatek 25 Kč): objednávku zaplatíte hotově nebo kartou přímo kurýrovi či ve výdejním místě při převzetí zásilky.
+                  Platba na dobírku (příplatek 29 Kč): objednávku zaplatíte hotově nebo kartou přímo kurýrovi či ve výdejním místě při převzetí zásilky.
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
