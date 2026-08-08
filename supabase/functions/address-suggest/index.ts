@@ -50,12 +50,15 @@ serve(async (req: Request) => {
     const rawCountry = String(url.searchParams.get("country") || "cz").toLowerCase();
     const country = /^[a-z]{2}$/.test(rawCountry) ? rawCountry : "cz";
 
-    const mapyUrl = new URL("https://api.mapy.cz/v1/suggest");
+    const mapyUrl = new URL("https://api.mapy.com/v1/suggest");
     mapyUrl.searchParams.set("lang", lang);
     mapyUrl.searchParams.set("limit", "6");
-    mapyUrl.searchParams.set("type", "regional.address,regional.street");
+    // Jen konkrétní adresy s číslem popisným — u nich API vrací i PSČ.
+    mapyUrl.searchParams.set("type", "regional.address");
     mapyUrl.searchParams.set("query", q);
-    mapyUrl.searchParams.set("country", country);
+    // POZOR: parametr se jmenuje "locality", ne "country".
+    // "country" API tiše ignoruje a výsledky by nebyly omezené na ČR.
+    mapyUrl.searchParams.set("locality", country);
 
     const apiRes = await fetch(mapyUrl.toString(), {
       headers: {
@@ -77,34 +80,39 @@ serve(async (req: Request) => {
     const suggestions = items.slice(0, 6).map((item: any) => {
       const reg = Array.isArray(item.regionalStructure) ? item.regionalStructure : [];
 
-      let street = item.name || "";
+      // Ulice s číslem popisným je v item.name, např. "Týnská ulička 610/7".
+      const street = String(item.name || "").trim();
+
+      // PSČ je vlastní pole item.zip. V regionalStructure NENÍ — hledat ho tam
+      // znamená, že se PSČ nikdy nevyplní, což je hlavní přínos našeptávače.
+      const zip = String(item.zip || "").replace(/\s+/g, "");
+
       let city = "";
-      let zip = "";
+      let cityPart = "";
       let countryName = "";
 
       for (const elem of reg) {
         const elemType = String(elem.type || "");
         const elemName = String(elem.name || "").trim();
+        if (!elemName) continue;
 
-        if (elemType.includes("postal_code")) {
-          zip = elemName.replace(/\s+/g, "");
-        } else if (elemType.includes("municipality") && !city) {
+        if (elemType === "regional.municipality" && !city) {
           city = elemName;
-        } else if (elemType.includes("country")) {
+        } else if (elemType === "regional.municipality_part" && !cityPart) {
+          cityPart = elemName;
+        } else if (elemType === "regional.country") {
           countryName = elemName;
-        } else if (elemType.includes("street") && (!street || !street.includes(elemName))) {
-          if (!street) street = elemName;
         }
       }
 
-      // If label contains details, use clean label for UI display
-      const label = item.label || item.name || [street, city].filter(Boolean).join(", ");
-
+      // POZOR: item.label je NÁZEV TYPU ("Adresa", "Město"), ne adresa.
+      // Do nabídky patří item.name a jako podtitulek item.location.
       return {
-        label,
-        street: street || label,
-        city: city || "",
-        zip: zip || "",
+        label: street,
+        context: String(item.location || [cityPart, city, countryName].filter(Boolean).join(", ")).trim(),
+        street,
+        city: city || cityPart || "",
+        zip,
         country: countryName || "Česko",
       };
     });

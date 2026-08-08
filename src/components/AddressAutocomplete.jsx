@@ -20,8 +20,10 @@ export default function AddressAutocomplete({
   const [loading, setLoading] = useState(false);
 
   const wrapperRef = useRef(null);
-  const abortControllerRef = useRef(null);
   const debounceTimerRef = useRef(null);
+  // Pořadové číslo požadavku — starší odpověď, která dorazí později,
+  // se zahodí, aby nepřepsala výsledky k novějšímu dotazu.
+  const requestSeqRef = useRef(0);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -45,11 +47,6 @@ export default function AddressAutocomplete({
       clearTimeout(debounceTimerRef.current);
     }
 
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      abortControllerRef.current = null;
-    }
-
     if (query.length < 2) {
       setSuggestions([]);
       setIsOpen(false);
@@ -59,22 +56,22 @@ export default function AddressAutocomplete({
     }
 
     debounceTimerRef.current = setTimeout(async () => {
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
+      const seq = ++requestSeqRef.current;
       setLoading(true);
 
       try {
         const langParam = lang === 'EN' ? 'en' : 'cs';
-        const { data, error } = await supabase.functions.invoke('address-suggest', {
-          method: 'GET',
-          headers: {},
-          queryParams: {
-            q: query,
-            lang: langParam,
-            country: 'cz',
-          },
-          signal: controller.signal,
-        });
+        // POZOR: supabase.functions.invoke NEZNÁ volbu "queryParams" — parametry
+        // se musí připojit rovnou k názvu funkce, stejně jako to dělá zbytek
+        // projektu (viz save-order-json). Jinak se dotaz vůbec neodešle.
+        const path = `address-suggest?q=${encodeURIComponent(query)}`
+          + `&lang=${encodeURIComponent(langParam)}`
+          + `&country=cz`;
+
+        const { data, error } = await supabase.functions.invoke(path, { method: 'GET' });
+
+        // Mezitím dorazila odpověď na novější dotaz — tuhle zahodíme.
+        if (seq !== requestSeqRef.current) return;
 
         if (error || !data || !Array.isArray(data.suggestions)) {
           setSuggestions([]);
@@ -83,13 +80,13 @@ export default function AddressAutocomplete({
           setSuggestions(data.suggestions);
           setIsOpen(data.suggestions.length > 0);
         }
-      } catch (err) {
-        if (err.name !== 'AbortError') {
+      } catch (_err) {
+        if (seq === requestSeqRef.current) {
           setSuggestions([]);
           setIsOpen(false);
         }
       } finally {
-        setLoading(false);
+        if (seq === requestSeqRef.current) setLoading(false);
       }
     }, 250);
 
@@ -237,10 +234,12 @@ export default function AddressAutocomplete({
                   gap: '2px',
                 }}
               >
-                <div style={{ fontWeight: '600' }}>{item.label}</div>
-                {(item.city || item.zip) && (
+                <div style={{ fontWeight: '600' }}>{item.label || item.street}</div>
+                {(item.context || item.city || item.zip) && (
                   <div style={{ fontSize: '11.5px', color: 'var(--text-muted, #94a3b8)' }}>
-                    {[item.city, item.zip].filter(Boolean).join(', ')}
+                    {item.context
+                      ? [item.zip, item.context].filter(Boolean).join(' · ')
+                      : [item.city, item.zip].filter(Boolean).join(', ')}
                   </div>
                 )}
               </li>
