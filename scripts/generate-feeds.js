@@ -217,7 +217,7 @@ async function run() {
 
   // 3. Generate Zboží Feed
   let zboziXml = '<?xml version="1.0" encoding="UTF-8" ?>\n';
-  zboziXml += '<SHOP>\n';
+  zboziXml += '<SHOP xmlns="http://www.zbozi.cz/ns/offer/1.0">\n';
 
   for (const p of filteredProducts) {
     const title = p.name || '';
@@ -237,10 +237,12 @@ async function run() {
     const ean = p.ean || p.custom_params?.ean || p.custom_params?.gtin || '';
     const brand = getBrand(p.game);
     const zboziCpc = p.custom_params?.zbozi_cpc || p.custom_params?.heureka_cpc || '5';
+    const fullProductName = brand && !title.toLowerCase().includes(brand.toLowerCase()) ? `${brand} ${title}` : title;
 
     zboziXml += '  <SHOPITEM>\n';
     zboziXml += `    <ITEM_ID>${escapeXml(p.id.substring(0, 36))}</ITEM_ID>\n`;
     zboziXml += `    <PRODUCTNAME>${escapeXml(title)}</PRODUCTNAME>\n`;
+    zboziXml += `    <PRODUCT>${escapeXml(fullProductName)}</PRODUCT>\n`;
     zboziXml += `    <DESCRIPTION>${escapeXml(desc)}</DESCRIPTION>\n`;
     zboziXml += `    <URL>${escapeXml(link)}</URL>\n`;
     zboziXml += `    <IMGURL>${escapeXml(imageLink)}</IMGURL>\n`;
