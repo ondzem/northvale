@@ -1674,7 +1674,10 @@ function AppContent() {
         const { data, error } = await supabase.functions.invoke('finalize-order', {
           body: {
             action: 'create',
-            orderDetails: order
+            orderDetails: order,
+            // Číslo opuštěné objednávky kartou pro ten samý košík — server ji zruší,
+            // aby v adminu nezůstávala nezaplacená duplicita.
+            supersedes: options.supersedes || null
           }
         });
 

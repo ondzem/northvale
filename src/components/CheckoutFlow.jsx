@@ -32,6 +32,14 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   // druhou objednávku. Ref se nastaví okamžitě.
   const submitLockRef = useRef(false);
 
+  // Otisk samotného košíku — bez ceny a bez způsobu platby. Slouží k poznání,
+  // že zákazník dokončuje TU SAMOU objednávku, jen jinou platbou (zkusil kartu,
+  // nedoplatil, přepnul na převod). Opuštěný pokus kartou se pak zruší.
+  const buildCartKey = () => JSON.stringify({
+    items: cart.map(i => [String(i.id), i.quantity]).sort(),
+    email: email.trim().toLowerCase()
+  });
+
   const initialDraftRef = useRef(loadCheckoutDraft());
   const draftData = initialDraftRef.current;
 
@@ -909,6 +917,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         localStorage.setItem('pending-order-data', JSON.stringify({
           orderId,
           fingerprint: orderFingerprint,
+          cartKey: buildCartKey(),
           userId: user?.id || null,
           cart,
           cartSubtotal,
@@ -1043,7 +1052,20 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     submitLockRef.current = true;
     setIsPaying(true);
     try {
-      const serverOrder = await submitOrder(order, actualAppliedCredit);
+      // Dokončuje zákazník ten samý košík, který předtím zkoušel zaplatit kartou?
+      // Pak je ta rozdělaná objednávka kartou k ničemu a server ji zruší.
+      let supersedes = null;
+      try {
+        const prev = JSON.parse(localStorage.getItem('pending-order-data') || 'null');
+        if (prev && prev.orderId && prev.cartKey === buildCartKey()) {
+          supersedes = prev.orderId;
+        }
+      } catch {
+        supersedes = null;
+      }
+
+      const serverOrder = await submitOrder(order, actualAppliedCredit, { supersedes });
+      try { localStorage.removeItem('pending-order-data'); } catch { /* localStorage nedostupné */ }
       setIsPaying(false);
       alert(lang === 'CZ'
         ? `Děkujeme za Váš nákup! Objednávka #${serverOrder.id} byla úspěšně vytvořena a uložena do Vašeho profilu.`

@@ -479,7 +479,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const body = await req.json();
-    const { action = "create", orderId, orderDetails, reserveOnly = false } = body;
+    const { action = "create", orderId, orderDetails, reserveOnly = false, supersedes = null } = body;
 
     // Ensure pohoda-orders bucket is private
     try {
@@ -698,6 +698,42 @@ serve(async (req) => {
         });
 
       if (uploadError) throw uploadError;
+
+      // Zrušit opuštěný pokus o platbu kartou pro ten samý košík.
+      // Zákazník zkusil kartu, nedoplatil a dokončil objednávku převodem nebo
+      // dobírkou — původní záznam je k ničemu a v adminu jen mate.
+      //
+      // Maže se jen tehdy, když je jisté, že o nic nepřijdeme: jiné číslo,
+      // nezaplacená, sklad neodepsaný a stejný zákazník.
+      if (supersedes && String(supersedes) !== String(generatedOrderId)) {
+        try {
+          const staleName = `order_${supersedes}.json`;
+          const { data: staleFile } = await supabase.storage
+            .from("pohoda-orders")
+            .download(staleName);
+
+          if (staleFile) {
+            const staleObj = JSON.parse(await staleFile.text());
+            const stale = staleObj.order || staleObj;
+
+            const isUnpaid = String(stale.payment_status || "").toLowerCase() !== "paid";
+            const stockUntouched = stale.stock_applied !== true && staleObj.stock_applied !== true;
+            const sameCustomer = String(stale.customer_email || "").trim().toLowerCase()
+              === String(normalizedOrderData.customer_email || "").trim().toLowerCase();
+
+            if (isUnpaid && stockUntouched && sameCustomer) {
+              await supabase.storage.from("pohoda-orders").remove([staleName]);
+              console.log(`[SUPERSEDE] Zrušen opuštěný pokus ${supersedes}, nahrazen ${generatedOrderId}`);
+            } else {
+              console.warn(
+                `[SUPERSEDE] ${supersedes} ponechán — unpaid:${isUnpaid} stockUntouched:${stockUntouched} sameCustomer:${sameCustomer}`
+              );
+            }
+          }
+        } catch (supersedeErr) {
+          console.error("Nepodařilo se zrušit opuštěnou objednávku:", supersedeErr);
+        }
+      }
 
       // 3. Update profiles table if logged in
       if (normalizedOrderData.user_id) {
