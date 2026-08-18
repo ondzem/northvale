@@ -1,5 +1,3 @@
-import { supabase } from '../supabase.js';
-
 /**
  * Get current local date in YYYY-MM-DD format (Czech timezone safe)
  */
@@ -162,51 +160,7 @@ export function calculateDiscountAmount(totalPrice, discountItem) {
   return Math.min(totalPrice, Math.max(0, amount));
 }
 
-/**
- * Apply discount code usage atomically upon order completion
- */
-export async function applyDiscountCodeUsage(codeString) {
-  if (!codeString) return;
-  const cleanCode = String(codeString).trim().toUpperCase();
-
-  try {
-    const { data: dbItem, error: fetchErr } = await supabase
-      .from('discount_codes')
-      .select('*')
-      .eq('code', cleanCode)
-      .maybeSingle();
-
-    if (fetchErr || !dbItem) return;
-
-    const newUsedCount = Number(dbItem.used_count || 0) + 1;
-    const maxUsesNum = dbItem.max_uses !== null && dbItem.max_uses !== undefined && dbItem.max_uses !== '' ? Number(dbItem.max_uses) : null;
-    const isExhausted = maxUsesNum !== null ? (newUsedCount >= maxUsesNum) : false;
-
-    const payload = {
-      used_count: newUsedCount
-    };
-
-    if (isExhausted) {
-      payload.is_active = false;
-      payload.active = false;
-    }
-
-    await supabase
-      .from('discount_codes')
-      .update(payload)
-      .eq('id', dbItem.id);
-
-    // If 1-time single use code, record device redemption
-    if (maxUsesNum === 1) {
-      try {
-        const redeemed = JSON.parse(localStorage.getItem('nv_redeemed_discounts') || '[]');
-        if (!redeemed.includes(cleanCode)) {
-          redeemed.push(cleanCode);
-          localStorage.setItem('nv_redeemed_discounts', JSON.stringify(redeemed));
-        }
-      } catch {}
-    }
-  } catch (err) {
-    console.error('Error applying discount code usage:', err);
-  }
-}
+// Pozn.: Použití slevového kódu (zvýšení used_count a případná deaktivace při
+// vyčerpání) provádí výhradně server v edge funkci finalize-order. Dřívější
+// klientská funkce applyDiscountCodeUsage byla odstraněna — zvyšovala počítadlo
+// podruhé a po zamčení RLS by stejně nemohla do tabulky zapisovat.

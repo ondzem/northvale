@@ -49,3 +49,6 @@ northvaletcg_*.csv
 
 # Claude Code – osobni nastaveni, necommitovat
 .claude/settings.local.json
+
+# graphify — lokální knowledge graf, negenerovat do gitu
+graphify-out/

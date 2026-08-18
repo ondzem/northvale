@@ -24,7 +24,6 @@ import CookieConsent from './components/CookieConsent';
 import ErrorPage from './components/ErrorPage';
 import PreRegistrationLanding from './components/PreRegistrationLanding';
 import { supabase } from './supabase';
-import { applyDiscountCodeUsage } from './services/discountService';
 import Blog from './components/Blog';
 import { blogArticles } from './blogData';
 
@@ -1660,9 +1659,8 @@ function AppContent() {
           };
         });
 
-        if (order && order.discountCode) {
-          applyDiscountCodeUsage(order.discountCode);
-        }
+        // Použití slevového kódu započítává výhradně server (finalize-order),
+        // aby se počítadlo nezvyšovalo dvakrát.
 
         setCart([]);
         try { localStorage.removeItem('northvale-checkout-draft'); } catch (_e) {}
@@ -1688,9 +1686,8 @@ function AppContent() {
         const serverOrder = data.order;
         setLastCompletedOrder(serverOrder);
 
-        if (order && order.discountCode) {
-          applyDiscountCodeUsage(order.discountCode);
-        }
+        // Použití slevového kódu započítává výhradně server (finalize-order),
+        // aby se počítadlo nezvyšovalo dvakrát.
 
         let updatedOrders = [];
         let newCredit = 0;

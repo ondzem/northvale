@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <SHOP>
   <SHOPITEM>
-    <ITEM_ID>espeon-terastal-gathering-binder-box</ITEM_ID>
-    <PRODUCTNAME>Espeon Terastal Gathering Binder Box</PRODUCTNAME>
-    <DESCRIPTION>Prémiová sběratelská sada zaměřená na konkrétní Eeveelution z čínské edice Terastal Gathering – čínské obdoby japonského Terastal Festival ex a západních Prismatic Evolutions. Skvělá volba pro fanoušky Eevee, kteří chtějí kombinaci nových karet i praktického vybavení pro organizaci sbírky</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/espeon-terastal-gathering-binder-box/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/espeon-terastal-gathering-binder-box.webp</IMGURL>
-    <PRICE_VAT>3299</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Pokémon</MANUFACTURER>
-    <HEUREKA_CPC>5</HEUREKA_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
     <ITEM_ID>wilds-unknown-booster-box</ITEM_ID>
     <PRODUCTNAME>Wilds Unknown Booster Box</PRODUCTNAME>
     <DESCRIPTION>Pixar konečně dorazil do Lorcany! Dvanáctá edice zavede vaše glimmery za hranice Winterspellu do drsných krajin jako Wilderknot, Torchlight Peaks nebo The Great Empty Sea, kde přežití závisí na týmové práci a odvaze.</DESCRIPTION>
@@ -33,6 +21,18 @@
     <PRICE_VAT>1299</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>espeon-terastal-gathering-binder-box</ITEM_ID>
+    <PRODUCTNAME>Espeon Terastal Gathering Binder Box</PRODUCTNAME>
+    <DESCRIPTION>Prémiová sběratelská sada zaměřená na konkrétní Eeveelution z čínské edice Terastal Gathering – čínské obdoby japonského Terastal Festival ex a západních Prismatic Evolutions. Skvělá volba pro fanoušky Eevee, kteří chtějí kombinaci nových karet i praktického vybavení pro organizaci sbírky</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/espeon-terastal-gathering-binder-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/espeon-terastal-gathering-binder-box.webp</IMGURL>
+    <PRICE_VAT>3299</PRICE_VAT>
+    <DELIVERY_DATE>30</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
@@ -61,6 +61,18 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
+    <ITEM_ID>wilds-unknown-illuminer-s-trove-box</ITEM_ID>
+    <PRODUCTNAME>Wilds Unknown Illuminer&apos;s Trove box</PRODUCTNAME>
+    <DESCRIPTION>Pixar poprvé dorazil do Lorcany! Dvanáctá edice zavede vaše glimmery za hranice Winterspellu do drsných krajin jako Wilderknot, Torchlight Peaks nebo The Great Empty Sea, kde bez odvahy a týmové práce nepřežijete.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/wilds-unknown-illuminer-s-trove-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/wilds-unknown-illuminer-s-trove-box.webp</IMGURL>
+    <PRICE_VAT>2649</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
     <ITEM_ID>into-the-inklands-booster-box</ITEM_ID>
     <PRODUCTNAME>Into the Inklands Booster box</PRODUCTNAME>
     <DESCRIPTION>Booster box k edici Into the Inklands obsahuje 24 boosterových balíčků po 12 kartách (celkem 288 karet). Přináší nový typ karet – lokace, a postavy z DuckTales, TaleSpinu i Pokladu z ostrova Treasure Planet. Ideální pro hráče i sběratele toužící po vzácných a foilových kartách.</DESCRIPTION>
@@ -78,18 +90,6 @@
     <DESCRIPTION>Ursula je zpět! Čtvrtá edice přivádí zlovolnou mořskou čarodějnici, uvolněnou z Velké Iluminárie, zpět do hry – a jedinou překážkou v cestě k ovládnutí Lorcany jste vy a vaši glimmerové.</DESCRIPTION>
     <URL>https://northvaletcg.eu/sealed-detail/ursula-s-return-booster-box/</URL>
     <IMGURL>https://northvaletcg.eu/product-images/ursula-s-return-booster-box.webp</IMGURL>
-    <PRICE_VAT>2949</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
-    <HEUREKA_CPC>5</HEUREKA_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
-    <ITEM_ID>shimmering-skies-booster-box</ITEM_ID>
-    <PRODUCTNAME>Shimmering Skies Booster Box</PRODUCTNAME>
-    <DESCRIPTION>Celá Lorcana slaví! Pátá edice přináší velký festival na oslavu vítězství nad Ursulou, zatímco se v pozadí rozplétá nové tajemství kolem Velké Iluminárie.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/shimmering-skies-booster-box/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/shimmering-skies-booster-box.webp</IMGURL>
     <PRICE_VAT>2949</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Disney Lorcana</MANUFACTURER>
@@ -121,12 +121,12 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>wilds-unknown-illuminer-s-trove-box</ITEM_ID>
-    <PRODUCTNAME>Wilds Unknown Illuminer&apos;s Trove box</PRODUCTNAME>
-    <DESCRIPTION>Pixar poprvé dorazil do Lorcany! Dvanáctá edice zavede vaše glimmery za hranice Winterspellu do drsných krajin jako Wilderknot, Torchlight Peaks nebo The Great Empty Sea, kde bez odvahy a týmové práce nepřežijete.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/wilds-unknown-illuminer-s-trove-box/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/wilds-unknown-illuminer-s-trove-box.webp</IMGURL>
-    <PRICE_VAT>2649</PRICE_VAT>
+    <ITEM_ID>shimmering-skies-booster-box</ITEM_ID>
+    <PRODUCTNAME>Shimmering Skies Booster Box</PRODUCTNAME>
+    <DESCRIPTION>Celá Lorcana slaví! Pátá edice přináší velký festival na oslavu vítězství nad Ursulou, zatímco se v pozadí rozplétá nové tajemství kolem Velké Iluminárie.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/shimmering-skies-booster-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/shimmering-skies-booster-box.webp</IMGURL>
+    <PRICE_VAT>2949</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Disney Lorcana</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
@@ -175,18 +175,6 @@
     <URL>https://northvaletcg.eu/sealed-detail/jolteon-terastal-gathering-binder-box/</URL>
     <IMGURL>https://northvaletcg.eu/product-images/jolteon-terastal-gathering-binder-box.webp</IMGURL>
     <PRICE_VAT>3299</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Pokémon</MANUFACTURER>
-    <HEUREKA_CPC>5</HEUREKA_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
-    <ITEM_ID>charizard-ex-super-premium-collectio</ITEM_ID>
-    <PRODUCTNAME>Charizard EX Super Premium Collection</PRODUCTNAME>
-    <DESCRIPTION>Zapalte hru s legendárním Charizardem! Tato prémiová kolekce je ideální volbou pro fanoušky ohnivého draka i pro sběratele, kteří chtějí svou sbírku posunout na další úroveň.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/charizard-ex-super-premium-collection/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/charizard-ex-super-premium-collection.webp</IMGURL>
-    <PRICE_VAT>3049</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Pokémon</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
@@ -309,18 +297,6 @@
     <PRICE_VAT>99</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Pokémon</MANUFACTURER>
-    <HEUREKA_CPC>5</HEUREKA_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
-    <ITEM_ID>case-wilds-unknown-booster-box</ITEM_ID>
-    <PRODUCTNAME>CASE Wilds Unknown Booster Box</PRODUCTNAME>
-    <DESCRIPTION>Case booster boxů k dvanácté edici Wilds Unknown obsahuje více kusů booster boxů v jednom velkoobchodním balení – ideální volba pro obchodníky i vášnivé sběratele, kteří chtějí zásobu na sklad nebo si chtějí zajistit více boxů najednou za výhodnějších podmínek</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/case-wilds-unknown-booster-box/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/case-wilds-unknown-booster-box.webp</IMGURL>
-    <PRICE_VAT>25999</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
@@ -625,14 +601,14 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>unleashed-booster</ITEM_ID>
-    <PRODUCTNAME>Unleashed booster</PRODUCTNAME>
-    <DESCRIPTION>Třetí edice Riftbound zachycuje jádro League of Legends – vyčkávání, napětí a moment, kdy vypustíte vše najednou. Booster pack přináší 14 karet z více než 220 karet a přes 30 alternativních artů, plus zbrusu novou mechaniku, která odměňuje trpělivé hráče čekající na ten správný okamžik k úderu</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/unleashed-booster/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/unleashed-booster.webp</IMGURL>
-    <PRICE_VAT>149</PRICE_VAT>
+    <ITEM_ID>charizard-ex-super-premium-collectio</ITEM_ID>
+    <PRODUCTNAME>Charizard EX Super Premium Collection</PRODUCTNAME>
+    <DESCRIPTION>Zapalte hru s legendárním Charizardem! Tato prémiová kolekce je ideální volbou pro fanoušky ohnivého draka i pro sběratele, kteří chtějí svou sbírku posunout na další úroveň.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/charizard-ex-super-premium-collection/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/charizard-ex-super-premium-collection.webp</IMGURL>
+    <PRICE_VAT>3049</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Northvale</MANUFACTURER>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
@@ -649,6 +625,18 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
+    <ITEM_ID>unleashed-booster</ITEM_ID>
+    <PRODUCTNAME>Unleashed booster</PRODUCTNAME>
+    <DESCRIPTION>Třetí edice Riftbound zachycuje jádro League of Legends – vyčkávání, napětí a moment, kdy vypustíte vše najednou. Booster pack přináší 14 karet z více než 220 karet a přes 30 alternativních artů, plus zbrusu novou mechaniku, která odměňuje trpělivé hráče čekající na ten správný okamžik k úderu</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/unleashed-booster/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/unleashed-booster.webp</IMGURL>
+    <PRICE_VAT>149</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
     <ITEM_ID>1024-pocket-gray</ITEM_ID>
     <PRODUCTNAME>1024 Pocket Gray</PRODUCTNAME>
     <DESCRIPTION>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</DESCRIPTION>
@@ -657,6 +645,18 @@
     <PRICE_VAT>1299</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>case-wilds-unknown-booster-box</ITEM_ID>
+    <PRODUCTNAME>CASE Wilds Unknown Booster Box</PRODUCTNAME>
+    <DESCRIPTION>Case booster boxů k dvanácté edici Wilds Unknown obsahuje více kusů booster boxů v jednom velkoobchodním balení – ideální volba pro obchodníky i vášnivé sběratele, kteří chtějí zásobu na sklad nebo si chtějí zajistit více boxů najednou za výhodnějších podmínek</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/case-wilds-unknown-booster-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/case-wilds-unknown-booster-box.webp</IMGURL>
+    <PRICE_VAT>25999</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>

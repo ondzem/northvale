@@ -37,9 +37,7 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
     try {
       const codeClean = promoCode.trim().toUpperCase();
       const { data, error } = await supabase
-        .from('discount_codes')
-        .select('*')
-        .eq('code', codeClean)
+        .rpc('lookup_discount_code', { p_code: codeClean })
         .maybeSingle();
 
       if (error) throw error;

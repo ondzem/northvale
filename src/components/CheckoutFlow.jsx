@@ -211,9 +211,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     try {
       const codeClean = promoInput.trim().toUpperCase();
       const { data, error } = await supabase
-        .from('discount_codes')
-        .select('*')
-        .eq('code', codeClean)
+        .rpc('lookup_discount_code', { p_code: codeClean })
         .maybeSingle();
 
       if (error) throw error;
