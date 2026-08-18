@@ -40,6 +40,23 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     email: email.trim().toLowerCase()
   });
 
+  // Unikátní klíč jednoho nákupu pro serverovou idempotenci. Stejný košík
+  // = stejný klíč (retry po timeoutu nezaloží druhou objednávku), změna
+  // košíku = nový klíč (nový nákup projde).
+  const getOrderRef = () => {
+    const K = 'northvale-order-ref';
+    try {
+      const ck = buildCartKey();
+      const prev = JSON.parse(localStorage.getItem(K) || 'null');
+      if (prev && prev.ref && prev.cartKey === ck) return prev.ref;
+      const ref = (crypto.randomUUID && crypto.randomUUID()) || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      localStorage.setItem(K, JSON.stringify({ cartKey: ck, ref }));
+      return ref;
+    } catch {
+      return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    }
+  };
+
   const initialDraftRef = useRef(loadCheckoutDraft());
   const draftData = initialDraftRef.current;
 
@@ -1064,8 +1081,12 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         supersedes = null;
       }
 
+      order.client_ref = getOrderRef();
       const serverOrder = await submitOrder(order, actualAppliedCredit, { supersedes });
-      try { localStorage.removeItem('pending-order-data'); } catch { /* localStorage nedostupné */ }
+      try {
+        localStorage.removeItem('pending-order-data');
+        localStorage.removeItem('northvale-order-ref');
+      } catch { /* localStorage nedostupné */ }
       setIsPaying(false);
       alert(lang === 'CZ'
         ? `Děkujeme za Váš nákup! Objednávka #${serverOrder.id} byla úspěšně vytvořena a uložena do Vašeho profilu.`

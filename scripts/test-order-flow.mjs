@@ -181,6 +181,9 @@ const adminKey = () => adminAccessToken || SERVICE_KEY;
 
 function baseOrder(overrides = {}) {
   return {
+    // Každé volání = samostatný nákup. Bez unikátního client_ref by serverová
+    // idempotence vracela pořád první objednávku (stejný zákazník + košík).
+    client_ref: crypto.randomUUID(),
     items: [{
       id: TEST_PRODUCT_ID,
       product_id: TEST_PRODUCT_ID,
@@ -629,7 +632,14 @@ async function testAdminConfirmPayment(orderId) {
   });
   if (!check('Uložení stavu "uhrazeno"', save.status === 200, `status ${save.status}: ${save.text.slice(0, 150)}`)) return;
 
-  const after = await readOrderJson(orderId);
+  // Čtení hned po přepisu souboru umí ze storage cache vrátit starý obsah —
+  // chvíli počkat a případně to zkusit znovu.
+  let after = null;
+  for (let i = 0; i < 5; i++) {
+    await sleep(1500);
+    after = await readOrderJson(orderId);
+    if (after?.order?.payment_status === 'paid') break;
+  }
   check('Objednávka je označena jako uhrazená', after?.order?.payment_status === 'paid', `stav: ${after?.order?.payment_status}`);
 
   const { data: prof } = await admin.from('profiles').select('order_history').eq('id', testUserId).maybeSingle();

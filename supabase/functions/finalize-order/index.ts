@@ -274,19 +274,28 @@ async function orderIdempotencyKey(orderData: any): Promise<string> {
     .slice(0, 32);
 }
 
-const IDEMPOTENCY_WINDOW_MS = 15 * 60 * 1000;
+// Klíč z checkoutu (client_ref) je unikátní pro jeden logický nákup — drží
+// dlouho. Obsahový otisk je jen záchrana pro staré klienty bez client_ref;
+// drží krátce, aby neodmítl zákazníka, který si legitimně objedná totéž znovu.
+const IDEMPOTENCY_REF_WINDOW_MS = 15 * 60 * 1000;
+const IDEMPOTENCY_CONTENT_WINDOW_MS = 2 * 60 * 1000;
 
-async function findRecentDuplicate(supabase: any, key: string): Promise<string | null> {
+async function findRecentDuplicate(supabase: any, key: string, windowMs: number): Promise<string | null> {
   try {
     const { data } = await supabase.storage.from("pohoda-orders").download(`idem/${key}.json`);
     if (!data) return null;
     const parsed = JSON.parse(await data.text());
     if (!parsed?.order_id || !parsed?.at) return null;
-    if (Date.now() - Number(parsed.at) > IDEMPOTENCY_WINDOW_MS) return null;
+    if (Date.now() - Number(parsed.at) > windowMs) return null;
     return String(parsed.order_id);
   } catch (_e) {
     return null;
   }
+}
+
+async function sha256Hex(input: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input));
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
 }
 
 async function markIdempotencyKey(supabase: any, key: string, orderId: string) {
@@ -600,9 +609,19 @@ serve(async (req) => {
       let idemKey: string | null = null;
       if (!generatedOrderId) {
         const probe = normalizeOrder({ ...orderDetails, id: "probe" });
-        idemKey = await orderIdempotencyKey(probe);
+        const clientRef = String(orderDetails.client_ref || orderDetails.clientRef || body.clientRef || "").trim();
+        let idemWindow: number;
+        if (clientRef) {
+          // Unikátní klíč jednoho nákupu z checkoutu — dedup jen skutečné
+          // opakované odeslání (dvojklik, retry po timeoutu), ne nový nákup.
+          idemKey = "ref-" + await sha256Hex(clientRef + "#" + String(probe.customer_email || "").trim().toLowerCase());
+          idemWindow = IDEMPOTENCY_REF_WINDOW_MS;
+        } else {
+          idemKey = await orderIdempotencyKey(probe);
+          idemWindow = IDEMPOTENCY_CONTENT_WINDOW_MS;
+        }
 
-        const duplicateId = await findRecentDuplicate(supabase, idemKey);
+        const duplicateId = await findRecentDuplicate(supabase, idemKey, idemWindow);
         if (duplicateId) {
           console.warn(`[IDEMPOTENCE] Duplicitní objednávka zachycena, vracím ${duplicateId}`);
           try {
