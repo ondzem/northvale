@@ -493,6 +493,19 @@ export default function OrdersTab({ showToast }) {
       return 0;
     }
 
+    // Vracet na sklad jde jen to, co se ze skladu opravdu odepsalo.
+    // Objednávky kartou se zakládají s reserveOnly:true — sklad se u nich
+    // odečítá až po potvrzení platby (stock_applied). Bez této kontroly
+    // by smazání nezaplacené objednávky kartou sklad NAVÝŠILO o zboží,
+    // které nikdy nikdo neodebral.
+    const stockApplied = orderData.stock_applied === true
+      || orderData.rawJson?.order?.stock_applied === true
+      || orderData.rawJson?.stock_applied === true;
+
+    if (!stockApplied) {
+      return 0;
+    }
+
     const items = orderData.items || orderData.cart || orderData.rawJson?.items || [];
     if (!Array.isArray(items) || items.length === 0) return 0;
 

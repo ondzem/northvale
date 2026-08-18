@@ -27,6 +27,11 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     }
   };
 
+  // Zámek proti dvojímu odeslání objednávky. `isPaying` je state — než se
+  // promítne do disabled na tlačítku, stihne projít druhý klik a založit
+  // druhou objednávku. Ref se nastaví okamžitě.
+  const submitLockRef = useRef(false);
+
   const initialDraftRef = useRef(loadCheckoutDraft());
   const draftData = initialDraftRef.current;
 
@@ -774,6 +779,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
     }
 
     if (payment === 'card') {
+      if (submitLockRef.current) return;
+      submitLockRef.current = true;
       setIsPaying(true);
       try {
         const order = {
@@ -829,17 +836,42 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         };
 
         // 1. Reserve Order ID from sequence
-        const { data: createData, error: createError } = await supabase.functions.invoke('finalize-order', {
-          body: {
-            action: 'get-order-id'
-          }
+        //
+        // Opakovaný pokus o platbu NESMÍ založit novou objednávku. Když se
+        // zákazník vrátí z brány s nedokončenou platbou a klikne znovu,
+        // použijeme původní rezervované číslo — jinak vznikne další
+        // objednávka v adminu za každý pokus.
+        const orderFingerprint = JSON.stringify({
+          items: cart.map(i => [String(i.id), i.quantity, i.price]).sort(),
+          finalTotal,
+          email: email.trim().toLowerCase(),
+          shipping
         });
 
-        if (createError || !createData || !createData.orderId) {
-          throw new Error(createError?.message || 'Server failed to reserve order ID');
+        let orderId = null;
+        try {
+          const prev = JSON.parse(localStorage.getItem('pending-order-data') || 'null');
+          if (prev && prev.orderId && prev.fingerprint === orderFingerprint) {
+            orderId = prev.orderId;
+          }
+        } catch {
+          orderId = null;
         }
 
-        const orderId = createData.orderId;
+        if (!orderId) {
+          const { data: createData, error: createError } = await supabase.functions.invoke('finalize-order', {
+            body: {
+              action: 'get-order-id'
+            }
+          });
+
+          if (createError || !createData || !createData.orderId) {
+            throw new Error(createError?.message || 'Server failed to reserve order ID');
+          }
+
+          orderId = createData.orderId;
+        }
+
         order.id = orderId;
 
         // 2. Create order in storage/DB with awaiting_payment status prior to redirect
@@ -876,6 +908,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         // 4. Save pending details in localStorage
         localStorage.setItem('pending-order-data', JSON.stringify({
           orderId,
+          fingerprint: orderFingerprint,
           userId: user?.id || null,
           cart,
           cartSubtotal,
@@ -926,6 +959,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         form.submit();
       } catch (err) {
         console.error('GP webpay checkout init failed:', err);
+        submitLockRef.current = false;
         setIsPaying(false);
         alert(
           lang === 'CZ' 
@@ -1005,6 +1039,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       pickupPointDetails: shipping.includes('pickup') ? pickupPointDetails : null
     };
 
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setIsPaying(true);
     try {
       const serverOrder = await submitOrder(order, actualAppliedCredit);
@@ -1017,6 +1053,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       setActivePage('order-confirmation');
     } catch (err) {
       console.error('Error finalizing order:', err);
+      submitLockRef.current = false;
       setIsPaying(false);
       alert(lang === 'CZ'
         ? 'Došlo k chybě při dokončování objednávky. Zkontrolujte prosím připojení k internetu.'

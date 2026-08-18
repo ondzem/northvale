@@ -246,6 +246,60 @@ async function verifyOrderPricing(supabase: any, orderData: any): Promise<any> {
   }
 }
 
+/**
+ * IDEMPOTENCE — ochrana proti duplicitním objednávkám.
+ *
+ * Zámek v prohlížeči neochrání před dvěma záložkami, retry po timeoutu ani
+ * před znovuodesláním z jiného zařízení. Klíč počítáme z obsahu objednávky
+ * (e-mail + položky + částka). Marker ve storage drží 15 minut; přijde-li
+ * ve stejném okně druhá identická objednávka, vrátíme tu původní.
+ */
+async function orderIdempotencyKey(orderData: any): Promise<string> {
+  const items = (orderData.items || [])
+    .map((i: any) => `${i.product_id || i.id}:${i.quantity}:${i.price}`)
+    .sort()
+    .join('|');
+  const canonical = [
+    String(orderData.customer_email || '').trim().toLowerCase(),
+    items,
+    String(orderData.final_total ?? ''),
+    String(orderData.shipping_method || ''),
+    String(orderData.payment_method || '')
+  ].join('#');
+
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(canonical));
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, 32);
+}
+
+const IDEMPOTENCY_WINDOW_MS = 15 * 60 * 1000;
+
+async function findRecentDuplicate(supabase: any, key: string): Promise<string | null> {
+  try {
+    const { data } = await supabase.storage.from("pohoda-orders").download(`idem/${key}.json`);
+    if (!data) return null;
+    const parsed = JSON.parse(await data.text());
+    if (!parsed?.order_id || !parsed?.at) return null;
+    if (Date.now() - Number(parsed.at) > IDEMPOTENCY_WINDOW_MS) return null;
+    return String(parsed.order_id);
+  } catch (_e) {
+    return null;
+  }
+}
+
+async function markIdempotencyKey(supabase: any, key: string, orderId: string) {
+  try {
+    const bytes = new TextEncoder().encode(JSON.stringify({ order_id: orderId, at: Date.now() }));
+    await supabase.storage
+      .from("pohoda-orders")
+      .upload(`idem/${key}.json`, bytes, { contentType: "application/json", upsert: true });
+  } catch (err) {
+    console.error("Failed to write idempotency marker:", err);
+  }
+}
+
 async function applyStockAndDiscount(supabase: any, orderData: any) {
   if (orderData.stock_applied === true) {
     return;
@@ -514,8 +568,38 @@ serve(async (req) => {
 
       // Generate sequence number or use passed orderId
       let generatedOrderId = orderId || orderDetails.id;
+
+      // Bez explicitního čísla jde o novou objednávku od zákazníka — zkontrolovat,
+      // jestli tu samou právě neposlal podruhé (dvojklik, dvě záložky, retry).
+      let idemKey: string | null = null;
       if (!generatedOrderId) {
+        const probe = normalizeOrder({ ...orderDetails, id: "probe" });
+        idemKey = await orderIdempotencyKey(probe);
+
+        const duplicateId = await findRecentDuplicate(supabase, idemKey);
+        if (duplicateId) {
+          console.warn(`[IDEMPOTENCE] Duplicitní objednávka zachycena, vracím ${duplicateId}`);
+          try {
+            const { data: dupFile } = await supabase.storage
+              .from("pohoda-orders")
+              .download(`order_${duplicateId}.json`);
+            if (dupFile) {
+              const dupObj = JSON.parse(await dupFile.text());
+              return new Response(JSON.stringify({
+                success: true,
+                duplicate: true,
+                orderId: duplicateId,
+                order: dupObj.order || dupObj
+              }), {
+                status: 200,
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+              });
+            }
+          } catch (_dupErr) {}
+        }
+
         generatedOrderId = await getNextInvoiceNumber(supabase);
+        await markIdempotencyKey(supabase, idemKey, generatedOrderId);
       }
 
       const rawOrderObj = {
