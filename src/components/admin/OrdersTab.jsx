@@ -512,7 +512,11 @@ export default function OrdersTab({ showToast }) {
     let restoredCount = 0;
     for (const item of items) {
       if (item.isService) continue;
-      const productId = item.code || item.id || item.product_id;
+      // Vyhledávat podle product_id, ne item.id — u variant (singles) je item.id
+      // ID varianty, které v tabulce products neexistuje, takže se sklad tiše
+      // nevracel vůbec. Odečítání ve finalize-order používá stejné pořadí.
+      const productId = item.product_id || item.code || item.id;
+      const variantId = (item.variant_id || item.id) !== productId ? (item.variant_id || item.id) : null;
       const qty = Number(item.quantity || 1);
 
       if (!productId || qty <= 0) continue;
@@ -525,7 +529,19 @@ export default function OrdersTab({ showToast }) {
           .maybeSingle();
 
         if (product) {
-          if (product.stock !== null && product.stock !== undefined) {
+          if (variantId && Array.isArray(product.variants) && product.variants.some(v => String(v.id) === String(variantId))) {
+            // Položka je varianta — vrátit sklad variantě, ne hlavnímu produktu
+            const updatedVariants = product.variants.map(v =>
+              String(v.id) === String(variantId)
+                ? { ...v, stock: Number(v.stock || 0) + qty }
+                : v
+            );
+            await supabase
+              .from('products')
+              .update({ variants: updatedVariants })
+              .eq('id', productId);
+            restoredCount += qty;
+          } else if (product.stock !== null && product.stock !== undefined) {
             const newStock = Number(product.stock || 0) + qty;
             await supabase
               .from('products')
