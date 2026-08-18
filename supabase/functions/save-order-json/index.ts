@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
-import { normalizeOrder, normalizeItems } from "../_shared/order-schema.ts";
+import { normalizeOrder, normalizeItems, slimOrderForHistory, ORDER_HISTORY_LIMIT } from "../_shared/order-schema.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -285,34 +285,43 @@ serve(async (req) => {
           const text = await fileBlob.text();
           const jsonObj = JSON.parse(text);
           const normalized = normalizeOrder(jsonObj.order || jsonObj);
-          
+
           // 6a: Support items in jsonObj.items || normalized.items
           const itemsToRestore = normalizeItems(jsonObj.items || normalized.items || []);
 
-          if (normalized.fulfillment_status !== 'shipped' && normalized.fulfillment_status !== 'completed') {
+          // Vracet na sklad jde jen to, co se ze skladu opravdu odepsalo.
+          // Objednávky kartou vznikají s reserveOnly (stock_applied=false) —
+          // bez této kontroly smazání nezaplacené objednávky sklad NAVÝŠÍ
+          // o zboží, které nikdo neodebral.
+          const stockApplied = jsonObj.order?.stock_applied === true || jsonObj.stock_applied === true;
+
+          if (stockApplied && normalized.fulfillment_status !== 'shipped' && normalized.fulfillment_status !== 'completed') {
             for (const item of itemsToRestore) {
-              const productId = item.product_id || item.id;
+              const productId = item.product_id || item.code || item.id;
+              // U variant (singles) je item.id ID varianty, ne produktu
+              const rawVariantId = item.variant_id || item.id;
+              const variantId = String(rawVariantId) !== String(productId) ? rawVariantId : null;
               const qty = Number(item.quantity || 1);
               if (productId && qty > 0) {
                 const { data: prod } = await supabase.from("products").select("id, stock, variants").eq("id", productId).maybeSingle();
                 if (prod) {
-                  if (prod.stock !== null && prod.stock !== undefined) {
-                    await supabase.from("products").update({ stock: Number(prod.stock || 0) + qty }).eq("id", productId);
-                    restoredCount += qty;
-                  } else if (Array.isArray(prod.variants) && prod.variants.length > 0) {
-                    let variantMatched = false;
-                    const updatedVariants = prod.variants.map((v: any) => {
-                      if (item.variant_id && v.id === item.variant_id) {
-                        variantMatched = true;
-                        return { ...v, stock: Number(v.stock || 0) + qty };
-                      }
-                      return v;
-                    });
-                    if (!variantMatched && updatedVariants.length > 0) {
-                      updatedVariants[0] = { ...updatedVariants[0], stock: Number(updatedVariants[0].stock || 0) + qty };
-                    }
+                  if (variantId && Array.isArray(prod.variants) && prod.variants.some((v: any) => String(v.id) === String(variantId))) {
+                    const updatedVariants = prod.variants.map((v: any) =>
+                      String(v.id) === String(variantId)
+                        ? { ...v, stock: Number(v.stock || 0) + qty }
+                        : v
+                    );
                     await supabase.from("products").update({ variants: updatedVariants }).eq("id", productId);
                     restoredCount += qty;
+                  } else if (prod.stock !== null && prod.stock !== undefined) {
+                    await supabase.from("products").update({ stock: Number(prod.stock || 0) + qty }).eq("id", productId);
+                    restoredCount += qty;
+                  }
+                  // Neznámá varianta: dřív se kusy přičetly první variantě
+                  // v seznamu ("variants[0]") — tichá korupce cizí varianty.
+                  // Teď se nevrací nic a jen se to zaloguje.
+                  else {
+                    console.warn(`[save-order-json] Sklad nevrácen — nenalezena varianta ${variantId} u produktu ${productId}`);
                   }
                 }
               }
@@ -391,7 +400,7 @@ serve(async (req) => {
           if (profile) {
             const history = profile.order_history || [];
             // 6c: Convert to string for strict comparison
-            const updatedHistory = [normalizedOrder, ...history.filter((h: any) => String(h.id) !== String(normalizedOrder.id))];
+            const updatedHistory = [slimOrderForHistory(normalizedOrder), ...history.filter((h: any) => String(h.id) !== String(normalizedOrder.id))].slice(0, ORDER_HISTORY_LIMIT);
 
             await supabase
               .from("profiles")

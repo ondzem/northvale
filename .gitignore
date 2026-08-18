@@ -46,3 +46,6 @@ scratch_debug_blog_error.js
 ahrefs-*.csv
 AHREFS-opravy-*.md
 northvaletcg_*.csv
+
+# Claude Code – osobni nastaveni, necommitovat
+.claude/settings.local.json

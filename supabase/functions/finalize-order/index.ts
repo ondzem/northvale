@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
-import { normalizeOrder, normalizeItems } from "../_shared/order-schema.ts";
+import { normalizeOrder, normalizeItems, slimOrderForHistory, ORDER_HISTORY_LIMIT } from "../_shared/order-schema.ts";
 import { getAuthContext, requireAdmin } from "../_shared/auth.ts";
 
 const corsHeaders = {
@@ -300,6 +300,30 @@ async function markIdempotencyKey(supabase: any, key: string, orderId: string) {
   }
 }
 
+/**
+ * Atomický odečet/vrácení skladu přes DB funkci (migrace adjust_stock).
+ * Čtení+zápis ve dvou krocích umí při souběhu dvou objednávek jeden
+ * odečet ztratit. Když RPC ještě není nasazené, vrací false a volající
+ * použije původní (neatomickou) cestu.
+ */
+async function adjustStockAtomic(supabase: any, productId: string, delta: number): Promise<boolean> {
+  try {
+    const { data, error } = await supabase.rpc("adjust_stock", { p_product_id: productId, p_delta: delta });
+    return !error && data === true;
+  } catch (_e) {
+    return false;
+  }
+}
+
+async function adjustDealStockAtomic(supabase: any, slotId: string, delta: number): Promise<boolean> {
+  try {
+    const { data, error } = await supabase.rpc("adjust_daily_deal_stock", { p_slot_id: slotId, p_delta: delta });
+    return !error && data === true;
+  } catch (_e) {
+    return false;
+  }
+}
+
 async function applyStockAndDiscount(supabase: any, orderData: any) {
   if (orderData.stock_applied === true) {
     return;
@@ -314,17 +338,19 @@ async function applyStockAndDiscount(supabase: any, orderData: any) {
       // Decrement daily deal stock if applicable
       if (item.product?.isDailyDeal) {
         const slotId = item.product.dealSlotId || 'active-deal';
-        const { data: dbDeal } = await supabase
-          .from('daily_deal')
-          .select('stock')
-          .eq('id', slotId)
-          .maybeSingle();
-        if (dbDeal) {
-          const newDealStock = Math.max(0, (dbDeal.stock || 0) - item.quantity);
-          await supabase
+        if (!(await adjustDealStockAtomic(supabase, slotId, -item.quantity))) {
+          const { data: dbDeal } = await supabase
             .from('daily_deal')
-            .update({ stock: newDealStock })
-            .eq('id', slotId);
+            .select('stock')
+            .eq('id', slotId)
+            .maybeSingle();
+          if (dbDeal) {
+            const newDealStock = Math.max(0, (dbDeal.stock || 0) - item.quantity);
+            await supabase
+              .from('daily_deal')
+              .update({ stock: newDealStock })
+              .eq('id', slotId);
+          }
         }
       }
 
@@ -348,7 +374,7 @@ async function applyStockAndDiscount(supabase: any, orderData: any) {
               .update({ variants: updatedVariants })
               .eq('id', prodId);
           }
-        } else {
+        } else if (!(await adjustStockAtomic(supabase, prodId, -item.quantity))) {
           const { data: dbProd } = await supabase
             .from('products')
             .select('stock')
@@ -745,7 +771,7 @@ serve(async (req) => {
 
         if (profile) {
           const history = profile.order_history || [];
-          const updatedHistory = [normalizedOrderData, ...history.filter((h: any) => h.id !== normalizedOrderData.id)];
+          const updatedHistory = [slimOrderForHistory(normalizedOrderData), ...history.filter((h: any) => h.id !== normalizedOrderData.id)].slice(0, ORDER_HISTORY_LIMIT);
           const newCredit = Math.max(0, (profile.store_credit || 0) - (normalizedOrderData.credit_applied || 0));
 
           await supabase
@@ -933,12 +959,12 @@ serve(async (req) => {
           });
 
           if (!updatedHistory.some((h: any) => String(h.id) === String(orderId))) {
-            updatedHistory.unshift(normalizedPaidOrder);
+            updatedHistory.unshift(slimOrderForHistory(normalizedPaidOrder));
           }
 
           await supabase
             .from("profiles")
-            .update({ order_history: updatedHistory })
+            .update({ order_history: updatedHistory.slice(0, ORDER_HISTORY_LIMIT) })
             .eq("id", normalizedPaidOrder.user_id);
         }
       }

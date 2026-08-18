@@ -482,102 +482,8 @@ export default function OrdersTab({ showToast }) {
     };
   };
 
-  const restoreOrderStock = async (orderData) => {
-    if (!orderData) return 0;
-    
-    // Check status & DPD parcel: Only restore stock if order was NOT sent to DPD and is NOT shipped/completed!
-    const status = (orderData.status || orderData.orderStatus || orderData.rawJson?.order?.status || '').toLowerCase();
-    const hasDpdParcel = !!(orderData.dpd_parcel_number || orderData.rawJson?.order?.dpd_parcel_number);
-
-    if (hasDpdParcel || status === 'shipped' || status === 'delivered' || status === 'completed' || status === 'odesláno' || status === 'doručeno') {
-      return 0;
-    }
-
-    // Vracet na sklad jde jen to, co se ze skladu opravdu odepsalo.
-    // Objednávky kartou se zakládají s reserveOnly:true — sklad se u nich
-    // odečítá až po potvrzení platby (stock_applied). Bez této kontroly
-    // by smazání nezaplacené objednávky kartou sklad NAVÝŠILO o zboží,
-    // které nikdy nikdo neodebral.
-    const stockApplied = orderData.stock_applied === true
-      || orderData.rawJson?.order?.stock_applied === true
-      || orderData.rawJson?.stock_applied === true;
-
-    if (!stockApplied) {
-      return 0;
-    }
-
-    const items = orderData.items || orderData.cart || orderData.rawJson?.items || [];
-    if (!Array.isArray(items) || items.length === 0) return 0;
-
-    let restoredCount = 0;
-    for (const item of items) {
-      if (item.isService) continue;
-      // Vyhledávat podle product_id, ne item.id — u variant (singles) je item.id
-      // ID varianty, které v tabulce products neexistuje, takže se sklad tiše
-      // nevracel vůbec. Odečítání ve finalize-order používá stejné pořadí.
-      const productId = item.product_id || item.code || item.id;
-      const variantId = (item.variant_id || item.id) !== productId ? (item.variant_id || item.id) : null;
-      const qty = Number(item.quantity || 1);
-
-      if (!productId || qty <= 0) continue;
-
-      try {
-        const { data: product } = await supabase
-          .from('products')
-          .select('id, stock, variants')
-          .eq('id', productId)
-          .maybeSingle();
-
-        if (product) {
-          if (variantId && Array.isArray(product.variants) && product.variants.some(v => String(v.id) === String(variantId))) {
-            // Položka je varianta — vrátit sklad variantě, ne hlavnímu produktu
-            const updatedVariants = product.variants.map(v =>
-              String(v.id) === String(variantId)
-                ? { ...v, stock: Number(v.stock || 0) + qty }
-                : v
-            );
-            await supabase
-              .from('products')
-              .update({ variants: updatedVariants })
-              .eq('id', productId);
-            restoredCount += qty;
-          } else if (product.stock !== null && product.stock !== undefined) {
-            const newStock = Number(product.stock || 0) + qty;
-            await supabase
-              .from('products')
-              .update({ stock: newStock })
-              .eq('id', productId);
-            restoredCount += qty;
-          } else if (Array.isArray(product.variants)) {
-            let variantUpdated = false;
-            const updatedVariants = product.variants.map(v => {
-              if (item.variant_id && v.id === item.variant_id) {
-                variantUpdated = true;
-                return { ...v, stock: Number(v.stock || 0) + qty };
-              }
-              return v;
-            });
-
-            if (!variantUpdated && updatedVariants.length > 0) {
-              updatedVariants[0] = {
-                ...updatedVariants[0],
-                stock: Number(updatedVariants[0].stock || 0) + qty
-              };
-            }
-
-            await supabase
-              .from('products')
-              .update({ variants: updatedVariants })
-              .eq('id', productId);
-            restoredCount += qty;
-          }
-        }
-      } catch (err) {
-        console.error(`Error restoring stock for product ${productId}:`, err);
-      }
-    }
-    return restoredCount;
-  };
+  // Sklad při mazání vrací výhradně server (save-order-json DELETE).
+  // Dřív ho vracel i frontend a každé smazání tak přičetlo kusy DVAKRÁT.
 
   const handleDeleteOrder = (orderId, filename) => {
     const title = lang === 'CZ' ? 'Smazat objednávku?' : 'Delete Order?';
@@ -592,17 +498,12 @@ export default function OrdersTab({ showToast }) {
       confirmText: lang === 'CZ' ? 'Smazat' : 'Delete',
       onConfirm: async () => {
         try {
-          const orderObj = loadedOrders[filename] || (detailOrder && detailOrder.id === orderId ? detailOrder : null);
-          let restoredCount = 0;
-          if (orderObj) {
-            restoredCount = await restoreOrderStock(orderObj);
-          }
-
-          const { error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
+          const { data: delData, error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
             method: 'DELETE'
           });
 
           if (error) throw error;
+          const restoredCount = Number(delData?.restoredCount || 0);
 
           const toastMsg = restoredCount > 0
             ? (lang === 'CZ' ? `Objednávka #${orderId} byla smazána. Navráceno ${restoredCount} ks na sklad.` : `Order #${orderId} deleted and ${restoredCount} pcs restored to stock.`)
@@ -642,16 +543,11 @@ export default function OrdersTab({ showToast }) {
         for (const orderId of selectedOrderIds) {
           try {
             const filename = `order_${orderId}.json`;
-            const orderObj = loadedOrders[filename] || loadedOrders[`order_${orderId}.xml`];
-            if (orderObj) {
-              const restored = await restoreOrderStock(orderObj);
-              totalRestored += Number(restored || 0);
-            }
-
-            const { error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
+            const { data: delData, error } = await supabase.functions.invoke(`save-order-json?filename=${encodeURIComponent(filename)}`, {
               method: 'DELETE'
             });
             if (error) throw error;
+            totalRestored += Number(delData?.restoredCount || 0);
             successCount++;
           } catch (err) {
             console.error(`Failed to delete order ${orderId}:`, err);

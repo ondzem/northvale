@@ -194,3 +194,29 @@ export function normalizeOrder(input: any): Record<string, any> {
     userId: user_id
   };
 }
+
+/**
+ * Odlehčená verze objednávky pro profiles.order_history.
+ *
+ * Položky košíku v sobě nesou celý objekt `product` (obrázky, popisy,
+ * varianty…) — ukládat tohle do historie profil nafoukne o desítky kB
+ * s každou objednávkou a zpomalí každé přihlášení. Historie potřebuje
+ * jen souhrn; kompletní objednávka žije ve storage (order_<id>.json).
+ */
+export function slimOrderForHistory(order: Record<string, any>): Record<string, any> {
+  const slim = { ...order };
+  delete slim.rawJson;
+  slim.items = (order.items || []).map((i: any) => ({
+    id: i.id,
+    product_id: i.product_id,
+    variant_id: i.variant_id ?? null,
+    name: i.name,
+    price: i.price,
+    quantity: i.quantity,
+    no_vat: !!i.no_vat
+  }));
+  return slim;
+}
+
+/** Strop délky order_history v profilu — starší objednávky zůstávají ve storage. */
+export const ORDER_HISTORY_LIMIT = 100;
