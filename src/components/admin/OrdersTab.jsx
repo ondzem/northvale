@@ -4,6 +4,7 @@ import { useTranslation } from '../../context/LanguageContext';
 import { supabase } from '../../supabase';
 import InvoiceTemplate from './InvoiceTemplate';
 import SendInvoiceModal from './SendInvoiceModal';
+import { FEATURE_FLAGS } from '../../config';
 
 const generateTextInvoice = (order) => {
   if (!order) return '';
@@ -2134,7 +2135,11 @@ export default function OrdersTab({ showToast }) {
                             const isPaid = (details?.rawJson?.order?.paymentStatus === 'paid') || (details?.rawJson?.order?.platba === 'uhrazeno');
                             const fStatus = (details?.rawJson?.order?.fulfillmentStatus || details?.rawJson?.order?.fulfillment_status || details?.rawJson?.order?.stav || '').toLowerCase();
                             const isCompleted = fStatus === 'completed' || fStatus === 'vyřízeno' || fStatus === 'doručeno' || fStatus === 'shipped' || fStatus === 'odesláno';
-                            const hasInvoiceError = !!details?.rawJson?.order?.invoice_error;
+                            // Nouzové dogenerování faktury dává smysl jen když faktury
+                            // vystavuje eshop. V ručním režimu by vyrobilo doklad, který
+                            // nesedí s účetnictvím provozovatele — proto se neukazuje
+                            // ani u starých objednávek s chybou.
+                            const hasInvoiceError = FEATURE_FLAGS.autoInvoices && !!details?.rawJson?.order?.invoice_error;
                             // Faktury se vystavují ručně v účetnictví — tady se jen odesílají.
                             const invoiceSentAt = details?.rawJson?.order?.invoice_sent_at;
 
