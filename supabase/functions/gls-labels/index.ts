@@ -346,7 +346,7 @@ serve(async (req) => {
       ClientNumber: clientNumInt,
       ClientReference: `${order.id}-${Date.now().toString().slice(-4)}`,
       Count: 1,
-      Content: "Sběratelské karty",
+      Content: "Zboží",
       Weight: defaultWeight,
       PickupAddress: {
         Name: Deno.env.get("GLS_SENDER_NAME") || "NORTHVALE s.r.o.",
@@ -355,7 +355,7 @@ serve(async (req) => {
         City: Deno.env.get("GLS_SENDER_CITY") || "Holice",
         ZipCode: (Deno.env.get("GLS_SENDER_ZIP") || "53401").replace(/\s+/g, ""),
         CountryIsoCode: "CZ",
-        ContactName: Deno.env.get("GLS_SENDER_CONTACT") || "Ondřej Zeman",
+        ContactName: Deno.env.get("GLS_SENDER_CONTACT") || "Ondřej Škrba",
         ContactPhone: Deno.env.get("GLS_SENDER_PHONE") || "+420739666779",
         ContactEmail: Deno.env.get("GLS_SENDER_EMAIL") || "info@northvaletcg.eu"
       },
