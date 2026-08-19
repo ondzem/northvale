@@ -93,6 +93,17 @@
       <g:brand>Disney Lorcana</g:brand>
     </item>
     <item>
+      <g:id>shimmering-skies-booster-box</g:id>
+      <g:title>Shimmering Skies Booster Box</g:title>
+      <g:description>Celá Lorcana slaví! Pátá edice přináší velký festival na oslavu vítězství nad Ursulou, zatímco se v pozadí rozplétá nové tajemství kolem Velké Iluminárie.</g:description>
+      <g:link>https://northvaletcg.eu/sealed-detail/shimmering-skies-booster-box/</g:link>
+      <g:image_link>https://northvaletcg.eu/product-images/shimmering-skies-booster-box.webp</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>2949.00 CZK</g:price>
+      <g:condition>new</g:condition>
+      <g:brand>Disney Lorcana</g:brand>
+    </item>
+    <item>
       <g:id>azurite-sea-booster-box</g:id>
       <g:title>Azurite Sea Booster Box</g:title>
       <g:description>Zvedněte kotvy a vydejte se s glimmery na dobrodružnou plavbu po Azurite Sea podle staré pirátské mapy!</g:description>
@@ -111,17 +122,6 @@
       <g:image_link>https://northvaletcg.eu/product-images/winterspell-booster-box.webp</g:image_link>
       <g:availability>in_stock</g:availability>
       <g:price>5549.00 CZK</g:price>
-      <g:condition>new</g:condition>
-      <g:brand>Disney Lorcana</g:brand>
-    </item>
-    <item>
-      <g:id>shimmering-skies-booster-box</g:id>
-      <g:title>Shimmering Skies Booster Box</g:title>
-      <g:description>Celá Lorcana slaví! Pátá edice přináší velký festival na oslavu vítězství nad Ursulou, zatímco se v pozadí rozplétá nové tajemství kolem Velké Iluminárie.</g:description>
-      <g:link>https://northvaletcg.eu/sealed-detail/shimmering-skies-booster-box/</g:link>
-      <g:image_link>https://northvaletcg.eu/product-images/shimmering-skies-booster-box.webp</g:image_link>
-      <g:availability>in_stock</g:availability>
-      <g:price>2949.00 CZK</g:price>
       <g:condition>new</g:condition>
       <g:brand>Disney Lorcana</g:brand>
     </item>

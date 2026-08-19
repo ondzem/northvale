@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from '../context/LanguageContext';
+import { FEATURE_FLAGS } from '../config';
 
 export default function OrderConfirmation({ order, setActivePage }) {
   const { lang } = useTranslation();
@@ -213,17 +214,21 @@ export default function OrderConfirmation({ order, setActivePage }) {
 
         {/* Disclaimer */}
         <p className="ocf-email">
-          {isBankTransfer 
-            ? (lang === 'CZ' 
-                ? 'Potvrzení objednávky a podklady k platbě Vám byly zaslány na e-mail.' 
+          {isBankTransfer
+            ? (lang === 'CZ'
+                ? 'Potvrzení objednávky a podklady k platbě Vám byly zaslány na e-mail.'
                 : 'Order confirmation and payment instructions have been sent to your email.')
-            : (order.paymentMethod && (order.paymentMethod.toLowerCase().includes('dobírk') || order.paymentMethod.toLowerCase().includes('cod')))
-              ? (lang === 'CZ' 
-                  ? 'Potvrzení objednávky a daňový doklad Vám byly zaslány na e-mail.' 
-                  : 'Order confirmation and tax invoice have been sent to your email.')
-              : (lang === 'CZ' 
-                  ? 'Potvrzení objednávky a daňový doklad (faktura) Vám byly zaslány na e-mail.' 
-                  : 'Order confirmation and tax invoice have been sent to your email.')}
+            : !FEATURE_FLAGS.autoInvoices
+              ? (lang === 'CZ'
+                  ? 'Potvrzení objednávky Vám bylo zasláno na e-mail. Fakturu (daňový doklad) Vám zašleme dodatečně v samostatném e-mailu.'
+                  : 'Your order confirmation has been sent to your email. The invoice will follow in a separate email.')
+              : (order.paymentMethod && (order.paymentMethod.toLowerCase().includes('dobírk') || order.paymentMethod.toLowerCase().includes('cod')))
+                ? (lang === 'CZ'
+                    ? 'Potvrzení objednávky a daňový doklad Vám byly zaslány na e-mail.'
+                    : 'Order confirmation and tax invoice have been sent to your email.')
+                : (lang === 'CZ'
+                    ? 'Potvrzení objednávky a daňový doklad (faktura) Vám byly zaslány na e-mail.'
+                    : 'Order confirmation and tax invoice have been sent to your email.')}
         </p>
 
         {/* Actions */}

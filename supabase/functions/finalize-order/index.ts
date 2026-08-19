@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 import { normalizeOrder, normalizeItems, slimOrderForHistory, ORDER_HISTORY_LIMIT } from "../_shared/order-schema.ts";
 import { getAuthContext, requireAdmin } from "../_shared/auth.ts";
+import { AUTO_INVOICES } from "../_shared/features.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -438,7 +439,10 @@ async function applyStockAndDiscount(supabase: any, orderData: any) {
 }
 
 async function triggerPostOrderActions(supabase: any, supabaseUrl: string, supabaseServiceKey: string, orderData: any, isMarkPaid = false) {
-  if (!orderData.has_no_vat) {
+  // Fakturu vystavuje provozovatel ručně ze svého účetnictví a posílá ji
+  // tlačítkem „Odeslat fakturu“ v adminu (funkce send-invoice-email).
+  // Viz _shared/features.ts.
+  if (AUTO_INVOICES && !orderData.has_no_vat) {
     try {
       const r = await fetch(`${supabaseUrl}/functions/v1/generate-invoice-pdf`, {
         method: "POST",

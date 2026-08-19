@@ -1461,7 +1461,11 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
 
                             {/* PDF Invoice Button */}
                             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                              {order.paymentStatus === 'paid' || order.paymentStatus === 'cod' ? (
+                              {!FEATURE_FLAGS.autoInvoices ? (
+                                <span style={{ fontSize: '12px', color: '#8a8a92' }}>
+                                  {lang === 'CZ' ? 'Fakturu Vám zašleme e-mailem.' : 'We will send your invoice by e-mail.'}
+                                </span>
+                              ) : order.paymentStatus === 'paid' || order.paymentStatus === 'cod' ? (
                                 <button 
                                   style={{ 
                                     background: 'rgba(253, 189, 22, 0.1)', 
@@ -1540,7 +1544,11 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                             {(order.finalTotal || order.total || 0).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč
                           </span>
                           <div style={{ textAlign: 'right' }}>
-                            {canDownload ? (
+                            {!FEATURE_FLAGS.autoInvoices ? (
+                              <span style={{ fontSize: '12px', color: '#8a8a92' }}>
+                                {lang === 'CZ' ? 'Zašleme e-mailem' : 'Sent by e-mail'}
+                              </span>
+                            ) : canDownload ? (
                               <button 
                                 className="prf-edit"
                                 style={{ 

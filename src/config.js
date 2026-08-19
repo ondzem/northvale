@@ -6,6 +6,11 @@ export const FEATURE_FLAGS = {
   showNewsletter: true,   // Set to true to show newsletter forms on storefront pages
   preRegistrationActive: false, // OFFICIALLY LAUNCHED: Storefront is live for all public visitors
   showCalendar: false,    // Set to true to enable and show TCG Release Calendar 2026
+  // Automatické faktury. Dočasně vypnuto — fakturu vystavuje provozovatel ručně
+  // ve svém účetnictví a posílá ji tlačítkem „Odeslat fakturu“ u objednávky
+  // v administraci. Když je false, zákazník fakturu nikde na webu nevidí.
+  // Musí odpovídat AUTO_INVOICES v supabase/functions/_shared/features.ts.
+  autoInvoices: false,
 };
 
 /**

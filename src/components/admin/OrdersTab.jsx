@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from '../../context/LanguageContext';
 import { supabase } from '../../supabase';
 import InvoiceTemplate from './InvoiceTemplate';
+import SendInvoiceModal from './SendInvoiceModal';
 
 const generateTextInvoice = (order) => {
   if (!order) return '';
@@ -124,6 +125,8 @@ export default function OrdersTab({ showToast }) {
   const [selectedOrderIds, setSelectedOrderIds] = useState([]);
   const [detailOrder, setDetailOrder] = useState(null);
   const [showInvoiceOrder, setShowInvoiceOrder] = useState(null);
+  // Objednávka, ke které se právě ručně odesílá faktura (viz SendInvoiceModal)
+  const [sendInvoiceOrder, setSendInvoiceOrder] = useState(null);
   const [loadingDetailsProgress, setLoadingDetailsProgress] = useState({ current: 0, total: 0 });
 
   // GLS API configuration states
@@ -1397,6 +1400,32 @@ export default function OrdersTab({ showToast }) {
 
   return (
     <div className="orders-tab-container">
+      {sendInvoiceOrder && (
+        <SendInvoiceModal
+          order={sendInvoiceOrder}
+          lang={lang}
+          showToast={showToast}
+          onClose={() => setSendInvoiceOrder(null)}
+          onSent={(sentAt, sentTo) => {
+            // Promítnout do načteného seznamu, ať se stav ukáže hned bez reloadu.
+            const sentId = sendInvoiceOrder?.id;
+            setLoadedOrders(prev => {
+              const next = { ...prev };
+              for (const key of Object.keys(next)) {
+                if (next[key]?.id !== sentId) continue;
+                next[key] = {
+                  ...next[key],
+                  rawJson: {
+                    ...next[key].rawJson,
+                    order: { ...next[key].rawJson?.order, invoice_sent_at: sentAt, invoice_sent_to: sentTo }
+                  }
+                };
+              }
+              return next;
+            });
+          }}
+        />
+      )}
       <style>{`
         @keyframes ordersSlideDown {
           from { opacity: 0; transform: translateY(-8px); }
@@ -2106,9 +2135,31 @@ export default function OrdersTab({ showToast }) {
                             const fStatus = (details?.rawJson?.order?.fulfillmentStatus || details?.rawJson?.order?.fulfillment_status || details?.rawJson?.order?.stav || '').toLowerCase();
                             const isCompleted = fStatus === 'completed' || fStatus === 'vyřízeno' || fStatus === 'doručeno' || fStatus === 'shipped' || fStatus === 'odesláno';
                             const hasInvoiceError = !!details?.rawJson?.order?.invoice_error;
+                            // Faktury se vystavují ručně v účetnictví — tady se jen odesílají.
+                            const invoiceSentAt = details?.rawJson?.order?.invoice_sent_at;
 
                             return (
                               <>
+                                {details && (
+                                  <button
+                                    className="orders-action-btn"
+                                    style={{
+                                      backgroundColor: invoiceSentAt ? 'rgba(255,255,255,0.06)' : '#6366f1',
+                                      color: invoiceSentAt ? '#8a8a92' : '#ffffff',
+                                      fontWeight: 'bold'
+                                    }}
+                                    onClick={() => setSendInvoiceOrder(details)}
+                                    title={invoiceSentAt
+                                      ? (lang === 'CZ'
+                                          ? `Faktura odeslána ${new Date(invoiceSentAt).toLocaleString('cs-CZ')} — lze poslat znovu`
+                                          : `Invoice sent on ${new Date(invoiceSentAt).toLocaleString('en-US')} — can be resent`)
+                                      : (lang === 'CZ' ? 'Odeslat zákazníkovi fakturu z účetnictví' : 'Send invoice from accounting to customer')}
+                                  >
+                                    {invoiceSentAt ? '✅' : '🧾'} {lang === 'CZ'
+                                      ? (invoiceSentAt ? 'Faktura odeslána' : 'Odeslat fakturu')
+                                      : (invoiceSentAt ? 'Invoice sent' : 'Send invoice')}
+                                  </button>
+                                )}
                                 {hasInvoiceError && (
                                   <button 
                                     className="orders-action-btn"

@@ -97,6 +97,18 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
+    <ITEM_ID>shimmering-skies-booster-box</ITEM_ID>
+    <PRODUCTNAME>Shimmering Skies Booster Box</PRODUCTNAME>
+    <DESCRIPTION>Celá Lorcana slaví! Pátá edice přináší velký festival na oslavu vítězství nad Ursulou, zatímco se v pozadí rozplétá nové tajemství kolem Velké Iluminárie.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/shimmering-skies-booster-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/shimmering-skies-booster-box.webp</IMGURL>
+    <PRICE_VAT>2949</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
     <ITEM_ID>azurite-sea-booster-box</ITEM_ID>
     <PRODUCTNAME>Azurite Sea Booster Box</PRODUCTNAME>
     <DESCRIPTION>Zvedněte kotvy a vydejte se s glimmery na dobrodružnou plavbu po Azurite Sea podle staré pirátské mapy!</DESCRIPTION>
@@ -115,18 +127,6 @@
     <URL>https://northvaletcg.eu/sealed-detail/winterspell-booster-box/</URL>
     <IMGURL>https://northvaletcg.eu/product-images/winterspell-booster-box.webp</IMGURL>
     <PRICE_VAT>5549</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
-    <HEUREKA_CPC>5</HEUREKA_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
-    <ITEM_ID>shimmering-skies-booster-box</ITEM_ID>
-    <PRODUCTNAME>Shimmering Skies Booster Box</PRODUCTNAME>
-    <DESCRIPTION>Celá Lorcana slaví! Pátá edice přináší velký festival na oslavu vítězství nad Ursulou, zatímco se v pozadí rozplétá nové tajemství kolem Velké Iluminárie.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/shimmering-skies-booster-box/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/shimmering-skies-booster-box.webp</IMGURL>
-    <PRICE_VAT>2949</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Disney Lorcana</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>

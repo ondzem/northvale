@@ -3,6 +3,8 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getAuthContext, requireAdmin } from "../_shared/auth.ts";
+import { AUTO_INVOICES } from "../_shared/features.ts";
+import { INVOICE_FOLLOWS_NOTE } from "../_shared/email-template.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
@@ -85,20 +87,24 @@ serve(async (req) => {
       const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+      // Faktura se přikládá jen když eshop faktury vystavuje sám. Dokud je
+      // vystavuje provozovatel ručně, zůstává prázdná. Viz _shared/features.ts.
       let base64Invoice = "";
-      try {
-        const fileName = `invoice_${order.id}.pdf`;
-        const { data: fileData, error: downloadError } = await supabase.storage
-          .from("invoices")
-          .download(fileName);
+      if (AUTO_INVOICES) {
+        try {
+          const fileName = `invoice_${order.id}.pdf`;
+          const { data: fileData, error: downloadError } = await supabase.storage
+            .from("invoices")
+            .download(fileName);
 
-        if (!downloadError && fileData) {
-          const arrayBuffer = await fileData.arrayBuffer();
-          const uint8Array = new Uint8Array(arrayBuffer);
-          base64Invoice = base64Encode(uint8Array);
+          if (!downloadError && fileData) {
+            const arrayBuffer = await fileData.arrayBuffer();
+            const uint8Array = new Uint8Array(arrayBuffer);
+            base64Invoice = base64Encode(uint8Array);
+          }
+        } catch (storageErr) {
+          console.error("Payment confirmed invoice storage download failed:", storageErr);
         }
-      } catch (storageErr) {
-        console.error("Payment confirmed invoice storage download failed:", storageErr);
       }
 
       const attachments = base64Invoice ? [
@@ -141,6 +147,7 @@ serve(async (req) => {
               </p>
             </div>
 
+            ${AUTO_INVOICES ? `
             <!-- Invoice Download Container -->
             <div style="background-color: #fdfdfd; border: 1px solid #e1e4e8; border-top: 4px solid #fdbd16; padding: 22px; margin-bottom: 24px; border-radius: 8px; text-align: center;">
               <div style="color: #666666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">
@@ -156,7 +163,10 @@ serve(async (req) => {
 
             <p style="font-size: 14px; color: #666666; line-height: 1.6; margin: 0 0 24px 0;">
               V příloze tohoto e-mailu naleznete Váš daňový doklad (fakturu). Jakmile zásilku předáme dopravci, zašleme Vám potvrzovací e-mail o expedici.
-            </p>
+            </p>` : `
+            <p style="font-size: 14px; color: #666666; line-height: 1.6; margin: 0 0 24px 0;">
+              ${INVOICE_FOLLOWS_NOTE} Jakmile zásilku předáme dopravci, zašleme Vám potvrzovací e-mail o expedici.
+            </p>`}
 
             <!-- Help / System Info -->
             <div style="border-top: 1px solid #e1e4e8; padding-top: 24px; margin-top: 30px; text-align: center;">
@@ -179,7 +189,9 @@ serve(async (req) => {
         body: JSON.stringify({
           sender: { name: senderName, email: senderEmail },
           to: [{ email: order.customerEmail, name: order.customerName }],
-          subject: `Platba přijata a daňový doklad - Objednávka #${order.id}`,
+          subject: AUTO_INVOICES
+            ? `Platba přijata a daňový doklad - Objednávka #${order.id}`
+            : `Platba přijata - Objednávka #${order.id}`,
           htmlContent: wrapInHtmlDocument(htmlPaymentConfirmedContent),
           attachment: attachments.length > 0 ? attachments : undefined
         })
@@ -286,9 +298,10 @@ serve(async (req) => {
       (orderItems && orderItems.some((it: any) => it.no_vat || it.noVat || (it.product && (it.product.no_vat || it.product.noVat))))
     );
 
-    // Download generated PDF invoice from Storage if available and order is NOT no-VAT
+    // Download generated PDF invoice from Storage if available and order is NOT no-VAT.
+    // Při ručním režimu faktur (AUTO_INVOICES = false) se nepřikládá nikdy.
     let base64Invoice = "";
-    if (!hasNoVatItems) {
+    if (AUTO_INVOICES && !hasNoVatItems) {
       try {
         const fileName = `invoice_${order.id}.pdf`;
         const { data: fileData, error: downloadError } = await supabase.storage
@@ -340,7 +353,7 @@ serve(async (req) => {
 
     // Generate a signed URL for download (expires in 1 year)
     let downloadInvoiceUrl = `https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/v1/object/public/invoices/invoice_${order.id}.pdf`; // default fallback
-    if (!hasNoVatItems) {
+    if (AUTO_INVOICES && !hasNoVatItems) {
       try {
         const { data: signedData, error: signedError } = await supabase.storage
           .from("invoices")
@@ -363,6 +376,16 @@ serve(async (req) => {
         confirmationIntroText = 'děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. Objednávku zpracujeme a předáme dopravci. Částku uhradíte při převzetí zásilky u kurýra.<br/><br/><strong>Upozornění k faktuře:</strong> Jelikož tato objednávka obsahuje zboží bez DPH / v osobitém režimu, daňový doklad (fakturu) Vám zašleme v samostatném e-mailu po vyřízení zásilky.';
       } else {
         confirmationIntroText = 'děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. Vaše platba kartou proběhla úspěšně a objednávku připravujeme k odeslání.<br/><br/><strong>Upozornění k faktuře:</strong> Jelikož tato objednávka obsahuje zboží bez DPH / v osobitém režimu, daňový doklad (fakturu) Vám zašleme v samostatném e-mailu přímo od našeho týmu.';
+      }
+    } else if (!AUTO_INVOICES) {
+      // Ruční režim faktur: zákazníkovi slíbíme fakturu zvlášť, nikde ji nenabízíme.
+      const invoiceNote = `<br/><br/><strong>Faktura:</strong> ${INVOICE_FOLLOWS_NOTE}`;
+      if (isBankTransfer) {
+        confirmationIntroText = 'děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí a podklady k úhradě platby převodem. Jakmile obdržíme Vaši platbu na náš účet, zboží ihned zabalíme a odešleme.' + invoiceNote;
+      } else if (isCod) {
+        confirmationIntroText = 'děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. Objednávku zpracujeme a předáme dopravci v nejbližším možném termínu. Částku uhradíte při převzetí zásilky u kurýra.' + invoiceNote;
+      } else {
+        confirmationIntroText = 'děkujeme za Váš nákup na NORTHVALE TCG. Vaši objednávku jsme v pořádku přijali a níže naleznete její shrnutí. Vaše platba proběhla úspěšně a objednávku připravujeme k odeslání.' + invoiceNote;
       }
     } else {
       if (isBankTransfer) {
@@ -696,7 +719,9 @@ serve(async (req) => {
     console.log(`[send-order-email] Confirm email response status: ${resConfirm.status}, body: ${txtConfirm}`);
 
     // 2. Send Invoice Email to Customer - ONLY IF ONLINE CARD PAYMENT AND NOT A NO-VAT ORDER!
-    if (!isBankTransfer && !isCod && !hasNoVatItems) {
+    // V ručním režimu faktur se tento e-mail neposílá vůbec — fakturu odešle
+    // provozovatel z adminu (send-invoice-email).
+    if (AUTO_INVOICES && !isBankTransfer && !isCod && !hasNoVatItems) {
       const resInvoice = await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
         headers: {
