@@ -30,8 +30,8 @@ export const DEFAULT_FAQ = [
         category_id: '11111111-1111-1111-1111-111111111111',
         question_cz: 'Kdy obdržím svou objednávku?',
         question_en: 'When will I receive my order?',
-        answer_cz: 'Garantujeme doručení do 48 hodin od zaplacení (v pracovní dny).',
-        answer_en: 'We guarantee delivery within 48 hours of payment (on business days).',
+        answer_cz: 'Garantujeme odeslání do 48 hodin od zaplacení (v pracovní dny).',
+        answer_en: 'We guarantee dispatch within 48 hours of payment (on business days).',
         position: 2
       }
     ]

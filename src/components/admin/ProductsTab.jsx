@@ -4694,7 +4694,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             </svg>
                             <div style={{ textAlign: 'left', lineHeight: '1.2' }}>
                               <div style={{ fontSize: '10px', color: '#fff', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Rychlost' : 'Fast Delivery'}</div>
-                              <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>{lang === 'CZ' ? 'Doručení do 48h' : 'Delivery within 48h'}</div>
+                              <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>{lang === 'CZ' ? 'Odeslání do 48h' : 'Dispatch within 48h'}</div>
                             </div>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

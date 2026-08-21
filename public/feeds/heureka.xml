@@ -181,6 +181,30 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
+    <ITEM_ID>case-wilds-unknown-booster-box</ITEM_ID>
+    <PRODUCTNAME>Wilds Unknown Booster Box CASE</PRODUCTNAME>
+    <DESCRIPTION>Case booster boxů k dvanácté edici Wilds Unknown obsahuje více kusů booster boxů v jednom velkoobchodním balení – ideální volba pro obchodníky i vášnivé sběratele, kteří chtějí zásobu na sklad nebo si chtějí zajistit více boxů najednou za výhodnějších podmínek</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/case-wilds-unknown-booster-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/case-wilds-unknown-booster-box.webp</IMGURL>
+    <PRICE_VAT>25999</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>abyss-eye-booster-pack</ITEM_ID>
+    <PRODUCTNAME>Abyss Eye booster pack</PRODUCTNAME>
+    <DESCRIPTION>Temnota se šíří říší! Japonská edice Abyss Eye přivádí do hry Mega Darkraie ex – hvězdu setu s masivním HP 280 a útokem &quot;Abyss Eye&quot;, který okamžitě vyřadí soupeřova aktivního Pokémona postiženého jakoukoli speciální podmínkou.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-pack/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/abyss-eye-booster-pack.webp</IMGURL>
+    <PRICE_VAT>99</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
     <ITEM_ID>akryl-booster-box-riftbound</ITEM_ID>
     <PRODUCTNAME>Akryl Booster Box Riftbound</PRODUCTNAME>
     <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Box Riftbound patří k nejžádanějším kouskům ve světě sběratelství, a proto by jeho ochrana měla odpovídat jeho skutečné hodnotě</DESCRIPTION>
@@ -189,6 +213,18 @@
     <PRICE_VAT>499</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>charizard-ex-super-premium-collectio</ITEM_ID>
+    <PRODUCTNAME>Charizard EX Super Premium Collection</PRODUCTNAME>
+    <DESCRIPTION>Zapalte hru s legendárním Charizardem! Tato prémiová kolekce je ideální volbou pro fanoušky ohnivého draka i pro sběratele, kteří chtějí svou sbírku posunout na další úroveň.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/charizard-ex-super-premium-collection/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/charizard-ex-super-premium-collection.webp</IMGURL>
+    <PRICE_VAT>3049</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
@@ -289,18 +325,6 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>abyss-eye-booster-pack</ITEM_ID>
-    <PRODUCTNAME>Abyss Eye booster pack</PRODUCTNAME>
-    <DESCRIPTION>Temnota se šíří říší! Japonská edice Abyss Eye přivádí do hry Mega Darkraie ex – hvězdu setu s masivním HP 280 a útokem &quot;Abyss Eye&quot;, který okamžitě vyřadí soupeřova aktivního Pokémona postiženého jakoukoli speciální podmínkou.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-pack/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/abyss-eye-booster-pack.webp</IMGURL>
-    <PRICE_VAT>99</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Pokémon</MANUFACTURER>
-    <HEUREKA_CPC>5</HEUREKA_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
     <ITEM_ID>akryl-etb-pokemon</ITEM_ID>
     <PRODUCTNAME>Akryl ETB Pokémon</PRODUCTNAME>
     <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Elite Trainer Box patří k nejžádanějším produktům u sběratelů i investorů, a proto by jejich ochrana měla odpovídat jejich skutečné hodnotě</DESCRIPTION>
@@ -337,18 +361,6 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>toploader-3x4-clear-regular-25ks</ITEM_ID>
-    <PRODUCTNAME>Toploader 3x4 Clear Regular</PRODUCTNAME>
-    <DESCRIPTION>Toploadery jsou tvrdé plastové obaly, které poskytují maximální ochranu vašim nejcennějším kartám před ohnutím, poškrábáním a nárazem. Dostupné v různých velikostech pro standardní i oversized karty, jsou ideální pro dlouhodobé uchovávání i bezpečné zasílání. Nezbytný doplněk pro každého sběratele.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/toploader-3x4-clear-regular-25ks/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/toploader-3x4-clear-regular-25ks.webp</IMGURL>
-    <PRICE_VAT>75</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Northvale</MANUFACTURER>
-    <HEUREKA_CPC>5</HEUREKA_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
     <ITEM_ID>akryl-booster-box-lorcana</ITEM_ID>
     <PRODUCTNAME>Akryl Booster box Lorcana</PRODUCTNAME>
     <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Box Disney Lorcana patří k nejžádanějším kouskům ve světě sběratelství, a proto by jeho ochrana měla odpovídat jeho skutečné hodnotě</DESCRIPTION>
@@ -369,6 +381,18 @@
     <PRICE_VAT>339</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Pokémon</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>toploader-3x4-clear-regular-25ks</ITEM_ID>
+    <PRODUCTNAME>Toploader 3x4 Clear Regular</PRODUCTNAME>
+    <DESCRIPTION>Toploadery jsou tvrdé plastové obaly, které poskytují maximální ochranu vašim nejcennějším kartám před ohnutím, poškrábáním a nárazem. Dostupné v různých velikostech pro standardní i oversized karty, jsou ideální pro dlouhodobé uchovávání i bezpečné zasílání. Nezbytný doplněk pro každého sběratele.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/toploader-3x4-clear-regular-25ks/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/toploader-3x4-clear-regular-25ks.webp</IMGURL>
+    <PRICE_VAT>75</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
@@ -601,18 +625,6 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>charizard-ex-super-premium-collectio</ITEM_ID>
-    <PRODUCTNAME>Charizard EX Super Premium Collection</PRODUCTNAME>
-    <DESCRIPTION>Zapalte hru s legendárním Charizardem! Tato prémiová kolekce je ideální volbou pro fanoušky ohnivého draka i pro sběratele, kteří chtějí svou sbírku posunout na další úroveň.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/charizard-ex-super-premium-collection/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/charizard-ex-super-premium-collection.webp</IMGURL>
-    <PRICE_VAT>3049</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Pokémon</MANUFACTURER>
-    <HEUREKA_CPC>5</HEUREKA_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
     <ITEM_ID>480-pocket-black</ITEM_ID>
     <PRODUCTNAME>480 Pocket Black</PRODUCTNAME>
     <DESCRIPTION>Prémiové album Gemloader je navrženo přímo pro karty v ochranných sleevech (i dvojitě sleevované), takže vaše nejcennější kousky budou v naprostém bezpečí a zároveň dobře viditelné</DESCRIPTION>
@@ -645,18 +657,6 @@
     <PRICE_VAT>1299</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
-    <HEUREKA_CPC>5</HEUREKA_CPC>
-    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
-    <ITEM_ID>case-wilds-unknown-booster-box</ITEM_ID>
-    <PRODUCTNAME>CASE Wilds Unknown Booster Box</PRODUCTNAME>
-    <DESCRIPTION>Case booster boxů k dvanácté edici Wilds Unknown obsahuje více kusů booster boxů v jednom velkoobchodním balení – ideální volba pro obchodníky i vášnivé sběratele, kteří chtějí zásobu na sklad nebo si chtějí zajistit více boxů najednou za výhodnějších podmínek</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/case-wilds-unknown-booster-box/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/case-wilds-unknown-booster-box.webp</IMGURL>
-    <PRICE_VAT>25999</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
@@ -841,6 +841,18 @@
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
+    <ITEM_ID>wilds-unknown-booster-pack</ITEM_ID>
+    <PRODUCTNAME>Wilds Unknown Booster pack</PRODUCTNAME>
+    <DESCRIPTION>Booster pack k dvanácté edici Wilds Unknown zavede vaše glimmery za hranice Winterspellu do drsných krajin jako Wilderknot, Torchlight Peaks nebo The Great Empty Sea, kde přežití závisí na týmové práci a odvaze. Obrázek je pouze ilustrační a při objednávce může dorazit i jiný art packu.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/wilds-unknown-booster-pack/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/wilds-unknown-booster-pack.webp</IMGURL>
+    <PRICE_VAT>279</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
     <ITEM_ID>flareon-advanced-gift-box</ITEM_ID>
     <PRODUCTNAME>Flareon Advanced Gift Box</PRODUCTNAME>
     <DESCRIPTION>Oslavte ohnivou eleganci Flareona v jednom prémiovém balení! Advanced Gift Box věnovaný Flareonovi přináší kombinaci vzácných karet, boosterů i praktického vybavení pro vaši sbírku</DESCRIPTION>
@@ -849,6 +861,18 @@
     <PRICE_VAT>3399</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Pokémon</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>secret-gardel-limited-gift-box-cn</ITEM_ID>
+    <PRODUCTNAME>Secret Gardel Limited Gift Box CN</PRODUCTNAME>
+    <DESCRIPTION>Vstupte do kouzelné lesní zahrady spolu s Ivernem a Lillií! Secret Garden (秘境花园) je prémiový sběratelský box určený pro čínský trh, navržený nejen jako sada balíčků, ale jako pečlivě zpracovaný kolekcionářský kousek s celostránkovými ilustracemi, pohlednicemi a art printy v botanickém, pohádkovém stylu.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/secret-gardel-limited-gift-box-cn/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/secret-gardel-limited-gift-box-cn.webp</IMGURL>
+    <PRICE_VAT>1999</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
@@ -909,6 +933,18 @@
     <PRICE_VAT>3399</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Pokémon</MANUFACTURER>
+    <HEUREKA_CPC>5</HEUREKA_CPC>
+    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>monkey-d-luffy-op13-001-ichiban-kuji</ITEM_ID>
+    <PRODUCTNAME>Monkey D. Luffy OP13-001 – Ichiban Kuji Promo (OP13-001)</PRODUCTNAME>
+    <DESCRIPTION>Exkluzivní japonská promo karta, kterou získali fanoušci jako nákupní bonus v rámci loterie Ichiban Kuji věnované One Piece Card Game! Díky limitované distribuci se rychle stala jednou z nejžádanějších sběratelských karet posledního období.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/monkey-d-luffy-op13-001-ichiban-kuji-promo-op13-001/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/monkey-d-luffy-op13-001-ichiban-kuji-promo-op13-001.webp</IMGURL>
+    <PRICE_VAT>949</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>One Piece</MANUFACTURER>
     <HEUREKA_CPC>5</HEUREKA_CPC>
     <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>

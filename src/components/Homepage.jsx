@@ -220,7 +220,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   const uspScrollRef = useRef(null);
   const uspItems = [
     { icon: '/truck-moving.png', title: lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping', desc: lang === 'CZ' ? 'při objednávce nad 1 750 Kč' : 'on orders over 1,750 Kč' },
-    { icon: '/tachometer-fast.png', title: lang === 'CZ' ? 'Rychlost doručení' : 'Fast Shipping', desc: lang === 'CZ' ? 'Doručení do 48 hodin' : 'Delivery within 48 hours' },
+    { icon: '/tachometer-fast.png', title: lang === 'CZ' ? 'Rychlé odeslání' : 'Fast Dispatch', desc: lang === 'CZ' ? 'Odeslání do 48 hodin' : 'Dispatch within 48 hours' },
     { icon: '/badget-check-alt.png', title: lang === 'CZ' ? '100% Originální' : '100% Authentic', desc: lang === 'CZ' ? 'Pouze od ověřených distributorů' : 'Only from verified distributors' },
     { icon: '/credit-card.png', title: lang === 'CZ' ? 'Bezpečná platba' : 'Secure Payment', desc: lang === 'CZ' ? 'Karta, bankovní převod, dobírka' : 'Cards, bank transfer, COD' }
   ];
@@ -1282,10 +1282,10 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             </div>
           </div>
           <div style={{ ...styles.uspBox, borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            <img src="/tachometer-fast.png" alt={lang === 'CZ' ? 'Rychlost doručení' : 'Fast Delivery'} title={lang === 'CZ' ? 'Rychlost doručení' : 'Fast Delivery'} width="36" height="36" style={styles.uspIcon} />
+            <img src="/tachometer-fast.png" alt={lang === 'CZ' ? 'Rychlé odeslání' : 'Fast Dispatch'} title={lang === 'CZ' ? 'Rychlé odeslání' : 'Fast Dispatch'} width="36" height="36" style={styles.uspIcon} />
             <div style={styles.uspText}>
-              <h4 style={styles.uspTitle}>{lang === 'CZ' ? 'Rychlost doručení' : 'Fast Shipping'}</h4>
-              <p style={styles.uspDesc}>{lang === 'CZ' ? 'Doručení do 48 hodin' : 'Delivery within 48 hours'}</p>
+              <h4 style={styles.uspTitle}>{lang === 'CZ' ? 'Rychlé odeslání' : 'Fast Dispatch'}</h4>
+              <p style={styles.uspDesc}>{lang === 'CZ' ? 'Odeslání do 48 hodin' : 'Dispatch within 48 hours'}</p>
             </div>
           </div>
           <div style={{ ...styles.uspBox, borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>

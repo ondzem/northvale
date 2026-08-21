@@ -1418,7 +1418,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                 </svg>
                 <div className="detail-badge-text">
                   <h4 className="detail-badge-title">{lang === 'CZ' ? 'Rychlost' : 'Fast Delivery'}</h4>
-                  <p className="detail-badge-desc">{lang === 'CZ' ? 'Doručení do 48 hodin' : 'Delivery within 48 hours'}</p>
+                  <p className="detail-badge-desc">{lang === 'CZ' ? 'Odeslání do 48 hodin' : 'Dispatch within 48 hours'}</p>
                 </div>
               </div>
               <div className="detail-trust-badge">
