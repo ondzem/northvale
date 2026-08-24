@@ -158,8 +158,14 @@ async function run() {
     googleXml += `      <g:price>${escapeXml(price)}</g:price>\n`;
     googleXml += '      <g:condition>new</g:condition>\n';
     googleXml += `      <g:brand>${escapeXml(brand)}</g:brand>\n`;
+    // Kategorie ve stromu Google (Toys & Games > Games > Card Games).
+    googleXml += '      <g:google_product_category>4403</g:google_product_category>\n';
     if (gtin) {
       googleXml += `      <g:gtin>${escapeXml(gtin)}</g:gtin>\n`;
+    } else {
+      // Bez EAN Google položku zamítne s "chybí GTIN", pokud mu výslovně
+      // neřekneme, že výrobce žádný identifikátor nepřidělil.
+      googleXml += '      <g:identifier_exists>no</g:identifier_exists>\n';
     }
     googleXml += '    </item>\n';
   }
@@ -193,9 +199,18 @@ async function run() {
     const brand = getBrand(p.game);
     const heurekaCpc = p.custom_params?.heureka_cpc || '5';
 
+    // Heureka páruje podle PRODUCTNAME a ten MUSÍ obsahovat i výrobce —
+    // tag MANUFACTURER se k párování nepoužívá, slouží jen jako filtr.
+    // Zdroj: https://sluzby.heureka.cz/napoveda/xml-feed/
+    const pairingName = title.toLowerCase().includes(brand.toLowerCase())
+      ? title
+      : `${brand} ${title}`;
+
     heurekaXml += '  <SHOPITEM>\n';
     heurekaXml += `    <ITEM_ID>${escapeXml(p.id.substring(0, 36))}</ITEM_ID>\n`;
-    heurekaXml += `    <PRODUCTNAME>${escapeXml(title)}</PRODUCTNAME>\n`;
+    heurekaXml += `    <PRODUCTNAME>${escapeXml(pairingName.substring(0, 200))}</PRODUCTNAME>\n`;
+    // PRODUCT = název tak, jak ho chceme zobrazit zákazníkovi.
+    heurekaXml += `    <PRODUCT>${escapeXml(title)}</PRODUCT>\n`;
     heurekaXml += `    <DESCRIPTION>${escapeXml(desc)}</DESCRIPTION>\n`;
     heurekaXml += `    <URL>${escapeXml(link)}</URL>\n`;
     heurekaXml += `    <IMGURL>${escapeXml(imageLink)}</IMGURL>\n`;
