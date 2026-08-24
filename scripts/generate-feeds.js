@@ -206,7 +206,9 @@ async function run() {
       heurekaXml += `    <EAN>${escapeXml(ean)}</EAN>\n`;
     }
     heurekaXml += `    <HEUREKA_CPC>${escapeXml(heurekaCpc)}</HEUREKA_CPC>\n`;
-    heurekaXml += '    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>\n';
+    // Kategorie MUSÍ přesně odpovídat stromu Heureky, jinak se produkty nespárují.
+    // Ověřeno proti https://www.heureka.cz/direct/xml-export/shops/heureka-sekce.xml
+    heurekaXml += '    <CATEGORYTEXT>Heureka.cz | Hobby | Sběratelství | Sběratelské karty</CATEGORYTEXT>\n';
     heurekaXml += '  </SHOPITEM>\n';
   }
 
@@ -253,7 +255,9 @@ async function run() {
       zboziXml += `    <EAN>${escapeXml(ean)}</EAN>\n`;
     }
     zboziXml += `    <MAX_CPC>${escapeXml(zboziCpc)}</MAX_CPC>\n`;
-    zboziXml += '    <CATEGORYTEXT>Sběratelství | Sběratelské karetní hry</CATEGORYTEXT>\n';
+    // Zboží.cz má vlastní strom kategorií, jiný než Heureka (id 2596).
+    // Ověřeno proti https://www.zbozi.cz/static/categories.csv
+    zboziXml += '    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>\n';
     zboziXml += '  </SHOPITEM>\n';
   }
 
