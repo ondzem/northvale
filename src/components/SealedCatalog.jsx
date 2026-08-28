@@ -1218,11 +1218,13 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     if (!hasProductImage(product)) return false;
 
     // Hiding out of stock products automatically
+    // (zboží na objednávku sklad nevede — nikdy se neskrývá)
+    const isOnOrder = !!(product.onOrder || product.on_order);
     if (product.type === 'single') {
       const hasStock = product.variants && product.variants.some(v => (v.stock || 0) > 0);
-      if (!hasStock) return false;
+      if (!hasStock && !isOnOrder) return false;
     } else {
-      if ((product.stock || 0) <= 0) return false;
+      if (!isOnOrder && (product.stock || 0) <= 0) return false;
     }
     if (onlyPreorder && !product.preorder) return false;
 

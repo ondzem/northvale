@@ -932,34 +932,45 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
     try {
       if (formGame === 'Pokémon' || formGame.toLowerCase().includes('pok')) {
-        let url = `https://api.pokemontcg.io/v2/cards?q=set.id:${resolvedSetId} number:${normalizedNumberVal}`;
-        let res = await fetch(url, { signal: controller.signal });
-        let data = await res.json();
+        // API karet občas vrací 500/504 s prázdným tělem — bez kontroly stavu
+        // spadlo čtení JSON a admin se nedozvěděl, co se stalo.
+        const fetchCards = async (url) => {
+          const res = await fetch(url, { signal: controller.signal });
+          if (!res.ok) return { httpError: res.status, cards: [] };
+          try {
+            const json = await res.json();
+            return { httpError: null, cards: json?.data || [] };
+          } catch {
+            return { httpError: res.status || 0, cards: [] };
+          }
+        };
 
-        if (!data.data || data.data.length === 0) {
-          url = `https://api.pokemontcg.io/v2/cards?q=set.ptcgoCode:${setVal.toUpperCase()} number:${normalizedNumberVal}`;
-          res = await fetch(url, { signal: controller.signal });
-          data = await res.json();
+        let result = await fetchCards(`https://api.pokemontcg.io/v2/cards?q=set.id:${resolvedSetId} number:${normalizedNumberVal}`);
+        if (!result.httpError && result.cards.length === 0) {
+          result = await fetchCards(`https://api.pokemontcg.io/v2/cards?q=set.ptcgoCode:${setVal.toUpperCase()} number:${normalizedNumberVal}`);
         }
 
-        if (!data.data || data.data.length === 0) {
-          url = `https://api.pokemontcg.io/v2/cards?q=number:${normalizedNumberVal}`;
-          res = await fetch(url, { signal: controller.signal });
-          data = await res.json();
+        if (result.httpError) {
+          showToast(lang === 'CZ'
+            ? `Databáze karet je momentálně nedostupná (chyba ${result.httpError}). Zkuste to prosím za chvíli, případně vyplňte údaje ručně.`
+            : `The card database is currently unavailable (error ${result.httpError}). Please try again in a moment or fill in the details manually.`, 'error');
+          return;
         }
 
-        let card = null;
-        if (data.data && data.data.length > 0) {
-          card = data.data.find(c =>
-            c.set.id.toLowerCase() === resolvedSetId ||
-            c.set.id.toLowerCase() === setVal ||
-            c.set.ptcgoCode?.toLowerCase() === setVal ||
-            c.set.name.toLowerCase().includes(setVal)
-          ) || data.data[0];
-        }
+        // Pozn.: dřívější třetí pokus hledal jen podle čísla karty napříč všemi
+        // sadami — vracel chybu 500 a při úspěchu mlčky doplnil kartu z cizí
+        // sady. Proto se doplňuje jen karta odpovídající zadané sadě.
+        const card = result.cards.find(c =>
+          c.set.id.toLowerCase() === resolvedSetId ||
+          c.set.id.toLowerCase() === setVal ||
+          c.set.ptcgoCode?.toLowerCase() === setVal ||
+          c.set.name.toLowerCase().includes(setVal)
+        ) || result.cards[0] || null;
 
         if (!card) {
-          showToast(lang === 'CZ' ? 'Karta nebyla nalezena.' : 'Card not found.', 'error');
+          showToast(lang === 'CZ'
+            ? `Karta „${setVal.toUpperCase()} ${normalizedNumberVal}“ nebyla nalezena. Zkontrolujte kód sady (např. PAL nebo sv2) a číslo karty bez lomítka (např. 62).`
+            : `Card "${setVal.toUpperCase()} ${normalizedNumberVal}" was not found. Check the set code (e.g. PAL or sv2) and the card number without a slash (e.g. 62).`, 'error');
           return;
         }
 
