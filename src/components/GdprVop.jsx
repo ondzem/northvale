@@ -805,6 +805,10 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                  5.3a. Zboží označené na stránce produktu jako „Na objednávku“ nedrží prodávající skladem — objednává je u svého dodavatele až po přijetí objednávky kupujícího. Orientační dodací lhůta takového zboží je vždy uvedena přímo na stránce produktu a začíná běžet od zaplacení objednávky (u dobírky od přijetí objednávky). Uvedená lhůta je orientační; pokud by ji nebylo možné dodržet (např. z důvodu nedostupnosti u dodavatele), prodávající o tom kupujícího neprodleně informuje a kupující má právo objednávku zrušit s vrácením celé uhrazené částky. Ostatní ustanovení těchto podmínek, včetně práva spotřebitele odstoupit od smlouvy do 14 dnů od převzetí, platí pro zboží na objednávku beze změny.
+                </p>
+
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
                   5.4. V případě, že je z důvodů na straně kupujícího nutno zboží doručovat opakovaně nebo jiným způsobem, než bylo uvedeno v objednávce, je kupující povinen uhradit náklady spojené s opakovaným doručováním zboží, resp. náklady spojené s jiným způsobem doručení.
                 </p>
 

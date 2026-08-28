@@ -57,6 +57,13 @@ function getBrand(game) {
   return 'Northvale';
 }
 
+// Z dodací lhůty zboží na objednávku („3–7 dnů“) vytáhne nejvyšší počet dní.
+function parseDeliveryDays(deliveryTime, fallback = 7) {
+  const nums = String(deliveryTime || '').match(/\d+/g);
+  if (!nums || nums.length === 0) return fallback;
+  return Math.max(...nums.map(Number));
+}
+
 function getCleanImageUrl(p, imgDir) {
   if (!p.image) return '';
   
@@ -106,7 +113,7 @@ async function run() {
 
   const { data: products, error } = await supabase
     .from('products')
-    .select('id, name, game, edition, category, subcat, description, short_description, price, stock, preorder, image, custom_params, ean');
+    .select('id, name, game, edition, category, subcat, description, short_description, price, stock, preorder, image, custom_params, ean, on_order, delivery_time');
 
   if (error) {
     console.error('Failed to fetch products:', error.message);
@@ -143,7 +150,8 @@ async function run() {
     const desc = stripHtml(p.short_description || p.description || title);
     const link = `https://northvaletcg.eu/sealed-detail/${p.id}/`;
     const imageLink = getCleanImageUrl(p, imgDir);
-    const availability = p.preorder ? 'preorder' : (p.stock > 0 ? 'in_stock' : 'out_of_stock');
+    // Zboží na objednávku se u Googlu hlásí jako backorder (dodání po objednání)
+    const availability = p.on_order ? 'backorder' : (p.preorder ? 'preorder' : (p.stock > 0 ? 'in_stock' : 'out_of_stock'));
     const price = `${parseFloat(p.price || 0).toFixed(2)} CZK`;
     const brand = getBrand(p.game);
     const gtin = p.ean || p.custom_params?.ean || p.custom_params?.gtin || '';
@@ -189,7 +197,10 @@ async function run() {
 
     // Heureka delivery date logic: 0 = in stock, YYYY-MM-DD for preorder, 14/30 days fallback if out of stock
     let deliveryDate = '0';
-    if (p.preorder) {
+    if (p.on_order) {
+      // Zboží na objednávku — dodání dle lhůty nastavené v adminu
+      deliveryDate = String(parseDeliveryDays(p.delivery_time));
+    } else if (p.preorder) {
       deliveryDate = p.custom_params?.release_date || '14'; // Fallback to 14 days if preorder date unknown
     } else if (p.stock <= 0) {
       deliveryDate = '30'; // Out of stock
@@ -245,7 +256,10 @@ async function run() {
 
     // Zboží delivery date logic: 0 = in stock, -1 = out of stock/on order, or exact days
     let deliveryDate = '0';
-    if (p.preorder) {
+    if (p.on_order) {
+      // Zboží na objednávku — dodání dle lhůty nastavené v adminu
+      deliveryDate = String(parseDeliveryDays(p.delivery_time));
+    } else if (p.preorder) {
       deliveryDate = '-1';
     } else if (p.stock <= 0) {
       deliveryDate = '-1';

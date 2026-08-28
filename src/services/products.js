@@ -114,6 +114,9 @@ function mapDbProduct(p) {
     stage: p.stage || null,
     element: p.element || null,
     releaseDate: p.preorder ? p.foil_condition : null,
+    // Zboží na objednávku — bez skladu, s vlastní dodací lhůtou
+    onOrder: !!p.on_order,
+    deliveryTime: p.delivery_time || null,
     customParams: p.custom_params || []
   };
 }
@@ -209,6 +212,8 @@ export function getCachedProducts(options = {}) {
         const totalStock = p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
         return totalStock > 0;
       } else {
+        // Zboží na objednávku se prodává bez skladu — nikdy ho neskrývat
+        if (p.onOrder || p.on_order) return true;
         return (p.stock || 0) > 0;
       }
     });
@@ -268,7 +273,7 @@ export async function fetchProductsFromDB(options = {}) {
     } else {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, image, back_image, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, description, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, illustrator, set_code, stage, element, custom_params, no_vat, image_alt, image_title, additional_images');
+        .select('id, name, image, back_image, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, description, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, illustrator, set_code, stage, element, custom_params, no_vat, image_alt, image_title, on_order, delivery_time, additional_images');
 
       if (error) {
         throw error;
@@ -304,6 +309,8 @@ export async function fetchProductsFromDB(options = {}) {
           const totalStock = p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
           return totalStock > 0;
         } else {
+          // Zboží na objednávku se prodává bez skladu — nikdy ho neskrývat
+          if (p.onOrder || p.on_order) return true;
           return (p.stock || 0) > 0;
         }
       });
@@ -355,6 +362,8 @@ export async function fetchProductsFromDB(options = {}) {
           const totalStock = p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
           return totalStock > 0;
         } else {
+          // Zboží na objednávku se prodává bez skladu — nikdy ho neskrývat
+          if (p.onOrder || p.on_order) return true;
           return (p.stock || 0) > 0;
         }
       });
@@ -532,6 +541,14 @@ export function mapProductToDb(p) {
     dbObj.foil_condition = p.preorder ? (p.releaseDate || null) : (p.foilCondition || p.foil_condition || null);
   } else if (p.foilCondition !== undefined || p.foil_condition !== undefined) {
     dbObj.foil_condition = p.foilCondition !== undefined ? p.foilCondition : p.foil_condition;
+  }
+  if (p.onOrder !== undefined || p.on_order !== undefined) {
+    const onOrder = !!(p.onOrder !== undefined ? p.onOrder : p.on_order);
+    dbObj.on_order = onOrder;
+    dbObj.delivery_time = onOrder ? ((p.deliveryTime !== undefined ? p.deliveryTime : p.delivery_time) || null) : null;
+    // U zboží na objednávku se sklad nevede — NULL zajistí, že ho server
+    // nikdy neodečte (adjust_stock má podmínku stock IS NOT NULL).
+    if (onOrder) dbObj.stock = null;
   }
   if (p.investment !== undefined) {
     dbObj.investment = !!p.investment;

@@ -369,6 +369,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
   // Specialized fields based on type
   const [formPreorder, setFormPreorder] = useState(false);
+  // Zboží na objednávku — objednává se u dodavatele, sklad se nevede
+  const [formOnOrder, setFormOnOrder] = useState(false);
+  const [formDeliveryTime, setFormDeliveryTime] = useState('');
   const [formReleaseDate, setFormReleaseDate] = useState('');
   const [formInvestment, setFormInvestment] = useState(false);
   const [formNoVat, setFormNoVat] = useState(false);
@@ -563,6 +566,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormStock('');
     setFormLang('EN');
     setFormPreorder(false);
+    setFormOnOrder(false);
+    setFormDeliveryTime('');
     setFormReleaseDate('');
     setFormInvestment(false);
     setFormNoVat(false);
@@ -658,6 +663,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setFormStock(p.stock !== null && p.stock !== undefined ? p.stock.toString() : '');
     setFormLang(p.lang || 'EN');
     setFormPreorder(!!p.preorder);
+    setFormOnOrder(!!(p.onOrder || p.on_order));
+    setFormDeliveryTime(p.deliveryTime || p.delivery_time || '');
     setFormReleaseDate(p.releaseDate || p.foil_condition || '');
     setFormInvestment(!!p.investment);
     setFormNoVat(!!p.no_vat);
@@ -1117,6 +1124,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       desc: JSON.stringify(formDescBlocks), // Save serialized description blocks
       preorder: formPreorder,
       releaseDate: formPreorder ? formReleaseDate : null,
+      onOrder: formOnOrder,
+      deliveryTime: formOnOrder ? (formDeliveryTime || null) : null,
       investment: formInvestment,
       no_vat: formNoVat,
       category_id: formCategoryId || null,
@@ -1739,6 +1748,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     backImage: formBackImage,
     preorder: formPreorder,
     releaseDate: formPreorder ? formReleaseDate : null,
+    onOrder: formOnOrder,
+    deliveryTime: formOnOrder ? (formDeliveryTime || null) : null,
     investment: formInvestment,
     category_id: formCategoryId,
     lang: formLang,
@@ -2508,17 +2519,17 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                           <div className="pmf-field">
                             <label className="pmf-label">
                               {lang === 'CZ' ? 'Skladem (ks)' : 'Stock (pcs)'}
-                              <span className="pmf-req-dot"> *</span>
+                              {!formOnOrder && <span className="pmf-req-dot"> *</span>}
                             </label>
                             <input
                               type="number"
-                              required
+                              required={!formOnOrder}
                               className="pmf-input"
-                              value={formStock}
+                              value={formOnOrder ? '' : formStock}
                               onChange={e => setFormStock(e.target.value)}
-                              placeholder="např. 5"
-                              disabled={isFieldLockActive}
-                              style={isFieldLockActive ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}}
+                              placeholder={formOnOrder ? (lang === 'CZ' ? 'Na objednávku — sklad se nevede' : 'Made to order — no stock') : 'např. 5'}
+                              disabled={isFieldLockActive || formOnOrder}
+                              style={(isFieldLockActive || formOnOrder) ? { opacity: 0.7, cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.02)' } : {}}
                             />
                           </div>
                         </div>
@@ -2652,6 +2663,42 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                         />
                         {lang === 'CZ' ? 'Bez DPH' : 'No VAT'}
                       </label>
+                    </div>
+
+                    {/* Zboží na objednávku — objednává se u externího dodavatele */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '10px 0', marginTop: '10px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <label className="pmf-check-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          className="pmf-check-box"
+                          checked={formOnOrder}
+                          onChange={e => setFormOnOrder(e.target.checked)}
+                          style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                        />
+                        {lang === 'CZ' ? 'Na objednávku (bez skladu)' : 'Made to order (no stock)'}
+                      </label>
+                      {formOnOrder && (
+                        <div className="pmf-field" style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <div className="pmf-label" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>
+                            {lang === 'CZ'
+                              ? 'Dodací lhůta — zobrazí se zákazníkovi na stránce produktu (např. „3–7 dnů“)'
+                              : 'Delivery time — shown to the customer on the product page (e.g. "3–7 days")'}
+                          </div>
+                          <input
+                            type="text"
+                            className="pmf-input"
+                            value={formDeliveryTime}
+                            onChange={e => setFormDeliveryTime(e.target.value)}
+                            style={{ padding: '8px 12px', fontSize: '13px', maxWidth: '300px' }}
+                            placeholder={lang === 'CZ' ? 'např. 3–7 dnů' : 'e.g. 3–7 days'}
+                          />
+                          <div style={{ fontSize: '11px', color: 'rgba(253,189,22,0.75)', lineHeight: 1.5 }}>
+                            {lang === 'CZ'
+                              ? 'Produkt se objednává u dodavatele až po objednávce zákazníka. Sklad se nevede ani neodečítá a produkt je vždy koupitelný.'
+                              : 'The product is ordered from the supplier after the customer orders. Stock is not tracked and the product is always purchasable.'}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Preorder & Investment checkboxes hidden for now

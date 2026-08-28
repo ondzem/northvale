@@ -40,32 +40,6 @@
     <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>flareon-terastal-gathering-binder-bo</ITEM_ID>
-    <PRODUCTNAME>Flareon Terastal Gathering Binder Box</PRODUCTNAME>
-    <PRODUCT>Pokémon Flareon Terastal Gathering Binder Box</PRODUCT>
-    <DESCRIPTION>Prémiová sběratelská sada zaměřená na konkrétní Eeveelution z čínské edice Terastal Gathering – čínské obdoby japonského Terastal Festival ex a západních Prismatic Evolutions. Skvělá volba pro fanoušky Eevee, kteří chtějí kombinaci nových karet i praktického vybavení pro organizaci sbírky</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/flareon-terastal-gathering-binder-box/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/flareon-terastal-gathering-binder-box.webp</IMGURL>
-    <PRICE_VAT>3299</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Pokémon</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
-    <ITEM_ID>archazia-s-island-booster-box</ITEM_ID>
-    <PRODUCTNAME>Archazia&apos;s Island Booster Box</PRODUCTNAME>
-    <PRODUCT>Disney Lorcana Archazia&apos;s Island Booster Box</PRODUCT>
-    <DESCRIPTION>Vydejte se na tajuplný ostrov, kde vaši Illumineeři konečně naleznou odpovědi na otázky z předchozích edic!</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/archazia-s-island-booster-box/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/archazia-s-island-booster-box.webp</IMGURL>
-    <PRICE_VAT>2949</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
     <ITEM_ID>wilds-unknown-illuminer-s-trove-box</ITEM_ID>
     <PRODUCTNAME>Wilds Unknown Illuminer&apos;s Trove box</PRODUCTNAME>
     <PRODUCT>Disney Lorcana Wilds Unknown Illuminer&apos;s Trove box</PRODUCT>
@@ -79,38 +53,12 @@
     <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>into-the-inklands-booster-box</ITEM_ID>
-    <PRODUCTNAME>Into the Inklands Booster box</PRODUCTNAME>
-    <PRODUCT>Disney Lorcana Into the Inklands Booster box</PRODUCT>
-    <DESCRIPTION>Booster box k edici Into the Inklands obsahuje 24 boosterových balíčků po 12 kartách (celkem 288 karet). Přináší nový typ karet – lokace, a postavy z DuckTales, TaleSpinu i Pokladu z ostrova Treasure Planet. Ideální pro hráče i sběratele toužící po vzácných a foilových kartách.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/into-the-inklands-booster-box/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/into-the-inklands-booster-box.webp</IMGURL>
-    <PRICE_VAT>2849</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
     <ITEM_ID>ursula-s-return-booster-box</ITEM_ID>
     <PRODUCTNAME>Ursula&apos;s Return Booster box</PRODUCTNAME>
     <PRODUCT>Disney Lorcana Ursula&apos;s Return Booster box</PRODUCT>
     <DESCRIPTION>Ursula je zpět! Čtvrtá edice přivádí zlovolnou mořskou čarodějnici, uvolněnou z Velké Iluminárie, zpět do hry – a jedinou překážkou v cestě k ovládnutí Lorcany jste vy a vaši glimmerové.</DESCRIPTION>
     <URL>https://northvaletcg.eu/sealed-detail/ursula-s-return-booster-box/</URL>
     <IMGURL>https://northvaletcg.eu/product-images/ursula-s-return-booster-box.webp</IMGURL>
-    <PRICE_VAT>2949</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
-    <ITEM_ID>shimmering-skies-booster-box</ITEM_ID>
-    <PRODUCTNAME>Shimmering Skies Booster Box</PRODUCTNAME>
-    <PRODUCT>Disney Lorcana Shimmering Skies Booster Box</PRODUCT>
-    <DESCRIPTION>Celá Lorcana slaví! Pátá edice přináší velký festival na oslavu vítězství nad Ursulou, zatímco se v pozadí rozplétá nové tajemství kolem Velké Iluminárie.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/shimmering-skies-booster-box/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/shimmering-skies-booster-box.webp</IMGURL>
     <PRICE_VAT>2949</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Disney Lorcana</MANUFACTURER>
@@ -138,6 +86,45 @@
     <URL>https://northvaletcg.eu/sealed-detail/winterspell-booster-box/</URL>
     <IMGURL>https://northvaletcg.eu/product-images/winterspell-booster-box.webp</IMGURL>
     <PRICE_VAT>5549</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>archazia-s-island-booster-box</ITEM_ID>
+    <PRODUCTNAME>Archazia&apos;s Island Booster Box</PRODUCTNAME>
+    <PRODUCT>Disney Lorcana Archazia&apos;s Island Booster Box</PRODUCT>
+    <DESCRIPTION>Vydejte se na tajuplný ostrov, kde vaši Illumineeři konečně naleznou odpovědi na otázky z předchozích edic!</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/archazia-s-island-booster-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/archazia-s-island-booster-box.webp</IMGURL>
+    <PRICE_VAT>2949</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>shimmering-skies-booster-box</ITEM_ID>
+    <PRODUCTNAME>Shimmering Skies Booster Box</PRODUCTNAME>
+    <PRODUCT>Disney Lorcana Shimmering Skies Booster Box</PRODUCT>
+    <DESCRIPTION>Celá Lorcana slaví! Pátá edice přináší velký festival na oslavu vítězství nad Ursulou, zatímco se v pozadí rozplétá nové tajemství kolem Velké Iluminárie.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/shimmering-skies-booster-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/shimmering-skies-booster-box.webp</IMGURL>
+    <PRICE_VAT>2949</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Disney Lorcana</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>into-the-inklands-booster-box</ITEM_ID>
+    <PRODUCTNAME>Into the Inklands Booster box</PRODUCTNAME>
+    <PRODUCT>Disney Lorcana Into the Inklands Booster box</PRODUCT>
+    <DESCRIPTION>Booster box k edici Into the Inklands obsahuje 24 boosterových balíčků po 12 kartách (celkem 288 karet). Přináší nový typ karet – lokace, a postavy z DuckTales, TaleSpinu i Pokladu z ostrova Treasure Planet. Ideální pro hráče i sběratele toužící po vzácných a foilových kartách.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/into-the-inklands-booster-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/into-the-inklands-booster-box.webp</IMGURL>
+    <PRICE_VAT>2849</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Disney Lorcana</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
@@ -358,8 +345,8 @@
     <DESCRIPTION>Exkluzivní japonská promo karta, kterou získali fanoušci jako nákupní bonus v rámci loterie Ichiban Kuji věnované One Piece Card Game! Díky limitované distribuci se rychle stala jednou z nejžádanějších sběratelských karet posledního období.</DESCRIPTION>
     <URL>https://northvaletcg.eu/sealed-detail/monkey-d-luffy-op13-001-ichiban-kuji-promo-op13-001/</URL>
     <IMGURL>https://northvaletcg.eu/product-images/monkey-d-luffy-op13-001-ichiban-kuji-promo-op13-001.webp</IMGURL>
-    <PRICE_VAT>0</PRICE_VAT>
-    <DELIVERY_DATE>-1</DELIVERY_DATE>
+    <PRICE_VAT>899</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>One Piece</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
@@ -404,39 +391,13 @@
     <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>monkey-d-luffy-p-159-shonen-jump-pro</ITEM_ID>
-    <PRODUCTNAME>Monkey D. Luffy P-159 – Shonen Jump Promo</PRODUCTNAME>
-    <PRODUCT>One Piece Monkey D. Luffy P-159 – Shonen Jump Promo</PRODUCT>
-    <DESCRIPTION>Vzácná japonská promo karta vydaná u příležitosti 29. výročí seriálového vydávání mangy One Piece! Karta byla distribuována jako fyzický bonus přímo v čísle #33 japonského magazínu Weekly Shonen Jump v roce 2026.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/monkey-d-luffy-p-159-shonen-jump-promo/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/monkey-d-luffy-p-159-shonen-jump-promo.webp</IMGURL>
-    <PRICE_VAT>0</PRICE_VAT>
-    <DELIVERY_DATE>-1</DELIVERY_DATE>
-    <MANUFACTURER>One Piece</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
-    <ITEM_ID>natsucomi-2026-metakira-luffy</ITEM_ID>
-    <PRODUCTNAME>NatsuComi 2026 MetaKira</PRODUCTNAME>
-    <PRODUCT>One Piece NatsuComi 2026 MetaKira</PRODUCT>
-    <DESCRIPTION>Exkluzivní japonská promo karta z letní kampaně Shueishy &quot;NatsuComi 2026&quot; – nová letní ilustrace Luffyho s meloury od Eiichira Ody, v třpytivém MetaKira provedení s potištěným podpisem autora. Limitovaná distribuce jen v Japonsku dělá z této karty vyhledávaný sběratelský kousek, odlišný od běžných karet z One Piece Card Game.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/natsucomi-2026-metakira-luffy/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/natsucomi-2026-metakira-luffy.webp</IMGURL>
-    <PRICE_VAT>0</PRICE_VAT>
-    <DELIVERY_DATE>-1</DELIVERY_DATE>
-    <MANUFACTURER>One Piece</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
-    <ITEM_ID>akryl-booster-box-lorcana</ITEM_ID>
-    <PRODUCTNAME>Akryl Booster box Lorcana</PRODUCTNAME>
-    <PRODUCT>Northvale Akryl Booster box Lorcana</PRODUCT>
-    <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Box Disney Lorcana patří k nejžádanějším kouskům ve světě sběratelství, a proto by jeho ochrana měla odpovídat jeho skutečné hodnotě</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/akryl-booster-box-lorcana/</URL>
-    <IMGURL></IMGURL>
-    <PRICE_VAT>499</PRICE_VAT>
+    <ITEM_ID>toploader-3x4-clear-regular-25ks</ITEM_ID>
+    <PRODUCTNAME>Toploader 3x4 Clear Regular</PRODUCTNAME>
+    <PRODUCT>Northvale Toploader 3x4 Clear Regular</PRODUCT>
+    <DESCRIPTION>Toploadery jsou tvrdé plastové obaly, které poskytují maximální ochranu vašim nejcennějším kartám před ohnutím, poškrábáním a nárazem. Dostupné v různých velikostech pro standardní i oversized karty, jsou ideální pro dlouhodobé uchovávání i bezpečné zasílání. Nezbytný doplněk pro každého sběratele.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/toploader-3x4-clear-regular-25ks/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/toploader-3x4-clear-regular-25ks.webp</IMGURL>
+    <PRICE_VAT>73</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
@@ -456,15 +417,28 @@
     <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>toploader-3x4-clear-regular-25ks</ITEM_ID>
-    <PRODUCTNAME>Toploader 3x4 Clear Regular</PRODUCTNAME>
-    <PRODUCT>Northvale Toploader 3x4 Clear Regular</PRODUCT>
-    <DESCRIPTION>Toploadery jsou tvrdé plastové obaly, které poskytují maximální ochranu vašim nejcennějším kartám před ohnutím, poškrábáním a nárazem. Dostupné v různých velikostech pro standardní i oversized karty, jsou ideální pro dlouhodobé uchovávání i bezpečné zasílání. Nezbytný doplněk pro každého sběratele.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/toploader-3x4-clear-regular-25ks/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/toploader-3x4-clear-regular-25ks.webp</IMGURL>
-    <PRICE_VAT>75</PRICE_VAT>
+    <ITEM_ID>akryl-booster-box-lorcana</ITEM_ID>
+    <PRODUCTNAME>Akryl Booster box Lorcana</PRODUCTNAME>
+    <PRODUCT>Northvale Akryl Booster box Lorcana</PRODUCT>
+    <DESCRIPTION>Vaše sbírka není jen souborem karet – je to vášeň, investice a příběh, který si zaslouží tu nejlepší péči. Booster Box Disney Lorcana patří k nejžádanějším kouskům ve světě sběratelství, a proto by jeho ochrana měla odpovídat jeho skutečné hodnotě</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/akryl-booster-box-lorcana/</URL>
+    <IMGURL></IMGURL>
+    <PRICE_VAT>499</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>monkey-d-luffy-p-159-shonen-jump-pro</ITEM_ID>
+    <PRODUCTNAME>Monkey D. Luffy P-159 – Shonen Jump Promo</PRODUCTNAME>
+    <PRODUCT>One Piece Monkey D. Luffy P-159 – Shonen Jump Promo</PRODUCT>
+    <DESCRIPTION>Vzácná japonská promo karta vydaná u příležitosti 29. výročí seriálového vydávání mangy One Piece! Karta byla distribuována jako fyzický bonus přímo v čísle #33 japonského magazínu Weekly Shonen Jump v roce 2026.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/monkey-d-luffy-p-159-shonen-jump-promo/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/monkey-d-luffy-p-159-shonen-jump-promo.webp</IMGURL>
+    <PRICE_VAT>849</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>One Piece</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
@@ -476,19 +450,6 @@
     <URL>https://northvaletcg.eu/sealed-detail/sleeved-binder-360-pocket-3x3-grey/</URL>
     <IMGURL>https://northvaletcg.eu/product-images/sleeved-binder-360-pocket-3x3-grey.webp</IMGURL>
     <PRICE_VAT>899</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Northvale</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
-    <ITEM_ID>just-sleeves-100ks</ITEM_ID>
-    <PRODUCTNAME>Just Sleeves</PRODUCTNAME>
-    <PRODUCT>Northvale Just Sleeves</PRODUCT>
-    <DESCRIPTION>Sleevy jsou tenké ochranné obaly, které chrání karty před poškrábáním, otisky prstů a běžným opotřebením. Dostupné ve standardních i speciálních velikostech, často i s motivy oblíbených postav. Základní a cenově dostupný způsob ochrany karet pro hráče i sběratele.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/just-sleeves-100ks/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/just-sleeves-100ks.webp</IMGURL>
-    <PRICE_VAT>25</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Northvale</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
@@ -541,6 +502,19 @@
     <URL>https://northvaletcg.eu/sealed-detail/op-16-the-time-of-battle-booster-box/</URL>
     <IMGURL>https://northvaletcg.eu/product-images/op-16-the-time-of-battle-booster-box.webp</IMGURL>
     <PRICE_VAT>4399</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>One Piece</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>natsucomi-2026-metakira-luffy</ITEM_ID>
+    <PRODUCTNAME>NatsuComi 2026 MetaKira</PRODUCTNAME>
+    <PRODUCT>One Piece NatsuComi 2026 MetaKira</PRODUCT>
+    <DESCRIPTION>Exkluzivní japonská promo karta z letní kampaně Shueishy &quot;NatsuComi 2026&quot; – nová letní ilustrace Luffyho s meloury od Eiichira Ody, v třpytivém MetaKira provedení s potištěným podpisem autora. Limitovaná distribuce jen v Japonsku dělá z této karty vyhledávaný sběratelský kousek, odlišný od běžných karet z One Piece Card Game.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/natsucomi-2026-metakira-luffy/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/natsucomi-2026-metakira-luffy.webp</IMGURL>
+    <PRICE_VAT>1499</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>One Piece</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
@@ -625,6 +599,19 @@
     <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
+    <ITEM_ID>flareon-terastal-gathering-binder-bo</ITEM_ID>
+    <PRODUCTNAME>Flareon Terastal Gathering Binder Box</PRODUCTNAME>
+    <PRODUCT>Pokémon Flareon Terastal Gathering Binder Box</PRODUCT>
+    <DESCRIPTION>Prémiová sběratelská sada zaměřená na konkrétní Eeveelution z čínské edice Terastal Gathering – čínské obdoby japonského Terastal Festival ex a západních Prismatic Evolutions. Skvělá volba pro fanoušky Eevee, kteří chtějí kombinaci nových karet i praktického vybavení pro organizaci sbírky</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/flareon-terastal-gathering-binder-box/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/flareon-terastal-gathering-binder-box.webp</IMGURL>
+    <PRICE_VAT>3299</PRICE_VAT>
+    <DELIVERY_DATE>-1</DELIVERY_DATE>
+    <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
     <ITEM_ID>480-pocket-red</ITEM_ID>
     <PRODUCTNAME>480 Pocket Red</PRODUCTNAME>
     <PRODUCT>Northvale 480 Pocket Red</PRODUCT>
@@ -686,6 +673,19 @@
     <PRICE_VAT>949</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>just-sleeves-100ks</ITEM_ID>
+    <PRODUCTNAME>Just Sleeves</PRODUCTNAME>
+    <PRODUCT>Northvale Just Sleeves</PRODUCT>
+    <DESCRIPTION>Sleevy jsou tenké ochranné obaly, které chrání karty před poškrábáním, otisky prstů a běžným opotřebením. Dostupné ve standardních i speciálních velikostech, často i s motivy oblíbených postav. Základní a cenově dostupný způsob ochrany karet pro hráče i sběratele.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/just-sleeves-100ks/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/just-sleeves-100ks.webp</IMGURL>
+    <PRICE_VAT>23</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
@@ -950,19 +950,6 @@
     <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>
   <SHOPITEM>
-    <ITEM_ID>secret-gardel-limited-gift-box-cn</ITEM_ID>
-    <PRODUCTNAME>Secret Gardel Limited Gift Box CN</PRODUCTNAME>
-    <PRODUCT>Northvale Secret Gardel Limited Gift Box CN</PRODUCT>
-    <DESCRIPTION>Vstupte do kouzelné lesní zahrady spolu s Ivernem a Lillií! Secret Garden (秘境花园) je prémiový sběratelský box určený pro čínský trh, navržený nejen jako sada balíčků, ale jako pečlivě zpracovaný kolekcionářský kousek s celostránkovými ilustracemi, pohlednicemi a art printy v botanickém, pohádkovém stylu.</DESCRIPTION>
-    <URL>https://northvaletcg.eu/sealed-detail/secret-gardel-limited-gift-box-cn/</URL>
-    <IMGURL>https://northvaletcg.eu/product-images/secret-gardel-limited-gift-box-cn.webp</IMGURL>
-    <PRICE_VAT>1999</PRICE_VAT>
-    <DELIVERY_DATE>0</DELIVERY_DATE>
-    <MANUFACTURER>Northvale</MANUFACTURER>
-    <MAX_CPC>5</MAX_CPC>
-    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
-  </SHOPITEM>
-  <SHOPITEM>
     <ITEM_ID>eevee-terastal-gathering-binder-box</ITEM_ID>
     <PRODUCTNAME>Eevee Terastal Gathering Binder Box</PRODUCTNAME>
     <PRODUCT>Pokémon Eevee Terastal Gathering Binder Box</PRODUCT>
@@ -998,6 +985,19 @@
     <PRICE_VAT>3799</PRICE_VAT>
     <DELIVERY_DATE>0</DELIVERY_DATE>
     <MANUFACTURER>Pokémon</MANUFACTURER>
+    <MAX_CPC>5</MAX_CPC>
+    <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
+  </SHOPITEM>
+  <SHOPITEM>
+    <ITEM_ID>secret-gardel-limited-gift-box-cn</ITEM_ID>
+    <PRODUCTNAME>Secret Garden Limited Gift Box CN</PRODUCTNAME>
+    <PRODUCT>Northvale Secret Garden Limited Gift Box CN</PRODUCT>
+    <DESCRIPTION>Vstupte do kouzelné lesní zahrady spolu s Ivernem a Lillií! Secret Garden (秘境花园) je prémiový sběratelský box určený pro čínský trh, navržený nejen jako sada balíčků, ale jako pečlivě zpracovaný kolekcionářský kousek s celostránkovými ilustracemi, pohlednicemi a art printy v botanickém, pohádkovém stylu.</DESCRIPTION>
+    <URL>https://northvaletcg.eu/sealed-detail/secret-gardel-limited-gift-box-cn/</URL>
+    <IMGURL>https://northvaletcg.eu/product-images/secret-gardel-limited-gift-box-cn.webp</IMGURL>
+    <PRICE_VAT>1999</PRICE_VAT>
+    <DELIVERY_DATE>0</DELIVERY_DATE>
+    <MANUFACTURER>Northvale</MANUFACTURER>
     <MAX_CPC>5</MAX_CPC>
     <CATEGORYTEXT>Kultura a zábava | Volný čas | Společenské hry | Karetní hry | Sběratelské karetní hry</CATEGORYTEXT>
   </SHOPITEM>

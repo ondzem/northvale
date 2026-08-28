@@ -170,6 +170,9 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
   // Determine pricing and stock
   const price = (hasVariants ? currentVariant?.price : product.price) ?? 0;
   const stock = (hasVariants ? currentVariant?.stock : product.stock) ?? 0;
+  // Zboží na objednávku — sklad se nevede, produkt je vždy koupitelný
+  const isOnOrder = !!(product.onOrder || product.on_order);
+  const canBuy = isOnOrder || stock > 0;
   const originalPrice = product.originalPrice || null;
 
   const handleCardClick = () => {
@@ -206,7 +209,7 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
   return (
     <a 
       href={cardUrl}
-      className={`vf-card type-${product.type} ${(stock === 0) ? 'out-of-stock' : ''}`}
+      className={`vf-card type-${product.type} ${!canBuy ? 'out-of-stock' : ''}`}
       onClick={(e) => {
         if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
           e.preventDefault();
@@ -278,7 +281,12 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
         {/* Meta row containing Stock (Left) and Price (Right) */}
         <div className="vf-meta" style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span className="vf-stock" style={{ fontSize: '10px' }}>
-            {stock > 0 ? (
+            {isOnOrder ? (
+              <>
+                <span className="vf-dot" style={{ backgroundColor: 'var(--color-gold)', boxShadow: '0 0 6px rgba(253, 189, 22, 0.5)' }}></span>
+                {lang === 'CZ' ? 'Na objednávku' : 'Made to order'}
+              </>
+            ) : stock > 0 ? (
               <>
                 <span className="vf-dot"></span>
                 {t('ProductCard.inStock')} ({stock} {t('ProductCard.pcs')})
@@ -324,13 +332,13 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
 
           <button 
             className="btn btn-primary do-kosiku-btn"
-            disabled={stock === 0}
+            disabled={!canBuy}
             onClick={handleBuyClick}
             style={{
               flexGrow: 1,
               backgroundColor: isAdded ? 'var(--color-green)' : 'var(--color-gold)',
-              cursor: (stock > 0) ? 'pointer' : 'not-allowed',
-              opacity: (stock > 0) ? 1 : 0.4
+              cursor: canBuy ? 'pointer' : 'not-allowed',
+              opacity: canBuy ? 1 : 0.4
             }}
           >
             <svg 

@@ -1387,7 +1387,7 @@ function AppContent() {
       const productIds = currentCart.map(item => item.product?.id).filter(Boolean);
       
       const { data: dbProds, error } = productIds.length > 0 
-        ? await supabase.from('products').select('id, stock, variants, name').in('id', productIds)
+        ? await supabase.from('products').select('id, stock, variants, name, on_order').in('id', productIds)
         : { data: [], error: null };
 
       if (error) throw error;
@@ -1506,6 +1506,11 @@ function AppContent() {
             verifiedCart.push(item);
           }
         } else {
+          // Zboží na objednávku se sklad nehlídá — je koupitelné vždy
+          if (dbProd.on_order) {
+            verifiedCart.push(item);
+            continue;
+          }
           const maxStock = dbProd.stock || 0;
           if (maxStock <= 0) {
             cartChanged = true;

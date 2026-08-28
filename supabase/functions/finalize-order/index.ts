@@ -387,10 +387,12 @@ async function applyStockAndDiscount(supabase: any, orderData: any) {
         } else if (!(await adjustStockAtomic(supabase, prodId, -item.quantity))) {
           const { data: dbProd } = await supabase
             .from('products')
-            .select('stock')
+            .select('stock, on_order')
             .eq('id', prodId)
             .maybeSingle();
-          if (dbProd) {
+          // Zboží na objednávku (a produkty se stock NULL) sklad nevede —
+          // nesmí se mu tady zapsat 0, jinak by se tvářilo jako vyprodané.
+          if (dbProd && !dbProd.on_order && dbProd.stock !== null && dbProd.stock !== undefined) {
             const newStock = Math.max(0, (dbProd.stock || 0) - item.quantity);
             await supabase
               .from('products')

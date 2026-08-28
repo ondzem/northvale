@@ -719,6 +719,8 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
 
   const price = product.price || 0;
   const stock = product.stock || 0;
+  // Zboží na objednávku — sklad se nevede, vždy koupitelné
+  const isOnOrder = !!(product.onOrder || product.on_order);
 
   let descBlocks = [];
   try {
@@ -1304,10 +1306,38 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
 
                 {/* Stock status */}
                 <div className="product-stock-delivery-wrapper">
+                  {isOnOrder ? (
+                    <div className="product-stock-status in-stock">
+                      <span style={{ fontSize: '20px', lineHeight: 1, color: 'var(--color-gold)' }}>●</span>
+                      {lang === 'CZ' ? 'Na objednávku' : 'Made to order'}
+                      {product.deliveryTime && (
+                        <span style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 'normal' }}>
+                          {' '}· {lang === 'CZ' ? `dodání ${product.deliveryTime}` : `delivery in ${product.deliveryTime}`}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
                   <div className={`product-stock-status ${(stock > 0 ? 'in-stock' : 'out-of-stock')}`}>
                     <span style={{ fontSize: '20px', lineHeight: 1, color: (stock > 0 ? 'var(--color-green)' : 'var(--color-red)') }}>●</span>
-                    {stock > 0 ? (lang === 'CZ' ? `Skladem (${stock} ks)` : `In Stock (${stock} pcs)`) : (lang === 'CZ' ? 'Na objednávku' : 'Special Order')}
+                    {stock > 0 ? (lang === 'CZ' ? `Skladem (${stock} ks)` : `In Stock (${stock} pcs)`) : (lang === 'CZ' ? 'Vyprodáno' : 'Sold out')}
                   </div>
+                  )}
+                  {/* Vysvětlení režimu „Na objednávku“ pro zákazníka */}
+                  {isOnOrder && (
+                    <div style={{
+                      fontSize: '12px', color: 'rgba(255,255,255,0.75)', marginTop: '6px',
+                      background: 'rgba(253,189,22,0.07)', border: '1px solid rgba(253,189,22,0.25)',
+                      borderRadius: '8px', padding: '10px 12px', lineHeight: 1.55
+                    }}>
+                      {lang === 'CZ'
+                        ? <>Toto zboží nedržíme skladem — objednáváme ho u dodavatele až po Vaší objednávce.
+                            {product.deliveryTime ? <> Obvykle Vám ho odešleme do <strong style={{ color: 'var(--color-gold)' }}>{product.deliveryTime}</strong> od zaplacení.</> : null}
+                            {' '}O průběhu Vás budeme informovat e-mailem.</>
+                        : <>This item is not kept in stock — we order it from our supplier after you place your order.
+                            {product.deliveryTime ? <> It usually ships within <strong style={{ color: 'var(--color-gold)' }}>{product.deliveryTime}</strong> of payment.</> : null}
+                            {' '}We will keep you informed by e-mail.</>}
+                    </div>
+                  )}
                   {/* Preorder expected release hidden for now
                 {product.preorder && product.releaseDate && (
                   <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
@@ -1348,13 +1378,13 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                 <div className="product-purchase-row">
                   <div className="product-quantity-selector">
                     <button className="qty-btn" onClick={() => setQty(prev => Math.max(1, prev - 1))}>−</button>
-                    <input type="number" className="qty-input" value={qty} onChange={e => setQty(Math.max(1, parseInt(e.target.value) || 1))} min="1" max={stock > 0 ? stock : 10} />
-                    <button className="qty-btn" onClick={() => setQty(prev => Math.min(stock > 0 ? stock : 10, prev + 1))}>+</button>
+                    <input type="number" className="qty-input" value={qty} onChange={e => setQty(Math.max(1, parseInt(e.target.value) || 1))} min="1" max={isOnOrder ? 10 : (stock > 0 ? stock : 10)} />
+                    <button className="qty-btn" onClick={() => setQty(prev => Math.min(isOnOrder ? 10 : (stock > 0 ? stock : 10), prev + 1))}>+</button>
                   </div>
 
                   <button
                     className="product-add-to-cart-btn"
-                    disabled={stock === 0}
+                    disabled={!isOnOrder && stock === 0}
                     onClick={() => addToCart(product, product, qty)}
                   >
                     {t('common.addToCart')}
