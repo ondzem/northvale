@@ -1291,8 +1291,8 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
             <hr className="product-detail-divider" />
 
             <div className="product-price-purchase-box">
-              <div className="price-stock-delivery-group">
-                {/* Price displaying */}
+              {/* Horní řada: cena vlevo, množství + koupit vpravo */}
+              <div className="pdp-buy-top">
                 <div className="product-price-section">
                   <div className="product-price-vat">
                     {price.toLocaleString('cs-CZ')} Kč
@@ -1304,82 +1304,11 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                   )}
                 </div>
 
-                {/* Stock status */}
-                <div className="product-stock-delivery-wrapper">
-                  {isOnOrder ? (
-                    <div className="product-stock-status in-stock">
-                      <span style={{ fontSize: '20px', lineHeight: 1, color: 'var(--color-gold)' }}>●</span>
-                      {lang === 'CZ' ? 'Na objednávku' : 'Made to order'}
-                      {product.deliveryTime && (
-                        <span style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 'normal' }}>
-                          {' '}· {lang === 'CZ' ? `dodání ${product.deliveryTime}` : `delivery in ${product.deliveryTime}`}
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                  <div className={`product-stock-status ${(stock > 0 ? 'in-stock' : 'out-of-stock')}`}>
-                    <span style={{ fontSize: '20px', lineHeight: 1, color: (stock > 0 ? 'var(--color-green)' : 'var(--color-red)') }}>●</span>
-                    {stock > 0 ? (lang === 'CZ' ? `Skladem (${stock} ks)` : `In Stock (${stock} pcs)`) : (lang === 'CZ' ? 'Vyprodáno' : 'Sold out')}
-                  </div>
-                  )}
-                  {/* Vysvětlení režimu „Na objednávku“ pro zákazníka */}
-                  {isOnOrder && (
-                    <div style={{
-                      fontSize: '12px', color: 'rgba(255,255,255,0.75)', marginTop: '6px',
-                      background: 'rgba(253,189,22,0.07)', border: '1px solid rgba(253,189,22,0.25)',
-                      borderRadius: '8px', padding: '10px 12px', lineHeight: 1.55
-                    }}>
-                      {lang === 'CZ'
-                        ? <>Toto zboží nedržíme skladem — objednáváme ho u dodavatele až po Vaší objednávce.
-                            {product.deliveryTime ? <> Obvykle Vám ho odešleme do <strong style={{ color: 'var(--color-gold)' }}>{product.deliveryTime}</strong> od zaplacení.</> : null}
-                            {' '}O průběhu Vás budeme informovat e-mailem.</>
-                        : <>This item is not kept in stock — we order it from our supplier after you place your order.
-                            {product.deliveryTime ? <> It usually ships within <strong style={{ color: 'var(--color-gold)' }}>{product.deliveryTime}</strong> of payment.</> : null}
-                            {' '}We will keep you informed by e-mail.</>}
-                    </div>
-                  )}
-                  {/* Preorder expected release hidden for now
-                {product.preorder && product.releaseDate && (
-                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                    <span>📅</span>
-                    <span>{lang === 'CZ' ? `Očekávané vydání: ${product.releaseDate}` : `Expected release: ${product.releaseDate}`}</span>
-                    <button 
-                      type="button"
-                      onClick={() => {
-                        sessionStorage.setItem('scrollToPreorderInfo', 'true');
-                        setActivePage('gdpr-vop', 'doprava');
-                      }}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        padding: 0,
-                        cursor: 'pointer',
-                        color: 'var(--nv-gold, #fdbd16)',
-                        textDecoration: 'underline',
-                        fontSize: '11px',
-                        fontWeight: '600',
-                        fontFamily: 'inherit',
-                        marginLeft: '4px'
-                      }}
-                    >
-                      {lang === 'CZ' ? 'Jak to funguje?' : 'How does it work?'}
-                    </button>
-                  </div>
-                )}
-                */}
-                  <span className="product-delivery-link" onClick={() => setActivePage('community')}>
-                    {lang === 'CZ' ? 'Možnosti doručení' : 'Delivery options'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="purchase-actions-group">
-                {/* Quantity and Cart Button */}
-                <div className="product-purchase-row">
+                <div className="pdp-buy-controls">
                   <div className="product-quantity-selector">
-                    <button className="qty-btn" onClick={() => setQty(prev => Math.max(1, prev - 1))}>−</button>
+                    <button className="qty-btn" onClick={() => setQty(prev => Math.max(1, prev - 1))} aria-label={lang === 'CZ' ? 'Snížit' : 'Decrease'}>−</button>
                     <input type="number" className="qty-input" value={qty} onChange={e => setQty(Math.max(1, parseInt(e.target.value) || 1))} min="1" max={isOnOrder ? 10 : (stock > 0 ? stock : 10)} />
-                    <button className="qty-btn" onClick={() => setQty(prev => Math.min(isOnOrder ? 10 : (stock > 0 ? stock : 10), prev + 1))}>+</button>
+                    <button className="qty-btn" onClick={() => setQty(prev => Math.min(isOnOrder ? 10 : (stock > 0 ? stock : 10), prev + 1))} aria-label={lang === 'CZ' ? 'Zvýšit' : 'Increase'}>+</button>
                   </div>
 
                   <button
@@ -1390,8 +1319,47 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                     {t('common.addToCart')}
                   </button>
                 </div>
+              </div>
 
-                {/* Actions Buttons Grid */}
+              {/* Dostupnost: tečka + stav (+ dodací lhůta u zboží na objednávku) */}
+              <div className="pdp-status-row">
+                <span className={`pdp-status-dot ${isOnOrder ? 'on-order' : (stock > 0 ? 'in-stock' : 'sold-out')}`} aria-hidden="true"></span>
+                <span className={`pdp-status-label ${isOnOrder ? 'on-order' : (stock > 0 ? 'in-stock' : 'sold-out')}`}>
+                  {isOnOrder
+                    ? (lang === 'CZ' ? 'Na objednávku' : 'Made to order')
+                    : stock > 0
+                      ? (lang === 'CZ' ? `Skladem (${stock} ks)` : `In Stock (${stock} pcs)`)
+                      : (lang === 'CZ' ? 'Vyprodáno' : 'Sold out')}
+                </span>
+                {isOnOrder && product.deliveryTime && (
+                  <>
+                    <span className="pdp-status-sep" aria-hidden="true">·</span>
+                    <span className="pdp-status-eta">
+                      {lang === 'CZ' ? `dodání ${product.deliveryTime}` : `delivery in ${product.deliveryTime}`}
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {/* Vysvětlení režimu „Na objednávku“ pro zákazníka */}
+              {isOnOrder && (
+                <p className="pdp-notice">
+                  {lang === 'CZ'
+                    ? <>Toto zboží nedržíme skladem — objednáváme ho u dodavatele až po Vaší objednávce.
+                        {product.deliveryTime ? <> Obvykle Vám ho odešleme do <strong>{product.deliveryTime}</strong> od zaplacení.</> : null}
+                        {' '}O průběhu Vás budeme informovat e-mailem.</>
+                    : <>This item is not kept in stock — we order it from our supplier after you place your order.
+                        {product.deliveryTime ? <> It usually ships within <strong>{product.deliveryTime}</strong> of payment.</> : null}
+                        {' '}We will keep you informed by e-mail.</>}
+                </p>
+              )}
+
+              {/* Spodní řada: možnosti doručení vlevo, doplňkové akce vpravo */}
+              <div className="pdp-bottom-row">
+                <span className="product-delivery-link" onClick={() => setActivePage('community')}>
+                  {lang === 'CZ' ? 'Možnosti doručení' : 'Delivery options'}
+                </span>
+
                 <div className="product-actions-grid">
                   <button className="product-action-btn" onClick={handleFavoriteClick} title="Oblíbené" aria-label="Oblíbené">
                     <svg viewBox="0 0 24 24" fill={isFavorite ? 'var(--color-gold)' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

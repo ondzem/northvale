@@ -111,6 +111,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://northvaletcg.eu/sealed-detail/archazia-s-island-booster-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://northvaletcg.eu/sealed-detail/wilds-unknown-illuminer-s-trove-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -131,17 +136,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/archazia-s-island-booster-box/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/into-the-inklands-booster-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://northvaletcg.eu/sealed-detail/shimmering-skies-booster-box/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://northvaletcg.eu/sealed-detail/into-the-inklands-booster-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -246,12 +246,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/toploader-3x4-clear-regular-25ks/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/mega-dream-ex-booster-pack/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/mega-dream-ex-booster-pack/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/toploader-3x4-clear-regular-25ks/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -396,6 +396,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://northvaletcg.eu/sealed-detail/216-pocket-toploader-hazel/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://northvaletcg.eu/sealed-detail/24-slots-psa-bgs-cerveny/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -407,6 +412,11 @@
   </url>
   <url>
     <loc>https://northvaletcg.eu/sealed-detail/etb-mega-evolution-gardevoir/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/wilds-unknown-booster-pack/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -436,11 +446,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/216-pocket-toploader-hazel/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://northvaletcg.eu/sealed-detail/216-pocket-toploader-grey/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -452,11 +457,6 @@
   </url>
   <url>
     <loc>https://northvaletcg.eu/sealed-detail/216-pocket-toploader-red/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://northvaletcg.eu/sealed-detail/wilds-unknown-booster-pack/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

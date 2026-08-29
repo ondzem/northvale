@@ -3713,11 +3713,12 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 }
 
 .product-delivery-link {
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--text-muted);
   text-decoration: underline;
+  text-underline-offset: 3px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 400;
   transition: color 0.2s ease;
 }
 
@@ -3725,15 +3726,134 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   color: var(--text-main);
 }
 
-/* Pricing and Purchase Box Wrapper */
+/* ==========================================================================
+   Nákupní blok na detailu produktu (varianta „Floating / Minimal“)
+   Bez karty a rámečků — obsah dělí jen tenké linky. Hodnoty odpovídají
+   schválenému návrhu z Claude Designu.
+   ========================================================================== */
 .product-price-purchase-box {
   margin-bottom: 12px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: var(--radius-lg);
-  padding: 32px 20px;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* --- horní řada: cena vs. nákup --- */
+.pdp-buy-top {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   gap: 20px;
+}
+
+.pdp-buy-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+/* --- řádek dostupnosti --- */
+.pdp-status-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(240, 240, 240, 0.07);
+}
+
+.pdp-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.pdp-status-dot.in-stock,
+.pdp-status-dot.on-order {
+  background-color: var(--color-green);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.45);
+}
+
+.pdp-status-dot.sold-out {
+  background-color: var(--color-red);
+  box-shadow: none;
+}
+
+.pdp-status-label {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.07px;
+}
+
+.pdp-status-label.in-stock,
+.pdp-status-label.on-order {
+  color: var(--color-green);
+}
+
+.pdp-status-label.sold-out {
+  color: var(--color-red);
+}
+
+.pdp-status-sep {
+  color: rgba(240, 240, 240, 0.25);
+  line-height: 1;
+}
+
+.pdp-status-eta {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* --- vysvětlující text (bez rámečku, jen typografie) --- */
+.pdp-notice {
+  margin: 14px 0 0 0;
+  max-width: 52ch;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+
+.pdp-notice strong {
+  color: #f0f0f0;
+  font-weight: 600;
+}
+
+/* --- spodní řada: doručení vs. doplňkové akce --- */
+.pdp-bottom-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(240, 240, 240, 0.07);
+}
+
+@media (min-width: 769px) {
+  .pdp-buy-top {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 32px;
+  }
+
+  .pdp-buy-controls {
+    flex: 0 0 auto;
+  }
+
+  .pdp-bottom-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
 }
 
 .price-stock-delivery-group {
@@ -3752,12 +3872,10 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 }
 
 @media (min-width: 769px) {
+  /* Nová struktura je vždy sloupec — řady si layout řeší samy
+     (viz .pdp-buy-top a .pdp-bottom-row). */
   .product-price-purchase-box {
-    padding: 40px 32px;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 24px;
+    padding: 0;
   }
 
   .price-stock-delivery-group {
@@ -3776,8 +3894,9 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  align-items: center;
-  text-align: center;
+  /* Zarovnání vlevo i na mobilu — celý nákupní blok je vlevo (dle návrhu) */
+  align-items: flex-start;
+  text-align: left;
 }
 
 @media (min-width: 769px) {
@@ -3788,15 +3907,18 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 }
 
 .product-price-vat {
-  font-size: 28px;
+  font-size: clamp(30px, 5vw, 42px);
   font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
   color: var(--color-gold);
   text-shadow: 0 0 15px rgba(253, 189, 22, 0.2);
 }
 
 .product-price-ex-vat {
-  font-size: 12px;
-  color: var(--text-muted);
+  font-size: 13.5px;
+  color: #50505a;
+  margin-top: 9px;
 }
 
 /* Purchase section */
@@ -3824,10 +3946,12 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 .product-quantity-selector {
   display: flex;
   align-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-md);
-  background: rgba(0, 0, 0, 0.2);
-  height: 48px;
+  justify-content: space-between;
+  border: 1px solid rgba(240, 240, 240, 0.12);
+  border-radius: 11px;
+  background: transparent;
+  height: 52px;
+  width: 120px;
   box-sizing: border-box;
   flex: 0 0 auto;
 }
@@ -3885,25 +4009,27 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 
 .product-add-to-cart-btn {
   flex: 1;
-  height: 48px;
+  height: 50px;
+  padding: 0 34px;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 700;
   background: var(--color-gold);
-  color: #000;
+  color: #1a1407;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 11px;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(253, 189, 22, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap;
 }
 
 @media (min-width: 769px) {
   .product-add-to-cart-btn {
     flex: 0 0 auto;
-    min-width: 200px;
+    min-width: 0;
   }
 }
 
@@ -3948,32 +4074,40 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 16px;
+  /* mezera 6px dle návrhu; na úzkých displejích se tlačítka zalomí,
+     aby se „Upozornění“ a „Sdílet“ neořízly mimo obrazovku */
+  flex-wrap: wrap;
+  gap: 6px;
   width: 100%;
+  margin-left: -12px;
 }
 
 @media (min-width: 769px) {
   .product-actions-grid {
     justify-content: flex-end;
-    gap: 20px;
+    flex-wrap: nowrap;
+    gap: 6px;
     width: auto;
+    margin-left: 0;
+    margin-right: -12px;
   }
 }
 
 .product-action-btn {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   background: transparent;
   border: none;
-  padding: 6px 0;
+  border-radius: 9px;
+  padding: 9px 12px;
   color: var(--text-muted);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  font-size: clamp(10px, 1.25vw, 11px);
-  font-weight: 600;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -3982,8 +4116,6 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 @media (min-width: 769px) {
   .product-action-btn {
     flex: 0 0 auto;
-    padding: 4px 8px;
-    font-size: 12px;
   }
 }
 
@@ -3995,16 +4127,16 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 
 .product-action-btn svg {
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
+  width: 16px;
+  height: 16px;
   color: var(--color-gold);
   transition: transform 0.2s ease;
 }
 
 @media (min-width: 769px) {
   .product-action-btn svg {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
   }
 }
 
