@@ -597,11 +597,11 @@ export default function HomepageTab({ showToast, onEditProduct }) {
     try {
       const { error } = await deleteDailyDealFromDB(selectedSlotId);
       if (error) throw error;
-      showToast(lang === 'CZ' ? 'Akce dne byla úspěšně smazána!' : 'Deal of the Day successfully deleted!', 'success');
+      showToast(lang === 'CZ' ? 'Akce byla úspěšně smazána!' : 'Special offer successfully deleted!', 'success');
       await loadDailyDeal();
     } catch (err) {
       console.error('Failed to delete daily deal:', err);
-      showToast(lang === 'CZ' ? 'Chyba při mazání akce dne!' : 'Error deleting Deal of the Day!', 'error');
+      showToast(lang === 'CZ' ? 'Chyba při mazání akce!' : 'Error deleting special offer!', 'error');
     }
     setDealSaving(false);
   };
@@ -653,15 +653,15 @@ export default function HomepageTab({ showToast, onEditProduct }) {
 
       showToast(
         isMockFallback
-          ? (lang === 'CZ' ? 'Akce dne uložena pouze lokálně (Chyba DB)!' : 'Daily deal saved locally only (DB error)!')
-          : (lang === 'CZ' ? 'Akce dne úspěšně uložena a naplánována!' : 'Deal of the Day successfully saved and scheduled!'),
+          ? (lang === 'CZ' ? 'Akce uložena pouze lokálně (Chyba DB)!' : 'Special offer saved locally only (DB error)!')
+          : (lang === 'CZ' ? 'Akce úspěšně uložena a naplánována!' : 'Special offer successfully saved and scheduled!'),
         isMockFallback ? 'warning' : 'success'
       );
 
       await loadDailyDeal();
     } catch (err) {
       console.error('Failed to save daily deal:', err);
-      showToast(lang === 'CZ' ? 'Chyba při ukládání akce dne!' : 'Error saving Deal of the Day!', 'error');
+      showToast(lang === 'CZ' ? 'Chyba při ukládání akce!' : 'Error saving special offer!', 'error');
     }
     setDealSaving(false);
   };
@@ -1466,7 +1466,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-            <span>{lang === 'CZ' ? 'Správa Akce dne (Deal of the Day)' : 'Deal of the Day Administration'}</span>
+            <span>{lang === 'CZ' ? 'Správa akce' : 'Special Offer Administration'}</span>
           </h3>
           <div className="admin-accordion-header-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1479,14 +1479,14 @@ export default function HomepageTab({ showToast, onEditProduct }) {
           <div className="admin-accordion-content">
             <p className="ctf-col-sub" style={{ marginBottom: '24px' }}>
               {lang === 'CZ'
-                ? 'Zde můžete upravit název, cenu, skladové zásoby, fotku a odpočet pro aktivní Akci dne. Akce se propíše na homepage i do katalogů.'
-                : 'Here you can configure the title, pricing, stock count, picture and timer for the active Daily Deal. Changes apply storefront-wide.'}
+                ? 'Zde můžete upravit název, cenu, skladové zásoby, fotku a odpočet pro aktivní akci. Akce se propíše na homepage i do katalogů.'
+                : 'Here you can configure the title, pricing, stock count, picture and timer for the active special offer. Changes apply storefront-wide.'}
             </p>
 
             {/* Slot selector dropdown */}
             <div className="ctf-field" style={{ marginBottom: '24px', maxWidth: '320px' }}>
               <label className="ctf-label" style={{ fontWeight: '700' }}>
-                {lang === 'CZ' ? 'Vyberte slot Akce dne:' : 'Select Daily Deal Slot:'}
+                {lang === 'CZ' ? 'Vyberte slot akce:' : 'Select offer slot:'}
               </label>
               <div className="ctf-select">
                 <select 
@@ -1494,13 +1494,13 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                   onChange={(e) => handleSlotChange(e.target.value)}
                 >
                   <option value="active-deal">
-                    {lang === 'CZ' ? '1. Aktivní akce dne (Hlavní)' : '1. Active Deal of the Day (Primary)'}
+                    {lang === 'CZ' ? '1. Aktivní akce (Hlavní)' : '1. Active offer (Primary)'}
                   </option>
                   <option value="deal-2">
-                    {lang === 'CZ' ? '2. Následující akce dne' : '2. Next Scheduled Deal'}
+                    {lang === 'CZ' ? '2. Následující akce' : '2. Next scheduled offer'}
                   </option>
                   <option value="deal-3">
-                    {lang === 'CZ' ? '3. Následující akce dne 2' : '3. Second Next Scheduled Deal'}
+                    {lang === 'CZ' ? '3. Následující akce 2' : '3. Second next scheduled offer'}
                   </option>
                 </select>
                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
@@ -1843,7 +1843,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                 >
                   {dealSaving 
                     ? (lang === 'CZ' ? 'Ukládání...' : 'Saving...') 
-                    : (lang === 'CZ' ? 'Uložit akci dne' : 'Save Deal of the Day')}
+                    : (lang === 'CZ' ? 'Uložit akci' : 'Save special offer')}
                 </button>
                 <button 
                   type="button" 
@@ -1859,7 +1859,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                   disabled={dealSaving}
                   onClick={() => setDealDeleteConfirm(true)}
                 >
-                  {lang === 'CZ' ? 'Odstranit akci dne' : 'Delete Deal of the Day'}
+                  {lang === 'CZ' ? 'Odstranit akci' : 'Delete special offer'}
                 </button>
               </div>
 
@@ -2040,7 +2040,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                     letterSpacing: '1px',
                     marginBottom: '6px'
                   }}>
-                    {lang === 'CZ' ? 'Akce dne' : 'Deal of the day'}
+                    {lang === 'CZ' ? 'Akce' : 'Special offer'}
                   </span>
                   <div style={{
                     display: 'flex',
@@ -2209,7 +2209,7 @@ export default function HomepageTab({ showToast, onEditProduct }) {
                 ? (lang === 'CZ' ? 'Poměr stran je uzamčen na šířku (2.28:1 - pro desktop)' : 'Aspect ratio locked to landscape (2.28:1 - for desktop)')
                 : (cropTarget === 'mobile'
                   ? (lang === 'CZ' ? 'Poměr stran je uzamčen na výšku (4:5 - pro mobil)' : 'Aspect ratio locked to portrait (4:5 - for mobile)')
-                  : (lang === 'CZ' ? 'Poměr stran je uzamčen na výšku (5:7 - pro akci dne)' : 'Aspect ratio locked to portrait (5:7 - for deal of the day)'))
+                  : (lang === 'CZ' ? 'Poměr stran je uzamčen na výšku (5:7 - pro akci)' : 'Aspect ratio locked to portrait (5:7 - for special offer)'))
               }
             </div>
             
@@ -2413,8 +2413,8 @@ export default function HomepageTab({ showToast, onEditProduct }) {
             </h4>
             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', margin: '0 0 24px 0', lineHeight: '1.5' }}>
               {lang === 'CZ' 
-                ? 'Opravdu chcete tuto akci dne smazat? Tuto akci nelze vzít zpět.' 
-                : 'Are you sure you want to delete this Deal of the Day? This cannot be undone.'}
+                ? 'Opravdu chcete tuto akci smazat? Tento krok nelze vzít zpět.' 
+                : 'Are you sure you want to delete this special offer? This cannot be undone.'}
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
               <button

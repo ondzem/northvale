@@ -1413,8 +1413,8 @@ function AppContent() {
             cartChanged = true;
             messages.push(
               lang === 'CZ'
-                ? `Akce dne "${item.name}" již skončila a byla odebrána z košíku.`
-                : `Daily deal "${item.name}" has expired and was removed from your cart.`
+                ? `Akce "${item.name}" již skončila a byla odebrána z košíku.`
+                : `The offer "${item.name}" has expired and was removed from your cart.`
             );
             continue;
           }
@@ -1437,8 +1437,8 @@ function AppContent() {
             cartChanged = true;
             messages.push(
               lang === 'CZ'
-                ? `Produkt "${item.name}" v akci dne je již vyprodán a byl odebrán z košíku.`
-                : `Product "${item.name}" in daily deal is sold out and was removed from your cart.`
+                ? `Produkt "${item.name}" v akci je již vyprodán a byl odebrán z košíku.`
+                : `Product "${item.name}" in the offer is sold out and was removed from your cart.`
             );
             continue;
           }

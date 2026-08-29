@@ -219,7 +219,7 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
             margin: '0 0 10px 0',
             fontFamily: 'var(--font-heading)'
           }}>
-            {lang === 'CZ' ? 'Připravujeme akci dne' : 'Daily Deal Coming Soon'}
+            {lang === 'CZ' ? 'Připravujeme akci' : 'Special Offer Coming Soon'}
           </h3>
           <p style={{
             fontSize: '13px',
@@ -404,7 +404,7 @@ export default function DealOfTheDay({ products, addToCart, setSelectedProductId
           letterSpacing: '1px',
           marginBottom: '6px'
         }}>
-          {lang === 'CZ' ? 'Akce dne' : 'Deal of the day'}
+          {lang === 'CZ' ? 'Akce' : 'Special offer'}
         </span>
         <div style={{
           display: 'flex',

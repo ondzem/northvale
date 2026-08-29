@@ -731,7 +731,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                 margin: '0 0 10px 0',
                 fontFamily: 'var(--font-heading)'
               }}>
-                {lang === 'CZ' ? 'Připravujeme akci dne' : 'Daily Deal Coming Soon'}
+                {lang === 'CZ' ? 'Připravujeme akci' : 'Special Offer Coming Soon'}
               </h3>
               <p style={{
                 fontSize: '13px',
@@ -925,7 +925,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   letterSpacing: '1px',
                   marginBottom: '6px'
                 }}>
-                  {lang === 'CZ' ? 'Akce dne' : 'Deal of the day'}
+                  {lang === 'CZ' ? 'Akce' : 'Special offer'}
                 </span>
                 <div style={{
                   display: 'flex',
@@ -991,7 +991,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
                   marginBottom: '16px',
                   textAlign: 'center'
                 }}>
-                  {lang === 'CZ' ? 'Akce dne' : 'Deal of the day'}
+                  {lang === 'CZ' ? 'Akce' : 'Special offer'}
                 </span>
                 <div style={{
                   display: 'flex',
