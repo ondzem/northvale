@@ -608,6 +608,60 @@ export function mapProductToDb(p) {
 /**
  * Create or update a product in Supabase.
  */
+/**
+ * Ověří kontrolní číslici čárového kódu (EAN-8, UPC-12, EAN-13, GTIN-14).
+ * Překlep v ručně opsaném kódu tím odhalíme dřív, než ho pošleme srovnávačům —
+ * chybný EAN spáruje produkt s cizím zbožím, což je horší než prázdné pole.
+ */
+export function isValidEan(value) {
+  const digits = String(value || '').replace(/\s|-/g, '');
+  if (!/^\d+$/.test(digits)) return false;
+  if (![8, 12, 13, 14].includes(digits.length)) return false;
+
+  const nums = digits.split('').map(Number);
+  const check = nums.pop();
+  // Váhy se střídají 3/1 od poslední číslice směrem doleva.
+  const sum = nums
+    .reverse()
+    .reduce((acc, d, i) => acc + d * (i % 2 === 0 ? 3 : 1), 0);
+  return ((10 - (sum % 10)) % 10) === check;
+}
+
+/**
+ * Hromadně doplní EAN u existujících produktů.
+ *
+ * Zapisuje VÝHRADNĚ sloupec ean — na rozdíl od saveProductToDB (které dělá
+ * upsert celého produktu) tu nehrozí, že by se ostatní údaje přepsaly
+ * výchozími hodnotami.
+ *
+ * @param {Array<{id: string, ean: string}>} entries
+ * @returns {Promise<{updated: number, failed: Array<{id: string, error: string}>}>}
+ */
+export async function updateProductEans(entries) {
+  const failed = [];
+  let updated = 0;
+
+  for (const entry of entries) {
+    const id = String(entry?.id || '').trim();
+    const ean = String(entry?.ean || '').replace(/\s|-/g, '').trim();
+    if (!id) continue;
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ ean: ean || null })
+        .eq('id', id);
+      if (error) throw error;
+      updated++;
+    } catch (err) {
+      failed.push({ id, error: err?.message || String(err) });
+    }
+  }
+
+  invalidateProductsCache();
+  return { updated, failed };
+}
+
 export async function saveProductToDB(product) {
   try {
     if (!supabase.from) {

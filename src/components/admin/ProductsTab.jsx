@@ -4,6 +4,7 @@ import { useTranslation } from '../../context/LanguageContext';
 import { fetchProductsFromDB, saveProductToDB, deleteProductFromDB, fetchProductByIdFromDB, fetchProductImage, fetchProductBackImage } from '../../services/products';
 import { fetchCategoriesFromDB } from '../../services/categories';
 import ProductCard from '../ProductCard';
+import BulkEanModal from './BulkEanModal';
 import { FEATURE_FLAGS, calculatePriceExVat } from '../../config';
 
 const AdminImageThumbnail = ({ productId, fallbackSrc }) => {
@@ -339,6 +340,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [sortBy, setSortBy] = useState('newest'); // 'newest', 'oldest', 'name_asc', 'name_desc'
   // Zobrazit jen produkty bez EAN — bez čárového kódu je srovnávače nespárují
   const [onlyMissingEan, setOnlyMissingEan] = useState(false);
+  const [isBulkEanOpen, setIsBulkEanOpen] = useState(false);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -1808,6 +1810,15 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
 
   return (
     <div style={{ width: '100%' }}>
+      {isBulkEanOpen && (
+        <BulkEanModal
+          products={products}
+          lang={lang}
+          showToast={showToast}
+          onClose={() => setIsBulkEanOpen(false)}
+          onSaved={() => loadData()}
+        />
+      )}
       {/* Top Bar Actions / Toolbar matching A _ Floating _ Minimal */}
       <div className="adf-toolbar">
         <div className="adf-tsearch">
@@ -1898,6 +1909,20 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
               ? (missingEanCount > 0 ? `Bez EAN: ${missingEanCount}` : 'EAN u všech')
               : (missingEanCount > 0 ? `No EAN: ${missingEanCount}` : 'All have EAN')}
           </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setIsBulkEanOpen(true)}
+          title={lang === 'CZ' ? 'Doplnit čárové kódy hromadně z tabulky' : 'Fill barcodes in bulk from a sheet'}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '7px',
+            padding: '0 14px', height: '38px', borderRadius: '8px', cursor: 'pointer',
+            fontSize: '12.5px', fontWeight: 600, whiteSpace: 'nowrap',
+            border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'var(--text-muted)'
+          }}
+        >
+          🏷️ <span>{lang === 'CZ' ? 'Doplnit EAN hromadně' : 'Bulk EAN'}</span>
         </button>
 
         <button type="button" className="adf-tcsv" onClick={() => setIsCsvModalOpen(true)}>
