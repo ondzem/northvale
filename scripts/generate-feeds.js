@@ -57,6 +57,41 @@ function getBrand(game) {
   return 'Northvale';
 }
 
+/**
+ * ITEM_ID pro Heureku/Zboží.cz smí mít nejvýše 36 znaků, takže delší ID se
+ * zkracují. Zkrácení ale může u dvou produktů vyjít stejně — pak by srovnávač
+ * považoval druhý produkt za ten první. Tady se hlídá, aby k tomu nedošlo:
+ * kolidující ID dostane krátkou příponu odvozenou z celého původního ID.
+ *
+ * DŮLEŽITÉ: už jednou odeslané ID se nesmí měnit, jinak se produkt na Heurece
+ * odpáruje a čeká se na nové spárování. Proto se přípona přidává výhradně
+ * tomu produktu, který koliduje jako druhý v pořadí.
+ */
+function shortHash(text) {
+  let h = 0;
+  for (let i = 0; i < text.length; i++) {
+    h = ((h << 5) - h + text.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h).toString(36).slice(0, 4);
+}
+
+function makeFeedItemId(id, usedIds) {
+  const full = String(id || '');
+  let candidate = full.substring(0, 36);
+  if (usedIds.has(candidate)) {
+    const suffix = '-' + shortHash(full);
+    candidate = full.substring(0, 36 - suffix.length) + suffix;
+    let guard = 0;
+    while (usedIds.has(candidate) && guard < 50) {
+      candidate = full.substring(0, 35 - suffix.length) + guard + suffix;
+      guard++;
+    }
+    console.warn(`ITEM_ID kolize po zkraceni: "${full}" -> "${candidate}"`);
+  }
+  usedIds.add(candidate);
+  return candidate;
+}
+
 // Z dodací lhůty zboží na objednávku („3–7 dnů“) vytáhne nejvyšší počet dní.
 function parseDeliveryDays(deliveryTime, fallback = 7) {
   const nums = String(deliveryTime || '').match(/\d+/g);
@@ -188,6 +223,7 @@ async function run() {
   let heurekaXml = '<?xml version="1.0" encoding="UTF-8" ?>\n';
   heurekaXml += '<SHOP>\n';
 
+  const heurekaIds = new Set();
   for (const p of filteredProducts) {
     const title = p.name || '';
     const desc = stripHtml(p.short_description || p.description || title);
@@ -218,7 +254,7 @@ async function run() {
       : `${brand} ${title}`;
 
     heurekaXml += '  <SHOPITEM>\n';
-    heurekaXml += `    <ITEM_ID>${escapeXml(p.id.substring(0, 36))}</ITEM_ID>\n`;
+    heurekaXml += `    <ITEM_ID>${escapeXml(makeFeedItemId(p.id, heurekaIds))}</ITEM_ID>\n`;
     heurekaXml += `    <PRODUCTNAME>${escapeXml(pairingName.substring(0, 200))}</PRODUCTNAME>\n`;
     // PRODUCT = název tak, jak ho chceme zobrazit zákazníkovi.
     heurekaXml += `    <PRODUCT>${escapeXml(title)}</PRODUCT>\n`;
@@ -247,6 +283,7 @@ async function run() {
   let zboziXml = '<?xml version="1.0" encoding="UTF-8" ?>\n';
   zboziXml += '<SHOP xmlns="http://www.zbozi.cz/ns/offer/1.0">\n';
 
+  const zboziIds = new Set();
   for (const p of filteredProducts) {
     const title = p.name || '';
     const desc = stripHtml(p.short_description || p.description || title);
@@ -271,7 +308,7 @@ async function run() {
     const fullProductName = brand && !title.toLowerCase().includes(brand.toLowerCase()) ? `${brand} ${title}` : title;
 
     zboziXml += '  <SHOPITEM>\n';
-    zboziXml += `    <ITEM_ID>${escapeXml(p.id.substring(0, 36))}</ITEM_ID>\n`;
+    zboziXml += `    <ITEM_ID>${escapeXml(makeFeedItemId(p.id, zboziIds))}</ITEM_ID>\n`;
     zboziXml += `    <PRODUCTNAME>${escapeXml(title)}</PRODUCTNAME>\n`;
     zboziXml += `    <PRODUCT>${escapeXml(fullProductName)}</PRODUCT>\n`;
     zboziXml += `    <DESCRIPTION>${escapeXml(desc)}</DESCRIPTION>\n`;

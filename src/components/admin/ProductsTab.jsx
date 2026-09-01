@@ -337,6 +337,8 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [filterType, setFilterType] = useState('all');
   const [filterGame, setFilterGame] = useState('all');
   const [sortBy, setSortBy] = useState('newest'); // 'newest', 'oldest', 'name_asc', 'name_desc'
+  // Zobrazit jen produkty bez EAN — bez čárového kódu je srovnávače nespárují
+  const [onlyMissingEan, setOnlyMissingEan] = useState(false);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -1675,20 +1677,31 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
       (p.edition && p.edition.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesType = filterType === 'all' || p.type === filterType;
     const matchesGame = filterGame === 'all' || p.game === filterGame;
-    return matchesSearch && matchesType && matchesGame;
+    const matchesEan = !onlyMissingEan || !(p.ean && String(p.ean).trim());
+    return matchesSearch && matchesType && matchesGame && matchesEan;
   });
 
+  // Kolik produktů nemá čárový kód (EAN) — bez něj je Heureka/Zboží nespárují
+  const missingEanCount = products.filter(p => !(p.ean && String(p.ean).trim())).length;
+
   // Sort products list
+  // Čas poslední změny: upravený starý produkt musí jít nahoru stejně jako nově
+  // přidaný. Když updated_at chybí (starší záznam), použije se datum založení.
+  const productTime = (p) => {
+    const raw = p.updated_at || p.created_at;
+    return raw ? new Date(raw).getTime() : 0;
+  };
+
   filteredProducts.sort((a, b) => {
     if (sortBy === 'newest') {
-      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      const dateA = productTime(a);
+      const dateB = productTime(b);
       if (dateB !== dateA) return dateB - dateA;
       return a.id.localeCompare(b.id);
     }
     if (sortBy === 'oldest') {
-      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      const dateA = productTime(a);
+      const dateB = productTime(b);
       if (dateA !== dateB) return dateA - dateB;
       return a.id.localeCompare(b.id);
     }
@@ -1855,13 +1868,37 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}
           >
-            <option value="newest">{lang === 'CZ' ? 'Nejnovější' : 'Newest'}</option>
-            <option value="oldest">{lang === 'CZ' ? 'Nejstarší' : 'Oldest'}</option>
+            <option value="newest">{lang === 'CZ' ? 'Naposledy upravené' : 'Recently updated'}</option>
+            <option value="oldest">{lang === 'CZ' ? 'Nejstarší úpravy' : 'Oldest first'}</option>
             <option value="name_asc">{lang === 'CZ' ? 'Název (A-Z)' : 'Name (A-Z)'}</option>
             <option value="name_desc">{lang === 'CZ' ? 'Název (Z-A)' : 'Name (Z-A)'}</option>
           </select>
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 9l6 6 6-6"></path></svg>
         </div>
+
+        {/* Kolik produktů nemá EAN — bez čárového kódu je srovnávače nespárují */}
+        <button
+          type="button"
+          onClick={() => setOnlyMissingEan(v => !v)}
+          title={lang === 'CZ'
+            ? 'Zobrazit jen produkty bez čárového kódu (EAN). Bez EAN je Heureka ani Zboží.cz nespárují se svým katalogem.'
+            : 'Show only products without an EAN barcode. Comparison sites cannot pair them without it.'}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '7px',
+            padding: '0 14px', height: '38px', borderRadius: '8px', cursor: 'pointer',
+            fontSize: '12.5px', fontWeight: 600, whiteSpace: 'nowrap',
+            border: `1px solid ${onlyMissingEan ? 'rgba(253,189,22,0.55)' : (missingEanCount > 0 ? 'rgba(253,189,22,0.28)' : 'rgba(255,255,255,0.1)')}`,
+            background: onlyMissingEan ? 'rgba(253,189,22,0.14)' : 'transparent',
+            color: missingEanCount > 0 ? 'var(--color-gold)' : 'var(--text-muted)'
+          }}
+        >
+          {missingEanCount > 0 ? '⚠' : '✓'}
+          <span>
+            {lang === 'CZ'
+              ? (missingEanCount > 0 ? `Bez EAN: ${missingEanCount}` : 'EAN u všech')
+              : (missingEanCount > 0 ? `No EAN: ${missingEanCount}` : 'All have EAN')}
+          </span>
+        </button>
 
         <button type="button" className="adf-tcsv" onClick={() => setIsCsvModalOpen(true)}>
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2h9l5 5v15H6z"></path><path d="M14 2v6h6M9 13h6M9 17h6"></path></svg>
