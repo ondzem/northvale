@@ -1238,10 +1238,15 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
       
       if (selectedGame === 'Acrylics' && (targetCatId === 'game-acrylics' || targetCatId === 'all')) {
         catMatch = isAcrylic;
-      } else if (product.category_id && matchedCatIds.includes(product.category_id)) {
-        catMatch = true;
+      } else if (product.category_id) {
+        // Má-li produkt přiřazenou kategorii, je to jediná pravda. Dřív se i tady
+        // sahalo po odhadu podle názvu, takže „Gem Pack Vol. 2 – Booster Box“
+        // (kategorie Booster boxy) vyskočil i v Booster balíčcích, protože má
+        // v názvu slovo „Pack“. Stejné pravidlo používá i getSubcategoryCount,
+        // takže počty u záložek teď sedí s jejich obsahem.
+        catMatch = matchedCatIds.includes(product.category_id);
       } else {
-        // Fallback using historical fields
+        // Záloha jen pro starší produkty, které kategorii přiřazenou nemají
         catMatch = matchedCatIds.some(catId => matchesHistoricalCategory(product, catId)) || matchesHistoricalCategory(product, targetCatId);
       }
       

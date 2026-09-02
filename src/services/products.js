@@ -273,7 +273,7 @@ export async function fetchProductsFromDB(options = {}) {
     } else {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, image, back_image, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, description, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, illustrator, set_code, stage, element, custom_params, no_vat, image_alt, image_title, on_order, delivery_time, updated_at, additional_images');
+        .select('id, name, image, back_image, type, game, edition, category, subcat, subsubcat, subsubcategory, rarity, description, price, stock, lang, packaging_type, booster_count, year, foil_condition, preorder, investment, company, grade, cert_number, acrylic_thickness, uv_protection, closing_type, inner_dimensions, variants, created_at, category_id, short_description, illustrator, set_code, stage, element, custom_params, no_vat, image_alt, image_title, on_order, delivery_time, updated_at, ean, additional_images');
 
       if (error) {
         throw error;
