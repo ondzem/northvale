@@ -4,6 +4,7 @@ import { FEATURE_FLAGS } from '../config';
 import { supabase } from '../supabase';
 import InvoiceTemplate from './admin/InvoiceTemplate';
 import { subscribeToNewsletter, deleteSubscriber } from '../services/newsletter';
+import { getTurnstileToken } from '../services/turnstile';
 
 export default function UserPortal({ user, setUser, setActivePage, onLogout, showToast }) {
   const { lang, t } = useTranslation();
@@ -604,9 +605,11 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
     }
 
     // Step 1: Verify current password by signing in
+    const captchaToken = await getTurnstileToken();
     const { error: verifyError } = await supabase.auth.signInWithPassword({
       email: user.email,
-      password: currentPassword
+      password: currentPassword,
+      options: { captchaToken }
     });
 
     if (verifyError) {
@@ -640,7 +643,9 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
   const handleForgotPassword = async () => {
     setIsResetting(true);
     try {
+      const captchaToken = await getTurnstileToken();
       const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+        captchaToken,
         redirectTo: window.location.origin
       });
 

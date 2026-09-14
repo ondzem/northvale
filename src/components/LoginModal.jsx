@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { FEATURE_FLAGS } from '../config';
 import { supabase } from '../supabase';
+import { getTurnstileToken } from '../services/turnstile';
 
 function formatAuthErrorMessage(error, lang = 'CZ') {
   if (!error) return '';
@@ -160,10 +161,15 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
     if (hasError) return;
 
     if (isRegisterMode) {
+      // Supabase má zapnutou CAPTCHA ochranu přihlašování — bez tokenu
+      // by registraci i přihlášení odmítl.
+      const captchaToken = await getTurnstileToken();
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          captchaToken,
           data: {
             full_name: fullName,
             newsletter: newsletter
@@ -180,9 +186,11 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
 
       onRegister(email, fullName);
     } else {
+      const captchaToken = await getTurnstileToken();
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password
+        password,
+        options: { captchaToken }
       });
 
       if (error) {
@@ -345,7 +353,9 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
     setIsResetting(true);
 
     try {
+      const captchaToken = await getTurnstileToken();
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        captchaToken,
         redirectTo: 'https://northvaletcg.eu'
       });
 
