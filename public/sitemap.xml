@@ -101,7 +101,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/reign-of-jafar-illuminers-trove-box/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/gem-pack-vol-3-booster-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -111,7 +111,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://northvaletcg.eu/sealed-detail/reign-of-jafar-illuminers-trove-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://northvaletcg.eu/sealed-detail/1024-pocket-gray/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/azurite-sea-booster-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -121,17 +131,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/ursula-s-return-booster-box/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://northvaletcg.eu/sealed-detail/archazia-s-island-booster-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/azurite-sea-booster-box/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/ursula-s-return-booster-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -151,22 +156,17 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/216-pocket-toploader-red/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://northvaletcg.eu/sealed-detail/op-16/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/jolteon-terastal-gathering-binder-box/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/216-pocket-toploader-red/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/case-wilds-unknown-booster-box/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/jolteon-terastal-gathering-binder-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -191,17 +191,17 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/tohoku-pokemon-center-box/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://northvaletcg.eu/sealed-detail/akryl-booster-bundle-pokemon/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://northvaletcg.eu/sealed-detail/360-pocket-white/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/tohoku-pokemon-center-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -216,6 +216,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://northvaletcg.eu/sealed-detail/gem-pack-vol-6-booster-pack/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://northvaletcg.eu/sealed-detail/destined-rivals-booster-bundle/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -226,17 +231,22 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/case-trove-box-wilds-unknown/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://northvaletcg.eu/sealed-detail/1024-pocket-black/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://northvaletcg.eu/sealed-detail/gem-pack-vol-3-booster-pack/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://northvaletcg.eu/sealed-detail/return-of-the-dragon-ultra-necrozma-advanced-gift-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/eevee-friends-premium-gift-box-terastal-grand-gathering/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -247,6 +257,11 @@
   </url>
   <url>
     <loc>https://northvaletcg.eu/sealed-detail/return-of-the-dragon-rayquaza-advanced-gift-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/gem-pack-vol-6-booster-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -271,6 +286,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://northvaletcg.eu/sealed-detail/leafeon-terastal-gathering-binder-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://northvaletcg.eu/sealed-detail/gem-pack-vol-5-booster-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -281,7 +301,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://northvaletcg.eu/sealed-detail/sylveon-terastal-gathering-binder-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://northvaletcg.eu/sealed-detail/gem-pack-vol-5-booster-pack/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/espeon-terastal-gathering-binder-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -296,6 +326,21 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://northvaletcg.eu/sealed-detail/umbreon-terastal-gathering-binder-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/case-trove-box-wilds-unknown/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/grading-card-submission-combo-pack-50-ks/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://northvaletcg.eu/sealed-detail/akryl-etb-pokemon/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -306,7 +351,27 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://northvaletcg.eu/sealed-detail/archazia-s-island-booster-pack/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/3-slot-psa-display-akryl/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/gem-pack-vol-4-booster-pack/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://northvaletcg.eu/sealed-detail/etb-mega-evolution-lucario/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/pokemon-charizard-upc-akrylovy-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -316,7 +381,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/winterspell-booster-box/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/pokemon-spc-prismatic-akrylovy-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -326,12 +391,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/espeon-terastal-gathering-binder-box/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://northvaletcg.eu/sealed-detail/shimmering-skies-illuminers-trove-box/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/winterspell-booster-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -341,12 +401,22 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://northvaletcg.eu/sealed-detail/lorcana-trove-box-akrylovy-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/shimmering-skies-illuminers-trove-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://northvaletcg.eu/sealed-detail/charizard-ex-super-premium-collection/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/fukuoka-pokemon-center-box/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/booster-bundle-display-v-2-akrylovy-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -356,7 +426,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/base-shop-limited-collection-vol-1/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/fukuoka-pokemon-center-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -366,7 +436,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/akryl-booster-box-lorcana/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/base-shop-limited-collection-vol-1/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -376,12 +446,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/monkey-d-luffy-p-159-shonen-jump-promo/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/akryl-booster-box-lorcana/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/gem-pack-vol-4-booster-pack/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/monkey-d-luffy-p-159-shonen-jump-promo/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -401,12 +471,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-box/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/precise-fit-sleeves-standard-size-100/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/precise-fit-sleeves-standard-size-100/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/abyss-eye-booster-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -426,12 +496,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/gem-pack-vol-4-booster-box/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/just-sleeves-100ks/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/just-sleeves-100ks/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/gem-pack-vol-4-booster-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -471,22 +541,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/etb-mega-evolution-gardevoir/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://northvaletcg.eu/sealed-detail/wilds-unknown-booster-pack/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/216-pocet-toploader-black/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://northvaletcg.eu/sealed-detail/216-pocket-toploader-green/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/etb-mega-evolution-gardevoir/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -496,12 +556,17 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/flareon-advanced-gift-box/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/216-pocket-toploader-green/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/eevee-terastal-gathering-binder-box/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/216-pocet-toploader-black/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/flareon-advanced-gift-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -511,12 +576,22 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://northvaletcg.eu/sealed-detail/glaceon-terastal-gathering-binder-box/</loc>
+    <loc>https://northvaletcg.eu/sealed-detail/eevee-terastal-gathering-binder-box/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://northvaletcg.eu/sealed-detail/jolteon-advanced-gift-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/glaceon-terastal-gathering-binder-box/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://northvaletcg.eu/sealed-detail/toploader-3x4-clear-regular-sleeves-100ks/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

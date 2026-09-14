@@ -1,4 +1,5 @@
 import { supabase } from '../supabase';
+import { getTurnstileToken } from './turnstile';
 
 /**
  * Subscribes an email address to the newsletter list.
@@ -11,8 +12,9 @@ export async function subscribeToNewsletter(email, lang = 'CZ', isPreRegistratio
     throw new Error('Email is required');
   }
 
+  const turnstileToken = await getTurnstileToken();
   const { data, error } = await supabase.functions.invoke('subscribe-newsletter', {
-    body: { email, lang, isPreRegistration }
+    body: { email, lang, isPreRegistration, turnstileToken }
   });
 
   if (error) {

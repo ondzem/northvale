@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
+import { getTurnstileToken } from '../services/turnstile';
 
 export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
   const { lang, t } = useTranslation();
@@ -87,8 +88,10 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
 
       // Trigger Edge Function to send email confirmation (with fullName)
       try {
+        const turnstileToken = await getTurnstileToken();
         const { error: fnError } = await supabase.functions.invoke('send-withdrawal-email', {
           body: {
+            turnstileToken,
             fullName: fullName.trim(),
             orderNumber: orderNumber.trim(),
             email: email.trim(),

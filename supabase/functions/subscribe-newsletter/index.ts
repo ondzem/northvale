@@ -2,6 +2,7 @@
 // Deploy via: npx supabase functions deploy subscribe-newsletter --project-ref bfxzhggjpiyqfolqpxzz
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { verifyTurnstile, callerIp, isHoneypotFilled, shouldAllow } from "../_shared/turnstile.ts";
 import { isValidEmail, clampText } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -95,6 +96,24 @@ serve(async (req) => {
     }
 
     const subBody = await req.json();
+
+    // OCHRANA PROTI BOTŮM: tahle funkce rozesílá e-maily přes naši doménu.
+    // Bez ověření by ji šlo volat donekonečna — spam a riziko, že nám
+    // poskytovatel zablokuje odesílání.
+    if (isHoneypotFilled(subBody)) {
+      console.warn("[subscribe-newsletter] honeypot vyplněn — odmítnuto.");
+      return new Response(JSON.stringify({ error: "Přihlášení se nepodařilo ověřit." }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+    {
+      const turnstile = await verifyTurnstile((subBody as any)?.turnstileToken, callerIp(req));
+      if (!shouldAllow(turnstile, "subscribe-newsletter")) {
+        return new Response(JSON.stringify({
+          error: "Ověření se nezdařilo. Obnovte prosím stránku a zkuste to znovu."
+        }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
     const email = clampText(subBody?.email, 254).toLowerCase();
     const lang = subBody?.lang === 'EN' ? 'EN' : 'CZ';
     const isPreRegistration = subBody?.isPreRegistration === true;

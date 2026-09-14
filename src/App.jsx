@@ -30,6 +30,7 @@ import { blogArticles } from './blogData';
 import { mockProducts } from './mockData';
 import { fetchProductsFromDB, getCachedProducts, getProductFromCache, generateDefaultSEOImageMetadata, invalidateProductsCache } from './services/products';
 import { FEATURE_FLAGS } from './config';
+import { getTurnstileToken } from './services/turnstile';
 import { LanguageProvider, useTranslation } from './context/LanguageContext';
 import './App.css';
 
@@ -1674,10 +1675,15 @@ function AppContent() {
         return serverOrder;
       } else {
         // Case A: Create order (Transfer, COD)
+        // Ověření proti botům — bez něj by šlo zakládat falešné objednávky,
+        // které u dobírky a převodu rovnou odečítají sklad.
+        const turnstileToken = await getTurnstileToken();
+
         const { data, error } = await supabase.functions.invoke('finalize-order', {
           body: {
             action: 'create',
             orderDetails: order,
+            turnstileToken,
             // Číslo opuštěné objednávky kartou pro ten samý košík — server ji zruší,
             // aby v adminu nezůstávala nezaplacená duplicita.
             supersedes: options.supersedes || null

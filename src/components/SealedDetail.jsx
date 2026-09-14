@@ -4,6 +4,7 @@ import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 import { supabase } from '../supabase';
 import { fetchProductByIdFromDB, getProductFromCache } from '../services/products';
+import { getTurnstileToken } from '../services/turnstile';
 
 const getGameImage = (product) => {
   if (product && (product.category === 'Acrylics' || product.game === 'Acrylics' || product.type === 'acrylic')) return '/acrylic-etb-box.webp';
@@ -908,6 +909,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
       try {
         await supabase.functions.invoke('send-support-notification', {
           body: {
+            turnstileToken: await getTurnstileToken(),
             type: 'review',
             productName: product.name,
             authorName: formattedName,
@@ -984,6 +986,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
       try {
         await supabase.functions.invoke('send-support-notification', {
           body: {
+            turnstileToken: await getTurnstileToken(),
             type: 'comment',
             productName: product.name,
             authorName: formattedName,
@@ -1063,6 +1066,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
       try {
         await supabase.functions.invoke('send-support-notification', {
           body: {
+            turnstileToken: await getTurnstileToken(),
             type: 'reply',
             productName: product.name,
             authorName: authorName,

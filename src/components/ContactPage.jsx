@@ -3,6 +3,7 @@ import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
 import { fetchFaqData } from '../services/faq';
+import { getTurnstileToken } from '../services/turnstile';
 
 export default function ContactPage({ setActivePage }) {
   const { lang, t } = useTranslation();
@@ -82,8 +83,10 @@ export default function ContactPage({ setActivePage }) {
 
       // 2. Trigger Edge Function to send email notification via Brevo
       try {
+        const turnstileToken = await getTurnstileToken();
         const { error: fnError } = await supabase.functions.invoke('send-contact-email', {
           body: {
+            turnstileToken,
             name: formName,
             email: formEmail,
             phone: formPhone || null,

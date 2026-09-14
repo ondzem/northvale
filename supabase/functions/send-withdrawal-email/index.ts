@@ -2,6 +2,7 @@
 // Deploy via Supabase CLI: supabase functions deploy send-withdrawal-email
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { verifyTurnstile, callerIp, isHoneypotFilled, shouldAllow } from "../_shared/turnstile.ts";
 import { safeField, isValidEmail } from "../_shared/auth.ts";
 
 const corsHeaders = {
@@ -56,6 +57,24 @@ serve(async (req) => {
     }
 
     const rawBody = await req.json();
+
+    // OCHRANA PROTI BOTŮM: tahle funkce rozesílá e-maily přes naši doménu.
+    // Bez ověření by ji šlo volat donekonečna — spam a riziko, že nám
+    // poskytovatel zablokuje odesílání.
+    if (isHoneypotFilled(rawBody)) {
+      console.warn("[send-withdrawal-email] honeypot vyplněn — odmítnuto.");
+      return new Response(JSON.stringify({ error: "Odeslání se nepodařilo ověřit." }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+    {
+      const turnstile = await verifyTurnstile((rawBody as any)?.turnstileToken, callerIp(req));
+      if (!shouldAllow(turnstile, "send-withdrawal-email")) {
+        return new Response(JSON.stringify({
+          error: "Ověření se nezdařilo. Obnovte prosím stránku a zkuste to znovu."
+        }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
 
     if (!rawBody?.orderNumber || !rawBody?.email || !rawBody?.refundMethod || !rawBody?.returnType) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {

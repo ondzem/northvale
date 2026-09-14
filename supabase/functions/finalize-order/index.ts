@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 import { normalizeOrder, normalizeItems, slimOrderForHistory, ORDER_HISTORY_LIMIT } from "../_shared/order-schema.ts";
 import { getAuthContext, requireAdmin } from "../_shared/auth.ts";
 import { AUTO_INVOICES } from "../_shared/features.ts";
+import { verifyTurnstile, callerIp, isHoneypotFilled, shouldAllow } from "../_shared/turnstile.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -537,6 +538,26 @@ serve(async (req) => {
       const authCtx = await getAuthContext(req, supabase, supabaseServiceKey);
       const denied = requireAdmin(authCtx, corsHeaders);
       if (denied) return denied;
+    }
+
+    // OCHRANA PROTI BOTŮM: vytvoření objednávky může volat kdokoli (nakupují
+    // i nepřihlášení). Bez ověření by robot mohl zakládat falešné objednávky —
+    // u dobírky a převodu se přitom rovnou odečítá sklad, takže by dokázal
+    // vynulovat zásoby a zahltit e-maily.
+    if (action === "create") {
+      if (isHoneypotFilled(body)) {
+        console.warn("[finalize-order] honeypot vyplněn — objednávka odmítnuta.");
+        return new Response(JSON.stringify({ error: "Objednávku se nepodařilo ověřit." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+
+      const turnstile = await verifyTurnstile(body.turnstileToken, callerIp(req));
+      if (!shouldAllow(turnstile, "finalize-order")) {
+        return new Response(JSON.stringify({
+          error: "Ověření se nezdařilo. Obnovte prosím stránku a zkuste objednávku odeslat znovu."
+        }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
     }
 
     // Action: Reset Invoice Counter
