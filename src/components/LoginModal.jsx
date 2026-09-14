@@ -59,6 +59,11 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
   const [fullNameError, setFullNameError] = useState(false);
   const [localMessage, setLocalMessage] = useState(null);
   const [isResetting, setIsResetting] = useState(false);
+  // Probíhá přihlášení/registrace — tlačítko musí dát najevo, že se něco děje.
+  // Ověření proti botům může chvíli trvat, bez zpětné vazby to působí jako
+  // by kliknutí nefungovalo.
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   // MFA / 2FA Verification States
   const [isAwaiting2FA, setIsAwaiting2FA] = useState(false);
@@ -122,6 +127,16 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await runSubmit(e);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const runSubmit = async (e) => {
     let hasError = false;
 
     // Validate email
@@ -384,17 +399,27 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
   };
 
   const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin
+    if (isGoogleLoading) return;
+    setIsGoogleLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      if (error) {
+        console.error('Google login error:', error);
+        triggerAlert(lang === 'CZ' ? `Chyba Google přihlášení: ${error.message}` : `Google login error: ${error.message}`, 'error');
+        setIsGoogleLoading(false);
+      } else {
+        onClose();
       }
-    });
-    if (error) {
-      console.error('Google login error:', error);
-      triggerAlert(lang === 'CZ' ? `Chyba Google přihlášení: ${error.message}` : `Google login error: ${error.message}`, 'error');
-    } else {
-      onClose();
+      // Při úspěchu se prohlížeč přesměrovává na Google — stav schválně
+      // necháváme zapnutý, ať tlačítko do odchodu ze stránky nezačne blikat.
+    } catch (err) {
+      console.error('Google login failed:', err);
+      setIsGoogleLoading(false);
     }
   };
 
@@ -685,8 +710,17 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
                 )}
 
                 {/* Submit Button */}
-                <button type="submit" className="login-submit-btn">
-                  {isRegisterMode ? t('LoginModal.btnRegister') : t('LoginModal.btnLogin')}
+                <button type="submit" className="login-submit-btn" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                      <span className="pr-spinner" style={{ width: '16px', height: '16px', borderWidth: '2px' }}></span>
+                      {isRegisterMode
+                        ? (lang === 'CZ' ? 'Registruji…' : 'Registering…')
+                        : (lang === 'CZ' ? 'Přihlašuji…' : 'Signing in…')}
+                    </span>
+                  ) : (
+                    isRegisterMode ? t('LoginModal.btnRegister') : t('LoginModal.btnLogin')
+                  )}
                 </button>
               </form>
 
@@ -719,6 +753,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
                   type="button" 
                   className="social-btn social-google"
                   onClick={handleGoogleLogin}
+                  disabled={isGoogleLoading}
                 >
                   <svg className="social-icon" viewBox="0 0 24 24" width="16" height="16">
                     <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.68 1.54 14.98 1 12 1 7.35 1 3.37 3.65 1.4 7.56l3.85 2.99c.96-2.87 3.66-4.51 6.75-4.51z"/>
@@ -726,7 +761,9 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, showT
                     <path fill="#FBBC05" d="M5.25 10.55c-.25-.75-.39-1.55-.39-2.38s.14-1.63.39-2.38L1.4 2.8C.51 4.59 0 6.6 0 8.73s.51 4.14 1.4 5.93l3.85-2.99.001-.12z"/>
                     <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.69-2.87c-1.02.68-2.33 1.09-3.96 1.09-3.09 0-5.71-2.07-6.64-4.88l-3.87 3c1.97 3.91 5.95 6.57 10.2 6.57z"/>
                   </svg>
-                  {t('LoginModal.signInGoogle')}
+                  {isGoogleLoading
+                    ? (lang === 'CZ' ? 'Přesměrovávám…' : 'Redirecting…')
+                    : t('LoginModal.signInGoogle')}
                 </button>
               </div>
             </div>

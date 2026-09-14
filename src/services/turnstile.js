@@ -15,6 +15,12 @@ const SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render
 
 let scriptPromise = null;
 
+/**
+ * Nejdelší doba, po kterou se vůbec čeká na ověření — včetně času, kdy
+ * uživatel klikal na „nejsem robot“. Po jejím vypršení pokračujeme bez tokenu.
+ */
+const HARD_LIMIT_MS = 30000;
+
 /** Načte skript Turnstile (jen jednou za celou návštěvu). */
 function loadScript() {
   if (typeof window === 'undefined') return Promise.reject(new Error('no-window'));
@@ -55,25 +61,63 @@ export async function getTurnstileToken(timeoutMs = 8000) {
     const turnstile = await loadScript();
     if (!turnstile) return null;
 
-    // Neviditelný kontejner mimo obrazovku — widget nemá nic vykreslovat,
-    // dokud Cloudflare nevyhodnotí, že návštěvník je podezřelý.
+    // POZOR: kontejner NESMÍ být schovaný mimo obrazovku.
+    // V režimu „interaction-only“ je widget neviditelný jen do chvíle, než
+    // Cloudflare vyhodnotí návštěvníka jako podezřelého (např. dvakrát špatné
+    // heslo) — pak chce zaškrtnutí „nejsem robot“. Když je prvek mimo
+    // obrazovku, nemá se kde zobrazit, uživatel nemá co potvrdit a přihlášení
+    // skončí chybou „no captcha_token found“.
+    //
+    // Proto sedí dole uprostřed obrazovky: dokud není potřeba, má nulovou
+    // velikost a není vidět; jakmile je potřeba, vyskočí nad obsah.
     const holder = document.createElement('div');
-    holder.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:300px;height:65px;';
+    holder.style.cssText = [
+      'position:fixed',
+      'left:50%',
+      'bottom:24px',
+      'transform:translateX(-50%)',
+      'z-index:2147483000',
+      'display:flex',
+      'justify-content:center'
+    ].join(';');
     document.body.appendChild(holder);
 
+    let widgetRef = { id: null };
+    const cleanup = () => {
+      try { if (widgetRef.id !== null) turnstile.remove(widgetRef.id); } catch { /* widget už je pryč */ }
+      try { holder.remove(); } catch { /* kontejner už je pryč */ }
+    };
+
     const token = await new Promise((resolve) => {
+      let timer = null;
+      let hardTimer = null;
       const done = (value) => {
-        clearTimeout(timer);
+        if (timer) clearTimeout(timer);
+        if (hardTimer) clearTimeout(hardTimer);
+        // Uklidit až po dokončení — dřív ne. Kdyby se widget odstranil podle
+        // pevného časovače, zmizel by uživateli zaškrtávátko pod rukama.
+        setTimeout(cleanup, 150);
         resolve(value);
       };
-      const timer = setTimeout(() => done(null), timeoutMs);
+      const arm = (ms) => {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => done(null), ms);
+      };
+      arm(timeoutMs);
 
-      let widgetId = null;
+      // Tvrdý strop. Kdyby se widget zasekl (nedostupná doména, výpadek),
+      // nesmí tlačítko zůstat zamčené donekonečna — raději pustíme dál bez
+      // tokenu, než abychom zákazníkovi zablokovali přihlášení či objednávku.
+      hardTimer = setTimeout(() => done(null), HARD_LIMIT_MS);
+
       try {
-        widgetId = turnstile.render(holder, {
+        widgetRef.id = turnstile.render(holder, {
           sitekey: TURNSTILE_SITE_KEY,
           appearance: 'interaction-only',
           callback: (t) => done(t),
+          // Cloudflare se chystá zobrazit zaškrtávátko — od téhle chvíle čekáme
+          // na člověka, ne na stroj, takže původních pár vteřin nestačí.
+          'before-interactive-callback': () => arm(HARD_LIMIT_MS),
           'error-callback': () => done(null),
           'timeout-callback': () => done(null)
         });
@@ -82,12 +126,6 @@ export async function getTurnstileToken(timeoutMs = 8000) {
         done(null);
       }
 
-      // Po dokončení widget uklidíme, ať se nehromadí při opakovaných pokusech.
-      const cleanup = () => {
-        try { if (widgetId !== null) turnstile.remove(widgetId); } catch { /* widget už je pryč */ }
-        try { holder.remove(); } catch { /* kontejner už je pryč */ }
-      };
-      setTimeout(cleanup, timeoutMs + 500);
     });
 
     return token || null;
