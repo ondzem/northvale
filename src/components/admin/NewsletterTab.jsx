@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../../context/LanguageContext';
 import { supabase } from '../../supabase';
 import { fetchSubscribers, deleteSubscriber } from '../../services/newsletter';
+import { runNewsletterChecks } from '../../services/newsletterChecks';
+import NewsletterCheckPanel from './NewsletterCheckPanel';
 
 export default function NewsletterTab({ showToast }) {
   const { lang } = useTranslation();
@@ -38,6 +40,10 @@ export default function NewsletterTab({ showToast }) {
 
   // Modals state
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  // Kontrola před odesláním: { loading, issues, links, aiAvailable, aiFailed }
+  const [checkState, setCheckState] = useState(null);
+  const [checkAck, setCheckAck] = useState(false);
+  const checkRunRef = useRef(0);
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, targetEmail: null });
   const [deletingCampId, setDeletingCampId] = useState(null);
   const [deleteCampConfirm, setDeleteCampConfirm] = useState({ isOpen: false, targetId: null, campaignName: '' });
@@ -148,10 +154,51 @@ export default function NewsletterTab({ showToast }) {
       );
       return;
     }
+    setCheckAck(false);
     setIsConfirmOpen(true);
+    runPreSendChecks();
   };
 
+  // Kontrola odkazů (hned, v prohlížeči) + AI korektura textů (server).
+  const runPreSendChecks = async () => {
+    const runId = ++checkRunRef.current;
+    const local = runNewsletterChecks({ subject, subjectEN, blocks });
+    setCheckState({ loading: true, ...local, aiAvailable: true, aiFailed: false });
+
+    // Obrázky se na AI neposílají (base64 by byl obří) — jen jejich odkazy.
+    const lightBlocks = blocks.map(b => (b.type === 'image'
+      ? { type: 'image', linkUrl: b.linkUrl, linkUrlEN: b.linkUrlEN }
+      : b));
+
+    let ai = { aiAvailable: true, aiFailed: true, issues: [] };
+    try {
+      const { data, error } = await supabase.functions.invoke('check-newsletter', {
+        body: { subject, subjectEN, blocks: lightBlocks }
+      });
+      if (!error && data) ai = data;
+    } catch (err) {
+      console.error('AI kontrola newsletteru selhala:', err);
+    }
+    if (runId !== checkRunRef.current) return; // mezitím spuštěna novější kontrola
+
+    setCheckState({
+      loading: false,
+      links: local.links,
+      issues: [...local.issues, ...(ai.issues || []).map(i => ({ ...i, source: 'ai' }))],
+      aiAvailable: ai.aiAvailable !== false,
+      aiFailed: !!ai.aiFailed
+    });
+  };
+
+  const checkIssues = checkState?.issues || [];
+  const blockingErrors = checkIssues.filter(i => i.source === 'local' && i.severity === 'error');
+  const needsAck = !!checkState && !checkState.loading && (
+    checkIssues.some(i => i.severity !== 'info') || !checkState.aiAvailable || checkState.aiFailed
+  );
+  const canSendAfterCheck = !!checkState && !checkState.loading && blockingErrors.length === 0 && (!needsAck || checkAck);
+
   const handleConfirmSend = async () => {
+    if (!canSendAfterCheck) return;
     setIsConfirmOpen(false);
     setIsSending(true);
 
@@ -1021,6 +1068,8 @@ export default function NewsletterTab({ showToast }) {
                 className="ctf-input"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
+                spellCheck
+                lang="cs"
                 placeholder="např. Získejte slevu 15%!"
                 style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: '12.5px' }}
                 required
@@ -1035,6 +1084,8 @@ export default function NewsletterTab({ showToast }) {
                 className="ctf-input"
                 value={subjectEN}
                 onChange={(e) => setSubjectEN(e.target.value)}
+                spellCheck
+                lang="en"
                 placeholder="e.g., Get 15% off!"
                 style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: '12.5px' }}
                 required
@@ -1102,6 +1153,8 @@ export default function NewsletterTab({ showToast }) {
                         rows={3}
                         value={block.content}
                         onChange={(e) => updateBlockContent(index, e.target.value, 'content')}
+                        spellCheck
+                        lang="cs"
                         placeholder={lang === 'CZ' ? 'Zde napište český text... (lze použít HTML tagy jako <h2>, <p>)' : 'Write Czech text here... (HTML tags allowed)'}
                         style={{ width: '100%', boxSizing: 'border-box', height: '80px', resize: 'vertical', fontSize: '12px' }}
                         required
@@ -1114,6 +1167,8 @@ export default function NewsletterTab({ showToast }) {
                         rows={3}
                         value={block.contentEN || ''}
                         onChange={(e) => updateBlockContentEN(index, e.target.value)}
+                        spellCheck
+                        lang="en"
                         placeholder={lang === 'CZ' ? 'Zde napište anglický překlad...' : 'Write English translation here...'}
                         style={{ width: '100%', boxSizing: 'border-box', height: '80px', resize: 'vertical', fontSize: '12px' }}
                         required
@@ -1354,6 +1409,8 @@ export default function NewsletterTab({ showToast }) {
                         placeholder="Text tlačítka (CZ)"
                         value={block.text || ''}
                         onChange={(e) => updateBlockButtonText(index, e.target.value)}
+                        spellCheck
+                        lang="cs"
                         style={{ width: '100%', boxSizing: 'border-box', fontSize: '11px', padding: '5px 8px' }}
                         required
                       />
@@ -1375,6 +1432,8 @@ export default function NewsletterTab({ showToast }) {
                         placeholder="Button text (EN)"
                         value={block.textEN || ''}
                         onChange={(e) => updateBlockButtonTextEN(index, e.target.value)}
+                        spellCheck
+                        lang="en"
                         style={{ width: '100%', boxSizing: 'border-box', fontSize: '11px', padding: '5px 8px' }}
                         required
                       />
@@ -1779,7 +1838,9 @@ export default function NewsletterTab({ showToast }) {
             border: '1px solid rgba(255,255,255,0.08)',
             borderRadius: '12px',
             padding: '24px',
-            maxWidth: '420px',
+            maxWidth: '600px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
             width: '90%',
             boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
             textAlign: 'center'
@@ -1788,11 +1849,18 @@ export default function NewsletterTab({ showToast }) {
             <h4 style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff', margin: '0 0 10px 0' }}>
               {lang === 'CZ' ? 'Opravdu odeslat newsletter?' : 'Confirm Email Blast?'}
             </h4>
-            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', margin: '0 0 20px 0', lineHeight: '1.5' }}>
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', margin: '0 0 16px 0', lineHeight: '1.5' }}>
               {lang === 'CZ'
                 ? `Tento krok vytvoří kampaň a okamžitě ji odešle na všechny aktivní a ověřené e-maily. Tuto akci nelze vzít zpět ani zastavit.`
                 : `This will trigger a campaign in Brevo and immediately dispatch it to all active and verified email addresses. This action cannot be undone or stopped.`}
             </p>
+            <NewsletterCheckPanel
+              state={checkState}
+              blockingCount={blockingErrors.length}
+              needsAck={needsAck}
+              ack={checkAck}
+              onAck={setCheckAck}
+            />
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
               <button
                 type="button"
@@ -1807,8 +1875,13 @@ export default function NewsletterTab({ showToast }) {
                 className="btn btn-primary"
                 style={{ padding: '8px 16px', flex: 1.5, background: 'var(--color-gold)', color: '#000', fontSize: '12px' }}
                 onClick={handleConfirmSend}
+                disabled={!canSendAfterCheck}
               >
-                {lang === 'CZ' ? 'Odeslat hromadně' : 'Send Campaign'}
+                {checkState?.loading
+                  ? (lang === 'CZ' ? 'Kontroluji…' : 'Checking…')
+                  : blockingErrors.length > 0
+                    ? (lang === 'CZ' ? 'Nejdřív oprav chyby' : 'Fix errors first')
+                    : (lang === 'CZ' ? 'Odeslat hromadně' : 'Send Campaign')}
               </button>
             </div>
           </div>
