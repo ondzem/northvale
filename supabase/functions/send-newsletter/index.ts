@@ -5,6 +5,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getAuthContext, requireAdmin } from "../_shared/auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { decode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
+import { fixEmailLinks } from "../_shared/email-links.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -309,7 +310,7 @@ serve(async (req) => {
             },
             name: newCampaignName,
             subject: originalData.subject,
-            htmlContent: originalData.htmlContent,
+            htmlContent: fixEmailLinks(originalData.htmlContent),
             recipients: {
               listIds: originalData.recipients?.listIds || [brevoListIdCZ]
             }
@@ -468,8 +469,9 @@ serve(async (req) => {
       }
 
       // Step D: Wrap compiled blocks in layouts
-      const compiledHtmlCZ = compileHtml(subject, blocksHtmlCZ, false);
-      const compiledHtmlEN = compileHtml(subjectEN || subject, blocksHtmlEN, true);
+      // Každý odkaz dotáhnout na plnou adresu — jinak Brevo po kliknutí hodí 404.
+      const compiledHtmlCZ = fixEmailLinks(compileHtml(subject, blocksHtmlCZ, false));
+      const compiledHtmlEN = fixEmailLinks(compileHtml(subjectEN || subject, blocksHtmlEN, true));
 
       const sentCampaignIds = [];
 
