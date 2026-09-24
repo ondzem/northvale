@@ -1,9 +1,8 @@
 /**
  * Výsledek kontroly newsletteru v potvrzovacím okně před odesláním.
  *
- * - Chyby v odkazech (kontrola v prohlížeči) odeslání ZABLOKUJÍ.
- * - Nálezy AI korektury a upozornění vyžadují zaškrtnutí „prošel jsem to“,
- *   protože AI se může splést a admin musí mít poslední slovo.
+ * - Chyby (rozbitý odkaz, prázdné tlačítko) odeslání ZABLOKUJÍ.
+ * - Upozornění (chybí EN verze, zdvojené slovo) vyžadují zaškrtnutí „prošel jsem to“.
  */
 
 const COLORS = {
@@ -28,9 +27,6 @@ function Issue({ issue }) {
     <div style={{ ...box, background: c.bg, border: `1px solid ${c.border}` }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
         <strong style={{ color: c.text }}>{c.label} · {issue.where}</strong>
-        <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px', whiteSpace: 'nowrap' }}>
-          {issue.source === 'ai' ? 'AI korektura' : 'kontrola odkazů'}
-        </span>
       </div>
       <div style={{ color: 'rgba(255,255,255,0.85)' }}>{issue.reason}</div>
       {issue.found && (
@@ -50,15 +46,6 @@ function Issue({ issue }) {
 export default function NewsletterCheckPanel({ state, blockingCount, needsAck, ack, onAck }) {
   if (!state) return null;
 
-  if (state.loading) {
-    return (
-      <div style={{ ...box, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <span className="pr-spinner" aria-hidden="true" />
-        Kontroluji pravopis, texty a odkazy… (pár vteřin)
-      </div>
-    );
-  }
-
   const order = { error: 0, warning: 1, info: 2 };
   const issues = [...(state.issues || [])].sort((a, b) => (order[a.severity] ?? 3) - (order[b.severity] ?? 3));
   const clean = issues.filter(i => i.severity !== 'info').length === 0;
@@ -71,20 +58,9 @@ export default function NewsletterCheckPanel({ state, blockingCount, needsAck, a
         </div>
       )}
 
-      {!state.aiAvailable && (
-        <div style={{ ...box, background: COLORS.warning.bg, border: `1px solid ${COLORS.warning.border}`, color: COLORS.warning.text }}>
-          AI korektura pravopisu není zapnutá. Texty si prosím přečti ručně.
-        </div>
-      )}
-      {state.aiAvailable && state.aiFailed && (
-        <div style={{ ...box, background: COLORS.warning.bg, border: `1px solid ${COLORS.warning.border}`, color: COLORS.warning.text }}>
-          AI korektura teď neproběhla (výpadek). Texty si prosím přečti ručně, nebo to zkus za chvíli znovu.
-        </div>
-      )}
-
-      {clean && state.aiAvailable && !state.aiFailed && (
+      {clean && (
         <div style={{ ...box, background: 'rgba(16,185,129,0.10)', border: '1px solid rgba(16,185,129,0.45)', color: '#6ee7b7' }}>
-          ✓ Pravopis, texty i odkazy vypadají v pořádku.
+          ✓ Odkazy i vyplnění vypadají v pořádku. Texty si i tak ještě jednou přečti.
         </div>
       )}
 

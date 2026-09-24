@@ -40,10 +40,9 @@ export default function NewsletterTab({ showToast }) {
 
   // Modals state
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  // Kontrola před odesláním: { loading, issues, links, aiAvailable, aiFailed }
+  // Kontrola před odesláním: { issues, links }
   const [checkState, setCheckState] = useState(null);
   const [checkAck, setCheckAck] = useState(false);
-  const checkRunRef = useRef(0);
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, targetEmail: null });
   const [deletingCampId, setDeletingCampId] = useState(null);
   const [deleteCampConfirm, setDeleteCampConfirm] = useState({ isOpen: false, targetId: null, campaignName: '' });
@@ -159,43 +158,15 @@ export default function NewsletterTab({ showToast }) {
     runPreSendChecks();
   };
 
-  // Kontrola odkazů (hned, v prohlížeči) + AI korektura textů (server).
-  const runPreSendChecks = async () => {
-    const runId = ++checkRunRef.current;
-    const local = runNewsletterChecks({ subject, subjectEN, blocks });
-    setCheckState({ loading: true, ...local, aiAvailable: true, aiFailed: false });
-
-    // Obrázky se na AI neposílají (base64 by byl obří) — jen jejich odkazy.
-    const lightBlocks = blocks.map(b => (b.type === 'image'
-      ? { type: 'image', linkUrl: b.linkUrl, linkUrlEN: b.linkUrlEN }
-      : b));
-
-    let ai = { aiAvailable: true, aiFailed: true, issues: [] };
-    try {
-      const { data, error } = await supabase.functions.invoke('check-newsletter', {
-        body: { subject, subjectEN, blocks: lightBlocks }
-      });
-      if (!error && data) ai = data;
-    } catch (err) {
-      console.error('AI kontrola newsletteru selhala:', err);
-    }
-    if (runId !== checkRunRef.current) return; // mezitím spuštěna novější kontrola
-
-    setCheckState({
-      loading: false,
-      links: local.links,
-      issues: [...local.issues, ...(ai.issues || []).map(i => ({ ...i, source: 'ai' }))],
-      aiAvailable: ai.aiAvailable !== false,
-      aiFailed: !!ai.aiFailed
-    });
+  // Kontrola odkazů a vyplnění — běží hned v prohlížeči.
+  const runPreSendChecks = () => {
+    setCheckState(runNewsletterChecks({ subject, subjectEN, blocks }));
   };
 
   const checkIssues = checkState?.issues || [];
-  const blockingErrors = checkIssues.filter(i => i.source === 'local' && i.severity === 'error');
-  const needsAck = !!checkState && !checkState.loading && (
-    checkIssues.some(i => i.severity !== 'info') || !checkState.aiAvailable || checkState.aiFailed
-  );
-  const canSendAfterCheck = !!checkState && !checkState.loading && blockingErrors.length === 0 && (!needsAck || checkAck);
+  const blockingErrors = checkIssues.filter(i => i.severity === 'error');
+  const needsAck = checkIssues.some(i => i.severity === 'warning');
+  const canSendAfterCheck = !!checkState && blockingErrors.length === 0 && (!needsAck || checkAck);
 
   const handleConfirmSend = async () => {
     if (!canSendAfterCheck) return;
@@ -1877,9 +1848,7 @@ export default function NewsletterTab({ showToast }) {
                 onClick={handleConfirmSend}
                 disabled={!canSendAfterCheck}
               >
-                {checkState?.loading
-                  ? (lang === 'CZ' ? 'Kontroluji…' : 'Checking…')
-                  : blockingErrors.length > 0
+                {blockingErrors.length > 0
                     ? (lang === 'CZ' ? 'Nejdřív oprav chyby' : 'Fix errors first')
                     : (lang === 'CZ' ? 'Odeslat hromadně' : 'Send Campaign')}
               </button>
