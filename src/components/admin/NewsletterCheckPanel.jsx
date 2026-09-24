@@ -1,8 +1,8 @@
 /**
  * Výsledek kontroly newsletteru v potvrzovacím okně před odesláním.
  *
- * - Chyby (rozbitý odkaz, prázdné tlačítko) odeslání ZABLOKUJÍ.
- * - Upozornění (chybí EN verze, zdvojené slovo) vyžadují zaškrtnutí „prošel jsem to“.
+ * Chyby i upozornění odeslání zastaví, dokud admin buď neopraví, nebo
+ * nezaškrtne, že je to správně — kontrola se může splést a nesmí ho zaseknout.
  */
 
 const COLORS = {
@@ -54,7 +54,7 @@ export default function NewsletterCheckPanel({ state, blockingCount, needsAck, a
     <div style={{ marginBottom: '16px' }}>
       {blockingCount > 0 && (
         <div style={{ ...box, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.6)', color: '#fecaca', fontWeight: 600 }}>
-          Našel jsem {blockingCount} {blockingCount === 1 ? 'rozbitý odkaz' : 'chyby v odkazech'}. Newsletter nejde odeslat, dokud je neopravíš.
+          Našel jsem {blockingCount} {blockingCount === 1 ? 'rozbitý odkaz' : 'chyby v odkazech'}. Oprav je, nebo pokud jsou správně, potvrď to dole.
         </div>
       )}
 
@@ -85,10 +85,14 @@ export default function NewsletterCheckPanel({ state, blockingCount, needsAck, a
         </details>
       )}
 
-      {needsAck && blockingCount === 0 && (
+      {needsAck && (
         <label style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', textAlign: 'left', fontSize: '13px', color: '#fff', marginTop: '10px', cursor: 'pointer' }}>
           <input type="checkbox" checked={ack} onChange={(e) => onAck(e.target.checked)} style={{ marginTop: '3px' }} />
-          <span>Všechna upozornění jsem prošel a texty i odkazy jsem zkontroloval.</span>
+          <span>
+            {blockingCount > 0
+              ? 'Zkontroloval jsem to — označené odkazy jsou správně, chci odeslat.'
+              : 'Všechna upozornění jsem prošel a texty i odkazy jsem zkontroloval.'}
+          </span>
         </label>
       )}
     </div>

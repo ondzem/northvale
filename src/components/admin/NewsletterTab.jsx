@@ -165,8 +165,9 @@ export default function NewsletterTab({ showToast }) {
 
   const checkIssues = checkState?.issues || [];
   const blockingErrors = checkIssues.filter(i => i.severity === 'error');
-  const needsAck = checkIssues.some(i => i.severity === 'warning');
-  const canSendAfterCheck = !!checkState && blockingErrors.length === 0 && (!needsAck || checkAck);
+  // Kontrola se může splést — admin ji vždy může přebít potvrzením, že je to správně.
+  const needsAck = checkIssues.some(i => i.severity === 'error' || i.severity === 'warning');
+  const canSendAfterCheck = !!checkState && (!needsAck || checkAck);
 
   const handleConfirmSend = async () => {
     if (!canSendAfterCheck) return;
@@ -1848,8 +1849,8 @@ export default function NewsletterTab({ showToast }) {
                 onClick={handleConfirmSend}
                 disabled={!canSendAfterCheck}
               >
-                {blockingErrors.length > 0
-                    ? (lang === 'CZ' ? 'Nejdřív oprav chyby' : 'Fix errors first')
+                {needsAck && !checkAck
+                    ? (lang === 'CZ' ? 'Oprav, nebo potvrď níže' : 'Fix or confirm below')
                     : (lang === 'CZ' ? 'Odeslat hromadně' : 'Send Campaign')}
               </button>
             </div>
