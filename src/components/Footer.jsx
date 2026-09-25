@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FEATURE_FLAGS } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import { subscribeToNewsletter } from '../services/newsletter';
+import { trackLead } from '../services/leadTracking';
 
 export default function Footer({ setActivePage, activePage }) {
   const { lang, t } = useTranslation();
@@ -20,6 +21,7 @@ export default function Footer({ setActivePage, activePage }) {
     setNewsletterError(null);
     try {
       await subscribeToNewsletter(newsletterEmail, lang);
+      trackLead('formular_odeslan', { formular: 'newsletter_paticka', tema: 'newsletter' });
       setNewsletterSuccess(true);
       setNewsletterEmail('');
     } catch (err) {
@@ -327,12 +329,12 @@ export default function Footer({ setActivePage, activePage }) {
           
           <div className="footer-contact-row">
             <span className="contact-key">E-mail</span>
-            <span className="contact-value">info@northvaletcg.eu</span>
+            <a className="contact-value" href="mailto:info@northvaletcg.eu" style={{ color: 'inherit', textDecoration: 'none' }}>info@northvaletcg.eu</a>
           </div>
 
           <div className="footer-contact-row">
             <span className="contact-key">{lang === 'CZ' ? 'Telefon' : 'Phone'}</span>
-            <span className="contact-value">+420 739 666 779</span>
+            <a className="contact-value" href="tel:+420739666779" style={{ color: 'inherit', textDecoration: 'none' }}>+420 739 666 779</a>
           </div>
         </div>
       </div>

@@ -1047,6 +1047,9 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   <br />• <strong>Marketing:</strong> For 3 years from your last purchase, or until you object/withdraw consent.
                   <br />• <strong>Cookies:</strong> Based on your browser settings (ranging from session to 2 years).
                 </p>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                  With your consent to analytics cookies, we count submitted forms and clicks on our phone number and e-mail address — as numbers only, without your contact details or message content. When you submit the contact form, we attach information about where you came from (e.g. Google, Instagram); the website keeps it only for the duration of your visit, until you close the browser.
+                </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>6. YOUR RIGHTS AS A DATA SUBJECT</h3>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
@@ -1269,6 +1272,10 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
                   8.2. Analytické cookies (Google Analytics, Microsoft Clarity) používáme pouze s vaším souhlasem uděleným prostřednictvím cookie lišty. Souhlas můžete kdykoli odvolat nebo své preference změnit v nastavení cookies na webu. Neudělení souhlasu nemá vliv na možnost používat e-shop.
+                </p>
+
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                  8.3. S vaším souhlasem s analytickými cookies počítáme odeslané formuláře a kliknutí na náš telefon a e-mail — pouze jako počty, bez vašich kontaktních údajů a bez obsahu zprávy. K odeslanému kontaktnímu formuláři připojujeme údaj o tom, odkud jste na web přišli (např. Google, Instagram); web si ho pamatuje jen po dobu návštěvy, do zavření prohlížeče.
                 </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>

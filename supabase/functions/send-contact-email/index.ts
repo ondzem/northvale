@@ -94,6 +94,8 @@ serve(async (req) => {
     const email = safeField(raw.email, 254);
     const phone = safeField(raw.phone, 40);
     const message = safeField(raw.message, 5000);
+    // Odkud návštěvník přišel (Instagram, Google…) — zjišťuje web, v e-mailu jen když je známé.
+    const zdroj = safeField(raw.zdroj, 120);
 
     const innerHtml = `
       <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%;">
@@ -124,10 +126,14 @@ serve(async (req) => {
               <td style="padding: 10px 0; font-weight: bold; color: #666666;">E-mail:</td>
               <td style="padding: 10px 0;"><a href="mailto:${email}" style="color: #fdbd16; font-weight: bold;">${email}</a></td>
             </tr>
-            <tr>
+            <tr${zdroj ? ' style="border-bottom: 1px solid #e1e4e8;"' : ''}>
               <td style="padding: 10px 0; font-weight: bold; color: #666666;">Telefon:</td>
               <td style="padding: 10px 0; color: #111111;">${phone || '—'}</td>
-            </tr>
+            </tr>${zdroj ? `
+            <tr>
+              <td style="padding: 10px 0; font-weight: bold; color: #666666;">Přišel z:</td>
+              <td style="padding: 10px 0; color: #111111;">${zdroj}</td>
+            </tr>` : ''}
           </table>
 
           <div style="background-color: #fdfdfd; border: 1px solid #e1e4e8; border-left: 4px solid #fdbd16; padding: 20px; border-radius: 8px; margin-bottom: 24px;">

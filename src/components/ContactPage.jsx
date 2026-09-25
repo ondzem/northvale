@@ -4,6 +4,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
 import { fetchFaqData } from '../services/faq';
 import { getTurnstileToken } from '../services/turnstile';
+import { trackLead, getVisitSource } from '../services/leadTracking';
 
 export default function ContactPage({ setActivePage }) {
   const { lang, t } = useTranslation();
@@ -81,6 +82,9 @@ export default function ContactPage({ setActivePage }) {
 
       if (dbError) throw dbError;
 
+      // Zpráva je uložená = poptávka vznikla (e-mail níže je jen notifikace).
+      trackLead('formular_odeslan', { formular: 'kontakt', tema: 'obecny_dotaz' });
+
       // 2. Trigger Edge Function to send email notification via Brevo
       try {
         const turnstileToken = await getTurnstileToken();
@@ -90,7 +94,8 @@ export default function ContactPage({ setActivePage }) {
             name: formName,
             email: formEmail,
             phone: formPhone || null,
-            message: formMessage
+            message: formMessage,
+            zdroj: getVisitSource()
           }
         });
         if (fnError) console.warn('Edge Function email dispatch failed:', fnError);

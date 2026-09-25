@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { subscribeToNewsletter } from '../services/newsletter';
+import { trackLead } from '../services/leadTracking';
 import { useTranslation } from '../context/LanguageContext';
 
 const translations = {
@@ -106,6 +107,7 @@ export default function PreRegistrationLanding({ onOpenLogin }) {
     try {
       // Pass isPreRegistration = true to register directly and trigger the discount code email
       await subscribeToNewsletter(trimmedEmail, lang, true);
+      trackLead('formular_odeslan', { formular: 'newsletter_predregistrace', tema: 'newsletter' });
       setRegisteredEmail(trimmedEmail);
       setSuccess(true);
       setEmail('');

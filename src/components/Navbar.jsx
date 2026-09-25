@@ -1236,8 +1236,8 @@ export default function Navbar({ setActivePage, cart, user, setFilters, setSearc
                     <p style={{ ...styles.drawerText, textAlign: 'left', lineHeight: '1.6' }}>
                       <strong>{lang === 'CZ' ? 'IČO' : 'Company ID'}:</strong> 29618142<br />
                       <strong>{lang === 'CZ' ? 'DIČ' : 'VAT ID'}:</strong> CZ29618142<br />
-                      <strong>E-mail:</strong> info@northvaletcg.eu<br />
-                      <strong>{lang === 'CZ' ? 'Telefon' : 'Phone'}:</strong> +420 739 666 779
+                      <strong>E-mail:</strong> <a href="mailto:info@northvaletcg.eu" style={{ color: 'inherit', textDecoration: 'none' }}>info@northvaletcg.eu</a><br />
+                      <strong>{lang === 'CZ' ? 'Telefon' : 'Phone'}:</strong> <a href="tel:+420739666779" style={{ color: 'inherit', textDecoration: 'none' }}>+420 739 666 779</a>
                     </p>
                   </div>
                 </>
