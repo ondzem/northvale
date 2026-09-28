@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
-import { FEATURE_FLAGS } from '../config';
+import { FEATURE_FLAGS, paymentAdjustmentLabel } from '../config';
 import { supabase } from '../supabase';
 import InvoiceTemplate from './admin/InvoiceTemplate';
 import { subscribeToNewsletter, deleteSubscriber } from '../services/newsletter';
@@ -1452,10 +1452,10 @@ export default function UserPortal({ user, setUser, setActivePage, onLogout, sho
                                 <span>{lang === 'CZ' ? 'Poštovné:' : 'Shipping:'}</span>
                                 <span style={{ color: '#eee' }}>{parseFloat(order.shippingCost || 0).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč</span>
                               </div>
-                              {parseFloat(order.paymentSurcharge || 0) > 0 && (
+                              {parseFloat(order.paymentSurcharge || 0) !== 0 && (
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                                  <span>{lang === 'CZ' ? 'Poplatek za platbu / dobírku:' : 'Payment fee:'}</span>
-                                  <span style={{ color: '#eee' }}>{parseFloat(order.paymentSurcharge || 0).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč</span>
+                                  <span>{paymentAdjustmentLabel(parseFloat(order.paymentSurcharge), lang)}:</span>
+                                  <span style={{ color: parseFloat(order.paymentSurcharge) < 0 ? '#10b981' : '#eee' }}>{parseFloat(order.paymentSurcharge) < 0 ? '−' : ''}{Math.abs(parseFloat(order.paymentSurcharge)).toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} Kč</span>
                                 </div>
                               )}
                               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', fontWeight: 'bold', fontSize: '14px' }}>

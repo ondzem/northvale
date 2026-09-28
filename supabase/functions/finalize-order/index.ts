@@ -80,18 +80,39 @@ async function getNextInvoiceNumber(supabase: any): Promise<string> {
 }
 
 /**
- * Ceník dopravy a dobírkového příplatku — MUSÍ odpovídat výpočtu v src/components/CheckoutFlow.jsx a src/config.js (COD_SURCHARGE).
- * Při změně částky příplatku je potřeba upravit obě místa — tady i v src/config.js.
- * Klient posílá jen název dopravy, cenu si dopočítá server.
+ * Ceník dopravy a plateb — MUSÍ odpovídat src/config.js (FREE_SHIPPING_THRESHOLD,
+ * COD_SURCHARGE, TRANSFER_DISCOUNT) a výpočtu v src/components/CheckoutFlow.jsx.
+ * Při změně je potřeba upravit obě místa — tady i v src/config.js.
+ * Klient posílá jen název dopravy a platby, cenu si dopočítá server.
  */
+const FREE_SHIPPING_THRESHOLD = 3500;
+const COD_SURCHARGE = 39;
+const TRANSFER_DISCOUNT = 20;
+
+function isPersonalPickupMethod(shippingMethod: string): boolean {
+  const m = String(shippingMethod || '').toLowerCase();
+  return m.includes('osobní') || m.includes('personal') || m.includes('škrba') || m.includes('skrba');
+}
+
+/**
+ * Úprava ceny za způsob platby se znaménkem: dobírka +39 Kč (ne u osobního
+ * odběru), QR kód / bankovní převod −20 Kč, platební brána 0 Kč.
+ */
+function serverPaymentAdjustment(paymentMethod: string, shippingMethod: string): number {
+  const pm = String(paymentMethod || '').toLowerCase();
+  const isCod = pm.includes('dobírk') || pm.includes('dobirk') || pm.includes('cash on delivery') || pm.includes('cod');
+  if (isCod) return isPersonalPickupMethod(shippingMethod) ? 0 : COD_SURCHARGE;
+  const isTransfer = pm.includes('převod') || pm.includes('prevod') || pm.includes('transfer') || pm.includes('qr');
+  if (isTransfer) return -TRANSFER_DISCOUNT;
+  return 0;
+}
 function serverShippingCost(shippingMethod: string, subtotalAfterDiscount: number, cartSubtotal: number): number {
   const m = String(shippingMethod || '').toLowerCase();
 
-  const isPersonal = m.includes('osobní') || m.includes('personal') || m.includes('škrba') || m.includes('skrba');
-  if (isPersonal) return 0;
+  if (isPersonalPickupMethod(m)) return 0;
 
-  // Doprava zdarma od 1750 Kč
-  if (cartSubtotal >= 1750 || subtotalAfterDiscount >= 1750) return 0;
+  // Doprava zdarma od 3 500 Kč včetně
+  if (cartSubtotal >= FREE_SHIPPING_THRESHOLD || subtotalAfterDiscount >= FREE_SHIPPING_THRESHOLD) return 0;
 
   const isPickup = m.includes('výdejní') || m.includes('pickup');
   if (m.includes('dpd')) return isPickup ? 79 : 109;
@@ -211,14 +232,8 @@ async function verifyOrderPricing(supabase: any, orderData: any): Promise<any> {
     const afterDiscount = Math.max(0, serverSubtotal - serverDiscount);
     const serverShipping = serverShippingCost(orderData.shipping_method, afterDiscount, serverSubtotal);
 
-    // Příplatek za dobírku si počítá server sám — klientovi se nevěří.
-    // MUSÍ odpovídat výpočtu v src/components/CheckoutFlow.jsx a hodnotě
-    // COD_SURCHARGE v src/config.js.
-    const pm = String(orderData.payment_method || '').toLowerCase();
-    const sm = String(orderData.shipping_method || '').toLowerCase();
-    const isCod = pm.includes('dobírk') || pm.includes('dobirk') || pm.includes('cash on delivery') || pm.includes('cod');
-    const isPersonalPickup = sm.includes('osobní') || sm.includes('personal') || sm.includes('škrba') || sm.includes('skrba');
-    const surcharge = (isCod && !isPersonalPickup) ? 29 : 0;
+    // Příplatek / slevu za způsob platby si počítá server sám — klientovi se nevěří.
+    const surcharge = serverPaymentAdjustment(orderData.payment_method, orderData.shipping_method);
 
     // Kredit může být nejvýše zůstatek na účtu zákazníka
     let credit = Math.max(0, Number(orderData.credit_applied) || 0);
@@ -700,6 +715,14 @@ serve(async (req) => {
           }
         }
       } catch (_eExist) {}
+
+      // Příplatek / slevu za platbu uložit podle serverového ceníku, ne podle
+      // klienta — u nových objednávek. Starou uloženou objednávku nepřepisujeme.
+      if (!existingStored) {
+        const adj = serverPaymentAdjustment(normalizedOrderData.payment_method, normalizedOrderData.shipping_method);
+        normalizedOrderData.payment_surcharge = adj;
+        normalizedOrderData.paymentSurcharge = adj;
+      }
 
       // BEZPEČNOST: přepočítat ceny z databáze. Klient posílá ceny i celkovou
       // částku ve svém požadavku — bez této kontroly lze objednat cokoli za 1 Kč.

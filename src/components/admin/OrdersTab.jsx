@@ -43,7 +43,9 @@ const generateTextInvoice = (order) => {
     lines.push(`Dopravné:              ${order.shippingCost} Kč`);
   }
   if (order.paymentSurcharge > 0) {
-    lines.push(`Dobírkový příplatek:   ${order.paymentSurcharge} Kč`);
+    lines.push(`Příplatek za dobírku:  ${order.paymentSurcharge} Kč`);
+  } else if (order.paymentSurcharge < 0) {
+    lines.push(`Sleva za převod / QR: ${order.paymentSurcharge} Kč`);
   }
   if (order.creditApplied > 0) {
     lines.push(`Uplatněný kredit:     -${order.creditApplied} Kč`);
@@ -354,9 +356,10 @@ export default function OrdersTab({ showToast }) {
                   isService: true
                 });
               }
-              if (parsed.paymentSurcharge > 0) {
+              // Se znaménkem: příplatek za dobírku (+) nebo sleva za převod / QR kód (−)
+              if (parsed.paymentSurcharge !== 0 && !isNaN(parsed.paymentSurcharge)) {
                 parsed.items.push({
-                  name: 'Dobírkový příplatek',
+                  name: parsed.paymentSurcharge < 0 ? 'Sleva za platbu převodem / QR kódem' : 'Příplatek za dobírku',
                   code: '',
                   quantity: 1,
                   price: parsed.paymentSurcharge,
@@ -449,8 +452,9 @@ export default function OrdersTab({ showToast }) {
         if (lowerName.includes('doprava') || lowerName.includes('gls') || lowerName.includes('dpd') || lowerName.includes('zásilkovna') || lowerName.includes('packeta') || lowerName.includes('pošta')) {
           shippingCost = unitPrice;
           shippingMethod = itemName;
-        } else if (lowerName.includes('dobírk') || lowerName.includes('surcharge') || lowerName.includes('příplat')) {
-          paymentSurcharge = unitPrice;
+        } else if (lowerName.includes('dobírk') || lowerName.includes('surcharge') || lowerName.includes('příplat')
+          || lowerName.includes('sleva za platbu') || lowerName.includes('sleva za převod')) {
+          paymentSurcharge = unitPrice; // se znaménkem — sleva za převod je záporná
         }
       }
 
@@ -1199,10 +1203,11 @@ export default function OrdersTab({ showToast }) {
         </inv:invoiceItem>`;
       }
 
-      if (paymentSurcharge > 0) {
+      // Se znaménkem: příplatek za dobírku (+) nebo sleva za převod / QR kód (−)
+      if (paymentSurcharge !== 0) {
         itemsXml += `
         <inv:invoiceItem>
-          <inv:text>Dobírkový příplatek</inv:text>
+          <inv:text>${paymentSurcharge < 0 ? 'Sleva za platbu převodem / QR kódem' : 'Příplatek za dobírku'}</inv:text>
           <inv:quantity>1</inv:quantity>
           <inv:rateVAT>high</inv:rateVAT>
           <inv:homeCurrency>
@@ -2388,9 +2393,11 @@ export default function OrdersTab({ showToast }) {
                                 </div>
                               )}
 
-                              {detailOrder.paymentSurcharge > 0 && (
+                              {!!detailOrder.paymentSurcharge && detailOrder.paymentSurcharge !== 0 && (
                                 <div className="orders-modal-total-row">
-                                  <span>{lang === 'CZ' ? 'Dobírkový příplatek' : 'COD fee'}:</span>
+                                  <span>{detailOrder.paymentSurcharge < 0
+                                    ? (lang === 'CZ' ? 'Sleva za převod / QR kód' : 'Transfer / QR discount')
+                                    : (lang === 'CZ' ? 'Příplatek za dobírku' : 'COD fee')}:</span>
                                   <span>{detailOrder.paymentSurcharge.toLocaleString()} Kč</span>
                                 </div>
                               )}

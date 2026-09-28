@@ -12,8 +12,8 @@ Northvale TCG je specializovaný e-shop a komunitní portál zaměřený na sbě
 - **GLS - Doručení na adresu**: 129 Kč
 - **GLS - Výdejní místo (ParcelShop/Alzabox)**: 89 Kč
 - **DPD - Výdejní místo (Pickup Point)**: 79 Kč
-- **Doprava zdarma**: Pro všechny objednávky nad 3 000 Kč.
-- **Platební metody**: Online platba kartou (GP webpay), bankovní převod, dobírka.
+- **Doprava zdarma**: Pro všechny objednávky od 3 500 Kč.
+- **Platební metody**: Online platba kartou (GP webpay) zdarma, QR kód / bankovní převod se slevou 20 Kč, dobírka s příplatkem 39 Kč.
 
 ## Garance Originality
 Klademe absolutní důraz na pravost všech prodávaných karet a produktů. Veškeré zboží odebíráme výhradně od oficiálních licencovaných distributorů. Před odesláním zásilky prochází každý rozbalený produkt i kusová karta přísnou fyzickou kontrolou pravosti naším odborníkem.

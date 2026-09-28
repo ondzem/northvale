@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from '../context/LanguageContext';
-import { FEATURE_FLAGS } from '../config';
+import { FEATURE_FLAGS, paymentAdjustmentLabel } from '../config';
 
 export default function OrderConfirmation({ order, setActivePage }) {
   const { lang } = useTranslation();
@@ -184,10 +184,10 @@ export default function OrderConfirmation({ order, setActivePage }) {
             </div>
           )}
 
-          {order.paymentSurcharge > 0 && (
-            <div className="ocf-srow">
-              <span>{lang === 'CZ' ? 'Dobírkový příplatek:' : 'Cash on Delivery Surcharge:'}</span>
-              <span>{order.paymentSurcharge.toLocaleString('cs-CZ')} Kč</span>
+          {Number(order.paymentSurcharge) !== 0 && !!order.paymentSurcharge && (
+            <div className="ocf-srow" style={order.paymentSurcharge < 0 ? { color: 'var(--nv-green, #10b981)' } : undefined}>
+              <span>{paymentAdjustmentLabel(order.paymentSurcharge, lang)}:</span>
+              <span>{order.paymentSurcharge < 0 ? '−' : ''}{Math.abs(order.paymentSurcharge).toLocaleString('cs-CZ')} Kč</span>
             </div>
           )}
 

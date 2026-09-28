@@ -439,7 +439,7 @@ export const blogArticles = [
       },
       {
         "type": "p",
-        "text": "Northvale TCG je příkladem tohoto přístupu v praxi: sortiment výhradně zaměřený na karetní hry, zboží pouze od ověřených distributorů, odeslání do 48 hodin a doprava zdarma při nákupu nad 1 750 Kč. Víte, co kupujete, a víte, odkud to pochází. Z českých specializovaných e-shopů se na kusové karty a sběratelský segment zaměřují také ShadowBall nebo Gengar.cz."
+        "text": "Northvale TCG je příkladem tohoto přístupu v praxi: sortiment výhradně zaměřený na karetní hry, zboží pouze od ověřených distributorů, odeslání do 48 hodin a doprava zdarma při nákupu od 3 500 Kč. Víte, co kupujete, a víte, odkud to pochází. Z českých specializovaných e-shopů se na kusové karty a sběratelský segment zaměřují také ShadowBall nebo Gengar.cz."
       },
       {
         "type": "p",
@@ -487,7 +487,7 @@ export const blogArticles = [
       },
       {
         "type": "p",
-        "text": "Konkrétní věci, které zkontrolujete rychle: jaké jsou možnosti dopravy a od jaké částky je zdarma, jak rychle se doručuje, jaké platební metody jsou k dispozici. Northvale TCG odesílá do 48 hodin, doprava je zdarma od 1 750 Kč a platbu zvládnete kartou, bankovním převodem nebo na dobírku. E-shop bez těchto informací přímo na webu je problém ještě před nákupem."
+        "text": "Konkrétní věci, které zkontrolujete rychle: jaké jsou možnosti dopravy a od jaké částky je zdarma, jak rychle se doručuje, jaké platební metody jsou k dispozici. Northvale TCG odesílá do 48 hodin, doprava je zdarma od 3 500 Kč a platbu zvládnete kartou, bankovním převodem nebo na dobírku. E-shop bez těchto informací přímo na webu je problém ještě před nákupem."
       },
       {
         "type": "p",
@@ -555,7 +555,7 @@ export const blogArticles = [
       },
       {
         "type": "p",
-        "text": "Chcete-li koupit Pokémon karty v Česku s jistotou, že dostanete originál a víte, co za své peníze dostáváte, Northvale TCG je solidní výchozí bod: originální zboží od ověřených distributorů, doprava zdarma od 1 750 Kč a odeslání do 48 hodin. Platí to pro zkušené sběratele i pro ty, kteří s nákupem teprve začínají."
+        "text": "Chcete-li koupit Pokémon karty v Česku s jistotou, že dostanete originál a víte, co za své peníze dostáváte, Northvale TCG je solidní výchozí bod: originální zboží od ověřených distributorů, doprava zdarma od 3 500 Kč a odeslání do 48 hodin. Platí to pro zkušené sběratele i pro ty, kteří s nákupem teprve začínají."
       }
     ]
   },
@@ -589,7 +589,7 @@ export const blogArticles = [
       },
       {
         "type": "p",
-        "text": "Northvale TCG je český online obchod zaměřený výhradně na karetní hry: Pokémon, Disney Lorcana a One Piece. Sortiment tu buduje někdo, kdo sám sbírá a oboru skutečně rozumí, a to se na výběru produktů pozná. Mezi praktické výhody patří odeslání do 48 hodin, doprava zdarma při objednávce nad 1 750 Kč, možnost předobjednávky nových setů a platba kartou, převodem nebo na dobírku."
+        "text": "Northvale TCG je český online obchod zaměřený výhradně na karetní hry: Pokémon, Disney Lorcana a One Piece. Sortiment tu buduje někdo, kdo sám sbírá a oboru skutečně rozumí, a to se na výběru produktů pozná. Mezi praktické výhody patří odeslání do 48 hodin, doprava zdarma při objednávce od 3 500 Kč, možnost předobjednávky nových setů a platba kartou, převodem nebo na dobírku."
       },
       {
         "type": "p",

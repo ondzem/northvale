@@ -260,11 +260,11 @@ serve(async (req) => {
       page.drawLine({ start: { x: 45, y: currentY + 10 }, end: { x: 550, y: currentY + 10 }, thickness: 0.2, color: cBorder });
     }
 
-    // Draw Payment Surcharge if exists
-    if (normalizedOrder.payment_surcharge && parseFloat(normalizedOrder.payment_surcharge) > 0) {
+    // Úprava ceny za platbu (se znaménkem): příplatek za dobírku / sleva za převod
+    if (normalizedOrder.payment_surcharge && parseFloat(normalizedOrder.payment_surcharge) !== 0) {
       const surVal = parseFloat(normalizedOrder.payment_surcharge);
-      drawText("Dobírkový příplatek (1 ks)", 45, currentY, 9, regularFont, cCharcoal);
-      drawTextRight(formatKcs(surVal), 550, currentY, 9, regularFont, cCharcoal);
+      drawText(surVal < 0 ? "Sleva za platbu převodem / QR kódem" : "Příplatek za dobírku (1 ks)", 45, currentY, 9, regularFont, cCharcoal);
+      drawTextRight(surVal < 0 ? `-${formatKcs(Math.abs(surVal))}` : formatKcs(surVal), 550, currentY, 9, regularFont, cCharcoal);
       currentY -= 20;
       page.drawLine({ start: { x: 45, y: currentY + 10 }, end: { x: 550, y: currentY + 10 }, thickness: 0.2, color: cBorder });
     }

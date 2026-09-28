@@ -23,13 +23,13 @@ Northvale TCG nevzniklo pouze jako prodejní kanál, ale jako projekt dlouholet�
 - **DPD Výdejní místa (Pickup)**: 79 Kč (Doručení na tisíce výdejních míst a samoobslužných boxů DPD po celé ČR.)
 - **GLS Výdejní místa (ParcelShop)**: 89 Kč (Doručení na partnerská výdejní místa a výdejní boxy GLS/Alzabox.)
 - **GLS Doručení na adresu**: 129 Kč (Standardní doručení kurýrem přímo na Vaši adresu domů nebo do zaměstnání.)
-- **Doprava zdarma**: Automaticky platí pro jakoukoli objednávku s celkovou hodnotou košíku nad 3 000 Kč.
+- **Doprava zdarma**: Automaticky platí pro jakoukoli objednávku s celkovou hodnotou košíku od 3 500 Kč.
 - **Doručování na Slovensko a do EU**: Aktuálně doručujeme pouze v rámci ČR (DPD, GLS, osobní odběr Holice). Doručení na Slovensko a do zbytku EU připravujeme, lze jej sjednat individuálně po dohodě e-mailem.
 
 ### Platební metody
-- **Online platba kartou**: Bezpečné a okamžité vypořádání transakce přes certifikovanou platební bránu GP webpay.
-- **Bankovní převod**: Platba předem na náš bankovní účet. Pokyny k platbě jsou odeslány e-mailem ihned po odeslání objednávky.
-- **Dobírka**: Platba v hotovosti nebo kartou kurýrovi při převzetí zásilky.
+- **Online platba kartou** (zdarma): Bezpečné a okamžité vypořádání transakce přes certifikovanou platební bránu GP webpay.
+- **QR kód / bankovní převod** (sleva 20 Kč z celkové ceny): Platba předem na náš bankovní účet. Pokyny k platbě jsou odeslány e-mailem ihned po odeslání objednávky.
+- **Dobírka** (příplatek 39 Kč): Platba v hotovosti nebo kartou kurýrovi při převzetí zásilky.
 
 ## 4. Služby Profesionalního Gradingu Karet
 Grading karet je proces, při kterém nezávislá třetí strana (odborná autorita) posoudí pravost a fyzický stav karty a následně ji uzavře do ochranného plastového pouzdra (slabu) s unikátním identifikačním štítkem a výslednou známkou (od 1 do 10).

@@ -118,7 +118,8 @@ export function normalizeOrder(input: any): Record<string, any> {
 
   const payment_method = String(obj.payment_method || obj.paymentMethod || '').trim();
   const shipping_cost = Math.max(0, parseFloat(obj.shipping_cost ?? obj.shippingCost ?? 0) || 0);
-  const payment_surcharge = Math.max(0, parseFloat(obj.payment_surcharge ?? obj.paymentSurcharge ?? 0) || 0);
+  // Se znaménkem: kladná = příplatek (dobírka), záporná = sleva (převod / QR kód).
+  const payment_surcharge = parseFloat(obj.payment_surcharge ?? obj.paymentSurcharge ?? 0) || 0;
 
   const itemsTotalSum = normalizedItemsList.reduce((sum: number, it: any) => sum + (it.price * it.quantity), 0);
   const subtotal = Math.max(0, parseFloat(obj.subtotal ?? itemsTotalSum) || 0);

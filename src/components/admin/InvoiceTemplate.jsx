@@ -1,4 +1,5 @@
 import React from 'react';
+import { paymentAdjustmentLabel } from '../../config';
 
 export default function InvoiceTemplate({ order, onClose, lang = 'CZ' }) {
   if (!order) return null;
@@ -141,9 +142,9 @@ export default function InvoiceTemplate({ order, onClose, lang = 'CZ' }) {
                   <td style={{ textAlign: 'right', fontWeight: '600' }}>{shippingCost.toLocaleString()} Kč</td>
                 </tr>
               )}
-              {paymentSurcharge > 0 && (
+              {paymentSurcharge !== 0 && (
                 <tr>
-                  <td>{lang === 'CZ' ? 'Dobírkový příplatek' : 'COD surcharge'}</td>
+                  <td>{paymentAdjustmentLabel(paymentSurcharge, lang)}</td>
                   <td style={{ textAlign: 'center' }}>1 ks</td>
                   <td style={{ textAlign: 'right' }}>{paymentSurcharge.toLocaleString()} Kč</td>
                   <td style={{ textAlign: 'center' }}>21%</td>

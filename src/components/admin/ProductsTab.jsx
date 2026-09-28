@@ -4805,7 +4805,7 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                             </svg>
                             <div style={{ textAlign: 'left', lineHeight: '1.2' }}>
                               <div style={{ fontSize: '10px', color: '#fff', fontWeight: 'bold' }}>{lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'}</div>
-                              <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>{lang === 'CZ' ? 'nad 1 750 Kč' : 'over 1,750 CZK'}</div>
+                              <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>{lang === 'CZ' ? 'od 3 500 Kč' : 'from 3,500 CZK'}</div>
                             </div>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

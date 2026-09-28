@@ -519,16 +519,20 @@ serve(async (req) => {
                 </tr>
               ` : ''}
 
-              ${order.paymentSurcharge && parseFloat(order.paymentSurcharge) > 0 ? `
+              ${order.paymentSurcharge && parseFloat(order.paymentSurcharge) !== 0 ? (() => {
+                // Se znaménkem: kladná = příplatek za dobírku, záporná = sleva za převod / QR kód.
+                const adj = parseFloat(order.paymentSurcharge);
+                const color = adj < 0 ? '#10B981' : '#666666';
+                return `
                 <tr>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; color: #666666;">
-                    Dobírkový příplatek
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; color: ${color};">
+                    ${adj < 0 ? 'Sleva za platbu převodem / QR kódem' : 'Příplatek za dobírku'}
                   </td>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: #666666; font-family: monospace; white-space: nowrap;">
-                    ${parseFloat(order.paymentSurcharge).toLocaleString('cs-CZ')} Kč
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: ${color}; font-family: monospace; white-space: nowrap;">
+                    ${adj < 0 ? '-' : ''}${Math.abs(adj).toLocaleString('cs-CZ')} Kč
                   </td>
-                </tr>
-              ` : ''}
+                </tr>`;
+              })() : ''}
 
               ${order.creditApplied && parseFloat(order.creditApplied) > 0 ? `
                 <tr>

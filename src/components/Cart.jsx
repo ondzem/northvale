@@ -3,6 +3,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
 import CartItemImage from './CartItemImage';
 import { validateDiscountCode, calculateDiscountAmount } from '../services/discountService';
+import { FREE_SHIPPING_THRESHOLD } from '../config';
 
 export default function Cart({ cart, setCart, setActivePage, appliedDiscount, setAppliedDiscount, alert }) {
   const { lang, t } = useTranslation();
@@ -147,10 +148,11 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
     setCart(prev => prev.filter(item => item.id !== itemId));
   };
 
-  const freeShippingThreshold = 1750;
-  const isFreeShipping = finalTotal >= freeShippingThreshold;
-  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - finalTotal);
-  const shippingPercent = Math.min(100, Math.round((finalTotal / freeShippingThreshold) * 100));
+  // Stejné pravidlo jako v pokladně a na serveru: rozhoduje hodnota zboží před slevou.
+  const freeShippingThreshold = FREE_SHIPPING_THRESHOLD;
+  const isFreeShipping = subtotal >= freeShippingThreshold;
+  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
+  const shippingPercent = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
 
   return (
     <div className="container fade-in">

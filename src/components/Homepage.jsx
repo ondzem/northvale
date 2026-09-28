@@ -219,7 +219,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
   // USP slideshow ref & data
   const uspScrollRef = useRef(null);
   const uspItems = [
-    { icon: '/truck-moving.png', title: lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping', desc: lang === 'CZ' ? 'při objednávce nad 1 750 Kč' : 'on orders over 1,750 Kč' },
+    { icon: '/truck-moving.png', title: lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping', desc: lang === 'CZ' ? 'při objednávce od 3 500 Kč' : 'on orders from 3,500 CZK' },
     { icon: '/tachometer-fast.png', title: lang === 'CZ' ? 'Rychlé odeslání' : 'Fast Dispatch', desc: lang === 'CZ' ? 'Odeslání do 48 hodin' : 'Dispatch within 48 hours' },
     { icon: '/badget-check-alt.png', title: lang === 'CZ' ? '100% Originální' : '100% Authentic', desc: lang === 'CZ' ? 'Pouze od ověřených distributorů' : 'Only from verified distributors' },
     { icon: '/credit-card.png', title: lang === 'CZ' ? 'Bezpečná platba' : 'Secure Payment', desc: lang === 'CZ' ? 'Karta, bankovní převod, dobírka' : 'Cards, bank transfer, COD' }
@@ -1278,7 +1278,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
             <img src="/truck-moving.png" alt={lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'} title={lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'} width="36" height="36" style={styles.uspIcon} />
             <div style={styles.uspText}>
               <h4 style={styles.uspTitle}>{lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'}</h4>
-              <p style={styles.uspDesc}>{lang === 'CZ' ? 'při objednávce nad 1 750 Kč' : 'on orders over 1,750 Kč'}</p>
+              <p style={styles.uspDesc}>{lang === 'CZ' ? 'při objednávce od 3 500 Kč' : 'on orders from 3,500 CZK'}</p>
             </div>
           </div>
           <div style={{ ...styles.uspBox, borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>

@@ -4,7 +4,7 @@ import { supabase } from '../supabase';
 import { getProductImageCached } from '../services/products';
 import CartItemImage from './CartItemImage';
 import { validateDiscountCode, calculateDiscountAmount } from '../services/discountService';
-import { COD_SURCHARGE } from '../config';
+import { COD_SURCHARGE, TRANSFER_DISCOUNT, FREE_SHIPPING_THRESHOLD, paymentAdjustment, paymentAdjustmentLabel } from '../config';
 import AddressAutocomplete from './AddressAutocomplete';
 
 export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, alert, onOpenLogin, appliedDiscount, setAppliedDiscount, validateCart }) {
@@ -163,9 +163,10 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const discountAmount = calculateDiscountAmount(cartSubtotal, appliedDiscount);
   const subtotalAfterDiscount = Math.max(0, cartSubtotal - discountAmount);
 
-  // Free shipping threshold at or above 1750 CZK (checked on cart subtotal or subtotal after discount)
+  // Doprava zdarma od FREE_SHIPPING_THRESHOLD (3 500 Kč) včetně — podle mezisoučtu košíku nebo po slevě.
+  // Sleva za převod se do hranice nepočítá (hranice je o hodnotě zboží).
   const isPersonalShipping = shipping === 'personal' || shipping === 'pardubice';
-  const isFreeShippingThreshold = (cartSubtotal >= 1750 || subtotalAfterDiscount >= 1750);
+  const isFreeShippingThreshold = (cartSubtotal >= FREE_SHIPPING_THRESHOLD || subtotalAfterDiscount >= FREE_SHIPPING_THRESHOLD);
 
   // Base shipping cost calculation
   let shippingCost = 0;
@@ -176,14 +177,14 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   else if (isPersonalShipping) shippingCost = 0;
   else shippingCost = 109;
 
-  // Free shipping override for all paid delivery methods if order >= 1750 CZK
+  // Free shipping override for all paid delivery methods if order >= FREE_SHIPPING_THRESHOLD
   if (!isPersonalShipping && isFreeShippingThreshold) {
     shippingCost = 0;
   }
 
-  // Příplatek za dobírku. U osobního odběru se neúčtuje — platí se v prodejně.
-  // Dopravou zdarma se neruší, je to poplatek za způsob platby.
-  const paymentSurcharge = (payment === 'cod' && !isPersonalShipping) ? COD_SURCHARGE : 0;
+  // Úprava ceny za způsob platby (se znaménkem): dobírka +39 Kč, převod / QR −20 Kč, brána 0 Kč.
+  // Dopravou zdarma se neruší. Server (finalize-order) počítá totéž a nižší částku odmítne.
+  const paymentSurcharge = paymentAdjustment(payment, isPersonalShipping);
 
   // U osobního odběru nedává dobírka smysl — platí se přímo v prodejně.
   useEffect(() => {
@@ -2355,11 +2356,15 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                     <span className="pof-radio-dot" aria-hidden="true"></span>
                     <span className="pof-radio-body">
                       <span className="pof-radio-name">
-                        {lang === 'CZ' ? 'Bankovní převod' : 'Bank Transfer'}
+                        {lang === 'CZ' ? 'QR kód / bankovní převod' : 'QR Code / Bank Transfer'}
                       </span>
                       <span className="pof-radio-desc">
                         {lang === 'CZ' ? 'Převod peněz z Vašeho účtu. Objednávka se vyřídí po připsání platby.' : 'Transfer money from your bank account. Order is processed after payment is received.'}
                       </span>
+                    </span>
+                    {/* Sleva musí být vidět už při výběru, ne až v souhrnu. */}
+                    <span className="pof-price is-free">
+                      {`−${TRANSFER_DISCOUNT} ${lang === 'CZ' ? 'Kč' : 'CZK'}`}
                     </span>
                   </button>
 
@@ -2594,11 +2599,11 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                      <span className="pof-sdots"></span>
                      <span>{shippingCost === 0 ? (lang === 'CZ' ? 'Zdarma' : 'Free') : `${shippingCost} ${lang === 'CZ' ? 'Kč' : 'CZK'}`}</span>
                    </div>
-                   {paymentSurcharge > 0 && (
-                     <div className="pof-srow">
-                       <span><span className="__om-t">{lang === 'CZ' ? 'Dobírkový příplatek' : 'COD Surcharge'}</span></span>
+                   {paymentSurcharge !== 0 && (
+                     <div className="pof-srow" style={paymentSurcharge < 0 ? { color: 'var(--nv-green)' } : undefined}>
+                       <span><span className="__om-t">{paymentAdjustmentLabel(paymentSurcharge, lang)}</span></span>
                        <span className="pof-sdots"></span>
-                       <span>{paymentSurcharge} <span className="__om-t">{lang === 'CZ' ? 'Kč' : 'CZK'}</span></span>
+                       <span>{paymentSurcharge < 0 ? `−${Math.abs(paymentSurcharge)}` : `+${paymentSurcharge}`} <span className="__om-t">{lang === 'CZ' ? 'Kč' : 'CZK'}</span></span>
                      </div>
                    )}
 

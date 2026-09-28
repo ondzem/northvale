@@ -320,7 +320,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>1. SHIPPING METHODS & RATES – CZECH REPUBLIC</h3>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  For orders with a total value exceeding 1,750 CZK, shipping is completely FREE (applies to DPD and GLS services).
+                  For orders with a total value of 3,500 CZK or more, shipping is completely FREE (applies to DPD and GLS services).
                   <br /><br />
                   • <strong>DPD – Pickup Point (DPD Pickup):</strong> 79 CZK. Pickup at any DPD parcel locker or store, usually within 1 business day of dispatch.
                   <br />• <strong>DPD – Home Delivery:</strong> 109 CZK. Courier delivery to your address within 1 business day of dispatch, with delivery time slot notifications.
@@ -346,8 +346,8 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   We support several secure payment methods for your convenience:
                   <br /><br />
                   • <strong>GP webpay – Online Card Payment (FREE):</strong> Fast, secure payment with Visa or Mastercard or via bank portals. Transactions are processed via Global Payments s.r.o. payment gateway and are encrypted using SSL/TLS. We do not store or access your credit card details.
-                  <br />• <strong>Bank Transfer (FREE):</strong> Pay directly from your bank account. Upon completing the checkout, you will receive an automatic email containing payment instructions, our bank account details, and a QR code. Payment is due within 5 business days.
-                  <br />• <strong>Cash on Delivery (29 CZK surcharge):</strong> Pay in cash or by card directly to the courier upon receiving the parcel.
+                  <br />• <strong>QR Code / Bank Transfer (20 CZK discount):</strong> Pay directly from your bank account; 20 CZK is deducted from the order total. Upon completing the checkout, you will receive an automatic email containing payment instructions, our bank account details, and a QR code. Payment is due within 5 business days.
+                  <br />• <strong>Cash on Delivery (39 CZK surcharge):</strong> Pay in cash or by card directly to the courier upon receiving the parcel.
                   <br />• <strong>Store Credit – Customer Balance (FREE):</strong> If you have a Store Credit balance on your user account (e.g., from buylist trade-ins), you can apply it as a discount on all or part of your purchase.
                 </p>
 
@@ -388,7 +388,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 </h3>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  U objednávek v hodnotě nad 1 750 Kč je doprava ZDARMA (platí pro DPD a GLS).
+                  U objednávek v hodnotě od 3 500 Kč je doprava ZDARMA (platí pro DPD a GLS).
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
@@ -472,11 +472,11 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  Klasický bankovní převod (zdarma): po dokončení objednávky obdržíte e-mail s podklady pro platbu (číslo účtu, variabilní symbol a QR kód). Kupní cena je splatná do 5 pracovních dnů.
+                  Platba QR kódem / bankovním převodem (sleva 20 Kč): z celkové ceny objednávky odečteme 20 Kč. Po dokončení objednávky obdržíte e-mail s podklady pro platbu (číslo účtu, variabilní symbol a QR kód). Kupní cena je splatná do 5 pracovních dnů.
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  Platba na dobírku (příplatek 29 Kč): objednávku zaplatíte hotově nebo kartou přímo kurýrovi či ve výdejním místě při převzetí zásilky.
+                  Platba na dobírku (příplatek 39 Kč): objednávku zaplatíte hotově nebo kartou přímo kurýrovi či ve výdejním místě při převzetí zásilky.
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
@@ -573,7 +573,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>4. PRICE OF GOODS AND PAYMENT TERMS</h3>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  4.1. The prices of goods are shown including value added tax (VAT) and all related statutory fees, excluding shipping and cash-on-delivery fees.
+                  4.1. The prices of goods are shown including value added tax (VAT) and all related statutory fees, excluding shipping and cash-on-delivery fees. A surcharge of 39 CZK applies to cash on delivery; for payment by QR code or bank transfer, 20 CZK is deducted from the order total; payment via the GP webpay gateway is free of charge.
                   <br /><br />
                   4.2. In the case of payment by bank transfer, the purchase price is payable within 5 business days of the conclusion of the Purchase Agreement. The Buyer is obliged to pay the purchase price using the designated variable symbol (order number).
                 </p>
@@ -756,7 +756,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 </h3>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  4.1. Cenu zboží a případné náklady spojené s dodáním zboží dle kupní smlouvy může kupující uhradit prodávajícímu následujícími způsoby: bezhotovostně prostřednictvím platební brány GP webpay (provozovatel Global Payments s.r.o.); bezhotovostně převodem na bankovní účet prodávajícího; na dobírku při převzetí zboží; uplatněním Store Creditu.
+                  4.1. Cenu zboží a případné náklady spojené s dodáním zboží dle kupní smlouvy může kupující uhradit prodávajícímu následujícími způsoby: bezhotovostně prostřednictvím platební brány GP webpay (provozovatel Global Payments s.r.o.); bezhotovostně převodem na bankovní účet prodávajícího; na dobírku při převzetí zboží; uplatněním Store Creditu. Při platbě na dobírku účtuje prodávající příplatek 39 Kč; při platbě QR kódem nebo bankovním převodem odečte z celkové ceny objednávky 20 Kč; platba přes platební bránu je bez poplatku.
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>

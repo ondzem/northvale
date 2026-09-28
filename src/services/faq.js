@@ -12,8 +12,8 @@ export const DEFAULT_FAQ = [
         category_id: '11111111-1111-1111-1111-111111111111',
         question_cz: 'Jaké jsou způsoby dopravy a kolik stojí?',
         question_en: 'What shipping methods do you offer and how much do they cost?',
-        answer_cz: 'Nabízíme DPD (79 Kč na výdejní místo / 109 Kč doručení na adresu) a GLS (89 Kč na výdejní místo / 129 Kč doručení na adresu). Při nákupu nad 1 750 Kč máte dopravu zcela zdarma.',
-        answer_en: 'We offer DPD (79 CZK pickup points / 109 CZK home delivery) and GLS (89 CZK pickup points / 129 CZK home delivery). We offer free shipping on all orders over 1,750 CZK.',
+        answer_cz: 'Nabízíme DPD (79 Kč na výdejní místo / 109 Kč doručení na adresu) a GLS (89 Kč na výdejní místo / 129 Kč doručení na adresu). Při nákupu od 3 500 Kč máte dopravu zcela zdarma.',
+        answer_en: 'We offer DPD (79 CZK pickup points / 109 CZK home delivery) and GLS (89 CZK pickup points / 129 CZK home delivery). We offer free shipping on all orders from 3,500 CZK.',
         position: 0
       },
       {

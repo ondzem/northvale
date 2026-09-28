@@ -23,14 +23,38 @@ export const VAT_CONFIG = {
 };
 
 /**
- * Příplatek za platbu na dobírku (v Kč).
- * MUSÍ souhlasit s obchodními podmínkami v src/components/GdprVop.jsx.
- * Neúčtuje se u osobního odběru — tam se platí přímo v prodejně.
+ * Ceník plateb (v Kč). MUSÍ souhlasit s:
+ *   - supabase/functions/finalize-order/index.ts (serverPaymentAdjustment) — server
+ *     cenu přepočítává a nižší částku odmítne,
+ *   - obchodními podmínkami v src/components/GdprVop.jsx.
+ *
+ * Platební brána 0 Kč · QR kód / bankovní převod −20 Kč · dobírka +39 Kč.
+ * Dobírka se neúčtuje u osobního odběru — tam se platí přímo v prodejně.
  */
-export const COD_SURCHARGE = 29;
+export const COD_SURCHARGE = 39;
+export const TRANSFER_DISCOUNT = 20;
 
-/** Hranice pro dopravu zdarma (v Kč). Příplatek za dobírku se jí neruší. */
-export const FREE_SHIPPING_THRESHOLD = 1750;
+/**
+ * Úprava ceny podle způsobu platby: kladná = příplatek, záporná = sleva.
+ * Ukládá se do objednávky jako paymentSurcharge (se znaménkem).
+ */
+export function paymentAdjustment(payment, isPersonalShipping) {
+  if (payment === 'cod') return isPersonalShipping ? 0 : COD_SURCHARGE;
+  if (payment === 'transfer') return -TRANSFER_DISCOUNT;
+  return 0;
+}
+
+/**
+ * Popisek řádku s úpravou ceny za platbu (příplatek za dobírku / sleva za převod).
+ * Používá se v souhrnu objednávky, potvrzení, účtu zákazníka i fakturách.
+ */
+export function paymentAdjustmentLabel(amount, lang = 'CZ') {
+  if (amount < 0) return lang === 'CZ' ? 'Sleva za platbu převodem / QR kódem' : 'Bank transfer / QR payment discount';
+  return lang === 'CZ' ? 'Příplatek za dobírku' : 'Cash on delivery surcharge';
+}
+
+/** Hranice pro dopravu zdarma (v Kč, včetně — „od 3 500 Kč“). Platí pro DPD a GLS. */
+export const FREE_SHIPPING_THRESHOLD = 3500;
 
 /**
  * Calculates price without VAT using official CZ VAT coefficient.

@@ -1409,7 +1409,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                 </svg>
                 <div className="detail-badge-text">
                   <h4 className="detail-badge-title">{lang === 'CZ' ? 'Doprava zdarma' : 'Free Shipping'}</h4>
-                  <p className="detail-badge-desc">{lang === 'CZ' ? 'nad 1 750 Kč' : 'over 1,750 CZK'}</p>
+                  <p className="detail-badge-desc">{lang === 'CZ' ? 'od 3 500 Kč' : 'from 3,500 CZK'}</p>
                 </div>
               </div>
               <div className="detail-trust-badge">
