@@ -338,6 +338,20 @@ export default function ProductCard({ product, addToCart, setSelectedProductId, 
             </svg>
           </button>
 
+          {/* Hlídací pes i u zboží skladem — až bude v akci nebo cena klesne */}
+          {canBuy && !isOnOrder && (
+            <button
+              className="card-favorite-btn card-watch-btn"
+              onClick={handleWatchClick}
+              aria-label={lang === 'CZ' ? 'Hlídat cenu a akce' : 'Watch price and sales'}
+              title={lang === 'CZ' ? 'Hlídat cenu a akce — pošleme e-mail, až bude v akci nebo levnější' : 'Watch price and sales'}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+            </button>
+          )}
           {!canBuy ? (
             <button
               className="btn do-kosiku-btn"

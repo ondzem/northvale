@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 // zakrývala nadpis okna i zavírací křížek.
 import { createPortal } from 'react-dom';
 import DeliveryOptionsModal from './DeliveryOptionsModal';
+import WatchdogModal from './WatchdogModal';
 import { FEATURE_FLAGS, calculatePriceExVat } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
@@ -2382,55 +2383,25 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
         </div>
       , document.body)}
 
-      {isWatchdogModalOpen && createPortal(
-        <div className="product-modal-overlay" onClick={() => setIsWatchdogModalOpen(false)}>
-          <div className="product-modal-container" onClick={e => e.stopPropagation()}>
-            <button className="product-modal-close" onClick={() => setIsWatchdogModalOpen(false)}>✕</button>
-            <h3 className="product-modal-title">{lang === 'CZ' ? 'Sledovat produkt (Hlídací pes)' : 'Watch Product (Watchdog)'}</h3>
-            <form onSubmit={handleWatchdogSubmit} className="login-modal-form">
-              <div className="login-form-group">
-                <label className="login-form-label">{lang === 'CZ' ? 'Upozornit mě, když:' : 'Notify me when:'}</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
-                    <input type="radio" name="watchdog-type" checked={effectiveWatchdogType === 'stock'} disabled={productAvailable} onChange={() => setWatchdogType('stock')} />
-                    {lang === 'CZ' ? 'Produkt bude skladem' : 'Product is in stock'}
-                    {productAvailable && <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{lang === 'CZ' ? '(teď je skladem)' : '(in stock now)'}</span>}
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
-                    <input type="radio" name="watchdog-type" checked={effectiveWatchdogType === 'sale'} onChange={() => setWatchdogType('sale')} />
-                    {lang === 'CZ' ? 'Produkt bude v akci' : 'Product is on sale'}
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer', flexWrap: 'wrap' }}>
-                    <input type="radio" name="watchdog-type" checked={effectiveWatchdogType === 'price'} onChange={() => setWatchdogType('price')} />
-                    {lang === 'CZ' ? 'Cena klesne pod:' : 'Price drops below:'}
-                    <input type="number" min="1" required={effectiveWatchdogType === 'price'} disabled={effectiveWatchdogType !== 'price'} value={watchdogPriceLimit} onChange={e => setWatchdogPriceLimit(e.target.value)} className="login-form-input" style={{ width: '100px', padding: '6px 12px', display: 'inline-block', margin: '0 4px', height: 'auto' }} placeholder={lang === 'CZ' ? 'Částka' : 'Amount'} />
-                    Kč
-                  </label>
-                </div>
-              </div>
-              <div className="login-form-group" style={{ marginTop: '8px' }}>
-                <label className="login-form-label">{lang === 'CZ' ? 'E-mail pro zaslání upozornění' : 'Email for notification'} <span className="text-red">*</span></label>
-                <input type="email" required className="login-form-input" value={watchdogEmail} onChange={e => setWatchdogEmail(e.target.value)} placeholder="jmeno@example.com" />
-              </div>
-              <div className="login-form-group" style={{ flexDirection: 'row', gap: '10px', alignItems: 'flex-start' }}>
-                <input type="checkbox" required id="watchdog-gdpr" checked={watchdogGdpr} onChange={e => setWatchdogGdpr(e.target.checked)} style={{ marginTop: '3px' }} />
-                <label htmlFor="watchdog-gdpr" style={{ fontSize: '11px', color: 'var(--text-muted)', cursor: 'pointer', lineHeight: '1.4' }}>
-                  {lang === 'CZ'
-                    ? 'Beru na vědomí, že moje e-mailová adresa bude spravována za účelem informování o dostupnosti a cenách produktů v souladu se zásadami zpracování osobních údajů.'
-                    : 'I acknowledge that my email address will be managed for the purpose of informing me about product availability and prices in accordance with the privacy policy.'}
-                </label>
-              </div>
-              {/* Honeypot proti botům — člověk ho nevidí */}
-              <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
-              <button type="submit" className="login-submit-btn" disabled={watchdogSubmitting}>
-                {watchdogSubmitting
-                  ? <><span className="pr-spinner" aria-hidden="true" /> {lang === 'CZ' ? 'Ukládám…' : 'Saving…'}</>
-                  : (lang === 'CZ' ? 'Uložit nastavení hlídání' : 'Save Watchdog Settings')}
-              </button>
-            </form>
-          </div>
-        </div>
-      , document.body)}
+      {isWatchdogModalOpen && (
+        <WatchdogModal
+          lang={lang}
+          productName={product.name}
+          currentPrice={price}
+          productAvailable={productAvailable}
+          type={effectiveWatchdogType}
+          onTypeChange={setWatchdogType}
+          priceLimit={watchdogPriceLimit}
+          onPriceLimitChange={setWatchdogPriceLimit}
+          email={watchdogEmail}
+          onEmailChange={setWatchdogEmail}
+          consent={watchdogGdpr}
+          onConsentChange={setWatchdogGdpr}
+          submitting={watchdogSubmitting}
+          onSubmit={handleWatchdogSubmit}
+          onClose={() => setIsWatchdogModalOpen(false)}
+        />
+      )}
 
       {isReviewModalOpen && createPortal(
         <div className="product-modal-overlay" onClick={() => setIsReviewModalOpen(false)}>
