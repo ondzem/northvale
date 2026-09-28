@@ -3713,6 +3713,10 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 }
 
 .product-delivery-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
   font-size: 13.5px;
   color: var(--text-muted);
   text-decoration: underline;
@@ -4654,6 +4658,99 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
   margin: 0 0 20px 0;
   color: var(--text-main);
   text-align: left;
+}
+
+/* Okno „Možnosti doručení“ (DeliveryOptionsModal) — styl ostatních oken na produktu */
+.product-modal-container.dmo {
+  max-width: 520px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.dmo-free {
+  border: 1px solid rgba(253, 189, 22, 0.22);
+  background: rgba(253, 189, 22, 0.05);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.dmo-free p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--text-main); }
+.dmo-free strong { color: var(--color-gold); font-weight: 700; }
+.dmo-free.is-met { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.06); }
+.dmo-free.is-met strong { color: var(--color-green); }
+.dmo-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 10px 0 6px;
+  overflow: hidden;
+}
+.dmo-bar span { display: block; height: 100%; background: var(--color-gold); border-radius: inherit; }
+.dmo-free.is-met .dmo-bar span { background: var(--color-green); }
+.dmo-free .dmo-sub { font-size: 11.5px; color: var(--text-muted); }
+
+.dmo-dispatch { font-size: 13px; color: var(--text-muted); margin: 0 0 18px; line-height: 1.5; }
+.dmo-dispatch strong { color: var(--text-main); font-weight: 600; }
+
+.dmo-heading {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 4px;
+}
+.dmo-list { list-style: none; margin: 0 0 18px; padding: 0; }
+.dmo-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.dmo-row:last-child { border-bottom: none; }
+.dmo-row-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.dmo-row-name { font-size: 14px; font-weight: 600; color: var(--text-main); }
+.dmo-row-desc { font-size: 12px; color: var(--text-muted); line-height: 1.45; }
+.dmo-price {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.dmo-price.is-free { color: var(--color-gold); }
+.dmo-price s { font-size: 11.5px; font-weight: 400; color: var(--text-muted); }
+
+.dmo-foot {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  line-height: 1.6;
+}
+.dmo-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--color-gold);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.dmo-link:hover { color: var(--color-gold-hover); }
+
+@media (max-width: 480px) {
+  .product-modal-container.dmo { padding: 22px 18px; }
+  .dmo-row { gap: 12px; }
 }
 
 /* Slideshow lists (Související / Podobné) using full catalog card design */

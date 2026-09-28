@@ -1,4 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+// Okna se vykreslují do <body>: stránka má animaci náběhu (.fade-in), která
+// je jinak uzavře do vrstvy POD lepkavou horní lištou — na mobilu pak lišta
+// zakrývala nadpis okna i zavírací křížek.
+import { createPortal } from 'react-dom';
+import DeliveryOptionsModal from './DeliveryOptionsModal';
 import { FEATURE_FLAGS, calculatePriceExVat } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
@@ -267,6 +272,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState('popis');
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
+  const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false);
   const [isWatchdogModalOpen, setIsWatchdogModalOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(() => {
     try {
@@ -1360,9 +1366,10 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
 
               {/* Spodní řada: možnosti doručení vlevo, doplňkové akce vpravo */}
               <div className="pdp-bottom-row">
-                <span className="product-delivery-link" onClick={() => setActivePage('community')}>
+                {/* Dřív vedlo na prázdnou stránku „community“ — teď otevírá přehled dopravy a plateb. */}
+                <button type="button" className="product-delivery-link" onClick={() => setIsDeliveryModalOpen(true)}>
                   {lang === 'CZ' ? 'Možnosti doručení' : 'Delivery options'}
-                </span>
+                </button>
 
                 <div className="product-actions-grid">
                   <button className="product-action-btn" onClick={handleFavoriteClick} title="Oblíbené" aria-label="Oblíbené">
@@ -2279,7 +2286,18 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
       )}
 
       {/* Local Modal Overlays for actions */}
-      {isAskModalOpen && (
+      {isDeliveryModalOpen && (
+        <DeliveryOptionsModal
+          price={price}
+          deliveryTime={product.deliveryTime}
+          isOnOrder={isOnOrder}
+          lang={lang}
+          onClose={() => setIsDeliveryModalOpen(false)}
+          onOpenTerms={() => { setIsDeliveryModalOpen(false); setActivePage('gdpr-vop', 'doprava'); }}
+        />
+      )}
+
+      {isAskModalOpen && createPortal(
         <div className="product-modal-overlay" onClick={() => setIsAskModalOpen(false)}>
           <div className="product-modal-container" onClick={e => e.stopPropagation()}>
             <button className="product-modal-close" onClick={() => setIsAskModalOpen(false)}>✕</button>
@@ -2309,9 +2327,9 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
             </form>
           </div>
         </div>
-      )}
+      , document.body)}
 
-      {isWatchdogModalOpen && (
+      {isWatchdogModalOpen && createPortal(
         <div className="product-modal-overlay" onClick={() => setIsWatchdogModalOpen(false)}>
           <div className="product-modal-container" onClick={e => e.stopPropagation()}>
             <button className="product-modal-close" onClick={() => setIsWatchdogModalOpen(false)}>✕</button>
@@ -2352,9 +2370,9 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
             </form>
           </div>
         </div>
-      )}
+      , document.body)}
 
-      {isReviewModalOpen && (
+      {isReviewModalOpen && createPortal(
         <div className="product-modal-overlay" onClick={() => setIsReviewModalOpen(false)}>
           <div className="product-modal-container" onClick={e => e.stopPropagation()}>
             <button className="product-modal-close" onClick={() => setIsReviewModalOpen(false)}>✕</button>
@@ -2385,9 +2403,9 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
             </form>
           </div>
         </div>
-      )}
+      , document.body)}
 
-      {isCommentModalOpen && (
+      {isCommentModalOpen && createPortal(
         <div className="product-modal-overlay" onClick={() => setIsCommentModalOpen(false)}>
           <div className="product-modal-container" onClick={e => e.stopPropagation()}>
             <button className="product-modal-close" onClick={() => setIsCommentModalOpen(false)}>✕</button>
@@ -2408,9 +2426,9 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
             </form>
           </div>
         </div>
-      )}
+      , document.body)}
 
-      {isReplyModalOpen && (
+      {isReplyModalOpen && createPortal(
         <div className="product-modal-overlay" onClick={() => setIsReplyModalOpen(false)}>
           <div className="product-modal-container" onClick={e => e.stopPropagation()}>
             <button className="product-modal-close" onClick={() => setIsReplyModalOpen(false)}>✕</button>
@@ -2431,7 +2449,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
             </form>
           </div>
         </div>
-      )}
+      , document.body)}
 
       {/* Custom Confirmation Modal */}
       {deleteConfirm.isOpen && (

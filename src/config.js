@@ -57,6 +57,30 @@ export function paymentAdjustmentLabel(amount, lang = 'CZ') {
 export const FREE_SHIPPING_THRESHOLD = 3500;
 
 /**
+ * Způsoby doručení pro zobrazení zákazníkovi (okno „Možnosti doručení“ na produktu).
+ * Ceny MUSÍ odpovídat výpočtu v src/components/CheckoutFlow.jsx,
+ * supabase/functions/finalize-order/index.ts (serverShippingCost)
+ * a textu „Doprava a doručení“ v src/components/GdprVop.jsx.
+ */
+export const SHIPPING_OPTIONS = [
+  { id: 'dpd-pickup', carrier: 'DPD', price: 79,
+    name: { CZ: 'DPD – výdejní místo', EN: 'DPD – pickup point' },
+    desc: { CZ: 'Výdejní místo nebo box DPD. Obvykle do druhého pracovního dne od odeslání.', EN: 'DPD pickup point or locker. Usually by the second business day after dispatch.' } },
+  { id: 'dpd-address', carrier: 'DPD', price: 109,
+    name: { CZ: 'DPD – doručení na adresu', EN: 'DPD – home delivery' },
+    desc: { CZ: 'Kurýrem na Vaši adresu, s možností změnit termín doručení.', EN: 'Courier to your address, with the option to reschedule delivery.' } },
+  { id: 'gls-pickup', carrier: 'GLS', price: 89,
+    name: { CZ: 'GLS – výdejní místo', EN: 'GLS – pickup point' },
+    desc: { CZ: 'Výdejní místo nebo box GLS (Parcel Shop). Obvykle do druhého pracovního dne od odeslání.', EN: 'GLS Parcel Shop or locker. Usually by the second business day after dispatch.' } },
+  { id: 'gls-address', carrier: 'GLS', price: 129,
+    name: { CZ: 'GLS – doručení na adresu', EN: 'GLS – home delivery' },
+    desc: { CZ: 'Kurýrem domů nebo do zaměstnání.', EN: 'Courier to your home or workplace.' } },
+  { id: 'personal', carrier: null, price: 0,
+    name: { CZ: 'Osobní odběr – Holice', EN: 'Personal pickup – Holice' },
+    desc: { CZ: 'ELEKTROOBCHOD Škrba, Bratří Čapků 1095, Holice. Po–Pá 7:00–12:00 a 13:00–16:00.', EN: 'ELEKTROOBCHOD Škrba, Bratří Čapků 1095, Holice. Mon–Fri 7:00–12:00 and 13:00–16:00.' } }
+];
+
+/**
  * Calculates price without VAT using official CZ VAT coefficient.
  * Formula: Price / (1 + vatRate)
  */
