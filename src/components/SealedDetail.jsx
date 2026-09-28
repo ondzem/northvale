@@ -273,7 +273,16 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
   const [activeTab, setActiveTab] = useState('popis');
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
   const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false);
-  const [isWatchdogModalOpen, setIsWatchdogModalOpen] = useState(false);
+  // Z karty vyprodaného produktu („Hlídat“) přijde příznak — okno se otevře rovnou.
+  const [isWatchdogModalOpen, setIsWatchdogModalOpen] = useState(() => {
+    try {
+      if (sessionStorage.getItem('nv-open-watchdog') === productId) {
+        sessionStorage.removeItem('nv-open-watchdog');
+        return true;
+      }
+    } catch { /* úložiště nedostupné */ }
+    return false;
+  });
   const [isFavorite, setIsFavorite] = useState(() => {
     try {
       const saved = localStorage.getItem(`fav-${productId}`);
@@ -307,6 +316,7 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
   const [watchdogPriceLimit, setWatchdogPriceLimit] = useState('');
   const [watchdogEmail, setWatchdogEmail] = useState('');
   const [watchdogGdpr, setWatchdogGdpr] = useState(false);
+  const [watchdogSubmitting, setWatchdogSubmitting] = useState(false);
 
   // Local state for reviews & comments (dynamic database)
   const [reviews, setReviews] = useState([]);
@@ -500,6 +510,12 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
     return !(getProductFromCache(productId) || products.find(p => p.id === productId));
   });
   const product = localProduct;
+
+  // Dá se produkt teď koupit? (hlídání „až bude skladem“ má smysl jen u vyprodaného)
+  const productAvailable = !!product && (!!(product.onOrder || product.on_order) || (product.stock || 0) > 0);
+
+  // „Až bude skladem“ nedává smysl u zboží, které skladem je → pak platí „až bude v akci“
+  const effectiveWatchdogType = (productAvailable && watchdogType === 'stock') ? 'sale' : watchdogType;
 
   const [detailAspectRatio, setDetailAspectRatio] = useState(1.0);
   const mainImageRef = useRef(null);
@@ -851,15 +867,44 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
     setIsAskModalOpen(false);
   };
 
-  const handleWatchdogSubmit = (e) => {
+  // Dřív tu byla jen hláška „nastaveno“ a nic se neukládalo — žádosti se ztrácely.
+  const handleWatchdogSubmit = async (e) => {
     e.preventDefault();
-    if (alert) {
-      alert(lang === 'CZ' ? 'Hlídací pes byl nastaven. Budete upozorněni e-mailem.' : 'Watchdog has been set. You will be notified by email.', 'success');
+    if (watchdogSubmitting) return;
+    setWatchdogSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('product-watchdog', {
+        body: {
+          action: 'subscribe',
+          productId: product.id,
+          email: watchdogEmail.trim(),
+          type: effectiveWatchdogType,
+          priceLimit: effectiveWatchdogType === 'price' ? Number(watchdogPriceLimit) : null,
+          lang,
+          turnstileToken: await getTurnstileToken()
+        }
+      });
+      // Chybová odpověď funkce (400 s vysvětlením) přijde v error.context
+      let serverMsg = data?.error;
+      if (error && !serverMsg) {
+        try { serverMsg = (await error.context?.json())?.error; } catch { /* bez těla */ }
+      }
+      if (error || data?.error) throw new Error(serverMsg || (lang === 'CZ' ? 'Hlídání se nepodařilo uložit.' : 'Could not save the watchdog.'));
+
+      if (alert) {
+        alert(data?.already
+          ? (lang === 'CZ' ? 'Tento produkt už hlídáte — ozveme se e-mailem.' : 'You are already watching this product.')
+          : (lang === 'CZ' ? 'Hlídací pes je nastavený. Potvrzení jsme Vám poslali e-mailem.' : 'Watchdog set. We sent you a confirmation e-mail.'), 'success');
+      }
+      setWatchdogPriceLimit('');
+      setWatchdogEmail('');
+      setWatchdogGdpr(false);
+      setIsWatchdogModalOpen(false);
+    } catch (err) {
+      if (alert) alert(err.message, 'error');
+    } finally {
+      setWatchdogSubmitting(false);
     }
-    setWatchdogPriceLimit('');
-    setWatchdogEmail('');
-    setWatchdogGdpr(false);
-    setIsWatchdogModalOpen(false);
   };
 
   const handleShareClick = () => {
@@ -1321,13 +1366,21 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                     <button className="qty-btn" onClick={() => setQty(prev => Math.min(isOnOrder ? 10 : (stock > 0 ? stock : 10), prev + 1))} aria-label={lang === 'CZ' ? 'Zvýšit' : 'Increase'}>+</button>
                   </div>
 
-                  <button
-                    className="product-add-to-cart-btn"
-                    disabled={!isOnOrder && stock === 0}
-                    onClick={() => addToCart(product, product, qty)}
-                  >
-                    {t('common.addToCart')}
-                  </button>
+                  {productAvailable ? (
+                    <button
+                      className="product-add-to-cart-btn"
+                      onClick={() => addToCart(product, product, qty)}
+                    >
+                      {t('common.addToCart')}
+                    </button>
+                  ) : (
+                    <button
+                      className="product-add-to-cart-btn is-watch"
+                      onClick={() => { setWatchdogType('stock'); setIsWatchdogModalOpen(true); }}
+                    >
+                      {lang === 'CZ' ? 'Hlídat dostupnost' : 'Notify me'}
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -2339,17 +2392,18 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                 <label className="login-form-label">{lang === 'CZ' ? 'Upozornit mě, když:' : 'Notify me when:'}</label>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
-                    <input type="radio" name="watchdog-type" checked={watchdogType === 'stock'} onChange={() => setWatchdogType('stock')} />
+                    <input type="radio" name="watchdog-type" checked={effectiveWatchdogType === 'stock'} disabled={productAvailable} onChange={() => setWatchdogType('stock')} />
                     {lang === 'CZ' ? 'Produkt bude skladem' : 'Product is in stock'}
+                    {productAvailable && <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{lang === 'CZ' ? '(teď je skladem)' : '(in stock now)'}</span>}
                   </label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
-                    <input type="radio" name="watchdog-type" checked={watchdogType === 'sale'} onChange={() => setWatchdogType('sale')} />
+                    <input type="radio" name="watchdog-type" checked={effectiveWatchdogType === 'sale'} onChange={() => setWatchdogType('sale')} />
                     {lang === 'CZ' ? 'Produkt bude v akci' : 'Product is on sale'}
                   </label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer', flexWrap: 'wrap' }}>
-                    <input type="radio" name="watchdog-type" checked={watchdogType === 'price'} onChange={() => setWatchdogType('price')} />
+                    <input type="radio" name="watchdog-type" checked={effectiveWatchdogType === 'price'} onChange={() => setWatchdogType('price')} />
                     {lang === 'CZ' ? 'Cena klesne pod:' : 'Price drops below:'}
-                    <input type="number" disabled={watchdogType !== 'price'} value={watchdogPriceLimit} onChange={e => setWatchdogPriceLimit(e.target.value)} className="login-form-input" style={{ width: '100px', padding: '6px 12px', display: 'inline-block', margin: '0 4px', height: 'auto' }} placeholder={lang === 'CZ' ? 'Částka' : 'Amount'} />
+                    <input type="number" min="1" required={effectiveWatchdogType === 'price'} disabled={effectiveWatchdogType !== 'price'} value={watchdogPriceLimit} onChange={e => setWatchdogPriceLimit(e.target.value)} className="login-form-input" style={{ width: '100px', padding: '6px 12px', display: 'inline-block', margin: '0 4px', height: 'auto' }} placeholder={lang === 'CZ' ? 'Částka' : 'Amount'} />
                     Kč
                   </label>
                 </div>
@@ -2366,7 +2420,13 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                     : 'I acknowledge that my email address will be managed for the purpose of informing me about product availability and prices in accordance with the privacy policy.'}
                 </label>
               </div>
-              <button type="submit" className="login-submit-btn">{lang === 'CZ' ? 'Uložit nastavení hlídání' : 'Save Watchdog Settings'}</button>
+              {/* Honeypot proti botům — člověk ho nevidí */}
+              <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
+              <button type="submit" className="login-submit-btn" disabled={watchdogSubmitting}>
+                {watchdogSubmitting
+                  ? <><span className="pr-spinner" aria-hidden="true" /> {lang === 'CZ' ? 'Ukládám…' : 'Saving…'}</>
+                  : (lang === 'CZ' ? 'Uložit nastavení hlídání' : 'Save Watchdog Settings')}
+              </button>
             </form>
           </div>
         </div>

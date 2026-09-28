@@ -5,6 +5,7 @@ import { fetchProductsFromDB, saveProductToDB, deleteProductFromDB, fetchProduct
 import { fetchCategoriesFromDB } from '../../services/categories';
 import ProductCard from '../ProductCard';
 import BulkEanModal from './BulkEanModal';
+import { supabase } from '../../supabase';
 import { FEATURE_FLAGS, calculatePriceExVat } from '../../config';
 
 const AdminImageThumbnail = ({ productId, fallbackSrc }) => {
@@ -340,6 +341,9 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   const [sortBy, setSortBy] = useState('newest'); // 'newest', 'oldest', 'name_asc', 'name_desc'
   // Zobrazit jen produkty bez EAN — bez čárového kódu je srovnávače nespárují
   const [onlyMissingEan, setOnlyMissingEan] = useState(false);
+  // Hlídací psi: { [productId]: { total, stock_count, sale_count, price_count, last_at } } — jen počty, bez e-mailů
+  const [watchdogCounts, setWatchdogCounts] = useState({});
+  const [onlyWatched, setOnlyWatched] = useState(false);
   const [isBulkEanOpen, setIsBulkEanOpen] = useState(false);
 
   // Modal State
@@ -552,6 +556,16 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     setProducts(pData || []);
     setCategories(cData || []);
     setLoading(false);
+
+    // Počty hlídacích psů — když selžou, seznam produktů funguje dál
+    try {
+      const { data, error } = await supabase.rpc('watchdog_counts');
+      if (!error && Array.isArray(data)) {
+        setWatchdogCounts(Object.fromEntries(data.map(r => [r.product_id, r])));
+      }
+    } catch (err) {
+      console.warn('Počty hlídacích psů se nenačetly:', err);
+    }
   };
 
   const handleOpenAddModal = () => {
@@ -1680,8 +1694,13 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
     const matchesType = filterType === 'all' || p.type === filterType;
     const matchesGame = filterGame === 'all' || p.game === filterGame;
     const matchesEan = !onlyMissingEan || !(p.ean && String(p.ean).trim());
-    return matchesSearch && matchesType && matchesGame && matchesEan;
+    const matchesWatched = !onlyWatched || (watchdogCounts[p.id]?.total || 0) > 0;
+    return matchesSearch && matchesType && matchesGame && matchesEan && matchesWatched;
   });
+
+  // Hlídané produkty a počet lidí, kteří čekají
+  const watchedProductsCount = Object.values(watchdogCounts).filter(c => c.total > 0).length;
+  const watchersTotal = Object.values(watchdogCounts).reduce((sum, c) => sum + (c.total || 0), 0);
 
   // Kolik produktů nemá čárový kód (EAN) — bez něj je Heureka/Zboží nespárují
   const missingEanCount = products.filter(p => !(p.ean && String(p.ean).trim())).length;
@@ -1695,6 +1714,11 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
   };
 
   filteredProducts.sort((a, b) => {
+    // Filtr „Hlídané“: nejvíc hlídané nahoře — ať je hned vidět, co shánět
+    if (onlyWatched) {
+      const diff = (watchdogCounts[b.id]?.total || 0) - (watchdogCounts[a.id]?.total || 0);
+      if (diff !== 0) return diff;
+    }
     if (sortBy === 'newest') {
       const dateA = productTime(a);
       const dateB = productTime(b);
@@ -1911,6 +1935,29 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
           </span>
         </button>
 
+        {/* Hlídací psi — kolik lidí čeká na naskladnění / akci / cenu */}
+        <button
+          type="button"
+          onClick={() => setOnlyWatched(v => !v)}
+          title={lang === 'CZ'
+            ? 'Zobrazit produkty, které si zákazníci hlídají (až budou skladem, v akci nebo levnější). Seřazeno podle počtu zájemců.'
+            : 'Show products customers are watching, sorted by number of watchers.'}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '7px',
+            padding: '0 14px', height: '38px', borderRadius: '8px', cursor: 'pointer',
+            fontSize: '12.5px', fontWeight: 600, whiteSpace: 'nowrap',
+            border: `1px solid ${onlyWatched ? 'rgba(253,189,22,0.55)' : 'rgba(255,255,255,0.1)'}`,
+            background: onlyWatched ? 'rgba(253,189,22,0.14)' : 'transparent',
+            color: watchedProductsCount > 0 ? 'var(--color-gold)' : 'var(--text-muted)'
+          }}
+        >
+          🔔 <span>
+            {lang === 'CZ'
+              ? (watchedProductsCount > 0 ? `Hlídané: ${watchedProductsCount} (${watchersTotal}× zájem)` : 'Hlídané: 0')
+              : `Watched: ${watchedProductsCount} (${watchersTotal})`}
+          </span>
+        </button>
+
         <button
           type="button"
           onClick={() => setIsBulkEanOpen(true)}
@@ -1973,6 +2020,19 @@ export default function ProductsTab({ showToast, initialEditProductId, onClearIn
                       <code style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', color: 'var(--nv-gold, #fdbd16)', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '150px' }} title={p.id}>
                         {p.id}
                       </code>
+                      {(watchdogCounts[p.id]?.total || 0) > 0 && (() => {
+                        const c = watchdogCounts[p.id];
+                        return (
+                          <span
+                            title={lang === 'CZ'
+                              ? `Hlídá ${c.total}× — až bude skladem: ${c.stock_count}, v akci: ${c.sale_count}, cenový limit: ${c.price_count}`
+                              : `Watched ${c.total}× — stock: ${c.stock_count}, sale: ${c.sale_count}, price: ${c.price_count}`}
+                            style={{ display: 'inline-block', marginTop: '4px', fontSize: '10.5px', fontWeight: 700, color: 'var(--color-gold)', background: 'rgba(253,189,22,0.12)', border: '1px solid rgba(253,189,22,0.3)', borderRadius: '4px', padding: '1px 6px', cursor: 'help' }}
+                          >
+                            🔔 {c.total}× {lang === 'CZ' ? 'hlídá' : 'watching'}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td data-label={lang === 'CZ' ? 'Název' : 'Name'}>
                       <input

@@ -52,6 +52,20 @@ function safeLocalStorageSetItem(key, value) {
   }
 }
 
+/**
+ * Dá se produkt koupit? Skladem, některá varianta skladem, nebo zboží na objednávku.
+ * Vyprodané produkty se v katalogu a vyhledávání zobrazují (se štítkem „Není skladem“
+ * a hlídacím psem) — jen se řadí na konec a na homepage se neukazují.
+ */
+export function isProductAvailable(p) {
+  if (!p) return false;
+  if (p.onOrder || p.on_order) return true;
+  if (p.type === 'single') {
+    return (p.variants || []).some(v => (v.stock || 0) > 0);
+  }
+  return (p.stock || 0) > 0;
+}
+
 export function hasProductImage(p) {
   if (!p) return false;
   if (p.has_image_data === true || p.hasImage === true) return true;
@@ -206,17 +220,7 @@ export function getCachedProducts(options = {}) {
   if (!includeAll) {
     filtered = filtered.filter(p => p.type !== 'single' && p.type !== 'slab');
     
-    // Always hide out-of-stock items from public view
-    filtered = filtered.filter(p => {
-      if (p.type === 'single') {
-        const totalStock = p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
-        return totalStock > 0;
-      } else {
-        // Zboží na objednávku se prodává bez skladu — nikdy ho neskrývat
-        if (p.onOrder || p.on_order) return true;
-        return (p.stock || 0) > 0;
-      }
-    });
+    // Vyprodané zboží se NESKRÝVÁ — zákazník ho najde a může si nastavit hlídacího psa.
 
     // Always hide products without an image from public storefront view
     filtered = filtered.filter(hasProductImage);
@@ -303,17 +307,7 @@ export async function fetchProductsFromDB(options = {}) {
     if (!includeAll) {
       filtered = filtered.filter(p => p.type !== 'single' && p.type !== 'slab');
       
-      // Always hide out-of-stock items from public view
-      filtered = filtered.filter(p => {
-        if (p.type === 'single') {
-          const totalStock = p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
-          return totalStock > 0;
-        } else {
-          // Zboží na objednávku se prodává bez skladu — nikdy ho neskrývat
-          if (p.onOrder || p.on_order) return true;
-          return (p.stock || 0) > 0;
-        }
-      });
+      // Vyprodané zboží se NESKRÝVÁ — zákazník ho najde a může si nastavit hlídacího psa.
     }
 
     if (types && types.length > 0) {
@@ -356,17 +350,7 @@ export async function fetchProductsFromDB(options = {}) {
     if (!includeAll) {
       filtered = filtered.filter(p => p.type !== 'single' && p.type !== 'slab');
       
-      // Always hide out-of-stock items from public view
-      filtered = filtered.filter(p => {
-        if (p.type === 'single') {
-          const totalStock = p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
-          return totalStock > 0;
-        } else {
-          // Zboží na objednávku se prodává bez skladu — nikdy ho neskrývat
-          if (p.onOrder || p.on_order) return true;
-          return (p.stock || 0) > 0;
-        }
-      });
+      // Vyprodané zboží se NESKRÝVÁ — zákazník ho najde a může si nastavit hlídacího psa.
 
       // Always hide products without an image from public storefront view
       filtered = filtered.filter(hasProductImage);

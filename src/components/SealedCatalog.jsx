@@ -4,7 +4,7 @@ import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
 import DealOfTheDay from './DealOfTheDay';
 import { fetchCategoriesFromDB, mockCategories, getCachedCategories, getCategoryIcon } from '../services/categories';
-import { hasProductImage } from '../services/products';
+import { hasProductImage, isProductAvailable } from '../services/products';
 
 function getGameFallbackLogo(game) {
   switch (game) {
@@ -1179,7 +1179,7 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
 
   const getStockCount = (stockType) => {
     if (stockType === 'inStock') {
-      return baseSealed.filter(p => p.stock > 0).length;
+      return baseSealed.filter(isProductAvailable).length;
     }
     if (stockType === 'preorder') {
       return baseSealed.filter(p => p.preorder === true).length;
@@ -1217,15 +1217,8 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
     // Hiding products without an image from public storefront view
     if (!hasProductImage(product)) return false;
 
-    // Hiding out of stock products automatically
-    // (zboží na objednávku sklad nevede — nikdy se neskrývá)
-    const isOnOrder = !!(product.onOrder || product.on_order);
-    if (product.type === 'single') {
-      const hasStock = product.variants && product.variants.some(v => (v.stock || 0) > 0);
-      if (!hasStock && !isOnOrder) return false;
-    } else {
-      if (!isOnOrder && (product.stock || 0) <= 0) return false;
-    }
+    // Vyprodané produkty zůstávají vidět (řadí se na konec); skryje je jen filtr „Pouze skladem“.
+    if (onlyInStock && !isProductAvailable(product)) return false;
     if (onlyPreorder && !product.preorder) return false;
 
     // Subcategories matching helper (tabs at the top)
@@ -1292,6 +1285,9 @@ export default function SealedCatalog({ products, addToCart, setSelectedProductI
 
   // Sort logic
   const sortedProducts = [...filteredProducts].sort((a, b) => {
+    // Vyprodané vždy až za zbožím, které jde koupit
+    const availDiff = Number(isProductAvailable(b)) - Number(isProductAvailable(a));
+    if (availDiff !== 0) return availDiff;
     if (sortBy === 'expensive') return b.price - a.price;
     if (sortBy === 'cheap') return a.price - b.price;
     if (sortBy === 'new') return b.id.localeCompare(a.id); // mock sort

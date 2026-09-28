@@ -42,14 +42,16 @@ export function wrapInHtmlDocument(innerContent: string): string {
  * @param title     hlavní nadpis
  * @param subtitle  řádek pod nadpisem (nepovinný, už jako HTML)
  * @param body      tělo zprávy (HTML)
+ * @param footer    vlastní patička (HTML) — výchozí je poděkování za nákup
  */
 export function renderEmailCard(opts: {
   emoji: string;
   title: string;
   subtitle?: string;
   body: string;
+  footer?: string;
 }): string {
-  const { emoji, title, subtitle, body } = opts;
+  const { emoji, title, subtitle, body, footer } = opts;
   return `
     <div style="background-color: #f5f6f8; padding: 40px 10px; font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100%;">
       <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 40px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: #222222;">
@@ -75,8 +77,8 @@ export function renderEmailCard(opts: {
         <!-- Help / System Info -->
         <div style="border-top: 1px solid #e1e4e8; padding-top: 24px; margin-top: 30px; text-align: center;">
           <p style="font-size: 12px; color: #888888; margin: 0; line-height: 1.6;">
-            Děkujeme za Váš nákup na NORTHVALE TCG. V případě dotazů nás kontaktujte na
-            <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; text-decoration: underline; font-weight: bold;">info@northvaletcg.eu</a>.
+            ${footer ?? `Děkujeme za Váš nákup na NORTHVALE TCG. V případě dotazů nás kontaktujte na
+            <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; text-decoration: underline; font-weight: bold;">info@northvaletcg.eu</a>.`}
           </p>
         </div>
       </div>

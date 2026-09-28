@@ -1027,7 +1027,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   <br /><br />
                   <strong>D. Legitimate Interests (Direct marketing and security):</strong> Sending newsletters to existing customers (with an easy opt-out link), fraud prevention in card buybacks, and general IT security. Legal basis: Art. 6(1)(f) GDPR.
                   <br /><br />
-                  <strong>E. Consent:</strong> Newsletter delivery to non-customers, and analytical/marketing cookies. Legal basis: Art. 6(1)(a) GDPR.
+                  <strong>E. Consent:</strong> Newsletter delivery to non-customers, product watchdog alerts (the e-mail address you enter to be notified when a product is back in stock, on sale or cheaper — kept until the alert is sent or you cancel it via the link in the e-mail), and analytical/marketing cookies. Legal basis: Art. 6(1)(a) GDPR.
                 </p>
 
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-gold)', margin: '20px 0 10px 0' }}>4. RECIPIENTS OF PERSONAL DATA (PROCESSORS)</h3>
@@ -1163,7 +1163,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  D. Souhlas (čl. 6 odst. 1 písm. a) GDPR): zasílání newsletteru osobám, které nejsou našimi zákazníky; ukládání analytických cookies a měření chování na webu (Google Analytics, Microsoft Clarity). Souhlas lze kdykoli odvolat, aniž je tím dotčena zákonnost zpracování před jeho odvoláním.
+                  D. Souhlas (čl. 6 odst. 1 písm. a) GDPR): zasílání newsletteru osobám, které nejsou našimi zákazníky; hlídací pes u produktu (e-mailová adresa, kterou zadáte, abychom Vám dali vědět, až bude produkt skladem, v akci nebo levnější — uchováváme ji do odeslání upozornění nebo do zrušení hlídání odkazem v e-mailu); ukládání analytických cookies a měření chování na webu (Google Analytics, Microsoft Clarity). Souhlas lze kdykoli odvolat, aniž je tím dotčena zákonnost zpracování před jeho odvoláním.
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>

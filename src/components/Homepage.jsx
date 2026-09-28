@@ -4,7 +4,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { fetchSlidesFromDB, DEFAULT_SLIDES } from '../services/slides';
 import { fetchDailyDealFromDB } from '../services/dailyDeal';
 import { fetchHomepageSectionsFromDB } from '../services/homepageSections';
-import { fetchProductByIdFromDB, fetchProductImage, generateDefaultSEOImageMetadata, hasProductImage } from '../services/products';
+import { fetchProductByIdFromDB, fetchProductImage, generateDefaultSEOImageMetadata, hasProductImage, isProductAvailable } from '../services/products';
 
 const ProductImage = ({ productId, src, alt, title, className = '', onAspectRatioLoaded }) => {
   const [imgSrc, setImgSrc] = useState(() => {
@@ -403,9 +403,10 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
     if (configuredIds.length > 0) {
       return configuredIds
         .map(id => products.find(p => p.id === id))
-        .filter(p => p && hasProductImage(p));
+        .filter(p => p && hasProductImage(p) && isProductAvailable(p));
     }
-    return products.filter(p => defaultFilter(p) && hasProductImage(p)).slice(0, 5);
+    // Na homepage jen zboží, které jde koupit (vyprodané je jen v katalogu a vyhledávání)
+    return products.filter(p => defaultFilter(p) && hasProductImage(p) && isProductAvailable(p)).slice(0, 5);
   };
 
   const getProductPrice = (product) => {
@@ -418,7 +419,7 @@ export default function Homepage({ setActivePage, addToCart, products, setSelect
 
   const newArrivals = getSectionProducts('newArrivals', p => p.type === 'single');
   const preorders = getSectionProducts('preorders', p => p.type === 'sealed' && p.preorder);
-  const gradedCards = products.filter(p => p.type === 'slab').slice(0, 5);
+  const gradedCards = products.filter(p => p.type === 'slab' && isProductAvailable(p)).slice(0, 5);
   const accessories = getSectionProducts('accessories', p => p.type === 'accessory');
   const newArrivalsRef = useRef(null);
   const preordersRef = useRef(null);

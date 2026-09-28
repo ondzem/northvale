@@ -11066,3 +11066,14 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 }
 
 
+
+/* Detail vyprodaného produktu: „Hlídat dostupnost“ místo „Do košíku“ */
+.product-add-to-cart-btn.is-watch {
+  background: transparent;
+  color: var(--color-gold);
+  border: 1px solid var(--color-gold);
+  box-shadow: none;
+}
+.product-add-to-cart-btn.is-watch:hover {
+  background: rgba(253, 189, 22, 0.08);
+}
