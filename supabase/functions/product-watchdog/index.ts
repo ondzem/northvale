@@ -96,34 +96,64 @@ const WHAT: Record<string, { cz: string; en: string }> = {
   price: { cz: "až cena klesne pod Váš limit", en: "when the price drops below your limit" },
 };
 
+/*
+ * Vzhled e-mailů je sjednocený s ostatními e-maily e-shopu (send-order-email):
+ * sdílená karta renderEmailCard, oslovení „Dobrý den,“, údaje v šedém boxu
+ * s barevným proužkem a zlaté tlačítko se stejným stylem.
+ */
+const P = 'font-size: 14.5px; color: #222222; line-height: 1.6; margin: 0 0 24px 0;';
+const P_MUTED = 'font-size: 14px; color: #666666; line-height: 1.6; margin: 0 0 24px 0;';
+
 function button(url: string, label: string) {
-  return `<div style="text-align:center;margin:28px 0 8px;">
-    <a href="${url}" style="display:inline-block;background:#fdbd16;color:#111111;font-weight:800;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:15px;">${label}</a>
+  return `<div style="text-align: center; margin: 0 0 24px 0;">
+    <a href="${url}" target="_blank" style="background-color: #fdbd16; color: #111111; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; border: 1px solid #e2a80f; box-shadow: 0 2px 4px rgba(253, 189, 22, 0.15);">${label}</a>
   </div>`;
 }
 
-function unsubFooter(token: string, cz: boolean) {
-  return cz
-    ? `Tento e-mail jste dostali, protože jste si na northvaletcg.eu nastavili hlídání produktu.
-       <a href="${unsubscribeUrl(token)}" style="color:#888888;text-decoration:underline;">Zrušit hlídání</a>.`
-    : `You received this e-mail because you set up a product watchdog on northvaletcg.eu.
-       <a href="${unsubscribeUrl(token)}" style="color:#888888;text-decoration:underline;">Cancel watchdog</a>.`;
+/** Box s produktem — stejný jako box „Daňový doklad“ v e-mailu objednávky (zlatý proužek nahoře). */
+function productBox(label: string, name: string, detail: string) {
+  return `<div style="background-color: #fdfdfd; border: 1px solid #e1e4e8; border-top: 4px solid #fdbd16; padding: 22px; margin-bottom: 24px; border-radius: 8px; text-align: center;">
+    <div style="color: #666666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">${label}</div>
+    <div style="font-size: 17px; font-weight: 800; color: #111111; margin-bottom: 8px;">${name}</div>
+    <div style="font-size: 14px; color: #444444; line-height: 1.5;">${detail}</div>
+  </div>`;
+}
+
+/** Patička zákaznických e-mailů: kontakt jako všude + zrušení hlídání. */
+function customerFooter(token: string | null, cz: boolean) {
+  const contact = cz
+    ? `V případě dotazů nás kontaktujte na <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; text-decoration: underline; font-weight: bold;">info@northvaletcg.eu</a>.`
+    : `If you have any questions, contact us at <a href="mailto:info@northvaletcg.eu" style="color: #fdbd16; text-decoration: underline; font-weight: bold;">info@northvaletcg.eu</a>.`;
+  if (!token) return contact;
+  return `${contact}<br/>${cz ? "Hlídání už nechcete?" : "No longer interested?"}
+    <a href="${unsubscribeUrl(token)}" style="color: #888888; text-decoration: underline;">${cz ? "Zrušit hlídání" : "Cancel watchdog"}</a>`;
 }
 
 function confirmationEmail(w: any, product: any) {
   const cz = w.lang !== "EN";
   const name = escapeHtml(product.name);
-  const what = cz ? WHAT[w.type].cz : WHAT[w.type].en;
-  const limit = w.type === "price" ? (cz ? ` (${kc(w.price_limit)})` : ` (${kc(w.price_limit)})`) : "";
-  const body = `<p style="font-size:15px;line-height:1.6;color:#333333;margin:0 0 12px;text-align:center;">
-      ${cz ? "Hlídáme pro Vás produkt" : "We are watching"} <strong>${name}</strong>.<br/>
-      ${cz ? "Pošleme Vám e-mail" : "We will e-mail you"} <strong>${what}${limit}</strong>.
-    </p>${button(productUrl(product.id), cz ? "Zobrazit produkt" : "View product")}`;
+  const what = (cz ? WHAT[w.type].cz : WHAT[w.type].en)
+    + (w.type === "price" ? ` (${kc(w.price_limit)})` : "");
+  const body = `
+    <p style="${P}">
+      ${cz ? "Dobrý den," : "Hello,"}<br/><br/>
+      ${cz
+        ? `děkujeme za Váš zájem. Produkt <strong>${name}</strong> pro Vás hlídáme a ozveme se e-mailem, jakmile nastane, co jste si nastavili.`
+        : `thank you for your interest. We are watching <strong>${name}</strong> for you and will e-mail you as soon as your condition is met.`}
+    </p>
+    ${productBox(cz ? "Hlídáme produkt" : "Watching product", name, `${cz ? "Upozorníme Vás" : "We will notify you"} <strong>${what}</strong>.`)}
+    ${button(productUrl(product.id), cz ? "Zobrazit produkt" : "View product")}
+    <p style="${P_MUTED}">
+      ${cz
+        ? "Upozornění pošleme jen jednou — tím hlídání skončí. Pokud o produkt už nemáte zájem, můžete hlídání kdykoli zrušit odkazem níže."
+        : "We send the alert only once — then the watchdog ends. You can cancel it anytime using the link below."}
+    </p>`;
   return wrapInHtmlDocument(renderEmailCard({
     emoji: "🔔",
     title: cz ? "Hlídání je nastavené" : "Watchdog is set",
+    subtitle: name,
     body,
-    footer: unsubFooter(w.unsubscribe_token, cz),
+    footer: customerFooter(w.unsubscribe_token, cz),
   }));
 }
 
@@ -135,46 +165,69 @@ function triggeredEmail(w: any, product: any, deal: { price: number; original: n
     ? (cz ? "Je zase skladem!" : "Back in stock!")
     : w.type === "sale" ? (cz ? "Produkt je v akci!" : "Now on sale!")
     : (cz ? "Cena klesla!" : "Price dropped!");
-  const priceLine = deal
-    ? `<span style="text-decoration:line-through;color:#999999;">${kc(deal.original)}</span> <strong style="color:#111111;">${kc(deal.price)}</strong>`
-    : `<strong style="color:#111111;">${kc(price)}</strong>`;
-  const body = `<p style="font-size:15px;line-height:1.6;color:#333333;margin:0 0 8px;text-align:center;">
-      <strong>${name}</strong>
+  const intro = w.type === "stock"
+    ? (cz ? `máme dobrou zprávu — produkt <strong>${name}</strong>, který jste si hlídali, je znovu skladem.` : `good news — <strong>${name}</strong>, which you were watching, is back in stock.`)
+    : w.type === "sale"
+    ? (cz ? `produkt <strong>${name}</strong>, který jste si hlídali, je právě v akci.` : `<strong>${name}</strong>, which you were watching, is now on sale.`)
+    : (cz ? `cena produktu <strong>${name}</strong>, který jste si hlídali, klesla pod Váš limit ${kc(w.price_limit)}.` : `the price of <strong>${name}</strong> dropped below your limit of ${kc(w.price_limit)}.`);
+  const priceHtml = deal
+    ? `<span style="text-decoration: line-through; color: #999999;">${kc(deal.original)}</span> <strong>${kc(deal.price)}</strong>`
+    : `<strong>${kc(price)}</strong>`;
+  const body = `
+    <p style="${P}">
+      ${cz ? "Dobrý den," : "Hello,"}<br/><br/>
+      ${intro}
     </p>
-    <p style="font-size:18px;margin:0 0 6px;text-align:center;">${priceLine}</p>
-    <p style="font-size:13px;color:#888888;margin:0;text-align:center;">
-      ${cz ? "Zásoby bývají omezené — doporučujeme neotálet." : "Stock is often limited — don't wait too long."}
-    </p>${button(productUrl(product.id), cz ? "Koupit nyní" : "Buy now")}`;
-  const subject = cz ? `${title} ${product.name}` : `${title} ${product.name}`;
+    <div style="background-color: #fdfdfd; border: 1px solid #e1e4e8; border-left: 4px solid #10b981; padding: 22px; margin-bottom: 24px; border-radius: 8px;">
+      <p style="font-size: 14.5px; color: #111111; margin: 0; line-height: 1.6;">
+        ${cz ? "Produkt" : "Product"}: <strong>${name}</strong><br/>
+        ${cz ? "Cena" : "Price"}: ${priceHtml}<br/>
+        ${cz ? "Dostupnost" : "Availability"}: <strong style="color: #10b981;">${product.on_order ? (cz ? "Na objednávku" : "Made to order") : (cz ? "Skladem" : "In stock")}</strong>
+      </p>
+    </div>
+    ${button(productUrl(product.id), cz ? "Koupit nyní" : "Buy now")}
+    <p style="${P_MUTED}">
+      ${cz
+        ? "Zásoby bývají omezené, doporučujeme neotálet. Tímto e-mailem hlídání skončilo — chcete-li produkt hlídat znovu, nastavte si ho na stránce produktu."
+        : "Stock is often limited, so don't wait too long. This watchdog has now ended — you can set a new one on the product page."}
+    </p>`;
   return {
-    subject,
+    subject: `${title} ${product.name}`,
     html: wrapInHtmlDocument(renderEmailCard({
       emoji: w.type === "stock" ? "📦" : "🏷️",
       title,
+      subtitle: name,
       body,
-      footer: cz
-        ? "Hlídání tohoto produktu tímto e-mailem skončilo. Chcete-li hlídat znovu, nastavte si ho na stránce produktu."
-        : "This watchdog has now ended. You can set a new one on the product page.",
+      footer: customerFooter(null, cz),
     })),
   };
 }
 
 function adminEmail(w: any, product: any, counts: { total: number; stock: number; sale: number; price: number }) {
   const what = WHAT[w.type].cz + (w.type === "price" ? ` (${kc(w.price_limit)})` : "");
-  const body = `<p style="font-size:15px;line-height:1.6;color:#333333;margin:0 0 16px;text-align:center;">
-      Někdo si nastavil hlídání produktu <strong>${escapeHtml(product.name)}</strong> — ${what}.
+  const row = (label: string, value: string, last = false) => `<tr${last ? "" : ' style="border-bottom: 1px solid #e1e4e8;"'}>
+      <td style="padding: 10px 0; font-weight: bold; width: 170px; color: #666666;">${label}</td>
+      <td style="padding: 10px 0; color: #111111;">${value}</td>
+    </tr>`;
+  const body = `
+    <p style="${P}">
+      Dobrý den,<br/><br/>
+      zákazník si právě nastavil hlídání produktu <strong>${escapeHtml(product.name)}</strong> — ${what}.
     </p>
-    <table style="width:100%;border-collapse:collapse;font-size:14px;margin:0 0 8px;">
-      <tr><td style="padding:8px 0;border-bottom:1px solid #e1e4e8;color:#666666;">Celkem hlídá</td><td style="padding:8px 0;border-bottom:1px solid #e1e4e8;text-align:right;font-weight:800;">${counts.total}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #e1e4e8;color:#666666;">až bude skladem</td><td style="padding:8px 0;border-bottom:1px solid #e1e4e8;text-align:right;">${counts.stock}</td></tr>
-      <tr><td style="padding:8px 0;border-bottom:1px solid #e1e4e8;color:#666666;">až bude v akci</td><td style="padding:8px 0;border-bottom:1px solid #e1e4e8;text-align:right;">${counts.sale}</td></tr>
-      <tr><td style="padding:8px 0;color:#666666;">cenový limit</td><td style="padding:8px 0;text-align:right;">${counts.price}</td></tr>
-    </table>${button(productUrl(product.id), "Zobrazit produkt")}`;
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13.5px; line-height: 1.6;">
+      ${row("Celkem hlídá", `<strong style="color: #fdbd16; font-size: 16px;">${counts.total}×</strong>`)}
+      ${row("Až bude skladem", String(counts.stock))}
+      ${row("Až bude v akci", String(counts.sale))}
+      ${row("Cenový limit", String(counts.price), true)}
+    </table>
+    ${button(productUrl(product.id), "Zobrazit produkt")}
+    <p style="${P_MUTED}">Přehled všech hlídaných produktů najdete v Administraci → Produkty → tlačítko „Hlídané“.</p>`;
   return wrapInHtmlDocument(renderEmailCard({
     emoji: "🔔",
     title: "Nový hlídací pes",
+    subtitle: escapeHtml(product.name),
     body,
-    footer: "Přehled všech hlídaných produktů najdete v Administraci → Produkty → filtr „Hlídané“.",
+    footer: "Tento e-mail byl automaticky vygenerován systémem NORTHVALE.",
   }));
 }
 
@@ -329,6 +382,29 @@ serve(async (req) => {
       }
       console.log(`[product-watchdog] zkontrolováno ${pending.length}, splněno ${due.length}, odesláno ${sent}`);
       return json({ success: true, checked: pending.length, due: due.length, sent });
+    }
+
+    // ── Náhled e-mailů (jen admin / cron secret) ─────────────────────────
+    if (action === "preview") {
+      const cronSecret = Deno.env.get("WATCHDOG_CRON_SECRET") || "";
+      const fromCron = cronSecret && req.headers.get("x-cron-secret") === cronSecret;
+      if (!fromCron) {
+        const ctx = await getAuthContext(req, supabase, serviceKey);
+        if (!ctx.isAdmin) return json({ error: "Forbidden" }, 403);
+      }
+      const to = String(body.to || "").trim().toLowerCase();
+      if (!isValidEmail(to)) return json({ error: "Neplatný e-mail" }, 400);
+      const { data: product } = await supabase.from("products")
+        .select("id, name, price, stock, variants, type, on_order").eq("id", String(body.productId || "")).maybeSingle();
+      if (!product) return json({ error: "Produkt nenalezen" }, 404);
+      const sample = { type: "stock", lang: "CZ", price_limit: null, unsubscribe_token: "00000000-0000-0000-0000-000000000000" };
+      const trig = triggeredEmail(sample, product, undefined);
+      const results = {
+        potvrzeni: await sendEmail(to, `[NÁHLED] Hlídání nastaveno: ${product.name}`, confirmationEmail(sample, product)),
+        skladem: await sendEmail(to, `[NÁHLED] ${trig.subject}`, trig.html),
+        obchod: await sendEmail(to, `[NÁHLED] [Hlídací pes] ${product.name} — hlídá 3×`, adminEmail(sample, product, { total: 3, stock: 2, sale: 1, price: 0 })),
+      };
+      return json({ success: true, results });
     }
 
     return json({ error: "Unknown action" }, 400);
