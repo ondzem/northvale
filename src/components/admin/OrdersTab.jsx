@@ -75,6 +75,19 @@ export default function OrdersTab({ showToast }) {
     }
   };
 
+  /**
+   * Nedokončená platba kartou: objednávka vznikne před přesměrováním na bránu.
+   * Když zákazník platbu zruší nebo bránu zavře, zůstane tu nezaplacená —
+   * v seznamu pak vypadá jako duplicita k jeho další (dokončené) objednávce.
+   */
+  const isUnfinishedCardPayment = (details) => {
+    if (!details) return false;
+    const pm = String(details.paymentMethod || '').toLowerCase();
+    const isCard = pm.includes('kart') || pm.includes('card') || pm.includes('webpay');
+    const st = String(details.rawJson?.order?.paymentStatus || details.rawJson?.order?.payment_status || details.paymentStatus || '').toLowerCase();
+    return isCard && st !== 'paid' && st !== 'uhrazeno';
+  };
+
   const getPaymentStatusColor = (status) => {
     switch (status) {
       case 'paid':
@@ -124,6 +137,9 @@ export default function OrdersTab({ showToast }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [carrierFilter, setCarrierFilter] = useState('all');
   const [timeFilter, setTimeFilter] = useState('all');
+  // Řazení seznamu — výchozí: nejnovější objednávka nahoře.
+  const [sortOrder, setSortOrder] = useState('newest');
+  const [paymentFilter, setPaymentFilter] = useState('all');
   const [loadedOrders, setLoadedOrders] = useState({});
   const [selectedOrderIds, setSelectedOrderIds] = useState([]);
   const [detailOrder, setDetailOrder] = useState(null);
@@ -1333,8 +1349,27 @@ export default function OrdersTab({ showToast }) {
     );
   };
 
+  /**
+   * Řazení objednávek. Server je vrací v náhodném pořadí (detaily stahuje
+   * souběžně), proto se řadí tady. Čísla objednávek se přidělují postupně
+   * při vzniku, takže vyšší číslo = novější objednávka — spolehlivější než
+   * datum, které u starých objednávek chybí nebo je v různých formátech.
+   */
+  const sortOrders = (list) => {
+    const byNumber = (f) => parseInt(f.name.replace(/\D/g, ''), 10) || 0;
+    const total = (f) => Number(loadedOrders[f.name]?.totalPrice) || 0;
+    return [...list].sort((a, b) => {
+      switch (sortOrder) {
+        case 'oldest': return byNumber(a) - byNumber(b);
+        case 'total_desc': return (total(b) - total(a)) || (byNumber(b) - byNumber(a));
+        case 'total_asc': return (total(a) - total(b)) || (byNumber(b) - byNumber(a));
+        default: return byNumber(b) - byNumber(a);
+      }
+    });
+  };
+
   const getFilteredOrders = () => {
-    return files.filter(f => {
+    return sortOrders(files.filter(f => {
       const details = loadedOrders[f.name];
       const orderId = f.name.replace('order_', '').replace('.json', '').replace('.xml', '');
       
@@ -1356,6 +1391,9 @@ export default function OrdersTab({ showToast }) {
           if (!isPickup) return false;
         }
       }
+
+      if (paymentFilter === 'hide_unfinished' && isUnfinishedCardPayment(details)) return false;
+      if (paymentFilter === 'only_unfinished' && !isUnfinishedCardPayment(details)) return false;
 
       if (timeFilter !== 'all') {
         const dateStr = details?.rawJson?.created_at || details?.rawJson?.order?.created_at || details?.date || f.created_at;
@@ -1388,7 +1426,7 @@ export default function OrdersTab({ showToast }) {
       }
 
       return true;
-    });
+    }));
   };
 
   const filteredFiles = getFilteredOrders();
@@ -1972,6 +2010,17 @@ export default function OrdersTab({ showToast }) {
               <option value="month">{lang === 'CZ' ? 'Tento měsíc (posledních 30d)' : 'This Month (last 30d)'}</option>
               <option value="year">{lang === 'CZ' ? 'Tento rok (posledních 365d)' : 'This Year (last 365d)'}</option>
             </select>
+            <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} onDoubleClick={(e) => e.stopPropagation()} aria-label={lang === 'CZ' ? 'Řazení' : 'Sort'}>
+              <option value="newest">{lang === 'CZ' ? 'Nejnovější nahoře' : 'Newest first'}</option>
+              <option value="oldest">{lang === 'CZ' ? 'Nejstarší nahoře' : 'Oldest first'}</option>
+              <option value="total_desc">{lang === 'CZ' ? 'Nejvyšší částka' : 'Highest total'}</option>
+              <option value="total_asc">{lang === 'CZ' ? 'Nejnižší částka' : 'Lowest total'}</option>
+            </select>
+            <select value={paymentFilter} onChange={(e) => setPaymentFilter(e.target.value)} onDoubleClick={(e) => e.stopPropagation()} aria-label={lang === 'CZ' ? 'Platby' : 'Payments'}>
+              <option value="all">{lang === 'CZ' ? 'Všechny objednávky' : 'All orders'}</option>
+              <option value="hide_unfinished">{lang === 'CZ' ? 'Skrýt nedokončené platby kartou' : 'Hide unfinished card payments'}</option>
+              <option value="only_unfinished">{lang === 'CZ' ? 'Jen nedokončené platby kartou' : 'Only unfinished card payments'}</option>
+            </select>
           </div>
         </div>
 
@@ -2108,6 +2157,25 @@ export default function OrdersTab({ showToast }) {
                             }}>
                               {getPaymentStatusText(details.rawJson?.order?.paymentStatus || details.rawJson?.order?.platba, lang)}
                             </span>
+                            {isUnfinishedCardPayment(details) && (
+                              <span
+                                title={lang === 'CZ'
+                                  ? 'Zákazník začal platit kartou, ale platbu na bráně nedokončil (zrušil ji nebo zavřel okno). Peníze nepřišly — nejde o skutečnou objednávku, pokud se zákazník neozve. Často k ní existuje další, dokončená objednávka téhož zákazníka.'
+                                  : 'The customer started a card payment but did not complete it at the gateway. No money was received.'}
+                                style={{
+                                  backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                                  color: '#f87171',
+                                  fontSize: '10px',
+                                  marginTop: '2px',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  fontWeight: 'bold',
+                                  alignSelf: 'flex-start',
+                                  cursor: 'help'
+                                }}>
+                                {lang === 'CZ' ? '✕ Platba kartou nedokončena' : '✕ Card payment not completed'}
+                              </span>
+                            )}
                             {details.rawJson?.order?.invoice_error && (
                               <span style={{
                                 backgroundColor: 'rgba(239, 68, 68, 0.15)',

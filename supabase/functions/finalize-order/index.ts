@@ -840,7 +840,12 @@ serve(async (req) => {
 
         if (profile) {
           const history = profile.order_history || [];
-          const updatedHistory = [slimOrderForHistory(normalizedOrderData), ...history.filter((h: any) => h.id !== normalizedOrderData.id)].slice(0, ORDER_HISTORY_LIMIT);
+          // Platba kartou (reserveOnly) ještě neproběhla — do „Moje objednávky“
+          // ji zapíše až mark_paid. Jinak by zákazníkovi po zrušené platbě na
+          // bráně visela nezaplacená objednávka vedle té, kterou pak dokončil.
+          const updatedHistory = reserveOnly
+            ? history
+            : [slimOrderForHistory(normalizedOrderData), ...history.filter((h: any) => h.id !== normalizedOrderData.id)].slice(0, ORDER_HISTORY_LIMIT);
           const newCredit = Math.max(0, (profile.store_credit || 0) - (normalizedOrderData.credit_applied || 0));
 
           await supabase

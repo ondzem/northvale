@@ -276,6 +276,7 @@ serve(async (req) => {
       ];
 
       let restoredCount = 0;
+      let orderUserId: string | null = null;
       try {
         let fileBlob = (await supabase.storage.from("pohoda-orders").download(`${baseName}.json`)).data;
         if (!fileBlob) {
@@ -285,6 +286,7 @@ serve(async (req) => {
           const text = await fileBlob.text();
           const jsonObj = JSON.parse(text);
           const normalized = normalizeOrder(jsonObj.order || jsonObj);
+          orderUserId = normalized.user_id || jsonObj.order?.user_id || jsonObj.order?.userId || null;
 
           // 6a: Support items in jsonObj.items || normalized.items
           const itemsToRestore = normalizeItems(jsonObj.items || normalized.items || []);
@@ -334,6 +336,24 @@ serve(async (req) => {
 
       const { data, error } = await supabase.storage.from("pohoda-orders").remove(filesToDelete);
       if (error) throw error;
+
+      // Smazaná objednávka nesmí zákazníkovi dál viset v „Moje objednávky“.
+      // Dřív tam zůstávaly např. nedokončené platby kartou, které admin smazal.
+      if (orderUserId) {
+        try {
+          const orderId = baseName.replace(/^order_/, "");
+          const { data: prof } = await supabase.from("profiles").select("order_history").eq("id", orderUserId).maybeSingle();
+          const history = Array.isArray(prof?.order_history) ? prof.order_history : null;
+          if (history) {
+            const kept = history.filter((o: any) => String(o?.id) !== orderId);
+            if (kept.length !== history.length) {
+              await supabase.from("profiles").update({ order_history: kept }).eq("id", orderUserId);
+            }
+          }
+        } catch (histErr) {
+          console.error("[save-order-json] Odebrání z historie zákazníka selhalo:", histErr);
+        }
+      }
 
       return new Response(JSON.stringify({ success: true, message: `Files deleted: ${filesToDelete.join(", ")}`, restoredCount, deleted: data }), {
         status: 200,
