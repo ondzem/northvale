@@ -7,7 +7,7 @@ import { getAuthContext, requireAdmin } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -36,11 +36,16 @@ serve(async (req) => {
     // Initialize Supabase Client with Service Role Key to bypass RLS
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // BEZPEČNOST: kontrolu expirace denní nabídky spouští cron (service klíč)
-    // nebo administrátor. Veřejné volání by umožnilo cizímu měnit stav nabídky.
-    const authCtx = await getAuthContext(req, supabase, supabaseServiceKey);
-    const denied = requireAdmin(authCtx, corsHeaders);
-    if (denied) return denied;
+    // BEZPEČNOST: kontrolu spouští pg_cron (hlavička x-cron-secret = secret
+    // DEAL_EXPIRY_CRON_SECRET) nebo administrátor. Veřejné volání by umožnilo
+    // cizímu měnit stav nabídky. Dřív cron posílal anon JWT → každé volání 401.
+    const cronSecret = Deno.env.get("DEAL_EXPIRY_CRON_SECRET") || "";
+    const fromCron = cronSecret !== "" && req.headers.get("x-cron-secret") === cronSecret;
+    if (!fromCron) {
+      const authCtx = await getAuthContext(req, supabase, supabaseServiceKey);
+      const denied = requireAdmin(authCtx, corsHeaders);
+      if (denied) return denied;
+    }
 
     // Fetch all active deals
     const { data: deals, error: dbError } = await supabase
