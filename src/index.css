@@ -11083,13 +11083,7 @@ html.os-windows::-webkit-scrollbar-thumb:hover {
 
 /* Okno „Hlídací pes“ (WatchdogModal) — výběr ve stylu pokladny */
 .product-modal-container.wdg { max-width: 480px; max-height: calc(100vh - 40px); overflow-y: auto; }
-.wdg-head { display: flex; align-items: center; gap: 14px; margin: 0 40px 22px 0; }
-.wdg-icon {
-  width: 42px; height: 42px; flex-shrink: 0; border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: rgba(253, 189, 22, 0.1); border: 1px solid rgba(253, 189, 22, 0.28); color: var(--color-gold);
-}
-.wdg-icon svg { width: 20px; height: 20px; }
+.wdg-head { margin: 0 40px 22px 0; }
 .product-modal-title.wdg-title { margin: 0; }
 .wdg-product { margin: 3px 0 0; font-size: 13px; color: var(--text-muted); line-height: 1.35; }
 
