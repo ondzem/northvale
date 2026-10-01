@@ -5,6 +5,7 @@ import { getProductImageCached } from '../services/products';
 import CartItemImage from './CartItemImage';
 import { validateDiscountCode, calculateDiscountAmount } from '../services/discountService';
 import { subscribeToNewsletter } from '../services/newsletter';
+import { estimateDeliveryDate, formatDeliveryDate } from '../services/deliveryEstimate';
 import { COD_SURCHARGE, TRANSFER_DISCOUNT, FREE_SHIPPING_THRESHOLD, paymentAdjustment, paymentAdjustmentLabel } from '../config';
 import AddressAutocomplete from './AddressAutocomplete';
 
@@ -163,6 +164,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   };
 
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  // Zboží na objednávku má vlastní dodací lhůtu — obecný odhad doručení by lhal
+  const cartHasOnOrder = cart.some(item => !!(item.product?.onOrder || item.product?.on_order || item.onOrder || item.on_order));
 
   // Calculate discount
   const discountAmount = calculateDiscountAmount(cartSubtotal, appliedDiscount);
@@ -1695,53 +1698,120 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           color: rgb(253, 189, 22);
           letter-spacing: -0.6px;
         }
-        .pof-recap {
-          margin: 18px 0 16px;
-          padding: 14px 16px;
-          border: 1px solid rgba(240, 240, 240, 0.09);
-          border-radius: 8px;
-          background: rgba(255, 255, 255, 0.02);
+        /* Souhrn údajů — stejný jazyk jako pole formuláře a souhrn objednávky:
+           žádný rámeček, popisky verzálkami, tenké linky. */
+        .pof-recap { margin: 4px 0 22px; }
+        .pof-recap-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          padding-bottom: 12px;
+          border-bottom: 1px solid rgba(240, 240, 240, 0.07);
         }
-        .pof-recap-title {
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
+        .pof-recap-head .__om-t {
           color: rgb(138, 138, 146);
-          margin-bottom: 8px;
+          font-size: 12px;
+          font-weight: 500;
+          letter-spacing: 1.92px;
+          text-transform: uppercase;
         }
-        .pof-recap-list { margin: 0; }
-        .pof-recap-list > div {
-          display: grid;
-          grid-template-columns: 82px 1fr;
-          gap: 10px;
-          padding: 6px 0;
-          font-size: 13px;
-          line-height: 1.45;
-        }
-        .pof-recap-list dt { color: rgb(138, 138, 146); }
-        .pof-recap-list dd { margin: 0; color: rgb(240, 240, 240); word-break: break-word; }
-        .pof-recap-missing { color: #f87171; }
-        .pof-recap-note {
-          margin: 10px 0 0;
-          padding-top: 10px;
-          border-top: 1px solid rgba(240, 240, 240, 0.07);
-          font-size: 12.5px;
-          line-height: 1.5;
+        .pof-recap-edit {
+          background: none;
+          border: none;
+          padding: 0;
+          font: inherit;
+          font-size: 12px;
+          font-weight: 500;
           color: rgb(253, 189, 22);
+          cursor: pointer;
+          text-decoration: underline;
+          text-underline-offset: 3px;
         }
-        .pof-consents { display: flex; flex-direction: column; gap: 10px; margin: 0 0 18px; }
+        .pof-recap-row {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          padding: 14px 0;
+          border-bottom: 1px solid rgba(240, 240, 240, 0.07);
+        }
+        .pof-recap-label {
+          font-size: 11px;
+          font-weight: 500;
+          color: rgb(138, 138, 146);
+          letter-spacing: 2.2px;
+          text-transform: uppercase;
+        }
+        .pof-recap-value {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          font-size: 14px;
+          font-weight: 500;
+          color: rgb(240, 240, 240);
+          line-height: 1.45;
+          word-break: break-word;
+        }
+        .pof-recap-sub { font-size: 13px; font-weight: 400; color: rgb(138, 138, 146); }
+        .pof-recap-eta {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          margin-top: 4px;
+          font-size: 12.5px;
+          font-weight: 500;
+          color: rgb(16, 185, 129);
+        }
+        .pof-recap-eta::before {
+          content: '';
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: rgb(16, 185, 129);
+          box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+        }
+        .pof-recap-missing { color: #f87171; font-weight: 500; }
+        .pof-recap-note {
+          display: flex;
+          gap: 9px;
+          align-items: flex-start;
+          margin: 14px 0 0;
+          font-size: 12px;
+          line-height: 1.5;
+          color: rgb(138, 138, 146);
+        }
+        .pof-recap-note svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; color: rgb(253, 189, 22); }
+
+        /* Nepovinné souhlasy — vlastní zaškrtávátko v barvách pokladny */
+        .pof-consents { display: flex; flex-direction: column; gap: 12px; margin: 0 0 22px; }
         .pof-consent {
           display: flex;
-          gap: 10px;
+          gap: 12px;
           align-items: flex-start;
           font-size: 12.5px;
           line-height: 1.5;
-          color: rgb(180, 180, 188);
+          color: rgb(138, 138, 146);
           cursor: pointer;
         }
-        .pof-consent input { margin-top: 2px; flex-shrink: 0; accent-color: rgb(253, 189, 22); width: 15px; height: 15px; }
-        .pof-consent strong { color: rgb(240, 240, 240); font-weight: 600; }
+        .pof-consent input {
+          appearance: none;
+          -webkit-appearance: none;
+          flex-shrink: 0;
+          width: 16px;
+          height: 16px;
+          margin: 1px 0 0;
+          border: 1.5px solid rgb(80, 80, 90);
+          border-radius: 4px;
+          background: transparent;
+          cursor: pointer;
+          transition: border-color 0.18s ease, background-color 0.18s ease;
+        }
+        .pof-consent input:hover { border-color: rgb(138, 138, 146); }
+        .pof-consent input:checked {
+          border-color: rgb(253, 189, 22);
+          background: rgb(253, 189, 22) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E") center / 11px no-repeat;
+        }
+        .pof-consent input:focus-visible { outline: 2px solid rgba(253, 189, 22, 0.5); outline-offset: 2px; }
+        .pof-consent strong { color: rgb(240, 240, 240); font-weight: 500; }
 
         .pof-total-val .__om-t {
           color: rgb(138, 138, 146);
@@ -2688,43 +2758,73 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   <span className="pof-total-val">{finalTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} <span className="__om-t">{lang === 'CZ' ? 'Kč' : 'CZK'}</span></span>
                 </div>
 
-                {/* Kontrola údajů před odesláním — bez samostatného kroku rekapitulace */}
+                {/* Kontrola údajů před odesláním — bez samostatného kroku rekapitulace.
+                    Vzhled jako pole formuláře: popisek verzálkami, hodnota, tenká linka. */}
                 <div className="pof-recap">
-                  <div className="pof-recap-title">{lang === 'CZ' ? 'Zkontrolujte své údaje' : 'Check your details'}</div>
-                  <dl className="pof-recap-list">
-                    <div>
-                      <dt>{lang === 'CZ' ? 'Kontakt' : 'Contact'}</dt>
-                      <dd>
-                        {name.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'chybí jméno' : 'name missing'}</span>}
-                        <br />{email.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'chybí e-mail' : 'e-mail missing'}</span>}
-                        {phone.trim() && <><br />{phone.trim()}</>}
-                      </dd>
+                  <div className="pof-recap-head">
+                    <span className="__om-t">{lang === 'CZ' ? 'Vaše údaje' : 'Your details'}</span>
+                    <button
+                      type="button"
+                      className="pof-recap-edit"
+                      onClick={() => document.querySelector('.pof-step')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                    >
+                      {lang === 'CZ' ? 'Upravit' : 'Edit'}
+                    </button>
+                  </div>
+
+                  <div className="pof-recap-row">
+                    <span className="pof-recap-label">{lang === 'CZ' ? 'Kontakt' : 'Contact'}</span>
+                    <span className="pof-recap-value">
+                      {name.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'Doplňte jméno' : 'Name missing'}</span>}
+                      <span className="pof-recap-sub">
+                        {email.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'doplňte e-mail' : 'e-mail missing'}</span>}
+                        {phone.trim() && <> · {phone.trim()}</>}
+                      </span>
+                    </span>
+                  </div>
+
+                  <div className="pof-recap-row">
+                    <span className="pof-recap-label">{lang === 'CZ' ? 'Doručení' : 'Delivery'}</span>
+                    <span className="pof-recap-value">
+                      {isPersonalShipping
+                        ? (lang === 'CZ' ? 'Osobní odběr – Holice' : 'Personal pickup – Holice')
+                        : (shipping === 'dpd-pickup' || shipping === 'gls-pickup')
+                          ? <>{shipping.startsWith('dpd') ? 'DPD' : 'GLS'} · {pickupPoint.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'vyberte výdejní místo' : 'choose a pickup point'}</span>}</>
+                          : <>{shipping.startsWith('dpd') ? 'DPD' : 'GLS'} · {[street.trim(), [zip.trim(), city.trim()].filter(Boolean).join(' ')].filter(Boolean).join(', ') || <span className="pof-recap-missing">{lang === 'CZ' ? 'doplňte adresu' : 'address missing'}</span>}</>}
+                      {!cartHasOnOrder && (
+                        <span className="pof-recap-eta">
+                          {isPersonalShipping
+                            ? (lang === 'CZ' ? 'K vyzvednutí obvykle do ' : 'Ready for pickup usually by ')
+                            : (lang === 'CZ' ? 'U vás obvykle do ' : 'Usually delivered by ')}
+                          {formatDeliveryDate(estimateDeliveryDate(new Date(), { personalPickup: isPersonalShipping }), lang)}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+
+                  {isCompany && (
+                    <div className="pof-recap-row">
+                      <span className="pof-recap-label">{lang === 'CZ' ? 'Fakturace' : 'Billing'}</span>
+                      <span className="pof-recap-value">
+                        {companyName.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'doplňte firmu' : 'company missing'}</span>}
+                        {(ico.trim() || dic.trim()) && (
+                          <span className="pof-recap-sub">
+                            {ico.trim() && <>IČO {ico.trim()}</>}{ico.trim() && dic.trim() && ' · '}{dic.trim() && <>DIČ {dic.trim()}</>}
+                          </span>
+                        )}
+                      </span>
                     </div>
-                    <div>
-                      <dt>{lang === 'CZ' ? 'Doručení' : 'Delivery'}</dt>
-                      <dd>
-                        {isPersonalShipping
-                          ? (lang === 'CZ' ? 'Osobní odběr – Holice' : 'Personal pickup – Holice')
-                          : (shipping === 'dpd-pickup' || shipping === 'gls-pickup')
-                            ? <>{shipping.startsWith('dpd') ? 'DPD' : 'GLS'} – {pickupPoint.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'vyberte výdejní místo' : 'choose a pickup point'}</span>}</>
-                            : <>{shipping.startsWith('dpd') ? 'DPD' : 'GLS'} – {[street.trim(), [zip.trim(), city.trim()].filter(Boolean).join(' ')].filter(Boolean).join(', ') || <span className="pof-recap-missing">{lang === 'CZ' ? 'chybí adresa' : 'address missing'}</span>}</>}
-                      </dd>
-                    </div>
-                    {isCompany && (
-                      <div>
-                        <dt>{lang === 'CZ' ? 'Fakturace' : 'Billing'}</dt>
-                        <dd>
-                          {companyName.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'chybí firma' : 'company missing'}</span>}
-                          {ico.trim() && <><br />IČO {ico.trim()}</>}
-                          {dic.trim() && <>, DIČ {dic.trim()}</>}
-                        </dd>
-                      </div>
-                    )}
-                  </dl>
+                  )}
+
                   <p className="pof-recap-note">
-                    {lang === 'CZ'
-                      ? 'Zkontrolujte prosím pečlivě zadané údaje. Po odeslání objednávky je už nelze změnit a fakturu vystavíme na tyto údaje.'
-                      : 'Please check your details carefully. They cannot be changed after the order is placed and the invoice will be issued to them.'}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    <span>
+                      {lang === 'CZ'
+                        ? 'Údaje prosím pečlivě zkontrolujte — po odeslání objednávky je už nelze změnit a fakturu vystavíme na ně.'
+                        : 'Please check your details carefully — they cannot be changed after the order is placed.'}
+                    </span>
                   </p>
                 </div>
 

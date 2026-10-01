@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import DeliveryOptionsModal from './DeliveryOptionsModal';
 import WatchdogModal from './WatchdogModal';
+import { estimateDeliveryDate, formatDeliveryDate } from '../services/deliveryEstimate';
 import { FEATURE_FLAGS, calculatePriceExVat } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
@@ -1400,6 +1401,16 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
                     <span className="pdp-status-sep" aria-hidden="true">·</span>
                     <span className="pdp-status-eta">
                       {lang === 'CZ' ? `dodání ${product.deliveryTime}` : `delivery in ${product.deliveryTime}`}
+                    </span>
+                  </>
+                )}
+                {/* Odhad doručení: odeslání do 48 h (2 prac. dny) + 1 prac. den doprava */}
+                {!isOnOrder && stock > 0 && (
+                  <>
+                    <span className="pdp-status-sep" aria-hidden="true">·</span>
+                    <span className="pdp-status-eta">
+                      {lang === 'CZ' ? 'u vás obvykle do ' : 'usually delivered by '}
+                      {formatDeliveryDate(estimateDeliveryDate(), lang)}
                     </span>
                   </>
                 )}

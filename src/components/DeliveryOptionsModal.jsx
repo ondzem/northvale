@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { estimateDeliveryDate, formatDeliveryDate } from '../services/deliveryEstimate';
 import {
   SHIPPING_OPTIONS,
   FREE_SHIPPING_THRESHOLD,
@@ -68,7 +69,9 @@ export default function DeliveryOptionsModal({ price = 0, deliveryTime, isOnOrde
             ? (cz
               ? <>Zboží na objednávku — odešleme {deliveryTime ? <>obvykle do <strong>{deliveryTime}</strong></> : 'po naskladnění'} od zaplacení.</>
               : <>Made to order — usually ships {deliveryTime ? <>within <strong>{deliveryTime}</strong></> : 'once in stock'} after payment.</>)
-            : (cz ? <>Skladem zboží <strong>odesíláme do 48 hodin</strong> v pracovní dny.</> : <>In-stock items <strong>ship within 48 hours</strong> on business days.</>)}
+            : (cz
+              ? <>Skladem zboží <strong>odesíláme do 48 hodin</strong> v pracovní dny — při objednávce dnes u vás obvykle do <strong>{formatDeliveryDate(estimateDeliveryDate(), 'CZ')}</strong>.</>
+              : <>In-stock items <strong>ship within 48 hours</strong> on business days — order today and it usually arrives by <strong>{formatDeliveryDate(estimateDeliveryDate(), 'EN')}</strong>.</>)}
         </p>
 
         <h4 className="dmo-heading">{cz ? 'Doprava' : 'Shipping'}</h4>
