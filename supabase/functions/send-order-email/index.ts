@@ -5,6 +5,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getAuthContext, requireAdmin } from "../_shared/auth.ts";
 import { AUTO_INVOICES } from "../_shared/features.ts";
 import { INVOICE_FOLLOWS_NOTE } from "../_shared/email-template.ts";
+import { orderViewUrl, orderLinksBlockHtml, isTestEmail } from "../_shared/order-link.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
@@ -61,7 +62,16 @@ serve(async (req) => {
     // (finalize-order se service klíčem) nebo přihlášený administrátor.
     // Bez toho může kdokoli s veřejným anon klíčem rozesílat z vaší domény
     // libovolné "potvrzení objednávky" na libovolnou adresu (phishing).
-    {
+    const body = await req.json();
+    const { order, items, emailType, trackingNumber, carrier } = body;
+
+    // Náhled e-mailů (testování designu): jen s tajným klíčem a jen na
+    // testovací adresu (+nvtest) — nejde tím poslat e-mail cizímu člověku.
+    const previewSecret = Deno.env.get("EMAIL_PREVIEW_SECRET") || "";
+    const isPreview = previewSecret !== ""
+      && req.headers.get("x-email-preview") === previewSecret
+      && isTestEmail(order?.customerEmail);
+    if (!isPreview) {
       const authUrl = Deno.env.get("SUPABASE_URL") ?? "";
       const authServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
       const authClient = createClient(authUrl, authServiceKey);
@@ -69,9 +79,6 @@ serve(async (req) => {
       const denied = requireAdmin(authCtx, corsHeaders);
       if (denied) return denied;
     }
-
-    const body = await req.json();
-    const { order, items, emailType, trackingNumber, carrier } = body;
 
     if (!order || !order.id || !order.customerEmail) {
       return new Response(JSON.stringify({ error: "Missing required order or customer details." }), {
@@ -81,6 +88,12 @@ serve(async (req) => {
     }
 
     const orderItems = Array.isArray(items) && items.length > 0 ? items : (Array.isArray(order.items) ? order.items : []);
+
+    // „Zobrazit objednávku“ (bez přihlášení) + časté dotazy — do všech zákaznických e-mailů
+    const orderUrl = await orderViewUrl(order.id, order.customerEmail);
+    const orderLinksBlock = orderLinksBlockHtml(orderUrl);
+    // V náhledu (jen testovací adresa + tajný klíč) vrátíme i odkaz, ať jde stránku vyzkoušet
+    const previewExtra = isPreview ? { orderUrl } : {};
 
     if (emailType === "payment_received") {
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -168,6 +181,8 @@ serve(async (req) => {
               ${INVOICE_FOLLOWS_NOTE} Jakmile zásilku předáme dopravci, zašleme Vám potvrzovací e-mail o expedici.
             </p>`}
 
+            ${orderLinksBlock}
+
             <!-- Help / System Info -->
             <div style="border-top: 1px solid #e1e4e8; padding-top: 24px; margin-top: 30px; text-align: center;">
               <p style="font-size: 12px; color: #888888; margin: 0; line-height: 1.6;">
@@ -197,7 +212,7 @@ serve(async (req) => {
         })
       });
 
-      return new Response(JSON.stringify({ success: true, message: "Payment confirmed email sent with invoice attachment." }), {
+      return new Response(JSON.stringify({ success: true, message: "Payment confirmed email sent with invoice attachment.", ...previewExtra }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -253,6 +268,8 @@ serve(async (req) => {
               Zásilka byla předána přepravci a přepravní služba <strong>${activeCarrier}</strong> Vás bude přímo kontaktovat prostřednictvím SMS a e-mailu s přesnými informacemi o doručení.
             </p>
 
+            ${orderLinksBlock}
+
             <!-- Help / System Info -->
             <div style="border-top: 1px solid #e1e4e8; padding-top: 24px; margin-top: 30px; text-align: center;">
               <p style="font-size: 12px; color: #888888; margin: 0; line-height: 1.6;">
@@ -279,7 +296,7 @@ serve(async (req) => {
         })
       });
 
-      return new Response(JSON.stringify({ success: true, message: "Expedited email sent successfully." }), {
+      return new Response(JSON.stringify({ success: true, message: "Expedited email sent successfully.", ...previewExtra }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -556,6 +573,8 @@ serve(async (req) => {
             </tbody>
           </table>
 
+          ${orderLinksBlock}
+
           <!-- Footer Note -->
           <p style="font-size: 12px; color: #888888; margin: 0; text-align: center; line-height: 1.5;">
             Tento e-mail byl odeslán automaticky. V případě jakýchkoli dotazů nás kontaktujte na
@@ -745,7 +764,13 @@ serve(async (req) => {
       console.log(`[send-order-email] Invoice email response status: ${resInvoice.status}, body: ${txtInvoice}`);
     }
 
-    // 3. Send Admin Alert Email
+    // 3. Send Admin Alert Email — ne pro testovací objednávky (+nvtest)
+    if (isTestEmail(order.customerEmail)) {
+      return new Response(JSON.stringify({ success: true, test: true, ...previewExtra }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const resAdmin = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {

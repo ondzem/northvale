@@ -1,6 +1,6 @@
 # Plán: automatická odpověď + objednávka bez přihlášení
 
-Stav: návrh, zatím nic nepostaveno (1. 10. 2026).
+Stav (1. 10. 2026): body 1 a 2 HOTOVÉ a nasazené. Bod 3 (rozcestník) zrušen — v e-mailech je jen odkaz na /faq. Storno zatím ne.
 
 ## 1. Automatická odpověď „Vaši zprávu jsme přijali“
 

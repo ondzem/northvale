@@ -4,6 +4,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { verifyTurnstile, callerIp, isHoneypotFilled, shouldAllow } from "../_shared/turnstile.ts";
 import { safeField, isValidEmail } from "../_shared/auth.ts";
+import { isTestEmail } from "../_shared/order-link.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -149,6 +150,58 @@ serve(async (req) => {
     `;
 
     const htmlContent = wrapInHtmlDocument(innerHtml);
+
+    // Automatická odpověď zákazníkovi — záměrně obyčejný e-mail bez šablony,
+    // jako by psal člověk. Zákazník hned ví, že zpráva dorazila a kdy se ozveme.
+    const plainMessage = String(raw.message || "").trim().slice(0, 5000);
+    const autoReplyText = [
+      "Dobrý den,",
+      "",
+      "děkujeme za Vaši zprávu. Máme ji a ozveme se Vám zpravidla do 24 hodin v pracovní dny.",
+      "Pokud se zpráva týká objednávky, napište nám prosím v odpovědi její číslo, urychlí to vyřízení.",
+      "",
+      "S pozdravem",
+      "Tým NORTHVALE TCG",
+      "info@northvaletcg.eu | +420 739 666 779",
+      "",
+      "---------- Vaše zpráva ----------",
+      ...plainMessage.split(/\r?\n/).map((l) => `> ${l}`),
+    ].join("\n");
+    const autoReplyHtml = `<div style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #222222; line-height: 1.6;">
+<p>Dobrý den,</p>
+<p>děkujeme za Vaši zprávu. Máme ji a ozveme se Vám zpravidla do 24 hodin v pracovní dny.<br/>
+Pokud se zpráva týká objednávky, napište nám prosím v odpovědi její číslo, urychlí to vyřízení.</p>
+<p>S pozdravem<br/>Tým NORTHVALE TCG<br/>
+<a href="mailto:info@northvaletcg.eu" style="color: #1a0dab;">info@northvaletcg.eu</a> | +420 739 666 779</p>
+<p style="color: #777777; margin-top: 24px;">---------- Vaše zpráva ----------</p>
+<blockquote style="margin: 0; padding-left: 12px; border-left: 2px solid #cccccc; color: #555555; white-space: pre-wrap;">${message}</blockquote>
+</div>`;
+    try {
+      const ack = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: { "api-key": brevoApiKey, "content-type": "application/json", "accept": "application/json" },
+        body: JSON.stringify({
+          sender: { name: senderName, email: senderEmail },
+          to: [{ email, name }],
+          replyTo: { email: recipientEmail, name: senderName },
+          subject: "Re: Vaše zpráva pro NORTHVALE TCG",
+          htmlContent: autoReplyHtml,
+          textContent: autoReplyText,
+        }),
+      });
+      if (!ack.ok) console.error(`[send-contact-email] auto-odpověď: Brevo ${ack.status} ${await ack.text()}`);
+    } catch (ackErr) {
+      // Odpověď zákazníkovi je bonus — zpráva pro obchod musí odejít i bez ní
+      console.error("[send-contact-email] auto-odpověď selhala:", ackErr);
+    }
+
+    // Testovací zprávy (+nvtest) do schránky obchodu neposílat
+    if (isTestEmail(email)) {
+      return new Response(JSON.stringify({ success: true, test: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Call Brevo transactional email API
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {

@@ -13,6 +13,7 @@ import CheckoutFlow from './components/CheckoutFlow';
 import UserPortal from './components/UserPortal';
 import AdminPanel from './components/AdminPanel';
 import OrderConfirmation from './components/OrderConfirmation';
+import OrderView from './components/OrderView';
 import GdprVop from './components/GdprVop';
 import AboutPage from './components/AboutPage';
 import TcgCalendarPage from './components/TcgCalendarPage';
@@ -69,6 +70,10 @@ const parseUrlToState = () => {
     page = FEATURE_FLAGS.showGrading ? 'grading' : 'home';
   } else if (path === '/grading-guide') {
     page = FEATURE_FLAGS.showGrading ? 'grading-guide' : 'home';
+  } else if (path.startsWith('/objednavka/')) {
+    // Stav objednávky bez přihlášení (odkaz z e-mailu, klíč v ?k=)
+    page = 'order-view';
+    productId = decodeURIComponent(path.replace('/objednavka/', ''));
   } else if (path === '/support') {
     page = 'support';
   } else if (path === '/faq') {
@@ -102,7 +107,8 @@ const parseUrlToState = () => {
   }
   
   searchParams.forEach((value, key) => {
-    if (key !== 'tab' && key !== 'q') {
+    // 'k' = klíč odkazu na objednávku — není to filtr katalogu
+    if (key !== 'tab' && key !== 'q' && key !== 'k') {
       if (value === 'true') parsedFilters[key] = true;
       else if (value === 'false') parsedFilters[key] = false;
       else parsedFilters[key] = value;
@@ -128,6 +134,11 @@ const generateUrlFromState = (page, productId, tab, filtersObj, searchQuery) => 
     path = FEATURE_FLAGS.showGrading ? '/grading/' : '/';
   } else if (page === 'grading-guide') {
     path = FEATURE_FLAGS.showGrading ? '/grading-guide/' : '/';
+  } else if (page === 'order-view' && productId) {
+    path = `/objednavka/${encodeURIComponent(productId)}/`;
+    // Klíč z e-mailu musí v adrese zůstat (obnovení stránky, sdílení se sebou)
+    const k = new URLSearchParams(window.location.search).get('k');
+    if (k) searchParams.set('k', k);
   } else if (page === 'support') {
     path = '/support/';
   } else if (page === 'faq') {
@@ -1951,6 +1962,13 @@ function AppContent() {
             appliedDiscount={appliedDiscount}
             setAppliedDiscount={setAppliedDiscount}
             validateCart={validateCartItems}
+          />
+        )}
+
+        {activePage === 'order-view' && (
+          <OrderView
+            orderId={selectedProductId}
+            setActivePage={navigateToPage}
           />
         )}
 
