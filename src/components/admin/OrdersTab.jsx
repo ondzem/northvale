@@ -1489,9 +1489,12 @@ export default function OrdersTab({ showToast }) {
         }
         .orders-search-group {
           display: flex;
+          flex-wrap: wrap;
           gap: 12px;
           flex-grow: 1;
-          max-width: 750px;
+        }
+        .orders-search-group input {
+          min-width: 220px;
         }
         .orders-search-group input {
           flex-grow: 1;
@@ -1988,7 +1991,7 @@ export default function OrdersTab({ showToast }) {
       )}
 
       <div className="orders-toolbar">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: '1 1 0', minWidth: 0 }}>
           <div className="orders-search-group" onDoubleClick={() => setShowSettingsBtn(prev => !prev)} style={{ cursor: 'pointer' }} title={lang === 'CZ' ? 'Poklikáním zobrazíte/skryjete nastavení dopravy' : 'Double click to toggle shipping settings'}>
             <input 
               type="text" 
@@ -2024,7 +2027,7 @@ export default function OrdersTab({ showToast }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', alignSelf: 'flex-start', flexShrink: 0 }}>
           {showSettingsBtn && (
             <button className="orders-action-btn" onClick={() => setShowGlsSettings(!showGlsSettings)}>
               ⚙️ {lang === 'CZ' ? 'Dopravci API Nastavení' : 'Shipping API Settings'}
@@ -2577,7 +2580,7 @@ export default function OrdersTab({ showToast }) {
       )}
 
       {/* Floating Action Bar when orders are checked */}
-      {selectedOrderIds.length > 0 && (
+      {selectedOrderIds.length > 0 && createPortal(
         <div className="orders-floating-bar">
           <div className="orders-floating-info">
             {lang === 'CZ' 
@@ -2608,7 +2611,8 @@ export default function OrdersTab({ showToast }) {
               🗑️ {lang === 'CZ' ? 'Smazat vybrané' : 'Delete Selected'}
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       {/* Custom Confirmation Modal */}
       {confirmModal.isOpen && createPortal(
