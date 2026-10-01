@@ -121,6 +121,32 @@ function serverShippingCost(shippingMethod: string, subtotalAfterDiscount: numbe
 }
 
 /**
+ * Předá objednávku do Heureky „Ověřeno zákazníky“ (Heureka pak zákazníkovi
+ * pošle dotazník). Nevolá se, když zákazník v pokladně odmítl, ani pro
+ * testovací adresy (+nvtest, @example.com).
+ */
+async function logHeurekaOrder(order: any): Promise<void> {
+  const email = String(order?.customer_email || "").trim().toLowerCase();
+  if (!email) return;
+  if (order.heurekaOptOut === true || order.heureka_opt_out === true) return;
+  if (email.includes("+nvtest") || email.endsWith("@example.com")) return;
+  if (Deno.env.get("HEUREKA_OZ_ENABLED") === "false") return;
+  const apiKey = Deno.env.get("HEUREKA_OZ_KEY");
+  if (!apiKey) return;
+  try {
+    const productItemIds = (order.items || []).map((item: any) => item.product_id || item.id);
+    const response = await fetch("https://api.heureka.cz/shop-certification/v2/order/log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ apiKey, email, orderId: String(order.id), productItemIds }),
+    });
+    console.log(`Heureka OZ response status: ${response.status}`);
+  } catch (heurekaErr) {
+    console.error("Failed to trigger Heureka OZ:", heurekaErr);
+  }
+}
+
+/**
  * BEZPEČNOST — ověření cen na serveru.
  *
  * Klient posílá ceny položek i celkovou částku. Bez této kontroly si může
@@ -858,33 +884,11 @@ serve(async (req) => {
         }
       }
 
-      // 5. Trigger Heureka "Ověřeno zákazníky" if enabled
-      // Zákazník může v pokladně odmítnout dotazník (Heureka to vyžaduje) —
-      // pak jeho e-mail do Heureky vůbec neposíláme.
-      const heurekaOptOut = normalizedOrderData.heurekaOptOut === true || normalizedOrderData.heureka_opt_out === true;
-      const heurekaOzEnabled = Deno.env.get("HEUREKA_OZ_ENABLED");
-      if (heurekaOzEnabled !== "false" && !heurekaOptOut && normalizedOrderData.customer_email) {
-        const heurekaOzKey = Deno.env.get("HEUREKA_OZ_KEY");
-        if (heurekaOzKey) {
-          try {
-            const productItemIds = (normalizedOrderData.items || []).map((item: any) => item.product_id || item.id);
-            const response = await fetch("https://api.heureka.cz/shop-certification/v2/order/log", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                apiKey: heurekaOzKey,
-                email: normalizedOrderData.customer_email,
-                orderId: String(normalizedOrderData.id),
-                productItemIds,
-              }),
-            });
-            console.log(`Heureka OZ response status: ${response.status}`);
-          } catch (heurekaErr) {
-            console.error("Failed to trigger Heureka OZ:", heurekaErr);
-          }
-        }
+      // 5. Heureka „Ověřeno zákazníky“ — jen u objednávky, která opravdu proběhla.
+      // Platba kartou (reserveOnly) ještě nezaplacená → pošle se až v mark_paid.
+      // Dřív se volalo hned, takže dotazník chodil i po zrušené platbě kartou.
+      if (!reserveOnly) {
+        await logHeurekaOrder(normalizedOrderData);
       }
 
       return new Response(JSON.stringify({ success: true, orderId: normalizedOrderData.id, order: normalizedOrderData }), {
@@ -999,12 +1003,18 @@ serve(async (req) => {
       };
 
       const normalizedPaidOrder = normalizeOrder(updatedOrderObj);
+      const wasAlreadyPaid = String(existingOrder.payment_status || existingOrder.paymentStatus || '').toLowerCase() === 'paid';
 
       // Apply stock deduction and discount code increment on payment confirmation
       await applyStockAndDiscount(supabase, normalizedPaidOrder);
 
       // Trigger invoice generation and email
       await triggerPostOrderActions(supabase, supabaseUrl, supabaseServiceKey, normalizedPaidOrder, true);
+
+      // Heureka až teď — platba kartou je potvrzená (a jen jednou)
+      if (!wasAlreadyPaid) {
+        await logHeurekaOrder(normalizedPaidOrder);
+      }
 
       // Save updated order back to storage
       const storageData = {
