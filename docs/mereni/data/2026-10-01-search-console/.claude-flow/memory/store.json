@@ -1,0 +1,32 @@
+{
+  "entries": {
+    "cmd-1790847164458": {
+      "key": "cmd-1790847164458",
+      "value": "{\"command\":\"pkill -f \\\"unzip -o -q\\\" ; cd \\\"/Users/ondrejzeman/Documents/Documents - Ondřej’s MacBook Air/Alvion/AntiGravity IDE/NORTHVALE/docs/mereni/data/2026-10-01-search-console\\\" && rm -f ./* 2>/dev/null; python3 - <<'EOF'\\nimport zipfile, unicodedata\\nz = zipfile.ZipFile(\\\"/Users/ondrejzeman/Downloads/northvaletcg.eu-Performance-on-Search-2026-10-01.zip\\\")\\nfor i in z.infolist():\\n    name = i.filename\\n    try: name = name.encode('cp437').decode('utf-8')\\n    except Exception: pass\\n    ascii_name = unicodedata.normalize('NFKD', name).encode('ascii','ignore').decode().replace(' ','-').lower()\\n    open(ascii_name,'wb').write(z.read(i))\\n    print(name, '->', ascii_name, i.file_size)\\nEOF\\nfor f in *.csv; do echo \\\"== $f ($(wc -l < \\\"$f\\\") lines)\\\"; head -4 \\\"$f\\\"; done\",\"exitCode\":0,\"success\":true}",
+      "namespace": "commands",
+      "storedAt": "2026-10-01T09:32:44.458Z",
+      "lastAccessed": "2026-10-01T09:32:44.458Z",
+      "accessCount": 0,
+      "expiresAt": "2026-10-31T09:32:44.458Z"
+    },
+    "cmd-1790847176251": {
+      "key": "cmd-1790847176251",
+      "value": "{\"command\":\"cd \\\"/Users/ondrejzeman/Documents/Documents - Ondřej’s MacBook Air/Alvion/AntiGravity IDE/NORTHVALE/docs/mereni/data/2026-10-01-search-console\\\" && python3 - <<'EOF'\\nimport csv\\ng=list(csv.DictReader(open('graf.csv')))\\nc=sum(int(r['Prokliky']) for r in g); i=sum(int(r['Zobrazení']) for r in g)\\npos=sum(float(r['Pozice'])*int(r['Zobrazení']) for r in g)/i\\nprint('dny',g[0]['Datum'],'-',g[-1]['Datum'],len(g),'| prokliky',c,'| zobrazeni',i,'| CTR %.2f%%'%(100*c/i),'| vazena pozice %.1f'%pos)\\nh=len(g)//2\\nfor part,rows in (('1.pul',g[:h]),('2.pul',g[h:])):\\n  print(part, sum(int(r['Prokliky']) for r in rows), sum(int(r['Zobrazení']) for r in rows))\\nq=list(csv.DictReader(open('dotazy.csv')))\\nprint('dotazu',len(q))\\nprint('--- top 25 dle zobrazeni')\\nfor r in sorted(q,key=lambda r:-int(r['Zobrazení']))[:25]: print(r['Nejčastější dotazy'],'|',r['Prokliky'],r['Zobrazení'],r['Pozice'])\\nprint('--- obchodni')\\nimport re\\nfor r in q:\\n  t=r['Nejčastější dotazy']\\n  if re.search(r'pokemon|pokémon|lorcana|one piece|booster|karty|tcg|eshop|e-shop|obchod|koupit|box|etb|sleeve|obal|album|binder',t): print(t,'|',r['Prokliky'],r['Zobrazení'],r['Pozice'])\\nEOF\",\"exitCode\":0,\"success\":true}",
+      "namespace": "commands",
+      "storedAt": "2026-10-01T09:32:56.251Z",
+      "lastAccessed": "2026-10-01T09:32:56.251Z",
+      "accessCount": 0,
+      "expiresAt": "2026-10-31T09:32:56.251Z"
+    },
+    "cmd-1790847352799": {
+      "key": "cmd-1790847352799",
+      "value": "{\"command\":\"cd \\\"/Users/ondrejzeman/Documents/Documents - Ondřej’s MacBook Air/Alvion/AntiGravity IDE/NORTHVALE/docs/mereni/data/2026-10-01-search-console\\\" && python3 - <<'EOF'\\nimport csv\\np=list(csv.DictReader(open('stranky.csv')))\\nfor r in p[:10]: print(r['Nejvýznamnější stránky'].replace('https://northvaletcg.eu',''),'|',r['Prokliky'],'|',r['Zobrazení'],'|',r['CTR'],'|',r['Pozice'])\\nq={r['Nejčastější dotazy']:r for r in csv.DictReader(open('dotazy.csv'))}\\nfor k in ['northvale','lorcana booster box','lorcana winterspell booster box','pokemon store','pokemon go etb','destined rivals booster bundle','one piece booster box','pokémon eshop','pokemon shop','tcg shop','psa hodnocení karet cena','psa grading cena','grading karet','kde koupit pokemon karticky']:\\n  r=q.get(k); print(k,'|',(r['Prokliky'],r['Zobrazení'],r['Pozice']) if r else '-')\\nEOF\",\"exitCode\":0,\"success\":true}",
+      "namespace": "commands",
+      "storedAt": "2026-10-01T09:35:52.799Z",
+      "lastAccessed": "2026-10-01T09:35:52.799Z",
+      "accessCount": 0,
+      "expiresAt": "2026-10-31T09:35:52.799Z"
+    }
+  },
+  "version": "3.0.0"
+}

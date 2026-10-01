@@ -82,3 +82,5 @@ Podklad pro případovou studii: kolik e-shop vydělal a odkud zákazníci při�
 - Do 1. 10. 2026 nákupní události do GA4 nedorazily (posílaly se ve formátu pro GTM, který web nemá). Data v GA4 tedy začínají tímto dnem.
 - GA4 dostane události jen od lidí, kteří povolili analytické cookies. **Pro čísla do studie ber Admin → Přehled prodejů** — ten počítá všechny objednávky.
 - V GA4 → Správce → Události označ `purchase` jako klíčovou událost (obvykle už je).
+
+Výsledky, výchozí stav a postup pravidelných kontrol: [docs/mereni/](mereni/README.md).

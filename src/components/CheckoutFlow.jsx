@@ -2557,7 +2557,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                               alert(lang === 'CZ' ? 'Nemáte dostatek kreditu.' : 'You do not have enough store credit.', 'error');
                               return;
                             }
-                            const maxPossibleCredit = Math.max(0, subtotalAfterDiscount + shippingCost + paymentSurcharge - isicDiscount);
+                            const maxPossibleCredit = totalBeforeCredit;
                             const finalApplied = Math.min(val, maxPossibleCredit);
                             setAppliedCredit(finalApplied);
                             setCreditInput(finalApplied.toString());
