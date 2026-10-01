@@ -39,3 +39,26 @@ Jak to funguje:
 Kde v e-mailech: hned pod shrnutím objednávky, zlaté tlačítko „Zobrazit objednávku“.
 
 Navazuje: storno objednávky (tlačítko na téže stránce, dokud není odesláno) — viz bod 4 z dřívějška.
+
+## 3. Zákaznický servis (rozcestník)
+
+Inspirace: sanitino.cz/zakaznicky-servis („S čím vám můžeme pomoci?“ + dlaždice).
+
+Návrh: stávající stránku Kontakt (`/support/`) předělat na „Zákaznický servis“ — nic nového nepsat, jen přehledně rozcestit, co už máme:
+
+| Dlaždice | Kam vede | Stav |
+|---|---|---|
+| Moje objednávka | Moje objednávky (později odkaz bez přihlášení z bodu 2) | máme |
+| Doprava a platba | `/gdpr-vop/?tab=doprava` | máme |
+| Vrácení zboží | `/gdpr-vop/?tab=odstoupeni` (formulář odstoupení) | máme |
+| Reklamace | sekce reklamací z VOP (případně krátký postup) | doplnit text |
+| Časté dotazy | FAQ akordeon na stejné stránce (odroluje) | máme |
+| Napište nám | kontaktní formulář + telefon + e-mail (odroluje) | máme |
+
+Do všech e-mailů k objednávce: „Nevíte si s něčím rady? Zákaznický servis najdete zde.“ → `/support/`.
+
+## Pořadí stavby (až dáš pokyn)
+1. Automatická odpověď na formulář (bod 1)
+2. Odkaz na objednávku bez přihlášení + tlačítko v e-mailech (bod 2)
+3. Zákaznický servis — dlaždice (bod 3) + odkaz v e-mailech
+4. Storno objednávky na stránce z bodu 2
