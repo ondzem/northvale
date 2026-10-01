@@ -2245,7 +2245,7 @@ export default function OrdersTab({ showToast }) {
                                   <button 
                                     className="orders-action-btn"
                                     style={{ backgroundColor: '#ef4444', color: '#ffffff', fontWeight: 'bold' }}
-                                    onClick={() => handleDownloadInvoice(details)}
+                                    onClick={() => setShowInvoiceOrder(details)}
                                     title={lang === 'CZ' ? 'Vygenerovat daňový doklad po chybě' : 'Generate invoice after error'}
                                   >
                                     📄 {lang === 'CZ' ? 'Vygenerovat fakturu' : 'Generate Invoice'}
