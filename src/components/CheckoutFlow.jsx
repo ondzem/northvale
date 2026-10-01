@@ -1700,12 +1700,17 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         }
         /* Souhrn údajů — stejný jazyk jako pole formuláře a souhrn objednávky:
            žádný rámeček, popisky verzálkami, tenké linky. */
-        .pof-recap { margin: 4px 0 22px; }
+        .pof-recap {
+          margin: 30px 0 34px;
+          padding-top: 26px;
+          border-top: 1px solid rgba(240, 240, 240, 0.12);
+        }
         .pof-recap-head {
           display: flex;
           justify-content: space-between;
           align-items: baseline;
-          padding-bottom: 12px;
+          padding-bottom: 14px;
+          margin-bottom: 4px;
           border-bottom: 1px solid rgba(240, 240, 240, 0.07);
         }
         .pof-recap-head .__om-t {
@@ -1730,8 +1735,8 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         .pof-recap-row {
           display: flex;
           flex-direction: column;
-          gap: 6px;
-          padding: 14px 0;
+          gap: 7px;
+          padding: 16px 0;
           border-bottom: 1px solid rgba(240, 240, 240, 0.07);
         }
         .pof-recap-label {
@@ -1774,7 +1779,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           display: flex;
           gap: 9px;
           align-items: flex-start;
-          margin: 14px 0 0;
+          margin: 18px 0 0;
           font-size: 12px;
           line-height: 1.5;
           color: rgb(138, 138, 146);
@@ -1782,7 +1787,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         .pof-recap-note svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; color: rgb(253, 189, 22); }
 
         /* Nepovinné souhlasy — vlastní zaškrtávátko v barvách pokladny */
-        .pof-consents { display: flex; flex-direction: column; gap: 12px; margin: 0 0 22px; }
+        .pof-consents { display: flex; flex-direction: column; gap: 14px; margin: 0 0 30px; }
         .pof-consent {
           display: flex;
           gap: 12px;
@@ -2762,7 +2767,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                     Vzhled jako pole formuláře: popisek verzálkami, hodnota, tenká linka. */}
                 <div className="pof-recap">
                   <div className="pof-recap-head">
-                    <span className="__om-t">{lang === 'CZ' ? 'Vaše údaje' : 'Your details'}</span>
+                    <span className="__om-t">{lang === 'CZ' ? 'Kontrola vašich údajů' : 'Check your details'}</span>
                     <button
                       type="button"
                       className="pof-recap-edit"
@@ -2773,7 +2778,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   </div>
 
                   <div className="pof-recap-row">
-                    <span className="pof-recap-label">{lang === 'CZ' ? 'Kontakt' : 'Contact'}</span>
+                    <span className="pof-recap-label">{lang === 'CZ' ? 'Objednávající' : 'Ordered by'}</span>
                     <span className="pof-recap-value">
                       {name.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'Doplňte jméno' : 'Name missing'}</span>}
                       <span className="pof-recap-sub">
@@ -2784,7 +2789,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   </div>
 
                   <div className="pof-recap-row">
-                    <span className="pof-recap-label">{lang === 'CZ' ? 'Doručení' : 'Delivery'}</span>
+                    <span className="pof-recap-label">{lang === 'CZ' ? 'Doručit na' : 'Deliver to'}</span>
                     <span className="pof-recap-value">
                       {isPersonalShipping
                         ? (lang === 'CZ' ? 'Osobní odběr – Holice' : 'Personal pickup – Holice')
