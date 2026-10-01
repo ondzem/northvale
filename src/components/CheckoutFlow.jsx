@@ -1698,93 +1698,24 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           color: rgb(253, 189, 22);
           letter-spacing: -0.6px;
         }
-        /* Souhrn údajů — stejný jazyk jako pole formuláře a souhrn objednávky:
-           žádný rámeček, popisky verzálkami, tenké linky. */
-        .pof-recap {
-          margin: 30px 0 34px;
-          padding-top: 26px;
-          border-top: 1px solid rgba(240, 240, 240, 0.12);
-        }
-        .pof-recap-head {
+        .pof-eta {
           display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-          padding-bottom: 14px;
-          margin-bottom: 4px;
-          border-bottom: 1px solid rgba(240, 240, 240, 0.07);
-        }
-        .pof-recap-head .__om-t {
-          color: rgb(138, 138, 146);
-          font-size: 12px;
-          font-weight: 500;
-          letter-spacing: 1.92px;
-          text-transform: uppercase;
-        }
-        .pof-recap-edit {
-          background: none;
-          border: none;
-          padding: 0;
-          font: inherit;
-          font-size: 12px;
-          font-weight: 500;
-          color: rgb(253, 189, 22);
-          cursor: pointer;
-          text-decoration: underline;
-          text-underline-offset: 3px;
-        }
-        .pof-recap-row {
-          display: flex;
-          flex-direction: column;
-          gap: 7px;
-          padding: 16px 0;
-          border-bottom: 1px solid rgba(240, 240, 240, 0.07);
-        }
-        .pof-recap-label {
-          font-size: 11px;
-          font-weight: 500;
-          color: rgb(138, 138, 146);
-          letter-spacing: 2.2px;
-          text-transform: uppercase;
-        }
-        .pof-recap-value {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-          font-size: 14px;
-          font-weight: 500;
-          color: rgb(240, 240, 240);
-          line-height: 1.45;
-          word-break: break-word;
-        }
-        .pof-recap-sub { font-size: 13px; font-weight: 400; color: rgb(138, 138, 146); }
-        .pof-recap-eta {
-          display: inline-flex;
           align-items: center;
-          gap: 7px;
-          margin-top: 4px;
-          font-size: 12.5px;
-          font-weight: 500;
-          color: rgb(16, 185, 129);
+          gap: 8px;
+          margin: -6px 0 24px;
+          font-size: 13px;
+          color: rgb(138, 138, 146);
         }
-        .pof-recap-eta::before {
+        .pof-eta::before {
           content: '';
           width: 6px;
           height: 6px;
           border-radius: 50%;
+          flex-shrink: 0;
           background: rgb(16, 185, 129);
           box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
         }
-        .pof-recap-missing { color: #f87171; font-weight: 500; }
-        .pof-recap-note {
-          display: flex;
-          gap: 9px;
-          align-items: flex-start;
-          margin: 18px 0 0;
-          font-size: 12px;
-          line-height: 1.5;
-          color: rgb(138, 138, 146);
-        }
-        .pof-recap-note svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; color: rgb(253, 189, 22); }
+        .pof-eta strong { color: rgb(16, 185, 129); font-weight: 600; }
 
         /* Nepovinné souhlasy — vlastní zaškrtávátko v barvách pokladny */
         .pof-consents { display: flex; flex-direction: column; gap: 14px; margin: 0 0 30px; }
@@ -2763,75 +2694,18 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                   <span className="pof-total-val">{finalTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} <span className="__om-t">{lang === 'CZ' ? 'Kč' : 'CZK'}</span></span>
                 </div>
 
-                {/* Kontrola údajů před odesláním — bez samostatného kroku rekapitulace.
-                    Vzhled jako pole formuláře: popisek verzálkami, hodnota, tenká linka. */}
-                <div className="pof-recap">
-                  <div className="pof-recap-head">
-                    <span className="__om-t">{lang === 'CZ' ? 'Kontrola vašich údajů' : 'Check your details'}</span>
-                    <button
-                      type="button"
-                      className="pof-recap-edit"
-                      onClick={() => document.querySelector('.pof-step')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                    >
-                      {lang === 'CZ' ? 'Upravit' : 'Edit'}
-                    </button>
-                  </div>
-
-                  <div className="pof-recap-row">
-                    <span className="pof-recap-label">{lang === 'CZ' ? 'Objednávající' : 'Ordered by'}</span>
-                    <span className="pof-recap-value">
-                      {name.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'Doplňte jméno' : 'Name missing'}</span>}
-                      <span className="pof-recap-sub">
-                        {email.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'doplňte e-mail' : 'e-mail missing'}</span>}
-                        {phone.trim() && <> · {phone.trim()}</>}
-                      </span>
-                    </span>
-                  </div>
-
-                  <div className="pof-recap-row">
-                    <span className="pof-recap-label">{lang === 'CZ' ? 'Doručit na' : 'Deliver to'}</span>
-                    <span className="pof-recap-value">
-                      {isPersonalShipping
-                        ? (lang === 'CZ' ? 'Osobní odběr – Holice' : 'Personal pickup – Holice')
-                        : (shipping === 'dpd-pickup' || shipping === 'gls-pickup')
-                          ? <>{shipping.startsWith('dpd') ? 'DPD' : 'GLS'} · {pickupPoint.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'vyberte výdejní místo' : 'choose a pickup point'}</span>}</>
-                          : <>{shipping.startsWith('dpd') ? 'DPD' : 'GLS'} · {[street.trim(), [zip.trim(), city.trim()].filter(Boolean).join(' ')].filter(Boolean).join(', ') || <span className="pof-recap-missing">{lang === 'CZ' ? 'doplňte adresu' : 'address missing'}</span>}</>}
-                      {!cartHasOnOrder && (
-                        <span className="pof-recap-eta">
-                          {isPersonalShipping
-                            ? (lang === 'CZ' ? 'K vyzvednutí obvykle do ' : 'Ready for pickup usually by ')
-                            : (lang === 'CZ' ? 'U vás obvykle do ' : 'Usually delivered by ')}
-                          {formatDeliveryDate(estimateDeliveryDate(new Date(), { personalPickup: isPersonalShipping }), lang)}
-                        </span>
-                      )}
-                    </span>
-                  </div>
-
-                  {isCompany && (
-                    <div className="pof-recap-row">
-                      <span className="pof-recap-label">{lang === 'CZ' ? 'Fakturace' : 'Billing'}</span>
-                      <span className="pof-recap-value">
-                        {companyName.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'doplňte firmu' : 'company missing'}</span>}
-                        {(ico.trim() || dic.trim()) && (
-                          <span className="pof-recap-sub">
-                            {ico.trim() && <>IČO {ico.trim()}</>}{ico.trim() && dic.trim() && ' · '}{dic.trim() && <>DIČ {dic.trim()}</>}
-                          </span>
-                        )}
-                      </span>
-                    </div>
-                  )}
-
-                  <p className="pof-recap-note">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-                    </svg>
+                {/* Odhad doručení: odeslání do 48 h (2 prac. dny) + 1 prac. den doprava.
+                    U zboží na objednávku se nezobrazuje — má vlastní dodací lhůtu. */}
+                {!cartHasOnOrder && (
+                  <div className="pof-eta">
                     <span>
-                      {lang === 'CZ'
-                        ? 'Údaje prosím pečlivě zkontrolujte — po odeslání objednávky je už nelze změnit a fakturu vystavíme na ně.'
-                        : 'Please check your details carefully — they cannot be changed after the order is placed.'}
+                      {isPersonalShipping
+                        ? (lang === 'CZ' ? 'K vyzvednutí obvykle do ' : 'Ready for pickup usually by ')
+                        : (lang === 'CZ' ? 'U vás obvykle do ' : 'Usually delivered by ')}
+                      <strong>{formatDeliveryDate(estimateDeliveryDate(new Date(), { personalPickup: isPersonalShipping }), lang)}</strong>
                     </span>
-                  </p>
-                </div>
+                  </div>
+                )}
 
                 {/* Nepovinné souhlasy — výchozí stav vždy nezaškrtnuto */}
                 <div className="pof-consents">
