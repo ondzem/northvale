@@ -1036,6 +1036,7 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
                   <br />• <strong>Carriers:</strong> Zásilkovna s.r.o. (Packeta), DPD CZ s.r.o., GLS Czech Republic s.r.o., Czech Post, s.p.
                   <br />• <strong>Payment Gateway:</strong> Global Payments s.r.o.
                   <br />• <strong>Analytics:</strong> Google Ireland Limited (Google Analytics), Microsoft Corporation (Microsoft Clarity).
+                  <br />• <strong>Satisfaction surveys:</strong> Heureka Shopping s.r.o. ("Verified by Customers" programme) — your e-mail and purchased items are shared after the order so it can send you a satisfaction questionnaire (legitimate interest, Art. 6(1)(f) GDPR). You can opt out with the checkbox at checkout.
                   <br />• <strong>IT & Accounting Services:</strong> Hosting providers, accounting software.
                   <br />• <strong>Grading Services (USA):</strong> Card submissions to PSA/BGS/TAG are made anonymously under our business accounts, without sharing your personal data.
                 </p>
@@ -1188,6 +1189,10 @@ export default function GdprVop({ setActivePage, initialTab = 'vop' }) {
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
                   Poskytovatelé analytických nástrojů: Google Ireland Limited (Google Analytics), Microsoft Ireland Operations Limited (Microsoft Clarity).
+                </p>
+
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                  Heureka Shopping s.r.o., Karolinská 650/1, 186 00 Praha 8 (program „Ověřeno zákazníky"): po dokončení objednávky jí předáváme Váš e-mail a údaje o zakoupeném zboží, aby Vám mohla zaslat dotazník spokojenosti s nákupem. Činíme tak na základě oprávněného zájmu (čl. 6 odst. 1 písm. f) GDPR) na zlepšování našich služeb. Zaslání dotazníku můžete odmítnout zaškrtnutím políčka v pokladně při objednávce; v takovém případě Heurece nic nepředáváme.
                 </p>
 
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>

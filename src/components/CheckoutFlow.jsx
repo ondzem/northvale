@@ -4,6 +4,7 @@ import { supabase } from '../supabase';
 import { getProductImageCached } from '../services/products';
 import CartItemImage from './CartItemImage';
 import { validateDiscountCode, calculateDiscountAmount } from '../services/discountService';
+import { subscribeToNewsletter } from '../services/newsletter';
 import { COD_SURCHARGE, TRANSFER_DISCOUNT, FREE_SHIPPING_THRESHOLD, paymentAdjustment, paymentAdjustmentLabel } from '../config';
 import AddressAutocomplete from './AddressAutocomplete';
 
@@ -83,6 +84,10 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const [showMapModal, setShowMapModal] = useState(false);
   const [mapType, setMapType] = useState('');
   const [notes, setNotes] = useState(() => draftData?.notes ?? '');
+  // Nepovinné souhlasy v pokladně: newsletter (výchozí NE — zákon) a odmítnutí
+  // dotazníku Heureka „Ověřeno zákazníky“ (Heureka vyžaduje možnost odmítnout).
+  const [newsletterOptIn, setNewsletterOptIn] = useState(false);
+  const [heurekaOptOut, setHeurekaOptOut] = useState(false);
 
   const [hasRestoredDraft, setHasRestoredDraft] = useState(() => {
     return !!(draftData && (draftData.name || draftData.email || draftData.street || draftData.phone));
@@ -478,6 +483,12 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
             { isCardPaid: true, orderId: orderNumber, gpWebpayParams }
           );
 
+          // Newsletter až po úspěšném zaplacení (zaškrtnuto v pokladně)
+          if (pending.newsletterOptIn && pending.customerDetails?.email) {
+            subscribeToNewsletter(pending.customerDetails.email.trim(), lang)
+              .catch(nlErr => console.warn('Přihlášení k newsletteru z pokladny selhalo:', nlErr));
+          }
+
           localStorage.removeItem('pending-order-data');
           setActivePage('order-confirmation');
         } catch (err) {
@@ -818,6 +829,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
             product: item.product || item
           })),
           subtotal: cartSubtotal,
+          heurekaOptOut,
           discountCode: appliedDiscount ? appliedDiscount.code : null,
           discountAmount: discountAmount,
           shippingCost,
@@ -934,6 +946,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           orderId,
           fingerprint: orderFingerprint,
           cartKey: buildCartKey(),
+          newsletterOptIn,
           userId: user?.id || null,
           cart,
           cartSubtotal,
@@ -1020,6 +1033,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
         product: item.product || item
       })),
       subtotal: cartSubtotal,
+      heurekaOptOut,
       discountCode: appliedDiscount ? appliedDiscount.code : null,
       discountAmount: discountAmount,
       shippingCost,
@@ -1082,6 +1096,11 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
 
       order.client_ref = getOrderRef();
       const serverOrder = await submitOrder(order, actualAppliedCredit, { supersedes });
+      // Newsletter až po úspěšně vytvořené objednávce (zaškrtnuto v pokladně)
+      if (newsletterOptIn && email.trim()) {
+        subscribeToNewsletter(email.trim(), lang)
+          .catch(nlErr => console.warn('Přihlášení k newsletteru z pokladny selhalo:', nlErr));
+      }
       try {
         localStorage.removeItem('pending-order-data');
         localStorage.removeItem('northvale-order-ref');
@@ -1676,6 +1695,54 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           color: rgb(253, 189, 22);
           letter-spacing: -0.6px;
         }
+        .pof-recap {
+          margin: 18px 0 16px;
+          padding: 14px 16px;
+          border: 1px solid rgba(240, 240, 240, 0.09);
+          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.02);
+        }
+        .pof-recap-title {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: rgb(138, 138, 146);
+          margin-bottom: 8px;
+        }
+        .pof-recap-list { margin: 0; }
+        .pof-recap-list > div {
+          display: grid;
+          grid-template-columns: 82px 1fr;
+          gap: 10px;
+          padding: 6px 0;
+          font-size: 13px;
+          line-height: 1.45;
+        }
+        .pof-recap-list dt { color: rgb(138, 138, 146); }
+        .pof-recap-list dd { margin: 0; color: rgb(240, 240, 240); word-break: break-word; }
+        .pof-recap-missing { color: #f87171; }
+        .pof-recap-note {
+          margin: 10px 0 0;
+          padding-top: 10px;
+          border-top: 1px solid rgba(240, 240, 240, 0.07);
+          font-size: 12.5px;
+          line-height: 1.5;
+          color: rgb(253, 189, 22);
+        }
+        .pof-consents { display: flex; flex-direction: column; gap: 10px; margin: 0 0 18px; }
+        .pof-consent {
+          display: flex;
+          gap: 10px;
+          align-items: flex-start;
+          font-size: 12.5px;
+          line-height: 1.5;
+          color: rgb(180, 180, 188);
+          cursor: pointer;
+        }
+        .pof-consent input { margin-top: 2px; flex-shrink: 0; accent-color: rgb(253, 189, 22); width: 15px; height: 15px; }
+        .pof-consent strong { color: rgb(240, 240, 240); font-weight: 600; }
+
         .pof-total-val .__om-t {
           color: rgb(138, 138, 146);
           font-size: 11px;
@@ -2619,6 +2686,62 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
                 <div className="pof-total">
                   <span><span className="__om-t">{lang === 'CZ' ? 'Celkem' : 'Total due'}</span></span>
                   <span className="pof-total-val">{finalTotal.toLocaleString(lang === 'CZ' ? 'cs-CZ' : 'en-US')} <span className="__om-t">{lang === 'CZ' ? 'Kč' : 'CZK'}</span></span>
+                </div>
+
+                {/* Kontrola údajů před odesláním — bez samostatného kroku rekapitulace */}
+                <div className="pof-recap">
+                  <div className="pof-recap-title">{lang === 'CZ' ? 'Zkontrolujte své údaje' : 'Check your details'}</div>
+                  <dl className="pof-recap-list">
+                    <div>
+                      <dt>{lang === 'CZ' ? 'Kontakt' : 'Contact'}</dt>
+                      <dd>
+                        {name.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'chybí jméno' : 'name missing'}</span>}
+                        <br />{email.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'chybí e-mail' : 'e-mail missing'}</span>}
+                        {phone.trim() && <><br />{phone.trim()}</>}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>{lang === 'CZ' ? 'Doručení' : 'Delivery'}</dt>
+                      <dd>
+                        {isPersonalShipping
+                          ? (lang === 'CZ' ? 'Osobní odběr – Holice' : 'Personal pickup – Holice')
+                          : (shipping === 'dpd-pickup' || shipping === 'gls-pickup')
+                            ? <>{shipping.startsWith('dpd') ? 'DPD' : 'GLS'} – {pickupPoint.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'vyberte výdejní místo' : 'choose a pickup point'}</span>}</>
+                            : <>{shipping.startsWith('dpd') ? 'DPD' : 'GLS'} – {[street.trim(), [zip.trim(), city.trim()].filter(Boolean).join(' ')].filter(Boolean).join(', ') || <span className="pof-recap-missing">{lang === 'CZ' ? 'chybí adresa' : 'address missing'}</span>}</>}
+                      </dd>
+                    </div>
+                    {isCompany && (
+                      <div>
+                        <dt>{lang === 'CZ' ? 'Fakturace' : 'Billing'}</dt>
+                        <dd>
+                          {companyName.trim() || <span className="pof-recap-missing">{lang === 'CZ' ? 'chybí firma' : 'company missing'}</span>}
+                          {ico.trim() && <><br />IČO {ico.trim()}</>}
+                          {dic.trim() && <>, DIČ {dic.trim()}</>}
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
+                  <p className="pof-recap-note">
+                    {lang === 'CZ'
+                      ? 'Zkontrolujte prosím pečlivě zadané údaje. Po odeslání objednávky je už nelze změnit a fakturu vystavíme na tyto údaje.'
+                      : 'Please check your details carefully. They cannot be changed after the order is placed and the invoice will be issued to them.'}
+                  </p>
+                </div>
+
+                {/* Nepovinné souhlasy — výchozí stav vždy nezaškrtnuto */}
+                <div className="pof-consents">
+                  <label className="pof-consent">
+                    <input type="checkbox" checked={newsletterOptIn} onChange={e => setNewsletterOptIn(e.target.checked)} />
+                    <span>{lang === 'CZ' ? 'Chci dostávat novinky a akce e-mailem (newsletter).' : 'I want to receive news and offers by e-mail (newsletter).'}</span>
+                  </label>
+                  <label className="pof-consent">
+                    <input type="checkbox" checked={heurekaOptOut} onChange={e => setHeurekaOptOut(e.target.checked)} />
+                    <span>
+                      {lang === 'CZ'
+                        ? <>Nesouhlasím se zasláním dotazníku spokojenosti v rámci programu <strong>Ověřeno zákazníky</strong> (Heureka), který pomáhá zlepšovat naše služby.</>
+                        : <>I do not agree to receive a satisfaction questionnaire within the <strong>Verified by Customers</strong> programme (Heureka).</>}
+                    </span>
+                  </label>
                 </div>
 
                 <button 

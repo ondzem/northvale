@@ -859,8 +859,11 @@ serve(async (req) => {
       }
 
       // 5. Trigger Heureka "Ověřeno zákazníky" if enabled
+      // Zákazník může v pokladně odmítnout dotazník (Heureka to vyžaduje) —
+      // pak jeho e-mail do Heureky vůbec neposíláme.
+      const heurekaOptOut = normalizedOrderData.heurekaOptOut === true || normalizedOrderData.heureka_opt_out === true;
       const heurekaOzEnabled = Deno.env.get("HEUREKA_OZ_ENABLED");
-      if (heurekaOzEnabled !== "false" && normalizedOrderData.customer_email) {
+      if (heurekaOzEnabled !== "false" && !heurekaOptOut && normalizedOrderData.customer_email) {
         const heurekaOzKey = Deno.env.get("HEUREKA_OZ_KEY");
         if (heurekaOzKey) {
           try {
