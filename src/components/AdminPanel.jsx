@@ -31,7 +31,6 @@ export default function AdminPanel({ showToast, setActivePage }) {
 
   const tabsConfig = [
     { id: 'orders', name_cz: 'Objednávky', name_en: 'Orders' },
-    { id: 'stats', name_cz: 'Přehled prodejů', name_en: 'Sales overview' },
     { id: 'products', name_cz: 'Správa produktů', name_en: 'Products CMS' },
     { id: 'categories', name_cz: 'Správa kategorií', name_en: 'Categories CMS' },
     { id: 'homepage', name_cz: 'Správa úvodní stránky', name_en: 'Homepage CMS' },
@@ -39,6 +38,7 @@ export default function AdminPanel({ showToast, setActivePage }) {
     { id: 'newsletter', name_cz: 'Newsletter', name_en: 'Newsletter' },
     { id: 'preregistration', name_cz: 'Předregistrace', name_en: 'Pre-registrations' },
     { id: 'discount_codes', name_cz: 'Slevové kódy', name_en: 'Discount Codes' },
+    { id: 'stats', name_cz: 'Přehled prodejů', name_en: 'Sales overview' },
     { id: 'sync', name_cz: 'Synchronizace', name_en: 'Sync / Pohoda' },
   ];
 
