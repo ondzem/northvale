@@ -6,6 +6,7 @@ import CartItemImage from './CartItemImage';
 import { validateDiscountCode, calculateDiscountAmount } from '../services/discountService';
 import { subscribeToNewsletter } from '../services/newsletter';
 import { estimateDeliveryDate, formatDeliveryDate } from '../services/deliveryEstimate';
+import { trackEcommerce, gaItems, getVisitSource } from '../services/leadTracking';
 import { COD_SURCHARGE, TRANSFER_DISCOUNT, FREE_SHIPPING_THRESHOLD, paymentAdjustment, paymentAdjustmentLabel } from '../config';
 import AddressAutocomplete from './AddressAutocomplete';
 
@@ -341,25 +342,10 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
 
   // GA4 begin_checkout
   useEffect(() => {
-    try {
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({ ecommerce: null });
-      window.dataLayer.push({
-        event: 'begin_checkout',
-        ecommerce: {
-          currency: 'CZK',
-          value: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-          items: cart.map(item => ({
-            item_id: item.id,
-            item_name: item.name,
-            price: item.price,
-            quantity: item.quantity
-          }))
-        }
-      });
-    } catch (gaErr) {
-      console.error('GA4 begin_checkout failed:', gaErr);
-    }
+    trackEcommerce('begin_checkout', {
+      value: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+      items: gaItems(cart)
+    });
   }, []);
 
   // GA4 add_shipping_info
@@ -367,26 +353,11 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   useEffect(() => {
     if (shipping && shipping !== trackedShippingRef.current) {
       trackedShippingRef.current = shipping;
-      try {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({ ecommerce: null });
-        window.dataLayer.push({
-          event: 'add_shipping_info',
-          ecommerce: {
-            currency: 'CZK',
-            value: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-            shipping_tier: shipping,
-            items: cart.map(item => ({
-              item_id: item.id,
-              item_name: item.name,
-              price: item.price,
-              quantity: item.quantity
-            }))
-          }
-        });
-      } catch (gaErr) {
-        console.error('GA4 add_shipping_info failed:', gaErr);
-      }
+      trackEcommerce('add_shipping_info', {
+        value: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        shipping_tier: shipping,
+        items: gaItems(cart)
+      });
     }
   }, [shipping, cart]);
 
@@ -395,26 +366,11 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   useEffect(() => {
     if (payment && payment !== trackedPaymentRef.current) {
       trackedPaymentRef.current = payment;
-      try {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({ ecommerce: null });
-        window.dataLayer.push({
-          event: 'add_payment_info',
-          ecommerce: {
-            currency: 'CZK',
-            value: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-            payment_type: payment,
-            items: cart.map(item => ({
-              item_id: item.id,
-              item_name: item.name,
-              price: item.price,
-              quantity: item.quantity
-            }))
-          }
-        });
-      } catch (gaErr) {
-        console.error('GA4 add_payment_info failed:', gaErr);
-      }
+      trackEcommerce('add_payment_info', {
+        value: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        payment_type: payment,
+        items: gaItems(cart)
+      });
     }
   }, [payment, cart]);
 
@@ -833,6 +789,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           })),
           subtotal: cartSubtotal,
           heurekaOptOut,
+          trafficSource: getVisitSource(),
           discountCode: appliedDiscount ? appliedDiscount.code : null,
           discountAmount: discountAmount,
           shippingCost,
@@ -1037,6 +994,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       })),
       subtotal: cartSubtotal,
       heurekaOptOut,
+      trafficSource: getVisitSource(),
       discountCode: appliedDiscount ? appliedDiscount.code : null,
       discountAmount: discountAmount,
       shippingCost,

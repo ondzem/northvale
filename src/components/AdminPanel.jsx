@@ -7,6 +7,7 @@ import FaqTab from './admin/FaqTab';
 import NewsletterTab from './admin/NewsletterTab';
 import DiscountCodesTab from './admin/DiscountCodesTab';
 import OrdersTab from './admin/OrdersTab';
+import StatsTab from './admin/StatsTab';
 import SyncTab from './admin/SyncTab';
 import PreregistrationTab from './admin/PreregistrationTab';
 
@@ -30,6 +31,7 @@ export default function AdminPanel({ showToast, setActivePage }) {
 
   const tabsConfig = [
     { id: 'orders', name_cz: 'Objednávky', name_en: 'Orders' },
+    { id: 'stats', name_cz: 'Přehled prodejů', name_en: 'Sales overview' },
     { id: 'products', name_cz: 'Správa produktů', name_en: 'Products CMS' },
     { id: 'categories', name_cz: 'Správa kategorií', name_en: 'Categories CMS' },
     { id: 'homepage', name_cz: 'Správa úvodní stránky', name_en: 'Homepage CMS' },
@@ -95,6 +97,12 @@ export default function AdminPanel({ showToast, setActivePage }) {
                   <circle cx="20" cy="21" r="1"></circle>
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                 </svg>
+              ) : tab.id === 'stats' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+                  <line x1="18" y1="20" x2="18" y2="10"></line>
+                  <line x1="12" y1="20" x2="12" y2="4"></line>
+                  <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
               ) : tab.id === 'products' ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
                   <path d="M3 7l9-4 9 4v10l-9 4-9-4z"></path>
@@ -149,6 +157,10 @@ export default function AdminPanel({ showToast, setActivePage }) {
             <OrdersTab 
               showToast={handleShowToastPlaceholder} 
             />
+          )}
+
+          {activeTab === 'stats' && (
+            <StatsTab showToast={handleShowToastPlaceholder} />
           )}
 
           {activeTab === 'products' && (

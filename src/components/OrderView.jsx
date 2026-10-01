@@ -4,6 +4,7 @@ import { supabase } from '../supabase';
 import { paymentAdjustmentLabel } from '../config';
 import { estimateDeliveryDate, formatDeliveryDate } from '../services/deliveryEstimate';
 import { ORDER_PAGE_CSS } from './orderPageStyles';
+import HowFoundSurvey from './HowFoundSurvey';
 
 /**
  * Stav objednávky bez přihlášení — /objednavka/<číslo>/?k=<klíč z e-mailu>.
@@ -258,6 +259,8 @@ export default function OrderView({ orderId, setActivePage }) {
           </div>
           <p className="ov-pm">{cz ? 'Způsob platby:' : 'Payment:'} {o.paymentMethod}</p>
         </div>
+
+        {!o.howFound && <HowFoundSurvey orderId={o.id} viewKey={accessKey} lang={lang} />}
 
         <p className="ocf-email">
           {cz ? <>Máte účet? Všechny objednávky najdete v sekci <button type="button" className="ov-link" onClick={() => setActivePage('profile')}>Moje objednávky</button>.</>

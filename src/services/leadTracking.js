@@ -1,7 +1,8 @@
 /**
- * Měření poptávek — jediné místo, přes které web posílá události do GA4.
+ * Měření poptávek a nákupů — jediné místo, přes které web posílá události do GA4.
  *
- * Měříme jen tři okamžiky, kdy se z návštěvníka stane poptávka:
+ * Nákupní kroky posílá trackEcommerce (viz níže). U poptávek měříme
+ * tři okamžiky, kdy se z návštěvníka stane poptávka:
  *   formular_odeslan  — úspěšně odeslaný formulář (param: formular, tema)
  *   klik_telefon      — klik na tel: odkaz        (param: misto)
  *   klik_email        — klik na mailto: odkaz     (param: misto)
@@ -33,6 +34,29 @@ export function trackLead(eventName, params = {}) {
   } catch {
     // měření nesmí nikdy rozbít web
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* Nákup — kroky produkt → košík → pokladna → nákup (GA4 e-commerce)    */
+/* ------------------------------------------------------------------ */
+
+/** Položky košíku/objednávky ve tvaru, který čeká GA4. */
+export function gaItems(list = []) {
+  return (list || []).map(item => ({
+    item_id: String(item.product_id || item.productId || item.id || ''),
+    item_name: item.name || item.productName || '',
+    price: Number(item.price) || 0,
+    quantity: Number(item.quantity) || 1
+  }));
+}
+
+/**
+ * Pošle e-commerce událost (view_item, add_to_cart, begin_checkout, purchase…).
+ * Musí jít přes gtag('event') — web nemá GTM, takže dřívější
+ * dataLayer.push({ event, ecommerce }) do GA4 nikdy nedorazil.
+ */
+export function trackEcommerce(eventName, params = {}) {
+  trackLead(eventName, { currency: 'CZK', ...params });
 }
 
 /* ------------------------------------------------------------------ */

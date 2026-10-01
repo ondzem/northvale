@@ -4,6 +4,7 @@ import { normalizeOrder, normalizeItems, slimOrderForHistory, ORDER_HISTORY_LIMI
 import { getAuthContext, requireAdmin } from "../_shared/auth.ts";
 import { AUTO_INVOICES } from "../_shared/features.ts";
 import { verifyTurnstile, callerIp, isHoneypotFilled, shouldAllow } from "../_shared/turnstile.ts";
+import { orderAccessKey } from "../_shared/order-link.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -698,11 +699,13 @@ serve(async (req) => {
               .download(`order_${duplicateId}.json`);
             if (dupFile) {
               const dupObj = JSON.parse(await dupFile.text());
+              const dupOrder = dupObj.order || dupObj;
               return new Response(JSON.stringify({
                 success: true,
                 duplicate: true,
                 orderId: duplicateId,
-                order: dupObj.order || dupObj
+                order: dupOrder,
+                viewKey: await orderAccessKey(duplicateId, dupOrder.customer_email || dupOrder.customerEmail)
               }), {
                 status: 200,
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -722,6 +725,12 @@ serve(async (req) => {
       };
 
       const normalizedOrderData = normalizeOrder(rawOrderObj);
+      // Odkud zákazník přišel (Google, Instagram…) — pro měsíční přehled v adminu.
+      // Jen krátký text; odpověď z dotazníku (how_found) smí zapsat jen order-view.
+      normalizedOrderData.traffic_source = String(orderDetails.trafficSource ?? orderDetails.traffic_source ?? "")
+        .replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 120);
+      delete normalizedOrderData.trafficSource;
+      delete normalizedOrderData.how_found;
 
       // Check if order already exists in storage for overwrite protection & stock deduction status
       const filename = `order_${generatedOrderId}.json`;
@@ -891,7 +900,8 @@ serve(async (req) => {
         await logHeurekaOrder(normalizedOrderData);
       }
 
-      return new Response(JSON.stringify({ success: true, orderId: normalizedOrderData.id, order: normalizedOrderData }), {
+      const viewKey = await orderAccessKey(normalizedOrderData.id, normalizedOrderData.customer_email);
+      return new Response(JSON.stringify({ success: true, orderId: normalizedOrderData.id, order: normalizedOrderData, viewKey }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -1056,7 +1066,8 @@ serve(async (req) => {
         }
       }
 
-      return new Response(JSON.stringify({ success: true, message: `Order ${orderId} marked as paid successfully.`, order: normalizedPaidOrder }), {
+      const viewKey = await orderAccessKey(normalizedPaidOrder.id || orderId, normalizedPaidOrder.customer_email);
+      return new Response(JSON.stringify({ success: true, message: `Order ${orderId} marked as paid successfully.`, order: normalizedPaidOrder, viewKey }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

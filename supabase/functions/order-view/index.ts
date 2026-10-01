@@ -2,6 +2,8 @@
  * Objednávka bez přihlášení — stránka /objednavka/<číslo>/?k=<klíč>.
  *
  * POST { id, k } → zákaznický přehled objednávky (jen pro platný klíč z e-mailu).
+ * POST { action: "survey", id, k, answer, other? } → uloží odpověď na
+ *   „Jak jste se o nás dozvěděl?“ (how_found) do objednávky.
  * Neplatný klíč i neexistující objednávka vrací stejné 404, aby nešlo
  * zkoušet, která čísla objednávek existují. Vrací jen to, co zákazník
  * potřebuje vidět — žádná interní pole (sklad, user_id, Pohoda…).
@@ -20,6 +22,12 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 const NOT_FOUND = { error: "not_found" };
+
+// Musí sedět s volbami v src/components/HowFoundSurvey.jsx
+const HOW_FOUND = new Set([
+  "vyhledavac", "instagram", "facebook", "tiktok", "youtube",
+  "komunita", "srovnavac", "doporuceni", "akce", "ai", "jinak",
+]);
 
 function trackingFor(o: any) {
   const gls = String(o.gls_parcel_number || "").trim();
@@ -40,8 +48,12 @@ serve(async (req) => {
     if (!/^[A-Za-z0-9-]{1,40}$/.test(id) || !/^[0-9a-f]{32}$/.test(k)) return json(NOT_FOUND, 404);
 
     const supabase = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
-    let file = (await supabase.storage.from("pohoda-orders").download(`order_${id}.json`)).data;
-    if (!file) file = (await supabase.storage.from("pohoda-orders").download(`processed/order_${id}.json`)).data;
+    let path = `order_${id}.json`;
+    let file = (await supabase.storage.from("pohoda-orders").download(path)).data;
+    if (!file) {
+      path = `processed/order_${id}.json`;
+      file = (await supabase.storage.from("pohoda-orders").download(path)).data;
+    }
     if (!file) return json(NOT_FOUND, 404);
 
     const raw = JSON.parse(await file.text());
@@ -49,6 +61,24 @@ serve(async (req) => {
 
     const expected = await orderAccessKey(o.id || id, o.customer_email);
     if (!expected || !safeEqual(expected, k)) return json(NOT_FOUND, 404);
+
+    if (body?.action === "survey") {
+      const answer = String(body?.answer || "").trim();
+      if (!HOW_FOUND.has(answer)) return json({ error: "invalid_answer" }, 400);
+      const other = answer === "jinak"
+        ? String(body?.other || "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 80)
+        : "";
+      const target = raw.order && typeof raw.order === "object" ? raw.order : raw;
+      target.how_found = other ? `${answer}: ${other}` : answer;
+      target.how_found_at = new Date().toISOString();
+      const { error: upErr } = await supabase.storage.from("pohoda-orders").upload(
+        path,
+        new TextEncoder().encode(JSON.stringify(raw, null, 2)),
+        { contentType: "application/json", upsert: true },
+      );
+      if (upErr) throw upErr;
+      return json({ success: true });
+    }
 
     const pickup = o.pickup_point_details || null;
     return json({
@@ -81,6 +111,7 @@ serve(async (req) => {
         creditApplied: Number(o.credit_applied) || 0,
         finalTotal: Number(o.final_total) || 0,
         tracking: trackingFor(raw.order || raw),
+        howFound: (raw.order || raw).how_found || null,
       },
     });
   } catch (err) {

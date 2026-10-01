@@ -2,38 +2,28 @@ import React from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { FEATURE_FLAGS, paymentAdjustmentLabel } from '../config';
 import { ORDER_PAGE_CSS } from './orderPageStyles';
+import { trackEcommerce, gaItems } from '../services/leadTracking';
+import HowFoundSurvey from './HowFoundSurvey';
 
 export default function OrderConfirmation({ order, setActivePage }) {
   const { lang } = useTranslation();
 
-  const trackedOrderIdRef = React.useRef(null);
   React.useEffect(() => {
-    if (order && trackedOrderIdRef.current !== order.id) {
-      trackedOrderIdRef.current = order.id;
-      try {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({ ecommerce: null });
-        window.dataLayer.push({
-          event: 'purchase',
-          ecommerce: {
-            transaction_id: order.id,
-            value: order.finalTotal,
-            tax: 0,
-            shipping: order.shippingCost || 0,
-            currency: 'CZK',
-            coupon: order.discountCode || undefined,
-            items: (order.items || []).map(item => ({
-              item_id: item.id || item.product_id,
-              item_name: item.name || item.productName,
-              price: item.price,
-              quantity: item.quantity
-            }))
-          }
-        });
-      } catch (gaErr) {
-        console.error('GA4 purchase failed:', gaErr);
-      }
-    }
+    if (!order?.id) return;
+    // Nákup se počítá jednou — ani obnovení stránky ho nesmí započítat znovu.
+    const key = 'nv-ga-purchase-sent';
+    let sent;
+    try { sent = JSON.parse(localStorage.getItem(key) || '[]'); } catch { sent = []; }
+    if (sent.includes(String(order.id))) return;
+    trackEcommerce('purchase', {
+      transaction_id: String(order.id),
+      value: Number(order.finalTotal ?? order.final_total) || 0,
+      shipping: Number(order.shippingCost ?? order.shipping_cost) || 0,
+      coupon: order.discountCode || order.discount_code || undefined,
+      payment_type: order.paymentMethod || order.payment_method || undefined,
+      items: gaItems(order.items)
+    });
+    try { localStorage.setItem(key, JSON.stringify([...sent, String(order.id)].slice(-20))); } catch { /* bez úložiště */ }
   }, [order]);
 
   if (!order) {
@@ -212,6 +202,8 @@ export default function OrderConfirmation({ order, setActivePage }) {
             </span>
           </div>
         </div>
+
+        <HowFoundSurvey orderId={order.id} viewKey={order.viewKey} lang={lang} />
 
         {/* Disclaimer */}
         <p className="ocf-email">

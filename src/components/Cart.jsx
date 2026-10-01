@@ -4,6 +4,7 @@ import { supabase } from '../supabase';
 import CartItemImage from './CartItemImage';
 import { validateDiscountCode, calculateDiscountAmount } from '../services/discountService';
 import { FREE_SHIPPING_THRESHOLD } from '../config';
+import { trackEcommerce, gaItems } from '../services/leadTracking';
 
 export default function Cart({ cart, setCart, setActivePage, appliedDiscount, setAppliedDiscount, alert }) {
   const { lang, t } = useTranslation();
@@ -11,25 +12,10 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
   const [promoLoading, setPromoLoading] = useState(false);
 
   useEffect(() => {
-    try {
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({ ecommerce: null });
-      window.dataLayer.push({
-        event: 'view_cart',
-        ecommerce: {
-          currency: 'CZK',
-          value: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-          items: cart.map(item => ({
-            item_id: item.id,
-            item_name: item.name,
-            price: item.price,
-            quantity: item.quantity
-          }))
-        }
-      });
-    } catch (gaErr) {
-      console.error('GA4 view_cart failed:', gaErr);
-    }
+    trackEcommerce('view_cart', {
+      value: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+      items: gaItems(cart)
+    });
   }, []);
 
   const handleApplyPromo = async () => {
@@ -86,27 +72,10 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
   const updateQuantity = (itemId, delta) => {
     const item = cart.find(i => i.id === itemId);
     if (item) {
-      try {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({ ecommerce: null });
-        window.dataLayer.push({
-          event: delta > 0 ? 'add_to_cart' : 'remove_from_cart',
-          ecommerce: {
-            currency: 'CZK',
-            value: item.price * Math.abs(delta),
-            items: [
-              {
-                item_id: item.id,
-                item_name: item.name,
-                price: item.price,
-                quantity: Math.abs(delta)
-              }
-            ]
-          }
-        });
-      } catch (gaErr) {
-        console.error('GA4 cart quantity update event failed:', gaErr);
-      }
+      trackEcommerce(delta > 0 ? 'add_to_cart' : 'remove_from_cart', {
+        value: item.price * Math.abs(delta),
+        items: gaItems([{ ...item, quantity: Math.abs(delta) }])
+      });
     }
 
     setCart(prev => {
@@ -123,27 +92,10 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
   const removeItem = (itemId) => {
     const item = cart.find(i => i.id === itemId);
     if (item) {
-      try {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({ ecommerce: null });
-        window.dataLayer.push({
-          event: 'remove_from_cart',
-          ecommerce: {
-            currency: 'CZK',
-            value: item.price * item.quantity,
-            items: [
-              {
-                item_id: item.id,
-                item_name: item.name,
-                price: item.price,
-                quantity: item.quantity
-              }
-            ]
-          }
-        });
-      } catch (gaErr) {
-        console.error('GA4 cart remove item event failed:', gaErr);
-      }
+      trackEcommerce('remove_from_cart', {
+        value: item.price * item.quantity,
+        items: gaItems([item])
+      });
     }
     setCart(prev => prev.filter(item => item.id !== itemId));
   };

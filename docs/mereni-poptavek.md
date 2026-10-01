@@ -67,3 +67,18 @@ k odkazům doplní `utm_source` samo. Nic ručně nepřepisuj.
 **Heureka, Zboží.cz, Google Merchant — NEMĚNIT.** Odkazy v produktových feedech
 nechte bez utm. Změna URL ve feedu rozpáruje produkty a párování trvá znovu
 kolem 4 pracovních dnů. Tyhle zdroje GA4 pozná samo podle domény.
+
+## 5. Měření nákupů (od 1. 10. 2026)
+
+Podklad pro případovou studii: kolik e-shop vydělal a odkud zákazníci přišli.
+
+| Co | Kde |
+|---|---|
+| Zdroj návštěvy u objednávky (Google, Instagram…) | uloží se automaticky do objednávky (`traffic_source`) |
+| „Jak jste se o nás dozvěděli?“ | nepovinně na potvrzení objednávky a na stránce objednávky z e-mailu (`how_found`) |
+| Nákupní kroky v GA4 | `view_item` → `add_to_cart` → `view_cart` → `begin_checkout` → `add_shipping_info` → `add_payment_info` → `purchase` |
+| Měsíční souhrn | Admin → **Přehled prodejů** (objednávky, tržby, průměr, zdroje, export CSV) |
+
+- Do 1. 10. 2026 nákupní události do GA4 nedorazily (posílaly se ve formátu pro GTM, který web nemá). Data v GA4 tedy začínají tímto dnem.
+- GA4 dostane události jen od lidí, kteří povolili analytické cookies. **Pro čísla do studie ber Admin → Přehled prodejů** — ten počítá všechny objednávky.
+- V GA4 → Správce → Události označ `purchase` jako klíčovou událost (obvykle už je).

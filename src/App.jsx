@@ -32,6 +32,7 @@ import { mockProducts } from './mockData';
 import { fetchProductsFromDB, getCachedProducts, getProductFromCache, generateDefaultSEOImageMetadata, invalidateProductsCache } from './services/products';
 import { FEATURE_FLAGS } from './config';
 import { getTurnstileToken } from './services/turnstile';
+import { trackEcommerce, gaItems } from './services/leadTracking';
 import { LanguageProvider, useTranslation } from './context/LanguageContext';
 import './App.css';
 
@@ -1593,27 +1594,10 @@ function AppContent() {
       } catch (_e) {}
     }
 
-    try {
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({ ecommerce: null });
-      window.dataLayer.push({
-        event: 'add_to_cart',
-        ecommerce: {
-          currency: 'CZK',
-          value: itemPrice * quantityToAdd,
-          items: [
-            {
-              item_id: itemId,
-              item_name: itemName,
-              price: itemPrice,
-              quantity: quantityToAdd
-            }
-          ]
-        }
-      });
-    } catch (gaErr) {
-      console.error('GA4 add_to_cart failed:', gaErr);
-    }
+    trackEcommerce('add_to_cart', {
+      value: itemPrice * quantityToAdd,
+      items: gaItems([{ id: itemId, name: itemName, price: itemPrice, quantity: quantityToAdd }])
+    });
 
     setCart(prevCart => {
       const existing = prevCart.find(item => item.id === itemId);
@@ -1663,7 +1647,8 @@ function AppContent() {
 
         const serverOrder = data.order || order;
 
-        setLastCompletedOrder(serverOrder);
+        // viewKey = klíč k odkazu na objednávku (dotazník „Jak jste se o nás dozvěděl?“)
+        setLastCompletedOrder({ ...serverOrder, viewKey: data.viewKey || null });
 
         // Update local user state
         setUser(prev => {
@@ -1706,7 +1691,7 @@ function AppContent() {
         }
 
         const serverOrder = data.order;
-        setLastCompletedOrder(serverOrder);
+        setLastCompletedOrder({ ...serverOrder, viewKey: data.viewKey || null });
 
         // Použití slevového kódu započítává výhradně server (finalize-order),
         // aby se počítadlo nezvyšovalo dvakrát.

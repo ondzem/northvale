@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import DeliveryOptionsModal from './DeliveryOptionsModal';
 import WatchdogModal from './WatchdogModal';
 import { estimateDeliveryDate, formatDeliveryDate } from '../services/deliveryEstimate';
+import { trackEcommerce, gaItems } from '../services/leadTracking';
 import { FEATURE_FLAGS, calculatePriceExVat } from '../config';
 import { useTranslation } from '../context/LanguageContext';
 import ProductCard from './ProductCard';
@@ -596,27 +597,10 @@ export default function SealedDetail({ productId, products, addToCart, setSelect
   useEffect(() => {
     if (localProduct && trackedProductIdRef.current !== localProduct.id) {
       trackedProductIdRef.current = localProduct.id;
-      try {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({ ecommerce: null });
-        window.dataLayer.push({
-          event: 'view_item',
-          ecommerce: {
-            currency: 'CZK',
-            value: localProduct.price,
-            items: [
-              {
-                item_id: localProduct.id,
-                item_name: localProduct.name,
-                price: localProduct.price,
-                quantity: 1
-              }
-            ]
-          }
-        });
-      } catch (gaErr) {
-        console.error('GA4 view_item failed:', gaErr);
-      }
+      trackEcommerce('view_item', {
+        value: Number(localProduct.price) || 0,
+        items: gaItems([{ id: localProduct.id, name: localProduct.name, price: localProduct.price, quantity: 1 }])
+      });
     }
   }, [localProduct]);
 
