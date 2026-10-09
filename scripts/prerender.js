@@ -121,19 +121,54 @@ function extractPlaintextDescription(rawDesc) {
   return trimmed.replace(/<[^>]*>/g, '');
 }
 
-// Clean product images from inline base64 bloat for prerendered HTML
-function cleanImageUrl(imgUrl) {
-  if (!imgUrl || imgUrl.startsWith('data:')) {
-    return '/Northvale Logo.webp';
-  }
-  return imgUrl;
+// Obrázky produktů jsou v DB jako base64. generate-feeds.js (prebuild) je
+// uloží do public/product-images/<id>.<přípona> — na ten soubor odkazujeme,
+// jinak by Google dostal jen logo (a to ještě s mezerou = neplatná URL).
+const LOGO_URL = 'https://northvaletcg.eu/Northvale%20Logo.webp';
+
+function productImagePath(prod) {
+  const img = prod && prod.image;
+  if (!img) return null;
+  const m = img.match(/^data:image\/([a-zA-Z0-9+]+);base64,/);
+  if (m) return `/product-images/${prod.id}.${m[1] === 'jpeg' ? 'jpg' : m[1]}`;
+  if (img.startsWith('data:')) return null;
+  return img;
 }
 
-function cleanAbsoluteImageUrl(imgUrl) {
-  if (!imgUrl || imgUrl.startsWith('data:')) {
-    return 'https://northvaletcg.eu/Northvale Logo.webp';
-  }
-  return imgUrl;
+// Clean product images from inline base64 bloat for prerendered HTML
+function cleanImageUrl(prod) {
+  return productImagePath(prod) || '/Northvale Logo.webp';
+}
+
+function cleanAbsoluteImageUrl(prod) {
+  const img = productImagePath(prod);
+  if (!img) return LOGO_URL;
+  return (img.startsWith('/') ? `https://northvaletcg.eu${img}` : img).replace(/ /g, '%20');
+}
+
+// Doprava a vrácení pro Google (záznamy obchodníka). Hodnoty z src/config.js
+// (nejlevnější doprava DPD výdejní místo 79 Kč, zdarma od 3 500 Kč) a VOP (14 dnů).
+function offerShippingAndReturns(price) {
+  return {
+    shippingDetails: {
+      '@type': 'OfferShippingDetails',
+      shippingRate: { '@type': 'MonetaryAmount', value: Number(price) >= 3500 ? 0 : 79, currency: 'CZK' },
+      shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'CZ' },
+      deliveryTime: {
+        '@type': 'ShippingDeliveryTime',
+        handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 2, unitCode: 'DAY' },
+        transitTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 2, unitCode: 'DAY' }
+      }
+    },
+    hasMerchantReturnPolicy: {
+      '@type': 'MerchantReturnPolicy',
+      applicableCountry: 'CZ',
+      returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+      merchantReturnDays: 14,
+      returnMethod: 'https://schema.org/ReturnByMail',
+      returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility'
+    }
+  };
 }
 
 // Generate JSON-LD Schema block
@@ -310,7 +345,7 @@ async function prerender() {
           ${products.map(prod => `
             <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; text-align: left; display: flex; flex-direction: column;">
               <div style="height: 180px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.15); border-radius: 4px; margin-bottom: 16px; overflow: hidden;">
-                <img src="${cleanImageUrl(prod.image)}" alt="${escapeHtml(prod.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+                <img src="${cleanImageUrl(prod)}" alt="${escapeHtml(prod.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
               </div>
               <h3 style="font-size: 15px; color: #fff; margin-bottom: 8px; font-weight: 600; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 42px;">${escapeHtml(prod.name)}</h3>
               <p style="font-size: 18px; color: #fdbd16; font-weight: 700; margin-top: auto;">${prod.price.toLocaleString()} Kč</p>
@@ -599,7 +634,7 @@ async function prerender() {
             "@type": "Product",
             "name": prod.name,
             "description": plainDesc || "Originální sealed produkt pro sběratele a hráče.",
-            "image": (prod.image && !prod.image.startsWith('data:')) ? prod.image : 'https://northvaletcg.eu/Northvale Logo.webp',
+            "image": cleanAbsoluteImageUrl(prod),
             "sku": prod.sku || prod.id,
             "mpn": prod.id,
             "brand": {
@@ -616,7 +651,8 @@ async function prerender() {
               "seller": {
                 "@type": "Organization",
                 "name": "Northvale TCG"
-              }
+              },
+              ...offerShippingAndReturns(prod.price)
             }
           }
         ]
@@ -624,7 +660,7 @@ async function prerender() {
       content: `
         <main style="max-width: 1200px; margin: 0 auto; padding: 48px 16px; display: flex; flex-wrap: wrap; gap: 48px; text-align: left;">
           <div style="flex: 1; min-width: 300px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.15); border-radius: 8px; padding: 32px; height: 400px;">
-            <img src="${cleanImageUrl(prod.image)}" alt="${escapeHtml(prod.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+            <img src="${cleanImageUrl(prod)}" alt="${escapeHtml(prod.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
           </div>
           <div style="flex: 1.2; min-width: 300px; display: flex; flex-direction: column;">
             <span style="color: #fdbd16; font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">${escapeHtml(prod.game || 'TCG')} / ${escapeHtml(prod.type || 'Sealed')}</span>
@@ -651,7 +687,7 @@ async function prerender() {
               ${products.filter(p => p.id !== prod.id && p.type !== 'single' && p.type !== 'slab').slice(0, 3).map(rel => `
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; display: flex; flex-direction: column;">
                   <div style="height: 150px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.15); border-radius: 4px; margin-bottom: 12px; overflow: hidden;">
-                    <img src="${cleanImageUrl(rel.image)}" alt="${escapeHtml(rel.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+                    <img src="${cleanImageUrl(rel)}" alt="${escapeHtml(rel.name)}" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
                   </div>
                   <h4 style="font-size: 14px; color: #fff; margin-bottom: 8px; font-weight: 600; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 38px;">${escapeHtml(rel.name)}</h4>
                   <p style="font-size: 16px; color: #fdbd16; font-weight: 700; margin-top: auto;">${rel.price.toLocaleString()} Kč</p>
@@ -920,7 +956,7 @@ async function prerender() {
       const prodId = r.path.split('/')[1];
       const prod = products.find(p => p.id === prodId);
       if (prod && prod.image) {
-        ogImageUrl = cleanAbsoluteImageUrl(prod.image);
+        ogImageUrl = cleanAbsoluteImageUrl(prod);
       }
     }
 

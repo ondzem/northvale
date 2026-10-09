@@ -33,6 +33,7 @@ import { fetchProductsFromDB, getCachedProducts, getProductFromCache, generateDe
 import { FEATURE_FLAGS } from './config';
 import { getTurnstileToken } from './services/turnstile';
 import { trackEcommerce, gaItems } from './services/leadTracking';
+import { productImageUrl, offerShippingAndReturns } from './services/productSchema';
 import { LanguageProvider, useTranslation } from './context/LanguageContext';
 import './App.css';
 
@@ -1067,8 +1068,9 @@ function AppContent() {
     const currentProduct = (activePage === 'sealed-detail' || activePage === 'singles-detail')
       ? dbProducts.find(p => p.id === selectedProductId)
       : null;
-    if (currentProduct && currentProduct.image) {
-      ogImageUrl = currentProduct.image;
+    if (currentProduct && productImageUrl(currentProduct)) {
+      // base64 z DB → odkaz na /product-images/ (data: není platná URL pro Google)
+      ogImageUrl = productImageUrl(currentProduct);
     } else if (activePage === 'blog' && selectedProductId) {
       const currentArticle = blogArticles.find(a => a.id === selectedProductId);
       if (currentArticle && currentArticle.image) {
@@ -1200,7 +1202,8 @@ function AppContent() {
               "seller": {
                 "@type": "Organization",
                 "name": "Northvale TCG"
-              }
+              },
+              ...offerShippingAndReturns(price)
             }
           }
         ]
