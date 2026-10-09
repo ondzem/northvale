@@ -185,8 +185,8 @@ const headerHtml = `
     </a>
     <nav class="nv-nav-menu" style="display: flex; gap: 24px; font-weight: 500;">
       <a href="/sealed-catalog/" style="color: #c5c6c7; text-decoration: none;">Sealed Produkty</a>
-      <a href="/grading/" style="color: #c5c6c7; text-decoration: none;">Grading</a>
-      <a href="/buylist/" style="color: #c5c6c7; text-decoration: none;">Výkup</a>
+      ${FEATURE_FLAGS.showGrading ? '<a href="/grading/" style="color: #c5c6c7; text-decoration: none;">Grading</a>' : ''}
+      ${FEATURE_FLAGS.showBuylist ? '<a href="/buylist/" style="color: #c5c6c7; text-decoration: none;">Výkup</a>' : ''}
       <a href="/faq/" style="color: #c5c6c7; text-decoration: none;">FAQ</a>
       <a href="/blog/" style="color: #c5c6c7; text-decoration: none;">Blog</a>
     </nav>
@@ -209,9 +209,8 @@ const footerHtml = `
       <a href="/gdpr-vop/?tab=vop" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Obchodní podmínky (VOP)</a>
       <a href="/gdpr-vop/?tab=gdpr" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Ochrana osobních údajů</a>
       <a href="/about/" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">O nás</a>
-      <a href="/community/" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Komunita</a>
       <a href="/support/" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Zákaznická podpora</a>
-      <a href="/grading-guide/" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Průvodce gradingem</a>
+      ${FEATURE_FLAGS.showGrading ? '<a href="/grading-guide/" style="display: block; color: #8a8a92; text-decoration: none; margin-bottom: 8px; font-size: 14px;">Průvodce gradingem</a>' : ''}
     </div>
     <div style="flex: 1; min-width: 200px;">
       <h4 style="color: #fff; margin-bottom: 16px; font-family: 'Outfit', sans-serif;">Kontakt</h4>
@@ -843,7 +842,14 @@ async function prerender() {
     }
   ];
 
-  staticSpecs.forEach(spec => {
+  // Vypnuté sekce (a /community, kterou aplikace nemá) web přesměruje / ukáže 404 —
+  // statická stránka s obsahem by Google mátla.
+  const disabledPaths = new Set([
+    'community',
+    ...(FEATURE_FLAGS.showBuylist ? [] : ['buylist']),
+    ...(FEATURE_FLAGS.showGrading ? [] : ['grading', 'grading-guide'])
+  ]);
+  staticSpecs.filter(spec => !disabledPaths.has(spec.path)).forEach(spec => {
     routes.push({
       path: spec.path,
       title: spec.title,

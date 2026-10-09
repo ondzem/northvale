@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
 import { blogArticles } from '../src/blogData.js';
 import { mockProducts } from '../src/mockData.js';
+import { FEATURE_FLAGS } from '../src/config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -83,10 +84,12 @@ async function run() {
   const staticUrls = [
     { loc: `${baseUrl}/`, priority: '1.0', changefreq: 'daily' },
     { loc: `${baseUrl}/sealed-catalog/`, priority: '0.8', changefreq: 'daily' },
-    { loc: `${baseUrl}/buylist/`, priority: '0.7', changefreq: 'weekly' },
-    { loc: `${baseUrl}/grading/`, priority: '0.7', changefreq: 'weekly' },
-    { loc: `${baseUrl}/grading-guide/`, priority: '0.6', changefreq: 'monthly' },
-    { loc: `${baseUrl}/community/`, priority: '0.6', changefreq: 'weekly' },
+    // Vypnuté sekce web přesměruje na úvod — v sitemapě by byly chybou „Stránka s přesměrováním“
+    ...(FEATURE_FLAGS.showBuylist ? [{ loc: `${baseUrl}/buylist/`, priority: '0.7', changefreq: 'weekly' }] : []),
+    ...(FEATURE_FLAGS.showGrading ? [
+      { loc: `${baseUrl}/grading/`, priority: '0.7', changefreq: 'weekly' },
+      { loc: `${baseUrl}/grading-guide/`, priority: '0.6', changefreq: 'monthly' }
+    ] : []),
     { loc: `${baseUrl}/support/`, priority: '0.6', changefreq: 'monthly' },
     { loc: `${baseUrl}/faq/`, priority: '0.6', changefreq: 'monthly' },
     { loc: `${baseUrl}/about/`, priority: '0.6', changefreq: 'monthly' },
