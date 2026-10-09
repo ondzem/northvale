@@ -50,3 +50,14 @@ Cíl: po 90 dnech (30. 12. 2026) mít čísla pro případovou studii — **koli
 - Klient před spuštěním e-shopu **neprodával** — výchozí tržby jsou 0 Kč, celý obrat je tedy přírůstek díky webu.
 - Souběžné aktivity (sociální sítě, akce) se systematicky nezapisují — při vyhodnocení je potřeba počítat s tím, že část zákazníků přišla přes ně (ukáže to dotazník a zdroj u objednávky).
 - Souhlas klienta s použitím anonymizovaných výsledků: **máme**.
+
+## Zásahy během měření
+
+Co se změnilo na webu nebo v profilech — při porovnávání čísel s tím počítej.
+
+| Datum | Zásah |
+|---|---|
+| 1. 10. 2026 | Start měření: zdroj u objednávky, dotazník po nákupu, GA4 nákupy, Přehled prodejů |
+| 9. 10. 2026 | Google dostává skutečné obrázky produktů (dřív logo s neplatnou URL), doprava a vrácení ve strukturovaných datech |
+| 9. 10. 2026 | Ze sitemapy pryč vypnuté stránky (grading, výkup, komunita); sitemapa znovu odeslaná v Search Console (Google ji od 19. 7. nenačetl) |
+| 9. 10. 2026 | Firemní profil: otevírací doba Po–Pá 7–12, 13–16; odkaz na web s `utm_campaign=firemni_profil`; Instagram + Facebook; z popisu pryč grading a výkup |
