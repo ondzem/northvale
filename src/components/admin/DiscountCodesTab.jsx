@@ -5,6 +5,19 @@ import { supabase } from '../../supabase';
 import { getDiscountCodeStatus, formatCzechDate } from '../../services/discountService';
 import { fetchCategoriesFromDB } from '../../services/categories';
 
+function Segmented({ label, name, value, options, onChange }) {
+  return (
+    <div className="dct-seg" role="radiogroup" aria-label={label}>
+      {options.map(o => (
+        <label key={o.value}>
+          <input type="radio" name={name} checked={value === o.value} onChange={() => onChange(o.value)} />
+          <span>{o.label}</span>
+        </label>
+      ))}
+    </div>
+  );
+}
+
 export default function DiscountCodesTab({ showToast }) {
   const { lang } = useTranslation();
   const [codes, setCodes] = useState([]);
@@ -16,8 +29,10 @@ export default function DiscountCodesTab({ showToast }) {
   const [newCode, setNewCode] = useState('');
   const [newDiscountType, setNewDiscountType] = useState('percent'); // 'percent' | 'fixed'
   const [newDiscountValue, setNewDiscountValue] = useState('');
+  const [newValidity, setNewValidity] = useState('none'); // 'none' | 'limited'
   const [newValidFrom, setNewValidFrom] = useState('');
   const [newValidUntil, setNewValidUntil] = useState('');
+  const [newUses, setNewUses] = useState('none'); // 'none' | 'limited'
   const [newMaxUses, setNewMaxUses] = useState('');
   // Rozsah kódu: 'all' | 'products' | 'categories'
   const [newScope, setNewScope] = useState('all');
@@ -128,6 +143,11 @@ export default function DiscountCodesTab({ showToast }) {
       return;
     }
 
+    if (newValidity === 'limited' && !newValidFrom && !newValidUntil) {
+      showToast(lang === 'CZ' ? 'Zadejte, od kdy nebo do kdy kód platí.' : 'Enter a start or end date.', 'error');
+      return;
+    }
+
     // Validate date range if both provided
     if (newValidFrom && newValidUntil && newValidFrom > newValidUntil) {
       showToast(lang === 'CZ' ? 'Datum konce platnosti musí být po datumu začátku.' : 'End date must be after start date.', 'error');
@@ -171,8 +191,10 @@ export default function DiscountCodesTab({ showToast }) {
       setNewCode('');
       setNewDiscountType('percent');
       setNewDiscountValue('');
+      setNewValidity('none');
       setNewValidFrom('');
       setNewValidUntil('');
+      setNewUses('none');
       setNewMaxUses('');
       setNewScope('all');
       setNewScopeIds([]);
@@ -318,9 +340,8 @@ export default function DiscountCodesTab({ showToast }) {
             </div>
 
             <div className="dct-modal-body">
-              <section className="dct-section">
-                <h4>{cz ? 'Sleva' : 'Discount'}</h4>
-                <label className="dct-field dct-full">
+              <div className="dct-primary">
+                <label className="dct-field">
                   <span>{cz ? 'Název kódu' : 'Code name'}</span>
                   <input
                     type="text"
@@ -331,90 +352,128 @@ export default function DiscountCodesTab({ showToast }) {
                     placeholder={cz ? 'např. LETO2026' : 'e.g. SUMMER2026'}
                   />
                 </label>
-                <label className="dct-field">
-                  <span>{cz ? 'Typ slevy' : 'Discount type'}</span>
-                  <select className="dct-input" value={newDiscountType} onChange={(e) => setNewDiscountType(e.target.value)}>
-                    <option value="percent">{cz ? 'Procenta' : 'Percent'}</option>
-                    <option value="fixed">{cz ? 'Pevná částka' : 'Fixed amount'}</option>
-                  </select>
-                </label>
-                <label className="dct-field">
-                  <span>{newDiscountType === 'percent' ? (cz ? 'Výše slevy (%)' : 'Amount (%)') : (cz ? 'Výše slevy (Kč)' : 'Amount (CZK)')}</span>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    step="any"
-                    className="dct-input"
-                    value={newDiscountValue}
-                    onChange={(e) => setNewDiscountValue(e.target.value)}
-                    placeholder={newDiscountType === 'percent' ? '10' : '200'}
-                  />
-                </label>
-              </section>
-
-              <section className="dct-section">
-                <h4>{cz ? 'Platnost' : 'Validity'}</h4>
-                <label className="dct-field">
-                  <span>{cz ? 'Platí od' : 'Valid from'}</span>
-                  <input type="date" className="dct-input" value={newValidFrom} onChange={(e) => setNewValidFrom(e.target.value)} />
-                </label>
-                <label className="dct-field">
-                  <span>{cz ? 'Platí do' : 'Valid until'}</span>
-                  <input type="date" className="dct-input" value={newValidUntil} onChange={(e) => setNewValidUntil(e.target.value)} />
-                </label>
-                <label className="dct-field dct-full">
-                  <span>{cz ? 'Maximální počet použití' : 'Maximum uses'}</span>
-                  <input
-                    type="number"
-                    min="1"
-                    className="dct-input"
-                    value={newMaxUses}
-                    onChange={(e) => setNewMaxUses(e.target.value)}
-                    placeholder={cz ? 'Neomezeně' : 'Unlimited'}
-                  />
-                  <small>{cz ? 'Hodnota 1 znamená jednorázový kód.' : 'A value of 1 makes the code single-use.'}</small>
-                </label>
-              </section>
-
-              <section className="dct-section">
-                <h4>{cz ? 'Na co kód platí' : 'What the code applies to'}</h4>
-                <label className="dct-field dct-full">
-                  <span>{cz ? 'Platí na' : 'Applies to'}</span>
-                  <select
-                    className="dct-input"
-                    value={newScope}
-                    onChange={(e) => { setNewScope(e.target.value); setNewScopeIds([]); setScopeSearch(''); }}
-                  >
-                    <option value="all">{cz ? 'Celý košík' : 'Whole cart'}</option>
-                    <option value="products">{cz ? 'Vybrané produkty' : 'Selected products'}</option>
-                    <option value="categories">{cz ? 'Vybrané kategorie' : 'Selected categories'}</option>
-                  </select>
-                </label>
-
-                {newScope !== 'all' && (
-                  <div className="dct-field dct-full">
+                <div className="dct-field">
+                  <span id="dct-value-label">{cz ? 'Výše slevy' : 'Amount'}</span>
+                  <div className="dct-amount">
                     <input
-                      type="text"
+                      type="number"
+                      required
+                      min="1"
+                      step="any"
                       className="dct-input"
-                      value={scopeSearch}
-                      onChange={(e) => setScopeSearch(e.target.value)}
-                      placeholder={cz ? 'Hledat…' : 'Search…'}
-                      aria-label={cz ? 'Hledat' : 'Search'}
+                      aria-labelledby="dct-value-label"
+                      value={newDiscountValue}
+                      onChange={(e) => setNewDiscountValue(e.target.value)}
+                      placeholder={newDiscountType === 'percent' ? '10' : '200'}
                     />
-                    <div className="dct-picker">
-                      {scopeOptions.length === 0 && <p className="dct-picker-empty">{cz ? 'Nic nenalezeno.' : 'Nothing found.'}</p>}
-                      {scopeOptions.map(o => (
-                        <label key={o.id}>
-                          <input type="checkbox" checked={newScopeIds.includes(o.id)} onChange={() => toggleScopeId(o.id)} />
-                          <span>{o.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                    <small>{cz ? `Vybráno: ${newScopeIds.length}` : `Selected: ${newScopeIds.length}`}</small>
+                    <Segmented
+                      label={cz ? 'Typ slevy' : 'Discount type'}
+                      name="dct-type"
+                      value={newDiscountType}
+                      onChange={setNewDiscountType}
+                      options={[{ value: 'percent', label: '%' }, { value: 'fixed', label: 'Kč' }]}
+                    />
                   </div>
-                )}
-              </section>
+                </div>
+              </div>
+
+              <div className="dct-options">
+                <div className="dct-option">
+                  <div className="dct-option-row">
+                    <span>{cz ? 'Platí na' : 'Applies to'}</span>
+                    <Segmented
+                      label={cz ? 'Platí na' : 'Applies to'}
+                      name="dct-scope"
+                      value={newScope}
+                      onChange={(v) => { setNewScope(v); setNewScopeIds([]); setScopeSearch(''); }}
+                      options={[
+                        { value: 'all', label: cz ? 'Celý košík' : 'Whole cart' },
+                        { value: 'products', label: cz ? 'Produkty' : 'Products' },
+                        { value: 'categories', label: cz ? 'Kategorie' : 'Categories' },
+                      ]}
+                    />
+                  </div>
+                  {newScope !== 'all' && (
+                    <div className="dct-reveal">
+                      <input
+                        type="text"
+                        className="dct-input"
+                        value={scopeSearch}
+                        onChange={(e) => setScopeSearch(e.target.value)}
+                        placeholder={cz ? 'Hledat…' : 'Search…'}
+                        aria-label={cz ? 'Hledat' : 'Search'}
+                      />
+                      <div className="dct-picker">
+                        {scopeOptions.length === 0 && <p className="dct-picker-empty">{cz ? 'Nic nenalezeno.' : 'Nothing found.'}</p>}
+                        {scopeOptions.map(o => (
+                          <label key={o.id}>
+                            <input type="checkbox" checked={newScopeIds.includes(o.id)} onChange={() => toggleScopeId(o.id)} />
+                            <span>{o.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <small>{cz ? `Vybráno: ${newScopeIds.length}` : `Selected: ${newScopeIds.length}`}</small>
+                    </div>
+                  )}
+                </div>
+
+                <div className="dct-option">
+                  <div className="dct-option-row">
+                    <span>{cz ? 'Platnost' : 'Validity'}</span>
+                    <Segmented
+                      label={cz ? 'Platnost' : 'Validity'}
+                      name="dct-validity"
+                      value={newValidity}
+                      onChange={(v) => { setNewValidity(v); setNewValidFrom(''); setNewValidUntil(''); }}
+                      options={[
+                        { value: 'none', label: cz ? 'Neomezená' : 'Unlimited' },
+                        { value: 'limited', label: cz ? 'Časově omezená' : 'Time-limited' },
+                      ]}
+                    />
+                  </div>
+                  {newValidity === 'limited' && (
+                    <div className="dct-reveal dct-dates">
+                      <label className="dct-field">
+                        <span>{cz ? 'Platí od' : 'Valid from'}</span>
+                        <input type="date" className="dct-input" value={newValidFrom} onChange={(e) => setNewValidFrom(e.target.value)} />
+                      </label>
+                      <label className="dct-field">
+                        <span>{cz ? 'Platí do' : 'Valid until'}</span>
+                        <input type="date" className="dct-input" value={newValidUntil} onChange={(e) => setNewValidUntil(e.target.value)} />
+                      </label>
+                    </div>
+                  )}
+                </div>
+
+                <div className="dct-option">
+                  <div className="dct-option-row">
+                    <span>{cz ? 'Počet použití' : 'Number of uses'}</span>
+                    <Segmented
+                      label={cz ? 'Počet použití' : 'Number of uses'}
+                      name="dct-uses"
+                      value={newUses}
+                      onChange={(v) => { setNewUses(v); setNewMaxUses(''); }}
+                      options={[
+                        { value: 'none', label: cz ? 'Neomezený' : 'Unlimited' },
+                        { value: 'limited', label: cz ? 'Omezený' : 'Limited' },
+                      ]}
+                    />
+                  </div>
+                  {newUses === 'limited' && (
+                    <label className="dct-reveal dct-field">
+                      <span>{cz ? 'Kolikrát lze kód použít' : 'How many times the code can be used'}</span>
+                      <input
+                        type="number"
+                        required
+                        min="1"
+                        className="dct-input"
+                        value={newMaxUses}
+                        onChange={(e) => setNewMaxUses(e.target.value)}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="dct-modal-foot">
@@ -486,17 +545,32 @@ const DCT_CSS = `
   .dct-modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.06); }
   .dct-danger { background-color: #ef4444 !important; color: #fff !important; }
 
-  .dct-section { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-  .dct-section h4 { grid-column: 1 / -1; margin: 0; font-size: 13px; font-weight: 600; color: var(--color-gold, #fdbd16); }
   .dct-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-  .dct-full { grid-column: 1 / -1; }
   .dct-field > span { font-size: 13px; color: rgba(255,255,255,0.7); }
   .dct-field small { font-size: 12px; color: rgba(255,255,255,0.5); }
   .dct-input { width: 100%; height: 44px; box-sizing: border-box; padding: 0 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px; font-family: inherit; outline: none; color-scheme: dark; transition: border-color 0.2s; }
   .dct-input:focus { border-color: var(--color-gold, #fdbd16); }
   .dct-input::placeholder { color: rgba(255,255,255,0.35); }
-  select.dct-input { appearance: none; -webkit-appearance: none; padding-right: 36px; cursor: pointer; background: rgba(255,255,255,0.04) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") no-repeat right 12px center; background-size: 14px; }
-  select.dct-input option { background: #18181c; color: #fff; }
+  .dct-primary { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+  .dct-amount { display: flex; gap: 8px; }
+  .dct-amount .dct-input { flex: 1; min-width: 0; }
+  .dct-seg { display: inline-flex; flex-shrink: 0; gap: 2px; height: 44px; box-sizing: border-box; padding: 3px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; }
+  .dct-seg label { position: relative; display: flex; cursor: pointer; }
+  .dct-seg input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+  .dct-seg span { display: flex; align-items: center; justify-content: center; width: 100%; padding: 0 14px; border-radius: 5px; font-size: 13px; color: rgba(255,255,255,0.6); white-space: nowrap; transition: background-color 0.2s, color 0.2s; }
+  .dct-seg label:hover span { color: #fff; }
+  .dct-seg input:checked + span { background: rgba(253,189,22,0.14); color: var(--color-gold, #fdbd16); font-weight: 600; }
+  .dct-seg input:focus-visible + span { outline: 2px solid var(--color-gold, #fdbd16); outline-offset: 1px; }
+  .dct-options { display: flex; flex-direction: column; border-top: 1px solid rgba(255,255,255,0.06); }
+  .dct-option { display: flex; flex-direction: column; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .dct-option:last-child { padding-bottom: 0; border-bottom: 0; }
+  .dct-option-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 14px; color: rgba(255,255,255,0.85); }
+  .dct-option-row .dct-seg { display: flex; width: 320px; }
+  .dct-option-row .dct-seg label { flex: 1 1 0; }
+  .dct-reveal { display: flex; flex-direction: column; gap: 8px; min-width: 0; animation: dct-reveal 0.24s cubic-bezier(0.32, 0.72, 0, 1); }
+  .dct-dates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  @keyframes dct-reveal { from { opacity: 0; transform: translateY(-4px); } }
+  @media (prefers-reduced-motion: reduce) { .dct-reveal { animation: none; } }
   .dct-picker { max-height: 208px; overflow-y: auto; padding: 4px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; }
   .dct-picker label { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 6px; font-size: 14px; color: rgba(255,255,255,0.85); cursor: pointer; }
   .dct-picker label:hover { background: rgba(255,255,255,0.05); }
@@ -512,7 +586,9 @@ const DCT_CSS = `
     .dct-overlay { padding: 0; align-items: stretch; }
     .dct-modal { max-width: none; border: 0; border-radius: 0; }
     .dct-confirm { margin: auto 16px; max-height: none; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; }
-    .dct-section { grid-template-columns: minmax(0, 1fr); }
+    .dct-primary { grid-template-columns: minmax(0, 1fr); }
+    .dct-option-row { flex-direction: column; align-items: stretch; gap: 8px; }
+    .dct-option-row .dct-seg { width: 100%; }
     .dct-modal-foot .btn { flex: 1; }
   }
 `;
