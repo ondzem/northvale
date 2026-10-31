@@ -2456,7 +2456,14 @@ export default function OrdersTab({ showToast }) {
                                 <span>{lang === 'CZ' ? 'Mezisoučet produktů' : 'Subtotal products'}:</span>
                                 <span>{detailOrder.items.filter(i => !i.isService).reduce((s, i) => s + i.total, 0).toLocaleString()} Kč</span>
                               </div>
-                              
+
+                              {detailOrder.discountAmount > 0 && (
+                                <div className="orders-modal-total-row">
+                                  <span>{lang === 'CZ' ? 'Sleva' : 'Discount'}{detailOrder.discountCode ? ` (${detailOrder.discountCode})` : ''}:</span>
+                                  <span>-{detailOrder.discountAmount.toLocaleString()} Kč</span>
+                                </div>
+                              )}
+
                               {detailOrder.shippingCost > 0 && (
                                 <div className="orders-modal-total-row">
                                   <span>{lang === 'CZ' ? 'Náklady na doručení' : 'Shipping fee'}:</span>

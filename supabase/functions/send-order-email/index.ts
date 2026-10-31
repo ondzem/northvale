@@ -525,6 +525,17 @@ serve(async (req) => {
                 `;
               }).join('')}
 
+              ${order.discountAmount && parseFloat(order.discountAmount) > 0 ? `
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; color: #10B981;">
+                    Sleva${order.discountCode ? ` (${order.discountCode})` : ''}
+                  </td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; text-align: right; color: #10B981;">
+                    -${parseFloat(order.discountAmount).toLocaleString('cs-CZ')} Kč
+                  </td>
+                </tr>
+              ` : ''}
+
               ${order.shippingCost && parseFloat(order.shippingCost) > 0 ? `
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #e1e4e8; color: #666666;">
