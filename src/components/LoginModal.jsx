@@ -8,6 +8,11 @@ function formatAuthErrorMessage(error, lang = 'CZ') {
   if (!error) return '';
   const msg = error.message || error.error_description || String(error);
 
+  if (msg.includes('captcha')) {
+    return lang === 'CZ'
+      ? 'Ověření, že nejste robot, se nepodařilo. Obnovte prosím stránku a zkuste to znovu.'
+      : 'We could not verify that you are not a robot. Please refresh the page and try again.';
+  }
   if (msg.includes('Invalid login credentials')) {
     return lang === 'CZ'
       ? 'Nesprávné heslo nebo e-mailový účet. Zkontrolujte prosím zadané údaje a zkuste to znovu.'

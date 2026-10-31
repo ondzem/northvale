@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
 import CartItemImage from './CartItemImage';
-import { validateDiscountCode, calculateDiscountAmount } from '../services/discountService';
+import { validateDiscountForCart, calculateCartDiscount } from '../services/discountService';
 import { FREE_SHIPPING_THRESHOLD } from '../config';
 import { trackEcommerce, gaItems } from '../services/leadTracking';
 
@@ -29,7 +29,7 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
 
       if (error) throw error;
 
-      const validation = validateDiscountCode(codeClean, data ? [data] : [], lang);
+      const validation = validateDiscountForCart(codeClean, data ? [data] : [], cart, lang);
 
       if (validation.isValid && validation.discountItem) {
         setAppliedDiscount(validation.discountItem);
@@ -66,7 +66,7 @@ export default function Cart({ cart, setCart, setActivePage, appliedDiscount, se
   };
 
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const discountAmount = calculateDiscountAmount(subtotal, appliedDiscount);
+  const discountAmount = calculateCartDiscount(cart, appliedDiscount);
   const finalTotal = Math.max(0, subtotal - discountAmount);
   
   const updateQuantity = (itemId, delta) => {

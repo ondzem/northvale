@@ -1,3 +1,5 @@
+import { eligibleSubtotal } from '../../supabase/functions/_shared/discount-scope.js';
+
 /**
  * Get current local date in YYYY-MM-DD format (Czech timezone safe)
  */
@@ -158,6 +160,35 @@ export function calculateDiscountAmount(totalPrice, discountItem) {
   }
 
   return Math.min(totalPrice, Math.max(0, amount));
+}
+
+/** Položky košíku ve tvaru pro výpočet rozsahu kódu. */
+function cartLines(cart) {
+  return (cart || []).map(item => ({
+    productId: item.product?.id || item.productId || item.id,
+    categoryId: item.product?.category_id || null,
+    amount: item.price * item.quantity
+  }));
+}
+
+/** Sleva v Kč pro celý košík — u kódu s rozsahem jen z platných položek. */
+export function calculateCartDiscount(cart, discountItem) {
+  return calculateDiscountAmount(eligibleSubtotal(cartLines(cart), discountItem), discountItem);
+}
+
+/** Ověří kód a navíc to, že v košíku je aspoň jedna položka, na kterou platí. */
+export function validateDiscountForCart(inputCode, availableCodes, cart, lang = 'CZ') {
+  const validation = validateDiscountCode(inputCode, availableCodes, lang);
+  if (validation.isValid && eligibleSubtotal(cartLines(cart), validation.discountItem) <= 0) {
+    return {
+      isValid: false,
+      error: lang === 'CZ'
+        ? `Slevový kód "${validation.discountItem.code}" platí jen na vybrané produkty a žádný z nich v košíku nemáte.`
+        : `Discount code "${validation.discountItem.code}" only applies to selected products and none of them is in your cart.`,
+      discountItem: null
+    };
+  }
+  return validation;
 }
 
 // Pozn.: Použití slevového kódu (zvýšení used_count a případná deaktivace při

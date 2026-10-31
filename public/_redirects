@@ -3,4 +3,7 @@
 /llms.txt      /llms.txt      200
 /llms-full.txt /llms-full.txt 200
 /storage/*  https://bfxzhggjpiyqfolqpxzz.supabase.co/storage/:splat  200
+# Feedy /feeds/*.xml obsluhuje netlify/edge-functions/feeds.js.
+# Bez ! = jen když statický soubor neexistuje, tedy u produktů přidaných po posledním nasazení.
+/product-images/:file https://bfxzhggjpiyqfolqpxzz.supabase.co/functions/v1/product-feed/image/:file 200
 /*          /index.html                                               200

@@ -5,6 +5,7 @@ import { getAuthContext, requireAdmin } from "../_shared/auth.ts";
 import { AUTO_INVOICES } from "../_shared/features.ts";
 import { verifyTurnstile, callerIp, isHoneypotFilled, shouldAllow } from "../_shared/turnstile.ts";
 import { orderAccessKey } from "../_shared/order-link.ts";
+import { eligibleSubtotal } from "../_shared/discount-scope.js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -163,6 +164,12 @@ async function verifyOrderPricing(supabase: any, orderData: any): Promise<any> {
 
     let serverSubtotal = 0;
     let verifiedItems = 0;
+    // Položky pro výpočet slevy s rozsahem (kategorie vždy z DB, ne od klienta)
+    const lines: { productId: string; categoryId: string | null; amount: number }[] = [];
+    const addLine = (productId: string, categoryId: string | null, amount: number) => {
+      serverSubtotal += amount;
+      lines.push({ productId, categoryId, amount });
+    };
 
     for (const item of items) {
       const qty = Math.max(1, Number(item.quantity) || 1);
@@ -170,7 +177,7 @@ async function verifyOrderPricing(supabase: any, orderData: any): Promise<any> {
       const clientPrice = Number(item.price) || 0;
 
       if (!prodId) {
-        serverSubtotal += clientPrice * qty;
+        addLine('', null, clientPrice * qty);
         continue;
       }
 
@@ -184,23 +191,23 @@ async function verifyOrderPricing(supabase: any, orderData: any): Promise<any> {
           .maybeSingle();
         const dealPrice = Number(deal?.deal_price ?? deal?.price);
         if (deal && !isNaN(dealPrice) && dealPrice > 0) {
-          serverSubtotal += dealPrice * qty;
+          addLine(prodId, null, dealPrice * qty);
           verifiedItems++;
         } else {
-          serverSubtotal += clientPrice * qty;
+          addLine(prodId, null, clientPrice * qty);
         }
         continue;
       }
 
       const { data: prod } = await supabase
         .from('products')
-        .select('price, variants')
+        .select('price, variants, category_id')
         .eq('id', prodId)
         .maybeSingle();
 
       if (!prod) {
         // Produkt v katalogu není (smazaný) — cenu ověřit nelze, necháme klientskou
-        serverSubtotal += clientPrice * qty;
+        addLine(prodId, null, clientPrice * qty);
         continue;
       }
 
@@ -217,9 +224,9 @@ async function verifyOrderPricing(supabase: any, orderData: any): Promise<any> {
       }
 
       if (serverPrice === null) {
-        serverSubtotal += clientPrice * qty;
+        addLine(prodId, prod.category_id, clientPrice * qty);
       } else {
-        serverSubtotal += serverPrice * qty;
+        addLine(prodId, prod.category_id, serverPrice * qty);
         verifiedItems++;
       }
     }
@@ -233,7 +240,7 @@ async function verifyOrderPricing(supabase: any, orderData: any): Promise<any> {
       const cleanCode = String(orderData.discount_code).trim().toUpperCase();
       const { data: code } = await supabase
         .from('discount_codes')
-        .select('discount_type, discount_value, discount_percent, is_active, active, valid_from, valid_until, max_uses, used_count')
+        .select('discount_type, discount_value, discount_percent, is_active, active, valid_from, valid_until, max_uses, used_count, scope, scope_products, scope_categories')
         .eq('code', cleanCode)
         .maybeSingle();
 
@@ -248,10 +255,11 @@ async function verifyOrderPricing(supabase: any, orderData: any): Promise<any> {
         if (isActive && fromOk && untilOk && usesOk) {
           const type = code.discount_type || 'percent';
           const val = Number(code.discount_value ?? code.discount_percent ?? 0);
+          const discountBase = eligibleSubtotal(lines, code);
           serverDiscount = type === 'percent'
-            ? Math.round((serverSubtotal * val) / 100)
+            ? Math.round((discountBase * val) / 100)
             : val;
-          serverDiscount = Math.min(serverSubtotal, Math.max(0, serverDiscount));
+          serverDiscount = Math.min(discountBase, Math.max(0, serverDiscount));
         }
       }
     }

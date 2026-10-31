@@ -1,28 +1,16 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from '../../context/LanguageContext';
 import { supabase } from '../../supabase';
 import { getDiscountCodeStatus, formatCzechDate } from '../../services/discountService';
+import { fetchCategoriesFromDB } from '../../services/categories';
 
 export default function DiscountCodesTab({ showToast }) {
   const { lang } = useTranslation();
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024);
-      setIsSmallScreen(window.innerWidth < 768);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
   const [codes, setCodes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
 
   // Advanced Form states
   const [newCode, setNewCode] = useState('');
@@ -31,6 +19,12 @@ export default function DiscountCodesTab({ showToast }) {
   const [newValidFrom, setNewValidFrom] = useState('');
   const [newValidUntil, setNewValidUntil] = useState('');
   const [newMaxUses, setNewMaxUses] = useState('');
+  // Rozsah kódu: 'all' | 'products' | 'categories'
+  const [newScope, setNewScope] = useState('all');
+  const [newScopeIds, setNewScopeIds] = useState([]);
+  const [scopeSearch, setScopeSearch] = useState('');
+  const [allProducts, setAllProducts] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
 
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, id: null, codeString: '' });
 
@@ -56,6 +50,69 @@ export default function DiscountCodesTab({ showToast }) {
     }
   };
 
+  useEffect(() => {
+    supabase.from('products').select('id, name').order('name')
+      .then(({ data }) => setAllProducts(data || []));
+    fetchCategoriesFromDB().then(data => setAllCategories(data || []));
+  }, []);
+
+  const categoryPath = (cat) => {
+    const names = [];
+    for (let c = cat, guard = 0; c && guard < 6; guard++) {
+      names.unshift(lang === 'CZ' ? c.name_cz : c.name_en);
+      c = allCategories.find(x => x.id === c.parent_id);
+    }
+    return names.join(' › ');
+  };
+
+  // Vybraná kategorie zahrnuje i své podkategorie — produkty mají jen tu nejnižší.
+  const withDescendants = (ids) => {
+    const result = new Set(ids);
+    for (let grew = true; grew;) {
+      grew = false;
+      for (const c of allCategories) {
+        if (c.parent_id && result.has(c.parent_id) && !result.has(c.id)) {
+          result.add(c.id);
+          grew = true;
+        }
+      }
+    }
+    return [...result];
+  };
+
+  const scopeOptions = (newScope === 'products'
+    ? allProducts.map(p => ({ id: p.id, label: p.name }))
+    : allCategories.map(c => ({ id: c.id, label: categoryPath(c) })).sort((a, b) => a.label.localeCompare(b.label, 'cs'))
+  ).filter(o => o.label.toLowerCase().includes(scopeSearch.trim().toLowerCase()));
+
+  const toggleScopeId = (id) => {
+    setNewScopeIds(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
+  };
+
+  const scopeLabel = (c) => {
+    if (c.scope === 'products') {
+      const n = (c.scope_products || []).length;
+      return lang === 'CZ' ? `Vybrané produkty (${n})` : `Selected products (${n})`;
+    }
+    if (c.scope === 'categories') {
+      const ids = c.scope_categories || [];
+      return allCategories.filter(x => ids.includes(x.id) && !ids.includes(x.parent_id)).map(categoryPath).join(', ');
+    }
+    return lang === 'CZ' ? 'Celý košík' : 'Whole cart';
+  };
+
+  const validityLabel = (c) => {
+    if (c.valid_from && c.valid_until) return `${formatCzechDate(c.valid_from)} – ${formatCzechDate(c.valid_until)}`;
+    if (c.valid_from) return `${lang === 'CZ' ? 'od' : 'from'} ${formatCzechDate(c.valid_from)}`;
+    if (c.valid_until) return `${lang === 'CZ' ? 'do' : 'until'} ${formatCzechDate(c.valid_until)}`;
+    return lang === 'CZ' ? 'Bez omezení' : 'No limit';
+  };
+
+  const usageLabel = (c) => {
+    const limited = c.max_uses !== null && c.max_uses !== undefined && c.max_uses !== '';
+    return limited ? `${c.used_count || 0} / ${c.max_uses}` : `${c.used_count || 0}×`;
+  };
+
   const handleAddCode = async (e) => {
     e.preventDefault();
     if (!newCode.trim()) return;
@@ -77,6 +134,11 @@ export default function DiscountCodesTab({ showToast }) {
       return;
     }
 
+    if (newScope !== 'all' && newScopeIds.length === 0) {
+      showToast(lang === 'CZ' ? 'Vyberte aspoň jeden produkt nebo kategorii.' : 'Select at least one product or category.', 'error');
+      return;
+    }
+
     const formattedCode = newCode.trim().toUpperCase();
     const parsedMaxUses = newMaxUses !== '' ? parseInt(newMaxUses, 10) : null;
 
@@ -91,6 +153,9 @@ export default function DiscountCodesTab({ showToast }) {
         valid_from: newValidFrom || null,
         valid_until: newValidUntil || null,
         max_uses: parsedMaxUses,
+        scope: newScope,
+        scope_products: newScope === 'products' ? newScopeIds : [],
+        scope_categories: newScope === 'categories' ? withDescendants(newScopeIds) : [],
         used_count: 0,
         is_active: true,
         active: true
@@ -109,6 +174,10 @@ export default function DiscountCodesTab({ showToast }) {
       setNewValidFrom('');
       setNewValidUntil('');
       setNewMaxUses('');
+      setNewScope('all');
+      setNewScopeIds([]);
+      setScopeSearch('');
+      setFormOpen(false);
       loadCodes();
     } catch (err) {
       console.error(err);
@@ -170,621 +239,280 @@ export default function DiscountCodesTab({ showToast }) {
     }
   };
 
+  const cz = lang === 'CZ';
+
   return (
-    <div style={{ ...styles.ctfShell, flexDirection: isMobile ? 'column' : 'row' }}>
-      {/* List / Management Panel */}
-      <section style={{ 
-        flex: isMobile ? 'none' : '1.4 1 0', 
-        width: isMobile ? '100%' : undefined, 
-        background: 'var(--bg-secondary, #141418)', 
-        borderRadius: '16px', 
-        border: '1px solid rgba(255,255,255,0.08)', 
-        padding: isMobile ? '16px' : '24px', 
-        minWidth: isMobile ? '100%' : '320px',
-        boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-          <div>
-            <h3 style={styles.sectionHeading}>
-              {lang === 'CZ' ? 'Seznam slevových kódů' : 'Discount Codes List'}
-            </h3>
-            <div style={styles.subtitle}>
-              {lang === 'CZ' ? 'Přehled všech vytvořených kódů, jejich stavu a čerpání' : 'Overview of all created codes, status and usage'}
-            </div>
-          </div>
-          <span style={styles.totalBadge}>
-            {codes.length} {lang === 'CZ' ? (codes.length === 1 ? 'kód' : codes.length < 5 ? 'kódy' : 'kódů') : 'codes'}
-          </span>
+    <div className="dct">
+      <style>{DCT_CSS}</style>
+
+      <div className="dct-head">
+        <div>
+          <h3 className="dct-title">{cz ? 'Slevové kódy' : 'Discount Codes'}</h3>
+          <p className="dct-sub">
+            {cz ? `${codes.length} ${codes.length === 1 ? 'kód' : codes.length > 1 && codes.length < 5 ? 'kódy' : 'kódů'} celkem` : `${codes.length} codes in total`}
+          </p>
         </div>
-        
-        {loading ? (
-          <p style={styles.textMuted}>{lang === 'CZ' ? 'Načítání kódů...' : 'Loading codes...'}</p>
-        ) : codes.length === 0 ? (
-          <p style={styles.emptyText}>{lang === 'CZ' ? 'Žádné slevové kódy nebyly nalezeny.' : 'No discount codes found.'}</p>
-        ) : isSmallScreen ? (
-          /* Mobile / Small Screen Card Layout */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {codes.map(c => {
-              const statusInfo = getDiscountCodeStatus(c, lang);
-              const displayValue = c.discount_type === 'fixed'
-                ? `${c.discount_value || 0} Kč`
-                : `${c.discount_value || c.discount_percent || 0} %`;
-              const maxUsesDisplay = c.max_uses !== null && c.max_uses !== undefined && c.max_uses !== ''
-                ? `${c.used_count || 0} / ${c.max_uses}`
-                : `${c.used_count || 0} / ∞`;
-              const validFromText = c.valid_from ? formatCzechDate(c.valid_from) : '—';
-              const validUntilText = c.valid_until ? formatCzechDate(c.valid_until) : '—';
-              const isActive = c.is_active !== undefined ? c.is_active : c.active;
+        <button type="button" className="btn btn-primary dct-new" onClick={() => setFormOpen(true)}>
+          {cz ? 'Nový kód' : 'New code'}
+        </button>
+      </div>
 
-              return (
-                <div 
-                  key={c.id} 
-                  style={{
-                    background: 'rgba(0, 0, 0, 0.3)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: '12px',
-                    padding: '14px 16px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-gold, #fdbd16)', letterSpacing: '0.5px' }}>
-                      {c.code}
-                    </span>
-                    <span style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff' }}>
-                      {displayValue}
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleActive(c.id, isActive)}
-                      style={{
-                        ...styles.badge,
-                        backgroundColor: statusInfo.bg,
-                        color: statusInfo.color,
-                        cursor: 'pointer'
-                      }}
-                      title={lang === 'CZ' ? 'Kliknutím změníte aktivitu' : 'Click to toggle activity'}
-                    >
-                      {statusInfo.label}
-                    </button>
-                    <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)' }}>
-                      {lang === 'CZ' ? 'Čerpání: ' : 'Usage: '}
-                      <strong style={{ color: 'var(--color-gold, #fdbd16)' }}>{maxUsesDisplay}</strong>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>
-                      📅 {c.valid_from || c.valid_until ? `${validFromText} ➔ ${validUntilText}` : (lang === 'CZ' ? 'Neomezená platnost' : 'Unlimited validity')}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => requestDeleteCode(c.id, c.code)}
-                      style={styles.deleteBtn}
-                      title={lang === 'CZ' ? 'Smazat kód' : 'Delete Code'}
-                    >
-                      🗑️
-                    </button>
-                  </div>
+      {loading ? (
+        <p className="dct-empty">{cz ? 'Načítání kódů…' : 'Loading codes…'}</p>
+      ) : codes.length === 0 ? (
+        <p className="dct-empty">{cz ? 'Zatím žádné slevové kódy.' : 'No discount codes yet.'}</p>
+      ) : (
+        <ul className="dct-list">
+          {codes.map(c => {
+            const statusInfo = getDiscountCodeStatus(c, lang);
+            const isActive = c.is_active !== undefined ? c.is_active : c.active;
+            const value = c.discount_type === 'fixed'
+              ? `${c.discount_value || 0} Kč`
+              : `${c.discount_value || c.discount_percent || 0} %`;
+            return (
+              <li className="dct-row" key={c.id}>
+                <div className="dct-main">
+                  <div className="dct-code">{c.code}</div>
+                  <dl className="dct-meta">
+                    <div><dt>{cz ? 'Platí na' : 'Applies to'}</dt><dd>{scopeLabel(c)}</dd></div>
+                    <div><dt>{cz ? 'Platnost' : 'Valid'}</dt><dd>{validityLabel(c)}</dd></div>
+                    <div><dt>{cz ? 'Použito' : 'Used'}</dt><dd>{usageLabel(c)}</dd></div>
+                  </dl>
                 </div>
-              );
-            })}
-          </div>
-        ) : (
-          /* Desktop / Tablet Table Layout */
-          <div style={{ overflowX: 'auto', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <table style={styles.table}>
-              <thead>
-                <tr style={styles.thRow}>
-                  <th style={styles.th}>{lang === 'CZ' ? 'Kód' : 'Code'}</th>
-                  <th style={styles.thAlignRight}>{lang === 'CZ' ? 'Sleva' : 'Discount'}</th>
-                  <th style={styles.thCenter}>{lang === 'CZ' ? 'Stav platnosti' : 'Status'}</th>
-                  <th style={styles.thCenter}>{lang === 'CZ' ? 'Čerpání' : 'Usage'}</th>
-                  <th style={styles.thCenter}>{lang === 'CZ' ? 'Platnost (Od – Do)' : 'Validity Period'}</th>
-                  <th style={styles.thAction}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {codes.map(c => {
-                  const statusInfo = getDiscountCodeStatus(c, lang);
-                  const displayValue = c.discount_type === 'fixed'
-                    ? `${c.discount_value || 0} Kč`
-                    : `${c.discount_value || c.discount_percent || 0} %`;
-                  const maxUsesDisplay = c.max_uses !== null && c.max_uses !== undefined && c.max_uses !== ''
-                    ? `${c.used_count || 0} / ${c.max_uses}`
-                    : `${c.used_count || 0} / ∞`;
-                  const validFromText = c.valid_from ? formatCzechDate(c.valid_from) : '—';
-                  const validUntilText = c.valid_until ? formatCzechDate(c.valid_until) : '—';
-                  const isActive = c.is_active !== undefined ? c.is_active : c.active;
+                <div className="dct-value">{value}</div>
+                <div className="dct-actions">
+                  <button
+                    type="button"
+                    className="dct-status"
+                    style={{ backgroundColor: statusInfo.bg, color: statusInfo.color }}
+                    onClick={() => handleToggleActive(c.id, isActive)}
+                    title={cz ? 'Kliknutím změníte aktivitu' : 'Click to toggle activity'}
+                  >
+                    {statusInfo.label}
+                  </button>
+                  <button
+                    type="button"
+                    className="dct-delete"
+                    onClick={() => requestDeleteCode(c.id, c.code)}
+                    aria-label={cz ? `Smazat kód ${c.code}` : `Delete code ${c.code}`}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5" />
+                    </svg>
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
-                  return (
-                    <tr key={c.id} style={styles.tbRow}>
-                      <td style={styles.tdCode}>{c.code}</td>
-                      <td style={styles.tdAlignRight}>{displayValue}</td>
-                      <td style={styles.tdCenter}>
-                        <button
-                          type="button"
-                          onClick={() => handleToggleActive(c.id, isActive)}
-                          style={{
-                            ...styles.badge,
-                            backgroundColor: statusInfo.bg,
-                            color: statusInfo.color,
-                            cursor: 'pointer'
-                          }}
-                          title={lang === 'CZ' ? 'Kliknutím změníte aktivitu' : 'Click to toggle activity'}
-                        >
-                          {statusInfo.label}
-                        </button>
-                      </td>
-                      <td style={styles.tdCenter}>
-                        <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-gold, #fdbd16)' }}>
-                          {maxUsesDisplay}
-                        </span>
-                      </td>
-                      <td style={styles.tdCenter}>
-                        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>
-                          {c.valid_from || c.valid_until ? `${validFromText} ➔ ${validUntilText}` : (lang === 'CZ' ? 'Neomezeně' : 'Unlimited')}
-                        </span>
-                      </td>
-                      <td style={styles.tdAction}>
-                        <button
-                          type="button"
-                          onClick={() => requestDeleteCode(c.id, c.code)}
-                          style={styles.deleteBtn}
-                          title={lang === 'CZ' ? 'Smazat kód' : 'Delete Code'}
-                        >
-                          🗑️
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-
-      {/* Add New Code Panel - Modern Luxury Grouped Layout */}
-      <section style={{ 
-        flex: isMobile ? 'none' : '1 1 0', 
-        width: isMobile ? '100%' : undefined, 
-        background: 'var(--bg-secondary, #141418)', 
-        borderRadius: '16px', 
-        border: '1px solid rgba(255,255,255,0.08)', 
-        padding: isMobile ? '16px' : '24px', 
-        minWidth: isMobile ? '100%' : '320px',
-        boxShadow: '0 12px 32px rgba(0,0,0,0.3)'
-      }}>
-        <div style={{ marginBottom: '20px' }}>
-          <h3 style={styles.sectionHeading}>
-            {lang === 'CZ' ? 'Vytvořit slevový kód' : 'Create Discount Code'}
-          </h3>
-          <div style={styles.subtitle}>
-            {lang === 'CZ' ? 'Konfigurace hodnoty, platnosti a kapacitního limitu' : 'Configure value, validity date range and usage capacity limit'}
-          </div>
-        </div>
-        
-        <form onSubmit={handleAddCode} style={styles.form}>
-          {/* GROUP 1: Code Name & Discount Amount */}
-          <div style={styles.cardGroup}>
-            <div style={styles.groupHeading}>
-              <span style={styles.groupIcon}>📌</span>
-              <span>{lang === 'CZ' ? '1. Základní nastavení' : '1. Basic Settings'}</span>
-            </div>
-
-            <div style={styles.field}>
-              <label style={styles.label}>
-                {lang === 'CZ' ? 'Název slevového kódu' : 'Discount Code Name'}
-              </label>
-              <input
-                type="text"
-                required
-                className="ctf-input"
-                value={newCode}
-                onChange={(e) => setNewCode(e.target.value.toUpperCase())}
-                placeholder="např. LETO2026 nebo SLEVA100"
-                style={styles.input}
-              />
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '12px' }}>
-              <div style={{ ...styles.field, flex: 1 }}>
-                <label style={styles.label}>
-                  {lang === 'CZ' ? 'Typ slevy' : 'Discount Type'}
-                </label>
-                <select
-                  className="ctf-input"
-                  value={newDiscountType}
-                  onChange={(e) => setNewDiscountType(e.target.value)}
-                  style={styles.selectInput}
-                >
-                  <option value="percent">% Procentuální sleva</option>
-                  <option value="fixed">Kč Pevná částka</option>
-                </select>
-              </div>
-
-              <div style={{ ...styles.field, flex: 1 }}>
-                <label style={styles.label}>
-                  {lang === 'CZ' ? (newDiscountType === 'percent' ? 'Výše slevy (%)' : 'Výše slevy (Kč)') : (newDiscountType === 'percent' ? 'Discount (%)' : 'Discount (CZK)')}
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="1"
-                  step="any"
-                  className="ctf-input"
-                  value={newDiscountValue}
-                  onChange={(e) => setNewDiscountValue(e.target.value)}
-                  placeholder={newDiscountType === 'percent' ? '10' : '200'}
-                  style={styles.input}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* GROUP 2: Date Range Limits */}
-          <div style={styles.cardGroup}>
-            <div style={styles.groupHeading}>
-              <span style={styles.groupIcon}>📅</span>
-              <span>{lang === 'CZ' ? '2. Časové rozmezí platnosti (Volitelné)' : '2. Validity Date Range (Optional)'}</span>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '12px' }}>
-              <div style={{ ...styles.field, flex: 1 }}>
-                <label style={styles.label}>
-                  {lang === 'CZ' ? 'Platí OD dátumu' : 'Valid FROM date'}
-                </label>
-                <input
-                  type="date"
-                  className="ctf-input"
-                  value={newValidFrom}
-                  onChange={(e) => setNewValidFrom(e.target.value)}
-                  style={styles.dateInput}
-                />
-              </div>
-
-              <div style={{ ...styles.field, flex: 1 }}>
-                <label style={styles.label}>
-                  {lang === 'CZ' ? 'Platí DO dátumu' : 'Valid UNTIL date'}
-                </label>
-                <input
-                  type="date"
-                  className="ctf-input"
-                  value={newValidUntil}
-                  onChange={(e) => setNewValidUntil(e.target.value)}
-                  style={styles.dateInput}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* GROUP 3: Usage Capacity Limit */}
-          <div style={styles.cardGroup}>
-            <div style={styles.groupHeading}>
-              <span style={styles.groupIcon}>🔢</span>
-              <span>{lang === 'CZ' ? '3. Limit počtu použití (Volitelné)' : '3. Usage Capacity Limit (Optional)'}</span>
-            </div>
-
-            <div style={styles.field}>
-              <label style={styles.label}>
-                {lang === 'CZ' ? 'Max. počet použití celkem' : 'Max usage capacity limit'}
-              </label>
-              <input
-                type="number"
-                min="1"
-                className="ctf-input"
-                value={newMaxUses}
-                onChange={(e) => setNewMaxUses(e.target.value)}
-                placeholder={lang === 'CZ' ? 'Nechte prázdné pro neomezený kód' : 'Leave empty for unlimited code'}
-                style={styles.input}
-              />
-              <div style={styles.tipBox}>
-                <span>💡</span>
-                <span>
-                  {lang === 'CZ'
-                    ? 'Zadejte "1" pro jednorázový slevový kód s automatickým blokováním po 1 použití.'
-                    : 'Enter "1" for a single-use promo code with device redemption protection.'}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={adding}
-            style={styles.submitBtn}
-          >
-            {adding ? (lang === 'CZ' ? 'Vytváření...' : 'Creating...') : (lang === 'CZ' ? '✓ Vytvořit slevový kód' : '✓ Create Discount Code')}
-          </button>
-        </form>
-      </section>
-
-      {/* Delete Confirmation Modal */}
-      {deleteConfirm.isOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.85)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999,
-          backdropFilter: 'blur(4px)'
-        }}>
-          <div style={{
-            background: 'var(--bg-secondary, #141416)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '12px',
-            padding: '24px',
-            maxWidth: '380px',
-            width: '90%',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
-          }}>
-            <h4 style={{ fontSize: '16px', fontWeight: 'bold', color: '#fff', margin: '0 0 10px 0' }}>
-              {lang === 'CZ' ? 'Smazat slevový kód?' : 'Delete Discount Code?'}
-            </h4>
-            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', margin: '0 0 20px 0', lineHeight: '1.5' }}>
-              {lang === 'CZ'
-                ? `Opravdu chcete smazat slevový kód "${deleteConfirm.codeString}"?`
-                : `Are you sure you want to delete discount code "${deleteConfirm.codeString}"?`}
-            </p>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{ padding: '6px 12px', fontSize: '12px' }}
-                onClick={() => setDeleteConfirm({ isOpen: false, id: null, codeString: '' })}
-              >
-                {lang === 'CZ' ? 'Zrušit' : 'Cancel'}
+      {formOpen && createPortal(
+        <div className="dct-overlay">
+          <form className="dct-modal" onSubmit={handleAddCode}>
+            <div className="dct-modal-head">
+              <h3 className="dct-title">{cz ? 'Nový slevový kód' : 'New discount code'}</h3>
+              <button type="button" className="dct-close" onClick={() => setFormOpen(false)} aria-label={cz ? 'Zavřít' : 'Close'}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
               </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                style={{ background: '#ef4444', color: '#fff', padding: '6px 12px', fontSize: '12px' }}
-                onClick={executeDeleteCode}
-              >
-                {lang === 'CZ' ? 'Smazat' : 'Delete'}
+            </div>
+
+            <div className="dct-modal-body">
+              <section className="dct-section">
+                <h4>{cz ? 'Sleva' : 'Discount'}</h4>
+                <label className="dct-field dct-full">
+                  <span>{cz ? 'Název kódu' : 'Code name'}</span>
+                  <input
+                    type="text"
+                    required
+                    className="dct-input"
+                    value={newCode}
+                    onChange={(e) => setNewCode(e.target.value.toUpperCase())}
+                    placeholder={cz ? 'např. LETO2026' : 'e.g. SUMMER2026'}
+                  />
+                </label>
+                <label className="dct-field">
+                  <span>{cz ? 'Typ slevy' : 'Discount type'}</span>
+                  <select className="dct-input" value={newDiscountType} onChange={(e) => setNewDiscountType(e.target.value)}>
+                    <option value="percent">{cz ? 'Procenta' : 'Percent'}</option>
+                    <option value="fixed">{cz ? 'Pevná částka' : 'Fixed amount'}</option>
+                  </select>
+                </label>
+                <label className="dct-field">
+                  <span>{newDiscountType === 'percent' ? (cz ? 'Výše slevy (%)' : 'Amount (%)') : (cz ? 'Výše slevy (Kč)' : 'Amount (CZK)')}</span>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    step="any"
+                    className="dct-input"
+                    value={newDiscountValue}
+                    onChange={(e) => setNewDiscountValue(e.target.value)}
+                    placeholder={newDiscountType === 'percent' ? '10' : '200'}
+                  />
+                </label>
+              </section>
+
+              <section className="dct-section">
+                <h4>{cz ? 'Platnost' : 'Validity'}</h4>
+                <label className="dct-field">
+                  <span>{cz ? 'Platí od' : 'Valid from'}</span>
+                  <input type="date" className="dct-input" value={newValidFrom} onChange={(e) => setNewValidFrom(e.target.value)} />
+                </label>
+                <label className="dct-field">
+                  <span>{cz ? 'Platí do' : 'Valid until'}</span>
+                  <input type="date" className="dct-input" value={newValidUntil} onChange={(e) => setNewValidUntil(e.target.value)} />
+                </label>
+                <label className="dct-field dct-full">
+                  <span>{cz ? 'Maximální počet použití' : 'Maximum uses'}</span>
+                  <input
+                    type="number"
+                    min="1"
+                    className="dct-input"
+                    value={newMaxUses}
+                    onChange={(e) => setNewMaxUses(e.target.value)}
+                    placeholder={cz ? 'Neomezeně' : 'Unlimited'}
+                  />
+                  <small>{cz ? 'Hodnota 1 znamená jednorázový kód.' : 'A value of 1 makes the code single-use.'}</small>
+                </label>
+              </section>
+
+              <section className="dct-section">
+                <h4>{cz ? 'Na co kód platí' : 'What the code applies to'}</h4>
+                <label className="dct-field dct-full">
+                  <span>{cz ? 'Platí na' : 'Applies to'}</span>
+                  <select
+                    className="dct-input"
+                    value={newScope}
+                    onChange={(e) => { setNewScope(e.target.value); setNewScopeIds([]); setScopeSearch(''); }}
+                  >
+                    <option value="all">{cz ? 'Celý košík' : 'Whole cart'}</option>
+                    <option value="products">{cz ? 'Vybrané produkty' : 'Selected products'}</option>
+                    <option value="categories">{cz ? 'Vybrané kategorie' : 'Selected categories'}</option>
+                  </select>
+                </label>
+
+                {newScope !== 'all' && (
+                  <div className="dct-field dct-full">
+                    <input
+                      type="text"
+                      className="dct-input"
+                      value={scopeSearch}
+                      onChange={(e) => setScopeSearch(e.target.value)}
+                      placeholder={cz ? 'Hledat…' : 'Search…'}
+                      aria-label={cz ? 'Hledat' : 'Search'}
+                    />
+                    <div className="dct-picker">
+                      {scopeOptions.length === 0 && <p className="dct-picker-empty">{cz ? 'Nic nenalezeno.' : 'Nothing found.'}</p>}
+                      {scopeOptions.map(o => (
+                        <label key={o.id}>
+                          <input type="checkbox" checked={newScopeIds.includes(o.id)} onChange={() => toggleScopeId(o.id)} />
+                          <span>{o.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <small>{cz ? `Vybráno: ${newScopeIds.length}` : `Selected: ${newScopeIds.length}`}</small>
+                  </div>
+                )}
+              </section>
+            </div>
+
+            <div className="dct-modal-foot">
+              <button type="button" className="btn btn-secondary" onClick={() => setFormOpen(false)}>{cz ? 'Zrušit' : 'Cancel'}</button>
+              <button type="submit" className="btn btn-primary" disabled={adding}>
+                {adding ? (cz ? 'Vytvářím…' : 'Creating…') : (cz ? 'Vytvořit kód' : 'Create code')}
+              </button>
+            </div>
+          </form>
+        </div>,
+        document.body
+      )}
+
+      {deleteConfirm.isOpen && createPortal(
+        <div className="dct-overlay">
+          <div className="dct-modal dct-confirm">
+            <div className="dct-modal-body">
+              <h3 className="dct-title">{cz ? 'Smazat slevový kód?' : 'Delete discount code?'}</h3>
+              <p className="dct-sub">
+                {cz ? `Kód ${deleteConfirm.codeString} se trvale odstraní.` : `Code ${deleteConfirm.codeString} will be permanently removed.`}
+              </p>
+            </div>
+            <div className="dct-modal-foot">
+              <button type="button" className="btn btn-secondary" onClick={() => setDeleteConfirm({ isOpen: false, id: null, codeString: '' })}>
+                {cz ? 'Zrušit' : 'Cancel'}
+              </button>
+              <button type="button" className="btn btn-primary dct-danger" onClick={executeDeleteCode}>
+                {cz ? 'Smazat' : 'Delete'}
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
 }
 
-const styles = {
-  ctfShell: {
-    display: 'flex',
-    gap: '24px',
-    width: '100%',
-    boxSizing: 'border-box'
-  },
-  sectionHeading: {
-    fontSize: '18px',
-    fontWeight: '800',
-    color: 'var(--text-main, #ffffff)',
-    margin: 0,
-    letterSpacing: '-0.3px'
-  },
-  subtitle: {
-    fontSize: '12px',
-    color: 'rgba(255, 255, 255, 0.5)',
-    marginTop: '4px'
-  },
-  totalBadge: {
-    fontSize: '11px',
-    fontWeight: '700',
-    padding: '4px 10px',
-    borderRadius: '12px',
-    background: 'rgba(253, 189, 22, 0.1)',
-    color: 'var(--color-gold, #fdbd16)',
-    border: '1px solid rgba(253, 189, 22, 0.25)'
-  },
-  textMuted: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: '14px'
-  },
-  emptyText: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: '14px',
-    fontStyle: 'italic'
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    fontSize: '13px'
-  },
-  thRow: {
-    borderBottom: '1px solid rgba(255,255,255,0.1)',
-    background: 'rgba(0,0,0,0.2)'
-  },
-  th: {
-    textAlign: 'left',
-    padding: '12px 10px',
-    color: 'rgba(255,255,255,0.65)',
-    fontWeight: '700',
-    fontSize: '11px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px'
-  },
-  thAlignRight: {
-    textAlign: 'right',
-    padding: '12px 10px',
-    color: 'rgba(255,255,255,0.65)',
-    fontWeight: '700',
-    fontSize: '11px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px'
-  },
-  thCenter: {
-    textAlign: 'center',
-    padding: '12px 10px',
-    color: 'rgba(255,255,255,0.65)',
-    fontWeight: '700',
-    fontSize: '11px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px'
-  },
-  thAction: {
-    width: '40px',
-    padding: '12px 10px'
-  },
-  tbRow: {
-    borderBottom: '1px solid rgba(255,255,255,0.05)',
-    transition: 'background 0.2s'
-  },
-  tdCode: {
-    padding: '12px 10px',
-    fontWeight: '800',
-    color: 'var(--color-gold, #fdbd16)',
-    letterSpacing: '0.5px',
-    fontSize: '14px'
-  },
-  tdAlignRight: {
-    padding: '12px 10px',
-    textAlign: 'right',
-    fontWeight: '700',
-    color: '#ffffff'
-  },
-  tdCenter: {
-    padding: '12px 10px',
-    textAlign: 'center'
-  },
-  tdAction: {
-    padding: '12px 10px',
-    textAlign: 'right'
-  },
-  badge: {
-    display: 'inline-block',
-    padding: '4px 10px',
-    borderRadius: '12px',
-    fontSize: '11px',
-    fontWeight: '700',
-    border: 'none',
-    outline: 'none'
-  },
-  deleteBtn: {
-    background: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '15px',
-    opacity: 0.7,
-    transition: 'opacity 0.2s',
-    padding: '4px'
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px'
-  },
-  cardGroup: {
-    background: 'rgba(0, 0, 0, 0.25)',
-    border: '1px solid rgba(255, 255, 255, 0.07)',
-    borderRadius: '12px',
-    padding: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px'
-  },
-  groupHeading: {
-    fontSize: '13px',
-    fontWeight: '700',
-    color: 'var(--color-gold, #fdbd16)',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    marginBottom: '2px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px'
-  },
-  groupIcon: {
-    fontSize: '14px'
-  },
-  field: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px'
-  },
-  label: {
-    fontSize: '12px',
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.85)'
-  },
-  input: {
-    width: '100%',
-    boxSizing: 'border-box',
-    padding: '10px 14px',
-    borderRadius: '8px',
-    background: 'rgba(10, 10, 14, 0.6)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    color: '#ffffff',
-    fontSize: '13px',
-    outline: 'none',
-    transition: 'border-color 0.2s, box-shadow 0.2s',
-    colorScheme: 'dark'
-  },
-  selectInput: {
-    width: '100%',
-    boxSizing: 'border-box',
-    padding: '10px 14px',
-    borderRadius: '8px',
-    background: 'rgba(10, 10, 14, 0.85) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23fdbd16\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    color: '#ffffff',
-    fontSize: '13px',
-    outline: 'none',
-    appearance: 'none',
-    WebkitAppearance: 'none',
-    MozAppearance: 'none',
-    cursor: 'pointer',
-    colorScheme: 'dark'
-  },
-  dateInput: {
-    width: '100%',
-    boxSizing: 'border-box',
-    padding: '10px 14px',
-    borderRadius: '8px',
-    background: 'rgba(10, 10, 14, 0.6)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    color: '#ffffff',
-    fontSize: '13px',
-    outline: 'none',
-    cursor: 'pointer',
-    colorScheme: 'dark'
-  },
-  tipBox: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '8px',
-    padding: '8px 12px',
-    borderRadius: '6px',
-    background: 'rgba(253, 189, 22, 0.06)',
-    border: '1px solid rgba(253, 189, 22, 0.15)',
-    fontSize: '11px',
-    color: 'rgba(255, 255, 255, 0.65)',
-    lineHeight: '1.4',
-    marginTop: '2px'
-  },
-  submitBtn: {
-    width: '100%',
-    padding: '14px',
-    fontWeight: '800',
-    fontSize: '14px',
-    borderRadius: '10px',
-    letterSpacing: '0.3px',
-    boxShadow: '0 6px 20px rgba(253, 189, 22, 0.25)',
-    transition: 'transform 0.15s, box-shadow 0.15s'
+const DCT_CSS = `
+  .dct { display: flex; flex-direction: column; gap: 20px; color: #fff; }
+  .dct-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .dct-title { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px; color: #fff; }
+  .dct-sub { margin: 4px 0 0; font-size: 13px; color: rgba(255,255,255,0.55); }
+  .dct-new { flex-shrink: 0; }
+  .dct-empty { margin: 0; padding: 40px 0; text-align: center; font-size: 14px; color: rgba(255,255,255,0.55); }
+
+  .dct-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .dct-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 24px; padding: 18px 20px; background: var(--bg-secondary); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; }
+  .dct-main { min-width: 0; }
+  .dct-code { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; color: var(--color-gold, #fdbd16); overflow-wrap: anywhere; }
+  .dct-meta { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 0.6fr); gap: 12px 24px; margin: 12px 0 0; }
+  .dct-meta > div { min-width: 0; }
+  .dct-meta dt { font-size: 11px; color: rgba(255,255,255,0.45); margin-bottom: 2px; }
+  .dct-meta dd { margin: 0; font-size: 13px; color: rgba(255,255,255,0.85); }
+  .dct-value { min-width: 84px; text-align: right; font-size: 20px; font-weight: 700; color: #fff; white-space: nowrap; }
+  .dct-actions { display: flex; align-items: center; gap: 8px; }
+  .dct-status { min-width: 104px; border: 0; border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }
+  .dct-status:hover { opacity: 0.8; }
+  .dct-delete, .dct-close { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; background: transparent; border: 0; border-radius: 8px; color: rgba(255,255,255,0.5); cursor: pointer; transition: background-color 0.2s, color 0.2s; }
+  .dct-delete:hover { background: rgba(239,68,68,0.12); color: #ef4444; }
+  .dct-close:hover { background: rgba(255,255,255,0.06); color: #fff; }
+
+  .dct-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(0,0,0,0.7); }
+  .dct-modal { display: flex; flex-direction: column; width: 100%; max-width: 560px; max-height: 100%; background: var(--bg-secondary, #141416); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; color: #fff; font-family: var(--font-sans), system-ui, sans-serif; }
+  .dct-confirm { max-width: 400px; }
+  .dct-modal-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .dct-modal-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 28px; }
+  .dct-confirm .dct-modal-body { gap: 0; }
+  .dct-modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .dct-danger { background-color: #ef4444 !important; color: #fff !important; }
+
+  .dct-section { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .dct-section h4 { grid-column: 1 / -1; margin: 0; font-size: 13px; font-weight: 600; color: var(--color-gold, #fdbd16); }
+  .dct-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .dct-full { grid-column: 1 / -1; }
+  .dct-field > span { font-size: 13px; color: rgba(255,255,255,0.7); }
+  .dct-field small { font-size: 12px; color: rgba(255,255,255,0.5); }
+  .dct-input { width: 100%; height: 44px; box-sizing: border-box; padding: 0 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px; font-family: inherit; outline: none; color-scheme: dark; transition: border-color 0.2s; }
+  .dct-input:focus { border-color: var(--color-gold, #fdbd16); }
+  .dct-input::placeholder { color: rgba(255,255,255,0.35); }
+  select.dct-input { appearance: none; -webkit-appearance: none; padding-right: 36px; cursor: pointer; background: rgba(255,255,255,0.04) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") no-repeat right 12px center; background-size: 14px; }
+  select.dct-input option { background: #18181c; color: #fff; }
+  .dct-picker { max-height: 208px; overflow-y: auto; padding: 4px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; }
+  .dct-picker label { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 6px; font-size: 14px; color: rgba(255,255,255,0.85); cursor: pointer; }
+  .dct-picker label:hover { background: rgba(255,255,255,0.05); }
+  .dct-picker input { flex-shrink: 0; width: 16px; height: 16px; margin: 0; accent-color: var(--color-gold, #fdbd16); }
+  .dct-picker-empty { margin: 0; padding: 12px; font-size: 13px; color: rgba(255,255,255,0.5); }
+
+  @media (max-width: 640px) {
+    .dct-row { grid-template-columns: minmax(0, 1fr) auto; gap: 14px 16px; padding: 16px; }
+    .dct-main { grid-column: 1 / 2; }
+    .dct-value { grid-column: 2; grid-row: 1; align-self: start; min-width: 0; font-size: 18px; }
+    .dct-actions { grid-column: 1 / -1; justify-content: space-between; }
+    .dct-meta { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+    .dct-overlay { padding: 0; align-items: stretch; }
+    .dct-modal { max-width: none; border: 0; border-radius: 0; }
+    .dct-confirm { margin: auto 16px; max-height: none; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; }
+    .dct-section { grid-template-columns: minmax(0, 1fr); }
+    .dct-modal-foot .btn { flex: 1; }
   }
-};
+`;

@@ -61,3 +61,4 @@ Co se změnilo na webu nebo v profilech — při porovnávání čísel s tím p
 | 9. 10. 2026 | Google dostává skutečné obrázky produktů (dřív logo s neplatnou URL), doprava a vrácení ve strukturovaných datech |
 | 9. 10. 2026 | Ze sitemapy pryč vypnuté stránky (grading, výkup, komunita); sitemapa znovu odeslaná v Search Console (Google ji od 19. 7. nenačetl) |
 | 9. 10. 2026 | Firemní profil: otevírací doba Po–Pá 7–12, 13–16; odkaz na web s `utm_campaign=firemni_profil`; Instagram + Facebook; z popisu pryč grading a výkup |
+| 31. 10. 2026 | Feedy živě přes Supabase (obnova každých 15 minut, dřív stály od posledního nasazení); slevové kódy na produkty a kategorie; připravený feed pro srovnávač |

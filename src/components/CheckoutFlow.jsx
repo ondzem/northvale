@@ -3,7 +3,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { supabase } from '../supabase';
 import { getProductImageCached } from '../services/products';
 import CartItemImage from './CartItemImage';
-import { validateDiscountCode, calculateDiscountAmount } from '../services/discountService';
+import { validateDiscountForCart, calculateCartDiscount } from '../services/discountService';
 import { subscribeToNewsletter } from '../services/newsletter';
 import { estimateDeliveryDate, formatDeliveryDate } from '../services/deliveryEstimate';
 import { trackEcommerce, gaItems, getVisitSource } from '../services/leadTracking';
@@ -169,7 +169,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
   const cartHasOnOrder = cart.some(item => !!(item.product?.onOrder || item.product?.on_order || item.onOrder || item.on_order));
 
   // Calculate discount
-  const discountAmount = calculateDiscountAmount(cartSubtotal, appliedDiscount);
+  const discountAmount = calculateCartDiscount(cart, appliedDiscount);
   const subtotalAfterDiscount = Math.max(0, cartSubtotal - discountAmount);
 
   // Doprava zdarma od FREE_SHIPPING_THRESHOLD (3 500 Kč) včetně — podle mezisoučtu košíku nebo po slevě.
@@ -226,7 +226,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
 
       if (error) throw error;
 
-      const validation = validateDiscountCode(codeClean, data ? [data] : [], lang);
+      const validation = validateDiscountForCart(codeClean, data ? [data] : [], cart, lang);
 
       if (validation.isValid && validation.discountItem) {
         setAppliedDiscount(validation.discountItem);
@@ -790,7 +790,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           subtotal: cartSubtotal,
           heurekaOptOut,
           trafficSource: getVisitSource(),
-          discountCode: appliedDiscount ? appliedDiscount.code : null,
+          discountCode: appliedDiscount && discountAmount > 0 ? appliedDiscount.code : null,
           discountAmount: discountAmount,
           shippingCost,
           paymentSurcharge,
@@ -910,7 +910,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
           userId: user?.id || null,
           cart,
           cartSubtotal,
-          discountCode: appliedDiscount ? appliedDiscount.code : null,
+          discountCode: appliedDiscount && discountAmount > 0 ? appliedDiscount.code : null,
           discountAmount,
           shippingCost,
           paymentSurcharge,
@@ -995,7 +995,7 @@ export default function CheckoutFlow({ cart, user, submitOrder, setActivePage, a
       subtotal: cartSubtotal,
       heurekaOptOut,
       trafficSource: getVisitSource(),
-      discountCode: appliedDiscount ? appliedDiscount.code : null,
+      discountCode: appliedDiscount && discountAmount > 0 ? appliedDiscount.code : null,
       discountAmount: discountAmount,
       shippingCost,
       paymentSurcharge,
